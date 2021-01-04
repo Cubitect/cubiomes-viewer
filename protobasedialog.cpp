@@ -21,6 +21,6 @@ bool ProtoBaseDialog::closeOnDone()
 void ProtoBaseDialog::setPath(QString path)
 {
     ui->label->setText(
-            "This take a moment.\n"
+            "This may take a moment.\n"
             "Results will be saved to \"" + path + "\" so subsequent searches will start faster.");
 }

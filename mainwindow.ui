@@ -17,6 +17,9 @@
    <iconset resource="icons.qrc">
     <normaloff>:/icons/426997539678997085.png</normaloff>:/icons/426997539678997085.png</iconset>
   </property>
+  <property name="styleSheet">
+   <string notr="true">QToolButton:checked { background-color:rgb(85, 87, 83) }</string>
+  </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout_6">
     <item row="0" column="0">

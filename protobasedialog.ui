@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>ProtoBaseDialog</class>
  <widget class="QDialog" name="ProtoBaseDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>627</width>
+    <height>113</height>
+   </rect>
+  </property>
   <property name="windowTitle">
    <string>Generating Protobases</string>
   </property>
@@ -16,7 +24,7 @@
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>This take a moment. Results will be saved to _PATH_ so subsequent searches will start faster.</string>
+      <string>This may take a moment. Results will be saved to _PATH_ so subsequent searches will start faster.</string>
      </property>
     </widget>
    </item>
