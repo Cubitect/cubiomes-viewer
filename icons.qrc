@@ -1,0 +1,31 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icons/desert.png</file>
+        <file>icons/igloo.png</file>
+        <file>icons/jungle.png</file>
+        <file>icons/shipwreck.png</file>
+        <file>icons/spawn.png</file>
+        <file>icons/stronghold.png</file>
+        <file>icons/village.png</file>
+        <file>icons/mansion.png</file>
+        <file>icons/mansion_d.png</file>
+        <file>icons/village_d.png</file>
+        <file>icons/desert_d.png</file>
+        <file>icons/hut.png</file>
+        <file>icons/hut_d.png</file>
+        <file>icons/igloo_d.png</file>
+        <file>icons/jungle_d.png</file>
+        <file>icons/monument.png</file>
+        <file>icons/monument_d.png</file>
+        <file>icons/outpost.png</file>
+        <file>icons/outpost_d.png</file>
+        <file>icons/portal.png</file>
+        <file>icons/portal_d.png</file>
+        <file>icons/ruins.png</file>
+        <file>icons/ruins_d.png</file>
+        <file>icons/shipwreck_d.png</file>
+        <file>icons/spawn_d.png</file>
+        <file>icons/stronghold_d.png</file>
+        <file>icons/426997539678997085.png</file>
+    </qresource>
+</RCC>
