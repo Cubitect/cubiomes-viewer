@@ -43,6 +43,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->frameMap->layout()->addWidget(ui->toolBar);
     ui->toolBar->setContentsMargins(0, 0, 0, 0);
 
+    ui->splitterSearch->setSizes(QList<int>({1000, 2000}));
+    ui->splitterConditions->setSizes(QList<int>({1000, 3000}));
+
     QFont mono = QFont("Monospace", 9);
     mono.setStyleHint(QFont::TypeWriter);
     ui->listConditions48->setFont(mono);
@@ -56,10 +59,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     protodialog = new ProtoBaseDialog(this);
 
-    connect(&sthread, &SearchThread::results, this, &MainWindow::searchResultsAdd);
-    connect(&sthread, &SearchThread::baseDone, this, &MainWindow::searchBaseDone);
+    connect(&sthread, &SearchThread::results, this, &MainWindow::searchResultsAdd, Qt::BlockingQueuedConnection);
+    connect(&sthread, &SearchThread::baseDone, this, &MainWindow::searchBaseDone, Qt::BlockingQueuedConnection);
     connect(&sthread, &SearchThread::finish, this, &MainWindow::searchFinish);
-    connect(ui->checkStop, &QAbstractButton::toggled, &sthread, &SearchThread::setStopOnResult);
+    connect(ui->checkStop, &QAbstractButton::toggled, &sthread, &SearchThread::setStopOnResult, Qt::DirectConnection);
     sthread.setStopOnResult(ui->checkStop->isChecked());
 
     connect(&stimer, &QTimer::timeout, this, QOverload<>::of(&MainWindow::resultTimeout));
@@ -406,10 +409,12 @@ void MainWindow::on_buttonStart_clicked()
         getSeed(&mc, NULL);
         QVector<Condition> condvec = getConditions();
         int64_t sstart = (int64_t)ui->lineStart48->text().toLongLong() & MASK48;
+        int searchtype = ui->comboSearchType->currentIndex();
 
         ui->lineStart48->setText(QString::asprintf("%" PRId64, sstart));
-        if (!sthread.isRunning() && sthread.set(sstart, mc, condvec))
+        if (!sthread.isRunning() && sthread.set(searchtype, sstart, mc, condvec))
         {
+            ui->comboSearchType->setEnabled(false);
             ui->buttonStart->setText("Abort search");
             ui->buttonStart->setIcon(QIcon::fromTheme("process-stop"));
             sthread.start();
@@ -421,15 +426,13 @@ void MainWindow::on_buttonStart_clicked()
     }
     else
     {
-        ui->buttonStart->setEnabled(false);
-        ui->buttonStart->setText("Stopping...");
-        update();
         sthread.stop(); // tell search to stop at next convenience
         sthread.quit(); // tell the event loop to exit
-        sthread.wait(); // wait for search to finish
+        //sthread.wait(); // wait for search to finish
         ui->buttonStart->setEnabled(true);
         ui->buttonStart->setText("Start search");
         ui->buttonStart->setIcon(QIcon::fromTheme("system-search"));
+        ui->comboSearchType->setEnabled(true);
     }
 
     update();

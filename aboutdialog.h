@@ -4,8 +4,8 @@
 #include <QDialog>
 
 #define VERS_MAJOR 1
-#define VERS_MINOR 0
-#define VERS_PATCH 2
+#define VERS_MINOR 1
+#define VERS_PATCH 0
 
 namespace Ui {
 class AboutDialog;

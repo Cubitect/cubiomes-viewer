@@ -4,8 +4,8 @@
 #include <QThread>
 #include <QThreadPool>
 #include <QMutex>
-#include <QThread>
 #include <QVector>
+#include <QElapsedTimer>
 
 #include "search.h"
 
@@ -18,11 +18,11 @@ class SearchThread : public QThread
 
 public:
     SearchThread(QObject *parent) :
-        QThread(parent),mc(),sstart(),condvec(),pool(this),stoponres(),seeds(),mutex()
+        QThread(parent),mc(),sstart(),condvec(),pool(this),stoponres(),seeds(),mutex(),elapsed()
     {
     }
 
-    bool set(int64_t start48, int mc, const QVector<Condition>& cv);
+    bool set(int type, int64_t start48, int mc, const QVector<Condition>& cv);
 
     void stop() { abortsearch = true; }
 
@@ -43,11 +43,14 @@ protected:
     QVector<Condition> condvec;
     QThreadPool pool;
     bool stoponres;
+    int searchtype;
 
 public:
     QVector<int64_t> seeds;
     QMutex mutex;
     volatile bool abortsearch;
+
+    QElapsedTimer elapsed;
 };
 
 #endif // SEARCHTHREAD_H

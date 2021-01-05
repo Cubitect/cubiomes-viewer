@@ -255,7 +255,7 @@ struct StructPos
 
 int testCond(StructPos *spos, int64_t seed, const Condition *cond, int mc, LayerStack *g, volatile bool *abort);
 
-size_t searchFamily(int64_t seedbuf[], int64_t s, int scnt, int mc,
+int64_t searchFamily(int64_t seedbuf[], int64_t s, int scnt, int mc,
         LayerStack *g, const Condition cond[], int ccnt, StructPos *spos, volatile bool *abort);
 
 

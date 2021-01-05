@@ -42,8 +42,9 @@ public:
 };
 
 // called from main GUI thread
-bool SearchThread::set(int64_t start48, int mc, const QVector<Condition>& cv)
+bool SearchThread::set(int type, int64_t start48, int mc, const QVector<Condition>& cv)
 {
+    this->searchtype = type;
     this->sstart = start48;
     this->mc = mc;
     this->condvec = cv;
@@ -95,9 +96,11 @@ static bool isCandidate(int64_t s48, int mc, const Condition *c, const Condition
     return true;
 }
 
+
 void SearchThread::run()
 {
     abortsearch = false;
+    elapsed.start();
 
     const Condition *cond = condvec.data();
     int64_t ccnt = condvec.size();
@@ -119,7 +122,9 @@ void SearchThread::run()
             s48 = *(int64_t*)sp;
             if (isCandidate(s48, mc, cond, cond+ccnt, &abortsearch))
             {
-                if (!abortsearch && runSearch48(s48, cond, ccnt) && stoponres)
+                if (abortsearch)
+                    break;
+                if (runSearch48(s48, cond, ccnt) && stoponres)
                     break;
             }
         }
@@ -135,7 +140,9 @@ void SearchThread::run()
         {
             if (isCandidate(s48, mc, cond, cond+ccnt, &abortsearch))
             {
-                if (!abortsearch && runSearch48(s48, cond, ccnt) && stoponres)
+                if (abortsearch)
+                    break;
+                if (runSearch48(s48, cond, ccnt) && stoponres)
                     break;
             }
         }
@@ -144,20 +151,48 @@ void SearchThread::run()
     emit finish(s48);
 }
 
+// search type options from combobox
+enum { SEARCH_ALL64 = 0, SEARCH_INC48 = 1, SEARCH_CANDIT = 2 };
+
 bool SearchThread::runSearch48(int64_t s48, const Condition* cond, int ccnt)
 {
-    // found a 48-bit seed: now distibute the search for the upper 16-bits onto a thread pool
+    // found a 48-bit seed candidate
     seeds.clear();
-    const int blocksize = 0x200;
-    const int blockcnt = 0x10000 / blocksize;
-    for (int i = 0; i < blockcnt; i++)
+
+    if (searchtype == SEARCH_CANDIT)
     {
-        pool.start(new FamilyBlock(this, s48, blocksize, mc, cond, ccnt));
-        s48 += (int64_t)blocksize << 48;
+        seeds.push_back(s48);
     }
-    pool.waitForDone();
+    else if (searchtype == SEARCH_INC48)
+    {
+        LayerStack g;
+        setupGenerator(&g, mc);
+        StructPos spos[100] = {};
+        int64_t seedbuf[1];
+        if (searchFamily(seedbuf, s48, 1, mc, &g, cond, ccnt, spos, &abortsearch))
+            seeds.push_back(seedbuf[0]);
+    }
+    else
+    {
+        // distribute the search for the upper 16-bits onto a thread pool
+        const int blocksize = 0x200;
+        const int blockcnt = 0x10000 / blocksize;
+        for (int i = 0; i < blockcnt; i++)
+        {
+            pool.start(new FamilyBlock(this, s48, blocksize, mc, cond, ccnt));
+            s48 += (int64_t)blocksize << 48;
+        }
+        pool.waitForDone();
+    }
+
     if (!abortsearch)
-        emit baseDone(s48);
+    {
+        if (elapsed.elapsed() > 10)
+        {
+            emit baseDone(s48);
+            elapsed.start();
+        }
+    }
     if (!seeds.empty())
     {
         emit results(seeds, false);

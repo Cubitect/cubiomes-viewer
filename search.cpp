@@ -860,7 +860,7 @@ L_STRUCT_ANY:
 
 
 
-size_t searchFamily(int64_t seedbuf[], int64_t s, int scnt, int mc,
+int64_t searchFamily(int64_t seedbuf[], int64_t s, int scnt, int mc,
         LayerStack *g, const Condition cond[], int ccnt, StructPos *spos, volatile bool *abort)
 {
     const Condition *c, *ce = cond + ccnt;
@@ -879,15 +879,14 @@ size_t searchFamily(int64_t seedbuf[], int64_t s, int scnt, int mc,
     int n = 0;
     while (scnt--)
     {
-        s += (1LL << 48);
         for (const Condition *ct = c; ct != ce; ct++)
             if (!testCond(spos, s, ct, mc, g, abort))
                 goto L_NEXT_SEED;
-
         seedbuf[n++] = s;
 L_NEXT_SEED:;
         if (*abort)
             break;
+        s += (1LL << 48);
     }
 
     return n;

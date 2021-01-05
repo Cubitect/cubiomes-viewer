@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1280</width>
-    <height>720</height>
+    <height>800</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,7 +23,7 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout_6">
     <item row="0" column="0">
-     <widget class="QSplitter" name="splitter">
+     <widget class="QSplitter" name="splitterMap">
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
@@ -91,7 +91,7 @@
           <item row="0" column="2">
            <widget class="QLabel" name="labelSeed">
             <property name="toolTip">
-             <string>Seed can be an integer or text. Leave empty for a random seed.</string>
+             <string>Seed can be an integer or text. Leave empty for a random seed</string>
             </property>
             <property name="text">
              <string>seed:</string>
@@ -101,7 +101,7 @@
           <item row="0" column="3">
            <widget class="QLineEdit" name="seedEdit">
             <property name="toolTip">
-             <string>press enter to accept</string>
+             <string>Press enter to accept</string>
             </property>
            </widget>
           </item>
@@ -124,7 +124,7 @@
              </size>
             </property>
             <property name="toolTip">
-             <string>Seed can be an integer or text. Leave empty for a random seed.</string>
+             <string>Seed can be an integer or text. Leave empty for a random seed</string>
             </property>
             <property name="text">
              <string>(random)</string>
@@ -144,15 +144,12 @@
            </attribute>
            <layout class="QGridLayout" name="gridLayout_5">
             <item row="2" column="0" colspan="2">
-             <widget class="QSplitter" name="splitter_2">
+             <widget class="QSplitter" name="splitterSearch">
               <property name="frameShape">
                <enum>QFrame::NoFrame</enum>
               </property>
               <property name="orientation">
                <enum>Qt::Vertical</enum>
-              </property>
-              <property name="opaqueResize">
-               <bool>true</bool>
               </property>
               <widget class="QGroupBox" name="groupBox">
                <property name="sizePolicy">
@@ -165,29 +162,45 @@
                 <string>Contraints</string>
                </property>
                <layout class="QGridLayout" name="gridLayout_2">
-                <item row="3" column="2">
-                 <widget class="QPushButton" name="buttonEdit">
+                <item row="3" column="0">
+                 <widget class="QPushButton" name="buttonInfo">
+                  <property name="maximumSize">
+                   <size>
+                    <width>20</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
                   <property name="text">
-                   <string>Edit condition</string>
+                   <string>?</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="1">
+                 <widget class="QPushButton" name="buttonRemove">
+                  <property name="text">
+                   <string>Remove selection</string>
                   </property>
                  </widget>
                 </item>
                 <item row="0" column="0" colspan="4">
-                 <widget class="QSplitter" name="splitter_3">
-                  <property name="midLineWidth">
-                   <number>3</number>
-                  </property>
+                 <widget class="QSplitter" name="splitterConditions">
                   <property name="orientation">
                    <enum>Qt::Vertical</enum>
                   </property>
                   <widget class="QListWidget" name="listConditions48">
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>20</height>
+                    </size>
+                   </property>
                    <property name="font">
                     <font>
                      <family>Monospace</family>
                     </font>
                    </property>
                    <property name="toolTip">
-                    <string>Conditions for the 48-bit seed generator.</string>
+                    <string>Conditions for the 48-bit seed generator</string>
                    </property>
                    <property name="dragDropMode">
                     <enum>QAbstractItemView::InternalMove</enum>
@@ -200,13 +213,19 @@
                    </property>
                   </widget>
                   <widget class="QListWidget" name="listConditionsFull">
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>20</height>
+                    </size>
+                   </property>
                    <property name="font">
                     <font>
                      <family>Monospace</family>
                     </font>
                    </property>
                    <property name="toolTip">
-                    <string>Biome dependent conditions.</string>
+                    <string>Conditions with biome dependency</string>
                    </property>
                    <property name="dragDropMode">
                     <enum>QAbstractItemView::InternalMove</enum>
@@ -220,13 +239,6 @@
                   </widget>
                  </widget>
                 </item>
-                <item row="3" column="1">
-                 <widget class="QPushButton" name="buttonRemove">
-                  <property name="text">
-                   <string>Remove selection</string>
-                  </property>
-                 </widget>
-                </item>
                 <item row="3" column="3">
                  <widget class="QPushButton" name="buttonAddFilter">
                   <property name="text">
@@ -234,16 +246,10 @@
                   </property>
                  </widget>
                 </item>
-                <item row="3" column="0">
-                 <widget class="QPushButton" name="buttonInfo">
-                  <property name="maximumSize">
-                   <size>
-                    <width>20</width>
-                    <height>16777215</height>
-                   </size>
-                  </property>
+                <item row="3" column="2">
+                 <widget class="QPushButton" name="buttonEdit">
                   <property name="text">
-                   <string>?</string>
+                   <string>Edit condition</string>
                   </property>
                  </widget>
                 </item>
@@ -317,24 +323,7 @@
                 </item>
                 <item row="1" column="0">
                  <layout class="QGridLayout" name="gridLayout">
-                  <item row="0" column="0">
-                   <widget class="QLabel" name="label_2">
-                    <property name="text">
-                     <string>Starting 48-bit seed:</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="3">
-                   <widget class="QCheckBox" name="checkStop">
-                    <property name="text">
-                     <string>Stop on results</string>
-                    </property>
-                    <property name="checked">
-                     <bool>true</bool>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="2" column="0" colspan="4">
+                  <item row="3" column="0" colspan="4">
                    <widget class="QProgressBar" name="progressBar">
                     <property name="toolTip">
                      <string>Progress within the set of all 48-bit seeds.</string>
@@ -350,26 +339,67 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="0" column="1" colspan="2">
+                  <item row="1" column="1" colspan="2">
                    <widget class="QLineEdit" name="lineStart48">
                     <property name="text">
                      <string>0</string>
                     </property>
                    </widget>
                   </item>
-                  <item row="1" column="0" colspan="2">
+                  <item row="1" column="0">
+                   <widget class="QLabel" name="label_2">
+                    <property name="text">
+                     <string>Starting 48-bit seed:</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="0">
+                   <widget class="QLabel" name="label">
+                    <property name="text">
+                     <string>Search order:</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="0" colspan="2">
                    <widget class="QPushButton" name="buttonClear">
                     <property name="text">
                      <string>Clear results</string>
                     </property>
                    </widget>
                   </item>
-                  <item row="1" column="2" colspan="2">
+                  <item row="2" column="2" colspan="2">
                    <widget class="QPushButton" name="buttonStart">
                     <property name="text">
                      <string>Start search</string>
                     </property>
                     <property name="checkable">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="1" colspan="3">
+                   <widget class="QComboBox" name="comboSearchType">
+                    <item>
+                     <property name="text">
+                      <string>64-bit multithreaded in blocks</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>48-bit incremental</string>
+                     </property>
+                    </item>
+                   </widget>
+                  </item>
+                  <item row="1" column="3">
+                   <widget class="QCheckBox" name="checkStop">
+                    <property name="toolTip">
+                     <string>stop as soon as the next set of matching seeds is found</string>
+                    </property>
+                    <property name="text">
+                     <string>Stop on results</string>
+                    </property>
+                    <property name="checked">
                      <bool>true</bool>
                     </property>
                    </widget>
