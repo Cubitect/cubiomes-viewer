@@ -156,7 +156,8 @@ bool SearchThread::runSearch48(int64_t s48, const Condition* cond, int ccnt)
         s48 += (int64_t)blocksize << 48;
     }
     pool.waitForDone();
-    emit baseDone(s48);
+    if (!abortsearch)
+        emit baseDone(s48);
     if (!seeds.empty())
     {
         emit results(seeds, false);

@@ -5,7 +5,7 @@
 
 #define VERS_MAJOR 1
 #define VERS_MINOR 0
-#define VERS_PATCH 1
+#define VERS_PATCH 2
 
 namespace Ui {
 class AboutDialog;
