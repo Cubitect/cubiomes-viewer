@@ -26,6 +26,8 @@
         <file>icons/shipwreck_d.png</file>
         <file>icons/spawn_d.png</file>
         <file>icons/stronghold_d.png</file>
-        <file>icons/426997539678997085.png</file>
+        <file>icons/map.png</file>
+        <file>icons/quad.png</file>
+        <file>icons/tempcat.png</file>
     </qresource>
 </RCC>

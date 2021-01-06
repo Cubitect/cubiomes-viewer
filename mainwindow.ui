@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="icons.qrc">
-    <normaloff>:/icons/426997539678997085.png</normaloff>:/icons/426997539678997085.png</iconset>
+    <normaloff>:/icons/map.png</normaloff>:/icons/map.png</iconset>
   </property>
   <property name="styleSheet">
    <string notr="true">QToolButton:checked { background-color:rgb(85, 87, 83) }</string>
@@ -29,6 +29,18 @@
       </property>
       <widget class="QFrame" name="controlFrame">
        <layout class="QVBoxLayout" name="verticalLayout_5">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
         <item>
          <layout class="QGridLayout" name="gridMCSeed">
           <item row="0" column="1">
@@ -162,6 +174,18 @@
                 <string>Contraints</string>
                </property>
                <layout class="QGridLayout" name="gridLayout_2">
+                <property name="leftMargin">
+                 <number>4</number>
+                </property>
+                <property name="topMargin">
+                 <number>4</number>
+                </property>
+                <property name="rightMargin">
+                 <number>4</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>4</number>
+                </property>
                 <item row="3" column="0">
                  <widget class="QPushButton" name="buttonInfo">
                   <property name="maximumSize">
@@ -175,14 +199,14 @@
                   </property>
                  </widget>
                 </item>
-                <item row="3" column="1">
+                <item row="3" column="2">
                  <widget class="QPushButton" name="buttonRemove">
                   <property name="text">
                    <string>Remove selection</string>
                   </property>
                  </widget>
                 </item>
-                <item row="0" column="0" colspan="4">
+                <item row="0" column="0" colspan="5">
                  <widget class="QSplitter" name="splitterConditions">
                   <property name="orientation">
                    <enum>Qt::Vertical</enum>
@@ -239,17 +263,24 @@
                   </widget>
                  </widget>
                 </item>
-                <item row="3" column="3">
+                <item row="3" column="4">
                  <widget class="QPushButton" name="buttonAddFilter">
                   <property name="text">
-                   <string>Add condition</string>
+                   <string>Add</string>
                   </property>
                  </widget>
                 </item>
-                <item row="3" column="2">
+                <item row="3" column="3">
                  <widget class="QPushButton" name="buttonEdit">
                   <property name="text">
-                   <string>Edit condition</string>
+                   <string>Edit</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="1">
+                 <widget class="QPushButton" name="buttonRemoveAll">
+                  <property name="text">
+                   <string>Remove all</string>
                   </property>
                  </widget>
                 </item>
@@ -266,6 +297,18 @@
                 <string>Matching seeds</string>
                </property>
                <layout class="QGridLayout" name="gridLayout_3">
+                <property name="leftMargin">
+                 <number>4</number>
+                </property>
+                <property name="topMargin">
+                 <number>4</number>
+                </property>
+                <property name="rightMargin">
+                 <number>4</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>4</number>
+                </property>
                 <item row="0" column="0">
                  <widget class="QTableWidget" name="listResults">
                   <property name="font">

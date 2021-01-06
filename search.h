@@ -16,7 +16,7 @@ struct FilterInfo
     int cat;
     bool coord;
     bool area;
-    bool biomes;
+    int layer;
     int step;
     int count;
     const char *icon;
@@ -35,6 +35,10 @@ enum
     F_QM_90,
     F_TEMP,
     F_BIOME,
+    F_BIOME_4_RIVER,
+    F_BIOME_16_SHORE,
+    F_BIOME_64_RARE,
+    F_BIOME_256_BIOME,
     F_SPAWN,
     F_STRONGHOLD,
     F_DESERT,
@@ -63,7 +67,7 @@ static const struct FilterList
 
         list[F_QH_IDEAL] = FilterInfo{
             CAT_48, 1, 1, 0, 512, 0,
-            NULL,
+            ":icons/quad.png",
             "Quad-hut (ideal)",
             "The lower 48-bits provide potential for four swamp huts in "
             "spawning range, in one of the best configurations that exist."
@@ -71,7 +75,7 @@ static const struct FilterList
 
         list[F_QH_CLASSIC] = FilterInfo{
             CAT_48, 1, 1, 0, 512, 0,
-            NULL,
+            ":icons/quad.png",
             "Quad-hut (classic)",
             "The lower 48-bits provide potential for four swamp huts in "
             "spawning range, in one of the \"classic\" configurations. "
@@ -81,7 +85,7 @@ static const struct FilterList
 
         list[F_QH_NORMAL] = FilterInfo{
             CAT_48, 1, 1, 0, 512, 0,
-            NULL,
+            ":icons/quad.png",
             "Quad-hut (normal)",
             "The lower 48-bits provide potential for four swamp huts in "
             "spawning range, such that all of them are within 128 blocks "
@@ -91,7 +95,7 @@ static const struct FilterList
 
         list[F_QH_BARELY] = FilterInfo{
             CAT_48, 1, 1, 0, 512, 0,
-            NULL,
+            ":icons/quad.png",
             "Quad-hut (barely)",
             "The lower 48-bits provide potential for four swamp huts in "
             "spawning range, in any configuration, such that the bounding "
@@ -100,7 +104,7 @@ static const struct FilterList
 
         list[F_QM_95] = FilterInfo{
             CAT_48, 1, 1, 0, 512, 0,
-            NULL,
+            ":icons/quad.png",
             "Quad-ocean-monument (>95%)",
             "The lower 48-bits provide potential for 95% of the area of "
             "four ocean monuments to be within 128 blocks of an AFK "
@@ -109,7 +113,7 @@ static const struct FilterList
 
         list[F_QM_90] = FilterInfo{
             CAT_48, 1, 1, 0, 512, 0,
-            NULL,
+            ":icons/quad.png",
             "Quad-ocean-monument (>90%)",
             "The lower 48-bits provide potential for 90% of the area of "
             "four ocean monuments to be within 128 blocks of an AFK "
@@ -118,7 +122,7 @@ static const struct FilterList
 
         list[F_TEMP] = FilterInfo{
             CAT_FULL, 1, 0, 0, 1024, 0,
-            NULL,
+            ":icons/tempcat.png",
             "All temperatures cluster",
             "Checks that the seed has all temperature categories "
             "(Oceanic, Warm, Lush, Cold, Freezing, and special variants) "
@@ -127,11 +131,43 @@ static const struct FilterList
         };
 
         list[F_BIOME] = FilterInfo{
-            CAT_FULL, 1, 1, 1, 1, 0,
-            NULL,
-            "Biome filter",
+            CAT_FULL, 1, 1, L_VORONOI_ZOOM_1, 1, 0,
+            ":icons/map.png",
+            "Biome filter 1:1",
             "Discard seeds that do not have the required biomes inside "
             "the specified area."
+        };
+
+        list[F_BIOME_4_RIVER] = FilterInfo{
+            CAT_FULL, 1, 1, L_RIVER_MIX_4, 4, 0,
+            ":icons/map.png",
+            "Biome filter 1:4 RIVER",
+            "Discard seeds that do not have the required biomes inside "
+            "the specified area at layer RIVER with scale 1:4."
+        };
+
+        list[F_BIOME_16_SHORE] = FilterInfo{
+            CAT_FULL, 1, 1, L_SHORE_16, 16, 0,
+            ":icons/map.png",
+            "Biome filter 1:16 SHORE",
+            "Discard seeds that do not have the required biomes inside "
+            "the specified area at layer SHORE with scale 1:16."
+        };
+
+        list[F_BIOME_64_RARE] = FilterInfo{
+            CAT_FULL, 1, 1, L_RARE_BIOME_64, 64, 0,
+            ":icons/map.png",
+            "Biome filter 1:64 RARE",
+            "Discard seeds that do not have the required biomes inside "
+            "the specified area at layer RARE_BIOME with scale 1:64."
+        };
+
+        list[F_BIOME_256_BIOME] = FilterInfo{
+            CAT_FULL, 1, 1, L_BIOME_256, 256, 0,
+            ":icons/map.png",
+            "Biome filter 1:256 BIOME",
+            "Discard seeds that do not have the required biomes inside "
+            "the specified area at layer BIOME with scale 1:256."
         };
 
         list[F_SPAWN] = FilterInfo{
@@ -149,49 +185,49 @@ static const struct FilterList
         };
 
         list[F_DESERT] = FilterInfo{
-            CAT_FULL, 1, 1, 0, 512, 1,
+            CAT_FULL, 1, 1, 0, 1, 1,
             ":icons/desert.png",
             "Desert pyramid",
             ""
         };
 
         list[F_JUNGLE] = FilterInfo{
-            CAT_FULL, 1, 1, 0, 512, 1,
+            CAT_FULL, 1, 1, 0, 1, 1,
             ":icons/jungle.png",
             "Jungle temple",
             ""
         };
 
         list[F_HUT] = FilterInfo{
-            CAT_FULL, 1, 1, 0, 512, 1,
+            CAT_FULL, 1, 1, 0, 1, 1,
             ":icons/hut.png",
             "Swamp hut",
             ""
         };
 
         list[F_IGLOO] = FilterInfo{
-            CAT_FULL, 1, 1, 0, 512, 1,
+            CAT_FULL, 1, 1, 0, 1, 1,
             ":icons/igloo.png",
             "Igloo",
             ""
         };
 
         list[F_MONUMENT] = FilterInfo{
-            CAT_FULL, 1, 1, 0, 512, 1,
+            CAT_FULL, 1, 1, 0, 1, 1,
             ":icons/monument.png",
             "Ocean monument",
             ""
         };
 
         list[F_VILLAGE] = FilterInfo{
-            CAT_FULL, 1, 1, 0, 512, 1,
+            CAT_FULL, 1, 1, 0, 1, 1,
             ":icons/village.png",
             "Village",
             ""
         };
 
         list[F_OUTPOST] = FilterInfo{
-            CAT_FULL, 1, 1, 0, 512, 1,
+            CAT_FULL, 1, 1, 0, 1, 1,
             ":icons/outpost.png",
             "Pillager outpost",
             ""
@@ -205,7 +241,6 @@ struct Condition
 {
     int type;
     int x1, z1, x2, z2;
-    int rx, rz, rw, rh;
     int save;
     int relative;
     BiomeFilter bfilter;

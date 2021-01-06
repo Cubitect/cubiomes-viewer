@@ -205,11 +205,74 @@ void FilterDialog::updateMode()
     ui->labelSpinBox->setEnabled(ft.count);
     ui->spinBox->setEnabled(ft.count);
 
-    ui->groupBoxBiomes->setEnabled(ft.biomes);
-    QString s = "Location";
+    ui->groupBoxBiomes->setEnabled(ft.layer);
+    if (ft.layer)
+    {
+        for (int i = 0; i < 256; i++)
+        {
+            if (biomecboxes[i])
+            {
+                uint64_t mL = 0, mM = 0;
+                genPotential(&mL, &mM, ft.layer, MC_1_16, i);
+                if (mL || mM)
+                {
+                    biomecboxes[i]->setEnabled(true);
+                    if (ft.layer != L_VORONOI_ZOOM_1)
+                    {
+                        QString tip = "Generates any of:";
+                        for (int j = 0; j < 64; j++)
+                        {
+                            if (mL & (1ULL << j) && biomecboxes[j])
+                                tip += QString("\n") + biomecboxes[j]->text();
+                        }
+                        for (int j = 0; j < 64; j++)
+                        {
+                            if (mM & (1ULL << j) && biomecboxes[j+128])
+                                tip += QString("\n") + biomecboxes[j+128]->text();
+                        }
+                        biomecboxes[i]->setToolTip(tip);
+                    }
+                    else
+                        biomecboxes[i]->setToolTip(biomecboxes[i]->text());
+                }
+                else
+                {
+                    biomecboxes[i]->setEnabled(false);
+                    biomecboxes[i]->setToolTip("");
+                }
+            }
+        }
+    }
+
+    QString loc = "";
+    QString areatip = "";
+    QString lowtip = "";
+    QString uptip = "";
+
     if (ft.step > 1)
-        s += QString::asprintf(" (rounded to a multiple of %d)", ft.step);
-    ui->groupBoxPosition->setTitle(s);
+    {
+        loc = QString::asprintf("Location (coordinates are multiplied by x%d)", ft.step);
+        areatip = QString::asprintf("From floor(-[S] / 2) x%d to floor([S] / 2) x%d on both axes (inclusive)", ft.step, ft.step);
+        lowtip = QString::asprintf("Lower bound x%d (inclusive)", ft.step);
+        uptip = QString::asprintf("Upper bound x%d (inclusive)", ft.step);
+    }
+    else
+    {
+        loc = "Location";
+        areatip = "From floor(-[S] / 2) to floor([S] / 2) on both axes (inclusive)";
+        lowtip = QString::asprintf("Lower bound (inclusive)");
+        uptip = QString::asprintf("Upper bound (inclusive)");
+    }
+    ui->groupBoxPosition->setTitle(loc);
+    ui->labelSquareArea->setToolTip(areatip);
+    ui->labelX1->setToolTip(lowtip);
+    ui->labelZ1->setToolTip(lowtip);
+    ui->labelX2->setToolTip(uptip);
+    ui->labelZ2->setToolTip(uptip);
+    ui->lineEditX1->setToolTip(lowtip);
+    ui->lineEditZ1->setToolTip(lowtip);
+    ui->lineEditX2->setToolTip(uptip);
+    ui->lineEditZ2->setToolTip(uptip);
     ui->textDescription->setText(ft.desription);
     ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(filterindex != F_SELECT);
 }
@@ -230,19 +293,7 @@ void FilterDialog::on_buttonCheck_clicked()
 {
     for (int i = 0; i < 256; i++)
         if (biomecboxes[i])
-            biomecboxes[i]->setChecked(true);
-}
-
-void FilterDialog::on_buttonCheckMajor_clicked()
-{
-    int majorcnt = sizeof(BIOMES_L_BIOME_256) / sizeof(BIOMES_L_BIOME_256[0]);
-
-    for (int i = 0; i < majorcnt; i++)
-    {
-        int b = BIOMES_L_BIOME_256[i];
-        if (biomecboxes[b])
-            biomecboxes[b]->setChecked(true);
-    }
+            biomecboxes[i]->setChecked(biomecboxes[i]->isEnabled());
 }
 
 void FilterDialog::on_buttonBox_accepted()
@@ -267,20 +318,11 @@ void FilterDialog::on_buttonBox_accepted()
         cond.z2 = ui->lineEditZ2->text().toInt();
     }
 
-    int r = g_filterinfo.list[cond.type].step;
-    if (r)
-    {
-        cond.rx = (cond.x1) / r - (cond.x1 < 0);
-        cond.rz = (cond.z1) / r - (cond.x1 < 0);
-        cond.rw = (cond.x2 + r-1) / r - (cond.x2 + r-1 < 0) - cond.rx;
-        cond.rh = (cond.z2 + r-1) / r - (cond.z2 + r-1 < 0) - cond.rz;
-    }
-
     if (ui->groupBoxBiomes->isEnabled())
     {
         int b[256], n = 0;
         for (int i = 0; i < 256; i++)
-            if (biomecboxes[i] && biomecboxes[i]->isChecked())
+            if (biomecboxes[i] && biomecboxes[i]->isChecked() && biomecboxes[i]->isEnabled())
                 b[n++] = i;
 
         cond.bfilter = setupBiomeFilter(b, n);

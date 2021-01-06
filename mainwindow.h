@@ -73,6 +73,7 @@ private slots:
     void on_actionSpawn_toggled(bool arg1);
     void on_actionStronghold_toggled(bool arg1);
 
+    void on_buttonRemoveAll_clicked();
     void on_buttonRemove_clicked();
     void on_buttonEdit_clicked();
     void on_buttonAddFilter_clicked();

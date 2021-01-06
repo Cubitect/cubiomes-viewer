@@ -426,10 +426,10 @@ CandidateList getCandidates(int mc, const Condition *cond, int ccnt, int64_t buf
 
             if (qb)
             {
-                int x = (cond[ci].x1 >> 9);
-                int z = (cond[ci].z1 >> 9);
-                int w = (cond[ci].x2 >> 9) - x;
-                int h = (cond[ci].z2 >> 9) - z;
+                int x = cond[ci].x1;
+                int z = cond[ci].z1;
+                int w = cond[ci].x2 - x + 1;
+                int h = cond[ci].z2 - z + 1;
 
                 // does the set of candidates for this condition fit in memory?
                 if (qbn * w*h < bufmax * 4 * (int64_t)sizeof(*clist.items->spos))
@@ -565,27 +565,25 @@ int testCond(StructPos *spos, int64_t seed, const Condition *cond, int mc, Layer
     case F_QH_BARELY:
         sconf = mc <= MC_1_12 ? SWAMP_HUT_CONFIG_112 : SWAMP_HUT_CONFIG;
         qual = cond->type;
-        x1 = cond->x1;
-        z1 = cond->z1;
-        x2 = cond->x2;
-        z2 = cond->z2;
 
         if (cond->relative)
         {
-            x1 += spos[cond->relative].cx;
-            z1 += spos[cond->relative].cz;
-            x2 += spos[cond->relative].cx;
-            z2 += spos[cond->relative].cz;
+            rx1 = ((cond->x1 << 9) + spos[cond->relative].cx) >> 9;
+            rz1 = ((cond->z1 << 9) + spos[cond->relative].cz) >> 9;
+            rx2 = ((cond->x2 << 9) + spos[cond->relative].cx) >> 9;
+            rz2 = ((cond->z2 << 9) + spos[cond->relative].cz) >> 9;
+        }
+        else
+        {
+            rx1 = cond->x1;
+            rz1 = cond->z1;
+            rx2 = cond->x2;
+            rz2 = cond->z2;
         }
 
-        rx1 = x1 >> 9;
-        rz1 = z1 >> 9;
-        rx2 = x2 >> 9;
-        rz2 = z2 >> 9;
-
-        for (rz = rz1; rz < rz2 && !*abort; rz++)
+        for (rz = rz1; rz <= rz2 && !*abort; rz++)
         {
-            for (rx = rx1; rx < rx2; rx++)
+            for (rx = rx1; rx <= rx2; rx++)
             {
                 s = moveStructure(seed, -rx, -rz);
                 if ( U(qhutQual((s + sconf.salt) & 0xfffff) >= qual) &&
@@ -605,33 +603,29 @@ int testCond(StructPos *spos, int64_t seed, const Condition *cond, int mc, Layer
         }
         return 0;
 
-    case F_QM_95:   qual = 58*58*4 * 95 / 100;  goto L_QM_ANY;
+    case F_QM_95:   qual = 58*58*4 * 95 / 100;  goto L_qm_any;
     case F_QM_90:   qual = 58*58*4 * 90 / 100;
-L_QM_ANY:
+L_qm_any:
         sconf = MONUMENT_CONFIG;
-
-        x1 = cond->x1;
-        z1 = cond->z1;
-        x2 = cond->x2;
-        z2 = cond->z2;
 
         if (cond->relative)
         {
-            x1 += spos[cond->relative].cx;
-            z1 += spos[cond->relative].cz;
-            x2 += spos[cond->relative].cx;
-            z2 += spos[cond->relative].cz;
+            rx1 = ((cond->x1 << 9) + spos[cond->relative].cx) >> 9;
+            rz1 = ((cond->z1 << 9) + spos[cond->relative].cz) >> 9;
+            rx2 = ((cond->x2 << 9) + spos[cond->relative].cx) >> 9;
+            rz2 = ((cond->z2 << 9) + spos[cond->relative].cz) >> 9;
+        }
+        else
+        {
+            rx1 = cond->x1;
+            rz1 = cond->z1;
+            rx2 = cond->x2;
+            rz2 = cond->z2;
         }
 
-        rx1 = x1 >> 9;
-        rz1 = z1 >> 9;
-        rx2 = x2 >> 9;
-        rz2 = z2 >> 9;
-
-
-        for (rz = rz1; rz < rz2 && !*abort; rz++)
+        for (rz = rz1; rz <= rz2 && !*abort; rz++)
         {
-            for (rx = rx1; rx < rx2; rx++)
+            for (rx = rx1; rx <= rx2; rx++)
             {
                 s = moveStructure(seed, -rx, -rz);
                 if (qmonumentQual(s) >= qual)
@@ -653,26 +647,25 @@ L_QM_ANY:
 
     case F_DESERT:
         sconf = mc <= MC_1_12 ? DESERT_PYRAMID_CONFIG_112 : DESERT_PYRAMID_CONFIG;
-        goto L_STRUCT_ANY;
+        goto L_struct_any;
     case F_HUT:
         sconf = mc <= MC_1_12 ? SWAMP_HUT_CONFIG_112 : SWAMP_HUT_CONFIG;
-        goto L_STRUCT_ANY;
+        goto L_struct_any;
     case F_JUNGLE:
         sconf = mc <= MC_1_12 ? JUNGLE_PYRAMID_CONFIG_112 : JUNGLE_PYRAMID_CONFIG;
-        goto L_STRUCT_ANY;
+        goto L_struct_any;
     case F_IGLOO:
         sconf = mc <= MC_1_12 ? IGLOO_CONFIG_112 : IGLOO_CONFIG;
-        goto L_STRUCT_ANY;
-    case F_MONUMENT:    sconf = MONUMENT_CONFIG;    goto L_STRUCT_ANY;
-    case F_VILLAGE:     sconf = VILLAGE_CONFIG;     goto L_STRUCT_ANY;
-    case F_OUTPOST:     sconf = OUTPOST_CONFIG;     goto L_STRUCT_ANY;
+        goto L_struct_any;
+    case F_MONUMENT:    sconf = MONUMENT_CONFIG;    goto L_struct_any;
+    case F_VILLAGE:     sconf = VILLAGE_CONFIG;     goto L_struct_any;
+    case F_OUTPOST:     sconf = OUTPOST_CONFIG;     goto L_struct_any;
 
-L_STRUCT_ANY:
+L_struct_any:
         x1 = cond->x1;
         z1 = cond->z1;
         x2 = cond->x2;
         z2 = cond->z2;
-
         if (cond->relative)
         {
             x1 += spos[cond->relative].cx;
@@ -690,8 +683,8 @@ L_STRUCT_ANY:
         // TODO: warn if multistructure clusters are used as a positional
         // dependency (the centre can change based on biomes)
 
-        xt = 0;
-        zt = 0;
+        sout->cx = xt = 0;
+        sout->cz = zt = 0;
         qual = 0;
 
         // Note "<="
@@ -700,7 +693,7 @@ L_STRUCT_ANY:
             for (rx = rx1; rx <= rx2; rx++)
             {
                 pc = getStructurePos(sconf, seed, rx, rz, &valid);
-                if (valid && pc.x >= x1 && pc.x < x2 && pc.z >= z1 && pc.z < z2)
+                if (valid && pc.x >= x1 && pc.x <= x2 && pc.z >= z1 && pc.z <= z2)
                 {
                     if (g && !isViableStructurePos(sconf.structType, mc, g, seed, pc.x, pc.z))
                         continue;
@@ -721,7 +714,12 @@ L_STRUCT_ANY:
         return 0;
 
     case F_SPAWN:
-        if (!g) return 1;
+        // TODO: warn if spawn is used for relative positioning
+        sout->cx = 0;
+        sout->cz = 0;
+        if (!g)
+            return 1;
+
         x1 = cond->x1;
         z1 = cond->z1;
         x2 = cond->x2;
@@ -736,7 +734,13 @@ L_STRUCT_ANY:
         applySeed(g, seed);
         if (*abort) return 0;
         pc = getSpawn(mc, g, NULL, seed);
-        return (pc.x >= x1 && pc.x < x2 && pc.z >= z1 && pc.z < z2);
+        if (pc.x >= x1 && pc.x <= x2 && pc.z >= z1 && pc.z <= z2)
+        {
+            sout->cx = pc.x;
+            sout->cz = pc.z;
+            return 1;
+        }
+        return 0;
 
     case F_STRONGHOLD:
         x1 = cond->x1;
@@ -802,7 +806,12 @@ L_STRUCT_ANY:
 
         // pre-biome-checks complete, the area appears to line up with possible generation positions
         if (!g)
+        {
+            // TODO: warn if strongholds are used for relative positioning
+            sout->cx = 0;
+            sout->cz = 0;
             return 1;
+        }
         else
         {
             StrongholdIter sh;
@@ -814,9 +823,15 @@ L_STRUCT_ANY:
                 if (*abort || sh.ringnum > r)
                     break;
 
-                if (sh.pos.x >= x1 && sh.pos.x < x2 && sh.pos.z >= z1 && sh.pos.z < z2)
+                if (sh.pos.x >= x1 && sh.pos.x <= x2 && sh.pos.z >= z1 && sh.pos.z <= z2)
+                {
                     if (++qual >= cond->count)
+                    {
+                        sout->cx = sh.pos.x;
+                        sout->cz = sh.pos.z;
                         return 1;
+                    }
+                }
 
                 if (sh.ringnum == r && sh.ringidx+1 == sh.ringmax)
                     break;
@@ -827,29 +842,47 @@ L_STRUCT_ANY:
         // TODO: burried treasure
 
     case F_TEMP:
-        if (!g) return 1;
-        x1 = cond->x1;
-        z1 = cond->z1;
         if (cond->relative)
         {
-            x1 += spos[cond->relative].cx;
-            z1 += spos[cond->relative].cz;
+            rx1 = ((cond->x1 << 10) + spos[cond->relative].cx) >> 10;
+            rz1 = ((cond->z1 << 10) + spos[cond->relative].cz) >> 10;
         }
-        return hasAllTemps(g, seed, x1 >> 10, z1 >> 10);
+        else
+        {
+            rx1 = cond->x1;
+            rz1 = cond->z1;
+        }
+        sout->cx = rx1 << 10;
+        sout->cz = rz1 << 10;
+        if (!g) return 1;
+        return hasAllTemps(g, seed, rx1, rz1);
 
-    case F_BIOME:
-        if (!g) return 1;
-        x1 = cond->x1;
-        z1 = cond->z1;
-        x2 = cond->x2 - cond->x1; // width
-        z2 = cond->z2 - cond->z1; // height
+    case F_BIOME:           s = 0; qual = L_VORONOI_ZOOM_1; goto L_biome_filter_any;
+    case F_BIOME_4_RIVER:   s = 2; qual = L_RIVER_MIX_4;    goto L_biome_filter_any;
+    case F_BIOME_16_SHORE:  s = 4; qual = L_SHORE_16;       goto L_biome_filter_any;
+    case F_BIOME_64_RARE:   s = 6; qual = L_RARE_BIOME_64;  goto L_biome_filter_any;
+    case F_BIOME_256_BIOME: s = 8; qual = L_BIOME_256;      goto L_biome_filter_any;
+
+L_biome_filter_any:
         if (cond->relative)
         {
-            x1 += spos[cond->relative].cx;
-            z1 += spos[cond->relative].cz;
+            rx1 = ((cond->x1 << s) + spos[cond->relative].cx) >> s;
+            rz1 = ((cond->z1 << s) + spos[cond->relative].cz) >> s;
+            rx2 = ((cond->x2 << s) + spos[cond->relative].cx) >> s;
+            rz2 = ((cond->z2 << s) + spos[cond->relative].cz) >> s;
         }
-        if (*abort) return 0;
-        return checkForBiomes(g, L_VORONOI_ZOOM_1, NULL, seed, x1, z1, x2, z2, cond->bfilter, 0) > 0;
+        else
+        {
+            rx1 = cond->x1;
+            rz1 = cond->z1;
+            rx2 = cond->x2;
+            rz2 = cond->z2;
+        }
+        sout->cx = ((rx1 + rx2) << s) >> 1;
+        sout->cz = ((rx1 + rx2) << s) >> 1;
+        if (!g) return 1;
+        if (rx2 < rx1 || rz2 < rz1 || *abort) return 0;
+        return checkForBiomes(g, qual, NULL, seed, rx1, rz1, rx2-rx1+1, rz2-rz1+1, cond->bfilter, 0) > 0;
 
     default:
         break;

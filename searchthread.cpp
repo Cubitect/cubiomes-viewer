@@ -73,11 +73,12 @@ bool SearchThread::set(int type, int64_t start48, int mc, const QVector<Conditio
         {
             int w = c.x2 - c.x1;
             int h = c.z2 - c.z1;
-            if (w * h < 1)
+            if (w < 0 || h < 0)
             {
+                const FilterInfo& ft = g_filterinfo.list[c.type];
                 QMessageBox::warning(NULL, "Warning", QString::asprintf(
-                        "Condition with ID [%02d] does not specify a valid area: (%d, %d) - (%d, %d).",
-                        c.save, c.x1, c.z1, c.x2, c.z2));
+                        "Condition with ID [%02d] does not specify a valid area:\nPosition: [%d, %d] Size: (%d, %d) Scale: x%d",
+                        c.save, c.x1, c.z1, w, h, ft.step));
                 return false;
             }
         }

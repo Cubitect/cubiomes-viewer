@@ -30,8 +30,6 @@ private slots:
 
     void on_buttonCheck_clicked();
 
-    void on_buttonCheckMajor_clicked();
-
     void on_buttonBox_accepted();
 
     void on_buttonArea_toggled(bool checked);

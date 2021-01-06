@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>600</width>
-    <height>505</height>
+    <height>640</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -84,13 +84,6 @@
           </property>
          </widget>
         </item>
-        <item>
-         <widget class="QPushButton" name="buttonCheckMajor">
-          <property name="text">
-           <string>check all major</string>
-          </property>
-         </widget>
-        </item>
        </layout>
       </item>
       <item>
@@ -104,7 +97,7 @@
            <x>0</x>
            <y>0</y>
            <width>560</width>
-           <height>63</height>
+           <height>198</height>
           </rect>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -186,6 +179,9 @@
       </item>
       <item row="1" column="2">
        <widget class="QCheckBox" name="buttonArea">
+        <property name="toolTip">
+         <string>Specify manual rectangle rather than square</string>
+        </property>
         <property name="text">
          <string>Custom area</string>
         </property>
@@ -198,6 +194,9 @@
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
          <widget class="QLabel" name="labelX1">
+          <property name="toolTip">
+           <string>Lower bound (inclusive)</string>
+          </property>
           <property name="text">
            <string>X&lt;sub&gt;1&lt;/sub&gt;=</string>
           </property>
@@ -205,6 +204,9 @@
         </item>
         <item>
          <widget class="QLineEdit" name="lineEditX1">
+          <property name="toolTip">
+           <string>Lower bound (inclusive)</string>
+          </property>
           <property name="text">
            <string>0</string>
           </property>
@@ -212,6 +214,9 @@
         </item>
         <item>
          <widget class="QLabel" name="labelZ1">
+          <property name="toolTip">
+           <string>Lower bound (inclusive)</string>
+          </property>
           <property name="text">
            <string>Z&lt;sub&gt;1&lt;/sub&gt;=</string>
           </property>
@@ -219,6 +224,9 @@
         </item>
         <item>
          <widget class="QLineEdit" name="lineEditZ1">
+          <property name="toolTip">
+           <string>Lower bound (inclusive)</string>
+          </property>
           <property name="text">
            <string>0</string>
           </property>
@@ -239,6 +247,9 @@
         </item>
         <item>
          <widget class="QLabel" name="labelX2">
+          <property name="toolTip">
+           <string>Upper bound (inclusive)</string>
+          </property>
           <property name="text">
            <string>X&lt;sub&gt;2&lt;/sub&gt;=</string>
           </property>
@@ -246,6 +257,9 @@
         </item>
         <item>
          <widget class="QLineEdit" name="lineEditX2">
+          <property name="toolTip">
+           <string>Upper bound (inclusive)</string>
+          </property>
           <property name="text">
            <string>0</string>
           </property>
@@ -253,6 +267,9 @@
         </item>
         <item>
          <widget class="QLabel" name="labelZ2">
+          <property name="toolTip">
+           <string>Upper bound (inclusive)</string>
+          </property>
           <property name="text">
            <string>Z&lt;sub&gt;2&lt;/sub&gt;=</string>
           </property>
@@ -260,6 +277,9 @@
         </item>
         <item>
          <widget class="QLineEdit" name="lineEditZ2">
+          <property name="toolTip">
+           <string>Upper bound (inclusive)</string>
+          </property>
           <property name="text">
            <string>0</string>
           </property>

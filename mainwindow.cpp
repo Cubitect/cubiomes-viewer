@@ -43,6 +43,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->frameMap->layout()->addWidget(ui->toolBar);
     ui->toolBar->setContentsMargins(0, 0, 0, 0);
 
+    ui->splitterMap->setSizes(QList<int>({8000, 10000}));
     ui->splitterSearch->setSizes(QList<int>({1000, 2000}));
     ui->splitterConditions->setSizes(QList<int>({1000, 3000}));
 
@@ -153,9 +154,9 @@ void MainWindow::setItemCondition(QListWidgetItem *item, Condition cond) const
         s += "     ";
 
     if (ft.coord)
-        s += QString::asprintf("(%d,%d)", cond.x1, cond.z1);
+        s += QString::asprintf("(%d,%d)", cond.x1*ft.step, cond.z1*ft.step);
     if (ft.area)
-        s += QString::asprintf(",(%d,%d)", cond.x2, cond.z2);
+        s += QString::asprintf(",(%d,%d)", (cond.x2+1)*ft.step-1, (cond.z2+1)*ft.step-1);
 
     if (ft.cat == CAT_48)
         item->setBackground(QColor(Qt::yellow));
@@ -302,6 +303,13 @@ static void remove_selected(QListWidget *list)
     }
 }
 
+void MainWindow::on_buttonRemoveAll_clicked()
+{
+    ui->listConditions48->clear();
+    ui->listConditionsFull->clear();
+    id_counter = 1;
+}
+
 void MainWindow::on_buttonRemove_clicked()
 {
     remove_selected(ui->listConditions48);
@@ -410,10 +418,25 @@ void MainWindow::on_buttonStart_clicked()
         QVector<Condition> condvec = getConditions();
         int64_t sstart = (int64_t)ui->lineStart48->text().toLongLong() & MASK48;
         int searchtype = ui->comboSearchType->currentIndex();
+        int ok = true;
 
-        ui->lineStart48->setText(QString::asprintf("%" PRId64, sstart));
-        if (!sthread.isRunning() && sthread.set(searchtype, sstart, mc, condvec))
+        if (condvec.empty())
         {
+            warning("Warning", "Please define some constraints using the \"Add\" button.");
+            ok = false;
+        }
+        if (sthread.isRunning())
+        {
+            warning("Warning", "Search is still running.");
+            ok = false;
+        }
+
+        if (ok)
+            ok = sthread.set(searchtype, sstart, mc, condvec);
+
+        if (ok)
+        {
+            ui->lineStart48->setText(QString::asprintf("%" PRId64, sstart));
             ui->comboSearchType->setEnabled(false);
             ui->buttonStart->setText("Abort search");
             ui->buttonStart->setIcon(QIcon::fromTheme("process-stop"));
