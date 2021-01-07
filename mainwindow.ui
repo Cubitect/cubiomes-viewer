@@ -18,7 +18,8 @@
     <normaloff>:/icons/map.png</normaloff>:/icons/map.png</iconset>
   </property>
   <property name="styleSheet">
-   <string notr="true">QToolButton:checked { background-color:rgb(85, 87, 83) }</string>
+   <string notr="true">QToolButton:checked { background-color:rgb(85, 87, 83) }
+QToolButton:!checked { background-color:rgb(240, 240, 240) }</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout_6">
