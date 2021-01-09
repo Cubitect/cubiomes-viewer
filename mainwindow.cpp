@@ -5,6 +5,7 @@
 #include "quadlistdialog.h"
 #include "aboutdialog.h"
 #include "quad.h"
+#include "cutil.h"
 
 #include <QIntValidator>
 #include <QMetaType>
@@ -518,6 +519,16 @@ void MainWindow::on_actionScan_seed_for_Quad_Huts_triggered()
     dialog->show();
 }
 
+void MainWindow::on_actionOpen_shadow_seed_triggered()
+{
+    int mc;
+    int64_t seed;
+    if (getSeed(&mc, &seed))
+    {
+        setSeed(mc, -7379792620528906219 - seed);
+    }
+}
+
 void MainWindow::on_actionAbout_triggered()
 {
     AboutDialog *dialog = new AboutDialog(this);
@@ -673,3 +684,5 @@ void MainWindow::copyCoord()
     QClipboard *clipboard = QGuiApplication::clipboard();
     clipboard->setText(QString::asprintf("%d, %d", p.x, p.z));
 }
+
+

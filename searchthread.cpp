@@ -82,6 +82,19 @@ bool SearchThread::set(int type, int64_t start48, int mc, const QVector<Conditio
                 return false;
             }
         }
+        if (c.type >= F_BIOME && c.type <= F_BIOME_256_BIOME)
+        {
+            if ((c.exclb & (c.bfilter.riverToFind | c.bfilter.oceanToFind)) ||
+                (c.exclm & c.bfilter.riverToFindM))
+            {
+                QMessageBox::warning(NULL, "Warning", QString::asprintf("Biome filter condition with ID [%02d] has contradicting flags for include and exclude.", c.save));
+                return false;
+            }
+            if (c.count == 0)
+            {
+                QMessageBox::information(NULL, "Info", QString::asprintf("Biome filter condition with ID [%02d] specifies no biomes.", c.save));
+            }
+        }
     }
 
     return true;

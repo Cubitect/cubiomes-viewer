@@ -39,6 +39,7 @@ enum
     F_BIOME_16_SHORE,
     F_BIOME_64_RARE,
     F_BIOME_256_BIOME,
+    F_BIOME_256_OTEMP,
     F_SPAWN,
     F_STRONGHOLD,
     F_DESERT,
@@ -134,40 +135,55 @@ static const struct FilterList
             CAT_FULL, 1, 1, L_VORONOI_ZOOM_1, 1, 0,
             ":icons/map.png",
             "Biome filter 1:1",
-            "Discard seeds that do not have the required biomes inside "
-            "the specified area."
+            "Only seeds with the included (+) biomes in the specified area and "
+            "discard those that have biomes that are explicitly excluded (-)."
         };
 
         list[F_BIOME_4_RIVER] = FilterInfo{
             CAT_FULL, 1, 1, L_RIVER_MIX_4, 4, 0,
             ":icons/map.png",
             "Biome filter 1:4 RIVER",
-            "Discard seeds that do not have the required biomes inside "
-            "the specified area at layer RIVER with scale 1:4."
+            "Only seeds with the included (+) biomes in the specified area and "
+            "discard those that have biomes that are explicitly excluded (-) "
+            "at layer RIVER with scale 1:4."
         };
 
         list[F_BIOME_16_SHORE] = FilterInfo{
             CAT_FULL, 1, 1, L_SHORE_16, 16, 0,
             ":icons/map.png",
             "Biome filter 1:16 SHORE",
-            "Discard seeds that do not have the required biomes inside "
-            "the specified area at layer SHORE with scale 1:16."
+            "Only seeds with the included (+) biomes in the specified area and "
+            "discard those that have biomes that are explicitly excluded (-) "
+            "at layer SHORE with scale 1:16."
         };
 
         list[F_BIOME_64_RARE] = FilterInfo{
             CAT_FULL, 1, 1, L_RARE_BIOME_64, 64, 0,
             ":icons/map.png",
             "Biome filter 1:64 RARE",
-            "Discard seeds that do not have the required biomes inside "
-            "the specified area at layer RARE_BIOME with scale 1:64."
+            "Only seeds with the included (+) biomes in the specified area and "
+            "discard those that have biomes that are explicitly excluded (-) "
+            "at layer RARE_BIOME with scale 1:64."
         };
 
         list[F_BIOME_256_BIOME] = FilterInfo{
             CAT_FULL, 1, 1, L_BIOME_256, 256, 0,
             ":icons/map.png",
             "Biome filter 1:256 BIOME",
-            "Discard seeds that do not have the required biomes inside "
-            "the specified area at layer BIOME with scale 1:256."
+            "Only seeds with the included (+) biomes in the specified area and "
+            "discard those that have biomes that are explicitly excluded (-) "
+            "at layer BIOME with scale 1:256."
+        };
+
+        list[F_BIOME_256_OTEMP] = FilterInfo{
+            CAT_48, 1, 1, L13_OCEAN_TEMP_256, 256, 0,
+            ":icons/map.png",
+            "Biome filter 1:256 O.TEMP",
+            "Only seeds with the included (+) biomes in the specified area and "
+            "discard those that have biomes that are explicitly excluded (-) "
+            "at layer OCEAN TEMPERATURE with scale 1:256. "
+            "This generation layer is only valid for versions >= 1.13, "
+            "and depends only on the lower 48-bits of the seed."
         };
 
         list[F_SPAWN] = FilterInfo{
@@ -244,6 +260,8 @@ struct Condition
     int save;
     int relative;
     BiomeFilter bfilter;
+    uint64_t exclb; // excluded biome
+    uint64_t exclm; // excluded modified
     int count;
 };
 

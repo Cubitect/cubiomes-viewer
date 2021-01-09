@@ -857,11 +857,12 @@ L_struct_any:
         if (!g) return 1;
         return hasAllTemps(g, seed, rx1, rz1);
 
-    case F_BIOME:           s = 0; qual = L_VORONOI_ZOOM_1; goto L_biome_filter_any;
-    case F_BIOME_4_RIVER:   s = 2; qual = L_RIVER_MIX_4;    goto L_biome_filter_any;
-    case F_BIOME_16_SHORE:  s = 4; qual = L_SHORE_16;       goto L_biome_filter_any;
-    case F_BIOME_64_RARE:   s = 6; qual = L_RARE_BIOME_64;  goto L_biome_filter_any;
-    case F_BIOME_256_BIOME: s = 8; qual = L_BIOME_256;      goto L_biome_filter_any;
+    case F_BIOME:           s = 0; qual = L_VORONOI_ZOOM_1;     goto L_biome_filter_any;
+    case F_BIOME_4_RIVER:   s = 2; qual = L_RIVER_MIX_4;        goto L_biome_filter_any;
+    case F_BIOME_16_SHORE:  s = 4; qual = L_SHORE_16;           goto L_biome_filter_any;
+    case F_BIOME_64_RARE:   s = 6; qual = L_RARE_BIOME_64;      goto L_biome_filter_any;
+    case F_BIOME_256_BIOME: s = 8; qual = L_BIOME_256;          goto L_biome_filter_any;
+    case F_BIOME_256_OTEMP: s = 8; qual = L13_OCEAN_TEMP_256;   goto L_biome_filter_any;
 
 L_biome_filter_any:
         if (cond->relative)
@@ -879,10 +880,40 @@ L_biome_filter_any:
             rz2 = cond->z2;
         }
         sout->cx = ((rx1 + rx2) << s) >> 1;
-        sout->cz = ((rx1 + rx2) << s) >> 1;
-        if (!g) return 1;
-        if (rx2 < rx1 || rz2 < rz1 || *abort) return 0;
-        return checkForBiomes(g, qual, NULL, seed, rx1, rz1, rx2-rx1+1, rz2-rz1+1, cond->bfilter, 0) > 0;
+        sout->cz = ((rz1 + rz2) << s) >> 1;
+        if (!g)
+        {
+            if (qual != L13_OCEAN_TEMP_256)
+                return 1;
+            if (mc < MC_1_13)
+                return 0;
+            thread_local LayerStack g_otemp;
+            if (!g_otemp.entry_1)
+                setupGenerator(&g_otemp, MC_1_13);
+            g = &g_otemp;
+        }
+        valid = 0;
+        if (rx2 >= rx1 || rz2 >= rz1 || !*abort)
+        {
+            int w = rx2-rx1+1;
+            int h = rz2-rz1+1;
+            int *area = allocCache(&g->layers[qual], w, h);
+            if (checkForBiomes(g, qual, area, seed, rx1, rz1, w, h, cond->bfilter, 0) > 0)
+            {
+                // check biome exclusion
+                uint64_t b = 0, bm = 0;
+                for (int i = 0; i < w*h; i++)
+                {
+                    int id = area[i];
+                    if (id < 128) b |= (1ULL << id);
+                    else bm |= (1ULL << (id-128));
+                }
+                if ((b & cond->exclb) == 0 && (bm & cond->exclm) == 0)
+                    valid = 1;
+            }
+            free(area);
+        }
+        return valid;
 
     default:
         break;

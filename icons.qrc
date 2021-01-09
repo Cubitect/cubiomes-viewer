@@ -29,5 +29,8 @@
         <file>icons/map.png</file>
         <file>icons/quad.png</file>
         <file>icons/tempcat.png</file>
+        <file>icons/check0.png</file>
+        <file>icons/check1.png</file>
+        <file>icons/check2.png</file>
     </qresource>
 </RCC>

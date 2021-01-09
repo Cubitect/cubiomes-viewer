@@ -1,13 +1,20 @@
 #include "filterdialog.h"
 #include "ui_filterdialog.h"
 
+#include "cutil.h"
+
 #include <QCheckBox>
 #include <QIntValidator>
+#include <QColor>
+#include <QPixmap>
+#include <QPainter>
+#include <QPainterPath>
 
 
 #define SETUP_BIOME_CHECKBOX(B) do {\
         biomecboxes[B] = new QCheckBox(#B);\
         ui->gridLayoutBiomes->addWidget(biomecboxes[B], B % 128, B / 128);\
+        biomecboxes[B]->setTristate(true);\
     } while (0)
 
 FilterDialog::FilterDialog(MainWindow *parent, Condition *initcond) :
@@ -119,6 +126,31 @@ FilterDialog::FilterDialog(MainWindow *parent, Condition *initcond) :
     SETUP_BIOME_CHECKBOX(bamboo_jungle);
     SETUP_BIOME_CHECKBOX(bamboo_jungle_hills);
 
+    ui->groupBoxBiomes->setStyleSheet(
+            "QCheckBox::indicator:unchecked     { image: url(:/icons/check0.png); }\n"
+            "QCheckBox::indicator:indeterminate { image: url(:/icons/check1.png); }\n"
+            "QCheckBox::indicator:checked       { image: url(:/icons/check2.png); }\n"
+            );
+
+    QPixmap pixmap(14,14);
+    pixmap.fill(QColor(0,0,0,0));
+    QPainter p(&pixmap);
+    p.setRenderHint(QPainter::Antialiasing);
+    QPainterPath path;
+    path.addRoundedRect(QRectF(1, 1, 12, 12), 3, 3);
+    QPen pen(Qt::black, 1);
+    p.setPen(pen);
+    for (int i = 0; i < 256; i++)
+    {
+        QCheckBox *cb = biomecboxes[i];
+        if (!cb)
+            continue;
+        QColor col(biomeColors[i][0], biomeColors[i][1], biomeColors[i][2]);
+        p.fillPath(path, col);
+        p.drawPath(path);
+        biomecboxes[i]->setIcon(QIcon(pixmap));
+    }
+
     custom = false;
 
     if (initcond)
@@ -147,6 +179,15 @@ FilterDialog::FilterDialog(MainWindow *parent, Condition *initcond) :
                 ui->buttonArea->setChecked(false);
             }
         }
+        else if (cond.x1 == cond.z1 && cond.x1+1 == -cond.x2 && cond.x1+1 == -cond.z2)
+        {
+            ui->lineRadius->setText(QString::number(cond.x2 * 2 + 1));
+            if (ui->buttonArea->isEnabled())
+            {
+                custom = false;
+                ui->buttonArea->setChecked(false);
+            }
+        }
         else
         {
             if (ui->buttonArea->isEnabled())
@@ -156,21 +197,32 @@ FilterDialog::FilterDialog(MainWindow *parent, Condition *initcond) :
             }
         }
 
+        // remember bamboo_jungle=168 has a bit at (bamboo_jungle & 0x3f) in cond.bfilter.edgesToFind
         for (int i = 0; i < 64; i++)
         {
-            if ((cond.bfilter.riverToFind | cond.bfilter.oceanToFind) & (1ULL << i))
-                if (biomecboxes[i])
-                    biomecboxes[i]->setChecked(true);
+            if (biomecboxes[i])
+            {
+                bool c1 = (cond.bfilter.riverToFind | cond.bfilter.oceanToFind) & (1ULL << i);
+                bool c2 = cond.exclb & (1ULL << i);
+                biomecboxes[i]->setCheckState(c2 ? Qt::Checked : c1 ? Qt::PartiallyChecked : Qt::Unchecked);
+            }
 
-            if (cond.bfilter.riverToFindM & (1ULL << i))
-                if (biomecboxes[i+128])
-                    biomecboxes[i+128]->setChecked(true);
+            if (biomecboxes[i+128])
+            {
+                bool c1 = (cond.bfilter.riverToFindM) & (1ULL << i);
+                bool c2 = cond.exclm & (1ULL << i);
+                biomecboxes[i+128]->setCheckState(c2 ? Qt::Checked : c1 ? Qt::PartiallyChecked : Qt::Unchecked);
+            }
         }
-
+        /*
         if (cond.bfilter.riverToFind & (1ULL << (bamboo_jungle & 0x3f)))
+        {
             biomecboxes[bamboo_jungle]->setChecked(true);
+        }
         if (cond.bfilter.riverToFindM & (1ULL << (bamboo_jungle_hills - 128)))
+        {
             biomecboxes[bamboo_jungle_hills]->setChecked(true);
+        }*/
     }
 
     updateMode();
@@ -206,7 +258,24 @@ void FilterDialog::updateMode()
     ui->spinBox->setEnabled(ft.count);
 
     ui->groupBoxBiomes->setEnabled(ft.layer);
-    if (ft.layer)
+    if (ft.layer == L13_OCEAN_TEMP_256)
+    {
+        for (int i = 0; i < 256; i++)
+        {
+            QCheckBox *cb = biomecboxes[i];
+            if (cb)
+            {
+                cb->setEnabled(false);
+                cb->setToolTip("");
+            }
+        }
+        biomecboxes[warm_ocean]->setEnabled(true);
+        biomecboxes[lukewarm_ocean]->setEnabled(true);
+        biomecboxes[ocean]->setEnabled(true);
+        biomecboxes[cold_ocean]->setEnabled(true);
+        biomecboxes[frozen_ocean]->setEnabled(true);
+    }
+    else if (ft.layer)
     {
         for (int i = 0; i < 256; i++)
         {
@@ -285,15 +354,21 @@ void FilterDialog::on_comboBoxType_activated(int)
 void FilterDialog::on_buttonUncheck_clicked()
 {
     for (int i = 0; i < 256; i++)
-        if (biomecboxes[i])
-            biomecboxes[i]->setChecked(false);
+    {
+        QCheckBox *cb = biomecboxes[i];
+        if (cb)
+            cb->setCheckState(Qt::Unchecked);
+    }
 }
 
 void FilterDialog::on_buttonCheck_clicked()
 {
     for (int i = 0; i < 256; i++)
-        if (biomecboxes[i])
-            biomecboxes[i]->setChecked(biomecboxes[i]->isEnabled());
+    {
+        QCheckBox *cb = biomecboxes[i];
+        if (cb)
+            cb->setCheckState(cb->isEnabled() ? Qt::PartiallyChecked : Qt::Unchecked);
+    }
 }
 
 void FilterDialog::on_buttonBox_accepted()
@@ -320,13 +395,29 @@ void FilterDialog::on_buttonBox_accepted()
 
     if (ui->groupBoxBiomes->isEnabled())
     {
-        int b[256], n = 0;
+        int b[256], in = 0, ex = 0;
+        cond.exclb = 0;
+        cond.exclm = 0;
         for (int i = 0; i < 256; i++)
-            if (biomecboxes[i] && biomecboxes[i]->isChecked() && biomecboxes[i]->isEnabled())
-                b[n++] = i;
+        {
+            QCheckBox *cb = biomecboxes[i];
+            if (cb && cb->isEnabled())
+            {
+                if (cb->checkState() == Qt::PartiallyChecked)
+                    b[in++] = i;
+                else if (cb->checkState() == Qt::Checked)
+                {
+                    if (i < 128)
+                        cond.exclb |= 1ULL << i;
+                    else
+                        cond.exclm |= 1ULL << (i-128);
+                    ex++;
+                }
+            }
+        }
 
-        cond.bfilter = setupBiomeFilter(b, n);
-        cond.count = n;
+        cond.bfilter = setupBiomeFilter(b, in);
+        cond.count = in + ex;
     }
 }
 

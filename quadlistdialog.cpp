@@ -2,8 +2,7 @@
 #include "ui_quadlistdialog.h"
 
 #include "mapview.h"
-
-#include "search.h"
+#include "cutil.h"
 
 #include <QMessageBox>
 #include <QDebug>

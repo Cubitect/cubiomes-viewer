@@ -61,6 +61,7 @@ HEADERS += \
         mainwindow.h \
         mapview.h \
         quad.h \
+        cutil.h \
         search.h \
         searchthread.h
 

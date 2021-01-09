@@ -250,7 +250,7 @@ QToolButton:!checked { background-color:rgb(240, 240, 240) }</string>
                     </font>
                    </property>
                    <property name="toolTip">
-                    <string>Conditions with biome dependency</string>
+                    <string>Conditions with full biome dependency</string>
                    </property>
                    <property name="dragDropMode">
                     <enum>QAbstractItemView::InternalMove</enum>
@@ -528,6 +528,7 @@ QToolButton:!checked { background-color:rgb(240, 240, 240) }</string>
     </property>
     <addaction name="actionGo_to"/>
     <addaction name="actionScan_seed_for_Quad_Huts"/>
+    <addaction name="actionOpen_shadow_seed"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -759,6 +760,11 @@ QToolButton:!checked { background-color:rgb(240, 240, 240) }</string>
   <action name="actionAbout">
    <property name="text">
     <string>About</string>
+   </property>
+  </action>
+  <action name="actionOpen_shadow_seed">
+   <property name="text">
+    <string>Open shadow seed</string>
    </property>
   </action>
  </widget>

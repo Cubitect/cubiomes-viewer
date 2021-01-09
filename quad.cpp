@@ -1,12 +1,11 @@
 #include "quad.h"
 
+#include "cutil.h"
+
 #include <QThreadPool>
 
 #include <cmath>
 #include <algorithm>
-
-unsigned char biomeColors[256][3];
-unsigned char tempsColors[256][3];
 
 
 Quad::Quad(const Level* l, int i, int j)

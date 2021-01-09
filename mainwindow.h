@@ -93,6 +93,7 @@ private slots:
 
     void on_actionGo_to_triggered();
     void on_actionScan_seed_for_Quad_Huts_triggered();
+    void on_actionOpen_shadow_seed_triggered();
     void on_actionAbout_triggered();
 
     void on_mapView_customContextMenuRequested(const QPoint &pos);
