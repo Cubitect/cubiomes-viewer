@@ -660,6 +660,7 @@ L_qm_any:
     case F_MONUMENT:    sconf = MONUMENT_CONFIG;    goto L_struct_any;
     case F_VILLAGE:     sconf = VILLAGE_CONFIG;     goto L_struct_any;
     case F_OUTPOST:     sconf = OUTPOST_CONFIG;     goto L_struct_any;
+    case F_MANSION:     sconf = MANSION_CONFIG;     goto L_struct_any;
 
 L_struct_any:
         x1 = cond->x1;
