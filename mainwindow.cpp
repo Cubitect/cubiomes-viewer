@@ -36,7 +36,6 @@ QDataStream& operator>>(QDataStream& in, Condition& v)
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    id_counter(1),
     sthread(this),
     stimer(this)
 {
@@ -169,12 +168,9 @@ void MainWindow::setItemCondition(QListWidgetItem *item, Condition cond) const
 
 void MainWindow::editCondition(QListWidgetItem *item)
 {
-    FilterDialog *dialog = new FilterDialog(this, (Condition*)item->data(Qt::UserRole).data());
+    FilterDialog *dialog = new FilterDialog(this, item, (Condition*)item->data(Qt::UserRole).data());
+    QObject::connect(dialog, SIGNAL(setCond(QListWidgetItem*,Condition)), this, SLOT(addItemCondition(QListWidgetItem*,Condition)), Qt::QueuedConnection);
     dialog->exec();
-    if (dialog->result() == QDialog::Accepted)
-    {
-        setItemCondition(item, dialog->cond);
-    }
 }
 
 void MainWindow::updateMapSeed()
@@ -308,7 +304,6 @@ void MainWindow::on_buttonRemoveAll_clicked()
 {
     ui->listConditions48->clear();
     ui->listConditionsFull->clear();
-    id_counter = 1;
 }
 
 void MainWindow::on_buttonRemove_clicked()
@@ -319,75 +314,49 @@ void MainWindow::on_buttonRemove_clicked()
 
 void MainWindow::on_buttonEdit_clicked()
 {
-    QList<QListWidgetItem*> sel;
-    sel = ui->listConditions48->selectedItems();
-    if (!sel.empty())
-        editCondition(sel.first());
-    sel = ui->listConditionsFull->selectedItems();
-    if (!sel.empty())
-        editCondition(sel.first());
+    QListWidget *list = 0;
+    QListWidgetItem* item = 0;
+    QList<QListWidgetItem*> selected;
+
+    list = ui->listConditions48;
+    selected = list->selectedItems();
+    if (!selected.empty())
+    {
+        item = selected.first();
+        list->takeItem(list->row(item));
+    }
+    else
+    {
+        list = ui->listConditionsFull;
+        selected = list->selectedItems();
+        if (!selected.empty())
+        {
+            item = selected.first();
+            list->takeItem(list->row(item));
+        }
+    }
+
+    if (item)
+        editCondition(item);
 }
 
 void MainWindow::on_buttonAddFilter_clicked()
 {
     FilterDialog *dialog = new FilterDialog(this);
-    dialog->exec();
-    if (dialog->result() == QDialog::Accepted)
-    {
-        Condition cond = dialog->cond;
-        cond.save = id_counter++;
-
-        const FilterInfo& ft = g_filterinfo.list[cond.type];
-        if (ft.cat == CAT_FULL)
-        {
-            QListWidgetItem *item = new QListWidgetItem(ui->listConditionsFull, QListWidgetItem::UserType);
-            setItemCondition(item, cond);
-            ui->listConditionsFull->addItem(item);
-        }
-        else if (ft.cat == CAT_48)
-        {
-            QListWidgetItem *item = new QListWidgetItem(ui->listConditions48, QListWidgetItem::UserType);
-            setItemCondition(item, cond);
-            ui->listConditions48->addItem(item);
-
-            if (cond.type >= F_QH_IDEAL && cond.type <= F_QH_BARELY)
-            {
-                Condition cq = cond;
-                cq.type = F_HUT;
-                cq.x1 = -128; cq.z1 = -128;
-                cq.x2 = +128; cq.z2 = +128;
-                cq.relative = cond.save;
-                cq.save = id_counter++;
-                cq.count = 4;
-                QListWidgetItem *item = new QListWidgetItem(ui->listConditionsFull, QListWidgetItem::UserType);
-                setItemCondition(item, cq);
-                ui->listConditionsFull->addItem(item);
-            }
-            else if (cond.type == F_QM_90 || cond.type == F_QM_95)
-            {
-                Condition cq = cond;
-                cq.type = F_MONUMENT;
-                cq.x1 = -160; cq.z1 = -160;
-                cq.x2 = +160; cq.z2 = +160;
-                cq.relative = cond.save;
-                cq.save = id_counter++;
-                cq.count = 4;
-                QListWidgetItem *item = new QListWidgetItem(ui->listConditionsFull, QListWidgetItem::UserType);
-                setItemCondition(item, cq);
-                ui->listConditionsFull->addItem(item);
-            }
-        }
-    }
+    QObject::connect(dialog, SIGNAL(setCond(QListWidgetItem*,Condition)), this, SLOT(addItemCondition(QListWidgetItem*,Condition)), Qt::QueuedConnection);
+    dialog->show();
 }
 
 
 void MainWindow::on_listConditions48_itemDoubleClicked(QListWidgetItem *item)
 {
+    ui->listConditions48->takeItem(ui->listConditions48->row(item));
     editCondition(item);
 }
 
 void MainWindow::on_listConditionsFull_itemDoubleClicked(QListWidgetItem *item)
 {
+    ui->listConditionsFull->takeItem(ui->listConditionsFull->row(item));
     editCondition(item);
 }
 
@@ -543,6 +512,63 @@ void MainWindow::on_mapView_customContextMenuRequested(const QPoint &pos)
     menu.exec(ui->mapView->mapToGlobal(pos));
 }
 
+void MainWindow::addItemCondition(QListWidgetItem *item, Condition cond)
+{
+    const FilterInfo& ft = g_filterinfo.list[cond.type];
+    int index = 1;
+    const QVector<Condition> condvec = getConditions();
+    for (const Condition& c : condvec)
+        if (c.save >= index)
+            index = c.save + 1;
+    cond.save = index;
+
+    if (ft.cat == CAT_FULL)
+    {
+        if (!item)
+            item = new QListWidgetItem();
+        setItemCondition(item, cond);
+        ui->listConditionsFull->addItem(item);
+    }
+    else if (ft.cat == CAT_48)
+    {
+        if (!item)
+            item = new QListWidgetItem();
+        setItemCondition(item, cond);
+        ui->listConditions48->addItem(item);
+
+        index++;
+        for (const Condition& c : condvec)
+            if (c.save >= index)
+                index = c.save + 1;
+
+        if (cond.type >= F_QH_IDEAL && cond.type <= F_QH_BARELY)
+        {
+            Condition cq = cond;
+            cq.type = F_HUT;
+            cq.x1 = -128; cq.z1 = -128;
+            cq.x2 = +128; cq.z2 = +128;
+            cq.relative = cond.save;
+            cq.save = index;
+            cq.count = 4;
+            QListWidgetItem *item = new QListWidgetItem(ui->listConditionsFull, QListWidgetItem::UserType);
+            setItemCondition(item, cq);
+            ui->listConditionsFull->addItem(item);
+        }
+        else if (cond.type == F_QM_90 || cond.type == F_QM_95)
+        {
+            Condition cq = cond;
+            cq.type = F_MONUMENT;
+            cq.x1 = -160; cq.z1 = -160;
+            cq.x2 = +160; cq.z2 = +160;
+            cq.relative = cond.save;
+            cq.save = index;
+            cq.count = 4;
+            QListWidgetItem *item = new QListWidgetItem(ui->listConditionsFull, QListWidgetItem::UserType);
+            setItemCondition(item, cq);
+            ui->listConditionsFull->addItem(item);
+        }
+    }
+}
 
 int MainWindow::searchResultsAdd(QVector<int64_t> seeds, bool countonly)
 {

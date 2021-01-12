@@ -69,20 +69,7 @@ bool SearchThread::set(int type, int64_t start48, int mc, const QVector<Conditio
             QMessageBox::warning(NULL, "Warning", QString::asprintf("More than one condition with ID [%02d].", c.save));
             return false;
         }
-        if (c.type != F_TEMP)
-        {
-            int w = c.x2 - c.x1;
-            int h = c.z2 - c.z1;
-            if (w < 0 || h < 0)
-            {
-                const FilterInfo& ft = g_filterinfo.list[c.type];
-                QMessageBox::warning(NULL, "Warning", QString::asprintf(
-                        "Condition with ID [%02d] does not specify a valid area:\nPosition: [%d, %d] Size: (%d, %d) Scale: x%d",
-                        c.save, c.x1, c.z1, w, h, ft.step));
-                return false;
-            }
-        }
-        if (c.type >= F_BIOME && c.type <= F_BIOME_256_BIOME)
+        if (c.type >= F_BIOME && c.type <= F_BIOME_256_OTEMP)
         {
             if ((c.exclb & (c.bfilter.riverToFind | c.bfilter.oceanToFind)) ||
                 (c.exclm & c.bfilter.riverToFindM))
@@ -93,6 +80,21 @@ bool SearchThread::set(int type, int64_t start48, int mc, const QVector<Conditio
             if (c.count == 0)
             {
                 QMessageBox::information(NULL, "Info", QString::asprintf("Biome filter condition with ID [%02d] specifies no biomes.", c.save));
+            }
+        }
+        if (c.type == F_TEMPS)
+        {
+            int w = c.x2 - c.x1;
+            int h = c.z2 - c.z1;
+            if (w * h < c.count)
+            {
+                QMessageBox::warning(NULL, "Warning", QString::asprintf(
+                        "Temperature category condition with ID [%02d] has too many restrictions for the area.", c.save));
+                return false;
+            }
+            if (c.count == 0)
+            {
+                QMessageBox::information(NULL, "Info", QString::asprintf("Temperature category condition with ID [%02d] specifies no restrictions.", c.save));
             }
         }
     }

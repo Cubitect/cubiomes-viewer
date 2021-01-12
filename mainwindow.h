@@ -99,6 +99,7 @@ private slots:
     void on_mapView_customContextMenuRequested(const QPoint &pos);
 
     // internal events
+    void addItemCondition(QListWidgetItem *item, Condition cond);
     int searchResultsAdd(QVector<int64_t> seeds, bool countonly);
     void searchBaseDone(int64_t s48);
     void searchFinish(int64_t s48);
@@ -112,7 +113,6 @@ private slots:
 
 public:
     Ui::MainWindow *ui;
-    int id_counter;
     SearchThread sthread;
     QTimer stimer;
     ProtoBaseDialog *protodialog;

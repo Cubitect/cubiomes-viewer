@@ -33,13 +33,13 @@ enum
     F_QH_BARELY,
     F_QM_95,
     F_QM_90,
-    F_TEMP,
     F_BIOME,
     F_BIOME_4_RIVER,
     F_BIOME_16_SHORE,
     F_BIOME_64_RARE,
     F_BIOME_256_BIOME,
     F_BIOME_256_OTEMP,
+    F_TEMPS,
     F_SPAWN,
     F_STRONGHOLD,
     F_DESERT,
@@ -121,16 +121,6 @@ static const struct FilterList
             "location."
         };
 
-        list[F_TEMP] = FilterInfo{
-            CAT_FULL, 1, 0, 0, 1024, 0,
-            ":icons/tempcat.png",
-            "All temperatures cluster",
-            "Checks that the seed has all temperature categories "
-            "(Oceanic, Warm, Lush, Cold, Freezing, and special variants) "
-            "in a 3x3 cluster at layer scale 1024. (Input position "
-            "represents the center of diversity.)"
-        };
-
         list[F_BIOME] = FilterInfo{
             CAT_FULL, 1, 1, L_VORONOI_ZOOM_1, 1, 0,
             ":icons/map.png",
@@ -184,6 +174,14 @@ static const struct FilterList
             "at layer OCEAN TEMPERATURE with scale 1:256. "
             "This generation layer is only valid for versions >= 1.13, "
             "and depends only on the lower 48-bits of the seed."
+        };
+
+        list[F_TEMPS] = FilterInfo{
+            CAT_FULL, 1, 1, 0, 1024, 0,
+            ":icons/tempcat.png",
+            "Temperature categories",
+            "Checks that the seed has a minimum of all the required temperature categories "
+            "in the given area."
         };
 
         list[F_SPAWN] = FilterInfo{
@@ -262,6 +260,7 @@ struct Condition
     BiomeFilter bfilter;
     uint64_t exclb; // excluded biome
     uint64_t exclm; // excluded modified
+    int temps[9];
     int count;
 };
 

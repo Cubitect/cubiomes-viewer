@@ -13,13 +13,37 @@
 
 #define SETUP_BIOME_CHECKBOX(B) do {\
         biomecboxes[B] = new QCheckBox(#B);\
-        ui->gridLayoutBiomes->addWidget(biomecboxes[B], B % 128, B / 128);\
+        ui->gridLayoutBiomes->addWidget(biomecboxes[B], (B) % 128, (B) / 128);\
         biomecboxes[B]->setTristate(true);\
     } while (0)
 
-FilterDialog::FilterDialog(MainWindow *parent, Condition *initcond) :
+#define SETUP_TEMPCAT_SPINBOX(B) do {\
+        tempsboxes[B] = new SpinExclude();\
+        QLabel *l = new QLabel(#B);\
+        ui->gridLayoutTemps->addWidget(tempsboxes[B], (B) % Special, (B) / Special * 2 + 0);\
+        ui->gridLayoutTemps->addWidget(l, (B) % Special, (B) / Special * 2 + 1);\
+        l->setToolTip(getTip( MC_1_16, L_SPECIAL_1024, (B) % Special + ((B)>=Special?256:0) ));\
+    } while (0)
+
+static QString getTip(int mc, int layer, int id)
+{
+    uint64_t mL = 0, mM = 0;
+    genPotential(&mL, &mM, layer, mc, id);
+    QString tip = "Generates any of:";
+    for (int j = 0; j < 64; j++)
+        if (mL & (1ULL << j))
+            tip += QString("\n") + biome2str(j);
+    for (int j = 0; j < 64; j++)
+        if (mM & (1ULL << j))
+            tip += QString("\n") + biome2str(128+j);
+    return tip;
+}
+
+
+FilterDialog::FilterDialog(MainWindow *parent, QListWidgetItem *item, Condition *initcond) :
     QDialog(parent, Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint),
-    ui(new Ui::FilterDialog)
+    ui(new Ui::FilterDialog),
+    item(item)
 {
     memset(&cond, 0, sizeof(cond));
     ui->setupUi(this);
@@ -48,11 +72,12 @@ FilterDialog::FilterDialog(MainWindow *parent, Condition *initcond) :
         ui->comboBoxRelative->addItem(QString::asprintf("[%02d] %s", c.save, ft.name), c.save);
     }
 
-    ui->lineRadius->setValidator(new QIntValidator(this));
-    ui->lineEditX1->setValidator(new QIntValidator(this));
-    ui->lineEditZ1->setValidator(new QIntValidator(this));
-    ui->lineEditX2->setValidator(new QIntValidator(this));
-    ui->lineEditZ2->setValidator(new QIntValidator(this));
+    QIntValidator *intval = new QIntValidator(this);
+    ui->lineRadius->setValidator(intval);
+    ui->lineEditX1->setValidator(intval);
+    ui->lineEditZ1->setValidator(intval);
+    ui->lineEditX2->setValidator(intval);
+    ui->lineEditZ2->setValidator(intval);
 
     memset(biomecboxes, 0, sizeof(biomecboxes));
 
@@ -126,7 +151,19 @@ FilterDialog::FilterDialog(MainWindow *parent, Condition *initcond) :
     SETUP_BIOME_CHECKBOX(bamboo_jungle);
     SETUP_BIOME_CHECKBOX(bamboo_jungle_hills);
 
-    ui->groupBoxBiomes->setStyleSheet(
+    memset(tempsboxes, 0, sizeof(tempsboxes));
+
+    SETUP_TEMPCAT_SPINBOX(Oceanic);
+    SETUP_TEMPCAT_SPINBOX(Warm);
+    SETUP_TEMPCAT_SPINBOX(Lush);
+    SETUP_TEMPCAT_SPINBOX(Cold);
+    SETUP_TEMPCAT_SPINBOX(Freezing);
+    SETUP_TEMPCAT_SPINBOX(Special+Warm);
+    SETUP_TEMPCAT_SPINBOX(Special+Lush);
+    SETUP_TEMPCAT_SPINBOX(Special+Cold);
+
+
+    ui->tabWidget->setStyleSheet(
             "QCheckBox::indicator:unchecked     { image: url(:/icons/check0.png); }\n"
             "QCheckBox::indicator:indeterminate { image: url(:/icons/check1.png); }\n"
             "QCheckBox::indicator:checked       { image: url(:/icons/check2.png); }\n"
@@ -162,7 +199,7 @@ FilterDialog::FilterDialog(MainWindow *parent, Condition *initcond) :
 
         updateMode();
 
-        if (!ui->groupBoxBiomes->isEnabled())
+        if (!ui->tabWidget->isEnabled())
             ui->spinBox->setValue(cond.count);
 
         ui->lineEditX1->setText(QString::number(cond.x1));
@@ -214,22 +251,24 @@ FilterDialog::FilterDialog(MainWindow *parent, Condition *initcond) :
                 biomecboxes[i+128]->setCheckState(c2 ? Qt::Checked : c1 ? Qt::PartiallyChecked : Qt::Unchecked);
             }
         }
-        /*
-        if (cond.bfilter.riverToFind & (1ULL << (bamboo_jungle & 0x3f)))
+        for (int i = 0; i < 9; i++)
         {
-            biomecboxes[bamboo_jungle]->setChecked(true);
+            if (tempsboxes[i])
+            {
+                tempsboxes[i]->setValue(cond.temps[i]);
+            }
         }
-        if (cond.bfilter.riverToFindM & (1ULL << (bamboo_jungle_hills - 128)))
-        {
-            biomecboxes[bamboo_jungle_hills]->setChecked(true);
-        }*/
     }
+
+    on_lineRadius_editingFinished();
 
     updateMode();
 }
 
 FilterDialog::~FilterDialog()
 {
+    if (item)
+        delete item;
     delete ui;
 }
 
@@ -257,61 +296,7 @@ void FilterDialog::updateMode()
     ui->labelSpinBox->setEnabled(ft.count);
     ui->spinBox->setEnabled(ft.count);
 
-    ui->groupBoxBiomes->setEnabled(ft.layer);
-    if (ft.layer == L13_OCEAN_TEMP_256)
-    {
-        for (int i = 0; i < 256; i++)
-        {
-            QCheckBox *cb = biomecboxes[i];
-            if (cb)
-            {
-                cb->setEnabled(false);
-                cb->setToolTip("");
-            }
-        }
-        biomecboxes[warm_ocean]->setEnabled(true);
-        biomecboxes[lukewarm_ocean]->setEnabled(true);
-        biomecboxes[ocean]->setEnabled(true);
-        biomecboxes[cold_ocean]->setEnabled(true);
-        biomecboxes[frozen_ocean]->setEnabled(true);
-    }
-    else if (ft.layer)
-    {
-        for (int i = 0; i < 256; i++)
-        {
-            if (biomecboxes[i])
-            {
-                uint64_t mL = 0, mM = 0;
-                genPotential(&mL, &mM, ft.layer, MC_1_16, i);
-                if (mL || mM)
-                {
-                    biomecboxes[i]->setEnabled(true);
-                    if (ft.layer != L_VORONOI_ZOOM_1)
-                    {
-                        QString tip = "Generates any of:";
-                        for (int j = 0; j < 64; j++)
-                        {
-                            if (mL & (1ULL << j) && biomecboxes[j])
-                                tip += QString("\n") + biomecboxes[j]->text();
-                        }
-                        for (int j = 0; j < 64; j++)
-                        {
-                            if (mM & (1ULL << j) && biomecboxes[j+128])
-                                tip += QString("\n") + biomecboxes[j+128]->text();
-                        }
-                        biomecboxes[i]->setToolTip(tip);
-                    }
-                    else
-                        biomecboxes[i]->setToolTip(biomecboxes[i]->text());
-                }
-                else
-                {
-                    biomecboxes[i]->setEnabled(false);
-                    biomecboxes[i]->setToolTip("");
-                }
-            }
-        }
-    }
+    updateBiomeSelection();
 
     QString loc = "";
     QString areatip = "";
@@ -343,8 +328,94 @@ void FilterDialog::updateMode()
     ui->lineEditX2->setToolTip(uptip);
     ui->lineEditZ2->setToolTip(uptip);
     ui->textDescription->setText(ft.desription);
-    ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(filterindex != F_SELECT);
+    ui->buttonOk->setEnabled(filterindex != F_SELECT);
 }
+
+void FilterDialog::updateBiomeSelection()
+{
+    int filterindex = ui->comboBoxType->currentData().toInt();
+    const FilterInfo &ft = g_filterinfo.list[filterindex];
+;
+    if (filterindex == F_TEMPS)
+    {
+        ui->tabWidget->setEnabled(true);
+        ui->tabWidget->setCurrentWidget(ui->tabTemps);
+        ui->tabTemps->setEnabled(true);
+        ui->tabBiomes->setEnabled(false);
+    }
+    else if (filterindex >= F_BIOME && filterindex <= F_BIOME_256_OTEMP)
+    {
+        ui->tabWidget->setEnabled(true);
+        ui->tabWidget->setCurrentWidget(ui->tabBiomes);
+        ui->tabTemps->setEnabled(false);
+        ui->tabBiomes->setEnabled(true);
+    }
+    else
+    {
+        ui->tabWidget->setEnabled(false);
+        ui->tabTemps->setEnabled(false);
+        ui->tabBiomes->setEnabled(false);
+    }
+
+    if (ft.layer == L13_OCEAN_TEMP_256)
+    {
+        for (int i = 0; i < 256; i++)
+        {
+            QCheckBox *cb = biomecboxes[i];
+            if (cb)
+            {
+                cb->setEnabled(false);
+                cb->setToolTip("");
+            }
+        }
+        biomecboxes[warm_ocean]->setEnabled(true);
+        biomecboxes[lukewarm_ocean]->setEnabled(true);
+        biomecboxes[ocean]->setEnabled(true);
+        biomecboxes[cold_ocean]->setEnabled(true);
+        biomecboxes[frozen_ocean]->setEnabled(true);
+    }
+    else if (ft.layer)
+    {
+        for (int i = 0; i < 256; i++)
+        {
+            QCheckBox *cb = biomecboxes[i];
+            if (!cb)
+                continue;
+
+            uint64_t mL = 0, mM = 0;
+            genPotential(&mL, &mM, ft.layer, MC_1_16, i);
+            if (mL || mM)
+            {
+                cb->setEnabled(true);
+                if (ft.layer != L_VORONOI_ZOOM_1)
+                {
+                    QString tip = "Generates any of:";
+                    for (int j = 0; j < 64; j++)
+                    {
+                        if (mL & (1ULL << j))
+                            tip += QString("\n") + biome2str(j);
+                    }
+                    for (int j = 0; j < 64; j++)
+                    {
+                        if (mM & (1ULL << j))
+                            tip += QString("\n") + biome2str(j+128);
+                    }
+                    cb->setToolTip(tip);
+                }
+                else
+                {
+                    cb->setToolTip(cb->text());
+                }
+            }
+            else
+            {
+                cb->setEnabled(false);
+                cb->setToolTip("");
+            }
+        }
+    }
+}
+
 
 void FilterDialog::on_comboBoxType_activated(int)
 {
@@ -371,7 +442,29 @@ void FilterDialog::on_buttonCheck_clicked()
     }
 }
 
-void FilterDialog::on_buttonBox_accepted()
+void FilterDialog::on_buttonArea_toggled(bool checked)
+{
+    custom = checked;
+    updateMode();
+}
+
+void FilterDialog::on_lineRadius_editingFinished()
+{
+    int v = ui->lineRadius->text().toInt();
+    int area = (v+1) * (v+1);
+    for (int i = 0; i < 9; i++)
+    {
+        if (tempsboxes[i])
+            tempsboxes[i]->setMaximum(area);
+    }
+}
+
+void FilterDialog::on_buttonCancel_clicked()
+{
+    close();
+}
+
+void FilterDialog::on_buttonOk_clicked()
 {
     cond.type = ui->comboBoxType->currentIndex();
     cond.relative = ui->comboBoxRelative->currentData().toInt();
@@ -393,7 +486,7 @@ void FilterDialog::on_buttonBox_accepted()
         cond.z2 = ui->lineEditZ2->text().toInt();
     }
 
-    if (ui->groupBoxBiomes->isEnabled())
+    if (ui->tabBiomes->isEnabled())
     {
         int b[256], in = 0, ex = 0;
         cond.exclb = 0;
@@ -419,10 +512,27 @@ void FilterDialog::on_buttonBox_accepted()
         cond.bfilter = setupBiomeFilter(b, in);
         cond.count = in + ex;
     }
+    if (ui->tabTemps->isEnabled())
+    {
+        cond.count = 0;
+        for (int i = 0; i < 9; i++)
+        {
+            if (!tempsboxes[i])
+                continue;
+            int cnt = tempsboxes[i]->value();
+            cond.temps[i] = cnt;
+            cond.count += abs(cnt);
+        }
+    }
+
+    emit setCond(item, cond);
+    item = 0;
+    close();
 }
 
-void FilterDialog::on_buttonArea_toggled(bool checked)
+void FilterDialog::on_FilterDialog_finished(int)
 {
-    custom = checked;
-    updateMode();
+    if (item)
+        emit setCond(item, cond);
+    item = 0;
 }

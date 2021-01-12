@@ -841,22 +841,6 @@ L_struct_any:
 
         // TODO: burried treasure
 
-    case F_TEMP:
-        if (cond->relative)
-        {
-            rx1 = ((cond->x1 << 10) + spos[cond->relative].cx) >> 10;
-            rz1 = ((cond->z1 << 10) + spos[cond->relative].cz) >> 10;
-        }
-        else
-        {
-            rx1 = cond->x1;
-            rz1 = cond->z1;
-        }
-        sout->cx = rx1 << 10;
-        sout->cz = rz1 << 10;
-        if (!g) return 1;
-        return hasAllTemps(g, seed, rx1, rz1);
-
     case F_BIOME:           s = 0; qual = L_VORONOI_ZOOM_1;     goto L_biome_filter_any;
     case F_BIOME_4_RIVER:   s = 2; qual = L_RIVER_MIX_4;        goto L_biome_filter_any;
     case F_BIOME_16_SHORE:  s = 4; qual = L_SHORE_16;           goto L_biome_filter_any;
@@ -914,6 +898,27 @@ L_biome_filter_any:
             free(area);
         }
         return valid;
+
+
+    case F_TEMPS:
+        if (cond->relative)
+        {
+            rx1 = ((cond->x1 << 10) + spos[cond->relative].cx) >> 10;
+            rz1 = ((cond->z1 << 10) + spos[cond->relative].cz) >> 10;
+            rx2 = ((cond->x2 << 10) + spos[cond->relative].cx) >> 10;
+            rz2 = ((cond->z2 << 10) + spos[cond->relative].cz) >> 10;
+        }
+        else
+        {
+            rx1 = cond->x1;
+            rz1 = cond->z1;
+            rx2 = cond->x2;
+            rz2 = cond->z2;
+        }
+        sout->cx = ((rx1 + rx2) << 10) >> 1;
+        sout->cz = ((rz1 + rz2) << 10) >> 1;
+        if (!g) return 1;
+        return checkForTemps(g, seed, rx1, rz1, rx2-rx1+1, rz2-rz1+1, cond->temps);
 
     default:
         break;
