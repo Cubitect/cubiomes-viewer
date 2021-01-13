@@ -181,8 +181,7 @@ static const struct FilterList
             CAT_FULL, 1, 1, 0, 1024, 0,
             ":icons/tempcat.png",
             "Temperature categories",
-            "Checks that the seed has a minimum of all the required temperature categories "
-            "in the given area."
+            "Checks that the area has a minimum of all the required temperature categories."
         };
 
         list[F_SPAWN] = FilterInfo{
