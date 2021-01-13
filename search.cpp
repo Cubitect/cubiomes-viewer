@@ -432,7 +432,7 @@ CandidateList getCandidates(int mc, const Condition *cond, int ccnt, int64_t buf
                 int h = cond[ci].z2 - z + 1;
 
                 // does the set of candidates for this condition fit in memory?
-                if (qbn * w*h < bufmax * 4 * (int64_t)sizeof(*clist.items->spos))
+                if (qbn * w*h * 4 * (int64_t)sizeof(*clist.items->spos) < bufmax)
                 {
                     if (clist.items == NULL)
                     {
