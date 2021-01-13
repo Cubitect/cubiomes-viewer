@@ -47,6 +47,7 @@ protected:
 
     void updateMapSeed();
     void updateSensitivity();
+    int getIndex(int idx) const;
 
 public slots:
     void warning(QString title, QString text);
@@ -91,6 +92,8 @@ private slots:
 
     void on_buttonInfo_clicked();
 
+    void on_actionSave_triggered();
+    void on_actionLoad_triggered();
     void on_actionGo_to_triggered();
     void on_actionScan_seed_for_Quad_Huts_triggered();
     void on_actionOpen_shadow_seed_triggered();
@@ -116,6 +119,7 @@ public:
     SearchThread sthread;
     QTimer stimer;
     ProtoBaseDialog *protodialog;
+    QString prevdir;
 };
 
 #endif // MAINWINDOW_H

@@ -536,6 +536,14 @@ QToolButton:!checked { background-color:rgb(240, 240, 240) }</string>
     </property>
     <addaction name="actionAbout"/>
    </widget>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionSave"/>
+    <addaction name="actionLoad"/>
+   </widget>
+   <addaction name="menuFile"/>
    <addaction name="menuMap"/>
    <addaction name="menuHelp"/>
   </widget>
@@ -765,6 +773,16 @@ QToolButton:!checked { background-color:rgb(240, 240, 240) }</string>
   <action name="actionOpen_shadow_seed">
    <property name="text">
     <string>Open shadow seed</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="text">
+    <string>Save progress...</string>
+   </property>
+  </action>
+  <action name="actionLoad">
+   <property name="text">
+    <string>Load progress...</string>
    </property>
   </action>
  </widget>

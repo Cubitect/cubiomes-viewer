@@ -7,6 +7,18 @@
 #define VERS_MINOR 1
 #define VERS_PATCH 0
 
+// returns +1 if newer, -1 if older  and 0 if equal
+inline int cmpVers(int major, int minor, int patch)
+{
+    int s;
+    s = (major > VERS_MAJOR) - (major < VERS_MAJOR);
+    if (s) return s;
+    s = (minor > VERS_MINOR) - (minor < VERS_MINOR);
+    if (s) return s;
+    s = (patch > VERS_PATCH) - (patch < VERS_PATCH);
+    return s;
+}
+
 namespace Ui {
 class AboutDialog;
 }

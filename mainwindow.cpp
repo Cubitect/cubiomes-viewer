@@ -15,6 +15,8 @@
 #include <QMenu>
 #include <QClipboard>
 #include <QFont>
+#include <QFileDialog>
+#include <QTextStream>
 
 #include <stdlib.h>
 
@@ -70,6 +72,8 @@ MainWindow::MainWindow(QWidget *parent) :
     stimer.start(500);
 
     updateSensitivity();
+
+    prevdir = ".";
 }
 
 MainWindow::~MainWindow()
@@ -203,6 +207,25 @@ void MainWindow::updateSensitivity()
         ui->buttonEdit->setEnabled(false);
     }
 }
+
+int MainWindow::getIndex(int idx) const
+{
+    const QVector<Condition> condvec = getConditions();
+    int cnt[100] = {};
+    for (const Condition& c : condvec)
+        if (c.save > 0 || c.save < 100)
+            cnt[c.save]++;
+        else return 0;
+    if (idx <= 0)
+        idx = 1;
+    if (cnt[idx] == 0)
+        return idx;
+    for (int i = 1; i < 100; i++)
+        if (cnt[i] == 0)
+            return i;
+    return 0;
+}
+
 
 void MainWindow::warning(QString title, QString text)
 {
@@ -476,6 +499,127 @@ void MainWindow::on_buttonInfo_clicked()
     QMessageBox::information(this, "Help: search conditions", msg, QMessageBox::Ok);
 }
 
+
+void MainWindow::on_actionSave_triggered()
+{
+    QString fnam = QFileDialog::getSaveFileName(this, "Save progress", prevdir, "Text files (*.txt);;Any files (*)");
+    if (!fnam.isEmpty())
+    {
+        QFileInfo finfo(fnam);
+        QFile file(fnam);
+        prevdir = finfo.absolutePath();
+
+        if (!file.open(QIODevice::WriteOnly))
+        {
+            warning("Warning", "Failed to open file.");
+            return;
+        }
+
+        QTextStream stream(&file);
+        stream << "#Version:  " << VERS_MAJOR << "." << VERS_MINOR << "." << VERS_PATCH << "\n";
+        stream << "#Search:   " << ui->comboSearchType->currentIndex() << "\n";
+        stream << "#Progress: " << ui->lineStart48->text().toLongLong() << "\n";
+        QVector<Condition> condvec = getConditions();
+        for (Condition &c : condvec)
+            stream << "#Cond: " << QByteArray((const char*) &c, sizeof(Condition)).toHex() << "\n";
+
+        int n = ui->listResults->rowCount();
+        for (int i = 0; i < n; i++)
+        {
+            int64_t seed = ui->listResults->item(i, 0)->data(Qt::UserRole).toLongLong();
+            stream << QString::asprintf("%" PRId64 "\n", seed);
+        }
+    }
+}
+
+void MainWindow::on_actionLoad_triggered()
+{
+    if (ui->buttonStart->isChecked() || sthread.isRunning())
+    {
+        warning("Warning", "Cannot load progress: search is still active.");
+        return;
+    }
+
+    QString fnam = QFileDialog::getOpenFileName(this, "Load progress", prevdir, "Text files (*.txt);;Any files (*)");
+    if (!fnam.isEmpty())
+    {
+        QFileInfo finfo(fnam);
+        QFile file(fnam);
+        prevdir = finfo.absolutePath();
+
+        if (!file.open(QIODevice::ReadOnly))
+        {
+            warning("Warning", "Failed to open file.");
+            return;
+        }
+
+        int major = 0, minor = 0, patch = 0;
+        int searchtype = 0;
+        int64_t s48 = 0;
+        QVector<Condition> condvec;
+        QVector<int64_t> seeds;
+
+        QTextStream stream(&file);
+        QString line;
+        line = stream.readLine();
+        if (sscanf(line.toLatin1().data(), "#Version: %d.%d.%d", &major, &minor, &patch) != 3)
+            goto L_read_failed;
+        if (cmpVers(major, minor, patch) > 0)
+            warning("Warning", "Progress file was created with a newer version.");
+
+        line = stream.readLine();
+        if (sscanf(line.toLatin1().data(), "#Search: %d", &searchtype) != 1)
+            goto L_read_failed;
+
+        line = stream.readLine();
+        if (sscanf(line.toLatin1().data(), "#Progress: %" PRId64, &s48) != 1)
+            goto L_read_failed;
+
+        while (stream.status() == QTextStream::Ok)
+        {
+            line = stream.readLine();
+            if (line.isEmpty())
+                break;
+            if (line.startsWith("#Cond:"))
+            {
+                QString hex = line.mid(6).trimmed();
+                QByteArray ba = QByteArray::fromHex(QByteArray(hex.toLatin1().data()));
+                if (ba.size() == sizeof(Condition))
+                {
+                    Condition c = *(Condition*) ba.data();
+                    condvec.push_back(c);
+                }
+                else goto L_read_failed;
+            }
+            else
+            {
+                int64_t seed;
+                if (sscanf(line.toLatin1().data(), "%" PRId64, &seed) == 1)
+                    seeds.push_back(seed);
+                else goto L_read_failed;
+            }
+        }
+
+        on_buttonRemoveAll_clicked();
+        on_buttonClear_clicked();
+
+        ui->comboSearchType->setCurrentIndex(searchtype);
+        ui->lineStart48->setText(QString::asprintf("%" PRId64, s48));
+
+        for (Condition &c : condvec)
+        {
+            QListWidgetItem *item = new QListWidgetItem();
+            addItemCondition(item, c);
+        }
+
+        searchResultsAdd(seeds, false);
+
+        return;
+L_read_failed:
+        warning("Warning", "Failed to parse progress file.");
+    }
+}
+
 void MainWindow::on_actionGo_to_triggered()
 {
     GotoDialog *dialog = new GotoDialog(this, ui->mapView->getX(), ui->mapView->getZ());
@@ -494,7 +638,7 @@ void MainWindow::on_actionOpen_shadow_seed_triggered()
     int64_t seed;
     if (getSeed(&mc, &seed))
     {
-        setSeed(mc, -7379792620528906219 - seed);
+        setSeed(mc, getShadow(seed));
     }
 }
 
@@ -515,12 +659,7 @@ void MainWindow::on_mapView_customContextMenuRequested(const QPoint &pos)
 void MainWindow::addItemCondition(QListWidgetItem *item, Condition cond)
 {
     const FilterInfo& ft = g_filterinfo.list[cond.type];
-    int index = 1;
-    const QVector<Condition> condvec = getConditions();
-    for (const Condition& c : condvec)
-        if (c.save >= index)
-            index = c.save + 1;
-    cond.save = index;
+    cond.save = getIndex(cond.save);
 
     if (ft.cat == CAT_FULL)
     {
@@ -531,15 +670,18 @@ void MainWindow::addItemCondition(QListWidgetItem *item, Condition cond)
     }
     else if (ft.cat == CAT_48)
     {
-        if (!item)
-            item = new QListWidgetItem();
+        if (item)
+        {
+            setItemCondition(item, cond);
+            ui->listConditions48->addItem(item);
+            return;
+        }
+
+        item = new QListWidgetItem();
         setItemCondition(item, cond);
         ui->listConditions48->addItem(item);
 
-        index++;
-        for (const Condition& c : condvec)
-            if (c.save >= index)
-                index = c.save + 1;
+        int idx = getIndex(cond.save+1);
 
         if (cond.type >= F_QH_IDEAL && cond.type <= F_QH_BARELY)
         {
@@ -548,7 +690,7 @@ void MainWindow::addItemCondition(QListWidgetItem *item, Condition cond)
             cq.x1 = -128; cq.z1 = -128;
             cq.x2 = +128; cq.z2 = +128;
             cq.relative = cond.save;
-            cq.save = index;
+            cq.save = idx;
             cq.count = 4;
             QListWidgetItem *item = new QListWidgetItem(ui->listConditionsFull, QListWidgetItem::UserType);
             setItemCondition(item, cq);
@@ -561,7 +703,7 @@ void MainWindow::addItemCondition(QListWidgetItem *item, Condition cond)
             cq.x1 = -160; cq.z1 = -160;
             cq.x2 = +160; cq.z2 = +160;
             cq.relative = cond.save;
-            cq.save = index;
+            cq.save = idx;
             cq.count = 4;
             QListWidgetItem *item = new QListWidgetItem(ui->listConditionsFull, QListWidgetItem::UserType);
             setItemCondition(item, cq);

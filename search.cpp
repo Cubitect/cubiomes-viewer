@@ -675,11 +675,20 @@ L_struct_any:
             z2 += spos[cond->relative].cz;
         }
 
-        rx1 = x1 >> 9;
-        rz1 = z1 >> 9;
-        rx2 = x2 >> 9;
-        rz2 = z2 >> 9;
-
+        if (sconf.regionSize == 32)
+        {
+            rx1 = x1 >> 9;
+            rz1 = z1 >> 9;
+            rx2 = x2 >> 9;
+            rz2 = z2 >> 9;
+        }
+        else
+        {
+            rx1 = (x1 / (sconf.regionSize << 4)) - (x1 < 0);
+            rz1 = (z1 / (sconf.regionSize << 4)) - (z1 < 0);
+            rx2 = (x2 / (sconf.regionSize << 4)) - (x2 < 0);
+            rz2 = (z2 / (sconf.regionSize << 4)) - (z2 < 0);
+        }
 
         // TODO: warn if multistructure clusters are used as a positional
         // dependency (the centre can change based on biomes)
