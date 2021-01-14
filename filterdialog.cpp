@@ -521,7 +521,8 @@ void FilterDialog::on_buttonOk_clicked()
                 continue;
             int cnt = tempsboxes[i]->value();
             cond.temps[i] = cnt;
-            cond.count += abs(cnt);
+            if (cnt > 0)
+                cond.count += cnt;
         }
     }
 
