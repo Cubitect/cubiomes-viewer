@@ -249,7 +249,8 @@
         <string>Cancel</string>
        </property>
        <property name="icon">
-        <iconset theme="dialog-cancel"/>
+        <iconset theme="dialog-cancel">
+         <normaloff>.</normaloff>.</iconset>
        </property>
       </widget>
      </item>
@@ -259,7 +260,8 @@
         <string>Ok</string>
        </property>
        <property name="icon">
-        <iconset theme="dialog-ok"/>
+        <iconset theme="dialog-ok">
+         <normaloff>.</normaloff>.</iconset>
        </property>
       </widget>
      </item>
@@ -357,6 +359,24 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>comboBoxType</tabstop>
+  <tabstop>buttonOk</tabstop>
+  <tabstop>buttonCancel</tabstop>
+  <tabstop>textDescription</tabstop>
+  <tabstop>spinBox</tabstop>
+  <tabstop>lineRadius</tabstop>
+  <tabstop>buttonArea</tabstop>
+  <tabstop>lineEditX1</tabstop>
+  <tabstop>lineEditZ1</tabstop>
+  <tabstop>lineEditX2</tabstop>
+  <tabstop>lineEditZ2</tabstop>
+  <tabstop>comboBoxRelative</tabstop>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>buttonUncheck</tabstop>
+  <tabstop>buttonCheck</tabstop>
+  <tabstop>scrollArea</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

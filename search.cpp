@@ -440,6 +440,12 @@ CandidateList getCandidates(int mc, const Condition *cond, int ccnt, int64_t buf
                         clist.scnt = 4;
                         clist.isiz = sizeof(*clist.items) + clist.scnt * sizeof(*clist.items->spos);
                         clist.mem = (char*) calloc(clist.bcnt, clist.isiz);
+                        if (!clist.mem)
+                        {
+                            if (dyn)
+                                free((void*)qb);
+                            break;
+                        }
 
                         Candidate *item = (Candidate*)(clist.mem);
 

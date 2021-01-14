@@ -84,12 +84,13 @@ bool SearchThread::set(int type, int64_t start48, int mc, const QVector<Conditio
         }
         if (c.type == F_TEMPS)
         {
-            int w = c.x2 - c.x1;
-            int h = c.z2 - c.z1;
+            int w = c.x2 - c.x1 + 1;
+            int h = c.z2 - c.z1 + 1;
             if (w * h < c.count)
             {
                 QMessageBox::warning(NULL, "Warning", QString::asprintf(
-                        "Temperature category condition with ID [%02d] has too many restrictions for the area.", c.save));
+                        "Temperature category condition with ID [%02d] has too many restrictions (%d) for the area (%d x %d).",
+                        c.save, c.count, w, h));
                 return false;
             }
             if (c.count == 0)
