@@ -144,10 +144,43 @@ bool MainWindow::setSeed(int mc, int64_t seed)
     return true;
 }
 
-// [ID] Condition                   Cnt Rel  Area
-void MainWindow::setItemCondition(QListWidgetItem *item, Condition cond) const
+QListWidgetItem *MainWindow::lockItem(QListWidgetItem *item)
 {
-    item->setData(Qt::UserRole, QVariant::fromValue(cond));
+    QListWidgetItem *edit = item->clone();
+    item->setFlags(item->flags() & ~Qt::ItemIsSelectable);
+    item->setSelected(false);
+    item->setBackground(QColor(Qt::lightGray));
+    edit->setData(Qt::UserRole+1, (qulonglong)item);
+    return edit;
+}
+
+bool list_contains(QListWidget *list, QListWidgetItem *item)
+{
+    if (!item)
+        return false;
+    int n = list->count();
+    for (int i = 0; i < n; i++)
+        if (list->item(i) == item)
+            return true;
+    return false;
+}
+
+// [ID] Condition Cnt Rel Area
+void MainWindow::setItemCondition(QListWidget *list, QListWidgetItem *item, Condition cond)
+{
+    QListWidgetItem *target = (QListWidgetItem*) item->data(Qt::UserRole+1).toULongLong();
+    if (list_contains(list, target) && !(target->flags() & Qt::ItemIsSelectable))
+    {
+        item->setData(Qt::UserRole+1, (qulonglong)0);
+        *target = *item;
+        delete item;
+        item = target;
+    }
+    else
+    {
+        list->addItem(item);
+        cond.save = getIndex(cond.save);
+    }
 
     const FilterInfo& ft = g_filterinfo.list[cond.type];
     QString s = QString::asprintf("[%02d] %-28sx%-3d", cond.save, ft.name, cond.count);
@@ -168,13 +201,16 @@ void MainWindow::setItemCondition(QListWidgetItem *item, Condition cond) const
         item->setBackground(QColor(Qt::green));
 
     item->setText(s);
+    item->setData(Qt::UserRole, QVariant::fromValue(cond));
 }
 
 void MainWindow::editCondition(QListWidgetItem *item)
 {
+    if (!(item->flags() & Qt::ItemIsSelectable))
+        return;
     FilterDialog *dialog = new FilterDialog(this, item, (Condition*)item->data(Qt::UserRole).data());
     QObject::connect(dialog, SIGNAL(setCond(QListWidgetItem*,Condition)), this, SLOT(addItemCondition(QListWidgetItem*,Condition)), Qt::QueuedConnection);
-    dialog->exec();
+    dialog->show();
 }
 
 void MainWindow::updateMapSeed()
@@ -318,8 +354,7 @@ static void remove_selected(QListWidget *list)
     QList<QListWidgetItem*> selected = list->selectedItems();
     for (QListWidgetItem *item : selected)
     {
-        list->takeItem(list->row(item));
-        delete item;
+        delete list->takeItem(list->row(item));
     }
 }
 
@@ -338,29 +373,23 @@ void MainWindow::on_buttonRemove_clicked()
 void MainWindow::on_buttonEdit_clicked()
 {
     QListWidget *list = 0;
-    QListWidgetItem* item = 0;
+    QListWidgetItem* edit = 0;
     QList<QListWidgetItem*> selected;
 
     list = ui->listConditions48;
     selected = list->selectedItems();
     if (!selected.empty())
-    {
-        item = selected.first();
-        list->takeItem(list->row(item));
-    }
+        edit = lockItem(selected.first());
     else
     {
         list = ui->listConditionsFull;
         selected = list->selectedItems();
         if (!selected.empty())
-        {
-            item = selected.first();
-            list->takeItem(list->row(item));
-        }
+            edit = lockItem(selected.first());
     }
 
-    if (item)
-        editCondition(item);
+    if (edit)
+        editCondition(edit);
 }
 
 void MainWindow::on_buttonAddFilter_clicked()
@@ -373,14 +402,12 @@ void MainWindow::on_buttonAddFilter_clicked()
 
 void MainWindow::on_listConditions48_itemDoubleClicked(QListWidgetItem *item)
 {
-    ui->listConditions48->takeItem(ui->listConditions48->row(item));
-    editCondition(item);
+    editCondition(lockItem(item));
 }
 
 void MainWindow::on_listConditionsFull_itemDoubleClicked(QListWidgetItem *item)
 {
-    ui->listConditionsFull->takeItem(ui->listConditionsFull->row(item));
-    editCondition(item);
+    editCondition(lockItem(item));
 }
 
 void MainWindow::on_listConditions48_itemSelectionChanged()
@@ -656,32 +683,29 @@ void MainWindow::on_mapView_customContextMenuRequested(const QPoint &pos)
     menu.exec(ui->mapView->mapToGlobal(pos));
 }
 
+
 void MainWindow::addItemCondition(QListWidgetItem *item, Condition cond)
 {
     const FilterInfo& ft = g_filterinfo.list[cond.type];
-    cond.save = getIndex(cond.save);
 
     if (ft.cat == CAT_FULL)
     {
         if (!item)
             item = new QListWidgetItem();
-        setItemCondition(item, cond);
-        ui->listConditionsFull->addItem(item);
+        setItemCondition(ui->listConditionsFull, item, cond);
     }
     else if (ft.cat == CAT_48)
     {
         if (item)
         {
-            setItemCondition(item, cond);
-            ui->listConditions48->addItem(item);
+            setItemCondition(ui->listConditions48, item, cond);
             return;
         }
-
-        item = new QListWidgetItem();
-        setItemCondition(item, cond);
-        ui->listConditions48->addItem(item);
-
-        int idx = getIndex(cond.save+1);
+        else
+        {
+            item = new QListWidgetItem();
+            setItemCondition(ui->listConditions48, item, cond);
+        }
 
         if (cond.type >= F_QH_IDEAL && cond.type <= F_QH_BARELY)
         {
@@ -690,11 +714,10 @@ void MainWindow::addItemCondition(QListWidgetItem *item, Condition cond)
             cq.x1 = -128; cq.z1 = -128;
             cq.x2 = +128; cq.z2 = +128;
             cq.relative = cond.save;
-            cq.save = idx;
+            cq.save = cond.save+1;
             cq.count = 4;
             QListWidgetItem *item = new QListWidgetItem(ui->listConditionsFull, QListWidgetItem::UserType);
-            setItemCondition(item, cq);
-            ui->listConditionsFull->addItem(item);
+            setItemCondition(ui->listConditionsFull, item, cq);
         }
         else if (cond.type == F_QM_90 || cond.type == F_QM_95)
         {
@@ -703,11 +726,10 @@ void MainWindow::addItemCondition(QListWidgetItem *item, Condition cond)
             cq.x1 = -160; cq.z1 = -160;
             cq.x2 = +160; cq.z2 = +160;
             cq.relative = cond.save;
-            cq.save = idx;
+            cq.save = cond.save+1;
             cq.count = 4;
             QListWidgetItem *item = new QListWidgetItem(ui->listConditionsFull, QListWidgetItem::UserType);
-            setItemCondition(item, cq);
-            ui->listConditionsFull->addItem(item);
+            setItemCondition(ui->listConditionsFull, item, cq);
         }
     }
 }

@@ -42,9 +42,9 @@ public:
     MapView *getMapView();
 
 protected:
-    void setItemCondition(QListWidgetItem *item, Condition cond) const;
+    QListWidgetItem *lockItem(QListWidgetItem *item);
+    void setItemCondition(QListWidget *list, QListWidgetItem *item, Condition cond);
     void editCondition(QListWidgetItem *item);
-
     void updateMapSeed();
     void updateSensitivity();
     int getIndex(int idx) const;

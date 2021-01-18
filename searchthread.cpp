@@ -1,6 +1,11 @@
 #include "searchthread.h"
 #include <QMessageBox>
 
+#include <x86intrin.h>
+
+#define TSC_INTERRUPT_CNT ((uint64_t)1 << 30)
+
+
 class FamilyBlock: public QRunnable
 {
     // This class is a threadpool item for a range of upper 16-bit values to
@@ -34,7 +39,6 @@ public:
             for (int i = 0; i < n; i++)
             {
                 master->seeds.push_back(seedbuf[i]);
-                //printf("%ld\n", seedbuf[i]); fflush(stdout);
             }
             master->mutex.unlock();
         }
@@ -126,6 +130,7 @@ void SearchThread::run()
     int64_t ci;
     char *sp;
     int64_t s48 = sstart;
+    uint64_t tsc_next = __rdtsc() + TSC_INTERRUPT_CNT;
 
     if (cl.mem)
     {
@@ -144,6 +149,12 @@ void SearchThread::run()
                 if (runSearch48(s48, cond, ccnt) && stoponres)
                     break;
             }
+            uint64_t t = __rdtsc();
+            if (t > tsc_next)
+            {
+                emit baseDone(s48);
+                tsc_next = t + TSC_INTERRUPT_CNT;
+            }
         }
         if (ci == cl.bcnt)
             s48 = MASK48+1;
@@ -161,6 +172,12 @@ void SearchThread::run()
                     break;
                 if (runSearch48(s48, cond, ccnt) && stoponres)
                     break;
+            }
+            uint64_t t = __rdtsc();
+            if (t > tsc_next)
+            {
+                emit baseDone(s48);
+                tsc_next = t + TSC_INTERRUPT_CNT;
             }
         }
     }
