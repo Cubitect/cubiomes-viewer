@@ -2,6 +2,7 @@
 #define CUTIL_H
 
 #include <QMutex>
+#include <QString>
 
 #include <random>
 
@@ -171,25 +172,29 @@ static inline int64_t getRnd64()
 }
 
 enum { S_TEXT, S_NUMERIC, S_RANDOM };
-inline int str2seed(const char *str, int64_t *out)
+inline int str2seed(const QString &str, int64_t *out)
 {
-    int slen = strlen(str);
-    char *p;
-    if (slen == 0)
+    if (str.isEmpty())
     {
         *out = getRnd64();
         return S_RANDOM;
     }
 
-    *out = strtoll(str, &p, 10);
-    if (str + slen == p)
+    bool ok = false;
+    *out = str.toLong(&ok);
+    if (ok)
+    {
         return S_NUMERIC;
+    }
 
     // String.hashCode();
-    *out = 0;
-    for (int i = 0; i < slen; i++)
-        *out = 31*(*out) + str[i];
-    *out &= (uint32_t)-1;
+    int32_t hash = 0;
+    const ushort *chars = str.utf16();
+    for (int i = 0; chars[i] != 0; i++)
+    {
+        hash = 31 * hash + chars[i];
+    }
+    *out = hash;
     return S_TEXT;
 }
 

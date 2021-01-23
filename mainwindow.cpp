@@ -120,8 +120,7 @@ bool MainWindow::getSeed(int *mc, int64_t *seed, bool applyrand)
 
     if (seed)
     {
-        const QByteArray& ba = ui->seedEdit->text().toLocal8Bit();
-        int v = str2seed(ba.data(), seed);
+        int v = str2seed(ui->seedEdit->text(), seed);
         if (applyrand && v == S_RANDOM)
             ui->seedEdit->setText(QString::asprintf("%" PRId64, *seed));
     }
@@ -300,7 +299,7 @@ void MainWindow::on_seedEdit_editingFinished()
 void MainWindow::on_seedEdit_textChanged(const QString &a)
 {
     int64_t s;
-    int v = str2seed(a.toLocal8Bit().data(), &s);
+    int v = str2seed(a, &s);
     switch (v)
     {
         case 0: ui->labelSeedType->setText("(text)"); break;
