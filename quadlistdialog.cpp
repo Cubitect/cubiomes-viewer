@@ -63,8 +63,7 @@ bool QuadListDialog::getSeed(int *mc, int64_t *seed)
         return false;
     }
 
-    const QByteArray& ba = ui->lineSeed->text().toLocal8Bit();
-    int v = str2seed(ba.data(), seed);
+    int v = str2seed(ui->lineSeed->text(), seed);
     if (v == S_RANDOM)
         ui->lineSeed->setText(QString::asprintf("%" PRId64, *seed));
 
