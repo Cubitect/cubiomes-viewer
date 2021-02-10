@@ -3,6 +3,8 @@
 
 #include <QThread>
 
+#include <algorithm>
+
 #include <unistd.h>
 
 #if defined(_WIN32)
@@ -395,105 +397,75 @@ L_QH_ANY:
     }
 }
 
-static int cmp_baseitem(const void *a, const void *b)
-{
-    return *(int64_t*)a > *(int64_t*)b;
-}
 
-/* Produces a list of seed bases from precomputed lists, provided all candidates
- * fit into a buffer.
+/* Produces a list of seed bases from precomputed lists, provided all candidates fit into a buffer.
  *
+ * @param list      output list
  * @param mc        mincraft version
  * @param cond      conditions
  * @param ccnt      number of conditions
  * @param bufmax    maximum allowed buffer size
  */
-CandidateList getCandidates(int mc, const Condition *cond, int ccnt, int64_t bufmax)
+void getCandidates(std::vector<int64_t>& list, int mc, const Condition *cond, int ccnt, int64_t bufmax)
 {
     int ci;
-    CandidateList clist = {};
 
     for (ci = 0; ci < ccnt; ci++)
     {
-        int64_t qbn = 0;
+        if (cond[ci].relative)
+            continue;
+
+        int64_t q, qbn = 0, *p;
         const int64_t *qb = NULL;
         StructureConfig sconf;
         int dyn;
+        int i, j;
 
-        if (cond[ci].relative == 0)
+        genSeedBases(mc, cond[ci].type, &qb, &qbn, &dyn, &sconf);
+        if (!qb)
+            continue;
+
+        int x = cond[ci].x1;
+        int z = cond[ci].z1;
+        int w = cond[ci].x2 - x + 1;
+        int h = cond[ci].z2 - z + 1;
+
+        // does the set of candidates for this condition fit in memory?
+        if (qbn * w*h * 4 * (int64_t)sizeof(int64_t) >= bufmax)
+            goto L_next_cond;
+
+        try {
+            list.resize(qbn * w*h);
+        } catch (...) {
+            goto L_next_cond;
+        }
+
+        p = list.data();
+        for (j = 0; j < h; j++)
         {
-            genSeedBases(mc, cond[ci].type, &qb, &qbn, &dyn, &sconf);
-
-            if (qb)
+            for (i = 0; i < w; i++)
             {
-                int x = cond[ci].x1;
-                int z = cond[ci].z1;
-                int w = cond[ci].x2 - x + 1;
-                int h = cond[ci].z2 - z + 1;
-
-                // does the set of candidates for this condition fit in memory?
-                if (qbn * w*h * 4 * (int64_t)sizeof(*clist.items->spos) < bufmax)
+                for (q = 0; q < qbn; q++)
                 {
-                    if (clist.items == NULL)
-                    {
-                        clist.bcnt = qbn * w*h;
-                        clist.scnt = 4;
-                        clist.isiz = sizeof(*clist.items) + clist.scnt * sizeof(*clist.items->spos);
-                        clist.mem = (char*) calloc(clist.bcnt, clist.isiz);
-                        if (!clist.mem)
-                        {
-                            if (dyn)
-                                free((void*)qb);
-                            break;
-                        }
-
-                        Candidate *item = (Candidate*)(clist.mem);
-
-                        int i, j;
-                        int64_t q;
-                        for (j = 0; j < h; j++)
-                        {
-                            for (i = 0; i < w; i++)
-                            {
-                                for (q = 0; q < qbn; q++)
-                                {
-                                    item->seed = moveStructure(qb[q], x+i, z+j);
-                                    item->spos[0].sconf = sconf;
-                                    item->spos[0].x = x+i;
-                                    item->spos[0].z = z+j;
-                                    item->spos[1].sconf = sconf;
-                                    item->spos[1].x = x+i+1;
-                                    item->spos[1].z = z+j;
-                                    item->spos[2].sconf = sconf;
-                                    item->spos[2].x = x+i;
-                                    item->spos[2].z = z+j+1;
-                                    item->spos[3].sconf = sconf;
-                                    item->spos[3].x = x+i+1;
-                                    item->spos[3].z = z+j+1;
-                                    item = (Candidate*)((char*)item + clist.isiz);
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        // TODO:
-                        // merge, i.e. filter out seeds and add new structure condition to item->spos
-                    }
+                    *p++ = moveStructure(qb[q], x+i, z+j);
                 }
-
-                if (dyn)
-                    free((void*)qb);
             }
         }
+
+    L_next_cond:
+        if (dyn && qb)
+            free((void*)qb);
+
+        if (!list.empty())
+            break;
     }
 
-    if (clist.items)
+    if (!list.empty())
     {
-        qsort(clist.items, clist.bcnt, clist.isiz, cmp_baseitem);
+        std::sort(list.begin(), list.end());
+        auto last = std::unique(list.begin(), list.end());
+        list.erase(last, list.end());
     }
-
-    return clist;
 }
 
 
@@ -550,7 +522,7 @@ static bool isInnerRingOk(int mc, int64_t seed, int x1, int z1, int x2, int z2, 
     return false;
 }
 
-int testCond(StructPos *spos, int64_t seed, const Condition *cond, int mc, LayerStack *g, volatile bool *abort)
+int testCond(StructPos *spos, int64_t seed, const Condition *cond, int mc, LayerStack *g, std::atomic_bool *abort)
 {
     int x1, x2, z1, z2;
     int rx1, rx2, rz1, rz2, rx, rz;
@@ -941,38 +913,4 @@ L_biome_filter_any:
     }
 
     return 1;
-}
-
-
-
-int64_t searchFamily(int64_t seedbuf[], int64_t s, int scnt, int mc,
-        LayerStack *g, const Condition cond[], int ccnt, StructPos *spos, volatile bool *abort)
-{
-    const Condition *c, *ce = cond + ccnt;
-
-    if (*abort)
-        return 0;
-
-    for (c = cond; c != ce; c++)
-        if (!testCond(spos, s, c, mc, NULL, abort))
-            return 0;
-
-    for (c = cond; c != ce; c++)
-        if (g_filterinfo.list[c->type].cat != CAT_48)
-            break;
-
-    int n = 0;
-    while (scnt--)
-    {
-        for (const Condition *ct = c; ct != ce; ct++)
-            if (!testCond(spos, s, ct, mc, g, abort))
-                goto L_NEXT_SEED;
-        seedbuf[n++] = s;
-L_NEXT_SEED:;
-        if (*abort)
-            break;
-        s += (1LL << 48);
-    }
-
-    return n;
 }

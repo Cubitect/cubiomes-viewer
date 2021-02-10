@@ -23,6 +23,7 @@ class MainWindow;
 }
 
 Q_DECLARE_METATYPE(int64_t)
+Q_DECLARE_METATYPE(uint64_t)
 Q_DECLARE_METATYPE(Pos)
 Q_DECLARE_METATYPE(Condition)
 
@@ -43,7 +44,7 @@ public:
 
 protected:
     QListWidgetItem *lockItem(QListWidgetItem *item);
-    void setItemCondition(QListWidget *list, QListWidgetItem *item, Condition cond);
+    void setItemCondition(QListWidget *list, QListWidgetItem *item, Condition *cond);
     void editCondition(QListWidgetItem *item);
     void updateMapSeed();
     void updateSensitivity();
@@ -54,6 +55,8 @@ public slots:
     void mapGoto(qreal x, qreal z);
     void openProtobaseMsg(QString path);
     void closeProtobaseMsg();
+
+    int searchResultsAdd(QVector<int64_t> seeds, bool countonly);
 
 private slots:
     void on_comboBoxMC_currentIndexChanged(int a);
@@ -91,6 +94,7 @@ private slots:
     void on_listResults_customContextMenuRequested(const QPoint &pos);
 
     void on_buttonInfo_clicked();
+    void on_buttonSearchHelp_clicked();
 
     void on_actionSave_triggered();
     void on_actionLoad_triggered();
@@ -99,13 +103,17 @@ private slots:
     void on_actionOpen_shadow_seed_triggered();
     void on_actionAbout_triggered();
 
+    void on_actionSearch_seed_list_triggered();
+    void on_actionSearch_full_seed_space_triggered();
+    void on_comboSearchType_currentIndexChanged(int index);
+    void on_buttonLoadList_clicked();
+
     void on_mapView_customContextMenuRequested(const QPoint &pos);
 
     // internal events
     void addItemCondition(QListWidgetItem *item, Condition cond);
-    int searchResultsAdd(QVector<int64_t> seeds, bool countonly);
-    void searchBaseDone(int64_t s48);
-    void searchFinish(int64_t s48);
+    void searchProgress(uint64_t last, uint64_t end, int64_t seed);
+    void searchFinish();
     void resultTimeout();
     void removeCurrent();
     void copyResults();
@@ -120,6 +128,8 @@ public:
     QTimer stimer;
     ProtoBaseDialog *protodialog;
     QString prevdir;
+    QString slistfnam;
+    std::vector<int64_t> slist64;
 };
 
 #endif // MAINWINDOW_H

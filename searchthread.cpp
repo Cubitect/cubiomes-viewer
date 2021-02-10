@@ -1,57 +1,36 @@
 #include "searchthread.h"
+#include "mainwindow.h"
+
 #include <QMessageBox>
+#include <QEventLoop>
 
 #include <x86intrin.h>
 
 #define TSC_INTERRUPT_CNT ((uint64_t)1 << 30)
 
+#define ITEM_SIZE 1024
 
-class FamilyBlock: public QRunnable
+
+extern MainWindow *gMainWindowInstance;
+
+
+SearchThread::SearchThread(MainWindow *parent)
+    : QThread()
+    , parent(parent)
+    , condvec()
+    , itemgen()
+    , pool()
+    , activecnt()
+    , abort()
+    , reqstop()
+    , recieved()
+    , lastid()
 {
-    // This class is a threadpool item for a range of upper 16-bit values to
-    // look through, following a full 64-bit seed.
-public:
-    SearchThread *master;   // master thread for results
-    int64_t sstart;         // starting seed
-    int scnt;               // number of upper 16-bit combinations to check
-    int mc;                 // mincraft version
-    const Condition* cond;  // conditions to be met
-    int ccnt;               // number of conditions
+    itemgen.abort = &abort;
+}
 
-    FamilyBlock(SearchThread *t, int64_t sstart, int scnt, int mc,
-                const Condition* cond, int ccnt)
-        : master(t),sstart(sstart),scnt(scnt),mc(mc),cond(cond),ccnt(ccnt)
-    {
-        setAutoDelete(true);
-    }
-
-    void run()
-    {
-        LayerStack g;
-        setupGenerator(&g, mc);
-        StructPos spos[100] = {};
-        int64_t seedbuf[scnt];
-
-        int n = searchFamily(seedbuf, sstart, scnt, mc, &g, cond, ccnt, spos, &master->abortsearch);
-        if (n && !master->abortsearch)
-        {
-            master->mutex.lock();
-            for (int i = 0; i < n; i++)
-            {
-                master->seeds.push_back(seedbuf[i]);
-            }
-            master->mutex.unlock();
-        }
-    }
-};
-
-// called from main GUI thread
-bool SearchThread::set(int type, int64_t start48, int mc, const QVector<Condition>& cv)
+bool SearchThread::set(int type, int threads, std::vector<int64_t>& slist64, int64_t sstart, int mc, const QVector<Condition>& cv)
 {
-    this->searchtype = type;
-    this->sstart = start48;
-    this->mc = mc;
-    this->condvec = cv;
     char refbuf[100] = {};
 
     for (const Condition& c : cv)
@@ -104,133 +83,104 @@ bool SearchThread::set(int type, int64_t start48, int mc, const QVector<Conditio
         }
     }
 
-    return true;
-}
-
-// does the 48-bit seed meet the conditions c..ce?
-static bool isCandidate(int64_t s48, int mc, const Condition *c, const Condition *ce, volatile bool *abort)
-{
-    StructPos spos[100] = {};
-    for (; c != ce; c++)
-        if (!testCond(spos, s48, c, mc, NULL, abort))
-            return false;
+    int itemsize = 1024;
+    condvec = cv;
+    itemgen.init(mc, condvec.data(), condvec.size(), slist64, itemsize, type, sstart);
+    pool.setMaxThreadCount(threads);
+    recieved.resize(2 * threads);
+    lastid = itemgen.itemid;
+    reqstop = false;
+    abort = false;
     return true;
 }
 
 
 void SearchThread::run()
 {
-    abortsearch = false;
-    elapsed.start();
-
-    const Condition *cond = condvec.data();
-    int64_t ccnt = condvec.size();
-
-    CandidateList cl = getCandidates(mc, cond, ccnt, PRECOMPUTE48_BUFSIZ);
-    int64_t ci;
-    char *sp;
-    int64_t s48 = sstart;
-    uint64_t tsc_next = __rdtsc() + TSC_INTERRUPT_CNT;
-
-    if (cl.mem)
+    pool.waitForDone();
+    for (int idx = 0; idx < recieved.size(); idx++)
     {
-        // a pre-computed list of candidates exists, skip forwards to starting point
-        for (ci = 0, sp = cl.mem; ci < cl.bcnt; ci++, sp += cl.isiz)
-            if ((s48 = *(int64_t*)sp) >= sstart)
-                break;
-
-        for (; ci < cl.bcnt && !abortsearch; ci++, sp += cl.isiz)
-        {
-            s48 = *(int64_t*)sp;
-            if (isCandidate(s48, mc, cond, cond+ccnt, &abortsearch))
-            {
-                if (abortsearch)
-                    break;
-                if (runSearch48(s48, cond, ccnt) && stoponres)
-                    break;
-            }
-            uint64_t t = __rdtsc();
-            if (t > tsc_next)
-            {
-                emit baseDone(s48);
-                tsc_next = t + TSC_INTERRUPT_CNT;
-            }
-        }
-        if (ci == cl.bcnt)
-            s48 = MASK48+1;
-
-        free(cl.mem);
+        recieved[idx].valid = false;
+        startNextItem();
     }
-    else
-    {
-        // go through all 48-bit seeds
-        for (; s48 <= MASK48 && !abortsearch; s48++)
-        {
-            if (isCandidate(s48, mc, cond, cond+ccnt, &abortsearch))
-            {
-                if (abortsearch)
-                    break;
-                if (runSearch48(s48, cond, ccnt) && stoponres)
-                    break;
-            }
-            uint64_t t = __rdtsc();
-            if (t > tsc_next)
-            {
-                emit baseDone(s48);
-                tsc_next = t + TSC_INTERRUPT_CNT;
-            }
-        }
-    }
-
-    emit finish(s48);
 }
 
-// search type options from combobox
-enum { SEARCH_ALL64 = 0, SEARCH_INC48 = 1, SEARCH_CANDIT = 2 };
-
-bool SearchThread::runSearch48(int64_t s48, const Condition* cond, int ccnt)
+void SearchThread::debug()
 {
-    // found a 48-bit seed candidate
-    seeds.clear();
-
-    if (searchtype == SEARCH_CANDIT)
-    {
-        seeds.push_back(s48);
-    }
-    else if (searchtype == SEARCH_INC48)
-    {
-        LayerStack g;
-        setupGenerator(&g, mc);
-        StructPos spos[100] = {};
-        int64_t seedbuf[1];
-        if (searchFamily(seedbuf, s48, 1, mc, &g, cond, ccnt, spos, &abortsearch))
-            seeds.push_back(seedbuf[0]);
-    }
-    else
-    {
-        // distribute the search for the upper 16-bits onto a thread pool
-        const int blocksize = 0x200;
-        const int blockcnt = 0x10000 / blocksize;
-        for (int i = 0; i < blockcnt; i++)
-        {
-            pool.start(new FamilyBlock(this, s48, blocksize, mc, cond, ccnt));
-            s48 += (int64_t)blocksize << 48;
-        }
-        pool.waitForDone();
-    }
-
-    if (!abortsearch)
-    {
-        if (elapsed.elapsed() > 10)
-        {
-            emit baseDone(s48);
-            elapsed.start();
-        }
-    }
-    if (!seeds.empty())
-    {
-        emit results(seeds, false);
-        return true;
-    }
-    return false;
+    printf("lastid: %-2lu reci:", lastid);
+    for (int i = 0; i < recieved.size(); i++)
+        printf(" %d", (int)recieved[i].valid);
+    printf("  (");
+    for (int i = 0; i < recieved.size(); i++)
+        printf(" %lu", i + lastid);
+    printf(" )\n");
+    fflush(stdout);
 }
+
+SearchItem *SearchThread::startNextItem()
+{
+    SearchItem *item = itemgen.requestItem();
+    if (!item)
+        return NULL;
+    // call back here when done
+    QObject::connect(item, &SearchItem::itemDone, this, &SearchThread::onItemDone, Qt::BlockingQueuedConnection);
+    QObject::connect(item, &SearchItem::canceled, this, &SearchThread::onItemCanceled, Qt::QueuedConnection);
+    // redirect results to mainwindow
+    QObject::connect(item, &SearchItem::results, parent, &MainWindow::searchResultsAdd, Qt::BlockingQueuedConnection);
+    ++activecnt;
+    pool.start(item);
+    return item;
+}
+
+
+void SearchThread::onItemDone(uint64_t itemid, int64_t seed, bool isdone)
+{
+    --activecnt;
+
+    itemgen.isdone |= isdone;
+    if (!itemgen.isdone && !reqstop && !abort)
+    {
+        if (itemid == lastid)
+        {
+            int64_t len = recieved.size();
+            int idx;
+            for (idx = 1; idx < len; idx++)
+            {
+                if (!recieved[idx].valid)
+                    break;
+            }
+
+            lastid += idx;
+
+            for (int i = idx; i < len; i++)
+                recieved[i-idx] = recieved[i];
+            for (int i = len-idx; i < len; i++)
+                recieved[i].valid = false;
+
+            for (int i = 0; i < idx; i++)
+                startNextItem();
+
+            uint64_t prog, end;
+            itemgen.getProgress(&prog, &end);
+            emit progress(prog, end, seed);
+        }
+        else
+        {
+            int idx = itemid - lastid;
+            recieved[idx].valid = true;
+            recieved[idx].seed = seed;
+        }
+    }
+
+    if (activecnt == 0)
+        emit searchFinish();
+}
+
+void SearchThread::onItemCanceled(uint64_t itemid)
+{
+    (void) itemid;
+    --activecnt;
+    if (activecnt == 0)
+        emit searchFinish();
+}
+

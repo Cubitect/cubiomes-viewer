@@ -7,50 +7,53 @@
 #include <QVector>
 #include <QElapsedTimer>
 
-#include "search.h"
+#include "searchitem.h"
 
 #define PRECOMPUTE48_BUFSIZ ((int64_t)1 << 30)
 
 
-class SearchThread : public QThread
+class MainWindow;
+
+struct SearchThread : QThread
 {
     Q_OBJECT
-
 public:
-    SearchThread(QObject *parent) :
-        QThread(parent),mc(),sstart(),condvec(),pool(this),stoponres(),seeds(),mutex(),elapsed()
+    struct CheckedSeed
     {
-    }
+        uint8_t valid;
+        int64_t seed;
+    };
 
-    bool set(int type, int64_t start48, int mc, const QVector<Condition>& cv);
+    SearchThread(MainWindow *parent);
 
-    void stop() { abortsearch = true; }
+    bool set(int type, int threads, std::vector<int64_t>& slist64, int64_t sstart, int mc, const QVector<Condition>& cv);
 
-    void run() override;
-    bool runSearch48(int64_t s48, const Condition* cond, int ccnt);
+    virtual void run() override;
+
+    void stop() { abort = true; pool.clear(); }
+    SearchItem *startNextItem();
+    void debug();
 
 signals:
-    int results(QVector<int64_t> seeds, bool countonly);
-    void baseDone(int64_t s48);
-    void finish(int64_t s48);
+    void progress(uint64_t last, uint64_t end, int64_t seed);
+    void searchFinish();
 
 public slots:
-    void setStopOnResult(bool a) { stoponres = a; }
-
-protected:
-    int mc;
-    int64_t sstart;
-    QVector<Condition> condvec;
-    QThreadPool pool;
-    bool stoponres;
-    int searchtype;
+    void onItemDone(uint64_t itemid, int64_t seed, bool isdone);
+    void onItemCanceled(uint64_t itemid);
 
 public:
-    QVector<int64_t> seeds;
-    QMutex mutex;
-    volatile bool abortsearch;
+    MainWindow            * parent;
 
-    QElapsedTimer elapsed;
+    QVector<Condition>      condvec;
+    SearchItemGenerator     itemgen;
+    QThreadPool             pool;
+    QAtomicInt              activecnt;  // running + queued items
+    std::atomic_bool        abort;
+    std::atomic_bool        reqstop;
+
+    QVector<CheckedSeed>    recieved;
+    uint64_t                lastid;     // last item id
 };
 
 #endif // SEARCHTHREAD_H

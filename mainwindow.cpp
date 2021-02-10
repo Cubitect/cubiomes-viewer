@@ -54,22 +54,26 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->listConditions48->setFont(mono);
     ui->listConditionsFull->setFont(mono);
     ui->listResults->setFont(mono);
+    ui->progressBar->setFont(mono);
 
     qRegisterMetaType< int64_t >("int64_t");
+    qRegisterMetaType< uint64_t >("uint64_t");
     qRegisterMetaType< QVector<int64_t> >("QVector<int64_t>");
     qRegisterMetaType< Condition >("Condition");
     qRegisterMetaTypeStreamOperators< Condition >("Condition");
 
     protodialog = new ProtoBaseDialog(this);
 
-    connect(&sthread, &SearchThread::results, this, &MainWindow::searchResultsAdd, Qt::BlockingQueuedConnection);
-    connect(&sthread, &SearchThread::baseDone, this, &MainWindow::searchBaseDone, Qt::BlockingQueuedConnection);
-    connect(&sthread, &SearchThread::finish, this, &MainWindow::searchFinish);
-    connect(ui->checkStop, &QAbstractButton::toggled, &sthread, &SearchThread::setStopOnResult, Qt::DirectConnection);
-    sthread.setStopOnResult(ui->checkStop->isChecked());
+    //connect(&sthread, &SearchThread::results, this, &MainWindow::searchResultsAdd, Qt::BlockingQueuedConnection);
+    connect(&sthread, &SearchThread::progress, this, &MainWindow::searchProgress, Qt::QueuedConnection);
+    connect(&sthread, &SearchThread::searchFinish, this, &MainWindow::searchFinish, Qt::QueuedConnection);
 
     connect(&stimer, &QTimer::timeout, this, QOverload<>::of(&MainWindow::resultTimeout));
     stimer.start(500);
+
+    searchProgress(0, ~(int64_t)0, 0);
+    ui->spinThreads->setMaximum(QThread::idealThreadCount());
+    ui->spinThreads->setValue(QThread::idealThreadCount());
 
     updateSensitivity();
 
@@ -166,7 +170,7 @@ bool list_contains(QListWidget *list, QListWidgetItem *item)
 }
 
 // [ID] Condition Cnt Rel Area
-void MainWindow::setItemCondition(QListWidget *list, QListWidgetItem *item, Condition cond)
+void MainWindow::setItemCondition(QListWidget *list, QListWidgetItem *item, Condition *cond)
 {
     QListWidgetItem *target = (QListWidgetItem*) item->data(Qt::UserRole+1).toULongLong();
     if (list_contains(list, target) && !(target->flags() & Qt::ItemIsSelectable))
@@ -179,21 +183,21 @@ void MainWindow::setItemCondition(QListWidget *list, QListWidgetItem *item, Cond
     else
     {
         list->addItem(item);
-        cond.save = getIndex(cond.save);
+        cond->save = getIndex(cond->save);
     }
 
-    const FilterInfo& ft = g_filterinfo.list[cond.type];
-    QString s = QString::asprintf("[%02d] %-28sx%-3d", cond.save, ft.name, cond.count);
+    const FilterInfo& ft = g_filterinfo.list[cond->type];
+    QString s = QString::asprintf("[%02d] %-28sx%-3d", cond->save, ft.name, cond->count);
 
-    if (cond.relative)
-        s += QString::asprintf("[%02d]+", cond.relative);
+    if (cond->relative)
+        s += QString::asprintf("[%02d]+", cond->relative);
     else
         s += "     ";
 
     if (ft.coord)
-        s += QString::asprintf("(%d,%d)", cond.x1*ft.step, cond.z1*ft.step);
+        s += QString::asprintf("(%d,%d)", cond->x1*ft.step, cond->z1*ft.step);
     if (ft.area)
-        s += QString::asprintf(",(%d,%d)", (cond.x2+1)*ft.step-1, (cond.z2+1)*ft.step-1);
+        s += QString::asprintf(",(%d,%d)", (cond->x2+1)*ft.step-1, (cond->z2+1)*ft.step-1);
 
     if (ft.cat == CAT_48)
         item->setBackground(QColor(Qt::yellow));
@@ -201,7 +205,7 @@ void MainWindow::setItemCondition(QListWidget *list, QListWidgetItem *item, Cond
         item->setBackground(QColor(Qt::green));
 
     item->setText(s);
-    item->setData(Qt::UserRole, QVariant::fromValue(cond));
+    item->setData(Qt::UserRole, QVariant::fromValue(*cond));
 }
 
 void MainWindow::editCondition(QListWidgetItem *item)
@@ -424,9 +428,7 @@ void MainWindow::on_buttonClear_clicked()
 {
     ui->listResults->clearContents();
     ui->listResults->setRowCount(0);
-    ui->lineStart48->setText("0");
-    ui->progressBar->setValue(0);
-    ui->progressBar->setFormat("0.00%");
+    searchProgress(0, 0, 0);
 }
 
 void MainWindow::on_buttonStart_clicked()
@@ -436,13 +438,19 @@ void MainWindow::on_buttonStart_clicked()
         int mc = MC_1_16;
         getSeed(&mc, NULL);
         QVector<Condition> condvec = getConditions();
-        int64_t sstart = (int64_t)ui->lineStart48->text().toLongLong() & MASK48;
+        int64_t sstart = (int64_t)ui->lineStart->text().toLongLong();
         int searchtype = ui->comboSearchType->currentIndex();
+        int threads = ui->spinThreads->value();
         int ok = true;
 
         if (condvec.empty())
         {
             warning("Warning", "Please define some constraints using the \"Add\" button.");
+            ok = false;
+        }
+        if (searchtype == SEARCH_LIST && slist64.empty())
+        {
+            warning("Warning", "No seed list file selected.");
             ok = false;
         }
         if (sthread.isRunning())
@@ -452,12 +460,13 @@ void MainWindow::on_buttonStart_clicked()
         }
 
         if (ok)
-            ok = sthread.set(searchtype, sstart, mc, condvec);
+            ok = sthread.set(searchtype, threads, slist64, sstart, mc, condvec);
 
         if (ok)
         {
-            ui->lineStart48->setText(QString::asprintf("%" PRId64, sstart));
+            ui->lineStart->setText(QString::asprintf("%" PRId64, sstart));
             ui->comboSearchType->setEnabled(false);
+            ui->spinThreads->setEnabled(false);
             ui->buttonStart->setText("Abort search");
             ui->buttonStart->setIcon(QIcon::fromTheme("process-stop"));
             sthread.start();
@@ -470,12 +479,13 @@ void MainWindow::on_buttonStart_clicked()
     else
     {
         sthread.stop(); // tell search to stop at next convenience
-        sthread.quit(); // tell the event loop to exit
+        //sthread.quit(); // tell the event loop to exit
         //sthread.wait(); // wait for search to finish
         ui->buttonStart->setEnabled(true);
         ui->buttonStart->setText("Start search");
         ui->buttonStart->setIcon(QIcon::fromTheme("system-search"));
         ui->comboSearchType->setEnabled(true);
+        ui->spinThreads->setEnabled(true);
     }
 
     update();
@@ -526,6 +536,22 @@ void MainWindow::on_buttonInfo_clicked()
     QMessageBox::information(this, "Help: search conditions", msg, QMessageBox::Ok);
 }
 
+void MainWindow::on_buttonSearchHelp_clicked()
+{
+    const char* msg =
+            "<html><head/><body><p>The <span style=\" font-weight:600;\">incremental</span> "
+            "search checks seeds in numerical order, save for grouping into work items for parallelization. "
+            "This type of search is best suited for a non-exhaustive search space and with strong biome dependencies.</p>"
+            "<p>With <span style=\" font-weight:600;\">48-bit family blocks</span> the search looks for suitable "
+            "48-bit seeds first and parallelizes the search through the upper 16-bits. "
+            "This type of search is best suited for exhaustive searches and for many types of structure restrictions.</p>"
+            "<p>Load a <span style=\" font-weight:600;\">seed list from a file</span> to search through an existing set of seeds. "
+            "The seeds should be in decimal ASCII text, separated by newline characters. "
+            "You can browse for a file using the &quot;...&quot; button.</p></body></html>"
+            ;
+    QMessageBox::information(this, "Help: search types", msg, QMessageBox::Ok);
+}
+
 
 void MainWindow::on_actionSave_triggered()
 {
@@ -545,7 +571,7 @@ void MainWindow::on_actionSave_triggered()
         QTextStream stream(&file);
         stream << "#Version:  " << VERS_MAJOR << "." << VERS_MINOR << "." << VERS_PATCH << "\n";
         stream << "#Search:   " << ui->comboSearchType->currentIndex() << "\n";
-        stream << "#Progress: " << ui->lineStart48->text().toLongLong() << "\n";
+        stream << "#Progress: " << ui->lineStart->text().toLongLong() << "\n";
         QVector<Condition> condvec = getConditions();
         for (Condition &c : condvec)
             stream << "#Cond: " << QByteArray((const char*) &c, sizeof(Condition)).toHex() << "\n";
@@ -631,7 +657,7 @@ void MainWindow::on_actionLoad_triggered()
         on_buttonClear_clicked();
 
         ui->comboSearchType->setCurrentIndex(searchtype);
-        ui->lineStart48->setText(QString::asprintf("%" PRId64, s48));
+        ui->lineStart->setText(QString::asprintf("%" PRId64, s48));
 
         for (Condition &c : condvec)
         {
@@ -675,6 +701,49 @@ void MainWindow::on_actionAbout_triggered()
     dialog->show();
 }
 
+void MainWindow::on_actionSearch_seed_list_triggered()
+{
+    ui->comboSearchType->setCurrentIndex(SEARCH_LIST);
+    on_buttonLoadList_clicked();
+}
+
+void MainWindow::on_actionSearch_full_seed_space_triggered()
+{
+    ui->comboSearchType->setCurrentIndex(SEARCH_BLOCKS);
+    slistfnam.clear();
+    slist64.clear();
+}
+
+void MainWindow::on_comboSearchType_currentIndexChanged(int index)
+{
+    ui->buttonLoadList->setEnabled(index == SEARCH_LIST);
+}
+
+void MainWindow::on_buttonLoadList_clicked()
+{
+    QString fnam = QFileDialog::getOpenFileName(this, "Load seed list", prevdir, "Text files (*.txt);;Any files (*)");
+    if (!fnam.isEmpty())
+    {
+        QFileInfo finfo(fnam);
+        prevdir = finfo.absolutePath();
+        slistfnam = finfo.fileName();
+        int64_t *l = NULL;
+        int64_t len;
+        QByteArray ba = fnam.toLatin1();
+        l = loadSavedSeeds(ba.data(), &len);
+        if (l && len > 0)
+        {
+            slist64.assign(l, l+len);
+            searchProgress(0, len, l[0]);
+            free(l);
+        }
+        else
+        {
+            warning("Warning", "Failed to load seed list from file");
+        }
+    }
+}
+
 void MainWindow::on_mapView_customContextMenuRequested(const QPoint &pos)
 {
     QMenu menu(this);
@@ -692,19 +761,19 @@ void MainWindow::addItemCondition(QListWidgetItem *item, Condition cond)
     {
         if (!item)
             item = new QListWidgetItem();
-        setItemCondition(ui->listConditionsFull, item, cond);
+        setItemCondition(ui->listConditionsFull, item, &cond);
     }
     else if (ft.cat == CAT_48)
     {
         if (item)
         {
-            setItemCondition(ui->listConditions48, item, cond);
+            setItemCondition(ui->listConditions48, item, &cond);
             return;
         }
         else
         {
             item = new QListWidgetItem();
-            setItemCondition(ui->listConditions48, item, cond);
+            setItemCondition(ui->listConditions48, item, &cond);
         }
 
         if (cond.type >= F_QH_IDEAL && cond.type <= F_QH_BARELY)
@@ -717,7 +786,7 @@ void MainWindow::addItemCondition(QListWidgetItem *item, Condition cond)
             cq.save = cond.save+1;
             cq.count = 4;
             QListWidgetItem *item = new QListWidgetItem(ui->listConditionsFull, QListWidgetItem::UserType);
-            setItemCondition(ui->listConditionsFull, item, cq);
+            setItemCondition(ui->listConditionsFull, item, &cq);
         }
         else if (cond.type == F_QM_90 || cond.type == F_QM_95)
         {
@@ -729,7 +798,7 @@ void MainWindow::addItemCondition(QListWidgetItem *item, Condition cond)
             cq.save = cond.save+1;
             cq.count = 4;
             QListWidgetItem *item = new QListWidgetItem(ui->listConditionsFull, QListWidgetItem::UserType);
-            setItemCondition(ui->listConditionsFull, item, cq);
+            setItemCondition(ui->listConditionsFull, item, &cq);
         }
     }
 }
@@ -768,7 +837,7 @@ int MainWindow::searchResultsAdd(QVector<int64_t> seeds, bool countonly)
         QTableWidgetItem* seeditem = new QTableWidgetItem();
         s48item->setData(Qt::UserRole, QVariant::fromValue(s));
         s48item->setText(QString::asprintf("%012llx|%04x",
-                (qulonglong)(s & MASK48), (uint)(s >> 48) & ((1 << 16) - 1)));
+                (qulonglong)(s & MASK48), (uint)(s >> 48) & 0xffff));
         seeditem->setData(Qt::DisplayRole, QVariant::fromValue(s));
         ui->listResults->insertRow(n);
         ui->listResults->setItem(n, 0, s48item);
@@ -783,28 +852,42 @@ int MainWindow::searchResultsAdd(QVector<int64_t> seeds, bool countonly)
         warning("Warning", QString::asprintf("Maximum number of results reached (%d).", MAXRESULTS));
     }
 
-    if (ui->checkStop->isChecked())
-        sthread.stop();
+    int addcnt = n - ns;
+    if (ui->checkStop->isChecked() && addcnt)
+    {
+        sthread.reqstop = true;
+        sthread.pool.clear();
+    }
 
-    return n - ns;
+    return addcnt;
 }
 
-void MainWindow::searchBaseDone(int64_t s48)
+void MainWindow::searchProgress(uint64_t last, uint64_t end, int64_t seed)
 {
-    ui->lineStart48->setText(QString::asprintf("%" PRId64, s48 + 1));
-    int v = (s48 * 10000) >> 48;
-    if (ui->progressBar->value() != v)
+//    if (sthread.itemgen.searchtype == SEARCH_BLOCKS)
+//        seed &= MASK48;
+    ui->lineStart->setText(QString::asprintf("%" PRId64, seed));
+
+    if (end)
     {
+        int v = (int) (10000 * (double)last / end);
         ui->progressBar->setValue(v);
-        ui->progressBar->setFormat(QString::asprintf("%d.%02d%%", v / 100, v % 100));
+        QString fmt = QString::asprintf(
+                    "%" PRIu64 " / %" PRIu64 " (%d.%02d%%)", last, end, v / 100, v % 100);
+        if (!slistfnam.isEmpty())
+            fmt = slistfnam + ": " + fmt;
+        ui->progressBar->setFormat(fmt);
     }
 }
 
-void MainWindow::searchFinish(int64_t s48)
+void MainWindow::searchFinish()
 {
-    if (s48 >= MASK48)
+    if (!sthread.abort)
     {
-        ui->lineStart48->setText(QString::asprintf("%" PRId64, MASK48));
+        searchProgress(0, 0, sthread.itemgen.seed);
+    }
+    if (sthread.itemgen.isdone)
+    {
         ui->progressBar->setValue(10000);
         ui->progressBar->setFormat(QString::asprintf("Done"));
     }
@@ -874,5 +957,3 @@ void MainWindow::copyCoord()
     QClipboard *clipboard = QGuiApplication::clipboard();
     clipboard->setText(QString::asprintf("%d, %d", p.x, p.z));
 }
-
-

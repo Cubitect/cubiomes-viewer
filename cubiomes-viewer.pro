@@ -44,6 +44,7 @@ SOURCES += \
         mapview.cpp \
         quad.cpp \
         search.cpp \
+        searchitem.cpp \
         searchthread.cpp \
         main.cpp
 
@@ -63,6 +64,7 @@ HEADERS += \
         quad.h \
         cutil.h \
         search.h \
+        searchitem.h \
         searchthread.h
 
 FORMS += \

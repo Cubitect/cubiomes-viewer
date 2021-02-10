@@ -3,6 +3,8 @@
 
 #include "cubiomes/finders.h"
 
+#include <vector>
+#include <atomic>
 
 enum
 {
@@ -271,51 +273,20 @@ struct Condition
     int count;
 };
 
-
-struct Candidate
-{
-    struct __attribute__((packed)) SPos
-    {
-        StructureConfig sconf;
-        int x, z;
-    };
-
-    // a candidate is a seed base and the structure positions it encompases
-    int64_t seed;
-    SPos spos[];
-};
-
-struct CandidateList
-{
-    union {
-        Candidate *items; // list of candidate items
-        char *mem;
-    };
-    int64_t isiz; // sizeof Candidate, each with scnt structures
-    int64_t scnt; // structures in each base item
-    int64_t bcnt; // number of base items
-};
-
-
-
-/* Attempts to construct a list of 48-bit bases that should be further checked.
- * Any conditions that would result in a list larger than a buffer size will
- * not be preloaded in this way.
- */
-CandidateList getCandidates(int mc, const Condition *cond, int ccnt, int64_t bufmax);
-
-
 struct StructPos
 {
     StructureConfig sconf;
     int cx, cz; // effective center position
 };
 
+/* Attempts to construct a list of 48-bit bases that should be further checked.
+ * Any conditions that would result in a list larger than a buffer size will
+ * not be preloaded in this way.
+ */
+void getCandidates(std::vector<int64_t>& list, int mc, const Condition *cond, int ccnt, int64_t bufmax);
 
-int testCond(StructPos *spos, int64_t seed, const Condition *cond, int mc, LayerStack *g, volatile bool *abort);
 
-int64_t searchFamily(int64_t seedbuf[], int64_t s, int scnt, int mc,
-        LayerStack *g, const Condition cond[], int ccnt, StructPos *spos, volatile bool *abort);
+int testCond(StructPos *spos, int64_t seed, const Condition *cond, int mc, LayerStack *g, std::atomic_bool *abort);
 
 
 

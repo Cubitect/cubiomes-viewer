@@ -9,6 +9,7 @@
 #include <QMenu>
 
 
+
 QuadListDialog::QuadListDialog(MainWindow *mainwindow)
     : QDialog(mainwindow)
     , ui(new Ui::QuadListDialog)
