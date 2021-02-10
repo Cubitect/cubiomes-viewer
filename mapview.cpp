@@ -98,8 +98,12 @@ void MapView::setShow(int stype, bool v)
     update(2);
 }
 
-void MapView::setView(qreal x, qreal z)
+void MapView::setView(qreal x, qreal z, qreal scale)
 {
+    if (scale > 0)
+    {
+        blocks2pix = 1.0 / scale;
+    }
     prevx = focusx = x;
     prevz = focusz = z;
     velx = velz = 0;

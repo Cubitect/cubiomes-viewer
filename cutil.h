@@ -181,7 +181,7 @@ inline int str2seed(const QString &str, int64_t *out)
     }
 
     bool ok = false;
-    *out = str.toLong(&ok);
+    *out = str.toLongLong(&ok);
     if (ok)
     {
         return S_NUMERIC;

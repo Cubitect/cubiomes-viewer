@@ -36,10 +36,11 @@ public:
 
     qreal getX() const { return focusx; }
     qreal getZ() const { return focusz; }
+    qreal getScale() const { return 1.0 / blocks2pix; }
 
     void setSeed(int mc, int64_t s);
     void setShow(int stype, bool v);
-    void setView(qreal x, qreal z);
+    void setView(qreal x, qreal z, qreal scale = 0);
 
     void timeout();
 

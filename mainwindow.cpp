@@ -271,9 +271,9 @@ void MainWindow::warning(QString title, QString text)
     QMessageBox::warning(this, title, text, QMessageBox::Ok);
 }
 
-void MainWindow::mapGoto(qreal x, qreal z)
+void MainWindow::mapGoto(qreal x, qreal z, qreal scale)
 {
-    ui->mapView->setView(x, z);
+    ui->mapView->setView(x, z, scale);
 }
 
 void MainWindow::openProtobaseMsg(QString path)
@@ -674,7 +674,7 @@ L_read_failed:
 
 void MainWindow::on_actionGo_to_triggered()
 {
-    GotoDialog *dialog = new GotoDialog(this, ui->mapView->getX(), ui->mapView->getZ());
+    GotoDialog *dialog = new GotoDialog(this, ui->mapView->getX(), ui->mapView->getZ(), ui->mapView->getScale());
     dialog->show();
 }
 

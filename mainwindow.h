@@ -52,7 +52,7 @@ protected:
 
 public slots:
     void warning(QString title, QString text);
-    void mapGoto(qreal x, qreal z);
+    void mapGoto(qreal x, qreal z, qreal scale);
     void openProtobaseMsg(QString path);
     void closeProtobaseMsg();
 

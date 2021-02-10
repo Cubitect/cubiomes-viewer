@@ -14,7 +14,7 @@ class GotoDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit GotoDialog(MainWindow *parent, qreal x, qreal z);
+    explicit GotoDialog(MainWindow *parent, qreal x, qreal z, qreal scale);
     ~GotoDialog();
 
 private slots:
@@ -23,6 +23,7 @@ private slots:
 private:
     Ui::GotoDialog *ui;
     MainWindow *mainwindow;
+    qreal scalemin, scalemax;
 };
 
 #endif // GOTODIALOG_H
