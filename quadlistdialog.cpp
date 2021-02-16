@@ -91,11 +91,8 @@ void QuadListDialog::refresh()
     int r = 3e7 / 512;
     int qhcnt = 0;
 
-    for (int i = 0; i < lbitcnt; i++)
-    {
-        int64_t l20 = lbits[i];
-        qhcnt += scanForQuads(sconf, (seed + sconf.salt) & MASK48, l20, -r, -r, 2*r, 2*r, qhlist+qhcnt, maxqh-qhcnt);
-    }
+    qhcnt = scanForQuads(sconf, 128, (seed + sconf.salt) & MASK48, lbits, lbitcnt, 20, -r, -r, 2*r, 2*r, qhlist, maxqh);
+
     if (qhcnt >= maxqh)
         QMessageBox::warning(this, "Warning", "Quad-hut scanning buffer exhausted, results will be incomplete.");
 

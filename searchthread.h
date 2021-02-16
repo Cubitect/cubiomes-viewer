@@ -26,7 +26,8 @@ public:
 
     SearchThread(MainWindow *parent);
 
-    bool set(int type, int threads, std::vector<int64_t>& slist64, int64_t sstart, int mc, const QVector<Condition>& cv);
+    bool set(int type, int threads, std::vector<int64_t>& slist64, int64_t sstart, int mc,
+             const QVector<Condition>& cv, int itemsize, int queuesize);
 
     virtual void run() override;
 

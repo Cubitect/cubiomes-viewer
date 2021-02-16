@@ -29,7 +29,8 @@ SearchThread::SearchThread(MainWindow *parent)
     itemgen.abort = &abort;
 }
 
-bool SearchThread::set(int type, int threads, std::vector<int64_t>& slist64, int64_t sstart, int mc, const QVector<Condition>& cv)
+bool SearchThread::set(int type, int threads, std::vector<int64_t>& slist64, int64_t sstart, int mc,
+                       const QVector<Condition>& cv, int itemsize, int queuesize)
 {
     char refbuf[100] = {};
 
@@ -83,11 +84,10 @@ bool SearchThread::set(int type, int threads, std::vector<int64_t>& slist64, int
         }
     }
 
-    int itemsize = 1024;
     condvec = cv;
     itemgen.init(mc, condvec.data(), condvec.size(), slist64, itemsize, type, sstart);
     pool.setMaxThreadCount(threads);
-    recieved.resize(2 * threads);
+    recieved.resize(queuesize);
     lastid = itemgen.itemid;
     reqstop = false;
     abort = false;

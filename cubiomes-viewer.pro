@@ -36,6 +36,7 @@ CONFIG += static
 
 SOURCES += \
         aboutdialog.cpp \
+        configdialog.cpp \
         gotodialog.cpp \
         protobasedialog.cpp \
         filterdialog.cpp \
@@ -49,6 +50,7 @@ SOURCES += \
         main.cpp
 
 HEADERS += \
+        configdialog.h \
         cubiomes/finders.h \
         cubiomes/generator.h \
         cubiomes/javarnd.h \
@@ -69,6 +71,7 @@ HEADERS += \
 
 FORMS += \
         aboutdialog.ui \
+        configdialog.ui \
         gotodialog.ui \
         mainwindow.ui \
         protobasedialog.ui \

@@ -12,7 +12,10 @@ AboutDialog::AboutDialog(QWidget *parent) :
     text.replace("_QT_MINOR_", QString::number(QT_VERSION_MINOR));
     text.replace("_MAJOR_", QString::number(VERS_MAJOR));
     text.replace("_MINOR_", QString::number(VERS_MINOR));
-    text.replace("_PATCH_", QString::number(VERS_PATCH));
+    if (VERS_PATCH >= 0)
+        text.replace("_PATCH_", QString::number(VERS_PATCH));
+    else
+        text.replace("_PATCH_", "dev");
     ui->label->setText(text);
 }
 

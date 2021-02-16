@@ -568,19 +568,6 @@ QToolButton:!checked { background-color:rgb(240, 240, 240) }</string>
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionDesert"/>
-   <addaction name="actionJungle"/>
-   <addaction name="actionIgloo"/>
-   <addaction name="actionHut"/>
-   <addaction name="actionVillage"/>
-   <addaction name="actionMonument"/>
-   <addaction name="actionRuin"/>
-   <addaction name="actionShipwreck"/>
-   <addaction name="actionMansion"/>
-   <addaction name="actionOutpost"/>
-   <addaction name="actionPortal"/>
-   <addaction name="actionSpawn"/>
-   <addaction name="actionStronghold"/>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -614,219 +601,23 @@ QToolButton:!checked { background-color:rgb(240, 240, 240) }</string>
     <addaction name="separator"/>
     <addaction name="actionSearch_seed_list"/>
     <addaction name="actionSearch_full_seed_space"/>
+    <addaction name="separator"/>
+    <addaction name="actionQuit"/>
+   </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="actionCopy"/>
+    <addaction name="actionPaste"/>
+    <addaction name="separator"/>
+    <addaction name="actionPreferences"/>
    </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuEdit"/>
    <addaction name="menuMap"/>
    <addaction name="menuHelp"/>
   </widget>
-  <action name="actionDesert">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="icons.qrc">
-     <normaloff>:/icons/desert_d.png</normaloff>
-     <normalon>:/icons/desert.png</normalon>:/icons/desert_d.png</iconset>
-   </property>
-   <property name="text">
-    <string>desert</string>
-   </property>
-   <property name="toolTip">
-    <string>Show desert pyramids</string>
-   </property>
-  </action>
-  <action name="actionJungle">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="icons.qrc">
-     <normaloff>:/icons/jungle_d.png</normaloff>
-     <normalon>:/icons/jungle.png</normalon>:/icons/jungle_d.png</iconset>
-   </property>
-   <property name="text">
-    <string>jungle</string>
-   </property>
-   <property name="toolTip">
-    <string>Show jungle temples</string>
-   </property>
-  </action>
-  <action name="actionIgloo">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="icons.qrc">
-     <normaloff>:/icons/igloo_d.png</normaloff>
-     <normalon>:/icons/igloo.png</normalon>:/icons/igloo_d.png</iconset>
-   </property>
-   <property name="text">
-    <string>igloo</string>
-   </property>
-   <property name="toolTip">
-    <string>Show igloos</string>
-   </property>
-  </action>
-  <action name="actionHut">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="icons.qrc">
-     <normaloff>:/icons/hut_d.png</normaloff>
-     <normalon>:/icons/hut.png</normalon>:/icons/hut_d.png</iconset>
-   </property>
-   <property name="text">
-    <string>hut</string>
-   </property>
-   <property name="toolTip">
-    <string>Show swamp huts</string>
-   </property>
-  </action>
-  <action name="actionMonument">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="icons.qrc">
-     <normaloff>:/icons/monument_d.png</normaloff>
-     <normalon>:/icons/monument.png</normalon>:/icons/monument_d.png</iconset>
-   </property>
-   <property name="text">
-    <string>monument</string>
-   </property>
-   <property name="toolTip">
-    <string>Show ocean monuments</string>
-   </property>
-  </action>
-  <action name="actionVillage">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="icons.qrc">
-     <normaloff>:/icons/village_d.png</normaloff>
-     <normalon>:/icons/village.png</normalon>:/icons/village_d.png</iconset>
-   </property>
-   <property name="text">
-    <string>village</string>
-   </property>
-   <property name="toolTip">
-    <string>Show villages</string>
-   </property>
-  </action>
-  <action name="actionRuin">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="icons.qrc">
-     <normaloff>:/icons/ruins_d.png</normaloff>
-     <normalon>:/icons/ruins.png</normalon>:/icons/ruins_d.png</iconset>
-   </property>
-   <property name="text">
-    <string>ruin</string>
-   </property>
-   <property name="toolTip">
-    <string>Show ocean ruins</string>
-   </property>
-  </action>
-  <action name="actionShipwreck">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="icons.qrc">
-     <normaloff>:/icons/shipwreck_d.png</normaloff>
-     <normalon>:/icons/shipwreck.png</normalon>:/icons/shipwreck_d.png</iconset>
-   </property>
-   <property name="text">
-    <string>shipwrecks</string>
-   </property>
-   <property name="toolTip">
-    <string>Show shipwrecks</string>
-   </property>
-  </action>
-  <action name="actionMansion">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="icons.qrc">
-     <normaloff>:/icons/mansion_d.png</normaloff>
-     <normalon>:/icons/mansion.png</normalon>:/icons/mansion_d.png</iconset>
-   </property>
-   <property name="text">
-    <string>mansion</string>
-   </property>
-   <property name="toolTip">
-    <string>Show woodland mansions</string>
-   </property>
-  </action>
-  <action name="actionOutpost">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="icons.qrc">
-     <normaloff>:/icons/outpost_d.png</normaloff>
-     <normalon>:/icons/outpost.png</normalon>:/icons/outpost_d.png</iconset>
-   </property>
-   <property name="text">
-    <string>outpost</string>
-   </property>
-   <property name="toolTip">
-    <string>Show pillager outposts</string>
-   </property>
-  </action>
-  <action name="actionPortal">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="icons.qrc">
-     <normaloff>:/icons/portal_d.png</normaloff>
-     <normalon>:/icons/portal.png</normalon>:/icons/portal_d.png</iconset>
-   </property>
-   <property name="text">
-    <string>portal</string>
-   </property>
-   <property name="toolTip">
-    <string>Show ruined portals</string>
-   </property>
-  </action>
-  <action name="actionSpawn">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="icons.qrc">
-     <normaloff>:/icons/spawn_d.png</normaloff>
-     <normalon>:/icons/spawn.png</normalon>:/icons/spawn_d.png</iconset>
-   </property>
-   <property name="text">
-    <string>spawn</string>
-   </property>
-   <property name="toolTip">
-    <string>Show spawn</string>
-   </property>
-  </action>
-  <action name="actionStronghold">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="icons.qrc">
-     <normaloff>:/icons/stronghold_d.png</normaloff>
-     <normalon>:/icons/stronghold.png</normalon>:/icons/stronghold_d.png</iconset>
-   </property>
-   <property name="text">
-    <string>stronghold</string>
-   </property>
-   <property name="toolTip">
-    <string>Show strongholds</string>
-   </property>
-  </action>
   <action name="actionGo_to">
    <property name="text">
     <string>Go to...</string>
@@ -868,6 +659,26 @@ QToolButton:!checked { background-color:rgb(240, 240, 240) }</string>
   <action name="actionSearch_full_seed_space">
    <property name="text">
     <string>Search full seed space</string>
+   </property>
+  </action>
+  <action name="actionCopy">
+   <property name="text">
+    <string>Copy seeds from list</string>
+   </property>
+  </action>
+  <action name="actionPaste">
+   <property name="text">
+    <string>Paste seeds into list</string>
+   </property>
+  </action>
+  <action name="actionPreferences">
+   <property name="text">
+    <string>Preferences...</string>
+   </property>
+  </action>
+  <action name="actionQuit">
+   <property name="text">
+    <string>Quit</string>
    </property>
   </action>
  </widget>

@@ -17,10 +17,7 @@
 #include <QFont>
 #include <QFileDialog>
 #include <QTextStream>
-
-#include <stdlib.h>
-
-#define MAXRESULTS 65535
+#include <QSettings>
 
 
 QDataStream& operator<<(QDataStream& out, const Condition& v)
@@ -45,6 +42,27 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->frameMap->layout()->addWidget(ui->toolBar);
     ui->toolBar->setContentsMargins(0, 0, 0, 0);
 
+
+    QAction *toorigin = new QAction("Origin", this);
+    toorigin->connect(toorigin, &QAction::triggered, [=](){ this->mapGoto(0,0,16); });
+    ui->toolBar->addAction(toorigin);
+    ui->toolBar->addSeparator();
+
+    saction.resize(STRUCT_NUM);
+    addMapAction(D_DESERT, "desert", "Show desert pyramid");
+    addMapAction(D_JUNGLE, "jungle", "Show jungle temples");
+    addMapAction(D_IGLOO, "igloo", "Show igloos");
+    addMapAction(D_HUT, "hut", "Show swamp huts");
+    addMapAction(D_VILLAGE, "village", "Show villages");
+    addMapAction(D_MANSION, "mansion", "Show woodland mansions");
+    addMapAction(D_MONUMENT, "monument", "Show ocean monuments");
+    addMapAction(D_RUINS, "ruins", "Show ocean ruins");
+    addMapAction(D_SHIPWRECK, "shipwreck", "Show shipwrecks");
+    addMapAction(D_OUTPOST, "outpost", "Show illager outposts");
+    addMapAction(D_PORTAL, "portal", "Show ruined portals");
+    addMapAction(D_SPAWN, "spawn", "Show world spawn");
+    addMapAction(D_STRONGHOLD, "stronghold", "Show strongholds");
+
     ui->splitterMap->setSizes(QList<int>({8000, 10000}));
     ui->splitterSearch->setSizes(QList<int>({1000, 2000}));
     ui->splitterConditions->setSizes(QList<int>({1000, 3000}));
@@ -59,6 +77,7 @@ MainWindow::MainWindow(QWidget *parent) :
     qRegisterMetaType< int64_t >("int64_t");
     qRegisterMetaType< uint64_t >("uint64_t");
     qRegisterMetaType< QVector<int64_t> >("QVector<int64_t>");
+    qRegisterMetaType< Config >("Config");
     qRegisterMetaType< Condition >("Condition");
     qRegisterMetaTypeStreamOperators< Condition >("Condition");
 
@@ -78,6 +97,8 @@ MainWindow::MainWindow(QWidget *parent) :
     updateSensitivity();
 
     prevdir = ".";
+    config.reset();
+    loadSettings();
 }
 
 MainWindow::~MainWindow()
@@ -86,7 +107,22 @@ MainWindow::~MainWindow()
     sthread.stop(); // tell search to stop at next convenience
     sthread.quit(); // tell the event loop to exit
     sthread.wait(); // wait for search to finish
+    saveSettings();
     delete ui;
+}
+
+QAction *MainWindow::addMapAction(int stype, const char *iconpath, const char *tip)
+{
+    QIcon icon;
+    QString inam = QString(":icons/") + iconpath;
+    icon.addPixmap(QPixmap(inam + ".png"), QIcon::Normal, QIcon::On);
+    icon.addPixmap(QPixmap(inam + "_d.png"), QIcon::Normal, QIcon::Off);
+    QAction *action = new QAction(icon, tip, this);
+    action->setCheckable(true);
+    action->connect(action, &QAction::toggled, [=](bool state){ this->onActionMapToggled(stype, state); });
+    ui->toolBar->addAction(action);
+    saction[stype] = action;
+    return action;
 }
 
 QVector<Condition> MainWindow::getConditions() const
@@ -146,6 +182,166 @@ bool MainWindow::setSeed(int mc, int64_t seed)
     ui->mapView->setSeed(mc, seed);
     return true;
 }
+
+void MainWindow::saveSettings()
+{
+    QSettings settings("Cubitect", "Cubiomes-Viewer");
+    settings.setValue("mainwindow/size", size());
+    settings.setValue("mainwindow/pos", pos());
+    settings.setValue("config/restoreSession", config.restoreSession);
+    settings.setValue("config/smoothMotion", config.smoothMotion);
+    settings.setValue("config/seedsPerItem", config.seedsPerItem);
+    settings.setValue("config/queueSize", config.queueSize);
+    settings.setValue("config/maxMatching", config.maxMatching);
+    if (config.restoreSession)
+    {
+        int mc = MC_1_16;
+        int64_t seed = 0;
+        getSeed(&mc, &seed, false);
+        settings.setValue("map/mc", mc);
+        settings.setValue("map/seed", (qlonglong)seed);
+        settings.setValue("map/x", ui->mapView->getX());
+        settings.setValue("map/z", ui->mapView->getZ());
+        settings.setValue("map/scale", ui->mapView->getScale());
+        for (int stype = 0; stype < STRUCT_NUM; stype++)
+            settings.setValue("map/show" + QString::number(stype), ui->mapView->getShow(stype));
+        saveProgress("session.save", true);
+    }
+}
+
+void MainWindow::loadSettings()
+{
+    QSettings settings("Cubitect", "Cubiomes-Viewer");
+    resize(settings.value("mainwindow/size", size()).toSize());
+    move(settings.value("mainwindow/pos", pos()).toPoint());
+    config.restoreSession = settings.value("config/restoreSession", config.restoreSession).toBool();
+    config.smoothMotion = settings.value("config/smoothMotion", config.smoothMotion).toBool();
+    config.seedsPerItem = settings.value("config/seedsPerItem", config.seedsPerItem).toInt();
+    config.queueSize = settings.value("config/queueSize", config.queueSize).toInt();
+    config.maxMatching = settings.value("config/maxMatching", config.maxMatching).toInt();
+    ui->mapView->hasinertia = config.smoothMotion;
+    if (config.restoreSession)
+    {
+        int mc = settings.value("map/mc", MC_1_16).toInt();
+        int64_t seed = settings.value("map/seed", 0).toLongLong();
+        setSeed(mc, seed);
+        qreal x = settings.value("map/x", 0).toDouble();
+        qreal z = settings.value("map/z", 0).toDouble();
+        qreal scale = settings.value("map/scale", 16).toDouble();
+        mapGoto(x, z, scale);
+        for (int stype = 0; stype < STRUCT_NUM; stype++)
+        {
+            bool s = settings.value("map/show" + QString::number(stype), false).toBool();
+            saction[stype]->setChecked(s);
+            ui->mapView->setShow(stype, s);
+        }
+        loadProgress("session.save", true);
+    }
+}
+
+bool MainWindow::saveProgress(QString fnam, bool quiet)
+{
+    QFileInfo finfo(fnam);
+    QFile file(fnam);
+    prevdir = finfo.absolutePath();
+
+    if (!file.open(QIODevice::WriteOnly))
+    {
+        if (!quiet)
+            warning("Warning", "Failed to open file.");
+        return false;
+    }
+
+    QTextStream stream(&file);
+    stream << "#Version:  " << VERS_MAJOR << "." << VERS_MINOR << "." << VERS_PATCH << "\n";
+    stream << "#Search:   " << ui->comboSearchType->currentIndex() << "\n";
+    stream << "#Progress: " << ui->lineStart->text().toLongLong() << "\n";
+    QVector<Condition> condvec = getConditions();
+    for (Condition &c : condvec)
+        stream << "#Cond: " << QByteArray((const char*) &c, sizeof(Condition)).toHex() << "\n";
+
+    int n = ui->listResults->rowCount();
+    for (int i = 0; i < n; i++)
+    {
+        int64_t seed = ui->listResults->item(i, 0)->data(Qt::UserRole).toLongLong();
+        stream << QString::asprintf("%" PRId64 "\n", seed);
+    }
+    return true;
+}
+
+bool MainWindow::loadProgress(QString fnam, bool quiet)
+{
+    QFileInfo finfo(fnam);
+    QFile file(fnam);
+    prevdir = finfo.absolutePath();
+
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        if (!quiet)
+            warning("Warning", "Failed to open file.");
+        return false;
+    }
+
+    int major = 0, minor = 0, patch = 0;
+    int searchtype = ui->comboSearchType->currentIndex();
+    int64_t seed = ui->lineStart->text().toLongLong();
+    QVector<Condition> condvec;
+    QVector<int64_t> seeds;
+
+    QTextStream stream(&file);
+    QString line;
+    line = stream.readLine();
+    if (sscanf(line.toLatin1().data(), "#Version: %d.%d.%d", &major, &minor, &patch) != 3)
+        return false;
+    if (cmpVers(major, minor, patch) > 0 && !quiet)
+        warning("Warning", "Progress file was created with a newer version.");
+
+    while (stream.status() == QTextStream::Ok)
+    {
+        line = stream.readLine();
+        if (line.isEmpty())
+            break;
+        if (sscanf(line.toLatin1().data(), "#Search: %d", &searchtype) == 1)
+            continue;
+        else if (sscanf(line.toLatin1().data(), "#Progress: %" PRId64, &seed) == 1)
+            continue;
+        else if (line.startsWith("#Cond:"))
+        {
+            QString hex = line.mid(6).trimmed();
+            QByteArray ba = QByteArray::fromHex(QByteArray(hex.toLatin1().data()));
+            if (ba.size() == sizeof(Condition))
+            {
+                Condition c = *(Condition*) ba.data();
+                condvec.push_back(c);
+            }
+            else return false;
+        }
+        else
+        {
+            int64_t seed;
+            if (sscanf(line.toLatin1().data(), "%" PRId64, &seed) == 1)
+                seeds.push_back(seed);
+            else return false;
+        }
+    }
+
+    on_buttonRemoveAll_clicked();
+    on_buttonClear_clicked();
+
+    ui->comboSearchType->setCurrentIndex(searchtype);
+    ui->lineStart->setText(QString::asprintf("%" PRId64, seed));
+
+    for (Condition &c : condvec)
+    {
+        QListWidgetItem *item = new QListWidgetItem();
+        addItemCondition(item, c);
+    }
+
+    searchResultsAdd(seeds, false);
+
+    return true;
+}
+
 
 QListWidgetItem *MainWindow::lockItem(QListWidgetItem *item)
 {
@@ -312,46 +508,6 @@ void MainWindow::on_seedEdit_textChanged(const QString &a)
     }
 }
 
-void MainWindow::on_actionDesert_toggled(bool show)
-{ ui->mapView->setShow(D_DESERT, show); }
-
-void MainWindow::on_actionJungle_toggled(bool show)
-{ ui->mapView->setShow(D_JUNGLE, show); }
-
-void MainWindow::on_actionIgloo_toggled(bool show)
-{ ui->mapView->setShow(D_IGLOO, show); }
-
-void MainWindow::on_actionHut_toggled(bool show)
-{ ui->mapView->setShow(D_HUT, show); }
-
-void MainWindow::on_actionMonument_toggled(bool show)
-{ ui->mapView->setShow(D_MONUMENT, show); }
-
-void MainWindow::on_actionVillage_toggled(bool show)
-{ ui->mapView->setShow(D_VILLAGE, show); }
-
-void MainWindow::on_actionRuin_toggled(bool show)
-{ ui->mapView->setShow(D_RUINS, show); }
-
-void MainWindow::on_actionShipwreck_toggled(bool show)
-{ ui->mapView->setShow(D_SHIPWRECK, show); }
-
-void MainWindow::on_actionMansion_toggled(bool show)
-{ ui->mapView->setShow(D_MANSION, show); }
-
-void MainWindow::on_actionOutpost_toggled(bool show)
-{ ui->mapView->setShow(D_OUTPOST, show); }
-
-void MainWindow::on_actionPortal_toggled(bool show)
-{ ui->mapView->setShow(D_PORTAL, show); }
-
-void MainWindow::on_actionSpawn_toggled(bool show)
-{ ui->mapView->setShow(D_SPAWN, show); }
-
-void MainWindow::on_actionStronghold_toggled(bool show)
-{ ui->mapView->setShow(D_STRONGHOLD, show); }
-
-
 static void remove_selected(QListWidget *list)
 {
     QList<QListWidgetItem*> selected = list->selectedItems();
@@ -459,7 +615,7 @@ void MainWindow::on_buttonStart_clicked()
         }
 
         if (ok)
-            ok = sthread.set(searchtype, threads, slist64, sstart, mc, condvec);
+            ok = sthread.set(searchtype, threads, slist64, sstart, mc, condvec, config.seedsPerItem, config.queueSize);
 
         if (ok)
         {
@@ -556,32 +712,7 @@ void MainWindow::on_actionSave_triggered()
 {
     QString fnam = QFileDialog::getSaveFileName(this, "Save progress", prevdir, "Text files (*.txt);;Any files (*)");
     if (!fnam.isEmpty())
-    {
-        QFileInfo finfo(fnam);
-        QFile file(fnam);
-        prevdir = finfo.absolutePath();
-
-        if (!file.open(QIODevice::WriteOnly))
-        {
-            warning("Warning", "Failed to open file.");
-            return;
-        }
-
-        QTextStream stream(&file);
-        stream << "#Version:  " << VERS_MAJOR << "." << VERS_MINOR << "." << VERS_PATCH << "\n";
-        stream << "#Search:   " << ui->comboSearchType->currentIndex() << "\n";
-        stream << "#Progress: " << ui->lineStart->text().toLongLong() << "\n";
-        QVector<Condition> condvec = getConditions();
-        for (Condition &c : condvec)
-            stream << "#Cond: " << QByteArray((const char*) &c, sizeof(Condition)).toHex() << "\n";
-
-        int n = ui->listResults->rowCount();
-        for (int i = 0; i < n; i++)
-        {
-            int64_t seed = ui->listResults->item(i, 0)->data(Qt::UserRole).toLongLong();
-            stream << QString::asprintf("%" PRId64 "\n", seed);
-        }
-    }
+        saveProgress(fnam);
 }
 
 void MainWindow::on_actionLoad_triggered()
@@ -594,81 +725,35 @@ void MainWindow::on_actionLoad_triggered()
 
     QString fnam = QFileDialog::getOpenFileName(this, "Load progress", prevdir, "Text files (*.txt);;Any files (*)");
     if (!fnam.isEmpty())
+        if (!loadProgress(fnam))
+            warning("Warning", "Failed to parse progress file.");
+}
+
+void MainWindow::on_actionQuit_triggered()
+{
+    close();
+}
+
+
+void MainWindow::on_actionCopy_triggered()
+{
+    // TODO: different types of copy/paste based on context
+    copyResults();
+}
+
+void MainWindow::on_actionPaste_triggered()
+{
+    pasteResults();
+}
+
+void MainWindow::on_actionPreferences_triggered()
+{
+    ConfigDialog *dialog = new ConfigDialog(this, &config);
+    int status = dialog->exec();
+    if (status == QDialog::Accepted)
     {
-        QFileInfo finfo(fnam);
-        QFile file(fnam);
-        prevdir = finfo.absolutePath();
-
-        if (!file.open(QIODevice::ReadOnly))
-        {
-            warning("Warning", "Failed to open file.");
-            return;
-        }
-
-        int major = 0, minor = 0, patch = 0;
-        int searchtype = 0;
-        int64_t s48 = 0;
-        QVector<Condition> condvec;
-        QVector<int64_t> seeds;
-
-        QTextStream stream(&file);
-        QString line;
-        line = stream.readLine();
-        if (sscanf(line.toLatin1().data(), "#Version: %d.%d.%d", &major, &minor, &patch) != 3)
-            goto L_read_failed;
-        if (cmpVers(major, minor, patch) > 0)
-            warning("Warning", "Progress file was created with a newer version.");
-
-        line = stream.readLine();
-        if (sscanf(line.toLatin1().data(), "#Search: %d", &searchtype) != 1)
-            goto L_read_failed;
-
-        line = stream.readLine();
-        if (sscanf(line.toLatin1().data(), "#Progress: %" PRId64, &s48) != 1)
-            goto L_read_failed;
-
-        while (stream.status() == QTextStream::Ok)
-        {
-            line = stream.readLine();
-            if (line.isEmpty())
-                break;
-            if (line.startsWith("#Cond:"))
-            {
-                QString hex = line.mid(6).trimmed();
-                QByteArray ba = QByteArray::fromHex(QByteArray(hex.toLatin1().data()));
-                if (ba.size() == sizeof(Condition))
-                {
-                    Condition c = *(Condition*) ba.data();
-                    condvec.push_back(c);
-                }
-                else goto L_read_failed;
-            }
-            else
-            {
-                int64_t seed;
-                if (sscanf(line.toLatin1().data(), "%" PRId64, &seed) == 1)
-                    seeds.push_back(seed);
-                else goto L_read_failed;
-            }
-        }
-
-        on_buttonRemoveAll_clicked();
-        on_buttonClear_clicked();
-
-        ui->comboSearchType->setCurrentIndex(searchtype);
-        ui->lineStart->setText(QString::asprintf("%" PRId64, s48));
-
-        for (Condition &c : condvec)
-        {
-            QListWidgetItem *item = new QListWidgetItem();
-            addItemCondition(item, c);
-        }
-
-        searchResultsAdd(seeds, false);
-
-        return;
-L_read_failed:
-        warning("Warning", "Failed to parse progress file.");
+        config = dialog->getConfig();
+        ui->mapView->hasinertia = config.smoothMotion;
     }
 }
 
@@ -699,6 +784,7 @@ void MainWindow::on_actionAbout_triggered()
     AboutDialog *dialog = new AboutDialog(this);
     dialog->show();
 }
+
 
 void MainWindow::on_actionSearch_seed_list_triggered()
 {
@@ -751,6 +837,11 @@ void MainWindow::on_mapView_customContextMenuRequested(const QPoint &pos)
     menu.exec(ui->mapView->mapToGlobal(pos));
 }
 
+
+void MainWindow::onActionMapToggled(int stype, bool show)
+{
+    ui->mapView->setShow(stype, show);
+}
 
 void MainWindow::addItemCondition(QListWidgetItem *item, Condition cond)
 {
@@ -806,10 +897,10 @@ int MainWindow::searchResultsAdd(QVector<int64_t> seeds, bool countonly)
 {
     int ns = ui->listResults->rowCount();
     int n = ns;
-    if (n >= MAXRESULTS)
+    if (n >= config.maxMatching)
         return 0;
-    if (seeds.size() + n > MAXRESULTS)
-        seeds.resize(MAXRESULTS - n);
+    if (seeds.size() + n > config.maxMatching)
+        seeds.resize(config.maxMatching - n);
     if (seeds.empty())
         return 0;
 
@@ -845,10 +936,10 @@ int MainWindow::searchResultsAdd(QVector<int64_t> seeds, bool countonly)
     }
     ui->listResults->setSortingEnabled(true);
 
-    if (countonly == false && n >= MAXRESULTS)
+    if (countonly == false && n >= config.maxMatching)
     {
         sthread.stop();
-        warning("Warning", QString::asprintf("Maximum number of results reached (%d).", MAXRESULTS));
+        warning("Warning", QString::asprintf("Maximum number of results reached (%d).", config.maxMatching));
     }
 
     int addcnt = n - ns;

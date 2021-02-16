@@ -4,9 +4,7 @@
 #include "quad.h"
 
 #include <QWidget>
-#include <QTimer>
 #include <QElapsedTimer>
-
 
 class MapOverlay : public QWidget
 {
@@ -34,9 +32,10 @@ public:
     explicit MapView(QWidget *parent = nullptr);
     ~MapView();
 
-    qreal getX() const { return focusx; }
-    qreal getZ() const { return focusz; }
+    qreal getX();
+    qreal getZ();
     qreal getScale() const { return 1.0 / blocks2pix; }
+    bool getShow(int stype) { return stype >= 0 && stype < STRUCT_NUM ? sshow[stype] : false; }
 
     void setSeed(int mc, int64_t s);
     void setShow(int stype, bool v);
@@ -64,9 +63,10 @@ public slots:
 public:
     QWorld *world;
 
-    QTimer *timer;
     QElapsedTimer elapsed1;
     QElapsedTimer frameelapsed;
+    bool hasinertia;
+    qreal decay;
 
     MapOverlay *overlay;
 
@@ -75,6 +75,7 @@ private:
     qreal focusx, focusz;
     qreal prevx, prevz;
     qreal velx, velz;
+    qreal mtime;
 
     bool holding;
     QPoint mstart, mprev;

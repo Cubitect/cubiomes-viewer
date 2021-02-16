@@ -2,7 +2,6 @@
 #include "cutil.h"
 
 #include <QPainter>
-#include <QTimer>
 #include <QThread>
 #include <QApplication>
 #include <QKeyEvent>
@@ -39,6 +38,8 @@ void MapOverlay::paintEvent(QPaintEvent *)
 MapView::MapView(QWidget *parent)
 : QWidget(parent)
 , world()
+, hasinertia(true)
+, decay(2.0)
 , blocks2pix(1.0/16)
 , focusx(),focusz()
 , prevx(),prevz()
@@ -54,10 +55,6 @@ MapView::MapView(QWidget *parent)
     pal.setColor(QPalette::Background, Qt::black);
     setAutoFillBackground(true);
     setPalette(pal);
-
-    timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, QOverload<>::of(&MapView::timeout));
-    timer->start(50);
 
     elapsed1.start();
     frameelapsed.start();
@@ -76,8 +73,8 @@ MapView::~MapView()
 
 void MapView::setSeed(int mc, int64_t s)
 {
-    prevx = focusx;
-    prevz = focusz;
+    prevx = focusx = getX();
+    prevz = focusz = getZ();
     velx = velz = 0;
     if (world == NULL || world->mc != mc || world->seed != s)
     {
@@ -110,34 +107,38 @@ void MapView::setView(qreal x, qreal z, qreal scale)
     update(2);
 }
 
-void MapView::timeout()
+qreal MapView::getX()
 {
-    qreal dt = 1e-3 * timer->interval(); //elapsed1.nsecsElapsed() * 1e-9;
-    //elapsed1.start();
-
-    frameelapsed.start();
-
-    if (!holding)
+    qreal dt = frameelapsed.nsecsElapsed() * 1e-9;
+    qreal fx = focusx;
+    if (velx)
     {
-        qreal m = 1.0 - 3*dt; if (m < 0) m = 0;
-        velx *= m;
-        velz *= m;
-        focusx += velx * dt;
-        focusz += velz * dt;
+        qreal df = 1.0 - exp(-decay*dt);
+        fx += velx * df;
+        if (df > 0.998)
+        {
+            focusx = fx;
+            velx = 0;
+        }
     }
-    else
-    {
-        velx = (focusx - prevx) / dt;
-        velz = (focusz - prevz) / dt;
-        prevx = focusx;
-        prevz = focusz;
-    }
+    return fx;
+}
 
-    if ((velx*velx + velz*velz) * (blocks2pix*blocks2pix) < 100)
+qreal MapView::getZ()
+{
+    qreal dt = frameelapsed.nsecsElapsed() * 1e-9;
+    qreal fz = focusz;
+    if (velz)
     {
-        velx = 0;
-        velz = 0;
+        qreal df = 1.0 - exp(-decay*dt);
+        fz += velz * df;
+        if (df > 0.998)
+        {
+            focusz = fz;
+            velz = 0;
+        }
     }
+    return fz;
 }
 
 void MapView::update(int cnt)
@@ -161,15 +162,8 @@ void MapView::paintEvent(QPaintEvent *)
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setRenderHint(QPainter::HighQualityAntialiasing);
 
-    qreal dt = frameelapsed.nsecsElapsed() * 1e-9;
-    qreal fx = focusx;
-    qreal fz = focusz;
-
-    if (!holding)
-    {
-        fx += velx * dt;
-        fz += velz * dt;
-    }
+    qreal fx = getX();
+    qreal fz = getZ();
 
     if (world)
     {
@@ -211,10 +205,12 @@ void MapView::mousePressEvent(QMouseEvent *e)
     {
         mprev = mstart = e->pos();
         holding = true;
-        prevx = focusx;
-        prevz = focusz;
+        prevx = focusx = getX();
+        prevz = focusz = getZ();
         velx = 0;
         velz = 0;
+        elapsed1.start();
+        frameelapsed.start();
 
         if (world)
         {
@@ -231,8 +227,16 @@ void MapView::mouseMoveEvent(QMouseEvent *e)
     if ((e->buttons() & Qt::LeftButton) && holding)
     {
         QPoint d = e->pos() - mprev;
-        focusx = focusx - d.x() / blocks2pix;
-        focusz = focusz - d.y() / blocks2pix;
+        qreal dt = elapsed1.nsecsElapsed() * 1e-9;
+        if (dt > .005)
+        {
+            mtime = dt;
+            prevx = focusx;
+            prevz = focusz;
+            focusx = focusx - d.x() / blocks2pix;
+            focusz = focusz - d.y() / blocks2pix;
+            elapsed1.start();
+        }
         mprev = e->pos();
         update();//repaint();
     }
@@ -242,6 +246,19 @@ void MapView::mouseReleaseEvent(QMouseEvent *e)
 {
     if (e->button() == Qt::LeftButton && holding)
     {
+        mtime += elapsed1.nsecsElapsed() * 1e-9;
+        if (mtime > .0)
+        {
+            elapsed1.start();
+            QPoint d = e->pos() - mprev;
+            focusx = focusx - d.x() / blocks2pix;
+            focusz = focusz - d.y() / blocks2pix;
+            velx = (focusx - prevx) / mtime;
+            velz = (focusz - prevz) / mtime;
+            frameelapsed.start();
+            update();
+        }
+
         holding = false;
         mprev = e->pos();
 
