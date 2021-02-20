@@ -61,6 +61,7 @@ bool SearchThread::set(int type, int threads, std::vector<int64_t>& slist64, int
                 QMessageBox::warning(NULL, "Warning", QString::asprintf("Biome filter condition with ID [%02d] has contradicting flags for include and exclude.", c.save));
                 return false;
             }
+            // TODO: compare mc version and available biomes
             if (c.count == 0)
             {
                 QMessageBox::information(NULL, "Info", QString::asprintf("Biome filter condition with ID [%02d] specifies no biomes.", c.save));

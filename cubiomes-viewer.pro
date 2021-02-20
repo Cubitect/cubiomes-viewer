@@ -67,7 +67,8 @@ HEADERS += \
         cutil.h \
         search.h \
         searchitem.h \
-        searchthread.h
+        searchthread.h \
+        seedtables.h
 
 FORMS += \
         aboutdialog.ui \

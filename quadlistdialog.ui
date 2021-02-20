@@ -6,12 +6,16 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>480</width>
+    <width>540</width>
     <height>333</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Quad-Hut Scan</string>
+   <string>Quad-Structure Scan</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="icons.qrc">
+    <normaloff>:/icons/quad.png</normaloff>:/icons/quad.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="1" column="0">
@@ -21,7 +25,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_8">
       <item row="0" column="0">
-       <widget class="QTableWidget" name="listQuadHuts">
+       <widget class="QTableWidget" name="listQuadStruct">
         <property name="font">
          <font>
           <family>Monospace</family>
@@ -48,6 +52,14 @@
         <attribute name="horizontalHeaderStretchLastSection">
          <bool>true</bool>
         </attribute>
+        <column>
+         <property name="text">
+          <string>Structure</string>
+         </property>
+         <property name="textAlignment">
+          <set>AlignLeading|AlignVCenter</set>
+         </property>
+        </column>
         <column>
          <property name="text">
           <string>Distance</string>
@@ -194,12 +206,15 @@
       <string>Close</string>
      </property>
      <property name="icon">
-      <iconset theme="window-close"/>
+      <iconset theme="window-close">
+       <normaloff>.</normaloff>.</iconset>
      </property>
     </widget>
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="icons.qrc"/>
+ </resources>
  <connections/>
 </ui>

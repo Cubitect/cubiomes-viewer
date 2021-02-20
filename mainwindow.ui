@@ -625,7 +625,7 @@ QToolButton:!checked { background-color:rgb(240, 240, 240) }</string>
   </action>
   <action name="actionScan_seed_for_Quad_Huts">
    <property name="text">
-    <string>Scan seed for Quad-Huts...</string>
+    <string>Scan seed for Quad-Structures...</string>
    </property>
   </action>
   <action name="actionAbout">

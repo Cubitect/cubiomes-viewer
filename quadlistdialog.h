@@ -24,7 +24,7 @@ public:
 private slots:
     void on_buttonGo_clicked();
 
-    void on_listQuadHuts_customContextMenuRequested(const QPoint &pos);
+    void on_listQuadStruct_customContextMenuRequested(const QPoint &pos);
 
     void gotoSwampHut();
 
