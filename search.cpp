@@ -267,25 +267,25 @@ int testCond(StructPos *spos, int64_t seed, const Condition *cond, int mc, Layer
             rx2 = cond->x2;
             rz2 = cond->z2;
         }
-
-        for (rz = rz1; rz <= rz2 && !*abort; rz++)
+        if (scanForQuads(
+                sconf, 128, (seed) & MASK48, low20QuadHutBarely,
+                sizeof(low20QuadHutBarely) / sizeof(int64_t), 20, sconf.salt,
+                rx1, rz1, rx2 - rx1 + 1, rz2 - rz1 + 1, &pc, 1) >= 1)
         {
-            for (rx = rx1; rx <= rx2; rx++)
+            rx = pc.x; rz = pc.z;
+            s = moveStructure(seed, -rx, -rz);
+            if ( U(qhutQual((s + sconf.salt) & 0xfffff) >= qual) &&
+                 U(isQuadBaseFeature24(sconf, s, 7,7,9)) )
             {
-                s = moveStructure(seed, -rx, -rz);
-                if ( U(qhutQual((s + sconf.salt) & 0xfffff) >= qual) &&
-                     U(isQuadBaseFeature24(sconf, s, 7,7,9)) )
-                {
-                    sout->sconf = sconf;
-                    p[0] = getStructurePos(sconf, seed, rx+0, rz+0, 0);
-                    p[1] = getStructurePos(sconf, seed, rx+0, rz+1, 0);
-                    p[2] = getStructurePos(sconf, seed, rx+1, rz+0, 0);
-                    p[3] = getStructurePos(sconf, seed, rx+1, rz+1, 0);
-                    pc = getOptimalAfk(p, 7,7,9, 0);
-                    sout->cx = pc.x;
-                    sout->cz = pc.z;
-                    return 1;
-                }
+                sout->sconf = sconf;
+                p[0] = getStructurePos(sconf, seed, rx+0, rz+0, 0);
+                p[1] = getStructurePos(sconf, seed, rx+0, rz+1, 0);
+                p[2] = getStructurePos(sconf, seed, rx+1, rz+0, 0);
+                p[3] = getStructurePos(sconf, seed, rx+1, rz+1, 0);
+                pc = getOptimalAfk(p, 7,7,9, 0);
+                sout->cx = pc.x;
+                sout->cz = pc.z;
+                return 1;
             }
         }
         return 0;
@@ -309,24 +309,25 @@ L_qm_any:
             rx2 = cond->x2;
             rz2 = cond->z2;
         }
-
-        for (rz = rz1; rz <= rz2 && !*abort; rz++)
+        if (scanForQuads(
+                sconf, 160, (seed) & MASK48, g_qm_90,
+                sizeof(g_qm_90) / sizeof(int64_t), 48,
+                0, // 0 for salt offset as g_qm_90 are not protobases
+                rx1, rz1, rx2 - rx1 + 1, rz2 - rz1 + 1, &pc, 1) >= 1)
         {
-            for (rx = rx1; rx <= rx2; rx++)
+            rx = pc.x; rz = pc.z;
+            s = moveStructure(seed, -rx, -rz);
+            if (qmonumentQual(s) >= qual)
             {
-                s = moveStructure(seed, -rx, -rz);
-                if (qmonumentQual(s) >= qual)
-                {
-                    sout->sconf = sconf;
-                    p[0] = getStructurePos(sconf, seed, rx+0, rz+0, 0);
-                    p[1] = getStructurePos(sconf, seed, rx+0, rz+1, 0);
-                    p[2] = getStructurePos(sconf, seed, rx+1, rz+0, 0);
-                    p[3] = getStructurePos(sconf, seed, rx+1, rz+1, 0);
-                    pc = getOptimalAfk(p, 58,23,58, 0);
-                    sout->cx = pc.x - 29; // monument is centered
-                    sout->cz = pc.z - 29;
-                    return 1;
-                }
+                sout->sconf = sconf;
+                p[0] = getStructurePos(sconf, seed, rx+0, rz+0, 0);
+                p[1] = getStructurePos(sconf, seed, rx+0, rz+1, 0);
+                p[2] = getStructurePos(sconf, seed, rx+1, rz+0, 0);
+                p[3] = getStructurePos(sconf, seed, rx+1, rz+1, 0);
+                pc = getOptimalAfk(p, 58,23,58, 0);
+                sout->cx = pc.x - 29; // monument is centered
+                sout->cz = pc.z - 29;
+                return 1;
             }
         }
         return 0;

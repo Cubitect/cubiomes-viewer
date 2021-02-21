@@ -89,15 +89,13 @@ void QuadListDialog::refresh()
     StructureConfig sconf = mc >= MC_1_13 ? SWAMP_HUT_CONFIG : SWAMP_HUT_CONFIG_112;
     const int maxq = 1000;
     Pos *qlist = new Pos[maxq];
-    int lbitcnt = sizeof(low20QuadHutBarely) / sizeof(int64_t);
-    int64_t lbitqh[lbitcnt];
     int r = 3e7 / 512;
-    int qcnt = 0;
+    int qcnt;
 
-    for (int i = 0; i < lbitcnt; i++)
-        lbitqh[i] = (low20QuadHutBarely[i] - sconf.salt) & 0xfffff;
-
-    qcnt = scanForQuads(sconf, 128, (seed) & MASK48, lbitqh, lbitcnt, 20, -r, -r, 2*r, 2*r, qlist, maxq);
+    qcnt = scanForQuads(
+                sconf, 128, (seed) & MASK48,
+                low20QuadHutBarely, sizeof(low20QuadHutBarely) / sizeof(int64_t), 20, sconf.salt,
+                -r, -r, 2*r, 2*r, qlist, maxq);
 
     if (qcnt >= maxq)
         QMessageBox::warning(this, "Warning", "Quad-hut scanning buffer exhausted, results will be incomplete.");
@@ -150,8 +148,10 @@ void QuadListDialog::refresh()
     if (mc >= MC_1_8)
     {
         sconf = MONUMENT_CONFIG;
-        lbitcnt = sizeof(g_qm_90) / sizeof(int64_t);
-        qcnt = scanForQuads(sconf, 160, seed & MASK48, g_qm_90, lbitcnt, 48, -r, -r, 2*r, 2*r, qlist, maxq);
+        qcnt = scanForQuads(
+                    sconf, 160, seed & MASK48,
+                    g_qm_90, sizeof(g_qm_90) / sizeof(int64_t), 48, 0,
+                    -r, -r, 2*r, 2*r, qlist, maxq);
 
         if (qcnt >= maxq)
             QMessageBox::warning(this, "Warning", "Quad-monument scanning buffer exhausted, results will be incomplete.");
