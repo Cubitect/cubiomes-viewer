@@ -39,11 +39,10 @@ MainWindow::MainWindow(QWidget *parent) :
     stimer(this)
 {
     ui->setupUi(this);
-    ui->frameMap->layout()->addWidget(ui->toolBar);
-    ui->toolBar->setContentsMargins(0, 0, 0, 0);
+    //ui->frameMap->layout()->addWidget(ui->toolBar);
+    //ui->toolBar->setContentsMargins(0, 0, 0, 0);
 
-
-    QAction *toorigin = new QAction("Origin", this);
+    QAction *toorigin = new QAction(QIcon(":/icons/origin.png"), "Goto origin", this);
     toorigin->connect(toorigin, &QAction::triggered, [=](){ this->mapGoto(0,0,16); });
     ui->toolBar->addAction(toorigin);
     ui->toolBar->addSeparator();
