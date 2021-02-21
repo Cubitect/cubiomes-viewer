@@ -18,8 +18,12 @@
     <normaloff>:/icons/map.png</normaloff>:/icons/map.png</iconset>
   </property>
   <property name="styleSheet">
-   <string notr="true">QToolButton:checked { background-color:rgb(85, 87, 83) }
-QToolButton:!checked { background-color:rgb(240, 240, 240) }</string>
+   <string notr="true">QToolButton {
+	checked { background-color:rgb(85, 87, 83) }
+	!checked { background-color:rgb(240, 240, 240); }
+	border: 2px solid #8f8f91;
+	border-radius:3px;
+}</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout_6">
@@ -564,6 +568,20 @@ QToolButton:!checked { background-color:rgb(240, 240, 240) }</string>
    </property>
    <property name="autoFillBackground">
     <bool>true</bool>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QToolButton {
+	border: 1.5px solid;
+	border-radius: 3px;
+}
+QToolButton:!checked {
+	border-color: rgb(238, 238, 236);
+	background-color: rgb(238, 238, 236);
+}
+QToolButton:checked {
+	border-color: rgb(32, 74, 135);
+	background-color: rgb(114, 159, 207);
+}</string>
    </property>
    <property name="movable">
     <bool>true</bool>
