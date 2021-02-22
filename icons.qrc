@@ -33,5 +33,7 @@
         <file>icons/check1.png</file>
         <file>icons/check2.png</file>
         <file>icons/origin.png</file>
+        <file>icons/treasure_d.png</file>
+        <file>icons/treasure.png</file>
     </qresource>
 </RCC>

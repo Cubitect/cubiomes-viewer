@@ -19,6 +19,7 @@ enum {
     D_MONUMENT,
     D_RUINS,
     D_SHIPWRECK,
+    D_TREASURE,
     D_OUTPOST,
     D_PORTAL,
     D_SPAWN,
@@ -37,6 +38,7 @@ public:
 
 
     std::vector<Pos> *addStruct(const StructureConfig sconf, LayerStack *g);
+    std::vector<Pos> *addTreasure(LayerStack *g);
     void run();
 
     int mc;

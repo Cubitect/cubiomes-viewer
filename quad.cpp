@@ -54,6 +54,52 @@ std::vector<Pos> *Quad::addStruct(const StructureConfig sconf, LayerStack *g)
     return st;
 }
 
+std::vector<Pos> *Quad::addTreasure(LayerStack *g)
+{
+    const StructureConfig sconf = TREASURE_CONFIG;
+    int x0 = ti*blocks, x1 = (ti+1)*blocks;
+    int z0 = tj*blocks, z1 = (tj+1)*blocks;
+    int si0 = (int)floor(x0 / 16.0);
+    int sj0 = (int)floor(z0 / 16.0);
+    int si1 = (int)floor((x1-1) / 16.0);
+    int sj1 = (int)floor((z1-1) / 16.0);
+
+    std::vector<Pos>* st = new std::vector<Pos>();
+    Layer *l16 = &g->layers[L_SHORE_16];
+    int w = si1 - si0 + 2;
+    int h = sj1 - sj0 + 2;
+    int *area = allocCache(l16, w, h);
+
+    genArea(l16, area, si0, sj0, w, h);
+
+    for (int j = 0; j < h-1; j++)
+    {
+        for (int i = 0; i < w-1; i++)
+        {
+            if (!isTreasureChunk(seed, i+si0, j+sj0))
+                continue;
+            if (!isViableFeatureBiome(mc, sconf.structType, area[(j+0)*w + (i+0)]) &&
+                !isViableFeatureBiome(mc, sconf.structType, area[(j+0)*w + (i+1)]) &&
+                !isViableFeatureBiome(mc, sconf.structType, area[(j+1)*w + (i+0)]) &&
+                !isViableFeatureBiome(mc, sconf.structType, area[(j+1)*w + (i+1)]) &&
+                area[(j+0)*w + (i+0)] != mushroom_fields &&
+                area[(j+0)*w + (i+1)] != mushroom_fields &&
+                area[(j+1)*w + (i+0)] != mushroom_fields &&
+                area[(j+1)*w + (i+1)] != mushroom_fields)
+            {
+                continue;
+            }
+            Pos p = { ((si0+i) << 4) + 9, ((sj0+j) << 4) + 9 };
+            if (isViableStructurePos(sconf.structType, mc, g, seed, p.x, p.z))
+            {
+                st->push_back(p);
+            }
+        }
+    }
+    free(area);
+    return st;
+}
+
 void Quad::run()
 {
     if (done)
@@ -103,6 +149,10 @@ void Quad::run()
             break;
         case D_SHIPWRECK:
             spos = addStruct(mc <= MC_1_15 ? SHIPWRECK_CONFIG_115 : SHIPWRECK_CONFIG, &g);
+            break;
+        case D_TREASURE:
+            if (mc >= MC_1_13)
+                spos = addTreasure(&g);
             break;
         case D_OUTPOST:
             spos = addStruct(OUTPOST_CONFIG, &g);
@@ -410,6 +460,7 @@ QWorld::QWorld(int mc, int64_t seed)
     icons[D_MONUMENT]   = QPixmap(":/icons/monument.png");
     icons[D_RUINS]      = QPixmap(":/icons/ruins.png");
     icons[D_SHIPWRECK]  = QPixmap(":/icons/shipwreck.png");
+    icons[D_TREASURE]   = QPixmap(":/icons/treasure.png");
     icons[D_OUTPOST]    = QPixmap(":/icons/outpost.png");
     icons[D_PORTAL]     = QPixmap(":/icons/portal.png");
     icons[D_SPAWN]      = QPixmap(":/icons/spawn.png");
