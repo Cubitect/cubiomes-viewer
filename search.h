@@ -52,6 +52,7 @@ enum
     F_VILLAGE,
     F_OUTPOST,
     F_MANSION,
+    F_TREASURE,
     FILTER_MAX,
 };
 
@@ -253,6 +254,13 @@ static const struct FilterList
             CAT_FULL, 1, 1, 0, 1, 1,
             ":icons/mansion.png",
             "Woodland mansion",
+            ""
+        };
+
+        list[F_TREASURE] = FilterInfo{
+            CAT_FULL, 1, 1, 0, 1, 1,
+            ":icons/treasure.png",
+            "Buried treasure",
             ""
         };
     }

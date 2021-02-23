@@ -411,6 +411,54 @@ L_struct_any:
         }
         return 0;
 
+    case F_TREASURE:
+        sconf = TREASURE_CONFIG;
+        x1 = cond->x1;
+        z1 = cond->z1;
+        x2 = cond->x2;
+        z2 = cond->z2;
+        if (cond->relative)
+        {
+            x1 += spos[cond->relative].cx;
+            z1 += spos[cond->relative].cz;
+            x2 += spos[cond->relative].cx;
+            z2 += spos[cond->relative].cz;
+        }
+        rx1 = x1 >> 4;
+        rz1 = z1 >> 4;
+        rx2 = x2 >> 4;
+        rz2 = z2 >> 4;
+
+        sout->cx = xt = 0;
+        sout->cz = zt = 0;
+        qual = 0;
+
+        for (int rz = rz1; rz <= rz2; rz++)
+        {
+            for (int rx = rx1; rx <= rx2; rx++)
+            {
+                pc = { (rx << 4) + 9, (rz << 4) + 9 };
+                if (pc.x < x1 || pc.x > x2 || pc.z < z1 || pc.z > z2)
+                    continue;
+                if (!isTreasureChunk(seed, rx, rz))
+                    continue;
+                if (g && !isViableStructurePos(sconf.structType, mc, g, seed, pc.x, pc.z))
+                    continue;
+
+                xt += pc.x;
+                zt += pc.z;
+
+                if (++qual >= cond->count)
+                {
+                    sout->sconf = sconf;
+                    sout->cx = xt / qual;
+                    sout->cz = zt / qual;
+                    return 1;
+                }
+            }
+        }
+        return 0;
+
     case F_SPAWN:
         // TODO: warn if spawn is used for relative positioning
         sout->cx = 0;
