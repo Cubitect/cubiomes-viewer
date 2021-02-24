@@ -302,6 +302,7 @@ SearchItem *SearchItemGenerator::requestItem()
             {
                 item->scnt -= 0x10000 - high;
                 high = 0;
+                low++;
 
                 /// === search for next candidate ===
                 for (; low <= MASK48; low++)
