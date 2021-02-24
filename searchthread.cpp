@@ -106,17 +106,6 @@ void SearchThread::run()
     }
 }
 
-void SearchThread::debug()
-{
-    printf("lastid: %-2lu reci:", lastid);
-    for (int i = 0; i < recieved.size(); i++)
-        printf(" %d", (int)recieved[i].valid);
-    printf("  (");
-    for (int i = 0; i < recieved.size(); i++)
-        printf(" %lu", i + lastid);
-    printf(" )\n");
-    fflush(stdout);
-}
 
 SearchItem *SearchThread::startNextItem()
 {

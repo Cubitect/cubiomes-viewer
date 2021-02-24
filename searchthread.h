@@ -33,7 +33,6 @@ public:
 
     void stop() { abort = true; pool.clear(); }
     SearchItem *startNextItem();
-    void debug();
 
 signals:
     void progress(uint64_t last, uint64_t end, int64_t seed);
