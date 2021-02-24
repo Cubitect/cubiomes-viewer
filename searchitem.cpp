@@ -270,10 +270,10 @@ SearchItem *SearchItemGenerator::requestItem()
         }
         else
         {
-            uint128_t s = (uint128_t) seed + itemsiz;
-            seed += itemsiz;
-            if (s != (uint128_t)seed)
+            unsigned long long int s;
+            if (__builtin_uaddll_overflow(seed, itemsiz, &s))
                 isdone = true;
+            seed = (int64_t)s;
         }
     }
 

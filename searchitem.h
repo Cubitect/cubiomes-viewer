@@ -12,8 +12,6 @@
 
 #define PRECOMPUTE48_BUFSIZ ((int64_t)1 << 30)
 
-typedef unsigned __int128 uint128_t;
-
 // search type options from combobox
 enum { SEARCH_INC = 0, SEARCH_BLOCKS = 1, SEARCH_LIST = 2 };
 
