@@ -198,6 +198,8 @@ void MainWindow::saveSettings()
         int mc = MC_1_16;
         int64_t seed = 0;
         getSeed(&mc, &seed, false);
+        settings.setValue("search/threads", ui->spinThreads->value());
+        settings.setValue("search/stoponres", ui->checkStop->isChecked());
         settings.setValue("map/mc", mc);
         settings.setValue("map/seed", (qlonglong)seed);
         settings.setValue("map/x", ui->mapView->getX());
@@ -222,6 +224,11 @@ void MainWindow::loadSettings()
     ui->mapView->hasinertia = config.smoothMotion;
     if (config.restoreSession)
     {
+        int threads = settings.value("search/threads", QThread::idealThreadCount()).toInt();
+        bool stoponres = settings.value("search/stoponres", true).toBool();
+        ui->spinThreads->setValue(threads);
+        ui->checkStop->setChecked(stoponres);
+
         int mc = settings.value("map/mc", MC_1_16).toInt();
         int64_t seed = settings.value("map/seed", 0).toLongLong();
         setSeed(mc, seed);
