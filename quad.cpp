@@ -565,27 +565,27 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
 
             for (Quad *q : l.cells)
             {
-                if (q->spos) // q was processed in another thread and is now done
+                if (!q->spos)
+                    continue;
+                // q was processed in another thread and is now done
+                for (Pos& p : *q->spos)
                 {
-                    for (Pos& p : *q->spos)
-                    {
-                        qreal x = vw/2 + (p.x - focusx) * blocks2pix;
-                        qreal y = vh/2 + (p.z - focusz) * blocks2pix;
-                        if (x >= 0 && x < vw && y >= 0 && y < vh)
-                        {
-                            QPointF d = QPointF(x, y);
-                            QRectF r = icons[stype].rect();
-                            frags.push_back(QPainter::PixmapFragment::create(d, r));
+                    qreal x = vw/2 + (p.x - focusx) * blocks2pix;
+                    qreal y = vh/2 + (p.z - focusz) * blocks2pix;
+                    if (x < 0 || x >= vw || y < 0 || y >= vh)
+                        continue;
 
-                            if (seldo)
-                            {
-                                r.moveCenter(d);
-                                if (r.contains(selx, selz))
-                                {
-                                    seltype = stype;
-                                    selpos = p;
-                                }
-                            }
+                    QPointF d = QPointF(x, y);
+                    QRectF r = icons[stype].rect();
+                    frags.push_back(QPainter::PixmapFragment::create(d, r));
+
+                    if (seldo)
+                    {
+                        r.moveCenter(d);
+                        if (r.contains(selx, selz))
+                        {
+                            seltype = stype;
+                            selpos = p;
                         }
                     }
                 }
@@ -671,12 +671,13 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
 
     if (seltype != D_NONE)
     {
+        QPixmap *icon = &icons[seltype];
         qreal x = vw/2 + (selpos.x - focusx) * blocks2pix;
         qreal y = vh/2 + (selpos.z - focusz) * blocks2pix;
-        QRect iconrec = icons[seltype].rect();
+        QRect iconrec = icon->rect();
         qreal w = iconrec.width() * 1.5;
         qreal h = iconrec.height() * 1.5;
-        painter.drawPixmap(x-w/2, y-h/2, w, h, icons[seltype]);
+        painter.drawPixmap(x-w/2, y-h/2, w, h, *icon);
 
         QFont f = QFont();
         f.setBold(true);
@@ -698,7 +699,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
         painter.setPen(QPen(QColor(255, 255, 255), 2));
         painter.drawText(textrec, s, QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
 
-        painter.drawPixmap(iconrec.translated(pad,pad), icons[seltype]);
+        painter.drawPixmap(iconrec.translated(pad,pad), *icon);
     }
 
     cleancache(cached, cachesize);

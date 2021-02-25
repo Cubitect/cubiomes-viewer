@@ -71,16 +71,12 @@ bool SearchThread::set(int type, int threads, std::vector<int64_t>& slist64, int
         {
             int w = c.x2 - c.x1 + 1;
             int h = c.z2 - c.z1 + 1;
-            if (w * h < c.count)
+            if (c.count > w * h)
             {
                 QMessageBox::warning(NULL, "Warning", QString::asprintf(
                         "Temperature category condition with ID [%02d] has too many restrictions (%d) for the area (%d x %d).",
                         c.save, c.count, w, h));
                 return false;
-            }
-            if (c.count == 0)
-            {
-                QMessageBox::information(NULL, "Info", QString::asprintf("Temperature category condition with ID [%02d] specifies no restrictions.", c.save));
             }
         }
     }
@@ -113,7 +109,7 @@ SearchItem *SearchThread::startNextItem()
     if (!item)
         return NULL;
     // call back here when done
-    QObject::connect(item, &SearchItem::itemDone, this, &SearchThread::onItemDone, Qt::BlockingQueuedConnection);
+    QObject::connect(item, &SearchItem::itemDone, this, &SearchThread::onItemDone, Qt::QueuedConnection);
     QObject::connect(item, &SearchItem::canceled, this, &SearchThread::onItemCanceled, Qt::QueuedConnection);
     // redirect results to mainwindow
     QObject::connect(item, &SearchItem::results, parent, &MainWindow::searchResultsAdd, Qt::BlockingQueuedConnection);

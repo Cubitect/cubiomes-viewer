@@ -35,5 +35,7 @@
         <file>icons/origin.png</file>
         <file>icons/treasure_d.png</file>
         <file>icons/treasure.png</file>
+        <file>icons/zombie_d.png</file>
+        <file>icons/zombie.png</file>
     </qresource>
 </RCC>
