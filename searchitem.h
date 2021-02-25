@@ -78,6 +78,7 @@ struct SearchItemGenerator
         const std::vector<int64_t>& slist,
         int itemsize, int searchtype, int64_t sstart);
 
+    void presearch();
 
     SearchItem *requestItem();
     void getProgress(uint64_t *prog, uint64_t *end);

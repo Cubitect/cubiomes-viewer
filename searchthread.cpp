@@ -94,6 +94,7 @@ bool SearchThread::set(int type, int threads, std::vector<int64_t>& slist64, int
 
 void SearchThread::run()
 {
+    itemgen.presearch();
     pool.waitForDone();
     for (int idx = 0; idx < recieved.size(); idx++)
     {
@@ -109,7 +110,7 @@ SearchItem *SearchThread::startNextItem()
     if (!item)
         return NULL;
     // call back here when done
-    QObject::connect(item, &SearchItem::itemDone, this, &SearchThread::onItemDone, Qt::QueuedConnection);
+    QObject::connect(item, &SearchItem::itemDone, this, &SearchThread::onItemDone, Qt::BlockingQueuedConnection);
     QObject::connect(item, &SearchItem::canceled, this, &SearchThread::onItemCanceled, Qt::QueuedConnection);
     // redirect results to mainwindow
     QObject::connect(item, &SearchItem::results, parent, &MainWindow::searchResultsAdd, Qt::BlockingQueuedConnection);

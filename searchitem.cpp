@@ -131,6 +131,11 @@ void SearchItemGenerator::init(
     this->scnt = ~(uint64_t)0;
     this->seed = sstart;
     this->isdone = false;
+}
+
+void SearchItemGenerator::presearch()
+{
+    int64_t sstart = seed;
 
     if (slist.empty() && searchtype != SEARCH_LIST)
         getCandidates(slist, mc, cond, ccnt, PRECOMPUTE48_BUFSIZ);
