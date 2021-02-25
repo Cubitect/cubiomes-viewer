@@ -258,6 +258,10 @@ void MapView::mouseReleaseEvent(QMouseEvent *e)
             frameelapsed.start();
             update();
         }
+        if (!hasinertia)
+        {
+            velx = velz = 0;
+        }
 
         holding = false;
         mprev = e->pos();
