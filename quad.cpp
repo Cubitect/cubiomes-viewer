@@ -25,7 +25,7 @@ Quad::~Quad()
     delete spos;
 }
 
-std::vector<Pos> *Quad::addStruct(const StructureConfig sconf, LayerStack *g)
+std::vector<VarPos> *Quad::addStruct(const StructureConfig sconf, LayerStack *g)
 {
     int x0 = ti*blocks, x1 = (ti+1)*blocks;
     int z0 = tj*blocks, z1 = (tj+1)*blocks;
@@ -34,7 +34,7 @@ std::vector<Pos> *Quad::addStruct(const StructureConfig sconf, LayerStack *g)
     int si1 = (int)floor((x1-1) / (qreal)(sconf.regionSize * 16));
     int sj1 = (int)floor((z1-1) / (qreal)(sconf.regionSize * 16));
 
-    std::vector<Pos>* st = new std::vector<Pos>();
+    std::vector<VarPos>* st = new std::vector<VarPos>();
 
     for (int i = si0; i <= si1; i++)
     {
@@ -45,8 +45,17 @@ std::vector<Pos> *Quad::addStruct(const StructureConfig sconf, LayerStack *g)
 
             if (valid && p.x >= x0 && p.x < x1 && p.z >= z0 && p.z < z1)
             {
-                if (isViableStructurePos(sconf.structType, mc, g, seed, p.x, p.z))
-                    st->push_back(p);
+                int id = isViableStructurePos(sconf.structType, mc, g, seed, p.x, p.z);
+                if (id)
+                {
+                    VarPos vp = { p, 0 };
+                    if (sconf.structType == Village)
+                    {
+                        VillageType vt = getVillageType(mc, seed, p.x, p.z, id);
+                        vp.variant = vt.abandoned;
+                    }
+                    st->push_back(vp);
+                }
             }
         }
     }
@@ -382,6 +391,7 @@ QWorld::QWorld(int mc, int64_t seed)
     , selz()
     , seltype(-1)
     , selpos()
+    , selvar()
     , qual()
 {
     setupGenerator(&g, mc);
@@ -418,6 +428,8 @@ QWorld::QWorld(int mc, int64_t seed)
     icons[D_PORTAL]     = QPixmap(":/icons/portal.png");
     icons[D_SPAWN]      = QPixmap(":/icons/spawn.png");
     icons[D_STRONGHOLD] = QPixmap(":/icons/stronghold.png");
+
+    iconzvil = QPixmap(":/icons/zombie.png");
 }
 
 QWorld::~QWorld()
@@ -568,16 +580,27 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
                 if (!q->spos)
                     continue;
                 // q was processed in another thread and is now done
-                for (Pos& p : *q->spos)
+                for (VarPos& vp : *q->spos)
                 {
-                    qreal x = vw/2 + (p.x - focusx) * blocks2pix;
-                    qreal y = vh/2 + (p.z - focusz) * blocks2pix;
+                    qreal x = vw/2 + (vp.p.x - focusx) * blocks2pix;
+                    qreal y = vh/2 + (vp.p.z - focusz) * blocks2pix;
                     if (x < 0 || x >= vw || y < 0 || y >= vh)
                         continue;
 
                     QPointF d = QPointF(x, y);
                     QRectF r = icons[stype].rect();
-                    frags.push_back(QPainter::PixmapFragment::create(d, r));
+                    if (stype == D_VILLAGE)
+                    {
+                        if (vp.variant) {
+                            painter.drawPixmap(x-r.width()/2, y-r.height()/2, iconzvil);
+                        } else {
+                            frags.push_back(QPainter::PixmapFragment::create(d, r));
+                        }
+                    }
+                    else
+                    {
+                        frags.push_back(QPainter::PixmapFragment::create(d, r));
+                    }
 
                     if (seldo)
                     {
@@ -585,7 +608,8 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
                         if (r.contains(selx, selz))
                         {
                             seltype = stype;
-                            selpos = p;
+                            selpos = vp.p;
+                            selvar = vp.variant;
                         }
                     }
                 }
@@ -612,6 +636,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
             {
                 seltype = D_SPAWN;
                 selpos = *sp;
+                selvar = 0;
             }
         }
     }
@@ -636,6 +661,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
                 {
                     seltype = D_STRONGHOLD;
                     selpos = p;
+                    selvar = 0;
                 }
             }
         }
@@ -672,6 +698,11 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
     if (seltype != D_NONE)
     {
         QPixmap *icon = &icons[seltype];
+        if (selvar)
+        {
+            if (seltype == D_VILLAGE)
+                icon = &iconzvil;
+        }
         qreal x = vw/2 + (selpos.x - focusx) * blocks2pix;
         qreal y = vh/2 + (selpos.z - focusz) * blocks2pix;
         QRect iconrec = icon->rect();

@@ -30,6 +30,12 @@ enum {
 
 struct Level;
 
+struct VarPos
+{
+    Pos p;
+    int variant;
+};
+
 class Quad : public QRunnable
 {
 public:
@@ -37,8 +43,8 @@ public:
     ~Quad();
 
 
-    std::vector<Pos> *addStruct(const StructureConfig sconf, LayerStack *g);
-    std::vector<Pos> *addTreasure(LayerStack *g);
+    std::vector<VarPos> *addStruct(const StructureConfig sconf, LayerStack *g);
+    std::vector<VarPos> *addTreasure(LayerStack *g);
     void run();
 
     int mc;
@@ -53,7 +59,7 @@ public:
 
     // img and spos act as an atomic gate (with NULL or non-NULL indicating available results)
     QAtomicPointer<QImage> img;
-    QAtomicPointer<std::vector<Pos>> spos;
+    QAtomicPointer<std::vector<VarPos>> spos;
 
     std::atomic_bool done; // indicates that no further processing will occur
 
@@ -127,10 +133,12 @@ struct QWorld
     qreal selx, selz;
     int seltype;
     Pos selpos;
+    int selvar;
 
     qreal qual; // quality, i.e. maximum pixels per 'block' at the current layer
 
     QPixmap icons[STRUCT_NUM];
+    QPixmap iconzvil;
 };
 
 
