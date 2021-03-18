@@ -40,10 +40,11 @@ std::vector<VarPos> *Quad::addStruct(const StructureConfig sconf, LayerStack *g)
     {
         for (int j = sj0; j <= sj1; j++)
         {
-            int valid;
-            Pos p = getStructurePos(sconf, seed, i, j, &valid);
+            Pos p;
+            if (!getStructurePos(sconf.structType, mc, seed, i, j, &p))
+                continue;
 
-            if (valid && p.x >= x0 && p.x < x1 && p.z >= z0 && p.z < z1)
+            if (p.x >= x0 && p.x < x1 && p.z >= z0 && p.z < z1)
             {
                 int id = isViableStructurePos(sconf.structType, mc, g, seed, p.x, p.z);
                 if (id)
@@ -254,7 +255,7 @@ void Level::init4map(int mcversion, int64_t ws, int pix, int layerscale)
         exit(1);
     }
 
-    setWorldSeed(entry, seed);
+    setLayerSeed(entry, seed);
 }
 
 void Level::init4struct(int mcversion, int64_t ws, int b, int structtype)
@@ -413,6 +414,7 @@ QWorld::QWorld(int mc, int64_t seed)
     qual = 1.0;
 
     memset(sshow, 0, sizeof(sshow));
+    showgrid = true;
 
     icons[D_DESERT]     = QPixmap(":/icons/desert.png");
     icons[D_JUNGLE]     = QPixmap(":/icons/jungle.png");
@@ -550,6 +552,8 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
                 QRect rec(px,pz,ps,ps);
                 painter.drawImage(rec, *q->img);
 
+                if (!showgrid)
+                    continue;
                 QString s = QString::asprintf("%d,%d", q->ti*q->blocks, q->tj*q->blocks);
                 QRect textrec = painter.fontMetrics()
                         .boundingRect(rec, Qt::AlignLeft | Qt::AlignTop, s);

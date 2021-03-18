@@ -12,6 +12,7 @@ struct Config
 {
     bool restoreSession;
     bool smoothMotion;
+    bool showGrid;
     int seedsPerItem;
     int queueSize;
     int maxMatching;

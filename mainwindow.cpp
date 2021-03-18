@@ -190,6 +190,7 @@ void MainWindow::saveSettings()
     settings.setValue("mainwindow/pos", pos());
     settings.setValue("config/restoreSession", config.restoreSession);
     settings.setValue("config/smoothMotion", config.smoothMotion);
+    settings.setValue("config/showGrid", config.showGrid);
     settings.setValue("config/seedsPerItem", config.seedsPerItem);
     settings.setValue("config/queueSize", config.queueSize);
     settings.setValue("config/maxMatching", config.maxMatching);
@@ -218,10 +219,21 @@ void MainWindow::loadSettings()
     move(settings.value("mainwindow/pos", pos()).toPoint());
     config.restoreSession = settings.value("config/restoreSession", config.restoreSession).toBool();
     config.smoothMotion = settings.value("config/smoothMotion", config.smoothMotion).toBool();
+    config.showGrid = settings.value("config/showGrid", config.showGrid).toBool();
     config.seedsPerItem = settings.value("config/seedsPerItem", config.seedsPerItem).toInt();
     config.queueSize = settings.value("config/queueSize", config.queueSize).toInt();
     config.maxMatching = settings.value("config/maxMatching", config.maxMatching).toInt();
-    ui->mapView->hasinertia = config.smoothMotion;
+
+    ui->mapView->setSmoothMotion(config.smoothMotion);
+    ui->mapView->setShowGrid(config.showGrid);
+
+    for (int stype = 0; stype < STRUCT_NUM; stype++)
+    {
+        bool s = settings.value("map/show" + QString::number(stype), false).toBool();
+        saction[stype]->setChecked(s);
+        ui->mapView->setShow(stype, s);
+    }
+
     if (config.restoreSession)
     {
         int threads = settings.value("search/threads", QThread::idealThreadCount()).toInt();
@@ -236,12 +248,6 @@ void MainWindow::loadSettings()
         qreal z = settings.value("map/z", 0).toDouble();
         qreal scale = settings.value("map/scale", 16).toDouble();
         mapGoto(x, z, scale);
-        for (int stype = 0; stype < STRUCT_NUM; stype++)
-        {
-            bool s = settings.value("map/show" + QString::number(stype), false).toBool();
-            saction[stype]->setChecked(s);
-            ui->mapView->setShow(stype, s);
-        }
         loadProgress("session.save", true);
     }
 }
@@ -760,7 +766,8 @@ void MainWindow::on_actionPreferences_triggered()
     if (status == QDialog::Accepted)
     {
         config = dialog->getConfig();
-        ui->mapView->hasinertia = config.smoothMotion;
+        ui->mapView->setSmoothMotion(config.smoothMotion);
+        ui->mapView->setShowGrid(config.showGrid);
     }
 }
 

@@ -278,10 +278,10 @@ int testCond(StructPos *spos, int64_t seed, const Condition *cond, int mc, Layer
                  U(isQuadBaseFeature24(sconf, s, 7,7,9)) )
             {
                 sout->sconf = sconf;
-                p[0] = getStructurePos(sconf, seed, rx+0, rz+0, 0);
-                p[1] = getStructurePos(sconf, seed, rx+0, rz+1, 0);
-                p[2] = getStructurePos(sconf, seed, rx+1, rz+0, 0);
-                p[3] = getStructurePos(sconf, seed, rx+1, rz+1, 0);
+                getStructurePos(sconf.structType, mc, seed, rx+0, rz+0, p+0);
+                getStructurePos(sconf.structType, mc, seed, rx+0, rz+1, p+1);
+                getStructurePos(sconf.structType, mc, seed, rx+1, rz+0, p+2);
+                getStructurePos(sconf.structType, mc, seed, rx+1, rz+1, p+3);
                 pc = getOptimalAfk(p, 7,7,9, 0);
                 sout->cx = pc.x;
                 sout->cz = pc.z;
@@ -320,10 +320,10 @@ L_qm_any:
             if (qmonumentQual(s) >= qual)
             {
                 sout->sconf = sconf;
-                p[0] = getStructurePos(sconf, seed, rx+0, rz+0, 0);
-                p[1] = getStructurePos(sconf, seed, rx+0, rz+1, 0);
-                p[2] = getStructurePos(sconf, seed, rx+1, rz+0, 0);
-                p[3] = getStructurePos(sconf, seed, rx+1, rz+1, 0);
+                getStructurePos(sconf.structType, mc, seed, rx+0, rz+0, p+0);
+                getStructurePos(sconf.structType, mc, seed, rx+0, rz+1, p+1);
+                getStructurePos(sconf.structType, mc, seed, rx+1, rz+0, p+2);
+                getStructurePos(sconf.structType, mc, seed, rx+1, rz+1, p+3);
                 pc = getOptimalAfk(p, 58,23,58, 0);
                 sout->cx = pc.x - 29; // monument is centered
                 sout->cz = pc.z - 29;
@@ -390,8 +390,9 @@ L_struct_any:
         {
             for (rx = rx1; rx <= rx2; rx++)
             {
-                pc = getStructurePos(sconf, seed, rx, rz, &valid);
-                if (valid && pc.x >= x1 && pc.x <= x2 && pc.z >= z1 && pc.z <= z2)
+                if (!getStructurePos(sconf.structType, mc, seed, rx+0, rz+0, &pc))
+                    continue;
+                if (pc.x >= x1 && pc.x <= x2 && pc.z >= z1 && pc.z <= z2)
                 {
                     if (g && !isViableStructurePos(sconf.structType, mc, g, seed, pc.x, pc.z))
                         continue;

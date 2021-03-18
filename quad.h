@@ -44,7 +44,6 @@ public:
 
 
     std::vector<VarPos> *addStruct(const StructureConfig sconf, LayerStack *g);
-    std::vector<VarPos> *addTreasure(LayerStack *g);
     void run();
 
     int mc;
@@ -121,6 +120,7 @@ struct QWorld
     unsigned int cachesize;
 
     bool sshow[STRUCT_NUM];
+    bool showgrid;
 
     // spawn and strongholds will be filled by a designated worker thread once results are done
     QAtomicPointer<Pos> spawn;

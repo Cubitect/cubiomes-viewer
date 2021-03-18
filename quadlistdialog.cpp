@@ -104,12 +104,12 @@ void QuadListDialog::refresh()
     int row = 0, qhn = 0, qmn = 0;
     for (int i = 0; i < qcnt; i++)
     {
-        Pos qh[4] = {
-            getStructurePos(sconf, seed, qlist[i].x+0, qlist[i].z+0, 0),
-            getStructurePos(sconf, seed, qlist[i].x+0, qlist[i].z+1, 0),
-            getStructurePos(sconf, seed, qlist[i].x+1, qlist[i].z+0, 0),
-            getStructurePos(sconf, seed, qlist[i].x+1, qlist[i].z+1, 0),
-        };
+        Pos qh[4];
+        getStructurePos(sconf.structType, mc, seed, qlist[i].x+0, qlist[i].z+0, qh+0);
+        getStructurePos(sconf.structType, mc, seed, qlist[i].x+0, qlist[i].z+1, qh+1);
+        getStructurePos(sconf.structType, mc, seed, qlist[i].x+1, qlist[i].z+0, qh+2);
+        getStructurePos(sconf.structType, mc, seed, qlist[i].x+1, qlist[i].z+1, qh+3);
+
         if (isViableStructurePos(sconf.structType, mc, &g, seed, qh[0].x, qh[0].z) &&
             isViableStructurePos(sconf.structType, mc, &g, seed, qh[1].x, qh[1].z) &&
             isViableStructurePos(sconf.structType, mc, &g, seed, qh[2].x, qh[2].z) &&
@@ -158,12 +158,11 @@ void QuadListDialog::refresh()
 
         for (int i = 0; i < qcnt; i++)
         {
-            Pos qm[4] = {
-                getStructurePos(sconf, seed, qlist[i].x+0, qlist[i].z+0, 0),
-                getStructurePos(sconf, seed, qlist[i].x+0, qlist[i].z+1, 0),
-                getStructurePos(sconf, seed, qlist[i].x+1, qlist[i].z+0, 0),
-                getStructurePos(sconf, seed, qlist[i].x+1, qlist[i].z+1, 0),
-            };
+            Pos qm[4];
+            getStructurePos(sconf.structType, mc, seed, qlist[i].x+0, qlist[i].z+0, qm+0);
+            getStructurePos(sconf.structType, mc, seed, qlist[i].x+0, qlist[i].z+1, qm+1);
+            getStructurePos(sconf.structType, mc, seed, qlist[i].x+1, qlist[i].z+0, qm+2);
+            getStructurePos(sconf.structType, mc, seed, qlist[i].x+1, qlist[i].z+1, qm+3);
             if (isViableStructurePos(sconf.structType, mc, &g, seed, qm[0].x, qm[0].z) &&
                 isViableStructurePos(sconf.structType, mc, &g, seed, qm[1].x, qm[1].z) &&
                 isViableStructurePos(sconf.structType, mc, &g, seed, qm[2].x, qm[2].z) &&

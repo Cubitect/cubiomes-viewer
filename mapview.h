@@ -35,17 +35,23 @@ public:
     qreal getX();
     qreal getZ();
     qreal getScale() const { return 1.0 / blocks2pix; }
-    bool getShow(int stype) { return stype >= 0 && stype < STRUCT_NUM ? sshow[stype] : false; }
 
     void setSeed(int mc, int64_t s);
-    void setShow(int stype, bool v);
     void setView(qreal x, qreal z, qreal scale = 0);
+
+    bool getShow(int stype) { return stype >= 0 && stype < STRUCT_NUM ? sshow[stype] : false; }
+    void setShow(int stype, bool v);
+    void setShowGrid(bool show);
+    void setSmoothMotion(bool smooth);
 
     void timeout();
 
     void update(int cnt = 1);
 
     Pos getActivePos();
+
+private:
+    void settingsToWorld();
 
 signals:
 
@@ -65,7 +71,6 @@ public:
 
     QElapsedTimer elapsed1;
     QElapsedTimer frameelapsed;
-    bool hasinertia;
     qreal decay;
 
     MapOverlay *overlay;
@@ -82,6 +87,8 @@ private:
     int updatecounter;
 
     bool sshow[STRUCT_NUM];
+    bool showgrid;
+    bool hasinertia;
 };
 
 #endif // MAPVIEW_H

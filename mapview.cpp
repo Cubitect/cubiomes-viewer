@@ -8,6 +8,7 @@
 #include <QWheelEvent>
 #include <QThreadPool>
 #include <QTime>
+#include <QSettings>
 
 #include <math.h>
 
@@ -38,7 +39,6 @@ void MapOverlay::paintEvent(QPaintEvent *)
 MapView::MapView(QWidget *parent)
 : QWidget(parent)
 , world()
-, hasinertia(true)
 , decay(2.0)
 , blocks2pix(1.0/16)
 , focusx(),focusz()
@@ -48,6 +48,8 @@ MapView::MapView(QWidget *parent)
 , mstart(),mprev()
 , updatecounter()
 , sshow()
+, showgrid(true)
+, hasinertia(true)
 {
     memset(sshow, 0, sizeof(sshow));
 
@@ -81,17 +83,14 @@ void MapView::setSeed(int mc, int64_t s)
         delete world;
         world = new QWorld(mc, s);
     }
-    for (int i = 0; i < STRUCT_NUM; i++)
-        world->sshow[i] = sshow[i];
+    settingsToWorld();
     update(2);
 }
 
 void MapView::setShow(int stype, bool v)
 {
     sshow[stype] = v;
-    if (world)
-        for (int s = 0; s < STRUCT_NUM; s++)
-            world->sshow[s] = sshow[s];
+    settingsToWorld();
     update(2);
 }
 
@@ -105,6 +104,27 @@ void MapView::setView(qreal x, qreal z, qreal scale)
     prevz = focusz = z;
     velx = velz = 0;
     update(2);
+}
+
+void MapView::setShowGrid(bool show)
+{
+    showgrid = show;
+    settingsToWorld();
+    update(2);
+}
+
+void MapView::setSmoothMotion(bool smooth)
+{
+    hasinertia = smooth;
+}
+
+void MapView::settingsToWorld()
+{
+    if (!world)
+        return;
+    world->showgrid = showgrid;
+    for (int s = 0; s < STRUCT_NUM; s++)
+        world->sshow[s] = sshow[s];
 }
 
 qreal MapView::getX()
