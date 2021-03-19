@@ -1,5 +1,6 @@
 #include "searchthread.h"
 #include "mainwindow.h"
+#include "cutil.h"
 
 #include <QMessageBox>
 #include <QEventLoop>
@@ -51,6 +52,18 @@ bool SearchThread::set(int type, int threads, std::vector<int64_t>& slist64, int
         if (++refbuf[c.save] > 1)
         {
             QMessageBox::warning(NULL, "Warning", QString::asprintf("More than one condition with ID [%02d].", c.save));
+            return false;
+        }
+        if (c.type < 0 || c.type >= FILTER_MAX)
+        {
+            QMessageBox::warning(NULL, "Error", QString::asprintf("Encountered invalid filter type %d in condition ID [%02d].", c.type, c.save));
+            return false;
+        }
+        if (mc < g_filterinfo.list[c.type].mcmin)
+        {
+            const char *mcs = mc2str(g_filterinfo.list[c.type].mcmin);
+            QString s = QString::asprintf("Condition [%02d] requires a minimum Minecraft version of %s.", c.save, mcs);
+            QMessageBox::warning(NULL, "Warning", s);
             return false;
         }
         if (c.type >= F_BIOME && c.type <= F_BIOME_256_OTEMP)

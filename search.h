@@ -21,6 +21,7 @@ struct FilterInfo
     int layer;
     int step;
     int count;
+    int mcmin;
     const char *icon;
     const char *name;
     const char *desription;
@@ -65,14 +66,14 @@ static const struct FilterList
     FilterList() : list{}
     {
         list[F_SELECT] = FilterInfo{
-            CAT_NONE, 0, 0, 0, 0, 0,
+            CAT_NONE, 0, 0, 0, 0, 0, MC_1_7,
             NULL,
             "",
             ""
         };
 
         list[F_QH_IDEAL] = FilterInfo{
-            CAT_48, 1, 1, 0, 512, 0,
+            CAT_48, 1, 1, 0, 512, 0, MC_1_7,
             ":icons/quad.png",
             "Quad-hut (ideal)",
             "The lower 48-bits provide potential for four swamp huts in "
@@ -80,7 +81,7 @@ static const struct FilterList
         };
 
         list[F_QH_CLASSIC] = FilterInfo{
-            CAT_48, 1, 1, 0, 512, 0,
+            CAT_48, 1, 1, 0, 512, 0, MC_1_7,
             ":icons/quad.png",
             "Quad-hut (classic)",
             "The lower 48-bits provide potential for four swamp huts in "
@@ -90,7 +91,7 @@ static const struct FilterList
         };
 
         list[F_QH_NORMAL] = FilterInfo{
-            CAT_48, 1, 1, 0, 512, 0,
+            CAT_48, 1, 1, 0, 512, 0, MC_1_7,
             ":icons/quad.png",
             "Quad-hut (normal)",
             "The lower 48-bits provide potential for four swamp huts in "
@@ -100,7 +101,7 @@ static const struct FilterList
         };
 
         list[F_QH_BARELY] = FilterInfo{
-            CAT_48, 1, 1, 0, 512, 0,
+            CAT_48, 1, 1, 0, 512, 0, MC_1_7,
             ":icons/quad.png",
             "Quad-hut (barely)",
             "The lower 48-bits provide potential for four swamp huts in "
@@ -109,7 +110,7 @@ static const struct FilterList
         };
 
         list[F_QM_95] = FilterInfo{
-            CAT_48, 1, 1, 0, 512, 0,
+            CAT_48, 1, 1, 0, 512, 0, MC_1_13,
             ":icons/quad.png",
             "Quad-ocean-monument (>95%)",
             "The lower 48-bits provide potential for 95% of the area of "
@@ -118,7 +119,7 @@ static const struct FilterList
         };
 
         list[F_QM_90] = FilterInfo{
-            CAT_48, 1, 1, 0, 512, 0,
+            CAT_48, 1, 1, 0, 512, 0, MC_1_13,
             ":icons/quad.png",
             "Quad-ocean-monument (>90%)",
             "The lower 48-bits provide potential for 90% of the area of "
@@ -127,7 +128,7 @@ static const struct FilterList
         };
 
         list[F_BIOME] = FilterInfo{
-            CAT_FULL, 1, 1, L_VORONOI_ZOOM_1, 1, 0,
+            CAT_FULL, 1, 1, L_VORONOI_ZOOM_1, 1, 0, MC_1_7,
             ":icons/map.png",
             "Biome filter 1:1",
             "Only seeds with the included (+) biomes in the specified area and "
@@ -135,7 +136,7 @@ static const struct FilterList
         };
 
         list[F_BIOME_4_RIVER] = FilterInfo{
-            CAT_FULL, 1, 1, L_RIVER_MIX_4, 4, 0,
+            CAT_FULL, 1, 1, L_RIVER_MIX_4, 4, 0, MC_1_7,
             ":icons/map.png",
             "Biome filter 1:4 RIVER",
             "Only seeds with the included (+) biomes in the specified area and "
@@ -144,7 +145,7 @@ static const struct FilterList
         };
 
         list[F_BIOME_16_SHORE] = FilterInfo{
-            CAT_FULL, 1, 1, L_SHORE_16, 16, 0,
+            CAT_FULL, 1, 1, L_SHORE_16, 16, 0, MC_1_7,
             ":icons/map.png",
             "Biome filter 1:16 SHORE",
             "Only seeds with the included (+) biomes in the specified area and "
@@ -153,7 +154,7 @@ static const struct FilterList
         };
 
         list[F_BIOME_64_RARE] = FilterInfo{
-            CAT_FULL, 1, 1, L_RARE_BIOME_64, 64, 0,
+            CAT_FULL, 1, 1, L_RARE_BIOME_64, 64, 0, MC_1_7,
             ":icons/map.png",
             "Biome filter 1:64 RARE",
             "Only seeds with the included (+) biomes in the specified area and "
@@ -162,7 +163,7 @@ static const struct FilterList
         };
 
         list[F_BIOME_256_BIOME] = FilterInfo{
-            CAT_FULL, 1, 1, L_BIOME_256, 256, 0,
+            CAT_FULL, 1, 1, L_BIOME_256, 256, 0, MC_1_7,
             ":icons/map.png",
             "Biome filter 1:256 BIOME",
             "Only seeds with the included (+) biomes in the specified area and "
@@ -171,106 +172,104 @@ static const struct FilterList
         };
 
         list[F_BIOME_256_OTEMP] = FilterInfo{
-            CAT_48, 1, 1, L13_OCEAN_TEMP_256, 256, 0,
+            CAT_48, 1, 1, L13_OCEAN_TEMP_256, 256, 0, MC_1_13,
             ":icons/map.png",
             "Biome filter 1:256 O.TEMP",
             "Only seeds with the included (+) biomes in the specified area and "
             "discard those that have biomes that are explicitly excluded (-) "
             "at layer OCEAN TEMPERATURE with scale 1:256. "
-            "This generation layer is only valid for versions >= 1.13, "
-            "and depends only on the lower 48-bits of the seed."
+            "This generation layer depends only on the lower 48-bits of the seed."
         };
 
         list[F_TEMPS] = FilterInfo{
-            CAT_FULL, 1, 1, 0, 1024, 0,
+            CAT_FULL, 1, 1, 0, 1024, 0, MC_1_7,
             ":icons/tempcat.png",
             "Temperature categories",
             "Checks that the area has a minimum of all the required temperature categories."
         };
 
         list[F_SPAWN] = FilterInfo{
-            CAT_FULL, 1, 1, 0, 1, 0,
+            CAT_FULL, 1, 1, 0, 1, 0, MC_1_7,
             ":icons/spawn.png",
             "Spawn",
             ""
         };
 
         list[F_STRONGHOLD] = FilterInfo{
-            CAT_FULL, 1, 1, 0, 1, 1,
+            CAT_FULL, 1, 1, 0, 1, 1, MC_1_7,
             ":icons/stronghold.png",
             "Stronghold",
             ""
         };
 
         list[F_DESERT] = FilterInfo{
-            CAT_FULL, 1, 1, 0, 1, 1,
+            CAT_FULL, 1, 1, 0, 1, 1, MC_1_7,
             ":icons/desert.png",
             "Desert pyramid",
             ""
         };
 
         list[F_JUNGLE] = FilterInfo{
-            CAT_FULL, 1, 1, 0, 1, 1,
+            CAT_FULL, 1, 1, 0, 1, 1, MC_1_7,
             ":icons/jungle.png",
             "Jungle temple",
             ""
         };
 
         list[F_HUT] = FilterInfo{
-            CAT_FULL, 1, 1, 0, 1, 1,
+            CAT_FULL, 1, 1, 0, 1, 1, MC_1_7,
             ":icons/hut.png",
             "Swamp hut",
             ""
         };
 
         list[F_IGLOO] = FilterInfo{
-            CAT_FULL, 1, 1, 0, 1, 1,
+            CAT_FULL, 1, 1, 0, 1, 1, MC_1_9,
             ":icons/igloo.png",
             "Igloo",
             ""
         };
 
         list[F_MONUMENT] = FilterInfo{
-            CAT_FULL, 1, 1, 0, 1, 1,
+            CAT_FULL, 1, 1, 0, 1, 1, MC_1_13,
             ":icons/monument.png",
             "Ocean monument",
             ""
         };
 
         list[F_VILLAGE] = FilterInfo{
-            CAT_FULL, 1, 1, 0, 1, 1,
+            CAT_FULL, 1, 1, 0, 1, 1, MC_1_7,
             ":icons/village.png",
             "Village",
             ""
         };
 
         list[F_OUTPOST] = FilterInfo{
-            CAT_FULL, 1, 1, 0, 1, 1,
+            CAT_FULL, 1, 1, 0, 1, 1, MC_1_14,
             ":icons/outpost.png",
             "Pillager outpost",
             ""
         };
 
         list[F_MANSION] = FilterInfo{
-            CAT_FULL, 1, 1, 0, 1, 1,
+            CAT_FULL, 1, 1, 0, 1, 1, MC_1_11,
             ":icons/mansion.png",
             "Woodland mansion",
             ""
         };
 
         list[F_TREASURE] = FilterInfo{
-            CAT_FULL, 1, 1, 0, 1, 1,
+            CAT_FULL, 1, 1, 0, 1, 1, MC_1_13,
             ":icons/treasure.png",
             "Buried treasure",
             ""
         };
 
         list[F_PORTAL] = FilterInfo{
-            CAT_48, 1, 1, 0, 1, 1,
+            CAT_FULL, 1, 1, 0, 1, 1, MC_1_16,
             ":icons/portal.png",
             "Ruined portal",
-            "Generate in all biomes, so the lower 48-bits of the seed are "
-            "sufficient ."
+            ""
         };
     }
 }
