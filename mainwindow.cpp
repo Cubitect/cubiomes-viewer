@@ -49,6 +49,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     saction.resize(STRUCT_NUM);
     addMapAction(D_GRID, "grid", "Show grid");
+    addMapAction(D_SLIME, "slime", "Show slime chunks");
     ui->toolBar->addSeparator();
     addMapAction(D_DESERT, "desert", "Show desert pyramid");
     addMapAction(D_JUNGLE, "jungle", "Show jungle temples");

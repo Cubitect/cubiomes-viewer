@@ -43,6 +43,7 @@ enum
     F_BIOME_256_BIOME,
     F_BIOME_256_OTEMP,
     F_TEMPS,
+    F_SLIME,
     F_SPAWN,
     F_STRONGHOLD,
     F_DESERT,
@@ -186,6 +187,13 @@ static const struct FilterList
             ":icons/tempcat.png",
             "Temperature categories",
             "Checks that the area has a minimum of all the required temperature categories."
+        };
+
+        list[F_SLIME] = FilterInfo{
+            CAT_FULL, 1, 1, 0, 16, 1, MC_1_7,
+            ":icons/slime.png",
+            "Slime chunk",
+            ""
         };
 
         list[F_SPAWN] = FilterInfo{

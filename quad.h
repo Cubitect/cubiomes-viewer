@@ -11,6 +11,7 @@
 enum {
     D_NONE = -1,
     D_GRID,
+    D_SLIME,
     D_DESERT,
     D_JUNGLE,
     D_IGLOO,
@@ -127,6 +128,10 @@ struct QWorld
     QAtomicPointer<std::vector<Pos>> strongholds;
     // isdel is a flag for the worker thread to stop
     std::atomic_bool isdel;
+
+    // slime overlay
+    QImage slimeimg;
+    int slimex, slimez;
 
     // structure selection from mouse position
     bool seldo;

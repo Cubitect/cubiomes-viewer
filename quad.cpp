@@ -1,4 +1,4 @@
-#include "quad.h"
+﻿#include "quad.h"
 
 #include "cutil.h"
 
@@ -387,6 +387,9 @@ QWorld::QWorld(int mc, int64_t seed)
     , spawn()
     , strongholds()
     , isdel()
+    , slimeimg()
+    , slimex()
+    , slimez()
     , seldo()
     , selx()
     , selz()
@@ -518,6 +521,7 @@ struct SpawnStronghold : public QRunnable
     }
 };
 
+
 void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz, qreal blocks2pix)
 {
     qreal uiw = vw / blocks2pix;
@@ -542,17 +546,18 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
         Level& l = lv[li];
         for (Quad *q : l.cells)
         {
-            if (q->img) // q was processed in another thread and is now done
+            if (!q->img)
+                continue;
+            // q was processed in another thread and is now done
+            qreal ps = q->blocks * blocks2pix;
+            qreal px = vw/2 + (q->ti) * ps - focusx * blocks2pix;
+            qreal pz = vh/2 + (q->tj) * ps - focusz * blocks2pix;
+
+            QRect rec(px,pz,ps,ps);
+            painter.drawImage(rec, *q->img);
+
+            if (sshow[D_GRID])
             {
-                qreal ps = q->blocks * blocks2pix;
-                qreal px = vw/2 + (q->ti) * ps - focusx * blocks2pix;
-                qreal pz = vh/2 + (q->tj) * ps - focusz * blocks2pix;
-
-                QRect rec(px,pz,ps,ps);
-                painter.drawImage(rec, *q->img);
-
-                if (!sshow[D_GRID])
-                    continue;
                 QString s = QString::asprintf("%d,%d", q->ti*q->blocks, q->tj*q->blocks);
                 QRect textrec = painter.fontMetrics()
                         .boundingRect(rec, Qt::AlignLeft | Qt::AlignTop, s);
@@ -566,6 +571,47 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
                 painter.drawRect(rec);
             }
         }
+    }
+
+    if (sshow[D_SLIME] && blocks2pix*16 > 2.0)
+    {
+        int x = floor(bx0 / 16), w = floor(bx1 / 16) - x + 1;
+        int z = floor(bz0 / 16), h = floor(bz1 / 16) - z + 1;
+
+        // conditions when the slime overlay should be updated
+        if (x < slimex || z < slimez ||
+            x+w >= slimex+slimeimg.width() || z+h >= slimez+slimeimg.height() ||
+            w*h*4 >= slimeimg.width()*slimeimg.height())
+        {
+            int pad = 64;
+            x -= pad;
+            z -= pad;
+            w += 2*pad;
+            h += 2*pad;
+            slimeimg = QImage(w, h, QImage::Format_Indexed8);
+            slimeimg.setColor(0, qRgba(0, 0, 0, 64));
+            slimeimg.setColor(1, qRgba(0, 255, 0, 64));
+            slimex = x;
+            slimez = z;
+
+            for (int j = 0; j < h; j++)
+            {
+                for (int i = 0; i < w; i++)
+                {
+                    int isslime = isSlimeChunk(seed, i+x, j+z);
+                    slimeimg.setPixel(i, j, isslime);
+                }
+            }
+        }
+
+        qreal ps = 16 * blocks2pix;
+        qreal px = vw/2 + slimex * ps - focusx * blocks2pix;
+        qreal pz = vh/2 + slimez * ps - focusz * blocks2pix;
+
+        QRect rec(px, pz, ps*slimeimg.width(), ps*slimeimg.height());
+        // match partial pixels to X11
+        //painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+        painter.drawImage(rec, slimeimg);
     }
 
     if (activelv < structlv)

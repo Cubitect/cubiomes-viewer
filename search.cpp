@@ -587,7 +587,32 @@ L_struct_any:
         }
         return 0;
 
-        // TODO: burried treasure
+    case F_SLIME:
+        if (cond->relative)
+        {
+            rx1 = ((cond->x1 << 4) + spos[cond->relative].cx) >> 4;
+            rz1 = ((cond->z1 << 4) + spos[cond->relative].cz) >> 4;
+            rx2 = ((cond->x2 << 4) + spos[cond->relative].cx) >> 4;
+            rz2 = ((cond->z2 << 4) + spos[cond->relative].cz) >> 4;
+        }
+        else
+        {
+            rx1 = cond->x1;
+            rz1 = cond->z1;
+            rx2 = cond->x2;
+            rz2 = cond->z2;
+        }
+        qual = 0;
+        for (int rz = rz1; rz <= rz2; rz++)
+        {
+            for (int rx = rx1; rx <= rx2; rx++)
+            {
+                if (isSlimeChunk(seed, rx, rz))
+                    if (++qual >= cond->count)
+                        return 1;
+            }
+        }
+        return 0;
 
     case F_BIOME:           s = 0; qual = L_VORONOI_ZOOM_1;     goto L_biome_filter_any;
     case F_BIOME_4_RIVER:   s = 2; qual = L_RIVER_MIX_4;        goto L_biome_filter_any;
