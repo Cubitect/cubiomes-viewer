@@ -302,9 +302,16 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="buttonCheck">
+          <widget class="QPushButton" name="buttonInclude">
            <property name="text">
             <string>include all</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="buttonExclude">
+           <property name="text">
+            <string>exclude all</string>
            </property>
           </widget>
          </item>
@@ -386,7 +393,7 @@
   <tabstop>comboBoxRelative</tabstop>
   <tabstop>tabWidget</tabstop>
   <tabstop>buttonUncheck</tabstop>
-  <tabstop>buttonCheck</tabstop>
+  <tabstop>buttonInclude</tabstop>
   <tabstop>scrollArea</tabstop>
  </tabstops>
  <resources/>

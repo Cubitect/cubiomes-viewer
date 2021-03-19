@@ -73,7 +73,9 @@ private slots:
 
     void on_buttonUncheck_clicked();
 
-    void on_buttonCheck_clicked();
+    void on_buttonInclude_clicked();
+
+    void on_buttonExclude_clicked();
 
     void on_buttonArea_toggled(bool checked);
 

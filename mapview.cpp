@@ -48,7 +48,6 @@ MapView::MapView(QWidget *parent)
 , mstart(),mprev()
 , updatecounter()
 , sshow()
-, showgrid(true)
 , hasinertia(true)
 {
     memset(sshow, 0, sizeof(sshow));
@@ -106,13 +105,6 @@ void MapView::setView(qreal x, qreal z, qreal scale)
     update(2);
 }
 
-void MapView::setShowGrid(bool show)
-{
-    showgrid = show;
-    settingsToWorld();
-    update(2);
-}
-
 void MapView::setSmoothMotion(bool smooth)
 {
     hasinertia = smooth;
@@ -122,7 +114,6 @@ void MapView::settingsToWorld()
 {
     if (!world)
         return;
-    world->showgrid = showgrid;
     for (int s = 0; s < STRUCT_NUM; s++)
         world->sshow[s] = sshow[s];
 }

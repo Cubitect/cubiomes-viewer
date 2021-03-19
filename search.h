@@ -53,6 +53,7 @@ enum
     F_OUTPOST,
     F_MANSION,
     F_TREASURE,
+    F_PORTAL,
     FILTER_MAX,
 };
 
@@ -262,6 +263,14 @@ static const struct FilterList
             ":icons/treasure.png",
             "Buried treasure",
             ""
+        };
+
+        list[F_PORTAL] = FilterInfo{
+            CAT_48, 1, 1, 0, 1, 1,
+            ":icons/portal.png",
+            "Ruined portal",
+            "Generate in all biomes, so the lower 48-bits of the seed are "
+            "sufficient ."
         };
     }
 }

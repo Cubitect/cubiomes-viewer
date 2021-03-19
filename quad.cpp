@@ -402,7 +402,7 @@ QWorld::QWorld(int mc, int64_t seed)
     structlv = 3;
     int pixs = 512;
     lvs.resize(D_SPAWN);
-    for (int stype = 0; stype < D_SPAWN; stype++)
+    for (int stype = D_DESERT; stype < D_SPAWN; stype++)
         lvs[stype].init4struct(mc, seed, 2048, stype);
     lv.resize(5);
     lv[0].init4map(mc, seed, pixs, 1);
@@ -414,7 +414,6 @@ QWorld::QWorld(int mc, int64_t seed)
     qual = 1.0;
 
     memset(sshow, 0, sizeof(sshow));
-    showgrid = true;
 
     icons[D_DESERT]     = QPixmap(":/icons/desert.png");
     icons[D_JUNGLE]     = QPixmap(":/icons/jungle.png");
@@ -552,7 +551,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
                 QRect rec(px,pz,ps,ps);
                 painter.drawImage(rec, *q->img);
 
-                if (!showgrid)
+                if (!sshow[D_GRID])
                     continue;
                 QString s = QString::asprintf("%d,%d", q->ti*q->blocks, q->tj*q->blocks);
                 QRect textrec = painter.fontMetrics()
@@ -571,7 +570,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
 
     if (activelv < structlv)
     {
-        for (int stype = 0; stype < D_SPAWN; stype++)
+        for (int stype = D_DESERT; stype < D_SPAWN; stype++)
         {
             Level& l = lvs[stype];
             if (!sshow[stype])
@@ -679,7 +678,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
         else
             lv[li].update(cached, 0, 0, 0, 0);
     }
-    for (int stype = 0; stype < D_SPAWN; stype++)
+    for (int stype = D_DESERT; stype < D_SPAWN; stype++)
     {
         if (activelv < structlv && sshow[stype])
             lvs[stype].update(cachedstruct, bx0, bz0, bx1, bz1);

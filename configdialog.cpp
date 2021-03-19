@@ -7,7 +7,6 @@ void Config::reset()
 {
     restoreSession = true;
     smoothMotion = true;
-    showGrid = true;
     seedsPerItem = 1024;
     queueSize = QThread::idealThreadCount();
     maxMatching = 65536;
@@ -35,7 +34,6 @@ void ConfigDialog::initSettings(Config *config)
 {
     ui->checkRestore->setChecked(config->restoreSession);
     ui->checkSmooth->setChecked(config->smoothMotion);
-    ui->checkGrid->setChecked(config->showGrid);
     ui->cboxItemSize->setCurrentText(QString::number(config->seedsPerItem));
     ui->lineQueueSize->setText(QString::number(config->queueSize));
     ui->lineMatching->setText(QString::number(config->maxMatching));
@@ -45,7 +43,6 @@ Config ConfigDialog::getConfig()
 {
     conf.restoreSession = ui->checkRestore->isChecked();
     conf.smoothMotion = ui->checkSmooth->isChecked();
-    conf.showGrid = ui->checkGrid->isChecked();
     conf.seedsPerItem = ui->cboxItemSize->currentText().toInt();
     conf.queueSize = ui->lineQueueSize->text().toInt();
     conf.maxMatching = ui->lineMatching->text().toInt();

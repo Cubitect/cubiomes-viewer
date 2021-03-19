@@ -432,13 +432,23 @@ void FilterDialog::on_buttonUncheck_clicked()
     }
 }
 
-void FilterDialog::on_buttonCheck_clicked()
+void FilterDialog::on_buttonInclude_clicked()
 {
     for (int i = 0; i < 256; i++)
     {
         QCheckBox *cb = biomecboxes[i];
         if (cb)
             cb->setCheckState(cb->isEnabled() ? Qt::PartiallyChecked : Qt::Unchecked);
+    }
+}
+
+void FilterDialog::on_buttonExclude_clicked()
+{
+    for (int i = 0; i < 256; i++)
+    {
+        QCheckBox *cb = biomecboxes[i];
+        if (cb)
+            cb->setCheckState(cb->isEnabled() ? Qt::Checked : Qt::Unchecked);
     }
 }
 

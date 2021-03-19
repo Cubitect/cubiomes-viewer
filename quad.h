@@ -10,6 +10,7 @@
 
 enum {
     D_NONE = -1,
+    D_GRID,
     D_DESERT,
     D_JUNGLE,
     D_IGLOO,
@@ -120,7 +121,6 @@ struct QWorld
     unsigned int cachesize;
 
     bool sshow[STRUCT_NUM];
-    bool showgrid;
 
     // spawn and strongholds will be filled by a designated worker thread once results are done
     QAtomicPointer<Pos> spawn;

@@ -48,6 +48,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->toolBar->addSeparator();
 
     saction.resize(STRUCT_NUM);
+    addMapAction(D_GRID, "grid", "Show grid");
+    ui->toolBar->addSeparator();
     addMapAction(D_DESERT, "desert", "Show desert pyramid");
     addMapAction(D_JUNGLE, "jungle", "Show jungle temples");
     addMapAction(D_IGLOO, "igloo", "Show igloos");
@@ -62,6 +64,8 @@ MainWindow::MainWindow(QWidget *parent) :
     addMapAction(D_PORTAL, "portal", "Show ruined portals");
     addMapAction(D_SPAWN, "spawn", "Show world spawn");
     addMapAction(D_STRONGHOLD, "stronghold", "Show strongholds");
+
+    saction[D_GRID]->setChecked(true);
 
     ui->splitterMap->setSizes(QList<int>({8000, 10000}));
     ui->splitterSearch->setSizes(QList<int>({1000, 2000}));
@@ -190,7 +194,6 @@ void MainWindow::saveSettings()
     settings.setValue("mainwindow/pos", pos());
     settings.setValue("config/restoreSession", config.restoreSession);
     settings.setValue("config/smoothMotion", config.smoothMotion);
-    settings.setValue("config/showGrid", config.showGrid);
     settings.setValue("config/seedsPerItem", config.seedsPerItem);
     settings.setValue("config/queueSize", config.queueSize);
     settings.setValue("config/maxMatching", config.maxMatching);
@@ -219,20 +222,11 @@ void MainWindow::loadSettings()
     move(settings.value("mainwindow/pos", pos()).toPoint());
     config.restoreSession = settings.value("config/restoreSession", config.restoreSession).toBool();
     config.smoothMotion = settings.value("config/smoothMotion", config.smoothMotion).toBool();
-    config.showGrid = settings.value("config/showGrid", config.showGrid).toBool();
     config.seedsPerItem = settings.value("config/seedsPerItem", config.seedsPerItem).toInt();
     config.queueSize = settings.value("config/queueSize", config.queueSize).toInt();
     config.maxMatching = settings.value("config/maxMatching", config.maxMatching).toInt();
 
     ui->mapView->setSmoothMotion(config.smoothMotion);
-    ui->mapView->setShowGrid(config.showGrid);
-
-    for (int stype = 0; stype < STRUCT_NUM; stype++)
-    {
-        bool s = settings.value("map/show" + QString::number(stype), false).toBool();
-        saction[stype]->setChecked(s);
-        ui->mapView->setShow(stype, s);
-    }
 
     if (config.restoreSession)
     {
@@ -247,6 +241,13 @@ void MainWindow::loadSettings()
         qreal x = settings.value("map/x", 0).toDouble();
         qreal z = settings.value("map/z", 0).toDouble();
         qreal scale = settings.value("map/scale", 16).toDouble();
+
+        for (int stype = 0; stype < STRUCT_NUM; stype++)
+        {
+            bool s = settings.value("map/show" + QString::number(stype), false).toBool();
+            saction[stype]->setChecked(s);
+            ui->mapView->setShow(stype, s);
+        }
         mapGoto(x, z, scale);
         loadProgress("session.save", true);
     }
@@ -767,7 +768,6 @@ void MainWindow::on_actionPreferences_triggered()
     {
         config = dialog->getConfig();
         ui->mapView->setSmoothMotion(config.smoothMotion);
-        ui->mapView->setShowGrid(config.showGrid);
     }
 }
 

@@ -345,10 +345,11 @@ L_qm_any:
     case F_IGLOO:
         sconf = mc <= MC_1_12 ? IGLOO_CONFIG_112 : IGLOO_CONFIG;
         goto L_struct_any;
-    case F_MONUMENT:    sconf = MONUMENT_CONFIG;    goto L_struct_any;
-    case F_VILLAGE:     sconf = VILLAGE_CONFIG;     goto L_struct_any;
-    case F_OUTPOST:     sconf = OUTPOST_CONFIG;     goto L_struct_any;
-    case F_MANSION:     sconf = MANSION_CONFIG;     goto L_struct_any;
+    case F_MONUMENT:    sconf = MONUMENT_CONFIG;        goto L_struct_any;
+    case F_VILLAGE:     sconf = VILLAGE_CONFIG;         goto L_struct_any;
+    case F_OUTPOST:     sconf = OUTPOST_CONFIG;         goto L_struct_any;
+    case F_MANSION:     sconf = MANSION_CONFIG;         goto L_struct_any;
+    case F_PORTAL:      sconf = RUINED_PORTAL_CONFIG;   goto L_struct_any;
 
 L_struct_any:
         x1 = cond->x1;
