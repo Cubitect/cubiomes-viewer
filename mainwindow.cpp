@@ -236,16 +236,25 @@ void MainWindow::loadSettings()
         ui->spinThreads->setValue(threads);
         ui->checkStop->setChecked(stoponres);
 
-        int mc = settings.value("map/mc", MC_1_16).toInt();
-        int64_t seed = settings.value("map/seed", 0).toLongLong();
+        int mc = MC_1_16;
+        int64_t seed = 0;
+        getSeed(&mc, &seed, true);
+        mc = settings.value("map/mc", mc).toInt();
+        seed = settings.value("map/seed", QVariant::fromValue(seed)).toLongLong();
         setSeed(mc, seed);
-        qreal x = settings.value("map/x", 0).toDouble();
-        qreal z = settings.value("map/z", 0).toDouble();
-        qreal scale = settings.value("map/scale", 16).toDouble();
+
+        qreal x = ui->mapView->getX();
+        qreal z = ui->mapView->getZ();
+        qreal scale = ui->mapView->getScale();
+
+        x = settings.value("map/x", x).toDouble();
+        z = settings.value("map/z", z).toDouble();
+        scale = settings.value("map/scale", scale).toDouble();
 
         for (int stype = 0; stype < STRUCT_NUM; stype++)
         {
-            bool s = settings.value("map/show" + QString::number(stype), false).toBool();
+            bool s = ui->mapView->getShow(stype);
+            s = settings.value("map/show" + QString::number(stype), s).toBool();
             saction[stype]->setChecked(s);
             ui->mapView->setShow(stype, s);
         }

@@ -239,7 +239,7 @@ static const struct FilterList
         };
 
         list[F_MONUMENT] = FilterInfo{
-            CAT_FULL, 1, 1, 0, 1, 1, MC_1_13,
+            CAT_FULL, 1, 1, 0, 1, 1, MC_1_8,
             ":icons/monument.png",
             "Ocean monument",
             ""

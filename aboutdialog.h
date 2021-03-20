@@ -5,7 +5,7 @@
 
 #define VERS_MAJOR 1
 #define VERS_MINOR 4
-#define VERS_PATCH 0
+#define VERS_PATCH 1
 
 // returns +1 if newer, -1 if older  and 0 if equal
 inline int cmpVers(int major, int minor, int patch)
