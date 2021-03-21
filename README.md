@@ -28,9 +28,9 @@ $ make
 ```
 build cubiomes-viewer
 ```
-mkdir ../build
-cd ../build
-qmake ..
-make
+$ mkdir ../build
+$ cd ../build
+$ qmake ..
+$ make
 ```
 
