@@ -11,3 +11,26 @@ Precompiled binaries can be found for Linux and Windows under [Releases on githu
 
 For the linux build you will probably have to add the executable flags to the binary (github seems to remove them upon upload).
 
+## Build from source
+
+Install Qt5 development files
+```
+$ sudo apt install build-essential qt5-default
+```
+get sources
+```
+$ git clone --recursive https://github.com/Cubitect/cubiomes-viewer.git
+```
+compile cubiomes library
+```
+$ cd cubiomes-viewer/cubiomes/
+$ make
+```
+build cubiomes-viewer
+```
+mkdir ../build
+cd ../build
+qmake ..
+make
+```
+
