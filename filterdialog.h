@@ -59,7 +59,7 @@ class FilterDialog : public QDialog
 
 public:
 
-    explicit FilterDialog(MainWindow *parent, QListWidgetItem *item = 0, Condition *initcond = 0);
+    explicit FilterDialog(MainWindow *parent, int mc, QListWidgetItem *item = 0, Condition *initcond = 0);
     ~FilterDialog();
 
     void updateMode();
@@ -96,6 +96,7 @@ private:
 public:
     QListWidgetItem *item;
     Condition cond;
+    int mc;
 };
 
 #endif // FILTERDIALOG_H

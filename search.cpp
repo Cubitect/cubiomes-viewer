@@ -333,23 +333,17 @@ L_qm_any:
         return 0;
 
 
-    case F_DESERT:
-        sconf = mc <= MC_1_12 ? DESERT_PYRAMID_CONFIG_112 : DESERT_PYRAMID_CONFIG;
-        goto L_struct_any;
-    case F_HUT:
-        sconf = mc <= MC_1_12 ? SWAMP_HUT_CONFIG_112 : SWAMP_HUT_CONFIG;
-        goto L_struct_any;
-    case F_JUNGLE:
-        sconf = mc <= MC_1_12 ? JUNGLE_PYRAMID_CONFIG_112 : JUNGLE_PYRAMID_CONFIG;
-        goto L_struct_any;
-    case F_IGLOO:
-        sconf = mc <= MC_1_12 ? IGLOO_CONFIG_112 : IGLOO_CONFIG;
-        goto L_struct_any;
-    case F_MONUMENT:    sconf = MONUMENT_CONFIG;        goto L_struct_any;
-    case F_VILLAGE:     sconf = VILLAGE_CONFIG;         goto L_struct_any;
-    case F_OUTPOST:     sconf = OUTPOST_CONFIG;         goto L_struct_any;
-    case F_MANSION:     sconf = MANSION_CONFIG;         goto L_struct_any;
-    case F_PORTAL:      sconf = RUINED_PORTAL_CONFIG;   goto L_struct_any;
+    case F_DESERT:      sconf = getConfig(Desert_Pyramid, mc);  goto L_struct_any;
+    case F_HUT:         sconf = getConfig(Swamp_Hut, mc);       goto L_struct_any;
+    case F_JUNGLE:      sconf = getConfig(Jungle_Pyramid, mc);  goto L_struct_any;
+    case F_IGLOO:       sconf = getConfig(Igloo, mc);           goto L_struct_any;
+    case F_MONUMENT:    sconf = getConfig(Monument, mc);        goto L_struct_any;
+    case F_VILLAGE:     sconf = getConfig(Village, mc);         goto L_struct_any;
+    case F_OUTPOST:     sconf = getConfig(Outpost, mc);         goto L_struct_any;
+    case F_MANSION:     sconf = getConfig(Mansion, mc);         goto L_struct_any;
+    case F_RUINS:       sconf = getConfig(Ocean_Ruin, mc);      goto L_struct_any;
+    case F_SHIPWRECK:   sconf = getConfig(Shipwreck, mc);       goto L_struct_any;
+    case F_PORTAL:      sconf = getConfig(Ruined_Portal, mc);   goto L_struct_any;
 
 L_struct_any:
         x1 = cond->x1;

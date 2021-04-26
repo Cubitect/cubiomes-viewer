@@ -40,13 +40,18 @@ static QString getTip(int mc, int layer, int id)
 }
 
 
-FilterDialog::FilterDialog(MainWindow *parent, QListWidgetItem *item, Condition *initcond) :
+FilterDialog::FilterDialog(MainWindow *parent, int mcversion, QListWidgetItem *item, Condition *initcond) :
     QDialog(parent, Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint),
     ui(new Ui::FilterDialog),
-    item(item)
+    item(item),
+    mc(mcversion)
 {
     memset(&cond, 0, sizeof(cond));
     ui->setupUi(this);
+
+    QString mcs = "MC ";
+    mcs += (mc2str(mc) ? mc2str(mc) : "?");
+    ui->labelMC->setText(mcs);
 
     for (int i = 1; i < FILTER_MAX; i++)
     {
@@ -55,6 +60,8 @@ FilterDialog::FilterDialog(MainWindow *parent, QListWidgetItem *item, Condition 
             ui->comboBoxType->addItem(QIcon(ft.icon), ft.name, i);
         else
             ui->comboBoxType->addItem(ft.name, i);
+        if (mc < ft.mcmin)
+            ui->comboBoxType->setItemData(i, false, Qt::UserRole-1); // deactivate
     }
 
     int initindex = 0;
@@ -357,7 +364,7 @@ void FilterDialog::updateBiomeSelection()
         ui->tabBiomes->setEnabled(false);
     }
 
-    if (ft.layer == L13_OCEAN_TEMP_256)
+    if (ft.layer == L_OCEAN_TEMP_256)
     {
         for (int i = 0; i < 256; i++)
         {
@@ -383,11 +390,11 @@ void FilterDialog::updateBiomeSelection()
                 continue;
 
             uint64_t mL = 0, mM = 0;
-            genPotential(&mL, &mM, ft.layer, MC_1_16, i);
+            genPotential(&mL, &mM, ft.layer, mc, i);
             if (mL || mM)
             {
                 cb->setEnabled(true);
-                if (ft.layer != L_VORONOI_ZOOM_1)
+                if (ft.layer != L_VORONOI_1)
                 {
                     QString tip = "Generates any of:";
                     for (int j = 0; j < 64; j++)

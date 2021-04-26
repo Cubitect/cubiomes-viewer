@@ -183,14 +183,27 @@
    <item row="0" column="0" colspan="2">
     <layout class="QGridLayout" name="gridLayout_2">
      <item row="0" column="0">
+      <widget class="QLabel" name="labelMC">
+       <property name="text">
+        <string>MC: 1.X</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1" alignment="Qt::AlignRight">
       <widget class="QLabel" name="labelFilterType">
        <property name="text">
         <string>Filter type:</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
+     <item row="0" column="2">
       <widget class="QComboBox" name="comboBoxType">
+       <property name="minimumSize">
+        <size>
+         <width>260</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="maxVisibleItems">
         <number>20</number>
        </property>
@@ -210,7 +223,7 @@
        </item>
       </widget>
      </item>
-     <item row="1" column="0" colspan="2">
+     <item row="1" column="0" colspan="3">
       <widget class="QGroupBox" name="verticalGroupBox">
        <property name="title">
         <string>Description</string>

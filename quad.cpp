@@ -219,35 +219,24 @@ void Level::init4map(int mcversion, int64_t ws, int pix, int layerscale)
         break;
     case 16:
         if (mc >= MC_1_13) {
-            setupMultiLayer(g.entry_1,
-                            &g.layers[L_SHORE_16],
-                            &g.layers[L13_ZOOM_16],
-                            0, mapOceanMixMod);
-            entry = g.entry_1;
+            entry = setupLayer(&g, L_VORONOI_1, &mapOceanMixMod, mc, 1, 0, 0, &g.layers[L_SHORE_16], &g.layers[L_ZOOM_16_OCEAN]);
         } else {
-            entry = &g.layers[L_SHORE_16];
+            entry = g.entry_16;
         }
         break;
     case 64:
         if (mc >= MC_1_13) {
-            setupMultiLayer(g.entry_1,
-                            &g.layers[L_RARE_BIOME_64],
-                            &g.layers[L13_ZOOM_64],
-                            0, mapOceanMixMod);
-            entry = g.entry_1;
+            entry = setupLayer(&g, L_VORONOI_1, &mapOceanMixMod, mc, 1, 0, 0, &g.layers[L_SUNFLOWER_64], &g.layers[L_ZOOM_64_OCEAN]);
         } else {
-            entry = &g.layers[L_RARE_BIOME_64];
+            entry = g.entry_64;
         }
         break;
     case 256:
         if (mc >= MC_1_13) {
-            setupMultiLayer(g.entry_1,
-                            &g.layers[L_BIOME_256],
-                            &g.layers[L13_OCEAN_TEMP_256],
-                            0, mapOceanMixMod);
-            entry = g.entry_1;
+            int layerid = mc >= MC_1_14 ? L_BAMBOO_256 : L_BIOME_256;
+            entry = setupLayer(&g, L_VORONOI_1, &mapOceanMixMod, mc, 1, 0, 0, &g.layers[layerid], &g.layers[L_OCEAN_TEMP_256]);
         } else {
-            entry = &g.layers[L_BIOME_256];
+            entry = g.entry_256;
         }
         break;
     default:
@@ -258,7 +247,7 @@ void Level::init4map(int mcversion, int64_t ws, int pix, int layerscale)
     setLayerSeed(entry, seed);
 }
 
-void Level::init4struct(int mcversion, int64_t ws, int b, int structtype)
+void Level::init4struct(int mcversion, int64_t ws, int b, int structtype, int lv)
 {
     mc = mcversion;
     seed = ws;
@@ -266,6 +255,7 @@ void Level::init4struct(int mcversion, int64_t ws, int b, int structtype)
     pixs = -1;
     scale = -1;
     stype = structtype;
+    viewlv = lv;
 }
 
 static int sqdist(int x, int z) { return x*x + z*z; }
@@ -380,7 +370,6 @@ QWorld::QWorld(int mc, int64_t seed)
     , lv()
     , lvs()
     , activelv()
-    , structlv()
     , cached()
     , cachedstruct()
     , cachesize()
@@ -402,11 +391,21 @@ QWorld::QWorld(int mc, int64_t seed)
     applySeed(&g, seed);
 
     activelv = 0;
-    structlv = 3;
+
     int pixs = 512;
     lvs.resize(D_SPAWN);
-    for (int stype = D_DESERT; stype < D_SPAWN; stype++)
-        lvs[stype].init4struct(mc, seed, 2048, stype);
+    lvs[D_DESERT].init4struct(mc, seed, 2048, D_DESERT, 2);
+    lvs[D_JUNGLE].init4struct(mc, seed, 2048, D_JUNGLE, 2);
+    lvs[D_IGLOO].init4struct(mc, seed, 2048, D_IGLOO, 2);
+    lvs[D_HUT].init4struct(mc, seed, 2048, D_HUT, 2);
+    lvs[D_VILLAGE].init4struct(mc, seed, 2048, D_VILLAGE, 2);
+    lvs[D_MANSION].init4struct(mc, seed, 2048, D_MANSION, 3);
+    lvs[D_MONUMENT].init4struct(mc, seed, 2048, D_MONUMENT, 2);
+    lvs[D_RUINS].init4struct(mc, seed, 2048, D_RUINS, 1);
+    lvs[D_SHIPWRECK].init4struct(mc, seed, 2048, D_SHIPWRECK, 1);
+    lvs[D_TREASURE].init4struct(mc, seed, 2048, D_TREASURE, 1);
+    lvs[D_OUTPOST].init4struct(mc, seed, 2048, D_OUTPOST, 2);
+    lvs[D_PORTAL].init4struct(mc, seed, 2048, D_PORTAL, 1);
     lv.resize(5);
     lv[0].init4map(mc, seed, pixs, 1);
     lv[1].init4map(mc, seed, pixs, 4);
@@ -614,58 +613,56 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
         painter.drawImage(rec, slimeimg);
     }
 
-    if (activelv < structlv)
+
+    for (int stype = D_DESERT; stype < D_SPAWN; stype++)
     {
-        for (int stype = D_DESERT; stype < D_SPAWN; stype++)
+        Level& l = lvs[stype];
+        if (!sshow[stype] || activelv > l.viewlv)
+            continue;
+
+        std::vector<QPainter::PixmapFragment> frags;
+
+        for (Quad *q : l.cells)
         {
-            Level& l = lvs[stype];
-            if (!sshow[stype])
+            if (!q->spos)
                 continue;
-
-            std::vector<QPainter::PixmapFragment> frags;
-
-            for (Quad *q : l.cells)
+            // q was processed in another thread and is now done
+            for (VarPos& vp : *q->spos)
             {
-                if (!q->spos)
+                qreal x = vw/2 + (vp.p.x - focusx) * blocks2pix;
+                qreal y = vh/2 + (vp.p.z - focusz) * blocks2pix;
+                if (x < 0 || x >= vw || y < 0 || y >= vh)
                     continue;
-                // q was processed in another thread and is now done
-                for (VarPos& vp : *q->spos)
-                {
-                    qreal x = vw/2 + (vp.p.x - focusx) * blocks2pix;
-                    qreal y = vh/2 + (vp.p.z - focusz) * blocks2pix;
-                    if (x < 0 || x >= vw || y < 0 || y >= vh)
-                        continue;
 
-                    QPointF d = QPointF(x, y);
-                    QRectF r = icons[stype].rect();
-                    if (stype == D_VILLAGE)
-                    {
-                        if (vp.variant) {
-                            painter.drawPixmap(x-r.width()/2, y-r.height()/2, iconzvil);
-                        } else {
-                            frags.push_back(QPainter::PixmapFragment::create(d, r));
-                        }
-                    }
-                    else
-                    {
+                QPointF d = QPointF(x, y);
+                QRectF r = icons[stype].rect();
+                if (stype == D_VILLAGE)
+                {
+                    if (vp.variant) {
+                        painter.drawPixmap(x-r.width()/2, y-r.height()/2, iconzvil);
+                    } else {
                         frags.push_back(QPainter::PixmapFragment::create(d, r));
                     }
+                }
+                else
+                {
+                    frags.push_back(QPainter::PixmapFragment::create(d, r));
+                }
 
-                    if (seldo)
+                if (seldo)
+                {
+                    r.moveCenter(d);
+                    if (r.contains(selx, selz))
                     {
-                        r.moveCenter(d);
-                        if (r.contains(selx, selz))
-                        {
-                            seltype = stype;
-                            selpos = vp.p;
-                            selvar = vp.variant;
-                        }
+                        seltype = stype;
+                        selpos = vp.p;
+                        selvar = vp.variant;
                     }
                 }
             }
-
-            painter.drawPixmapFragments(frags.data(), frags.size(), icons[stype]);
         }
+
+        painter.drawPixmapFragments(frags.data(), frags.size(), icons[stype]);
     }
 
     Pos* sp = spawn; // atomic fetch
@@ -726,10 +723,11 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
     }
     for (int stype = D_DESERT; stype < D_SPAWN; stype++)
     {
-        if (activelv < structlv && sshow[stype])
-            lvs[stype].update(cachedstruct, bx0, bz0, bx1, bz1);
-        else
-            lvs[stype].update(cachedstruct, 0, 0, 0, 0);
+        Level& l = lvs[stype];
+        if (activelv <= l.viewlv && sshow[stype])
+            l.update(cachedstruct, bx0, bz0, bx1, bz1);
+        else if (activelv > l.viewlv+1)
+            l.update(cachedstruct, 0, 0, 0, 0);
     }
 
     // start the spawn and stronghold worker thread if this is the first run

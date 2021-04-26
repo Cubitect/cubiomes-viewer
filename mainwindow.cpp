@@ -431,7 +431,9 @@ void MainWindow::editCondition(QListWidgetItem *item)
 {
     if (!(item->flags() & Qt::ItemIsSelectable))
         return;
-    FilterDialog *dialog = new FilterDialog(this, item, (Condition*)item->data(Qt::UserRole).data());
+    int mc = MC_1_16;
+    getSeed(&mc, 0);
+    FilterDialog *dialog = new FilterDialog(this, mc, item, (Condition*)item->data(Qt::UserRole).data());
     QObject::connect(dialog, SIGNAL(setCond(QListWidgetItem*,Condition)), this, SLOT(addItemCondition(QListWidgetItem*,Condition)), Qt::QueuedConnection);
     dialog->show();
 }
@@ -577,7 +579,9 @@ void MainWindow::on_buttonEdit_clicked()
 
 void MainWindow::on_buttonAddFilter_clicked()
 {
-    FilterDialog *dialog = new FilterDialog(this);
+    int mc;
+    getSeed(&mc, 0);
+    FilterDialog *dialog = new FilterDialog(this, mc);
     QObject::connect(dialog, SIGNAL(setCond(QListWidgetItem*,Condition)), this, SLOT(addItemCondition(QListWidgetItem*,Condition)), Qt::QueuedConnection);
     dialog->show();
 }

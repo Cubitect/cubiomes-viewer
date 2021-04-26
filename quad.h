@@ -77,7 +77,7 @@ struct Level
     ~Level();
 
     void init4map(int mc, int64_t ws, int pix, int layerscale);
-    void init4struct(int mc, int64_t ws, int blocks, int stype);
+    void init4struct(int mc, int64_t ws, int blocks, int stype, int viewlv);
 
     void resizeLevel(std::vector<Quad*>& cache, int x, int z, int w, int h);
     void update(std::vector<Quad*>& cache, qreal bx0, qreal bz0, qreal bx1, qreal bz1);
@@ -92,6 +92,7 @@ struct Level
     int blocks;
     int pixs;
     int stype;
+    int viewlv;
 };
 
 
@@ -111,10 +112,9 @@ struct QWorld
 
     // the visible area is managed in Quads of different scales (for biomes and structures),
     // which are managed in rectangular sections as levels
-    std::vector<Level> lv;  // levels for biomes
-    std::vector<Level> lvs; // levels for structures
-    int activelv;           // currently visible level
-    int structlv;           // currently visible structure level
+    std::vector<Level> lv;      // levels for biomes
+    std::vector<Level> lvs;     // levels for structures
+    int activelv;               // currently visible level
 
     // processed Quads are cached until they are too far out of view
     std::vector<Quad*> cached;

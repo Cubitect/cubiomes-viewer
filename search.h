@@ -15,13 +15,13 @@ enum
 
 struct FilterInfo
 {
-    int cat;
-    bool coord;
-    bool area;
-    int layer;
-    int step;
-    int count;
-    int mcmin;
+    int cat;    // seed source category
+    bool coord; // requires coordinate entry
+    bool area;  // requires area entry
+    int layer;  // associated generator layer
+    int step;   // coordinate multiplier
+    int count;  //
+    int mcmin;  // minimum version
     const char *icon;
     const char *name;
     const char *desription;
@@ -55,6 +55,8 @@ enum
     F_OUTPOST,
     F_MANSION,
     F_TREASURE,
+    F_RUINS,
+    F_SHIPWRECK,
     F_PORTAL,
     FILTER_MAX,
 };
@@ -67,14 +69,14 @@ static const struct FilterList
     FilterList() : list{}
     {
         list[F_SELECT] = FilterInfo{
-            CAT_NONE, 0, 0, 0, 0, 0, MC_1_7,
+            CAT_NONE, 0, 0, 0, 0, 0, MC_1_0,
             NULL,
             "",
             ""
         };
 
         list[F_QH_IDEAL] = FilterInfo{
-            CAT_48, 1, 1, 0, 512, 0, MC_1_7,
+            CAT_48, 1, 1, 0, 512, 0, MC_1_4,
             ":icons/quad.png",
             "Quad-hut (ideal)",
             "The lower 48-bits provide potential for four swamp huts in "
@@ -82,7 +84,7 @@ static const struct FilterList
         };
 
         list[F_QH_CLASSIC] = FilterInfo{
-            CAT_48, 1, 1, 0, 512, 0, MC_1_7,
+            CAT_48, 1, 1, 0, 512, 0, MC_1_4,
             ":icons/quad.png",
             "Quad-hut (classic)",
             "The lower 48-bits provide potential for four swamp huts in "
@@ -92,7 +94,7 @@ static const struct FilterList
         };
 
         list[F_QH_NORMAL] = FilterInfo{
-            CAT_48, 1, 1, 0, 512, 0, MC_1_7,
+            CAT_48, 1, 1, 0, 512, 0, MC_1_4,
             ":icons/quad.png",
             "Quad-hut (normal)",
             "The lower 48-bits provide potential for four swamp huts in "
@@ -102,7 +104,7 @@ static const struct FilterList
         };
 
         list[F_QH_BARELY] = FilterInfo{
-            CAT_48, 1, 1, 0, 512, 0, MC_1_7,
+            CAT_48, 1, 1, 0, 512, 0, MC_1_4,
             ":icons/quad.png",
             "Quad-hut (barely)",
             "The lower 48-bits provide potential for four swamp huts in "
@@ -111,7 +113,7 @@ static const struct FilterList
         };
 
         list[F_QM_95] = FilterInfo{
-            CAT_48, 1, 1, 0, 512, 0, MC_1_13,
+            CAT_48, 1, 1, 0, 512, 0, MC_1_8,
             ":icons/quad.png",
             "Quad-ocean-monument (>95%)",
             "The lower 48-bits provide potential for 95% of the area of "
@@ -120,7 +122,7 @@ static const struct FilterList
         };
 
         list[F_QM_90] = FilterInfo{
-            CAT_48, 1, 1, 0, 512, 0, MC_1_13,
+            CAT_48, 1, 1, 0, 512, 0, MC_1_8,
             ":icons/quad.png",
             "Quad-ocean-monument (>90%)",
             "The lower 48-bits provide potential for 90% of the area of "
@@ -129,7 +131,7 @@ static const struct FilterList
         };
 
         list[F_BIOME] = FilterInfo{
-            CAT_FULL, 1, 1, L_VORONOI_ZOOM_1, 1, 0, MC_1_7,
+            CAT_FULL, 1, 1, L_VORONOI_1, 1, 0, MC_1_0,
             ":icons/map.png",
             "Biome filter 1:1",
             "Only seeds with the included (+) biomes in the specified area and "
@@ -137,7 +139,7 @@ static const struct FilterList
         };
 
         list[F_BIOME_4_RIVER] = FilterInfo{
-            CAT_FULL, 1, 1, L_RIVER_MIX_4, 4, 0, MC_1_7,
+            CAT_FULL, 1, 1, L_RIVER_MIX_4, 4, 0, MC_1_0,
             ":icons/map.png",
             "Biome filter 1:4 RIVER",
             "Only seeds with the included (+) biomes in the specified area and "
@@ -146,7 +148,7 @@ static const struct FilterList
         };
 
         list[F_BIOME_16_SHORE] = FilterInfo{
-            CAT_FULL, 1, 1, L_SHORE_16, 16, 0, MC_1_7,
+            CAT_FULL, 1, 1, L_SHORE_16, 16, 0, MC_1_0,
             ":icons/map.png",
             "Biome filter 1:16 SHORE",
             "Only seeds with the included (+) biomes in the specified area and "
@@ -155,7 +157,7 @@ static const struct FilterList
         };
 
         list[F_BIOME_64_RARE] = FilterInfo{
-            CAT_FULL, 1, 1, L_RARE_BIOME_64, 64, 0, MC_1_7,
+            CAT_FULL, 1, 1, L_SUNFLOWER_64, 64, 0, MC_1_7,
             ":icons/map.png",
             "Biome filter 1:64 RARE",
             "Only seeds with the included (+) biomes in the specified area and "
@@ -164,7 +166,7 @@ static const struct FilterList
         };
 
         list[F_BIOME_256_BIOME] = FilterInfo{
-            CAT_FULL, 1, 1, L_BIOME_256, 256, 0, MC_1_7,
+            CAT_FULL, 1, 1, L_BIOME_256, 256, 0, MC_1_0,
             ":icons/map.png",
             "Biome filter 1:256 BIOME",
             "Only seeds with the included (+) biomes in the specified area and "
@@ -190,42 +192,42 @@ static const struct FilterList
         };
 
         list[F_SLIME] = FilterInfo{
-            CAT_FULL, 1, 1, 0, 16, 1, MC_1_7,
+            CAT_FULL, 1, 1, 0, 16, 1, MC_1_0,
             ":icons/slime.png",
             "Slime chunk",
             ""
         };
 
         list[F_SPAWN] = FilterInfo{
-            CAT_FULL, 1, 1, 0, 1, 0, MC_1_7,
+            CAT_FULL, 1, 1, 0, 1, 0, MC_1_0,
             ":icons/spawn.png",
             "Spawn",
             ""
         };
 
         list[F_STRONGHOLD] = FilterInfo{
-            CAT_FULL, 1, 1, 0, 1, 1, MC_1_7,
+            CAT_FULL, 1, 1, 0, 1, 1, MC_1_0,
             ":icons/stronghold.png",
             "Stronghold",
             ""
         };
 
         list[F_DESERT] = FilterInfo{
-            CAT_FULL, 1, 1, 0, 1, 1, MC_1_7,
+            CAT_FULL, 1, 1, 0, 1, 1, MC_1_3,
             ":icons/desert.png",
             "Desert pyramid",
             ""
         };
 
         list[F_JUNGLE] = FilterInfo{
-            CAT_FULL, 1, 1, 0, 1, 1, MC_1_7,
+            CAT_FULL, 1, 1, 0, 1, 1, MC_1_3,
             ":icons/jungle.png",
             "Jungle temple",
             ""
         };
 
         list[F_HUT] = FilterInfo{
-            CAT_FULL, 1, 1, 0, 1, 1, MC_1_7,
+            CAT_FULL, 1, 1, 0, 1, 1, MC_1_4,
             ":icons/hut.png",
             "Swamp hut",
             ""
@@ -246,7 +248,7 @@ static const struct FilterList
         };
 
         list[F_VILLAGE] = FilterInfo{
-            CAT_FULL, 1, 1, 0, 1, 1, MC_1_7,
+            CAT_FULL, 1, 1, 0, 1, 1, MC_1_0,
             ":icons/village.png",
             "Village",
             ""
@@ -270,6 +272,20 @@ static const struct FilterList
             CAT_FULL, 1, 1, 0, 1, 1, MC_1_13,
             ":icons/treasure.png",
             "Buried treasure",
+            ""
+        };
+
+        list[F_RUINS] = FilterInfo{
+            CAT_FULL, 1, 1, 0, 1, 1, MC_1_13,
+            ":icons/ruins.png",
+            "Ocean ruins",
+            ""
+        };
+
+        list[F_SHIPWRECK] = FilterInfo{
+            CAT_FULL, 1, 1, 0, 1, 1, MC_1_13,
+            ":icons/shipwreck.png",
+            "Shipwreck",
             ""
         };
 
