@@ -55,13 +55,13 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="2">
-           <widget class="QLabel" name="labelSeed">
+          <item row="0" column="0">
+           <widget class="QLabel" name="labeMC">
             <property name="toolTip">
-             <string>Seed can be an integer or text. Leave empty for a random seed</string>
+             <string>Minecraft version</string>
             </property>
             <property name="text">
-             <string>seed:</string>
+             <string>MC</string>
             </property>
            </widget>
           </item>
@@ -81,13 +81,13 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="labeMC">
+          <item row="0" column="2">
+           <widget class="QLabel" name="labelSeed">
             <property name="toolTip">
-             <string>Minecraft version</string>
+             <string>Seed can be an integer or text. Leave empty for a random seed</string>
             </property>
             <property name="text">
-             <string>MC</string>
+             <string>seed:</string>
             </property>
            </widget>
           </item>
@@ -158,7 +158,7 @@
         <item>
          <widget class="QTabWidget" name="tabContainer">
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="tabSearch">
            <attribute name="title">
@@ -530,6 +530,165 @@
                 </item>
                </layout>
               </widget>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="tabAnalysis">
+           <attribute name="title">
+            <string>Analysis</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout_7">
+            <item row="0" column="0">
+             <widget class="QLabel" name="labelSquareArea">
+              <property name="text">
+               <string>Within centred square of side =</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="lineRadius">
+              <property name="text">
+               <string>0</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2" colspan="2">
+             <widget class="QCheckBox" name="cboxArea">
+              <property name="toolTip">
+               <string>Specify manual rectangle rather than square</string>
+              </property>
+              <property name="text">
+               <string>Custom area</string>
+              </property>
+              <property name="checkable">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0" colspan="2">
+             <layout class="QHBoxLayout" name="horizontalLayout_2">
+              <item>
+               <widget class="QLabel" name="labelX1">
+                <property name="toolTip">
+                 <string>Lower bound (inclusive)</string>
+                </property>
+                <property name="text">
+                 <string>X&lt;sub&gt;1&lt;/sub&gt;=</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="lineEditX1">
+                <property name="toolTip">
+                 <string>Lower bound (inclusive)</string>
+                </property>
+                <property name="text">
+                 <string>0</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="labelZ1">
+                <property name="toolTip">
+                 <string>Lower bound (inclusive)</string>
+                </property>
+                <property name="text">
+                 <string>Z&lt;sub&gt;1&lt;/sub&gt;=</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="lineEditZ1">
+                <property name="toolTip">
+                 <string>Lower bound (inclusive)</string>
+                </property>
+                <property name="text">
+                 <string>0</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QLabel" name="labelX2">
+                <property name="toolTip">
+                 <string>Upper bound (inclusive)</string>
+                </property>
+                <property name="text">
+                 <string>X&lt;sub&gt;2&lt;/sub&gt;=</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="lineEditX2">
+                <property name="toolTip">
+                 <string>Upper bound (inclusive)</string>
+                </property>
+                <property name="text">
+                 <string>0</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="labelZ2">
+                <property name="toolTip">
+                 <string>Upper bound (inclusive)</string>
+                </property>
+                <property name="text">
+                 <string>Z&lt;sub&gt;2&lt;/sub&gt;=</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="lineEditZ2">
+                <property name="toolTip">
+                 <string>Upper bound (inclusive)</string>
+                </property>
+                <property name="text">
+                 <string>0</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="1" column="2" colspan="2">
+             <widget class="QPushButton" name="buttonAnalysis">
+              <property name="text">
+               <string>Analyze</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0" colspan="4">
+             <widget class="QTreeView" name="treeAnalysis">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <family>Monospace</family>
+               </font>
+              </property>
+              <property name="dragDropMode">
+               <enum>QAbstractItemView::InternalMove</enum>
+              </property>
+              <property name="selectionMode">
+               <enum>QAbstractItemView::ExtendedSelection</enum>
+              </property>
              </widget>
             </item>
            </layout>
