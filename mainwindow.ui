@@ -158,7 +158,7 @@
         <item>
          <widget class="QTabWidget" name="tabContainer">
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="tabSearch">
            <attribute name="title">
@@ -539,35 +539,8 @@
             <string>Analysis</string>
            </attribute>
            <layout class="QGridLayout" name="gridLayout_7">
-            <item row="0" column="0">
-             <widget class="QLabel" name="labelSquareArea">
-              <property name="text">
-               <string>Within centred square of side =</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QLineEdit" name="lineRadius">
-              <property name="text">
-               <string>0</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="2" colspan="2">
-             <widget class="QCheckBox" name="cboxArea">
-              <property name="toolTip">
-               <string>Specify manual rectangle rather than square</string>
-              </property>
-              <property name="text">
-               <string>Custom area</string>
-              </property>
-              <property name="checkable">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
             <item row="1" column="0" colspan="2">
-             <layout class="QHBoxLayout" name="horizontalLayout_2">
+             <layout class="QHBoxLayout" name="layoutArea">
               <item>
                <widget class="QLabel" name="labelX1">
                 <property name="toolTip">
@@ -663,15 +636,52 @@
               </item>
              </layout>
             </item>
-            <item row="1" column="2" colspan="2">
+            <item row="0" column="0">
+             <widget class="QLabel" name="labelSquareArea">
+              <property name="text">
+               <string>Within centred square of side =</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="0">
+             <widget class="QPushButton" name="buttonExport">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>Export</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0" colspan="4">
              <widget class="QPushButton" name="buttonAnalysis">
               <property name="text">
                <string>Analyze</string>
               </property>
              </widget>
             </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="lineRadius">
+              <property name="text">
+               <string>0</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2" colspan="2">
+             <widget class="QCheckBox" name="cboxArea">
+              <property name="toolTip">
+               <string>Specify manual rectangle rather than square</string>
+              </property>
+              <property name="text">
+               <string>Custom area</string>
+              </property>
+              <property name="checkable">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
             <item row="3" column="0" colspan="4">
-             <widget class="QTreeView" name="treeAnalysis">
+             <widget class="QTreeWidget" name="treeAnalysis">
               <property name="minimumSize">
                <size>
                 <width>0</width>
@@ -683,11 +693,40 @@
                 <family>Monospace</family>
                </font>
               </property>
+              <property name="editTriggers">
+               <set>QAbstractItemView::NoEditTriggers</set>
+              </property>
               <property name="dragDropMode">
-               <enum>QAbstractItemView::InternalMove</enum>
+               <enum>QAbstractItemView::NoDragDrop</enum>
               </property>
               <property name="selectionMode">
                <enum>QAbstractItemView::ExtendedSelection</enum>
+              </property>
+              <property name="sortingEnabled">
+               <bool>true</bool>
+              </property>
+              <property name="columnCount">
+               <number>2</number>
+              </property>
+              <attribute name="headerDefaultSectionSize">
+               <number>280</number>
+              </attribute>
+              <column>
+               <property name="text">
+                <string>object</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>count</string>
+               </property>
+              </column>
+             </widget>
+            </item>
+            <item row="1" column="2" colspan="2">
+             <widget class="QPushButton" name="buttonFromVisible">
+              <property name="text">
+               <string>From visible</string>
               </property>
              </widget>
             </item>

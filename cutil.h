@@ -48,6 +48,29 @@ inline int str2mc(const char *s)
     return -1;
 }
 
+inline const char* struct2str(int stype)
+{
+    switch (stype)
+    {
+    case Desert_Pyramid:    return "Desert_Pyramid";
+    case Jungle_Pyramid:    return "Jungle_Pyramid";
+    case Swamp_Hut:         return "Swamp_Hut";
+    case Igloo:             return "Igloo";
+    case Village:           return "Village";
+    case Ocean_Ruin:        return "Ocean_Ruin";
+    case Shipwreck:         return "Shipwreck";
+    case Monument:          return "Monument";
+    case Mansion:           return "Mansion";
+    case Outpost:           return "Outpost";
+    case Ruined_Portal:     return "Ruined_Portal";
+    case Treasure:          return "Treasure";
+    case Fortress:          return "Fortress";
+    case Bastion:           return "Bastion";
+    case End_City:          return "End_City";
+    }
+    return "?";
+}
+
 // get a random 64-bit integer
 static inline int64_t getRnd64()
 {

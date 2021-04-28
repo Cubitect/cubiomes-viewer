@@ -38,6 +38,9 @@ struct VarPos
     int variant;
 };
 
+void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
+    LayerStack *g, int mc, int64_t seed, int x0, int z0, int x1, int z1);
+
 class Quad : public QRunnable
 {
 public:
@@ -45,7 +48,7 @@ public:
     ~Quad();
 
 
-    std::vector<VarPos> *addStruct(const StructureConfig sconf, LayerStack *g);
+    std::vector<VarPos> *addStruct(const StructureConfig sconf);
     void run();
 
     int mc;

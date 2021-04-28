@@ -18,6 +18,7 @@
 #include <QFileDialog>
 #include <QTextStream>
 #include <QSettings>
+#include <QTreeWidget>
 
 
 QDataStream& operator<<(QDataStream& out, const Condition& v)
@@ -31,6 +32,7 @@ QDataStream& operator>>(QDataStream& in, Condition& v)
     in.readRawData((char*)&v, sizeof(Condition));
     return in;
 }
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -98,6 +100,14 @@ MainWindow::MainWindow(QWidget *parent) :
     searchProgress(0, ~(int64_t)0, 0);
     ui->spinThreads->setMaximum(QThread::idealThreadCount());
     ui->spinThreads->setValue(QThread::idealThreadCount());
+
+    QIntValidator *intval = new QIntValidator(this);
+    ui->lineRadius->setValidator(intval);
+    ui->lineEditX1->setValidator(intval);
+    ui->lineEditZ1->setValidator(intval);
+    ui->lineEditX2->setValidator(intval);
+    ui->lineEditZ2->setValidator(intval);
+    on_cboxArea_toggled(false);
 
     updateSensitivity();
 
@@ -865,6 +875,229 @@ void MainWindow::on_mapView_customContextMenuRequested(const QPoint &pos)
     menu.exec(ui->mapView->mapToGlobal(pos));
 }
 
+void MainWindow::on_cboxArea_toggled(bool checked)
+{
+    ui->labelSquareArea->setEnabled(!checked);
+    ui->lineRadius->setEnabled(!checked);
+    ui->labelX1->setEnabled(checked);
+    ui->labelZ1->setEnabled(checked);
+    ui->labelX2->setEnabled(checked);
+    ui->labelZ2->setEnabled(checked);
+    ui->lineEditX1->setEnabled(checked);
+    ui->lineEditZ1->setEnabled(checked);
+    ui->lineEditX2->setEnabled(checked);
+    ui->lineEditZ2->setEnabled(checked);
+}
+
+void MainWindow::on_lineRadius_editingFinished()
+{
+    on_buttonAnalysis_clicked();
+}
+
+void MainWindow::on_buttonFromVisible_clicked()
+{
+    qreal uiw = ui->mapView->width() * ui->mapView->getScale();
+    qreal uih = ui->mapView->height() * ui->mapView->getScale();
+    int bx0 = (int) floor(ui->mapView->getX() - uiw/2);
+    int bz0 = (int) floor(ui->mapView->getZ() - uih/2);
+    int bx1 = (int) ceil(ui->mapView->getX() + uiw/2);
+    int bz1 = (int) ceil(ui->mapView->getZ() + uih/2);
+
+    ui->cboxArea->setChecked(true);
+    ui->lineEditX1->setText( QString::number(bx0) );
+    ui->lineEditZ1->setText( QString::number(bz0) );
+    ui->lineEditX2->setText( QString::number(bx1) );
+    ui->lineEditZ2->setText( QString::number(bz1) );
+}
+
+void MainWindow::on_buttonAnalysis_clicked()
+{
+    int x1, z1, x2, z2;
+
+    if (ui->lineRadius->isEnabled())
+    {
+        int d = ui->lineRadius->text().toInt();
+        x1 = (-d) >> 1;
+        z1 = (-d) >> 1;
+        x2 = (d) >> 1;
+        z2 = (d) >> 1;
+    }
+    else
+    {
+        x1 = ui->lineEditX1->text().toInt();
+        z1 = ui->lineEditZ1->text().toInt();
+        x2 = ui->lineEditX2->text().toInt();
+        z2 = ui->lineEditZ2->text().toInt();
+    }
+    if (x2 < x1 || z2 < z1)
+    {
+        warning("Warning", "Area for analysis is not valid");
+        return;
+    }
+
+    int mc;
+    int64_t seed;
+    if (!getSeed(&mc, &seed))
+        return;
+
+    const int step = 512;
+
+    LayerStack g;
+    setupGenerator(&g, mc);
+    applySeed(&g, seed);
+    int *ids = allocCache(g.entry_1, step, step);
+
+    long idcnt[256] = {0};
+    for (int x = x1; x <= x2; x += step)
+    {
+        for (int z = z1; z <= z2; z += step)
+        {
+            int w = x2-x+1 < step ? x2-x+1 : step;
+            int h = z2-z+1 < step ? z2-z+1 : step;
+            genArea(g.entry_1, ids, x, z, w, h);
+
+            for (int i = 0; i < w*h; i++)
+                idcnt[ ids[i] & 0xff ]++;
+        }
+    }
+
+    int bcnt = 0;
+    for (int i = 0; i < 256; i++)
+        bcnt += !!idcnt[i];
+
+    free(ids);
+    ids = NULL;
+
+    QTreeWidget *tree = ui->treeAnalysis;
+    while (tree->topLevelItemCount() > 0)
+        delete tree->takeTopLevelItem(0);
+
+    QTreeWidgetItem* item_cat;
+    item_cat = new QTreeWidgetItem(tree);
+    item_cat->setText(0, "Biomes");
+    item_cat->setData(1, Qt::DisplayRole, QVariant::fromValue(bcnt));
+
+    for (int id = 0; id < 256; id++)
+    {
+        long cnt = idcnt[id];
+        if (cnt <= 0)
+            continue;
+        const char *s;
+        if (!(s = biome2str(id)))
+            continue;
+        QTreeWidgetItem* item = new QTreeWidgetItem(item_cat, QTreeWidgetItem::UserType + id);
+        item->setText(0, s);
+        item->setData(1, Qt::DisplayRole, QVariant::fromValue(cnt));
+    }
+
+    tree->insertTopLevelItem(0, item_cat);
+
+    std::vector<VarPos> st;
+    for (int stype = Desert_Pyramid; stype <= Treasure; stype++)
+    {
+        st.clear();
+        getStructs(&st, getConfig(stype, mc), &g, mc, seed, x1, z1, x2, z2);
+        if (st.empty())
+            continue;
+
+        item_cat = new QTreeWidgetItem(tree);
+        const char *s = struct2str(stype);
+        item_cat->setText(0, s);
+        item_cat->setData(1, Qt::DisplayRole, QVariant::fromValue(st.size()));
+
+        for (size_t i = 0; i < st.size(); i++)
+        {
+            VarPos vp = st[i];
+            QTreeWidgetItem* item = new QTreeWidgetItem(item_cat);
+            item->setData(0, Qt::UserRole, QVariant::fromValue(vp.p));
+            item->setText(0, QString::asprintf("%d,\t%d", vp.p.x, vp.p.z));
+            if (vp.variant)
+            {
+                if (stype == Village)
+                    item->setText(1, "Abandoned");
+            }
+        }
+        tree->insertTopLevelItem(stype, item_cat);
+    }
+
+    Pos pos = getSpawn(mc, &g, NULL, seed);
+    if (pos.x >= x1 && pos.x <= x2 && pos.z >= z1 && pos.z <= z2)
+    {
+        item_cat = new QTreeWidgetItem(tree);
+        item_cat->setText(0, "Spawn");
+        item_cat->setData(1, Qt::DisplayRole, QVariant::fromValue(1));
+        QTreeWidgetItem* item = new QTreeWidgetItem(item_cat);
+        item->setData(0, Qt::UserRole, QVariant::fromValue(pos));
+        item->setText(0, QString::asprintf("%d,\t%d", pos.x, pos.z));
+    }
+
+    StrongholdIter sh;
+    initFirstStronghold(&sh, mc, seed);
+    std::vector<Pos> shp;
+    while (nextStronghold(&sh, &g, NULL) > 0)
+    {
+        pos = sh.pos;
+        if (pos.x >= x1 && pos.x <= x2 && pos.z >= z1 && pos.z <= z2)
+            shp.push_back(pos);
+    }
+
+    if (!shp.empty())
+    {
+        item_cat = new QTreeWidgetItem(tree);
+        item_cat->setText(0, "Stronghold");
+        item_cat->setData(1, Qt::DisplayRole, QVariant::fromValue(shp.size()));
+        for (Pos pos : shp)
+        {
+            QTreeWidgetItem* item = new QTreeWidgetItem(item_cat);
+            item->setData(0, Qt::UserRole, QVariant::fromValue(pos));
+            item->setText(0, QString::asprintf("%d,\t%d", pos.x, pos.z));
+        }
+    }
+
+    ui->buttonExport->setEnabled(true);
+}
+
+void MainWindow::on_buttonExport_clicked()
+{
+    QString fnam = QFileDialog::getSaveFileName(this, "Export analysis", prevdir,
+        "Text files (*.txt *csv);;Any files (*)");
+    if (fnam.isEmpty())
+        return;
+
+    QFileInfo finfo(fnam);
+    QFile file(fnam);
+    prevdir = finfo.absolutePath();
+
+    if (!file.open(QIODevice::WriteOnly))
+    {
+        warning("Warning", "Failed to open file.");
+        return;
+    }
+
+    QTextStream stream(&file);
+
+    QTreeWidgetItemIterator it(ui->treeAnalysis);
+    for (; *it; ++it)
+    {
+        QTreeWidgetItem *item = *it;
+        if (item->type() >= QTreeWidgetItem::UserType)
+            stream << QString::number(item->type() - QTreeWidgetItem::UserType) << ", ";
+        stream << item->text(0).replace('\t', ' ');
+        if (!item->text(1).isEmpty())
+            stream << ", " << item->text(1);
+        stream << "\n";
+    }
+}
+
+void MainWindow::on_treeAnalysis_itemDoubleClicked(QTreeWidgetItem *item)
+{
+    QVariant dat = item->data(0, Qt::UserRole);
+    if (dat.isValid())
+    {
+        Pos p = qvariant_cast<Pos>(dat);
+        ui->mapView->setView(p.x+0.5, p.z+0.5);
+    }
+}
 
 void MainWindow::onActionMapToggled(int stype, bool show)
 {

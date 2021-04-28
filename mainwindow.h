@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QListWidgetItem>
 #include <QTableWidgetItem>
+#include <QTreeWidgetItem>
 #include <QWidget>
 
 #include <QTimer>
@@ -106,6 +107,13 @@ private slots:
     void on_buttonLoadList_clicked();
 
     void on_mapView_customContextMenuRequested(const QPoint &pos);
+
+    void on_cboxArea_toggled(bool checked);
+    void on_lineRadius_editingFinished();
+    void on_buttonFromVisible_clicked();
+    void on_buttonAnalysis_clicked();
+    void on_treeAnalysis_itemDoubleClicked(QTreeWidgetItem *item);
+    void on_buttonExport_clicked();
 
     // internal events
 

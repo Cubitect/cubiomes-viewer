@@ -25,16 +25,13 @@ Quad::~Quad()
     delete spos;
 }
 
-std::vector<VarPos> *Quad::addStruct(const StructureConfig sconf, LayerStack *g)
+void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
+    LayerStack *g, int mc, int64_t seed, int x0, int z0, int x1, int z1)
 {
-    int x0 = ti*blocks, x1 = (ti+1)*blocks;
-    int z0 = tj*blocks, z1 = (tj+1)*blocks;
     int si0 = (int)floor(x0 / (qreal)(sconf.regionSize * 16));
     int sj0 = (int)floor(z0 / (qreal)(sconf.regionSize * 16));
     int si1 = (int)floor((x1-1) / (qreal)(sconf.regionSize * 16));
     int sj1 = (int)floor((z1-1) / (qreal)(sconf.regionSize * 16));
-
-    std::vector<VarPos>* st = new std::vector<VarPos>();
 
     for (int i = si0; i <= si1; i++)
     {
@@ -55,12 +52,22 @@ std::vector<VarPos> *Quad::addStruct(const StructureConfig sconf, LayerStack *g)
                         VillageType vt = getVillageType(mc, seed, p.x, p.z, id);
                         vp.variant = vt.abandoned;
                     }
-                    st->push_back(vp);
+                    out->push_back(vp);
                 }
             }
         }
     }
+}
 
+std::vector<VarPos> *Quad::addStruct(const StructureConfig sconf)
+{
+    LayerStack g;
+    setupGenerator(&g, mc);
+    int x0 = ti*blocks, x1 = (ti+1)*blocks;
+    int z0 = tj*blocks, z1 = (tj+1)*blocks;
+
+    std::vector<VarPos>* st = new std::vector<VarPos>();
+    getStructs(st, sconf, &g, mc, seed, x0, z0, x1, z1);
     return st;
 }
 
@@ -82,47 +89,26 @@ void Quad::run()
     }
     else
     {
-        LayerStack g;
-        setupGenerator(&g, mc);
+        int structureType = -1;
 
         switch (stype)
         {
-        case D_DESERT:
-            spos = addStruct(mc <= MC_1_12 ? DESERT_PYRAMID_CONFIG_112 : DESERT_PYRAMID_CONFIG, &g);
-            break;
-        case D_JUNGLE:
-            spos = addStruct(mc <= MC_1_12 ? JUNGLE_PYRAMID_CONFIG_112 : JUNGLE_PYRAMID_CONFIG, &g);
-            break;
-        case D_IGLOO:
-            spos = addStruct(mc <= MC_1_12 ? IGLOO_CONFIG_112 : IGLOO_CONFIG, &g);
-            break;
-        case D_HUT:
-            spos = addStruct(mc <= MC_1_12 ? SWAMP_HUT_CONFIG_112 : SWAMP_HUT_CONFIG, &g);
-            break;
-        case D_VILLAGE:
-            spos = addStruct(VILLAGE_CONFIG, &g);
-            break;
-        case D_MANSION:
-            spos = addStruct(MANSION_CONFIG, &g);
-            break;
-        case D_MONUMENT:
-            spos = addStruct(MONUMENT_CONFIG, &g);
-            break;
-        case D_RUINS:
-            spos = addStruct(mc <= MC_1_15 ? OCEAN_RUIN_CONFIG_115 : OCEAN_RUIN_CONFIG, &g);
-            break;
-        case D_SHIPWRECK:
-            spos = addStruct(mc <= MC_1_15 ? SHIPWRECK_CONFIG_115 : SHIPWRECK_CONFIG, &g);
-            break;
-        case D_TREASURE:
-            spos = addStruct(TREASURE_CONFIG, &g);
-            break;
-        case D_OUTPOST:
-            spos = addStruct(OUTPOST_CONFIG, &g);
-            break;
-        case D_PORTAL:
-            spos = addStruct(RUINED_PORTAL_CONFIG, &g);
-            break;
+        case D_DESERT:      structureType = Desert_Pyramid; break;
+        case D_JUNGLE:      structureType = Jungle_Pyramid; break;
+        case D_IGLOO:       structureType = Igloo; break;
+        case D_HUT:         structureType = Swamp_Hut; break;
+        case D_VILLAGE:     structureType = Village; break;
+        case D_MANSION:     structureType = Mansion; break;
+        case D_MONUMENT:    structureType = Monument; break;
+        case D_RUINS:       structureType = Ocean_Ruin; break;
+        case D_SHIPWRECK:   structureType = Shipwreck; break;
+        case D_TREASURE:    structureType = Treasure; break;
+        case D_OUTPOST:     structureType = Outpost; break;
+        case D_PORTAL:      structureType = Ruined_Portal; break;
+        }
+        if (structureType >= 0)
+        {
+            spos = addStruct(getConfig(structureType, mc));
         }
     }
     done = true;
