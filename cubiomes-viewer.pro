@@ -14,7 +14,7 @@ win32: {
 }
 
 QMAKE_CFLAGS    =  -fwrapv
-QMAKE_CXXFLAGS  =  $$QMAKE_CFLAGS
+QMAKE_CXXFLAGS  =  $$QMAKE_CFLAGS -std=gnu++11
 QMAKE_CXXFLAGS_RELEASE *= -O3
 
 TARGET = cubiomes-viewer
