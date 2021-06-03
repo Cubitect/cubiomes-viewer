@@ -9,13 +9,13 @@
 QT      += core widgets
 LIBS    += -lm $$PWD/cubiomes/libcubiomes.a
 
+QMAKE_CFLAGS    =  -fwrapv
+QMAKE_CXXFLAGS  =  $$QMAKE_CFLAGS -std=gnu++11
+QMAKE_CXXFLAGS_RELEASE *= -O3
+
 win32: {
     LIBS += -static -static-libgcc -static-libstdc++
 }
-
-QMAKE_CFLAGS    =  -fwrapv
-QMAKE_CXXFLAGS  =  $$QMAKE_CFLAGS -std=gnu++11 -Wno-deprecated-copy -Wno-missing-field-initilizers
-QMAKE_CXXFLAGS_RELEASE *= -O3
 
 TARGET = cubiomes-viewer
 #TEMPLATE = app

@@ -31,7 +31,6 @@ Q_DECLARE_METATYPE(Pos)
 Q_DECLARE_METATYPE(Config)
 
 class MapView;
-class Gen48Settings;
 class ProtoBaseDialog;
 
 class MainWindow : public QMainWindow

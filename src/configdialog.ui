@@ -2,11 +2,19 @@
 <ui version="4.0">
  <class>ConfigDialog</class>
  <widget class="QDialog" name="ConfigDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>411</width>
+    <height>222</height>
+   </rect>
+  </property>
   <property name="windowTitle">
    <string>Preferences</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="icons.qrc">
+   <iconset resource="../icons.qrc">
     <normaloff>:/icons/map.png</normaloff>:/icons/map.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout">
@@ -94,7 +102,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="icons.qrc"/>
+  <include location="../icons.qrc"/>
  </resources>
  <connections>
   <connection>

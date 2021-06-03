@@ -175,7 +175,7 @@
         <string/>
        </property>
        <property name="icon">
-        <iconset resource="icons.qrc">
+        <iconset resource="../icons.qrc">
          <normaloff>:/icons/info.png</normaloff>:/icons/info.png</iconset>
        </property>
        <property name="iconSize">
@@ -254,7 +254,7 @@
           <string>Clear results</string>
          </property>
          <property name="icon">
-          <iconset resource="icons.qrc">
+          <iconset resource="../icons.qrc">
            <normaloff>:/icons/clear.png</normaloff>:/icons/clear.png</iconset>
          </property>
         </widget>
@@ -265,7 +265,7 @@
           <string>Start search</string>
          </property>
          <property name="icon">
-          <iconset resource="icons.qrc">
+          <iconset resource="../icons.qrc">
            <normaloff>:/icons/search.png</normaloff>:/icons/search.png</iconset>
          </property>
          <property name="checkable">
@@ -280,7 +280,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="icons.qrc"/>
+  <include location="../icons.qrc"/>
  </resources>
  <connections/>
 </ui>
