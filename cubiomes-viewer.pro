@@ -35,61 +35,61 @@ CONFIG += static
 
 
 SOURCES += \
-        aboutdialog.cpp \
-        collapsable.cpp \
-        configdialog.cpp \
-        formconditions.cpp \
-        formgen48.cpp \
-        formsearchcontrol.cpp \
-        gotodialog.cpp \
-        protobasedialog.cpp \
-        filterdialog.cpp \
-        quadlistdialog.cpp \
-        mapview.cpp \
-        quad.cpp \
-        search.cpp \
-        searchitem.cpp \
-        searchthread.cpp \
-        mainwindow.cpp \
-        main.cpp
+        src/aboutdialog.cpp \
+        src/collapsable.cpp \
+        src/configdialog.cpp \
+        src/formconditions.cpp \
+        src/formgen48.cpp \
+        src/formsearchcontrol.cpp \
+        src/gotodialog.cpp \
+        src/protobasedialog.cpp \
+        src/filterdialog.cpp \
+        src/quadlistdialog.cpp \
+        src/mapview.cpp \
+        src/quad.cpp \
+        src/search.cpp \
+        src/searchitem.cpp \
+        src/searchthread.cpp \
+        src/mainwindow.cpp \
+        src/main.cpp
 
 HEADERS += \
-        collapsable.h \
         cubiomes/finders.h \
         cubiomes/generator.h \
         cubiomes/javarnd.h \
         cubiomes/layers.h \
         cubiomes/util.h \
-        aboutdialog.h \
-        configdialog.h \
-        formconditions.h \
-        formgen48.h \
-        formsearchcontrol.h \
-        gotodialog.h \
-        protobasedialog.h \
-        filterdialog.h \
-        quadlistdialog.h \
-        mapview.h \
-        quad.h \
-        cutil.h \
-        search.h \
-        searchitem.h \
-        searchthread.h \
-        seedtables.h \
-        mainwindow.h \
-        settings.h
+        src/collapsable.h \
+        src/aboutdialog.h \
+        src/configdialog.h \
+        src/formconditions.h \
+        src/formgen48.h \
+        src/formsearchcontrol.h \
+        src/gotodialog.h \
+        src/protobasedialog.h \
+        src/filterdialog.h \
+        src/quadlistdialog.h \
+        src/mapview.h \
+        src/quad.h \
+        src/cutil.h \
+        src/search.h \
+        src/searchitem.h \
+        src/searchthread.h \
+        src/seedtables.h \
+        src/mainwindow.h \
+        src/settings.h
 
 FORMS += \
-        aboutdialog.ui \
-        configdialog.ui \
-        formconditions.ui \
-        formgen48.ui \
-        formsearchcontrol.ui \
-        gotodialog.ui \
-        protobasedialog.ui \
-        filterdialog.ui \
-        quadlistdialog.ui\
-        mainwindow.ui
+        src/aboutdialog.ui \
+        src/configdialog.ui \
+        src/formconditions.ui \
+        src/formgen48.ui \
+        src/formsearchcontrol.ui \
+        src/gotodialog.ui \
+        src/protobasedialog.ui \
+        src/filterdialog.ui \
+        src/quadlistdialog.ui\
+        src/mainwindow.ui
 
 RESOURCES += \
         icons.qrc

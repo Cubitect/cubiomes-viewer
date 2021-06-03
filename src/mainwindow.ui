@@ -14,7 +14,7 @@
    <string>Cubiomes Viewer</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="icons.qrc">
+   <iconset>
     <normaloff>:/icons/map.png</normaloff>:/icons/map.png</iconset>
   </property>
   <property name="styleSheet">
@@ -215,7 +215,7 @@ QSplitter::handle:vertical {
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>1227</width>
+                 <width>1226</width>
                  <height>697</height>
                 </rect>
                </property>
@@ -664,18 +664,16 @@ QToolButton:checked {
   <customwidget>
    <class>MapView</class>
    <extends>QWidget</extends>
-   <header>mapview.h</header>
+   <header>src/mapview.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>Collapsable</class>
    <extends>QWidget</extends>
-   <header>collapsable.h</header>
+   <header>src/collapsable.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="icons.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>
