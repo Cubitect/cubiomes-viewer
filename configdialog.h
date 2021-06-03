@@ -4,20 +4,13 @@
 #include <QDialog>
 #include <QAbstractButton>
 
+#include "settings.h"
+
+
 namespace Ui {
 class ConfigDialog;
 }
 
-struct Config
-{
-    bool restoreSession;
-    bool smoothMotion;
-    int seedsPerItem;
-    int queueSize;
-    int maxMatching;
-
-    void reset();
-};
 
 class ConfigDialog : public QDialog
 {
@@ -29,7 +22,7 @@ public:
 
     void initSettings(Config *config);
 
-    Config getConfig();
+    Config getSettings();
 
 private slots:
     void on_buttonBox_clicked(QAbstractButton *button);

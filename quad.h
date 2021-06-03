@@ -29,6 +29,50 @@ enum {
     STRUCT_NUM
 };
 
+inline const char *mapopt2str(int opt)
+{
+    switch (opt)
+    {
+    case D_GRID:        return "grid";
+    case D_SLIME:       return "slime";
+    case D_DESERT:      return "desert";
+    case D_JUNGLE:      return "jungle";
+    case D_IGLOO:       return "igloo";
+    case D_HUT:         return "hut";
+    case D_VILLAGE:     return "village";
+    case D_MANSION:     return "mansion";
+    case D_MONUMENT:    return "monument";
+    case D_RUINS:       return "ruins";
+    case D_SHIPWRECK:   return "shipwreck";
+    case D_TREASURE:    return "treasure";
+    case D_OUTPOST:     return "outpost";
+    case D_PORTAL:      return "portal";
+    case D_SPAWN:       return "spawn";
+    case D_STRONGHOLD:  return "stronghold";
+    default:            return "";
+    }
+}
+
+inline int str2mapopt(const char *s)
+{
+    if (!strcmp(s, "grid"))         return D_GRID;
+    if (!strcmp(s, "slime"))        return D_SLIME;
+    if (!strcmp(s, "desert"))       return D_DESERT;
+    if (!strcmp(s, "jungle"))       return D_JUNGLE;
+    if (!strcmp(s, "igloo"))        return D_IGLOO;
+    if (!strcmp(s, "hut"))          return D_HUT;
+    if (!strcmp(s, "village"))      return D_VILLAGE;
+    if (!strcmp(s, "mansion"))      return D_MANSION;
+    if (!strcmp(s, "monument"))     return D_MONUMENT;
+    if (!strcmp(s, "ruins"))        return D_RUINS;
+    if (!strcmp(s, "shipwreck"))    return D_SHIPWRECK;
+    if (!strcmp(s, "treasure"))     return D_TREASURE;
+    if (!strcmp(s, "outpost"))      return D_OUTPOST;
+    if (!strcmp(s, "portal"))       return D_PORTAL;
+    if (!strcmp(s, "spawn"))        return D_SPAWN;
+    if (!strcmp(s, "stronghold"))   return D_STRONGHOLD;
+    return D_NONE;
+}
 
 struct Level;
 
@@ -47,8 +91,6 @@ public:
     Quad(const Level* l, int i, int j);
     ~Quad();
 
-
-    std::vector<VarPos> *addStruct(const StructureConfig sconf);
     void run();
 
     int mc;

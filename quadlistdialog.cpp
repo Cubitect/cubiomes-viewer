@@ -1,6 +1,7 @@
 #include "quadlistdialog.h"
 #include "ui_quadlistdialog.h"
 
+#include "mainwindow.h"
 #include "mapview.h"
 #include "cutil.h"
 #include "seedtables.h"
@@ -8,7 +9,6 @@
 #include <QMessageBox>
 #include <QDebug>
 #include <QMenu>
-
 
 
 QuadListDialog::QuadListDialog(MainWindow *mainwindow)

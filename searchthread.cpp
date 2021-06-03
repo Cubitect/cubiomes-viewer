@@ -1,13 +1,12 @@
 #include "searchthread.h"
-#include "mainwindow.h"
+#include "formsearchcontrol.h"
 #include "cutil.h"
+#include "mainwindow.h" // TODO: remove
 
 #include <QMessageBox>
 #include <QEventLoop>
 
 #include <x86intrin.h>
-
-#define TSC_INTERRUPT_CNT ((uint64_t)1 << 30)
 
 #define ITEM_SIZE 1024
 
@@ -15,7 +14,7 @@
 extern MainWindow *gMainWindowInstance;
 
 
-SearchThread::SearchThread(MainWindow *parent)
+SearchThread::SearchThread(FormSearchControl *parent)
     : QThread()
     , parent(parent)
     , condvec()
@@ -30,7 +29,8 @@ SearchThread::SearchThread(MainWindow *parent)
     itemgen.abort = &abort;
 }
 
-bool SearchThread::set(int type, int threads, std::vector<int64_t>& slist64, int64_t sstart, int mc,
+bool SearchThread::set(QObject *mainwin, int type, int threads, Gen48Settings gen48,
+                       std::vector<int64_t>& slist, int64_t sstart, int mc,
                        const QVector<Condition>& cv, int itemsize, int queuesize)
 {
     char refbuf[100] = {};
@@ -95,7 +95,7 @@ bool SearchThread::set(int type, int threads, std::vector<int64_t>& slist64, int
     }
 
     condvec = cv;
-    itemgen.init(mc, condvec.data(), condvec.size(), slist64, itemsize, type, sstart);
+    itemgen.init(mainwin, mc, condvec.data(), condvec.size(), gen48, slist, itemsize, type, sstart);
     pool.setMaxThreadCount(threads);
     recieved.resize(queuesize);
     lastid = itemgen.itemid;
@@ -109,11 +109,18 @@ void SearchThread::run()
 {
     itemgen.presearch();
     pool.waitForDone();
+
+    uint64_t prog, end;
+    itemgen.getProgress(&prog, &end);
+    emit progress(prog, end, itemgen.seed);
+
     for (int idx = 0; idx < recieved.size(); idx++)
     {
         recieved[idx].valid = false;
         startNextItem();
     }
+
+    emit searchEnded();
 }
 
 
@@ -126,7 +133,7 @@ SearchItem *SearchThread::startNextItem()
     QObject::connect(item, &SearchItem::itemDone, this, &SearchThread::onItemDone, Qt::BlockingQueuedConnection);
     QObject::connect(item, &SearchItem::canceled, this, &SearchThread::onItemCanceled, Qt::QueuedConnection);
     // redirect results to mainwindow
-    QObject::connect(item, &SearchItem::results, parent, &MainWindow::searchResultsAdd, Qt::BlockingQueuedConnection);
+    QObject::connect(item, &SearchItem::results, parent, &FormSearchControl::searchResultsAdd, Qt::BlockingQueuedConnection);
     ++activecnt;
     pool.start(item);
     return item;

@@ -4,8 +4,8 @@
 #include <QDialog>
 
 #define VERS_MAJOR 1
-#define VERS_MINOR 5
-#define VERS_PATCH 0
+#define VERS_MINOR 6
+#define VERS_PATCH -1   // negative patch number designates a development version
 
 // returns +1 if newer, -1 if older  and 0 if equal
 inline int cmpVers(int major, int minor, int patch)
@@ -15,7 +15,9 @@ inline int cmpVers(int major, int minor, int patch)
     if (s) return s;
     s = (minor > VERS_MINOR) - (minor < VERS_MINOR);
     if (s) return s;
-    s = (patch > VERS_PATCH) - (patch < VERS_PATCH);
+    int p0 = VERS_PATCH >= 0 ? 1000+VERS_PATCH : -VERS_PATCH;
+    int p1 = patch      >= 0 ? 1000+patch      : -patch;
+    s = (p1 > p0) - (p1 < p0);
     return s;
 }
 

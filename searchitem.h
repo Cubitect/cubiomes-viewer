@@ -8,12 +8,9 @@
 #include <QVector>
 #include <QElapsedTimer>
 
+#include "settings.h"
 #include "search.h"
 
-#define PRECOMPUTE48_BUFSIZ ((int64_t)1 << 30)
-
-// search type options from combobox
-enum { SEARCH_INC = 0, SEARCH_BLOCKS = 1, SEARCH_LIST = 2 };
 
 struct SearchItem : public QObject, QRunnable
 {
@@ -71,24 +68,27 @@ public:
     // (or the last entry in the seed list)
 };
 
+
 struct SearchItemGenerator
 {
     void init(
-        int mc, const Condition *cond, int ccnt,
-        const std::vector<int64_t>& slist,
-        int itemsize, int searchtype, int64_t sstart);
+            QObject *mainwin, int mc, const Condition *cond, int ccnt,
+            Gen48Settings gen48, const std::vector<int64_t>& seedlist,
+            int itemsize, int searchtype, int64_t sstart);
 
     void presearch();
 
     SearchItem *requestItem();
     void getProgress(uint64_t *prog, uint64_t *end);
 
+    QObject               * mainwin;
     int                     searchtype;
     int                     mc;
     const Condition       * cond;
     int                     ccnt;
     uint64_t                itemid;     // item incrementor
     int                     itemsiz;    // number of seeds per search item
+    Gen48Settings           gen48;      // 48-bit generator settings
     std::vector<int64_t>    slist;      // candidate list
     uint64_t                idx;        // index within candidate list
     uint64_t                scnt;       // size of search space

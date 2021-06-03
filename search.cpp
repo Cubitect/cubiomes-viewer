@@ -9,175 +9,6 @@
 extern MainWindow *gMainWindowInstance;
 
 
-int check(int64_t s48, void *data)
-{
-    const StructureConfig sconf = *(const StructureConfig*) data;
-    return isQuadBase(sconf, s48 - sconf.salt, 128);
-}
-
-/* Loads a seed list for a filter type from disk, or generates it if neccessary.
- * @mc      mincreaft version
- * @ftyp    filter type
- * @qb      output seed base list
- * @qbn     output length of seed base list
- * @dyn     list was dynamically allocated and requires a free
- * @sconf   structure configuration used for the bases
- */
-static void genSeedBases(int mc, int ftyp, const int64_t **qb, int64_t *qbn,
-                         int *dyn, StructureConfig *sconf)
-{
-    char fnam[128];
-
-    const char *lbstr = NULL;
-    const int64_t *lbset = NULL;
-    int64_t lbcnt = 0;
-    int64_t *dqb = NULL;
-
-    *qb = NULL;
-    *qbn = 0;
-    *dyn = 0;
-
-    switch (ftyp)
-    {
-    case F_QH_IDEAL:
-        lbstr = "ideal";
-        lbset = low20QuadIdeal;
-        lbcnt = sizeof(low20QuadIdeal) / sizeof(int64_t);
-        goto L_QH_ANY;
-    case F_QH_CLASSIC:
-        lbstr = "cassic";
-        lbset = low20QuadClassic;
-        lbcnt = sizeof(low20QuadClassic) / sizeof(int64_t);
-        goto L_QH_ANY;
-    case F_QH_NORMAL:
-        lbstr = "normal";
-        lbset = low20QuadHutNormal;
-        lbcnt = sizeof(low20QuadHutNormal) / sizeof(int64_t);
-        goto L_QH_ANY;
-    case F_QH_BARELY:
-        lbstr = "barely";
-        lbset = low20QuadHutBarely;
-        lbcnt = sizeof(low20QuadHutBarely) / sizeof(int64_t);
-        goto L_QH_ANY;
-L_QH_ANY:
-        snprintf(fnam, sizeof(fnam), "protobases/quad_%s.txt", lbstr);
-        *sconf = mc <= MC_1_12 ? SWAMP_HUT_CONFIG_112 : SWAMP_HUT_CONFIG;
-
-        if ((dqb = loadSavedSeeds(fnam, qbn)) == NULL)
-        {
-            QMetaObject::invokeMethod(gMainWindowInstance, "openProtobaseMsg", Qt::QueuedConnection, Q_ARG(QString, QString(fnam)));
-
-            int threads = QThread::idealThreadCount();
-            int err = searchAll48(&dqb, qbn, fnam, threads, lbset, lbcnt, 20, check, sconf);
-
-            QMetaObject::invokeMethod(gMainWindowInstance, "closeProtobaseMsg", Qt::BlockingQueuedConnection);
-
-            if (err)
-            {
-                QMetaObject::invokeMethod(
-                        gMainWindowInstance, "warning", Qt::BlockingQueuedConnection,
-                        Q_ARG(QString, QString("Warning")),
-                        Q_ARG(QString, QString("Failed to generate protobases.")));
-                return;
-            }
-        }
-        if (dqb)
-        {
-            // convert protobases to proper bases by subtracting the salt
-            for (int64_t i = 0; i < (*qbn); i++)
-                dqb[i] -= sconf->salt;
-            *qb = (const int64_t*)dqb;
-            *dyn = 1;
-        }
-        break;
-
-    case F_QM_95:
-        *qb = g_qm_95;
-        *qbn = sizeof(g_qm_95) / sizeof(int64_t);
-        *sconf = MONUMENT_CONFIG;
-        *dyn = 0;
-        break;
-    case F_QM_90:
-        *qb = g_qm_90;
-        *qbn = sizeof(g_qm_90) / sizeof(int64_t);
-        *sconf = MONUMENT_CONFIG;
-        *dyn = 0;
-        break;
-    }
-}
-
-
-/* Produces a list of seed bases from precomputed lists, provided all candidates fit into a buffer.
- *
- * @param list      output list
- * @param mc        mincraft version
- * @param cond      conditions
- * @param ccnt      number of conditions
- * @param bufmax    maximum allowed buffer size
- */
-void getCandidates(std::vector<int64_t>& list, int mc, const Condition *cond, int ccnt, int64_t bufmax)
-{
-    int ci;
-
-    for (ci = 0; ci < ccnt; ci++)
-    {
-        if (cond[ci].relative)
-            continue;
-
-        int64_t q, qbn = 0, *p;
-        const int64_t *qb = NULL;
-        StructureConfig sconf;
-        int dyn;
-        int i, j;
-
-        genSeedBases(mc, cond[ci].type, &qb, &qbn, &dyn, &sconf);
-        if (!qb)
-            continue;
-
-        int x = cond[ci].x1;
-        int z = cond[ci].z1;
-        int w = cond[ci].x2 - x + 1;
-        int h = cond[ci].z2 - z + 1;
-
-        // does the set of candidates for this condition fit in memory?
-        if (qbn * w*h * 4 * (int64_t)sizeof(int64_t) >= bufmax)
-            goto L_next_cond;
-
-        try {
-            list.resize(qbn * w*h);
-        } catch (...) {
-            goto L_next_cond;
-        }
-
-        p = list.data();
-        for (j = 0; j < h; j++)
-        {
-            for (i = 0; i < w; i++)
-            {
-                for (q = 0; q < qbn; q++)
-                {
-                    *p++ = moveStructure(qb[q], x+i, z+j);
-                }
-            }
-        }
-
-    L_next_cond:
-        if (dyn && qb)
-            free((void*)qb);
-
-        if (!list.empty())
-            break;
-    }
-
-    if (!list.empty())
-    {
-        std::sort(list.begin(), list.end());
-        auto last = std::unique(list.begin(), list.end());
-        list.erase(last, list.end());
-    }
-}
-
-
 static bool intersectLineLine(double ax1, double az1, double ax2, double az2, double bx1, double bz1, double bx2, double bz2)
 {
     double ax = ax2 - ax1, az = az2 - az1;
@@ -243,6 +74,13 @@ int testCond(StructPos *spos, int64_t seed, const Condition *cond, int mc, Layer
     Pos p[128];
 
     StructPos *sout = spos + cond->save;
+    const FilterInfo& finfo = g_filterinfo.list[cond->type];
+
+    if (finfo.stype > 0)
+    {
+        if (!getConfig(finfo.stype, mc, &sconf))
+            return 0;
+    }
 
     switch (cond->type)
     {
@@ -250,7 +88,6 @@ int testCond(StructPos *spos, int64_t seed, const Condition *cond, int mc, Layer
     case F_QH_CLASSIC:
     case F_QH_NORMAL:
     case F_QH_BARELY:
-        sconf = mc <= MC_1_12 ? SWAMP_HUT_CONFIG_112 : SWAMP_HUT_CONFIG;
         qual = cond->type;
 
         if (cond->relative)
@@ -293,7 +130,6 @@ int testCond(StructPos *spos, int64_t seed, const Condition *cond, int mc, Layer
     case F_QM_95:   qual = 58*58*4 * 95 / 100;  goto L_qm_any;
     case F_QM_90:   qual = 58*58*4 * 90 / 100;
 L_qm_any:
-        sconf = MONUMENT_CONFIG;
 
         if (cond->relative)
         {
@@ -333,19 +169,19 @@ L_qm_any:
         return 0;
 
 
-    case F_DESERT:      sconf = getConfig(Desert_Pyramid, mc);  goto L_struct_any;
-    case F_HUT:         sconf = getConfig(Swamp_Hut, mc);       goto L_struct_any;
-    case F_JUNGLE:      sconf = getConfig(Jungle_Pyramid, mc);  goto L_struct_any;
-    case F_IGLOO:       sconf = getConfig(Igloo, mc);           goto L_struct_any;
-    case F_MONUMENT:    sconf = getConfig(Monument, mc);        goto L_struct_any;
-    case F_VILLAGE:     sconf = getConfig(Village, mc);         goto L_struct_any;
-    case F_OUTPOST:     sconf = getConfig(Outpost, mc);         goto L_struct_any;
-    case F_MANSION:     sconf = getConfig(Mansion, mc);         goto L_struct_any;
-    case F_RUINS:       sconf = getConfig(Ocean_Ruin, mc);      goto L_struct_any;
-    case F_SHIPWRECK:   sconf = getConfig(Shipwreck, mc);       goto L_struct_any;
-    case F_PORTAL:      sconf = getConfig(Ruined_Portal, mc);   goto L_struct_any;
+    case F_DESERT:
+    case F_HUT:
+    case F_JUNGLE:
+    case F_IGLOO:
+    case F_MONUMENT:
+    case F_VILLAGE:
+    case F_OUTPOST:
+    case F_MANSION:
+    case F_RUINS:
+    case F_SHIPWRECK:
+    case F_TREASURE:
+    case F_PORTAL:
 
-L_struct_any:
         x1 = cond->x1;
         z1 = cond->z1;
         x2 = cond->x2;
@@ -364,6 +200,13 @@ L_struct_any:
             rz1 = z1 >> 9;
             rx2 = x2 >> 9;
             rz2 = z2 >> 9;
+        }
+        else if (sconf.regionSize == 1)
+        {
+            rx1 = x1 >> 4;
+            rz1 = z1 >> 4;
+            rx2 = x2 >> 4;
+            rz2 = z2 >> 4;
         }
         else
         {
@@ -402,54 +245,6 @@ L_struct_any:
                         sout->cz = zt / qual;
                         return 1;
                     }
-                }
-            }
-        }
-        return 0;
-
-    case F_TREASURE:
-        sconf = TREASURE_CONFIG;
-        x1 = cond->x1;
-        z1 = cond->z1;
-        x2 = cond->x2;
-        z2 = cond->z2;
-        if (cond->relative)
-        {
-            x1 += spos[cond->relative].cx;
-            z1 += spos[cond->relative].cz;
-            x2 += spos[cond->relative].cx;
-            z2 += spos[cond->relative].cz;
-        }
-        rx1 = x1 >> 4;
-        rz1 = z1 >> 4;
-        rx2 = x2 >> 4;
-        rz2 = z2 >> 4;
-
-        sout->cx = xt = 0;
-        sout->cz = zt = 0;
-        qual = 0;
-
-        for (int rz = rz1; rz <= rz2; rz++)
-        {
-            for (int rx = rx1; rx <= rx2; rx++)
-            {
-                pc = { (rx << 4) + 9, (rz << 4) + 9 };
-                if (pc.x < x1 || pc.x > x2 || pc.z < z1 || pc.z > z2)
-                    continue;
-                if (!isTreasureChunk(seed, rx, rz))
-                    continue;
-                if (g && !isViableStructurePos(sconf.structType, mc, g, seed, pc.x, pc.z))
-                    continue;
-
-                xt += pc.x;
-                zt += pc.z;
-
-                if (++qual >= cond->count)
-                {
-                    sout->sconf = sconf;
-                    sout->cx = xt / qual;
-                    sout->cz = zt / qual;
-                    return 1;
                 }
             }
         }
@@ -608,12 +403,14 @@ L_struct_any:
         }
         return 0;
 
-    case F_BIOME:           s = 0; qual = L_VORONOI_ZOOM_1;     goto L_biome_filter_any;
-    case F_BIOME_4_RIVER:   s = 2; qual = L_RIVER_MIX_4;        goto L_biome_filter_any;
-    case F_BIOME_16_SHORE:  s = 4; qual = L_SHORE_16;           goto L_biome_filter_any;
-    case F_BIOME_64_RARE:   s = 6; qual = L_RARE_BIOME_64;      goto L_biome_filter_any;
-    case F_BIOME_256_BIOME: s = 8; qual = L_BIOME_256;          goto L_biome_filter_any;
-    case F_BIOME_256_OTEMP: s = 8; qual = L13_OCEAN_TEMP_256;   goto L_biome_filter_any;
+    // biome filters reference specific layers
+    // MAYBE: options for layers in different versions?
+    case F_BIOME:           s = 0; goto L_biome_filter_any;
+    case F_BIOME_4_RIVER:   s = 2; goto L_biome_filter_any;
+    case F_BIOME_16_SHORE:  s = 4; goto L_biome_filter_any;
+    case F_BIOME_64_RARE:   s = 6; goto L_biome_filter_any;
+    case F_BIOME_256_BIOME: s = 8; goto L_biome_filter_any;
+    case F_BIOME_256_OTEMP: s = 8; goto L_biome_filter_any;
 
 L_biome_filter_any:
         if (cond->relative)
@@ -634,7 +431,7 @@ L_biome_filter_any:
         sout->cz = ((rz1 + rz2) << s) >> 1;
         if (!g)
         {
-            if (qual != L13_OCEAN_TEMP_256)
+            if (finfo.layer != L_OCEAN_TEMP_256)
                 return 1;
             if (mc < MC_1_13)
                 return 0;
@@ -648,8 +445,8 @@ L_biome_filter_any:
         {
             int w = rx2-rx1+1;
             int h = rz2-rz1+1;
-            int *area = allocCache(&g->layers[qual], w, h);
-            if (checkForBiomes(g, qual, area, seed, rx1, rz1, w, h, cond->bfilter, 0) > 0)
+            int *area = allocCache(&g->layers[finfo.layer], w, h);
+            if (checkForBiomes(g, finfo.layer, area, seed, rx1, rz1, w, h, cond->bfilter, 0) > 0)
             {
                 // check biome exclusion
                 uint64_t b = 0, bm = 0;

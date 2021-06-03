@@ -5,9 +5,12 @@
 #include <QCheckBox>
 #include <QSpinBox>
 #include <QLineEdit>
+#include <QListWidgetItem>
 
-#include "mainwindow.h"
 #include "search.h"
+#include "formconditions.h"
+
+class MainWindow;
 
 namespace Ui {
 class FilterDialog;
@@ -53,14 +56,15 @@ public slots:
     }
 };
 
+
 class FilterDialog : public QDialog
 {
     Q_OBJECT
 
 public:
 
-    explicit FilterDialog(MainWindow *parent, int mc, QListWidgetItem *item = 0, Condition *initcond = 0);
-    ~FilterDialog();
+    explicit FilterDialog(FormConditions *parent, int mc, QListWidgetItem *item = 0, Condition *initcond = 0);
+    virtual ~FilterDialog();
 
     void updateMode();
     void updateBiomeSelection();

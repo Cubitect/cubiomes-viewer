@@ -15,7 +15,7 @@ AboutDialog::AboutDialog(QWidget *parent) :
     if (VERS_PATCH >= 0)
         text.replace("_PATCH_", QString::number(VERS_PATCH));
     else
-        text.replace("_PATCH_", "dev");
+        text.replace("_PATCH_", "dev" + QString::number(-1-VERS_PATCH));
     ui->label->setText(text);
 }
 

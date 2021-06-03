@@ -59,17 +59,6 @@ void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
     }
 }
 
-std::vector<VarPos> *Quad::addStruct(const StructureConfig sconf)
-{
-    LayerStack g;
-    setupGenerator(&g, mc);
-    int x0 = ti*blocks, x1 = (ti+1)*blocks;
-    int z0 = tj*blocks, z1 = (tj+1)*blocks;
-
-    std::vector<VarPos>* st = new std::vector<VarPos>();
-    getStructs(st, sconf, &g, mc, seed, x0, z0, x1, z1);
-    return st;
-}
 
 void Quad::run()
 {
@@ -108,7 +97,16 @@ void Quad::run()
         }
         if (structureType >= 0)
         {
-            spos = addStruct(getConfig(structureType, mc));
+            LayerStack g;
+            setupGenerator(&g, mc);
+            int x0 = ti*blocks, x1 = (ti+1)*blocks;
+            int z0 = tj*blocks, z1 = (tj+1)*blocks;
+
+            std::vector<VarPos>* st = new std::vector<VarPos>();
+            StructureConfig sconf;
+            if (getConfig(structureType, mc, &sconf))
+                getStructs(st, sconf, &g, mc, seed, x0, z0, x1, z1);
+            spos = st;
         }
     }
     done = true;

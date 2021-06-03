@@ -2,7 +2,8 @@
 #define QUADLISTDIALOG_H
 
 #include <QDialog>
-#include "mainwindow.h"
+
+class MainWindow;
 
 namespace Ui {
 class QuadListDialog;

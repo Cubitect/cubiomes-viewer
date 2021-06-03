@@ -9,10 +9,8 @@
 
 #include "searchitem.h"
 
-#define PRECOMPUTE48_BUFSIZ ((int64_t)1 << 30)
 
-
-class MainWindow;
+class FormSearchControl;
 
 struct SearchThread : QThread
 {
@@ -24,9 +22,10 @@ public:
         int64_t seed;
     };
 
-    SearchThread(MainWindow *parent);
+    SearchThread(FormSearchControl *parent);
 
-    bool set(int type, int threads, std::vector<int64_t>& slist64, int64_t sstart, int mc,
+    bool set(QObject *mainwin, int type, int threads, Gen48Settings gen48,
+             std::vector<int64_t>& slist, int64_t sstart, int mc,
              const QVector<Condition>& cv, int itemsize, int queuesize);
 
     virtual void run() override;
@@ -36,14 +35,15 @@ public:
 
 signals:
     void progress(uint64_t last, uint64_t end, int64_t seed);
-    void searchFinish();
+    void searchEnded();     // search thread is exiting (e.g. abort or done)
+    void searchFinish();    // search ended and is comlete
 
 public slots:
     void onItemDone(uint64_t itemid, int64_t seed, bool isdone);
     void onItemCanceled(uint64_t itemid);
 
 public:
-    MainWindow            * parent;
+    FormSearchControl     * parent;
 
     QVector<Condition>      condvec;
     SearchItemGenerator     itemgen;

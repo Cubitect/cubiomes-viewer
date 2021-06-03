@@ -1,6 +1,7 @@
 #include "filterdialog.h"
 #include "ui_filterdialog.h"
 
+#include "mainwindow.h"
 #include "cutil.h"
 
 #include <QCheckBox>
@@ -40,11 +41,11 @@ static QString getTip(int mc, int layer, int id)
 }
 
 
-FilterDialog::FilterDialog(MainWindow *parent, int mcversion, QListWidgetItem *item, Condition *initcond) :
-    QDialog(parent, Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint),
-    ui(new Ui::FilterDialog),
-    item(item),
-    mc(mcversion)
+FilterDialog::FilterDialog(FormConditions *parent, int mcversion, QListWidgetItem *item, Condition *initcond)
+    : QDialog(parent, Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint)
+    , ui(new Ui::FilterDialog)
+    , item(item)
+    , mc(mcversion)
 {
     memset(&cond, 0, sizeof(cond));
     ui->setupUi(this);

@@ -3,16 +3,6 @@
 
 #include <QThread>
 
-void Config::reset()
-{
-    restoreSession = true;
-    smoothMotion = true;
-    seedsPerItem = 1024;
-    queueSize = QThread::idealThreadCount();
-    maxMatching = 65536;
-}
-
-
 ConfigDialog::ConfigDialog(QWidget *parent, Config *config) :
     QDialog(parent),
     ui(new Ui::ConfigDialog)
@@ -32,16 +22,20 @@ ConfigDialog::~ConfigDialog()
 
 void ConfigDialog::initSettings(Config *config)
 {
-    ui->checkRestore->setChecked(config->restoreSession);
     ui->checkSmooth->setChecked(config->smoothMotion);
+    ui->checkRestore->setChecked(config->restoreSession);
+    ui->checkAutosave->setChecked(config->autosaveCycle != 0);
+    if (config->autosaveCycle)
+        ui->spinAutosave->setValue(config->autosaveCycle);
     ui->cboxItemSize->setCurrentText(QString::number(config->seedsPerItem));
     ui->lineQueueSize->setText(QString::number(config->queueSize));
     ui->lineMatching->setText(QString::number(config->maxMatching));
 }
 
-Config ConfigDialog::getConfig()
+Config ConfigDialog::getSettings()
 {
     conf.restoreSession = ui->checkRestore->isChecked();
+    conf.autosaveCycle = ui->checkAutosave->isChecked() ? ui->spinAutosave->value() : 0;
     conf.smoothMotion = ui->checkSmooth->isChecked();
     conf.seedsPerItem = ui->cboxItemSize->currentText().toInt();
     conf.queueSize = ui->lineQueueSize->text().toInt();

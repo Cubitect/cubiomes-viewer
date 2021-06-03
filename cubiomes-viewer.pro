@@ -14,7 +14,7 @@ win32: {
 }
 
 QMAKE_CFLAGS    =  -fwrapv
-QMAKE_CXXFLAGS  =  $$QMAKE_CFLAGS -std=gnu++11
+QMAKE_CXXFLAGS  =  $$QMAKE_CFLAGS -std=gnu++11 -Wno-deprecated-copy -Wno-missing-field-initilizers
 QMAKE_CXXFLAGS_RELEASE *= -O3
 
 TARGET = cubiomes-viewer
@@ -36,48 +36,60 @@ CONFIG += static
 
 SOURCES += \
         aboutdialog.cpp \
+        collapsable.cpp \
         configdialog.cpp \
+        formconditions.cpp \
+        formgen48.cpp \
+        formsearchcontrol.cpp \
         gotodialog.cpp \
         protobasedialog.cpp \
         filterdialog.cpp \
         quadlistdialog.cpp \
-        mainwindow.cpp \
         mapview.cpp \
         quad.cpp \
         search.cpp \
         searchitem.cpp \
         searchthread.cpp \
+        mainwindow.cpp \
         main.cpp
 
 HEADERS += \
-        configdialog.h \
+        collapsable.h \
         cubiomes/finders.h \
         cubiomes/generator.h \
         cubiomes/javarnd.h \
         cubiomes/layers.h \
         cubiomes/util.h \
         aboutdialog.h \
+        configdialog.h \
+        formconditions.h \
+        formgen48.h \
+        formsearchcontrol.h \
         gotodialog.h \
         protobasedialog.h \
         filterdialog.h \
         quadlistdialog.h \
-        mainwindow.h \
         mapview.h \
         quad.h \
         cutil.h \
         search.h \
         searchitem.h \
         searchthread.h \
-        seedtables.h
+        seedtables.h \
+        mainwindow.h \
+        settings.h
 
 FORMS += \
         aboutdialog.ui \
         configdialog.ui \
+        formconditions.ui \
+        formgen48.ui \
+        formsearchcontrol.ui \
         gotodialog.ui \
-        mainwindow.ui \
         protobasedialog.ui \
         filterdialog.ui \
-        quadlistdialog.ui
+        quadlistdialog.ui\
+        mainwindow.ui
 
 RESOURCES += \
         icons.qrc
