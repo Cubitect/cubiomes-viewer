@@ -578,6 +578,16 @@ void MainWindow::on_actionPaste_triggered()
     formControl->pasteResults();
 }
 
+void MainWindow::on_actionAddShadow_triggered()
+{
+    QVector<int64_t> results = formControl->getResults();
+    QVector<int64_t> shadows;
+    shadows.reserve(results.size());
+    for (int64_t s : results)
+        shadows.push_back( getShadow(s) );
+    formControl->searchResultsAdd(shadows, false);
+}
+
 void MainWindow::on_mapView_customContextMenuRequested(const QPoint &pos)
 {
     QMenu menu(this);
@@ -866,3 +876,4 @@ void MainWindow::copyCoord()
     QClipboard *clipboard = QGuiApplication::clipboard();
     clipboard->setText(QString::asprintf("%d, %d", p.x, p.z));
 }
+

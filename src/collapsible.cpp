@@ -1,4 +1,4 @@
-#include "collapsable.h"
+#include "collapsible.h"
 
 #include <QPropertyAnimation>
 #include <QVBoxLayout>
@@ -7,7 +7,7 @@
 #include <QPushButton>
 #include <QMessageBox>
 
-Collapsable::Collapsable(QWidget *parent)
+Collapsible::Collapsible(QWidget *parent)
     : QWidget(parent)
     , animgroup(new QParallelAnimationGroup(this))
     , toggleButton(new QToolButton(this))
@@ -45,11 +45,11 @@ Collapsable::Collapsable(QWidget *parent)
     vbox->setSpacing(0);
     setLayout(vbox);
 
-    connect(toggleButton, &QToolButton::toggled, this, &Collapsable::toggle);
-    connect(animgroup, &QAbstractAnimation::finished, this, &Collapsable::finishAnimation);
+    connect(toggleButton, &QToolButton::toggled, this, &Collapsible::toggle);
+    connect(animgroup, &QAbstractAnimation::finished, this, &Collapsible::finishAnimation);
 }
 
-void Collapsable::toggle(bool collapsed)
+void Collapsible::toggle(bool collapsed)
 {
     if (!content)
         return;
@@ -80,7 +80,7 @@ void Collapsable::toggle(bool collapsed)
     animgroup->start();
 }
 
-void Collapsable::finishAnimation()
+void Collapsible::finishAnimation()
 {
     if (toggleButton->isChecked())
     {
@@ -89,7 +89,7 @@ void Collapsable::finishAnimation()
     }
 }
 
-void Collapsable::init(const QString& title, QWidget *widget, bool collapsed)
+void Collapsible::init(const QString& title, QWidget *widget, bool collapsed)
 {
     toggleButton->setText(title);
     toggleButton->setChecked(!collapsed);
@@ -105,7 +105,7 @@ void Collapsable::init(const QString& title, QWidget *widget, bool collapsed)
     }
 }
 
-void Collapsable::setInfo(const QString& title, const QString& text)
+void Collapsible::setInfo(const QString& title, const QString& text)
 {
     QPixmap pixmap = QPixmap(":/icons/info.png");
     QPushButton *button = new QPushButton(pixmap, "", this);
@@ -120,7 +120,7 @@ void Collapsable::setInfo(const QString& title, const QString& text)
     infomsg = text;
 }
 
-void Collapsable::showInfo()
+void Collapsible::showInfo()
 {
     QMessageBox::information(this, infotitle, infomsg, QMessageBox::Ok);
 }

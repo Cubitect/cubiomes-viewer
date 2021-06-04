@@ -7,11 +7,11 @@
 #include <QFrame>
 #include <QHBoxLayout>
 
-class Collapsable : public QWidget
+class Collapsible : public QWidget
 {
     Q_OBJECT
 public:
-    explicit Collapsable(QWidget *parent = nullptr);
+    explicit Collapsible(QWidget *parent = nullptr);
     void init(const QString& title, QWidget *widget, bool collapsed);
     void setInfo(const QString& title, const QString& text);
 

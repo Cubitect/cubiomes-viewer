@@ -36,7 +36,7 @@ CONFIG += static
 
 SOURCES += \
         src/aboutdialog.cpp \
-        src/collapsable.cpp \
+        src/collapsible.cpp \
         src/configdialog.cpp \
         src/formconditions.cpp \
         src/formgen48.cpp \
@@ -59,8 +59,8 @@ HEADERS += \
         cubiomes/javarnd.h \
         cubiomes/layers.h \
         cubiomes/util.h \
-        src/collapsable.h \
         src/aboutdialog.h \
+        src/collapsible.h \
         src/configdialog.h \
         src/formconditions.h \
         src/formgen48.h \

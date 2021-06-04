@@ -14,7 +14,7 @@
    <string>Cubiomes Viewer</string>
   </property>
   <property name="windowIcon">
-   <iconset>
+   <iconset resource="../icons.qrc">
     <normaloff>:/icons/map.png</normaloff>:/icons/map.png</iconset>
   </property>
   <property name="styleSheet">
@@ -215,7 +215,7 @@ QSplitter::handle:vertical {
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>1226</width>
+                 <width>1227</width>
                  <height>697</height>
                 </rect>
                </property>
@@ -246,7 +246,7 @@ QSplitter::handle:vertical {
                   <property name="orientation">
                    <enum>Qt::Vertical</enum>
                   </property>
-                  <widget class="Collapsable" name="collapseConstraints" native="true">
+                  <widget class="Collapsible" name="collapseConstraints" native="true">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                      <horstretch>0</horstretch>
@@ -254,7 +254,7 @@ QSplitter::handle:vertical {
                     </sizepolicy>
                    </property>
                   </widget>
-                  <widget class="Collapsable" name="collapseGen48" native="true">
+                  <widget class="Collapsible" name="collapseGen48" native="true">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                      <horstretch>0</horstretch>
@@ -262,7 +262,7 @@ QSplitter::handle:vertical {
                     </sizepolicy>
                    </property>
                   </widget>
-                  <widget class="Collapsable" name="collapseControl" native="true">
+                  <widget class="Collapsible" name="collapseControl" native="true">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                      <horstretch>0</horstretch>
@@ -588,6 +588,8 @@ QToolButton:checked {
     <addaction name="actionCopy"/>
     <addaction name="actionPaste"/>
     <addaction name="separator"/>
+    <addaction name="actionAddShadow"/>
+    <addaction name="separator"/>
     <addaction name="actionPreferences"/>
    </widget>
    <addaction name="menuFile"/>
@@ -658,6 +660,11 @@ QToolButton:checked {
     <string>Quit</string>
    </property>
   </action>
+  <action name="actionAddShadow">
+   <property name="text">
+    <string>Add shadow for all seeds</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -668,12 +675,14 @@ QToolButton:checked {
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>Collapsable</class>
+   <class>Collapsible</class>
    <extends>QWidget</extends>
-   <header>src/collapsable.h</header>
+   <header>src/collapsible.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="../icons.qrc"/>
+ </resources>
  <connections/>
 </ui>

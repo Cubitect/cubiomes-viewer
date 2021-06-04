@@ -76,6 +76,7 @@ private slots:
     void on_actionAbout_triggered();
     void on_actionCopy_triggered();
     void on_actionPaste_triggered();
+    void on_actionAddShadow_triggered();
 
     void on_mapView_customContextMenuRequested(const QPoint &pos);
 
