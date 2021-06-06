@@ -3,6 +3,13 @@
 
 #include <QMessageBox>
 #include <QStandardPaths>
+#include <QApplication>
+
+#ifdef _WIN32
+#include <intrin.h>
+#else
+#include <x86intrin.h>
+#endif
 
 
 SearchItem::~SearchItem()
@@ -213,8 +220,8 @@ static void genQHBases(QObject *qtobj, int qual, int64_t salt, std::vector<int64
     }
     else
     {
-        printf("Loaded quad-protobases from: %s\n", fnam.data());
-        fflush(stdout);
+        //printf("Loaded quad-protobases from: %s\n", fnam.data());
+        //fflush(stdout);
     }
 
     if (qb)
@@ -460,11 +467,19 @@ SearchItem *SearchItemGenerator::requestItem()
                 high = 0;
                 low++;
 
+                unsigned long long ts = __rdtsc() + (1ULL << 27);
+
                 /// === search for next candidate ===
                 for (; low <= MASK48; low++)
                 {
                     if (isCandidate(low, mc, cond, cond+ccnt, abort))
                         break;
+                    if (__rdtsc() > ts)
+                    {
+                        ts = __rdtsc() + (1ULL << 27);
+                        high = 0xffff;
+                        break;
+                    }
                 }
                 if (low > MASK48)
                     isdone = true;

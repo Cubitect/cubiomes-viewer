@@ -1,17 +1,10 @@
 #include "searchthread.h"
 #include "formsearchcontrol.h"
 #include "cutil.h"
-#include "mainwindow.h" // TODO: remove
 
 #include <QMessageBox>
 #include <QEventLoop>
-
-#include <x86intrin.h>
-
-#define ITEM_SIZE 1024
-
-
-extern MainWindow *gMainWindowInstance;
+#include <QApplication>
 
 
 SearchThread::SearchThread(FormSearchControl *parent)
@@ -174,6 +167,15 @@ void SearchThread::onItemDone(uint64_t itemid, int64_t seed, bool isdone)
         else
         {
             int idx = itemid - lastid;
+            if (idx < 0 || idx >= recieved.size())
+            {
+                QMessageBox::critical(parent, "Fatal Error",
+                                      "Encountered invalid state of seed generator. "
+                                      "This is likely a issue with the search thread logic.",
+                                      QMessageBox::Abort);
+                QApplication::exit();
+                ::exit(1);
+            }
             recieved[idx].valid = true;
             recieved[idx].seed = seed;
         }
