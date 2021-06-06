@@ -159,6 +159,17 @@ FilterDialog::FilterDialog(FormConditions *parent, int mcversion, QListWidgetIte
     SETUP_BIOME_CHECKBOX(bamboo_jungle);
     SETUP_BIOME_CHECKBOX(bamboo_jungle_hills);
 
+    SETUP_BIOME_CHECKBOX(nether_wastes);
+    SETUP_BIOME_CHECKBOX(the_end);
+    SETUP_BIOME_CHECKBOX(small_end_islands);
+    SETUP_BIOME_CHECKBOX(end_midlands);
+    SETUP_BIOME_CHECKBOX(end_highlands);
+    SETUP_BIOME_CHECKBOX(end_barrens);
+    SETUP_BIOME_CHECKBOX(soul_sand_valley);
+    SETUP_BIOME_CHECKBOX(crimson_forest);
+    SETUP_BIOME_CHECKBOX(warped_forest);
+    SETUP_BIOME_CHECKBOX(basalt_deltas);
+
     memset(tempsboxes, 0, sizeof(tempsboxes));
 
     SETUP_TEMPCAT_SPINBOX(Oceanic);
@@ -339,11 +350,25 @@ void FilterDialog::updateMode()
     ui->buttonOk->setEnabled(filterindex != F_SELECT);
 }
 
+void FilterDialog::enableSet(const int *ids, int n)
+{
+    for (int i = 0; i < 256; i++)
+    {
+        if (biomecboxes[i])
+        {
+            biomecboxes[i]->setEnabled(false);
+            biomecboxes[i]->setToolTip("");
+        }
+    }
+    for (int i = 0; i < n; i++)
+        biomecboxes[ids[i]]->setEnabled(true);
+}
+
 void FilterDialog::updateBiomeSelection()
 {
     int filterindex = ui->comboBoxType->currentData().toInt();
     const FilterInfo &ft = g_filterinfo.list[filterindex];
-;
+
     if (filterindex == F_TEMPS)
     {
         ui->tabWidget->setEnabled(true);
@@ -351,7 +376,7 @@ void FilterDialog::updateBiomeSelection()
         ui->tabTemps->setEnabled(true);
         ui->tabBiomes->setEnabled(false);
     }
-    else if (filterindex >= F_BIOME && filterindex <= F_BIOME_256_OTEMP)
+    else if (filterindex >= F_BIOME && filterindex <= F_BIOME_END_16)
     {
         ui->tabWidget->setEnabled(true);
         ui->tabWidget->setCurrentWidget(ui->tabBiomes);
@@ -365,22 +390,29 @@ void FilterDialog::updateBiomeSelection()
         ui->tabBiomes->setEnabled(false);
     }
 
-    if (ft.layer == L_OCEAN_TEMP_256)
+    if (filterindex == F_BIOME_NETHER_4)
     {
-        for (int i = 0; i < 256; i++)
-        {
-            QCheckBox *cb = biomecboxes[i];
-            if (cb)
-            {
-                cb->setEnabled(false);
-                cb->setToolTip("");
-            }
-        }
-        biomecboxes[warm_ocean]->setEnabled(true);
-        biomecboxes[lukewarm_ocean]->setEnabled(true);
-        biomecboxes[ocean]->setEnabled(true);
-        biomecboxes[cold_ocean]->setEnabled(true);
-        biomecboxes[frozen_ocean]->setEnabled(true);
+        const int ids[] = {
+            nether_wastes, soul_sand_valley, crimson_forest,
+            warped_forest, basalt_deltas
+        };
+        enableSet(ids, sizeof(ids) / sizeof(int));
+    }
+    else if (filterindex == F_BIOME_END_16)
+    {
+        const int ids[] = {
+            the_end, small_end_islands, end_midlands,
+            end_highlands, end_barrens
+        };
+        enableSet(ids, sizeof(ids) / sizeof(int));
+    }
+    if (filterindex == F_BIOME_256_OTEMP)
+    {
+        const int ids[] = {
+            warm_ocean, lukewarm_ocean, ocean,
+            cold_ocean, frozen_ocean
+        };
+        enableSet(ids, sizeof(ids) / sizeof(int));
     }
     else if (ft.layer)
     {

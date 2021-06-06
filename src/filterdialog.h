@@ -68,6 +68,7 @@ public:
 
     void updateMode();
     void updateBiomeSelection();
+    void enableSet(const int *ids, int n);
 
 signals:
     void setCond(QListWidgetItem *item, Condition cond);

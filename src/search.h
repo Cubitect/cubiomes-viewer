@@ -46,6 +46,8 @@ enum
     F_BIOME_256_BIOME,
     F_BIOME_256_OTEMP,
     F_TEMPS,
+    F_BIOME_NETHER_4,
+    F_BIOME_END_16,
     F_SLIME,
     F_SPAWN,
     F_STRONGHOLD,
@@ -195,6 +197,24 @@ static const struct FilterList
             ":icons/tempcat.png",
             "Temperature categories",
             "Checks that the area has a minimum of all the required temperature categories."
+        };
+
+        list[F_BIOME_NETHER_4] = FilterInfo{
+            CAT_FULL, 1, 1, 0, 0, 4, 0, MC_1_16, -1,
+            ":icons/nether.png",
+            "Nether biome filter 1:4",
+            "Only seeds with the included (+) biomes in the specified area and "
+            "discard those that have biomes that are explicitly excluded (-). "
+            "Nether biomes are sampled at scale 1:4, at height: y = 0."
+        };
+
+        list[F_BIOME_END_16] = FilterInfo{
+            CAT_FULL, 1, 1, 0, 0, 16, 0, MC_1_9, +1,
+            ":icons/the_end.png",
+            "End biome filter 1:16",
+            "Only seeds with the included (+) biomes in the specified area and "
+            "discard those that have biomes that are explicitly excluded (-). "
+            "End biomes are sampled at scale 1:16."
         };
 
         list[F_SLIME] = FilterInfo{

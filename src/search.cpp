@@ -62,6 +62,7 @@ static bool isInnerRingOk(int mc, int64_t seed, int x1, int z1, int x2, int z2, 
     return false;
 }
 
+
 int testCond(StructPos *spos, int64_t seed, const Condition *cond, int mc, LayerStack *g, std::atomic_bool *abort)
 {
     int x1, x2, z1, z2;
@@ -511,6 +512,55 @@ L_biome_filter_any:
         sout->cz = ((rz1 + rz2) << 10) >> 1;
         if (!g) return 1;
         return checkForTemps(g, seed, rx1, rz1, rx2-rx1+1, rz2-rz1+1, cond->temps);
+
+
+    case F_BIOME_NETHER_4:  s = 2;  goto L_nether_end;
+    case F_BIOME_END_16:    s = 4;  goto L_nether_end;
+
+L_nether_end:
+        if (cond->relative)
+        {
+            rx1 = ((cond->x1 << s) + spos[cond->relative].cx) >> s;
+            rz1 = ((cond->z1 << s) + spos[cond->relative].cz) >> s;
+            rx2 = ((cond->x2 << s) + spos[cond->relative].cx) >> s;
+            rz2 = ((cond->z2 << s) + spos[cond->relative].cz) >> s;
+        }
+        else
+        {
+            rx1 = cond->x1;
+            rz1 = cond->z1;
+            rx2 = cond->x2;
+            rz2 = cond->z2;
+        }
+        sout->cx = ((rx1 + rx2) << s) >> 1;
+        sout->cz = ((rz1 + rz2) << s) >> 1;
+        if (!g) return 1;
+        else
+        {
+            int w = rx2 - rx1 + 1;
+            int h = rz2 - rz1 + 1;
+            int *area = (int*) malloc(w * h * sizeof(int));
+
+            if (cond->type == F_BIOME_NETHER_4)
+                genNetherScaled(mc, seed, 4, area, rx1, rz1, w, h, 0, 0);
+            else
+                genEndScaled(mc, seed, 16, area, rx1, rz1, w, h);
+
+            uint64_t b = 0, bm = 0;
+            for (int i = 0; i < w*h; i++)
+            {
+                int id = area[i];
+                if (id < 128) b |= (1ULL << id);
+                else bm |= (1ULL << (id-128));
+            }
+            valid = ((b & cond->bfilter.riverToFind) ^ cond->bfilter.riverToFind) == 0 &&
+                    ((bm & cond->bfilter.riverToFindM) ^ cond->bfilter.riverToFindM) == 0 &&
+                    (b & cond->exclb) == 0 &&
+                    (bm & cond->exclm) == 0;
+
+            free(area);
+        }
+        return valid;
 
     default:
         break;
