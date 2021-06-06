@@ -6,6 +6,8 @@
 #include <QTableWidgetItem>
 #include <QTreeWidgetItem>
 #include <QWidget>
+#include <QAction>
+#include <QActionGroup>
 
 #include <QTimer>
 #include <QThreadPool>
@@ -44,7 +46,8 @@ public:
     QAction *addMapAction(int stype, const char *iconpath, const char *tip);
 
     bool getSeed(int *mc, int64_t *seed, bool applyrand = true);
-    bool setSeed(int mc, int64_t seed);
+    bool setSeed(int mc, int64_t seed, int dim = INT_MAX);
+    int getDim();
     MapView *getMapView();
 
 protected:
@@ -110,6 +113,9 @@ public:
     QTimer autosaveTimer;
 
     QVector<QAction*> saction;
+    QAction *dimactions[3];
+    QActionGroup *dimgroup;
+
     ProtoBaseDialog *protodialog;
 };
 

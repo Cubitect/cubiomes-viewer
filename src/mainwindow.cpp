@@ -71,8 +71,22 @@ MainWindow::MainWindow(QWidget *parent)
     //ui->toolBar->setContentsMargins(0, 0, 0, 0);
 
     QAction *toorigin = new QAction(QIcon(":/icons/origin.png"), "Goto origin", this);
-    toorigin->connect(toorigin, &QAction::triggered, [=](){ this->mapGoto(0,0,16); });
+    connect(toorigin, &QAction::triggered, [=](){ this->mapGoto(0,0,16); });
     ui->toolBar->addAction(toorigin);
+    ui->toolBar->addSeparator();
+
+    dimactions[0] = addMapAction(-1, "overworld", "Overworld");
+    dimactions[1] = addMapAction(-1, "nether", "Nether");
+    dimactions[2] = addMapAction(-1, "the_end", "End");
+    dimgroup = new QActionGroup(this);
+
+    for (int i = 0; i < 3; i++)
+    {
+        connect(dimactions[i], &QAction::triggered, [=](){ this->updateMapSeed(); });
+        ui->toolBar->addAction(dimactions[i]);
+        dimgroup->addAction(dimactions[i]);
+    }
+    dimactions[0]->setChecked(true);
     ui->toolBar->addSeparator();
 
     saction.resize(STRUCT_NUM);
@@ -93,6 +107,11 @@ MainWindow::MainWindow(QWidget *parent)
     addMapAction(D_PORTAL, "portal", "Show ruined portals");
     addMapAction(D_SPAWN, "spawn", "Show world spawn");
     addMapAction(D_STRONGHOLD, "stronghold", "Show strongholds");
+    ui->toolBar->addSeparator();
+    addMapAction(D_FORTESS, "fortress", "Show nether fortresses");
+    addMapAction(D_BASTION, "bastion", "Show bastions");
+    ui->toolBar->addSeparator();
+    addMapAction(D_ENDCITY, "endcity", "Show end cities");
 
     saction[D_GRID]->setChecked(true);
 
@@ -135,9 +154,12 @@ QAction *MainWindow::addMapAction(int stype, const char *iconpath, const char *t
     icon.addPixmap(QPixmap(inam + "_d.png"), QIcon::Normal, QIcon::Off);
     QAction *action = new QAction(icon, tip, this);
     action->setCheckable(true);
-    action->connect(action, &QAction::toggled, [=](bool state){ this->onActionMapToggled(stype, state); });
     ui->toolBar->addAction(action);
-    saction[stype] = action;
+    if (stype >= 0)
+    {
+        action->connect(action, &QAction::toggled, [=](bool state){ this->onActionMapToggled(stype, state); });
+        saction[stype] = action;
+    }
     return action;
 }
 
@@ -172,7 +194,7 @@ bool MainWindow::getSeed(int *mc, int64_t *seed, bool applyrand)
     return ok;
 }
 
-bool MainWindow::setSeed(int mc, int64_t seed)
+bool MainWindow::setSeed(int mc, int64_t seed, int dim)
 {
     const char *mcstr = mc2str(mc);
     if (!mcstr)
@@ -181,10 +203,23 @@ bool MainWindow::setSeed(int mc, int64_t seed)
         return false;
     }
 
+    if (dim == INT_MAX)
+        dim = getDim();
+
     ui->comboBoxMC->setCurrentText(mcstr);
     ui->seedEdit->setText(QString::asprintf("%" PRId64, seed));
-    ui->mapView->setSeed(mc, seed);
+    ui->mapView->setSeed(mc, seed, dim);
     return true;
+}
+
+int MainWindow::getDim()
+{
+    QAction *active = dimgroup->checkedAction();
+    if (active == dimactions[1])
+        return -1; // nether
+    if (active == dimactions[2])
+        return +1; // end
+    return 0;
 }
 
 void MainWindow::saveSettings()
@@ -205,6 +240,7 @@ void MainWindow::saveSettings()
     getSeed(&mc, &seed, false);
     settings.setValue("map/mc", mc);
     settings.setValue("map/seed", (qlonglong)seed);
+    settings.setValue("map/dim", getDim());
     settings.setValue("map/x", ui->mapView->getX());
     settings.setValue("map/z", ui->mapView->getZ());
     settings.setValue("map/scale", ui->mapView->getScale());
@@ -234,6 +270,14 @@ void MainWindow::loadSettings()
     config.maxMatching = settings.value("config/maxMatching", config.maxMatching).toInt();
 
     ui->mapView->setSmoothMotion(config.smoothMotion);
+
+    int dim = settings.value("map/dim", getDim()).toInt();
+    if (dim == -1)
+        dimactions[1]->setChecked(true);
+    else if (dim == +1)
+        dimactions[2]->setChecked(true);
+    else
+        dimactions[0]->setChecked(true);
 
     int mc = MC_1_16;
     int64_t seed = 0;
@@ -436,7 +480,7 @@ void MainWindow::updateMapSeed()
     int mc;
     int64_t seed;
     if (getSeed(&mc, &seed))
-        ui->mapView->setSeed(mc, seed);
+        setSeed(mc, seed);
 }
 
 
@@ -655,30 +699,62 @@ void MainWindow::on_buttonAnalysis_clicked()
         warning("Warning", "Invalid area for analysis");
         return;
     }
+    if ((int64_t)(x2 - x1) * (int64_t)(z2 - z1) > 100000000LL)
+    {
+        QString msg = QString::asprintf(
+                    "Area for analysis is very large (%d, %d).\n"
+                    "The analysis might take a while. Do you want to continue?",
+                    x2-x1+1, z2-z1+1);
+        int button = QMessageBox::warning(this, "Warning", msg, QMessageBox::Cancel, QMessageBox::Yes);
+        if (button != QMessageBox::Yes)
+            return;
+    }
+
+    bool everything = ui->radioEverything->isChecked();
 
     int mc;
     int64_t seed;
     if (!getSeed(&mc, &seed))
         return;
 
+    ui->buttonAnalysis->setEnabled(false);
+    update();
+    QApplication::processEvents();
+
     const int step = 512;
+    long idcnt[256] = {0};
+    int dim = getDim();
 
     LayerStack g;
     setupGenerator(&g, mc);
     applySeed(&g, seed);
     int *ids = allocCache(g.entry_1, step, step);
 
-    long idcnt[256] = {0};
     for (int x = x1; x <= x2; x += step)
     {
         for (int z = z1; z <= z2; z += step)
         {
             int w = x2-x+1 < step ? x2-x+1 : step;
             int h = z2-z+1 < step ? z2-z+1 : step;
-            genArea(g.entry_1, ids, x, z, w, h);
 
-            for (int i = 0; i < w*h; i++)
-                idcnt[ ids[i] & 0xff ]++;
+            if (everything || dim == 0)
+            {
+                genArea(g.entry_1, ids, x, z, w, h);
+                for (int i = 0; i < w*h; i++)
+                    idcnt[ ids[i] & 0xff ]++;
+            }
+            if (everything || dim == -1)
+            {
+                genNetherScaled(mc, seed, 1, ids, x, z, w, h, 0, 0);
+                for (int i = 0; i < w*h; i++)
+                    idcnt[ ids[i] & 0xff ]++;
+            }
+            if (everything || dim == +1)
+            {
+                genEndScaled(mc, seed, 1, ids, x, z, w, h);
+                for (int i = 0; i < w*h; i++)
+                    idcnt[ ids[i] & 0xff ]++;
+            }
         }
     }
 
@@ -714,13 +790,17 @@ void MainWindow::on_buttonAnalysis_clicked()
     tree->insertTopLevelItem(0, item_cat);
 
     std::vector<VarPos> st;
-    for (int stype = Desert_Pyramid; stype <= Treasure; stype++)
+    for (int sopt = D_DESERT; sopt < D_SPAWN; sopt++)
     {
+        if (!everything && !getMapView()->getShow(sopt))
+            continue;
+
         st.clear();
+        int stype = mapopt2stype(sopt);
         StructureConfig sconf;
         if (!getConfig(stype, mc, &sconf))
             continue;
-        getStructs(&st, sconf, &g, mc, seed, x1, z1, x2, z2);
+        getStructs(&st, sconf, mc, seed, x1, z1, x2, z2);
         if (st.empty())
             continue;
 
@@ -744,41 +824,48 @@ void MainWindow::on_buttonAnalysis_clicked()
         tree->insertTopLevelItem(stype, item_cat);
     }
 
-    Pos pos = getSpawn(mc, &g, NULL, seed);
-    if (pos.x >= x1 && pos.x <= x2 && pos.z >= z1 && pos.z <= z2)
+    if (everything || getMapView()->getShow(D_SPAWN))
     {
-        item_cat = new QTreeWidgetItem(tree);
-        item_cat->setText(0, "Spawn");
-        item_cat->setData(1, Qt::DisplayRole, QVariant::fromValue(1));
-        QTreeWidgetItem* item = new QTreeWidgetItem(item_cat);
-        item->setData(0, Qt::UserRole, QVariant::fromValue(pos));
-        item->setText(0, QString::asprintf("%d,\t%d", pos.x, pos.z));
-    }
-
-    StrongholdIter sh;
-    initFirstStronghold(&sh, mc, seed);
-    std::vector<Pos> shp;
-    while (nextStronghold(&sh, &g, NULL) > 0)
-    {
-        pos = sh.pos;
+        Pos pos = getSpawn(mc, &g, NULL, seed);
         if (pos.x >= x1 && pos.x <= x2 && pos.z >= z1 && pos.z <= z2)
-            shp.push_back(pos);
-    }
-
-    if (!shp.empty())
-    {
-        item_cat = new QTreeWidgetItem(tree);
-        item_cat->setText(0, "Stronghold");
-        item_cat->setData(1, Qt::DisplayRole, QVariant::fromValue(shp.size()));
-        for (Pos pos : shp)
         {
+            item_cat = new QTreeWidgetItem(tree);
+            item_cat->setText(0, "Spawn");
+            item_cat->setData(1, Qt::DisplayRole, QVariant::fromValue(1));
             QTreeWidgetItem* item = new QTreeWidgetItem(item_cat);
             item->setData(0, Qt::UserRole, QVariant::fromValue(pos));
             item->setText(0, QString::asprintf("%d,\t%d", pos.x, pos.z));
         }
     }
 
+    if (everything || getMapView()->getShow(D_STRONGHOLD))
+    {
+        StrongholdIter sh;
+        initFirstStronghold(&sh, mc, seed);
+        std::vector<Pos> shp;
+        while (nextStronghold(&sh, &g, NULL) > 0)
+        {
+            Pos pos = sh.pos;
+            if (pos.x >= x1 && pos.x <= x2 && pos.z >= z1 && pos.z <= z2)
+                shp.push_back(pos);
+        }
+
+        if (!shp.empty())
+        {
+            item_cat = new QTreeWidgetItem(tree);
+            item_cat->setText(0, "Stronghold");
+            item_cat->setData(1, Qt::DisplayRole, QVariant::fromValue(shp.size()));
+            for (Pos pos : shp)
+            {
+                QTreeWidgetItem* item = new QTreeWidgetItem(item_cat);
+                item->setData(0, Qt::UserRole, QVariant::fromValue(pos));
+                item->setText(0, QString::asprintf("%d,\t%d", pos.x, pos.z));
+            }
+        }
+    }
+
     ui->buttonExport->setEnabled(true);
+    ui->buttonAnalysis->setEnabled(true);
 }
 
 void MainWindow::on_buttonExport_clicked()

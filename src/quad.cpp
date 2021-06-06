@@ -9,8 +9,8 @@
 
 
 Quad::Quad(const Level* l, int i, int j)
-    : mc(l->mc),entry(l->entry),seed(l->seed)
-    , ti(i),tj(j),blocks(l->blocks),pixs(l->pixs),stype(l->stype)
+    : mc(l->mc),seed(l->seed),dim(l->dim),entry(l->entry)
+    , ti(i),tj(j),blocks(l->blocks),pixs(l->pixs),sopt(l->sopt)
     , rgb(),img(),spos()
     , done()
     , prio(),stopped()
@@ -26,8 +26,25 @@ Quad::~Quad()
 }
 
 void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
-    LayerStack *g, int mc, int64_t seed, int x0, int z0, int x1, int z1)
+        int mc, int64_t seed, int x0, int z0, int x1, int z1)
 {
+    union {
+        LayerStack g;
+        NetherNoise nn;
+        EndNoise en;
+    } u;
+
+    int dim;
+    if (sconf.structType == Fortress || sconf.structType == Bastion)
+        dim = -1;
+    else if (sconf.structType == End_City)
+        dim = +1;
+    else
+    {
+        dim = 0;
+        setupGenerator(&u.g, mc);
+    }
+
     int si0 = (int)floor(x0 / (qreal)(sconf.regionSize * 16));
     int sj0 = (int)floor(z0 / (qreal)(sconf.regionSize * 16));
     int si1 = (int)floor((x1-1) / (qreal)(sconf.regionSize * 16));
@@ -43,7 +60,26 @@ void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
 
             if (p.x >= x0 && p.x < x1 && p.z >= z0 && p.z < z1)
             {
-                int id = isViableStructurePos(sconf.structType, mc, g, seed, p.x, p.z);
+                int id = 0;
+                if (dim == 0)
+                {
+                    id = isViableStructurePos(sconf.structType, mc, &u.g, seed, p.x, p.z);
+                }
+                else if (dim == -1)
+                {
+                    id = isViableNetherStructurePos(sconf.structType, mc, &u.nn, seed, p.x, p.z);
+                }
+                else if (dim == +1)
+                {
+                    id = isViableEndStructurePos(sconf.structType, mc, &u.en, seed, p.x, p.z);
+                    if (id)
+                    {
+                        SurfaceNoise sn;
+                        initSurfaceNoiseEnd(&sn, seed);
+                        id = isViableEndCityTerrain(&u.en, &sn, p.x, p.z);
+                    }
+                }
+
                 if (id)
                 {
                     VarPos vp = { p, 0 };
@@ -60,6 +96,7 @@ void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
 }
 
 
+
 void Quad::run()
 {
     if (done)
@@ -67,9 +104,23 @@ void Quad::run()
 
     if (pixs > 0)
     {
-        int *b = allocCache(entry, pixs, pixs);
-
-        genArea(entry, b, ti*pixs, tj*pixs, pixs, pixs);
+        int x = ti*pixs, z = tj*pixs, w = pixs, h = pixs;
+        int *b = NULL;
+        if (dim == -1)
+        {
+            b = (int*) malloc((pixs+7) * (pixs+7) * sizeof(int));
+            genNetherScaled(mc, seed, blocks / pixs, b, x, z, w, h, 0, 0);
+        }
+        else if (dim == +1) // end
+        {
+            b = (int*) malloc((pixs+7) * (pixs+7) * sizeof(int));
+            genEndScaled(mc, seed, blocks / pixs, b, x, z, w, h);
+        }
+        else
+        {
+            b = allocCache(entry, pixs, pixs);
+            genArea(entry, b, x, z, w, h);
+        }
 
         rgb = new uchar[pixs*pixs * 3];
         biomesToImage(rgb, biomeColors, b, pixs, pixs, 1, 1);
@@ -78,34 +129,15 @@ void Quad::run()
     }
     else
     {
-        int structureType = -1;
-
-        switch (stype)
-        {
-        case D_DESERT:      structureType = Desert_Pyramid; break;
-        case D_JUNGLE:      structureType = Jungle_Pyramid; break;
-        case D_IGLOO:       structureType = Igloo; break;
-        case D_HUT:         structureType = Swamp_Hut; break;
-        case D_VILLAGE:     structureType = Village; break;
-        case D_MANSION:     structureType = Mansion; break;
-        case D_MONUMENT:    structureType = Monument; break;
-        case D_RUINS:       structureType = Ocean_Ruin; break;
-        case D_SHIPWRECK:   structureType = Shipwreck; break;
-        case D_TREASURE:    structureType = Treasure; break;
-        case D_OUTPOST:     structureType = Outpost; break;
-        case D_PORTAL:      structureType = Ruined_Portal; break;
-        }
+        int structureType = mapopt2stype(sopt);
         if (structureType >= 0)
         {
-            LayerStack g;
-            setupGenerator(&g, mc);
             int x0 = ti*blocks, x1 = (ti+1)*blocks;
             int z0 = tj*blocks, z1 = (tj+1)*blocks;
-
             std::vector<VarPos>* st = new std::vector<VarPos>();
             StructureConfig sconf;
             if (getConfig(structureType, mc, &sconf))
-                getStructs(st, sconf, &g, mc, seed, x0, z0, x1, z1);
+                getStructs(st, sconf, mc, seed, x0, z0, x1, z1);
             spos = st;
         }
     }
@@ -114,10 +146,10 @@ void Quad::run()
 
 
 Level::Level()
-    : cells(),g(),entry(),seed(),mc()
+    : cells(),g(),entry(),seed(),mc(),dim()
     , tx(),tz(),tw(),th()
     , scale(),blocks(),pixs()
-    , stype()
+    , sopt()
 {
 }
 
@@ -181,64 +213,70 @@ int mapOceanMixMod(const Layer * l, int * out, int x, int z, int w, int h)
     return 0;
 }
 
-void Level::init4map(int mcversion, int64_t ws, int pix, int layerscale)
+void Level::init4map(int mcversion, int64_t ws, int dim, int pix, int layerscale)
 {
-    mc = mcversion;
-    seed = ws;
-    setupGenerator(&g, mc);
+    this->mc = mcversion;
+    this->seed = ws;
+    this->dim = dim;
 
     tx = tz = tw = th = 0;
     scale = layerscale;
     pixs = pix;
     blocks = pix * layerscale;
-    stype = D_NONE;
+    sopt = D_NONE;
 
-    switch (scale)
+    if (dim == 0) // overworld
     {
-    case 1:
-        entry = g.entry_1;
-        break;
-    case 4:
-        entry = g.entry_4;
-        break;
-    case 16:
-        if (mc >= MC_1_13) {
-            entry = setupLayer(&g, L_VORONOI_1, &mapOceanMixMod, mc, 1, 0, 0, &g.layers[L_SHORE_16], &g.layers[L_ZOOM_16_OCEAN]);
-        } else {
-            entry = g.entry_16;
-        }
-        break;
-    case 64:
-        if (mc >= MC_1_13) {
-            entry = setupLayer(&g, L_VORONOI_1, &mapOceanMixMod, mc, 1, 0, 0, &g.layers[L_SUNFLOWER_64], &g.layers[L_ZOOM_64_OCEAN]);
-        } else {
-            entry = g.entry_64;
-        }
-        break;
-    case 256:
-        if (mc >= MC_1_13) {
-            int layerid = mc >= MC_1_14 ? L_BAMBOO_256 : L_BIOME_256;
-            entry = setupLayer(&g, L_VORONOI_1, &mapOceanMixMod, mc, 1, 0, 0, &g.layers[layerid], &g.layers[L_OCEAN_TEMP_256]);
-        } else {
-            entry = g.entry_256;
-        }
-        break;
-    default:
-        printf("Bad scale (%d) for level\n", scale);
-        exit(1);
-    }
+        setupGenerator(&g, mc);
 
-    setLayerSeed(entry, seed);
+        switch (scale)
+        {
+        case 1:
+            entry = g.entry_1;
+            break;
+        case 4:
+            entry = g.entry_4;
+            break;
+        case 16:
+            if (mc >= MC_1_13) {
+                entry = setupLayer(&g, L_VORONOI_1, &mapOceanMixMod, mc, 1, 0, 0, &g.layers[L_SHORE_16], &g.layers[L_ZOOM_16_OCEAN]);
+            } else {
+                entry = g.entry_16;
+            }
+            break;
+        case 64:
+            if (mc >= MC_1_13) {
+                entry = setupLayer(&g, L_VORONOI_1, &mapOceanMixMod, mc, 1, 0, 0, &g.layers[L_SUNFLOWER_64], &g.layers[L_ZOOM_64_OCEAN]);
+            } else {
+                entry = g.entry_64;
+            }
+            break;
+        case 256:
+            if (mc >= MC_1_13) {
+                int layerid = mc >= MC_1_14 ? L_BAMBOO_256 : L_BIOME_256;
+                entry = setupLayer(&g, L_VORONOI_1, &mapOceanMixMod, mc, 1, 0, 0, &g.layers[layerid], &g.layers[L_OCEAN_TEMP_256]);
+            } else {
+                entry = g.entry_256;
+            }
+            break;
+        default:
+            printf("Bad scale (%d) for level\n", scale);
+            exit(1);
+        }
+
+        setLayerSeed(entry, seed);
+    }
 }
 
 void Level::init4struct(int mcversion, int64_t ws, int b, int structtype, int lv)
 {
     mc = mcversion;
+    dim = 0;
     seed = ws;
     blocks = b;
     pixs = -1;
     scale = -1;
-    stype = structtype;
+    sopt = structtype;
     viewlv = lv;
 }
 
@@ -268,7 +306,7 @@ void Level::resizeLevel(std::vector<Quad*>& cache, int x, int z, int w, int h)
         int gx = c->ti - x;
         int gz = c->tj - z;
 
-        if (c->blocks == blocks && c->stype == stype)
+        if (c->blocks == blocks && c->sopt == sopt && c->dim == dim)
         {
             // remove outside quads from schedule
             if (QThreadPool::globalInstance()->tryTake(c))
@@ -308,6 +346,8 @@ void Level::resizeLevel(std::vector<Quad*>& cache, int x, int z, int w, int h)
                 {
                     g->stopped = false;
                     g->prio = sqdist(i-w/2, j-h/2);
+                    if (g->dim != dim)
+                        g->prio += 1000000;
                     togen.push_back(g);
                 }
             }
@@ -348,13 +388,15 @@ void Level::update(std::vector<Quad*>& cache, qreal bx0, qreal bz0, qreal bx1, q
 }
 
 
-QWorld::QWorld(int mc, int64_t seed)
+QWorld::QWorld(int mc, int64_t seed, int dim)
     : mc(mc)
     , seed(seed)
-    , lv()
+    , dim(dim)
+    , sha()
+    , lvb()
     , lvs()
     , activelv()
-    , cached()
+    , cachedbiomes()
     , cachedstruct()
     , cachesize()
     , spawn()
@@ -373,6 +415,7 @@ QWorld::QWorld(int mc, int64_t seed)
 {
     setupGenerator(&g, mc);
     applySeed(&g, seed);
+    sha = getVoronoiSHA(seed);
 
     activelv = 0;
 
@@ -390,12 +433,27 @@ QWorld::QWorld(int mc, int64_t seed)
     lvs[D_TREASURE].init4struct(mc, seed, 2048, D_TREASURE, 1);
     lvs[D_OUTPOST].init4struct(mc, seed, 2048, D_OUTPOST, 2);
     lvs[D_PORTAL].init4struct(mc, seed, 2048, D_PORTAL, 1);
-    lv.resize(5);
-    lv[0].init4map(mc, seed, pixs, 1);
-    lv[1].init4map(mc, seed, pixs, 4);
-    lv[2].init4map(mc, seed, pixs, 16);
-    lv[3].init4map(mc, seed, pixs, 64);
-    lv[4].init4map(mc, seed, pixs, 256);
+    lvs[D_FORTESS].init4struct(mc, seed, 2048, D_FORTESS, 1);
+    lvs[D_BASTION].init4struct(mc, seed, 2048, D_BASTION, 1);
+    lvs[D_ENDCITY].init4struct(mc, seed, 2048, D_ENDCITY, 1);
+
+    if (dim == 0)
+    {
+        lvb.resize(5);
+        lvb[0].init4map(mc, seed, dim, pixs, 1);
+        lvb[1].init4map(mc, seed, dim, pixs, 4);
+        lvb[2].init4map(mc, seed, dim, pixs, 16);
+        lvb[3].init4map(mc, seed, dim, pixs, 64);
+        lvb[4].init4map(mc, seed, dim, pixs, 256);
+    }
+    else
+    {
+        lvb.resize(4);
+        lvb[0].init4map(mc, seed, dim, pixs, 1);
+        lvb[1].init4map(mc, seed, dim, pixs, 4);
+        lvb[2].init4map(mc, seed, dim, pixs, 16);
+        lvb[3].init4map(mc, seed, dim, pixs, 64);
+    }
     cachesize = 100;
     qual = 1.0;
 
@@ -415,6 +473,9 @@ QWorld::QWorld(int mc, int64_t seed)
     icons[D_PORTAL]     = QPixmap(":/icons/portal.png");
     icons[D_SPAWN]      = QPixmap(":/icons/spawn.png");
     icons[D_STRONGHOLD] = QPixmap(":/icons/stronghold.png");
+    icons[D_FORTESS]    = QPixmap(":/icons/fortress.png");
+    icons[D_BASTION]    = QPixmap(":/icons/bastion.png");
+    icons[D_ENDCITY]    = QPixmap(":/icons/endcity.png");
 
     iconzvil = QPixmap(":/icons/zombie.png");
 }
@@ -424,7 +485,7 @@ QWorld::~QWorld()
     isdel = true;
     QThreadPool::globalInstance()->clear();
     QThreadPool::globalInstance()->waitForDone();
-    for (Quad *q : cached)
+    for (Quad *q : cachedbiomes)
         delete q;
     for (Quad *q : cachedstruct)
         delete q;
@@ -433,6 +494,71 @@ QWorld::~QWorld()
         delete spawn;
         delete strongholds;
     }
+}
+
+void QWorld::setDim(int dim)
+{
+    QThreadPool::globalInstance()->clear();
+    QThreadPool::globalInstance()->waitForDone();
+    this->dim = dim;
+
+    // cache existing quads
+    for (Level& l : lvb)
+    {
+        std::vector<Quad*> todel;
+        for (Quad *q : l.cells)
+        {
+            if (q->done)
+                cachedbiomes.push_back(q);
+            else
+                todel.push_back(q);
+        }
+        l.cells.swap(todel);
+    }
+
+    cleancache(cachedbiomes, (int)(cachesize));
+
+    lvb.clear();
+    int pixs = 512;
+    if (dim == 0)
+    {
+        lvb.resize(5);
+        lvb[0].init4map(mc, seed, dim, pixs, 1);
+        lvb[1].init4map(mc, seed, dim, pixs, 4);
+        lvb[2].init4map(mc, seed, dim, pixs, 16);
+        lvb[3].init4map(mc, seed, dim, pixs, 64);
+        lvb[4].init4map(mc, seed, dim, pixs, 256);
+    }
+    else
+    {
+        lvb.resize(4);
+        lvb[0].init4map(mc, seed, dim, pixs, 1);
+        lvb[1].init4map(mc, seed, dim, pixs, 4);
+        lvb[2].init4map(mc, seed, dim, pixs, 16);
+        lvb[3].init4map(mc, seed, dim, pixs, 64);
+    }
+}
+
+int QWorld::getBiome(Pos p)
+{
+    if (dim == -1)
+    {
+        if (mc < MC_1_16)
+            return nether_wastes;
+        NetherNoise nn;
+        setNetherSeed(&nn, seed);
+        voronoiAccess3D(sha, p.x, 0, p.z, &p.x, 0, &p.z);
+        return getNetherBiome(&nn, p.x, 0, p.z, NULL);
+    }
+    else if (dim == 1)
+    {
+        if (mc < MC_1_9)
+            return the_end;
+        int buf[49];
+        genEndScaled(mc, seed, 1, buf, p.x, p.z, 1, 1);
+        return buf[0];
+    }
+    return getBiomeAtPos(&g, p);
 }
 
 void QWorld::cleancache(std::vector<Quad*>& cache, unsigned int maxsize)
@@ -515,18 +641,18 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
     qreal bx1 = focusx + uiw/2;
     qreal bz1 = focusz + uih/2;
 
-    if      (blocks2pix >= qual) activelv = -1;
-    else if (blocks2pix >= qual/4) activelv = 0;
-    else if (blocks2pix >= qual/16) activelv = 1;
-    else if (blocks2pix >= qual/64) activelv = 2;
+    if      (blocks2pix >= qual)     activelv = -1;
+    else if (blocks2pix >= qual/4)   activelv = 0;
+    else if (blocks2pix >= qual/16)  activelv = 1;
+    else if (blocks2pix >= qual/64)  activelv = 2;
     else if (blocks2pix >= qual/256) activelv = 3;
-    else activelv = lv.size()-1;
+    else activelv = lvb.size()-1;
 
     for (int li = activelv+1; li >= activelv; --li)
     {
-        if (li < 0 || li >= (int)lv.size())
+        if (li < 0 || li >= (int)lvb.size())
             continue;
-        Level& l = lv[li];
+        Level& l = lvb[li];
         for (Quad *q : l.cells)
         {
             if (!q->img)
@@ -598,10 +724,10 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
     }
 
 
-    for (int stype = D_DESERT; stype < D_SPAWN; stype++)
+    for (int sopt = D_DESERT; sopt < D_SPAWN; sopt++)
     {
-        Level& l = lvs[stype];
-        if (!sshow[stype] || activelv > l.viewlv)
+        Level& l = lvs[sopt];
+        if (!sshow[sopt] || activelv > l.viewlv)
             continue;
 
         std::vector<QPainter::PixmapFragment> frags;
@@ -615,12 +741,13 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
             {
                 qreal x = vw/2 + (vp.p.x - focusx) * blocks2pix;
                 qreal y = vh/2 + (vp.p.z - focusz) * blocks2pix;
+
                 if (x < 0 || x >= vw || y < 0 || y >= vh)
                     continue;
 
                 QPointF d = QPointF(x, y);
-                QRectF r = icons[stype].rect();
-                if (stype == D_VILLAGE)
+                QRectF r = icons[sopt].rect();
+                if (sopt == D_VILLAGE)
                 {
                     if (vp.variant) {
                         painter.drawPixmap(x-r.width()/2, y-r.height()/2, iconzvil);
@@ -638,7 +765,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
                     r.moveCenter(d);
                     if (r.contains(selx, selz))
                     {
-                        seltype = stype;
+                        seltype = sopt;
                         selpos = vp.p;
                         selvar = vp.variant;
                     }
@@ -646,7 +773,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
             }
         }
 
-        painter.drawPixmapFragments(frags.data(), frags.size(), icons[stype]);
+        painter.drawPixmapFragments(frags.data(), frags.size(), icons[sopt]);
     }
 
     Pos* sp = spawn; // atomic fetch
@@ -698,17 +825,18 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
         painter.drawPixmapFragments(frags.data(), frags.size(), icons[D_STRONGHOLD]);
     }
 
-    for (int li = lv.size()-1; li >= 0; --li)
+    for (int li = lvb.size()-1; li >= 0; --li)
     {
+        Level& l = lvb[li];
         if (li == activelv || li == activelv+1)
-            lv[li].update(cached, bx0, bz0, bx1, bz1);
+            l.update(cachedbiomes, bx0, bz0, bx1, bz1);
         else
-            lv[li].update(cached, 0, 0, 0, 0);
+            l.update(cachedbiomes, 0, 0, 0, 0);
     }
-    for (int stype = D_DESERT; stype < D_SPAWN; stype++)
+    for (int sopt = D_DESERT; sopt < D_SPAWN; sopt++)
     {
-        Level& l = lvs[stype];
-        if (activelv <= l.viewlv && sshow[stype])
+        Level& l = lvs[sopt];
+        if (activelv <= l.viewlv && sshow[sopt])
             l.update(cachedstruct, bx0, bz0, bx1, bz1);
         else if (activelv > l.viewlv+1)
             l.update(cachedstruct, 0, 0, 0, 0);
@@ -764,7 +892,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
         painter.drawPixmap(iconrec.translated(pad,pad), *icon);
     }
 
-    cleancache(cached, cachesize);
+    cleancache(cachedbiomes, cachesize);
     cleancache(cachedstruct, cachesize);
 }
 

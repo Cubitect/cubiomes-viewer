@@ -47,5 +47,17 @@
         <file>icons/cancel.png</file>
         <file>icons/clear.png</file>
         <file>icons/info.png</file>
+        <file>icons/overworld.png</file>
+        <file>icons/nether.png</file>
+        <file>icons/overworld_d.png</file>
+        <file>icons/the_end_d.png</file>
+        <file>icons/the_end.png</file>
+        <file>icons/nether_d.png</file>
+        <file>icons/fortress_d.png</file>
+        <file>icons/fortress.png</file>
+        <file>icons/endcity_d.png</file>
+        <file>icons/endcity.png</file>
+        <file>icons/bastion_d.png</file>
+        <file>icons/bastion.png</file>
     </qresource>
 </RCC>

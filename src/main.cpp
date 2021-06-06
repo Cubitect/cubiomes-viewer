@@ -13,8 +13,8 @@ unsigned char tempsColors[256][3];
 int main(int argc, char *argv[])
 {
     initBiomes();
-    initBiomeColours(biomeColors);
-    initBiomeTypeColours(tempsColors);
+    initBiomeColors(biomeColors);
+    initBiomeTypeColors(tempsColors);
 
     QApplication a(argc, argv);
     MainWindow mw;

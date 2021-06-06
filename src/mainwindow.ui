@@ -62,6 +62,16 @@ QSplitter::handle:vertical {
             </property>
            </widget>
           </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="labelSeed">
+            <property name="toolTip">
+             <string>Seed can be an integer or text. Leave empty for a random seed</string>
+            </property>
+            <property name="text">
+             <string>seed:</string>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="0">
            <widget class="QLabel" name="labeMC">
             <property name="toolTip">
@@ -85,16 +95,6 @@ QSplitter::handle:vertical {
             </property>
             <property name="text">
              <string>(random)</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
-           <widget class="QLabel" name="labelSeed">
-            <property name="toolTip">
-             <string>Seed can be an integer or text. Leave empty for a random seed</string>
-            </property>
-            <property name="text">
-             <string>seed:</string>
             </property>
            </widget>
           </item>
@@ -283,7 +283,67 @@ QSplitter::handle:vertical {
             <string>Analysis</string>
            </attribute>
            <layout class="QGridLayout" name="gridLayout_7">
-            <item row="1" column="0" colspan="2">
+            <item row="0" column="1" colspan="2">
+             <widget class="QLineEdit" name="lineRadius">
+              <property name="text">
+               <string>0</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="0">
+             <widget class="QPushButton" name="buttonExport">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>Export</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="0" colspan="5">
+             <widget class="QTreeWidget" name="treeAnalysis">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <family>Monospace</family>
+               </font>
+              </property>
+              <property name="editTriggers">
+               <set>QAbstractItemView::NoEditTriggers</set>
+              </property>
+              <property name="dragDropMode">
+               <enum>QAbstractItemView::NoDragDrop</enum>
+              </property>
+              <property name="selectionMode">
+               <enum>QAbstractItemView::ExtendedSelection</enum>
+              </property>
+              <property name="sortingEnabled">
+               <bool>true</bool>
+              </property>
+              <property name="columnCount">
+               <number>2</number>
+              </property>
+              <attribute name="headerDefaultSectionSize">
+               <number>280</number>
+              </attribute>
+              <column>
+               <property name="text">
+                <string>object</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>count</string>
+               </property>
+              </column>
+             </widget>
+            </item>
+            <item row="1" column="0" colspan="3">
              <layout class="QHBoxLayout" name="layoutArea">
               <item>
                <widget class="QLabel" name="labelX1">
@@ -380,6 +440,13 @@ QSplitter::handle:vertical {
               </item>
              </layout>
             </item>
+            <item row="1" column="3" colspan="2">
+             <widget class="QPushButton" name="buttonFromVisible">
+              <property name="text">
+               <string>From visible</string>
+              </property>
+             </widget>
+            </item>
             <item row="0" column="0">
              <widget class="QLabel" name="labelSquareArea">
               <property name="text">
@@ -387,31 +454,7 @@ QSplitter::handle:vertical {
               </property>
              </widget>
             </item>
-            <item row="4" column="0">
-             <widget class="QPushButton" name="buttonExport">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="text">
-               <string>Export</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="0" colspan="4">
-             <widget class="QPushButton" name="buttonAnalysis">
-              <property name="text">
-               <string>Analyze</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QLineEdit" name="lineRadius">
-              <property name="text">
-               <string>0</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="2" colspan="2">
+            <item row="0" column="3" colspan="2">
              <widget class="QCheckBox" name="cboxArea">
               <property name="toolTip">
                <string>Specify manual rectangle rather than square</string>
@@ -424,55 +467,33 @@ QSplitter::handle:vertical {
               </property>
              </widget>
             </item>
-            <item row="3" column="0" colspan="4">
-             <widget class="QTreeWidget" name="treeAnalysis">
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>20</height>
-               </size>
+            <item row="4" column="0" colspan="5">
+             <widget class="QPushButton" name="buttonAnalysis">
+              <property name="text">
+               <string>Analyze</string>
               </property>
-              <property name="font">
-               <font>
-                <family>Monospace</family>
-               </font>
-              </property>
-              <property name="editTriggers">
-               <set>QAbstractItemView::NoEditTriggers</set>
-              </property>
-              <property name="dragDropMode">
-               <enum>QAbstractItemView::NoDragDrop</enum>
-              </property>
-              <property name="selectionMode">
-               <enum>QAbstractItemView::ExtendedSelection</enum>
-              </property>
-              <property name="sortingEnabled">
-               <bool>true</bool>
-              </property>
-              <property name="columnCount">
-               <number>2</number>
-              </property>
-              <attribute name="headerDefaultSectionSize">
-               <number>280</number>
-              </attribute>
-              <column>
-               <property name="text">
-                <string>object</string>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>count</string>
-               </property>
-              </column>
              </widget>
             </item>
-            <item row="1" column="2" colspan="2">
-             <widget class="QPushButton" name="buttonFromVisible">
-              <property name="text">
-               <string>From visible</string>
-              </property>
-             </widget>
+            <item row="2" column="0" colspan="5">
+             <layout class="QHBoxLayout" name="horizontalLayout">
+              <item>
+               <widget class="QRadioButton" name="radioStructs">
+                <property name="text">
+                 <string>Selected structures</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="radioEverything">
+                <property name="text">
+                 <string>Everything</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
            </layout>
           </widget>

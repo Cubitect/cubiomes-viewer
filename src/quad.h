@@ -10,8 +10,10 @@
 
 enum {
     D_NONE = -1,
+    // generics
     D_GRID,
     D_SLIME,
+    // structures
     D_DESERT,
     D_JUNGLE,
     D_IGLOO,
@@ -24,6 +26,10 @@ enum {
     D_TREASURE,
     D_OUTPOST,
     D_PORTAL,
+    D_FORTESS,
+    D_BASTION,
+    D_ENDCITY,
+    // non-recurring structures
     D_SPAWN,
     D_STRONGHOLD,
     STRUCT_NUM
@@ -49,6 +55,9 @@ inline const char *mapopt2str(int opt)
     case D_PORTAL:      return "portal";
     case D_SPAWN:       return "spawn";
     case D_STRONGHOLD:  return "stronghold";
+    case D_FORTESS:     return "fortress";
+    case D_BASTION:     return "bastion";
+    case D_ENDCITY:     return "endcity";
     default:            return "";
     }
 }
@@ -71,7 +80,34 @@ inline int str2mapopt(const char *s)
     if (!strcmp(s, "portal"))       return D_PORTAL;
     if (!strcmp(s, "spawn"))        return D_SPAWN;
     if (!strcmp(s, "stronghold"))   return D_STRONGHOLD;
+    if (!strcmp(s, "fortress"))     return D_FORTESS;
+    if (!strcmp(s, "bastion"))      return D_BASTION;
+    if (!strcmp(s, "endcity"))      return D_ENDCITY;
     return D_NONE;
+}
+
+inline int mapopt2stype(int opt)
+{
+    switch (opt)
+    {
+    case D_DESERT:      return Desert_Pyramid;
+    case D_JUNGLE:      return Jungle_Pyramid;
+    case D_IGLOO:       return Igloo;
+    case D_HUT:         return Swamp_Hut;
+    case D_VILLAGE:     return Village;
+    case D_MANSION:     return Mansion;
+    case D_MONUMENT:    return Monument;
+    case D_RUINS:       return Ocean_Ruin;
+    case D_SHIPWRECK:   return Shipwreck;
+    case D_TREASURE:    return Treasure;
+    case D_OUTPOST:     return Outpost;
+    case D_PORTAL:      return Ruined_Portal;
+    case D_FORTESS:     return Fortress;
+    case D_BASTION:     return Bastion;
+    case D_ENDCITY:     return End_City;
+    default:
+        return -1;
+    }
 }
 
 struct Level;
@@ -83,7 +119,7 @@ struct VarPos
 };
 
 void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
-    LayerStack *g, int mc, int64_t seed, int x0, int z0, int x1, int z1);
+        int mc, int64_t seed, int x0, int z0, int x1, int z1);
 
 class Quad : public QRunnable
 {
@@ -94,12 +130,13 @@ public:
     void run();
 
     int mc;
-    const Layer *entry;
     int64_t seed;
+    int dim;
+    const Layer *entry;
     int ti, tj;
     int blocks;
     int pixs;
-    int stype;
+    int sopt;
 
     uchar *rgb;
 
@@ -121,8 +158,8 @@ struct Level
     Level();
     ~Level();
 
-    void init4map(int mc, int64_t ws, int pix, int layerscale);
-    void init4struct(int mc, int64_t ws, int blocks, int stype, int viewlv);
+    void init4map(int mc, int64_t ws, int dim, int pix, int layerscale);
+    void init4struct(int mc, int64_t ws, int blocks, int sopt, int viewlv);
 
     void resizeLevel(std::vector<Quad*>& cache, int x, int z, int w, int h);
     void update(std::vector<Quad*>& cache, qreal bx0, qreal bz0, qreal bx1, qreal bz1);
@@ -132,37 +169,43 @@ struct Level
     Layer *entry;
     int64_t seed;
     int mc;
+    int dim;
     int tx, tz, tw, th;
     int scale;
     int blocks;
     int pixs;
-    int stype;
+    int sopt;
     int viewlv;
 };
 
 
 struct QWorld
 {
-    QWorld(int mc, int64_t seed);
+    QWorld(int mc, int64_t seed, int dim = 0);
     ~QWorld();
+
+    void setDim(int dim);
 
     void cleancache(std::vector<Quad*>& cache, unsigned int maxsize);
 
     void draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz, qreal blocks2pix);
 
+    int getBiome(Pos p);
 
     int mc;
     int64_t seed;
+    int dim;
     LayerStack g;
+    int64_t sha;
 
     // the visible area is managed in Quads of different scales (for biomes and structures),
     // which are managed in rectangular sections as levels
-    std::vector<Level> lv;      // levels for biomes
+    std::vector<Level> lvb;     // levels for biomes
     std::vector<Level> lvs;     // levels for structures
     int activelv;               // currently visible level
 
     // processed Quads are cached until they are too far out of view
-    std::vector<Quad*> cached;
+    std::vector<Quad*> cachedbiomes;
     std::vector<Quad*> cachedstruct;
     unsigned int cachesize;
 

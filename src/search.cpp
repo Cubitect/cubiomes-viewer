@@ -182,6 +182,11 @@ L_qm_any:
     case F_TREASURE:
     case F_PORTAL:
 
+    case F_FORTRESS:
+    case F_BASTION:
+
+    case F_ENDCITY:
+
         x1 = cond->x1;
         z1 = cond->z1;
         x2 = cond->x2;
@@ -232,8 +237,30 @@ L_qm_any:
                     continue;
                 if (pc.x >= x1 && pc.x <= x2 && pc.z >= z1 && pc.z <= z2)
                 {
-                    if (g && !isViableStructurePos(sconf.structType, mc, g, seed, pc.x, pc.z))
-                        continue;
+                    if (g)
+                    {
+                        if (finfo.dim == 0 && !isViableStructurePos(sconf.structType, mc, g, seed, pc.x, pc.z))
+                            continue;
+                        if (finfo.dim == -1)
+                        {
+                            NetherNoise nn;
+                            if (!isViableNetherStructurePos(sconf.structType, mc, &nn, seed, pc.x, pc.z))
+                                continue;
+                        }
+                        if (finfo.dim == +1)
+                        {
+                            EndNoise en;
+                            if (!isViableEndStructurePos(sconf.structType, mc, &en, seed, pc.x, pc.z))
+                                continue;
+                            if (sconf.structType == End_City)
+                            {
+                                SurfaceNoise sn; // TODO: store for reuse?
+                                initSurfaceNoiseEnd(&sn, seed);
+                                if (!isViableEndCityTerrain(&en, &sn, pc.x, pc.z))
+                                    continue;
+                            }
+                        }
+                    }
 
                     xt += pc.x;
                     zt += pc.z;
@@ -249,6 +276,7 @@ L_qm_any:
             }
         }
         return 0;
+
 
     case F_SPAWN:
         // TODO: warn if spawn is used for relative positioning
