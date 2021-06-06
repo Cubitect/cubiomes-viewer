@@ -41,7 +41,7 @@
        <widget class="QComboBox" name="comboBoxRelative">
         <item>
          <property name="text">
-          <string>Word origin</string>
+          <string>World origin</string>
          </property>
         </item>
        </widget>
