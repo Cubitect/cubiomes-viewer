@@ -36,7 +36,7 @@ public:
         }
         for (c = cond; c != ce; c++)
         {
-            if (g_filterinfo.list[c->type].cat == CAT_48)
+            if (g_filterinfo.list[c->type].cat == CAT_QUAD)
                 continue;
             if (!testCond(spos, seed, c, mc, g, abort))
                return false;

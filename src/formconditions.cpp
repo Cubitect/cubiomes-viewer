@@ -145,9 +145,9 @@ void FormConditions::setItemCondition(QListWidget *list, QListWidgetItem *item, 
     if (ft.area)
         s += QString::asprintf(",(%d,%d)", (cond->x2+1)*ft.step-1, (cond->z2+1)*ft.step-1);
 
-    if (ft.cat == CAT_48)
+    if (ft.cat == CAT_QUAD)
         item->setBackground(QColor(Qt::yellow));
-    else if (ft.cat == CAT_FULL)
+    else
         item->setBackground(QColor(Qt::green));
 
     item->setText(s);
@@ -226,17 +226,17 @@ void FormConditions::addItemCondition(QListWidgetItem *item, Condition cond)
 {
     const FilterInfo& ft = g_filterinfo.list[cond.type];
 
-    if (ft.cat == CAT_FULL)
+    if (ft.cat != CAT_QUAD)
     {
         if (!item)
             item = new QListWidgetItem();
         setItemCondition(ui->listConditionsFull, item, &cond);
     }
-    else if (ft.cat == CAT_48 && item)
+    else if (item)
     {
         setItemCondition(ui->listConditionsFull, item, &cond);
     }
-    else if (ft.cat == CAT_48 && item == NULL)
+    else
     {
         item = new QListWidgetItem();
         setItemCondition(ui->listConditionsFull, item, &cond);

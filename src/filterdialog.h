@@ -92,6 +92,8 @@ private slots:
 
     void on_FilterDialog_finished(int result);
 
+    void on_comboBoxCat_currentIndexChanged(int index);
+
 private:
     Ui::FilterDialog *ui;
     QCheckBox *biomecboxes[256];

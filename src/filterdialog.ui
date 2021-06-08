@@ -189,41 +189,7 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="1" alignment="Qt::AlignRight">
-      <widget class="QLabel" name="labelFilterType">
-       <property name="text">
-        <string>Filter type:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="2">
-      <widget class="QComboBox" name="comboBoxType">
-       <property name="minimumSize">
-        <size>
-         <width>260</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="maxVisibleItems">
-        <number>20</number>
-       </property>
-       <property name="sizeAdjustPolicy">
-        <enum>QComboBox::AdjustToMinimumContentsLengthWithIcon</enum>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>20</width>
-         <height>20</height>
-        </size>
-       </property>
-       <item>
-        <property name="text">
-         <string>Please select</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item row="1" column="0" colspan="3">
+     <item row="2" column="0" colspan="4">
       <widget class="QGroupBox" name="verticalGroupBox">
        <property name="title">
         <string>Description</string>
@@ -249,6 +215,121 @@
          </widget>
         </item>
        </layout>
+      </widget>
+     </item>
+     <item row="0" column="1" alignment="Qt::AlignRight">
+      <widget class="QLabel" name="labelFilterType">
+       <property name="text">
+        <string>Filter type:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <widget class="QComboBox" name="comboBoxCat">
+       <property name="minimumSize">
+        <size>
+         <width>160</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="sizeAdjustPolicy">
+        <enum>QComboBox::AdjustToMinimumContentsLengthWithIcon</enum>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>20</width>
+         <height>20</height>
+        </size>
+       </property>
+       <item>
+        <property name="text">
+         <string>Select category</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Quad-structure</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icons.qrc">
+          <normaloff>:/icons/quad.png</normaloff>:/icons/quad.png</iconset>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Structures</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icons.qrc">
+          <normaloff>:/icons/village.png</normaloff>:/icons/village.png</iconset>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Biome filter</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icons.qrc">
+          <normaloff>:/icons/overworld.png</normaloff>:/icons/overworld.png</iconset>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Nether biomes</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icons.qrc">
+          <normaloff>:/icons/nether.png</normaloff>:/icons/nether.png</iconset>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>End biomes</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icons.qrc">
+          <normaloff>:/icons/the_end.png</normaloff>:/icons/the_end.png</iconset>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Others</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icons.qrc">
+          <normaloff>:/icons/slime.png</normaloff>:/icons/slime.png</iconset>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="0" column="3">
+      <widget class="QComboBox" name="comboBoxType">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>240</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maxVisibleItems">
+        <number>20</number>
+       </property>
+       <property name="sizeAdjustPolicy">
+        <enum>QComboBox::AdjustToMinimumContentsLengthWithIcon</enum>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>20</width>
+         <height>20</height>
+        </size>
+       </property>
+       <item>
+        <property name="text">
+         <string>Select filter</string>
+        </property>
+       </item>
       </widget>
      </item>
     </layout>
@@ -392,7 +473,6 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>comboBoxType</tabstop>
   <tabstop>buttonOk</tabstop>
   <tabstop>buttonCancel</tabstop>
   <tabstop>textDescription</tabstop>
@@ -409,6 +489,8 @@
   <tabstop>buttonInclude</tabstop>
   <tabstop>scrollArea</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="../icons.qrc"/>
+ </resources>
  <connections/>
 </ui>

@@ -54,16 +54,6 @@ FilterDialog::FilterDialog(FormConditions *parent, int mcversion, QListWidgetIte
     mcs += (mc2str(mc) ? mc2str(mc) : "?");
     ui->labelMC->setText(mcs);
 
-    for (int i = 1; i < FILTER_MAX; i++)
-    {
-        const FilterInfo &ft = g_filterinfo.list[i];
-        if (ft.icon)
-            ui->comboBoxType->addItem(QIcon(ft.icon), ft.name, i);
-        else
-            ui->comboBoxType->addItem(ft.name, i);
-        if (mc < ft.mcmin)
-            ui->comboBoxType->setItemData(i, false, Qt::UserRole-1); // deactivate
-    }
 
     int initindex = 0;
     QVector<Condition> existing = parent->getConditions();
@@ -212,8 +202,19 @@ FilterDialog::FilterDialog(FormConditions *parent, int mcversion, QListWidgetIte
     if (initcond)
     {
         cond = *initcond;
+        const FilterInfo &ft = g_filterinfo.list[cond.type];
 
-        ui->comboBoxType->setCurrentIndex(cond.type);
+        ui->comboBoxCat->setCurrentIndex(ft.cat);
+        for (int i = 0; i < ui->comboBoxType->count(); i++)
+        {
+            int type = ui->comboBoxType->itemData(i, Qt::UserRole).toInt();
+            if (type == cond.type)
+            {
+                ui->comboBoxType->setCurrentIndex(i);
+                break;
+            }
+        }
+
         ui->comboBoxRelative->setCurrentIndex(initindex);
 
         updateMode();
@@ -376,7 +377,7 @@ void FilterDialog::updateBiomeSelection()
         ui->tabTemps->setEnabled(true);
         ui->tabBiomes->setEnabled(false);
     }
-    else if (filterindex >= F_BIOME && filterindex <= F_BIOME_END_16)
+    else if (ft.cat == CAT_BIOMES || ft.cat == CAT_NETHER || ft.cat == CAT_END)
     {
         ui->tabWidget->setEnabled(true);
         ui->tabWidget->setCurrentWidget(ui->tabBiomes);
@@ -390,7 +391,7 @@ void FilterDialog::updateBiomeSelection()
         ui->tabBiomes->setEnabled(false);
     }
 
-    if (filterindex == F_BIOME_NETHER_4)
+    if (ft.cat == CAT_NETHER)
     {
         const int ids[] = {
             nether_wastes, soul_sand_valley, crimson_forest,
@@ -398,7 +399,7 @@ void FilterDialog::updateBiomeSelection()
         };
         enableSet(ids, sizeof(ids) / sizeof(int));
     }
-    else if (filterindex == F_BIOME_END_16)
+    else if (ft.cat == CAT_END)
     {
         const int ids[] = {
             the_end, small_end_islands, end_midlands,
@@ -516,7 +517,7 @@ void FilterDialog::on_buttonCancel_clicked()
 
 void FilterDialog::on_buttonOk_clicked()
 {
-    cond.type = ui->comboBoxType->currentIndex();
+    cond.type = ui->comboBoxType->currentData().toInt();
     cond.relative = ui->comboBoxRelative->currentData().toInt();
     cond.count = ui->spinBox->text().toInt();
 
@@ -587,3 +588,32 @@ void FilterDialog::on_FilterDialog_finished(int)
         emit setCond(item, cond);
     item = 0;
 }
+
+void FilterDialog::on_comboBoxCat_currentIndexChanged(int idx)
+{
+    ui->comboBoxType->setEnabled(idx != CAT_NONE);
+    ui->comboBoxType->clear();
+
+    int slot = 0;
+    ui->comboBoxType->insertItem(slot, "Select filter", QVariant::fromValue((int)F_SELECT));
+
+    for (int i = 1; i < FILTER_MAX; i++)
+    {
+        const FilterInfo &ft = g_filterinfo.list[i];
+        if (ft.cat != idx)
+            continue;
+        slot++;
+        if (ft.icon)
+            ui->comboBoxType->insertItem(slot, QIcon(ft.icon), ft.name, i);
+        else
+            ui->comboBoxType->insertItem(slot, ft.name, i);
+
+        if (mc < ft.mcmin)
+            ui->comboBoxType->setItemData(slot, false, Qt::UserRole-1); // deactivate
+    }
+
+    updateMode();
+}
+
+
+

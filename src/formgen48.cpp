@@ -195,7 +195,7 @@ void FormGen48::updateAutoConditions(const QVector<Condition>& condlist)
     for (const Condition& c : condlist)
     {
         const FilterInfo& finfo = g_filterinfo.list[c.type];
-        if (finfo.cat == CAT_48)
+        if (finfo.cat == CAT_QUAD)
         {
             cond = c;
             break;

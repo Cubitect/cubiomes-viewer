@@ -513,9 +513,14 @@ L_biome_filter_any:
         if (!g) return 1;
         return checkForTemps(g, seed, rx1, rz1, rx2-rx1+1, rz2-rz1+1, cond->temps);
 
-
+    case F_BIOME_NETHER_1:  s = 0;  goto L_nether_end;
     case F_BIOME_NETHER_4:  s = 2;  goto L_nether_end;
+    case F_BIOME_NETHER_16: s = 4;  goto L_nether_end;
+    case F_BIOME_NETHER_64: s = 6;  goto L_nether_end;
+    case F_BIOME_END_1:     s = 0;  goto L_nether_end;
+    case F_BIOME_END_4:     s = 2;  goto L_nether_end;
     case F_BIOME_END_16:    s = 4;  goto L_nether_end;
+    case F_BIOME_END_64:    s = 6;  goto L_nether_end;
 
 L_nether_end:
         if (cond->relative)
@@ -541,10 +546,10 @@ L_nether_end:
             int h = rz2 - rz1 + 1;
             int *area = (int*) malloc(w * h * sizeof(int));
 
-            if (cond->type == F_BIOME_NETHER_4)
-                genNetherScaled(mc, seed, 4, area, rx1, rz1, w, h, 0, 0);
+            if (finfo.dim == -1)
+                genNetherScaled(mc, seed, 1 << s, area, rx1, rz1, w, h, 0, 0);
             else
-                genEndScaled(mc, seed, 16, area, rx1, rz1, w, h);
+                genEndScaled(mc, seed, 1 << s, area, rx1, rz1, w, h);
 
             uint64_t b = 0, bm = 0;
             for (int i = 0; i < w*h; i++)
