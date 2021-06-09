@@ -24,15 +24,14 @@ get sources
 ```
 $ git clone --recursive https://github.com/Cubitect/cubiomes-viewer.git
 ```
-compile cubiomes library
+prepare build directory
 ```
-$ cd cubiomes-viewer/cubiomes/
-$ make
+$ cd cubiomes-viewer
+$ mkdir build
+$ cd build
 ```
 build cubiomes-viewer
 ```
-$ mkdir ../build
-$ cd ../build
 $ qmake ..
 $ make
 ```
