@@ -25,6 +25,14 @@
 #include <QDateTime>
 #include <QStandardPaths>
 
+extern "C"
+int getStructureConfig_override(int stype, int mc, StructureConfig *sconf)
+{
+    int ok = getStructureConfig(stype, mc, sconf);
+    // TODO: add and apply config settings
+    return ok;
+}
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -798,7 +806,7 @@ void MainWindow::on_buttonAnalysis_clicked()
         st.clear();
         int stype = mapopt2stype(sopt);
         StructureConfig sconf;
-        if (!getConfig(stype, mc, &sconf))
+        if (!getStructureConfig_override(stype, mc, &sconf))
             continue;
         getStructs(&st, sconf, mc, seed, x1, z1, x2, z2);
         if (st.empty())

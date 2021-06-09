@@ -79,7 +79,7 @@ int FormConditions::getIndex(int idx) const
     const QVector<Condition> condvec = getConditions();
     int cnt[100] = {};
     for (const Condition& c : condvec)
-        if (c.save > 0 || c.save < 100)
+        if (c.save > 0 && c.save < 100)
             cnt[c.save]++;
         else return 0;
     if (idx <= 0)

@@ -86,7 +86,9 @@ void QuadListDialog::refresh()
     LayerStack g;
     setupGenerator(&g, mc);
 
-    StructureConfig sconf = mc >= MC_1_13 ? SWAMP_HUT_CONFIG : SWAMP_HUT_CONFIG_112;
+    StructureConfig sconf;
+    getStructureConfig_override(Swamp_Hut, mc, &sconf);
+
     const int maxq = 1000;
     Pos *qlist = new Pos[maxq];
     int r = 3e7 / 512;
@@ -147,10 +149,12 @@ void QuadListDialog::refresh()
 
     if (mc >= MC_1_8)
     {
-        sconf = MONUMENT_CONFIG;
+        getStructureConfig_override(Monument, mc, &sconf);
+        // TODO: check salt delta
+        int64_t salt_delta = sconf.salt - MONUMENT_CONFIG.salt;
         qcnt = scanForQuads(
                     sconf, 160, seed & MASK48,
-                    g_qm_90, sizeof(g_qm_90) / sizeof(int64_t), 48, 0,
+                    g_qm_90, sizeof(g_qm_90) / sizeof(int64_t), 48, salt_delta,
                     -r, -r, 2*r, 2*r, qlist, maxq);
 
         if (qcnt >= maxq)

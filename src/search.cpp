@@ -79,7 +79,7 @@ int testCond(StructPos *spos, int64_t seed, const Condition *cond, int mc, Layer
 
     if (finfo.stype > 0)
     {
-        if (!getConfig(finfo.stype, mc, &sconf))
+        if (!getStructureConfig_override(finfo.stype, mc, &sconf))
             return 0;
     }
 

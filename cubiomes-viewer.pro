@@ -6,32 +6,29 @@
 
 # For a release with binary compatibility, cubiomes should be compiled for the
 # default achitecture.
-QT      += core widgets
-LIBS    += -lm $$PWD/cubiomes/libcubiomes.a
 
-QMAKE_CFLAGS    =  -fwrapv
-QMAKE_CXXFLAGS  =  $$QMAKE_CFLAGS -std=gnu++11
+CUPATH   = $$PWD/cubiomes
+QT      += core widgets
+LIBS    += -lm $$CUPATH/libcubiomes.a
+
+# comment out to use the profile compiler
+#QMAKE_CC = clang
+#QMAKE_CXX = clang++
+
+QMAKE_CFLAGS    = -fwrapv -DSTRUCT_CONFIG_OVERRIDE=1
+QMAKE_CXXFLAGS  = $$QMAKE_CFLAGS -std=gnu++11
 QMAKE_CXXFLAGS_RELEASE *= -O3
 
 win32: {
     LIBS += -static -static-libgcc -static-libstdc++
 }
 
+# also compile cubiomes
+QMAKE_PRE_LINK += $(MAKE) -C $$CUPATH -f $$CUPATH/makefile CFLAGS="-DSTRUCT_CONFIG_OVERRIDE=1" clean all
+
 TARGET = cubiomes-viewer
-#TEMPLATE = app
 
 CONFIG += static
-
-# The following define makes your compiler emit warnings if you use
-# any feature of Qt which has been marked as deprecated (the exact warnings
-# depend on your compiler). Please consult the documentation of the
-# deprecated API in order to know how to port your code away from it.
-#DEFINES += QT_DEPRECATED_WARNINGS
-
-# You can also make your code fail to compile if you use deprecated APIs.
-# In order to do so, uncomment the following line.
-# You can also select to disable deprecated APIs only up to a certain version of Qt.
-#DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 
 SOURCES += \
@@ -54,11 +51,11 @@ SOURCES += \
         src/main.cpp
 
 HEADERS += \
-        cubiomes/finders.h \
-        cubiomes/generator.h \
-        cubiomes/javarnd.h \
-        cubiomes/layers.h \
-        cubiomes/util.h \
+        $$CUPATH/finders.h \
+        $$CUPATH/generator.h \
+        $$CUPATH/javarnd.h \
+        $$CUPATH/layers.h \
+        $$CUPATH/util.h \
         src/aboutdialog.h \
         src/collapsible.h \
         src/configdialog.h \

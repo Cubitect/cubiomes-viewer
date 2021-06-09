@@ -136,7 +136,7 @@ void Quad::run()
             int z0 = tj*blocks, z1 = (tj+1)*blocks;
             std::vector<VarPos>* st = new std::vector<VarPos>();
             StructureConfig sconf;
-            if (getConfig(structureType, mc, &sconf))
+            if (getStructureConfig_override(structureType, mc, &sconf))
                 getStructs(st, sconf, mc, seed, x0, z0, x1, z1);
             spos = st;
         }
