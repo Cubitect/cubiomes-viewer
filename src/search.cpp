@@ -539,12 +539,14 @@ L_nether_end:
         }
         sout->cx = ((rx1 + rx2) << s) >> 1;
         sout->cz = ((rz1 + rz2) << s) >> 1;
-        if (!g) return 1;
+        // generally, nether and end biomes only depend on lower 48-bit
+        if (s == 0 && !g) // (but voronoi uses the full 64-bits)
+            return 1;
         else
         {
             int w = rx2 - rx1 + 1;
             int h = rz2 - rz1 + 1;
-            int *area = (int*) malloc(w * h * sizeof(int));
+            int *area = (int*) malloc((w+7) * (h+7) * sizeof(int));
 
             if (finfo.dim == -1)
                 genNetherScaled(mc, seed, 1 << s, area, rx1, rz1, w, h, 0, 0);

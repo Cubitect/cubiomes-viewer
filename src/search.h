@@ -221,19 +221,22 @@ static const struct FilterList
             CAT_NETHER, 1, 1, 0, 0, 4, 0, MC_1_16, -1,
             ":icons/nether.png",
             "Nether biome filter 1:4",
-            "Nether biomes with normal noise sampling at scale 1:4. (height: y = 0)"
+            "Nether biomes with normal noise sampling at scale 1:4. (height: y = 0) "
+            "(Nether and End biomes only depend on the lower 48-bits of the seed.)"
         };
         list[F_BIOME_NETHER_16] = FilterInfo{
             CAT_NETHER, 1, 1, 0, 0, 16, 0, MC_1_16, -1,
             ":icons/nether.png",
             "Nether biome filter 1:16",
-            "Nether biomes, but only sampled at scale 1:16. (height: y = 0)"
+            "Nether biomes, but only sampled at scale 1:16. (height: y = 0) "
+            "(Nether and End biomes only depend on the lower 48-bits of the seed.)"
         };
         list[F_BIOME_NETHER_64] = FilterInfo{
             CAT_NETHER, 1, 1, 0, 0, 64, 0, MC_1_16, -1,
             ":icons/nether.png",
             "Nether biome filter 1:64",
-            "Nether biomes, but only sampled at scale 1:64, (height: y = 0)"
+            "Nether biomes, but only sampled at scale 1:64, (height: y = 0) "
+            "(Nether and End biomes only depend on the lower 48-bits of the seed.)"
         };
 
         list[F_BIOME_END_1] = FilterInfo{
@@ -246,19 +249,22 @@ static const struct FilterList
             CAT_END, 1, 1, 0, 0, 4, 0, MC_1_9, +1,
             ":icons/the_end.png",
             "End biome filter 1:4",
-            "End biomes sampled at scale 1:4. Note this is just a simple upscale of 1:16."
+            "End biomes sampled at scale 1:4. Note this is just a simple upscale of 1:16. "
+            "(Nether and End biomes only depend on the lower 48-bits of the seed.)"
         };
         list[F_BIOME_END_16] = FilterInfo{
             CAT_END, 1, 1, 0, 0, 16, 0, MC_1_9, +1,
             ":icons/the_end.png",
             "End biome filter 1:16",
-            "End biomes with normal sampling at scale 1:16."
+            "End biomes with normal sampling at scale 1:16. "
+            "(Nether and End biomes only depend on the lower 48-bits of the seed.)"
         };
         list[F_BIOME_END_64] = FilterInfo{
             CAT_END, 1, 1, 0, 0, 64, 0, MC_1_9, +1,
             ":icons/the_end.png",
             "End biome filter 1:64",
-            "End biomes with lossy sampling at scale 1:64."
+            "End biomes with lossy sampling at scale 1:64. "
+            "(Nether and End biomes only depend on the lower 48-bits of the seed.)"
         };
 
         list[F_SLIME] = FilterInfo{
