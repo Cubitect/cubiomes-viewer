@@ -99,7 +99,7 @@ QListWidgetItem *FormConditions::lockItem(QListWidgetItem *item)
     QListWidgetItem *edit = item->clone();
     item->setFlags(item->flags() & ~Qt::ItemIsSelectable);
     item->setSelected(false);
-    item->setBackground(QColor(Qt::lightGray));
+    item->setBackground(QColor(128, 128, 128, 192));
     edit->setData(Qt::UserRole+1, (qulonglong)item);
     return edit;
 }
@@ -145,10 +145,9 @@ void FormConditions::setItemCondition(QListWidget *list, QListWidgetItem *item, 
     if (ft.area)
         s += QString::asprintf(",(%d,%d)", (cond->x2+1)*ft.step-1, (cond->z2+1)*ft.step-1);
 
+
     if (ft.cat == CAT_QUAD)
-        item->setBackground(QColor(Qt::yellow));
-    else
-        item->setBackground(QColor(Qt::green));
+        item->setBackground(QColor(255, 255, 0, 80));
 
     item->setText(s);
     item->setData(Qt::UserRole, QVariant::fromValue(*cond));
@@ -245,8 +244,11 @@ void FormConditions::addItemCondition(QListWidgetItem *item, Condition cond)
         {
             Condition cq = cond;
             cq.type = F_HUT;
-            cq.x1 = -128; cq.z1 = -128;
-            cq.x2 = +128; cq.z2 = +128;
+            //cq.x1 = -128; cq.z1 = -128;
+            //cq.x2 = +128; cq.z2 = +128;
+            // use 256 to avoid confusion when this restriction is removed
+            cq.x1 = -256; cq.z1 = -256;
+            cq.x2 = +256; cq.z2 = +256;
             cq.relative = cond.save;
             cq.save = cond.save+1;
             cq.count = 4;
@@ -257,8 +259,11 @@ void FormConditions::addItemCondition(QListWidgetItem *item, Condition cond)
         {
             Condition cq = cond;
             cq.type = F_MONUMENT;
-            cq.x1 = -160; cq.z1 = -160;
-            cq.x2 = +160; cq.z2 = +160;
+            //cq.x1 = -160; cq.z1 = -160;
+            //cq.x2 = +160; cq.z2 = +160;
+            // use 256 to avoid confusion when this restriction is removed
+            cq.x1 = -256; cq.z1 = -256;
+            cq.x2 = +256; cq.z2 = +256;
             cq.relative = cond.save;
             cq.save = cond.save+1;
             cq.count = 4;

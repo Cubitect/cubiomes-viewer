@@ -100,6 +100,7 @@ private slots:
     void onGen48Changed();
     void onSelectedSeedChanged(int64_t seed);
     void onSearchStatusChanged(bool running);
+    void onStyleChanged(int style);
     void copyCoord();
 
 

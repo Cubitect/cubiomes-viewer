@@ -27,6 +27,7 @@ void ConfigDialog::initSettings(Config *config)
     ui->checkAutosave->setChecked(config->autosaveCycle != 0);
     if (config->autosaveCycle)
         ui->spinAutosave->setValue(config->autosaveCycle);
+    ui->comboStyle->setCurrentIndex(config->uistyle);
     ui->cboxItemSize->setCurrentText(QString::number(config->seedsPerItem));
     ui->lineQueueSize->setText(QString::number(config->queueSize));
     ui->lineMatching->setText(QString::number(config->maxMatching));
@@ -37,6 +38,7 @@ Config ConfigDialog::getSettings()
     conf.restoreSession = ui->checkRestore->isChecked();
     conf.autosaveCycle = ui->checkAutosave->isChecked() ? ui->spinAutosave->value() : 0;
     conf.smoothMotion = ui->checkSmooth->isChecked();
+    conf.uistyle = ui->comboStyle->currentIndex();
     conf.seedsPerItem = ui->cboxItemSize->currentText().toInt();
     conf.queueSize = ui->lineQueueSize->text().toInt();
     conf.maxMatching = ui->lineMatching->text().toInt();

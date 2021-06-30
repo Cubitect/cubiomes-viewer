@@ -6,8 +6,6 @@
 
 #include <algorithm>
 
-extern MainWindow *gMainWindowInstance;
-
 
 static bool intersectLineLine(double ax1, double az1, double ax2, double az2, double bx1, double bz1, double bx2, double bz2)
 {

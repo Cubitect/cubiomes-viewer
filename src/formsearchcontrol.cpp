@@ -268,15 +268,22 @@ void FormSearchControl::on_listResults_customContextMenuRequested(const QPoint &
 void FormSearchControl::on_buttonSearchHelp_clicked()
 {
     const char* msg =
-            "<html><head/><body><p>The <span style=\" font-weight:600;\">incremental</span> "
-            "search checks seeds in numerical order, save for grouping into work items for parallelization. "
-            "This type of search is best suited for a non-exhaustive search space and with strong biome dependencies.</p>"
-            "<p>With <span style=\" font-weight:600;\">48-bit family blocks</span> the search looks for suitable "
-            "48-bit seeds first and parallelizes the search through the upper 16-bits. "
-            "This type of search is best suited for exhaustive searches and for many types of structure restrictions.</p>"
-            "<p>Load a <span style=\" font-weight:600;\">seed list from a file</span> to search through an existing set of seeds. "
-            "The seeds should be in decimal ASCII text, separated by newline characters. "
-            "You can browse for a file using the &quot;...&quot; button. (The seed generator is ignored with this option.)"
+            "<html><head/><body><p>"
+            "The <b>incremental</b> search checks seeds in numerical order, "
+            "save for grouping into work items for parallelization. This type "
+            "of search is best suited for a non-exhaustive search space and "
+            "with strong biome dependencies."
+            "</p><p>"
+            "With <b>48-bit family blocks</b> the search looks for suitable "
+            "48-bit seeds first and parallelizes the search through the upper "
+            "16-bits. This type of search is best suited for exhaustive "
+            "searches and for many types of structure restrictions."
+            "</p><p>"
+            "Load a <b>seed list from a file</b> to search through an "
+            "existing set of seeds. The seeds should be in decimal ASCII text, "
+            "separated by newline characters. You can browse for a file using "
+            "the &quot;...&quot; button. (The seed generator is ignored with "
+            "this option.)"
             "</p></body></html>"
             ;
     QMessageBox::information(this, "Help: search types", msg, QMessageBox::Ok);

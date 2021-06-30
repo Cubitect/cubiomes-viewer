@@ -234,33 +234,11 @@ static void genQHBases(QObject *qtobj, int qual, int64_t salt, std::vector<int64
     }
 }
 
-// Produces a list of seed bases from precomputed lists, provided all candidates fit into a buffer.
-bool getQuadCandidates(std::vector<int64_t>& list48, QObject *qtobj, Gen48Settings gen48, int mc, int64_t bufmax)
+
+bool applyTranspose(std::vector<int64_t>& slist,
+                    Gen48Settings gen48, int64_t bufmax)
 {
-    std::vector<int64_t> qlist;
-    list48.clear();
-
-    if (gen48.mode == GEN48_QH)
-    {
-        int64_t salt = 0;
-        if (gen48.qual == IDEAL_SALTED)
-            salt = gen48.salt;
-        else
-            salt = (mc <= MC_1_12 ? SWAMP_HUT_CONFIG_112.salt : SWAMP_HUT_CONFIG.salt);
-        genQHBases(qtobj, gen48.qual, salt, qlist);
-    }
-    else if (gen48.mode == GEN48_QM)
-    {
-        const int64_t *qb = g_qm_90;
-        int64_t qn = sizeof(g_qm_90) / sizeof(int64_t);
-        qlist.reserve(qn);
-        for (int64_t i = 0; i < qn; i++)
-            if (qmonumentQual(qb[i]) >= gen48.qmarea)
-                qlist.push_back(qb[i]);
-    }
-
-    if (qlist.empty())
-        return false;
+    std::vector<int64_t> list48;
 
     int x = gen48.x1;
     int z = gen48.z1;
@@ -268,11 +246,11 @@ bool getQuadCandidates(std::vector<int64_t>& list48, QObject *qtobj, Gen48Settin
     int h = gen48.z2 - z + 1;
 
     // does the set of candidates for this condition fit in memory?
-    if ((int64_t)qlist.size() * (int64_t)sizeof(int64_t) * w*h >= bufmax)
+    if ((int64_t)slist.size() * (int64_t)sizeof(int64_t) * w*h >= bufmax)
         return false;
 
     try {
-        list48.resize(qlist.size() * w*h);
+        list48.resize(slist.size() * w*h);
     } catch (...) {
         return false;
     }
@@ -280,23 +258,58 @@ bool getQuadCandidates(std::vector<int64_t>& list48, QObject *qtobj, Gen48Settin
     int64_t *p = list48.data();
     for (int j = 0; j < h; j++)
         for (int i = 0; i < w; i++)
-            for (int64_t b : qlist)
+            for (int64_t b : slist)
                 *p++ = moveStructure(b, x+i, z+j);
 
     std::sort(list48.begin(), list48.end());
     auto last = std::unique(list48.begin(), list48.end());
     list48.erase(last, list48.end());
-
-    return !list48.empty();
+    slist.swap(list48);
+    return !slist.empty();
 }
-
 
 void SearchItemGenerator::presearch()
 {
     int64_t sstart = seed;
 
-    if (slist.empty() && searchtype != SEARCH_LIST)
-        getQuadCandidates(slist, mainwin, gen48, mc, PRECOMPUTE48_BUFSIZ);
+    if (searchtype != SEARCH_LIST)
+    {
+        if (gen48.mode == GEN48_QH)
+        {
+            int64_t salt = 0;
+            if (gen48.qual == IDEAL_SALTED)
+                salt = gen48.salt;
+            else
+            {
+                StructureConfig sconf;
+                getStructureConfig_override(Swamp_Hut, mc, &sconf);
+                salt = sconf.salt;
+            }
+            slist.clear();
+            genQHBases(mainwin, gen48.qual, salt, slist);
+        }
+        else if (gen48.mode == GEN48_QM)
+        {
+            const int64_t *qb = g_qm_90;
+            int64_t qn = sizeof(g_qm_90) / sizeof(int64_t);
+            slist.clear();
+            slist.reserve(qn);
+            for (int64_t i = 0; i < qn; i++)
+                if (qmonumentQual(qb[i]) >= gen48.qmarea)
+                    slist.push_back(qb[i]);
+        }
+        else if (gen48.mode == GEN48_LIST)
+        {
+            if (gen48.listsalt)
+            {
+                for (auto& s : slist)
+                    s += gen48.listsalt;
+            }
+        }
+
+        if (!slist.empty())
+            applyTranspose(slist, gen48, PRECOMPUTE48_BUFSIZ);
+    }
 
     if (searchtype == SEARCH_LIST && !slist.empty())
     {

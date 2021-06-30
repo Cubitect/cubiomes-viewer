@@ -19,10 +19,19 @@ FormGen48::FormGen48(MainWindow *parent)
 
     QIntValidator *intval = new QIntValidator(this);
     ui->lineSalt->setValidator(intval);
+    ui->lineListSalt->setValidator(intval);
     ui->lineEditX1->setValidator(intval);
     ui->lineEditZ1->setValidator(intval);
     ui->lineEditX2->setValidator(intval);
     ui->lineEditZ2->setValidator(intval);
+    connect(ui->lineEditX1, SIGNAL(editingFinished()), SLOT(onChange()));
+    connect(ui->lineEditZ1, SIGNAL(editingFinished()), SLOT(onChange()));
+    connect(ui->lineEditX2, SIGNAL(editingFinished()), SLOT(onChange()));
+    connect(ui->lineEditZ2, SIGNAL(editingFinished()), SLOT(onChange()));
+
+    connect(ui->spinMonumentArea, SIGNAL(editingFinished()), SLOT(onChange()));
+    connect(ui->lineSalt, SIGNAL(editingFinished()), SLOT(onChange()));
+    connect(ui->lineListSalt, SIGNAL(editingFinished()), SLOT(onChange()));
 
     QFont mono = QFont("Monospace", 9);
     mono.setStyleHint(QFont::TypeWriter);
@@ -78,10 +87,11 @@ bool FormGen48::setList48(QString path, bool quiet)
 
 void FormGen48::setSettings(const Gen48Settings& gen48, bool quiet)
 {
-    ui->comboMode->setCurrentIndex(gen48.mode);
+    ui->tabWidget->setCurrentIndex(gen48.mode);
     ui->comboLow20->setCurrentIndex(gen48.qual);
     ui->spinMonumentArea->setValue(gen48.qmarea);
     ui->lineSalt->setText(QString::number(gen48.salt));
+    ui->lineListSalt->setText(QString::number(gen48.listsalt));
     ui->lineEditX1->setText(QString::number(gen48.x1));
     ui->lineEditZ1->setText(QString::number(gen48.z1));
     ui->lineEditX2->setText(QString::number(gen48.x2));
@@ -94,17 +104,18 @@ void FormGen48::setSettings(const Gen48Settings& gen48, bool quiet)
     else
         ui->radioAuto->setChecked(true);
 
-    on_comboMode_currentIndexChanged(gen48.mode);
+    on_tabWidget_currentChanged(gen48.mode);
 }
 
 Gen48Settings FormGen48::getSettings(bool resolveauto)
 {
     Gen48Settings s;
 
-    s.mode = ui->comboMode->currentIndex();
+    s.mode = ui->tabWidget->currentIndex();
     s.qual = ui->comboLow20->currentIndex();
     s.qmarea = ui->spinMonumentArea->value();
     s.salt = ui->lineSalt->text().toLongLong();
+    s.listsalt = ui->lineListSalt->text().toLongLong();
     s.manualarea = ui->radioManual->isChecked();
     s.x1 = ui->lineEditX1->text().toInt();
     s.z1 = ui->lineEditZ1->text().toInt();
@@ -156,7 +167,7 @@ uint64_t FormGen48::estimateSeedCnt()
     }
     else
     {
-        cnt = MASK48+1;
+        cnt = MASK48 + 1;
     }
 
     if (gen48.mode != GEN48_NONE)
@@ -206,19 +217,21 @@ void FormGen48::updateAutoConditions(const QVector<Condition>& condlist)
 
 void FormGen48::updateAutoUi()
 {
-    QString modestr = "[Auto]";
+    QString modestr = "";
     bool isqh = cond.type >= F_QH_IDEAL && cond.type <= F_QH_BARELY;
     bool isqm = cond.type >= F_QM_95 && cond.type <= F_QM_90;
     if (isqh)
-        modestr += " (Quad-hut)";
+        modestr = "[Quad-hut]";
     else if (isqm)
-        modestr += " (Quad-monument)";
+        modestr = "[Quad-monument]";
+    else
+        modestr = "[None]";
 
-    ui->comboMode->setItemText(GEN48_AUTO, modestr);
+    ui->labelAuto->setText(modestr);
 
     if (cond.type != 0)
     {
-        if (ui->comboMode->currentIndex() == GEN48_AUTO)
+        if (ui->tabWidget->currentIndex() == GEN48_AUTO)
         {
             ui->radioAuto->setChecked(true);
 
@@ -238,19 +251,6 @@ void FormGen48::updateAutoUi()
     emit changed();
 }
 
-void FormGen48::setPathEnabled(bool enabled)
-{
-    ui->buttonBrowse->setEnabled(enabled);
-    ui->lineList48->setEnabled(enabled);
-    ui->labelPath->setEnabled(enabled);
-}
-
-void FormGen48::setSaltEnabled(bool enabled)
-{
-    ui->lineSalt->setEnabled(enabled);
-    ui->labelSalt->setEnabled(enabled);
-}
-
 void FormGen48::setAreaEnabled(bool enabled)
 {
     ui->labelTranspose->setEnabled(enabled);
@@ -268,22 +268,9 @@ void FormGen48::setAreaEnabled(bool enabled)
     ui->lineEditZ2->setEnabled(enabled);
 }
 
-void FormGen48::setQualEnabled(bool enabled)
-{
-    ui->comboLow20->setEnabled(enabled);
-    ui->labelLow20->setEnabled(enabled);
-}
-
-void FormGen48::setQMEnabled(bool enabled)
-{
-    ui->spinMonumentArea->setEnabled(enabled);
-    ui->labelQM->setEnabled(enabled);
-}
-
 void FormGen48::updateMode()
 {
-    int mode = ui->comboMode->currentIndex();
-    int qual = ui->comboLow20->currentIndex();
+    int mode = ui->tabWidget->currentIndex();
 
     if (mode == GEN48_AUTO)
     {
@@ -291,34 +278,21 @@ void FormGen48::updateMode()
     }
 
     if (mode == GEN48_AUTO || mode == GEN48_NONE)
-    {
         setAreaEnabled(false);
-        setPathEnabled(false);
-        setSaltEnabled(false);
-        setQualEnabled(false);
-        setQMEnabled(false);
-    }
-    else if (mode == GEN48_QH && qual == IDEAL_SALTED)
-    {
-        setAreaEnabled(true);
-        setPathEnabled(false);
-        setSaltEnabled(true);
-        setQualEnabled(true);
-        setQMEnabled(false);
-    }
     else
-    {
         setAreaEnabled(true);
-        setPathEnabled(mode == GEN48_LIST);
-        setSaltEnabled(mode == GEN48_LIST);
-        setQualEnabled(mode == GEN48_QH);
-        setQMEnabled(mode == GEN48_QM);
+
+    if (mode == GEN48_QH)
+    {
+        int qual = ui->comboLow20->currentIndex();
+        ui->labelSalt->setEnabled(qual == IDEAL_SALTED);
+        ui->lineSalt->setEnabled(qual == IDEAL_SALTED);
     }
 
     emit changed();
 }
 
-void FormGen48::on_comboMode_currentIndexChanged(int)
+void FormGen48::on_tabWidget_currentChanged(int)
 {
     updateMode();
 }
@@ -341,12 +315,8 @@ void FormGen48::on_radioAuto_toggled()
     emit changed();
 }
 
-void FormGen48::on_spinMonumentArea_editingFinished()
+void FormGen48::onChange()
 {
     emit changed();
 }
 
-void FormGen48::on_lineSalt_editingFinished()
-{
-    emit changed();
-}

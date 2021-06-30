@@ -47,11 +47,17 @@ public slots:
     void change(int v)
     {
         if (v < 0)
-            setStyleSheet("background: lightcoral");
+        {
+            setStyleSheet("background: #28ff0000");
+        }
         else if (v > 0)
-            setStyleSheet("background: lightgreen");
+        {
+            setStyleSheet("background: #2800ff00");
+        }
         else
+        {
             setStyleSheet("");
+        }
         findChild<QLineEdit*>()->deselect();
     }
 };

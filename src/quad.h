@@ -159,7 +159,7 @@ struct Level
     ~Level();
 
     void init4map(int mc, int64_t ws, int dim, int pix, int layerscale);
-    void init4struct(int mc, int64_t ws, int blocks, int sopt, int viewlv);
+    void init4struct(int mc, int64_t ws, int dim, int blocks, int sopt, int viewlv);
 
     void resizeLevel(std::vector<Quad*>& cache, int x, int z, int w, int h);
     void update(std::vector<Quad*>& cache, qreal bx0, qreal bz0, qreal bx1, qreal bz1);
@@ -219,7 +219,7 @@ struct QWorld
 
     // slime overlay
     QImage slimeimg;
-    int slimex, slimez;
+    long slimex, slimez;
 
     // structure selection from mouse position
     bool seldo;

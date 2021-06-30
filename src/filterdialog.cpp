@@ -55,7 +55,7 @@ FilterDialog::FilterDialog(FormConditions *parent, int mcversion, QListWidgetIte
     ui->labelMC->setText(mcs);
 
 
-    int initindex = 0;
+    int initindex = -1;
     QVector<Condition> existing = parent->getConditions();
     for (Condition c : existing)
     {
@@ -68,6 +68,19 @@ FilterDialog::FilterDialog(FormConditions *parent, int mcversion, QListWidgetIte
                 initindex = ui->comboBoxRelative->count();
         }
         ui->comboBoxRelative->addItem(QString::asprintf("[%02d] %s", c.save, ft.name), c.save);
+    }
+    if (initindex < 0)
+    {
+        if (initcond && initcond->relative > 0)
+        {
+            initindex = ui->comboBoxRelative->count();
+            ui->comboBoxRelative->addItem(
+                QString::asprintf("[%02d] broken reference", initcond->relative), initcond->relative);
+        }
+        else
+        {
+            initindex = 0;
+        }
     }
 
     QIntValidator *intval = new QIntValidator(this);

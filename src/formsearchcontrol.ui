@@ -20,16 +20,7 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
-   <property name="leftMargin">
-    <number>0</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
+   <property name="margin">
     <number>0</number>
    </property>
    <item row="0" column="0">
@@ -86,7 +77,7 @@
        <string>Hex  (Low-48 | Top-16)</string>
       </property>
       <property name="textAlignment">
-       <set>AlignLeading|AlignVCenter</set>
+       <set>AlignLeft|AlignVCenter</set>
       </property>
      </column>
      <column>
@@ -94,7 +85,7 @@
        <string>Seed</string>
       </property>
       <property name="textAlignment">
-       <set>AlignLeading|AlignVCenter</set>
+       <set>AlignLeft|AlignVCenter</set>
       </property>
      </column>
     </widget>

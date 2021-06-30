@@ -71,6 +71,15 @@ inline const char* struct2str(int stype)
     return "?";
 }
 
+inline int structDim(int stype)
+{
+    if (stype == Fortress || stype == Bastion)
+        return -1;
+    if (stype == End_City)
+        return 1;
+    return 0;
+}
+
 // get a random 64-bit integer
 static inline int64_t getRnd64()
 {

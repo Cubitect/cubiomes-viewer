@@ -1,4 +1,4 @@
-﻿#include "quad.h"
+#include "quad.h"
 
 #include "cutil.h"
 
@@ -6,6 +6,8 @@
 
 #include <cmath>
 #include <algorithm>
+
+#define SEAM_BUF 8
 
 
 Quad::Quad(const Level* l, int i, int j)
@@ -104,27 +106,27 @@ void Quad::run()
 
     if (pixs > 0)
     {
-        int x = ti*pixs, z = tj*pixs, w = pixs, h = pixs;
+        int x = ti*pixs, z = tj*pixs, w = pixs+SEAM_BUF, h = pixs+SEAM_BUF;
         int *b = NULL;
         if (dim == -1)
         {
-            b = (int*) malloc((pixs+7) * (pixs+7) * sizeof(int));
+            b = (int*) malloc((w+7) * (h+7) * sizeof(int));
             genNetherScaled(mc, seed, blocks / pixs, b, x, z, w, h, 0, 0);
         }
         else if (dim == +1) // end
         {
-            b = (int*) malloc((pixs+7) * (pixs+7) * sizeof(int));
+            b = (int*) malloc((w+7) * (h+7) * sizeof(int));
             genEndScaled(mc, seed, blocks / pixs, b, x, z, w, h);
         }
         else
         {
-            b = allocCache(entry, pixs, pixs);
+            b = allocCache(entry, w, h);
             genArea(entry, b, x, z, w, h);
         }
 
-        rgb = new uchar[pixs*pixs * 3];
-        biomesToImage(rgb, biomeColors, b, pixs, pixs, 1, 1);
-        img = new QImage(rgb, pixs, pixs, QImage::Format_RGB888);
+        rgb = new uchar[w*h * 3];
+        biomesToImage(rgb, biomeColors, b, w, h, 1, 1);
+        img = new QImage(rgb, w, h, 3*w, QImage::Format_RGB888);
         free(b);
     }
     else
@@ -268,16 +270,16 @@ void Level::init4map(int mcversion, int64_t ws, int dim, int pix, int layerscale
     }
 }
 
-void Level::init4struct(int mcversion, int64_t ws, int b, int structtype, int lv)
+void Level::init4struct(int mc, int64_t ws, int dim, int blocks, int sopt, int lv)
 {
-    mc = mcversion;
-    dim = 0;
-    seed = ws;
-    blocks = b;
-    pixs = -1;
-    scale = -1;
-    sopt = structtype;
-    viewlv = lv;
+    this->mc = mc;
+    this->dim = dim;
+    this->seed = ws;
+    this->blocks = blocks;
+    this->pixs = -1;
+    this->scale = -1;
+    this->sopt = sopt;
+    this->viewlv = lv;
 }
 
 static int sqdist(int x, int z) { return x*x + z*z; }
@@ -421,21 +423,21 @@ QWorld::QWorld(int mc, int64_t seed, int dim)
 
     int pixs = 512;
     lvs.resize(D_SPAWN);
-    lvs[D_DESERT].init4struct(mc, seed, 2048, D_DESERT, 2);
-    lvs[D_JUNGLE].init4struct(mc, seed, 2048, D_JUNGLE, 2);
-    lvs[D_IGLOO].init4struct(mc, seed, 2048, D_IGLOO, 2);
-    lvs[D_HUT].init4struct(mc, seed, 2048, D_HUT, 2);
-    lvs[D_VILLAGE].init4struct(mc, seed, 2048, D_VILLAGE, 2);
-    lvs[D_MANSION].init4struct(mc, seed, 2048, D_MANSION, 3);
-    lvs[D_MONUMENT].init4struct(mc, seed, 2048, D_MONUMENT, 2);
-    lvs[D_RUINS].init4struct(mc, seed, 2048, D_RUINS, 1);
-    lvs[D_SHIPWRECK].init4struct(mc, seed, 2048, D_SHIPWRECK, 1);
-    lvs[D_TREASURE].init4struct(mc, seed, 2048, D_TREASURE, 1);
-    lvs[D_OUTPOST].init4struct(mc, seed, 2048, D_OUTPOST, 2);
-    lvs[D_PORTAL].init4struct(mc, seed, 2048, D_PORTAL, 1);
-    lvs[D_FORTESS].init4struct(mc, seed, 2048, D_FORTESS, 1);
-    lvs[D_BASTION].init4struct(mc, seed, 2048, D_BASTION, 1);
-    lvs[D_ENDCITY].init4struct(mc, seed, 2048, D_ENDCITY, 1);
+    lvs[D_DESERT]       .init4struct(mc, seed, 0, 2048, D_DESERT, 2);
+    lvs[D_JUNGLE]       .init4struct(mc, seed, 0, 2048, D_JUNGLE, 2);
+    lvs[D_IGLOO]        .init4struct(mc, seed, 0, 2048, D_IGLOO, 2);
+    lvs[D_HUT]          .init4struct(mc, seed, 0, 2048, D_HUT, 2);
+    lvs[D_VILLAGE]      .init4struct(mc, seed, 0, 2048, D_VILLAGE, 2);
+    lvs[D_MANSION]      .init4struct(mc, seed, 0, 2048, D_MANSION, 3);
+    lvs[D_MONUMENT]     .init4struct(mc, seed, 0, 2048, D_MONUMENT, 2);
+    lvs[D_RUINS]        .init4struct(mc, seed, 0, 2048, D_RUINS, 1);
+    lvs[D_SHIPWRECK]    .init4struct(mc, seed, 0, 2048, D_SHIPWRECK, 1);
+    lvs[D_TREASURE]     .init4struct(mc, seed, 0, 2048, D_TREASURE, 1);
+    lvs[D_OUTPOST]      .init4struct(mc, seed, 0, 2048, D_OUTPOST, 2);
+    lvs[D_PORTAL]       .init4struct(mc, seed, 0, 2048, D_PORTAL, 1);
+    lvs[D_FORTESS]      .init4struct(mc, seed,-1, 2048, D_FORTESS, 1);
+    lvs[D_BASTION]      .init4struct(mc, seed,-1, 2048, D_BASTION, 1);
+    lvs[D_ENDCITY]      .init4struct(mc, seed, 1, 2048, D_ENDCITY, 1);
 
     if (dim == 0)
     {
@@ -659,9 +661,10 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
                 continue;
             // q was processed in another thread and is now done
             qreal ps = q->blocks * blocks2pix;
-            qreal px = vw/2 + (q->ti) * ps - focusx * blocks2pix;
-            qreal pz = vh/2 + (q->tj) * ps - focusz * blocks2pix;
-
+            qreal px = vw/2.0 + (q->ti) * ps - focusx * blocks2pix;
+            qreal pz = vh/2.0 + (q->tj) * ps - focusz * blocks2pix;
+            // account for the seam buffer pixels
+            ps += ((SEAM_BUF)*q->blocks / (qreal)q->pixs) * blocks2pix;
             QRect rec(px,pz,ps,ps);
             painter.drawImage(rec, *q->img);
 
@@ -682,10 +685,10 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
         }
     }
 
-    if (sshow[D_SLIME] && blocks2pix*16 > 2.0)
+    if (sshow[D_SLIME] && dim == 0 && blocks2pix*16 > 2.0)
     {
-        int x = floor(bx0 / 16), w = floor(bx1 / 16) - x + 1;
-        int z = floor(bz0 / 16), h = floor(bz1 / 16) - z + 1;
+        long x = floor(bx0 / 16), w = floor(bx1 / 16) - x + 1;
+        long z = floor(bz0 / 16), h = floor(bz1 / 16) - z + 1;
 
         // conditions when the slime overlay should be updated
         if (x < slimex || z < slimez ||
@@ -714,12 +717,10 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
         }
 
         qreal ps = 16 * blocks2pix;
-        qreal px = vw/2 + slimex * ps - focusx * blocks2pix;
-        qreal pz = vh/2 + slimez * ps - focusz * blocks2pix;
+        qreal px = vw/2.0 + slimex * ps - focusx * blocks2pix;
+        qreal pz = vh/2.0 + slimez * ps - focusz * blocks2pix;
 
         QRect rec(px, pz, ps*slimeimg.width(), ps*slimeimg.height());
-        // match partial pixels to X11
-        //painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
         painter.drawImage(rec, slimeimg);
     }
 
@@ -728,6 +729,8 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
     {
         Level& l = lvs[sopt];
         if (!sshow[sopt] || activelv > l.viewlv)
+            continue;
+        if (dim != l.dim)
             continue;
 
         std::vector<QPainter::PixmapFragment> frags;
@@ -739,8 +742,8 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
             // q was processed in another thread and is now done
             for (VarPos& vp : *q->spos)
             {
-                qreal x = vw/2 + (vp.p.x - focusx) * blocks2pix;
-                qreal y = vh/2 + (vp.p.z - focusz) * blocks2pix;
+                qreal x = vw/2.0 + (vp.p.x - focusx) * blocks2pix;
+                qreal y = vh/2.0 + (vp.p.z - focusz) * blocks2pix;
 
                 if (x < 0 || x >= vw || y < 0 || y >= vh)
                     continue;
@@ -777,14 +780,14 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
     }
 
     Pos* sp = spawn; // atomic fetch
-    if (sp && sp != (Pos*)-1 && sshow[D_SPAWN])
+    if (sp && sp != (Pos*)-1 && sshow[D_SPAWN] && dim == 0)
     {
-        qreal x = vw/2 + (sp->x - focusx) * blocks2pix;
-        qreal y = vh/2 + (sp->z - focusz) * blocks2pix;
+        qreal x = vw/2.0 + (sp->x - focusx) * blocks2pix;
+        qreal y = vh/2.0 + (sp->z - focusz) * blocks2pix;
 
         QPointF d = QPointF(x, y);
         QRectF r = icons[D_SPAWN].rect();
-        painter.drawPixmap(d, icons[D_SPAWN]);
+        painter.drawPixmap(x-r.width()/2, y-r.height()/2, icons[D_SPAWN]);
 
         if (seldo)
         {
@@ -799,14 +802,14 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
     }
 
     std::vector<Pos>* shs = strongholds; // atomic fetch
-    if (shs && sshow[D_STRONGHOLD])
+    if (shs && sshow[D_STRONGHOLD] && dim == 0)
     {
         std::vector<QPainter::PixmapFragment> frags;
         frags.reserve(shs->size());
         for (Pos p : *shs)
         {
-            qreal x = vw/2 + (p.x - focusx) * blocks2pix;
-            qreal y = vh/2 + (p.z - focusz) * blocks2pix;
+            qreal x = vw/2.0 + (p.x - focusx) * blocks2pix;
+            qreal y = vh/2.0 + (p.z - focusz) * blocks2pix;
             QPointF d = QPointF(x, y);
             QRectF r = icons[D_STRONGHOLD].rect();
             frags.push_back(QPainter::PixmapFragment::create(d, r));
@@ -836,7 +839,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
     for (int sopt = D_DESERT; sopt < D_SPAWN; sopt++)
     {
         Level& l = lvs[sopt];
-        if (activelv <= l.viewlv && sshow[sopt])
+        if (activelv <= l.viewlv && sshow[sopt] && dim == l.dim)
             l.update(cachedstruct, bx0, bz0, bx1, bz1);
         else if (activelv > l.viewlv+1)
             l.update(cachedstruct, 0, 0, 0, 0);
@@ -862,8 +865,8 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
             if (seltype == D_VILLAGE)
                 icon = &iconzvil;
         }
-        qreal x = vw/2 + (selpos.x - focusx) * blocks2pix;
-        qreal y = vh/2 + (selpos.z - focusz) * blocks2pix;
+        qreal x = vw/2.0 + (selpos.x - focusx) * blocks2pix;
+        qreal y = vh/2.0 + (selpos.z - focusz) * blocks2pix;
         QRect iconrec = icon->rect();
         qreal w = iconrec.width() * 1.5;
         qreal h = iconrec.height() * 1.5;

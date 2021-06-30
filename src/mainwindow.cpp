@@ -24,6 +24,8 @@
 #include <QTreeWidget>
 #include <QDateTime>
 #include <QStandardPaths>
+#include <QDebug>
+#include <QFile>
 
 extern "C"
 int getStructureConfig_override(int stype, int mc, StructureConfig *sconf)
@@ -46,8 +48,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->collapseConstraints->init("Conditions", formCond, false);
     connect(formCond, &FormConditions::changed, this, &MainWindow::onConditionsChanged);
     ui->collapseConstraints->setInfo(
-        "Help: Search conditions",
-        "The search conditions define the properties by which potential seeds are filtered."
+        "Help: Conditions",
+        "The search conditions define the properties by which potential seeds "
+        "are filtered."
         "\n\n"
         "Conditions can reference each other to produce relative positionial "
         "dependencies (indicated with the ID in square brackets [XY]). "
@@ -57,21 +60,47 @@ MainWindow::MainWindow(QWidget *parent)
     );
 
     formGen48 = new FormGen48(this);
-    ui->collapseGen48->init("Seed generator (48-bit)", formGen48, true);
+    ui->collapseGen48->init("Seed generator (48-bit)", formGen48, false);
     connect(formGen48, &FormGen48::changed, this, &MainWindow::onGen48Changed);
     ui->collapseGen48->setInfo(
         "Help: Seed generator",
-        "For some searches, the 48-bit structure seed candidates can be generated without searching, "
-        "which can vastly reduce the search space that has to be checked. The generator mode \"Auto\" "
-        "is recommended for general use, which automatically selects suitable options based on the "
-        "conditions list."
+        "<html><head/><body><p>"
+        "For some searches, the 48-bit structure seed candidates can be "
+        "generated without searching, which can vastly reduce the search space "
+        "that has to be checked."
+        "</p><p>"
+        "The generator mode <b>Auto</b> is recommended for general use, which "
+        "automatically selects suitable options based on the conditions list."
+        "</p><p>"
+        "The <b>Quad-feature</b> generator mode uses certain low bits to "
+        "produce a list of candidates for structures in ideal proximity. This "
+        "only works for structures with uniform distributions of region-size=32 "
+        "and chunk-gap=8. For swamp huts this can be extended to include more "
+        "constellations with all bounding boxes within 128 blocks."
+        "</p><p>"
+        "A perfect <b>Quad-monument</b> structure constellation does not "
+        "actually exist, but some extremely rare structure seed bases get close, "
+        "with over 90&#37; of the area within 128 blocks. The generator uses a "
+        "precomputed list of these seed bases."
+        "</p><p>"
+        "Using a <b>Seed list</b> you can provide a custom set of 48-bit "
+        "candidates. Optionally, a salt value can be added and the seeds can "
+        "be region transposed."
+        "</p></body></html>"
     );
 
     formControl = new FormSearchControl(this);
     ui->collapseControl->init("Matching seeds", formControl, false);
     connect(formControl, &FormSearchControl::selectedSeedChanged, this, &MainWindow::onSelectedSeedChanged);
     connect(formControl, &FormSearchControl::searchStatusChanged, this, &MainWindow::onSearchStatusChanged);
-
+    ui->collapseControl->setInfo(
+        "Help: Matching seeds",
+        "<html><head/><body><p>"
+        "The list of seeds acts as a buffer onto which suitable seeds are added "
+        "when they are found. You can also copy the seed list, or paste seeds "
+        "into the list. Selecting a seed will open it in the map view."
+        "</p></body></html>"
+    );
 
     this->update();
 
@@ -126,7 +155,7 @@ MainWindow::MainWindow(QWidget *parent)
     protodialog = new ProtoBaseDialog(this);
 
     ui->splitterMap->setSizes(QList<int>({6000, 10000}));
-    ui->splitterSearch->setSizes(QList<int>({1000, 1000, 2000}));
+    ui->splitterSearch->setSizes(QList<int>({800, 1200, 2000}));
 
     qRegisterMetaType< int64_t >("int64_t");
     qRegisterMetaType< uint64_t >("uint64_t");
@@ -239,6 +268,7 @@ void MainWindow::saveSettings()
     settings.setValue("config/restoreSession", config.restoreSession);
     settings.setValue("config/autosaveCycle", config.autosaveCycle);
     settings.setValue("config/smoothMotion", config.smoothMotion);
+    settings.setValue("config/uistyle", config.uistyle);
     settings.setValue("config/seedsPerItem", config.seedsPerItem);
     settings.setValue("config/queueSize", config.queueSize);
     settings.setValue("config/maxMatching", config.maxMatching);
@@ -273,11 +303,13 @@ void MainWindow::loadSettings()
     config.smoothMotion = settings.value("config/smoothMotion", config.smoothMotion).toBool();
     config.restoreSession = settings.value("config/restoreSession", config.restoreSession).toBool();
     config.autosaveCycle = settings.value("config/autosaveCycle", config.autosaveCycle).toInt();
+    config.uistyle = settings.value("config/uistyle", config.uistyle).toInt();
     config.seedsPerItem = settings.value("config/seedsPerItem", config.seedsPerItem).toInt();
     config.queueSize = settings.value("config/queueSize", config.queueSize).toInt();
     config.maxMatching = settings.value("config/maxMatching", config.maxMatching).toInt();
 
     ui->mapView->setSmoothMotion(config.smoothMotion);
+    onStyleChanged(config.uistyle);
 
     int dim = settings.value("map/dim", getDim()).toInt();
     if (dim == -1)
@@ -368,6 +400,8 @@ bool MainWindow::saveProgress(QString fnam, bool quiet)
     stream << "#MonArea:  " << gen48.qmarea << "\n";
     if (gen48.salt != 0)
         stream << "#Salt:     " << gen48.salt << "\n";
+    if (gen48.listsalt != 0)
+        stream << "#LSalt:    " << gen48.listsalt << "\n";
     if (gen48.manualarea)
     {
         stream << "#Gen48X1:  " << gen48.x1 << "\n";
@@ -437,7 +471,8 @@ bool MainWindow::loadProgress(QString fnam, bool quiet)
         else if (sscanf(p, "#Mode48:   %d", &gen48.mode) == 1)                  {}
         else if (sscanf(p, "#HutQual:  %d", &gen48.qual) == 1)                  {}
         else if (sscanf(p, "#MonArea:  %d", &gen48.qmarea) == 1)                {}
-        else if (sscanf(p, "#Salt:     %" PRId64, &gen48.salt) == 1)            {}
+        else if (sscanf(p, "#Salt:     %" PRIu64, &gen48.salt) == 1)            {}
+        else if (sscanf(p, "#LSalt:    %" PRIu64, &gen48.listsalt) == 1)        {}
         else if (sscanf(p, "#Gen48X1:  %d", &gen48.x1) == 1)                    { gen48.manualarea = true; }
         else if (sscanf(p, "#Gen48Z1:  %d", &gen48.z1) == 1)                    { gen48.manualarea = true; }
         else if (sscanf(p, "#Gen48X2:  %d", &gen48.x2) == 1)                    { gen48.manualarea = true; }
@@ -577,8 +612,11 @@ void MainWindow::on_actionPreferences_triggered()
     int status = dialog->exec();
     if (status == QDialog::Accepted)
     {
+        Config oldConfig = config;
         config = dialog->getSettings();
         ui->mapView->setSmoothMotion(config.smoothMotion);
+        if (oldConfig.uistyle != config.uistyle)
+            onStyleChanged(config.uistyle);
 
         if (config.autosaveCycle)
         {
@@ -802,9 +840,10 @@ void MainWindow::on_buttonAnalysis_clicked()
     {
         if (!everything && !getMapView()->getShow(sopt))
             continue;
-
-        st.clear();
         int stype = mapopt2stype(sopt);
+        if (dim != structDim(stype))
+            continue;
+        st.clear();
         StructureConfig sconf;
         if (!getStructureConfig_override(stype, mc, &sconf))
             continue;
@@ -832,7 +871,7 @@ void MainWindow::on_buttonAnalysis_clicked()
         tree->insertTopLevelItem(stype, item_cat);
     }
 
-    if (everything || getMapView()->getShow(D_SPAWN))
+    if (everything || (dim == 0 && getMapView()->getShow(D_SPAWN)))
     {
         Pos pos = getSpawn(mc, &g, NULL, seed);
         if (pos.x >= x1 && pos.x <= x2 && pos.z >= z1 && pos.z <= z2)
@@ -846,7 +885,7 @@ void MainWindow::on_buttonAnalysis_clicked()
         }
     }
 
-    if (everything || getMapView()->getShow(D_STRONGHOLD))
+    if (everything || (dim == 0 && getMapView()->getShow(D_STRONGHOLD)))
     {
         StrongholdIter sh;
         initFirstStronghold(&sh, mc, seed);
@@ -963,6 +1002,21 @@ void MainWindow::onSelectedSeedChanged(int64_t seed)
 void MainWindow::onSearchStatusChanged(bool running)
 {
     formGen48->setEnabled(!running);
+}
+
+void MainWindow::onStyleChanged(int style)
+{
+    if (style == STYLE_DARK)
+    {
+        QFile file(":dark.qss");
+        file.open(QFile::ReadOnly);
+        QString st = file.readAll();
+        qApp->setStyleSheet(st);
+    }
+    else
+    {
+        qApp->setStyleSheet("");
+    }
 }
 
 void MainWindow::copyCoord()

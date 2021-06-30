@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>428</width>
-    <height>251</height>
+    <width>435</width>
+    <height>179</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -20,44 +20,220 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <property name="leftMargin">
-    <number>0</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
+   <property name="margin">
     <number>0</number>
    </property>
    <item row="0" column="0">
     <widget class="QWidget" name="widget" native="true">
      <layout class="QGridLayout" name="gridLayout_2">
-      <property name="leftMargin">
+      <property name="margin">
        <number>0</number>
       </property>
-      <property name="topMargin">
-       <number>0</number>
-      </property>
-      <property name="rightMargin">
-       <number>0</number>
-      </property>
-      <property name="bottomMargin">
-       <number>0</number>
-      </property>
-      <item row="10" column="2" colspan="4">
-       <widget class="QLabel" name="labelCount">
-        <property name="text">
-         <string>0</string>
+      <item row="0" column="0" colspan="2">
+       <widget class="QTabWidget" name="tabWidget">
+        <property name="currentIndex">
+         <number>0</number>
         </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
+        <widget class="QWidget" name="tabAuto">
+         <attribute name="title">
+          <string>Auto/None</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_4">
+          <property name="margin">
+           <number>0</number>
+          </property>
+          <item row="0" column="0">
+           <widget class="QLabel" name="labelAutoDesc">
+            <property name="text">
+             <string>Automatically select suitable options based on conditions.</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="labelAuto">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="tabQuadF">
+         <attribute name="title">
+          <string>Quad-feature</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_5">
+          <property name="margin">
+           <number>0</number>
+          </property>
+          <item row="1" column="0">
+           <widget class="QLabel" name="labelSalt">
+            <property name="toolTip">
+             <string>Value (such as a structure salt) added to the 48-bit seeds</string>
+            </property>
+            <property name="text">
+             <string>Add structure salt:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="lineSalt">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>0</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="labelLow20">
+            <property name="toolTip">
+             <string>Selects a set of values for the lower 20-bits of the seed, corresponding to quad-feature constellations
+Applies only to feature-structures of region-size = 32 and chunk-gap = 8, in particular swamp-huts</string>
+            </property>
+            <property name="text">
+             <string>Restrict lower bits:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QComboBox" name="comboLow20">
+            <property name="sizeAdjustPolicy">
+             <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+            </property>
+            <item>
+             <property name="text">
+              <string>Quad-hut (ideal)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Quad-hut (classic)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Quad-hut (normal)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Quad-hut (barely)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Quad-feature (ideal, custom salt)</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="tabQuadM">
+         <attribute name="title">
+          <string>Quad-monument</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_6">
+          <property name="margin">
+           <number>0</number>
+          </property>
+          <item row="0" column="0">
+           <widget class="QLabel" name="labelQM">
+            <property name="toolTip">
+             <string>Number of planar spawning spaces inside monuments that are within 128 blocks of a center position
+(i.e. this is a measure quality, out of 4*58*58)</string>
+            </property>
+            <property name="text">
+             <string>Min. monument area:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QSpinBox" name="spinMonumentArea">
+            <property name="minimum">
+             <number>12115</number>
+            </property>
+            <property name="maximum">
+             <number>13028</number>
+            </property>
+            <property name="value">
+             <number>13028</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="tabList">
+         <attribute name="title">
+          <string>Seed list</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_7">
+          <property name="margin">
+           <number>0</number>
+          </property>
+          <item row="0" column="0">
+           <widget class="QLabel" name="labelPath">
+            <property name="toolTip">
+             <string>Use a custom seed list as source for 48-bit seed candidates</string>
+            </property>
+            <property name="text">
+             <string>Load 48-bit seed list:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="lineList48">
+            <property name="font">
+             <font>
+              <family>Monospace</family>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QPushButton" name="buttonBrowse">
+            <property name="maximumSize">
+             <size>
+              <width>24</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="labelListSalt">
+            <property name="toolTip">
+             <string>Value (such as a structure salt) added to the 48-bit seeds</string>
+            </property>
+            <property name="text">
+             <string>Add structure salt:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1" colspan="2">
+           <widget class="QLineEdit" name="lineListSalt">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="text">
+             <string>0</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
        </widget>
       </item>
-      <item row="7" column="0" colspan="6">
+      <item row="1" column="0" colspan="2">
        <widget class="QFrame" name="frame">
         <property name="frameShape">
          <enum>QFrame::NoFrame</enum>
@@ -66,16 +242,7 @@
          <enum>QFrame::Plain</enum>
         </property>
         <layout class="QGridLayout" name="gridLayout_3">
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
+         <property name="margin">
           <number>0</number>
          </property>
          <item row="0" column="0">
@@ -118,155 +285,7 @@
         </layout>
        </widget>
       </item>
-      <item row="0" column="1" colspan="5">
-       <widget class="QComboBox" name="comboMode">
-        <item>
-         <property name="text">
-          <string>[Auto]</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Quad-feature</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Quad-monument</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Seed list</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>[None] (All seeds)</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="1" column="1" colspan="5">
-       <widget class="QComboBox" name="comboLow20">
-        <property name="sizeAdjustPolicy">
-         <enum>QComboBox::AdjustToMinimumContentsLength</enum>
-        </property>
-        <item>
-         <property name="text">
-          <string>Quad-hut (ideal)</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Quad-hut (classic)</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Quad-hut (normal)</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Quad-hut (barely)</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Quad-feature (ideal, custom salt)</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="5" column="1" colspan="5">
-       <widget class="QLineEdit" name="lineSalt">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="text">
-         <string>0</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="labelMode">
-        <property name="text">
-         <string>Generator mode:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="labelPath">
-        <property name="toolTip">
-         <string>Use a custom seed list as source for 48-bit seed candidates</string>
-        </property>
-        <property name="text">
-         <string>Load 48-bit seed list:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1" colspan="5">
-       <widget class="QSpinBox" name="spinMonumentArea">
-        <property name="minimum">
-         <number>12115</number>
-        </property>
-        <property name="maximum">
-         <number>13028</number>
-        </property>
-        <property name="value">
-         <number>13028</number>
-        </property>
-       </widget>
-      </item>
-      <item row="11" column="0">
-       <spacer name="verticalSpacer">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::MinimumExpanding</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>0</width>
-          <height>0</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="3" column="1" colspan="4">
-       <widget class="QLineEdit" name="lineList48">
-        <property name="font">
-         <font>
-          <family>Monospace</family>
-          <pointsize>9</pointsize>
-         </font>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="labelLow20">
-        <property name="toolTip">
-         <string>Selects a set of values for the lower 20-bits of the seed, corresponding to quad-feature constellations
-Applies only to feature-structures of region-size = 32 and chunk-gap = 8, in particular swamp-huts</string>
-        </property>
-        <property name="text">
-         <string>Restrict lower bits:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="10" column="0" colspan="2">
-       <widget class="QLabel" name="labelSpace">
-        <property name="text">
-         <string>Seeds in search space:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="0" colspan="6">
+      <item row="2" column="0" colspan="2">
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
          <widget class="QLabel" name="labelX1">
@@ -363,39 +382,38 @@ Applies only to feature-structures of region-size = 32 and chunk-gap = 8, in par
         </item>
        </layout>
       </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="labelSalt">
-        <property name="toolTip">
-         <string>Value (such as a structure salt) added to the 48-bit seeds</string>
-        </property>
+      <item row="3" column="0">
+       <widget class="QLabel" name="labelSpace">
         <property name="text">
-         <string>Add structure salt:</string>
+         <string>Seeds in search space:</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="5">
-       <widget class="QPushButton" name="buttonBrowse">
-        <property name="maximumSize">
+      <item row="3" column="1">
+       <widget class="QLabel" name="labelCount">
+        <property name="text">
+         <string>0</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <spacer name="verticalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::MinimumExpanding</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
          <size>
-          <width>24</width>
-          <height>16777215</height>
+          <width>20</width>
+          <height>0</height>
          </size>
         </property>
-        <property name="text">
-         <string>...</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="labelQM">
-        <property name="toolTip">
-         <string>Number of planar spawning spaces inside monuments that are within 128 blocks of a center position
-(i.e. this is a measure quality, out of 4*58*58)</string>
-        </property>
-        <property name="text">
-         <string>Min. monument area:</string>
-        </property>
-       </widget>
+       </spacer>
       </item>
      </layout>
     </widget>

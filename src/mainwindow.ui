@@ -17,21 +17,6 @@
    <iconset resource="../icons.qrc">
     <normaloff>:/icons/map.png</normaloff>:/icons/map.png</iconset>
   </property>
-  <property name="styleSheet">
-   <string notr="true">QToolButton {
-	checked { background-color:rgb(85, 87, 83) }
-	!checked { background-color:rgb(240, 240, 240); }
-	border: 2px solid #8f8f91;
-	border-radius:3px;
-}
-QSplitter::handle:horizontal {
-	image: url(:/icons/splitter_h.png);
-}
-QSplitter::handle:vertical {
-	image: url(:/icons/splitter_v.png);
-}
-    </string>
-  </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout_6">
     <item row="0" column="0">
@@ -41,7 +26,16 @@ QSplitter::handle:vertical {
       </property>
       <widget class="QFrame" name="controlFrame">
        <layout class="QVBoxLayout" name="verticalLayout_5">
-        <property name="margin">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
          <number>0</number>
         </property>
         <item>
@@ -169,16 +163,43 @@ QSplitter::handle:vertical {
             <string>Search</string>
            </attribute>
            <layout class="QGridLayout" name="gridLayout">
-            <property name="margin">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
              <number>0</number>
             </property>
             <item row="0" column="0">
              <widget class="QScrollArea" name="scrollArea">
               <property name="minimumSize">
                <size>
-                <width>480</width>
+                <width>500</width>
                 <height>0</height>
                </size>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">QAbstractScrollArea#scrollArea {
+ 	border: 0px none;
+}
+
+QToolButton {
+ 	background-color: transparent;
+}</string>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::NoFrame</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Plain</enum>
+              </property>
+              <property name="lineWidth">
+               <number>0</number>
               </property>
               <property name="verticalScrollBarPolicy">
                <enum>Qt::ScrollBarAsNeeded</enum>
@@ -197,7 +218,7 @@ QSplitter::handle:vertical {
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>1228</width>
+                 <width>1232</width>
                  <height>699</height>
                 </rect>
                </property>
@@ -224,6 +245,12 @@ QSplitter::handle:vertical {
                     <horstretch>0</horstretch>
                     <verstretch>0</verstretch>
                    </sizepolicy>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">
+QSplitter {
+  background-color: transparent;
+}</string>
                   </property>
                   <property name="orientation">
                    <enum>Qt::Vertical</enum>
@@ -491,7 +518,16 @@ QSplitter::handle:vertical {
         <enum>QFrame::Raised</enum>
        </property>
        <layout class="QGridLayout" name="gridLayout_4">
-        <property name="margin">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
          <number>0</number>
         </property>
         <item row="0" column="0">
@@ -508,20 +544,26 @@ QSplitter::handle:vertical {
     <string>toolBar</string>
    </property>
    <property name="autoFillBackground">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="styleSheet">
-    <string notr="true">QToolButton {
-	border: 1.5px solid;
-	border-radius: 3px;
+    <string notr="true">
+QToolBar {
+	border-radius: 5px;
+	padding: 0px;
+	spacing: 0px;
+}
+
+QToolButton {
+	border-radius: 5px;
+	padding: 2px;
+	border: 0px solid;
+	margin: 0px;
 }
 QToolButton:!checked {
-	border-color: rgb(238, 238, 236);
-	background-color: rgb(238, 238, 236);
 }
 QToolButton:checked {
-	border-color: rgb(32, 74, 135);
-	background-color: rgb(114, 159, 207);
+	background-color: #8a9dc4;
 }</string>
    </property>
    <property name="movable">
@@ -552,7 +594,7 @@ QToolButton:checked {
      <x>0</x>
      <y>0</y>
      <width>1280</width>
-     <height>23</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuMap">

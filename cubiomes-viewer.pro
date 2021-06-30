@@ -89,6 +89,7 @@ FORMS += \
         src/mainwindow.ui
 
 RESOURCES += \
-        icons.qrc
+        icons.qrc \
+        style.qrc
 
 DISTFILES +=

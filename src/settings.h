@@ -3,11 +3,14 @@
 
 #include <QThread>
 
+enum { STYLE_SYSTEM, STYLE_DARK };
+
 struct Config
 {
     bool smoothMotion;
     bool restoreSession;
     int autosaveCycle;
+    int uistyle;
     int seedsPerItem;
     int queueSize;
     int maxMatching;
@@ -19,6 +22,7 @@ struct Config
         smoothMotion = true;
         restoreSession = true;
         autosaveCycle = 10;
+        uistyle = STYLE_DARK;
         seedsPerItem = 256;
         queueSize = QThread::idealThreadCount();
         maxMatching = 65536;
@@ -32,7 +36,8 @@ struct Gen48Settings
 {
     int mode;
     QString slist48path;
-    int64_t salt;
+    uint64_t salt;
+    uint64_t listsalt;
     int qual;
     int qmarea;
     bool manualarea;
@@ -45,6 +50,7 @@ struct Gen48Settings
         mode = GEN48_AUTO;
         slist48path = "";
         salt = 0;
+        listsalt = 0;
         qual = IDEAL;
         qmarea = 13028;
         manualarea = false;

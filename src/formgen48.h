@@ -37,25 +37,17 @@ signals:
     void changed();
 
 private:
-    void setPathEnabled(bool enabled);
-    void setSaltEnabled(bool enabled);
     void setAreaEnabled(bool enabled);
-    void setQualEnabled(bool enabled);
-    void setQMEnabled(bool enabled);
 
     void updateMode();
 
 private slots:
-    void on_comboMode_currentIndexChanged(int idx);
+    void on_tabWidget_currentChanged(int idx);
     void on_comboLow20_currentIndexChanged(int idx);
-
     void on_buttonBrowse_clicked();
-
     void on_radioAuto_toggled();
 
-    void on_spinMonumentArea_editingFinished();
-
-    void on_lineSalt_editingFinished();
+    void onChange();
 
 private:
     MainWindow *parent;

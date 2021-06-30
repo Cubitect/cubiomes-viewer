@@ -112,6 +112,7 @@ void Collapsible::setInfo(const QString& title, const QString& text)
     button->setStyleSheet("border: none;");
     button->setIconSize(pixmap.rect().size());
     button->setToolTip("Show help");
+    button->setMaximumSize(14, 14);
 
     connect(button, SIGNAL(clicked()), this, SLOT(showInfo()));
 
