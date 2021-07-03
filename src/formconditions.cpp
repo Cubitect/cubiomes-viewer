@@ -158,7 +158,7 @@ void FormConditions::editCondition(QListWidgetItem *item)
 {
     if (!(item->flags() & Qt::ItemIsSelectable))
         return;
-    int mc = MC_1_16;
+    int mc = MC_NEWEST;
     parent->getSeed(&mc, 0);
     FilterDialog *dialog = new FilterDialog(this, mc, item, (Condition*)item->data(Qt::UserRole).data());
     QObject::connect(dialog, SIGNAL(setCond(QListWidgetItem*,Condition)), this, SLOT(addItemCondition(QListWidgetItem*,Condition)), Qt::QueuedConnection);

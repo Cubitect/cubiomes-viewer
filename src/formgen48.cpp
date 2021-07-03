@@ -57,8 +57,8 @@ bool FormGen48::setList48(QString path, bool quiet)
         slist48path = path;
         parent->prevdir = finfo.absolutePath();
 
-        int64_t *l = NULL;
-        int64_t len;
+        uint64_t *l = NULL;
+        uint64_t len;
         QByteArray ba = path.toLatin1();
         l = loadSavedSeeds(ba.data(), &len);
         if (l && len > 0)
@@ -175,7 +175,7 @@ uint64_t FormGen48::estimateSeedCnt()
         uint64_t w = gen48.x2 - gen48.x1 + 1;
         uint64_t h = gen48.z2 - gen48.z1 + 1;
         uint64_t n = w*h * cnt;
-        if (cnt > 0 && n < PRECOMPUTE48_BUFSIZ*sizeof(int64_t) && n / cnt == w*h)
+        if (cnt > 0 && n < PRECOMPUTE48_BUFSIZ*sizeof(uint64_t) && n / cnt == w*h)
             cnt = n;
         else
             cnt = MASK48+1;
@@ -242,10 +242,20 @@ void FormGen48::updateAutoUi()
         }
         if (ui->radioAuto->isChecked())
         {
-            ui->lineEditX1->setText(QString::number(cond.x1));
-            ui->lineEditZ1->setText(QString::number(cond.z1));
-            ui->lineEditX2->setText(QString::number(cond.x2));
-            ui->lineEditZ2->setText(QString::number(cond.z2));
+            if (ui->tabWidget->currentIndex() == GEN48_LIST)
+            {
+                ui->lineEditX1->setText("0");
+                ui->lineEditZ1->setText("0");
+                ui->lineEditX2->setText("0");
+                ui->lineEditZ2->setText("0");
+            }
+            else
+            {
+                ui->lineEditX1->setText(QString::number(cond.x1));
+                ui->lineEditZ1->setText(QString::number(cond.z1));
+                ui->lineEditX2->setText(QString::number(cond.x2));
+                ui->lineEditZ2->setText(QString::number(cond.z2));
+            }
         }
     }
     emit changed();
@@ -272,7 +282,7 @@ void FormGen48::updateMode()
 {
     int mode = ui->tabWidget->currentIndex();
 
-    if (mode == GEN48_AUTO)
+    //if (mode == GEN48_AUTO)
     {
         updateAutoUi();
     }

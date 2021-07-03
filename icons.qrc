@@ -57,5 +57,7 @@
         <file>icons/endcity.png</file>
         <file>icons/bastion_d.png</file>
         <file>icons/bastion.png</file>
+        <file>icons/gateway.png</file>
+        <file>icons/gateway_d.png</file>
     </qresource>
 </RCC>

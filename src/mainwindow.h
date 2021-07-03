@@ -43,10 +43,10 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    QAction *addMapAction(int stype, const char *iconpath, const char *tip);
+    QAction *addMapAction(int sopt, const char *iconpath, const char *tip);
 
-    bool getSeed(int *mc, int64_t *seed, bool applyrand = true);
-    bool setSeed(int mc, int64_t seed, int dim = INT_MAX);
+    bool getSeed(int *mc, uint64_t *seed, bool applyrand = true);
+    bool setSeed(int mc, uint64_t seed, int dim = INT_MAX);
     int getDim();
     MapView *getMapView();
 
@@ -95,10 +95,10 @@ private slots:
 
     // internal events
     void onAutosaveTimeout();
-    void onActionMapToggled(int stype, bool a);
+    void onActionMapToggled(int sopt, bool a);
     void onConditionsChanged();
     void onGen48Changed();
-    void onSelectedSeedChanged(int64_t seed);
+    void onSelectedSeedChanged(uint64_t seed);
     void onSearchStatusChanged(bool running);
     void onStyleChanged(int style);
     void copyCoord();

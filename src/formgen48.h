@@ -25,7 +25,7 @@ public:
     Gen48Settings getSettings(bool resolveauto = false);
 
     bool setList48(QString path, bool quiet);
-    const std::vector<int64_t>& getList48() { return slist48; }
+    const std::vector<uint64_t>& getList48() { return slist48; }
 
     uint64_t estimateSeedCnt();
     void updateCount();
@@ -57,7 +57,7 @@ private:
     Condition cond;
 
     QString slist48path;
-    std::vector<int64_t> slist48;
+    std::vector<uint64_t> slist48;
 };
 
 #endif // FORMGEN48_H

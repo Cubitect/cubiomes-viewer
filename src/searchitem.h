@@ -25,7 +25,7 @@ public:
 
     virtual void run();
 
-    inline bool testSeed(StructPos *spos, int64_t seed, LayerStack *g, bool s48check)
+    inline bool testSeed(StructPos *spos, uint64_t seed, LayerStack *g, bool s48check)
     {
         const Condition *c, *ce = cond + ccnt;
         if (s48check)
@@ -45,8 +45,8 @@ public:
     }
 
 signals:
-    int results(QVector<int64_t> seeds, bool countonly);
-    void itemDone(uint64_t itemid, int64_t seed, bool isdone);
+    int results(QVector<uint64_t> seeds, bool countonly);
+    void itemDone(uint64_t itemid, uint64_t seed, bool isdone);
     void canceled(uint64_t itemid);
 
 public:
@@ -55,12 +55,12 @@ public:
     const Condition   * cond;
     int                 ccnt;
     uint64_t            itemid;     // item identifier
-    const int64_t     * slist;      // candidate list
-    int64_t             len;        // number of candidates
-    int64_t             idx;        // current index in candidate buffer
-    int64_t             sstart;     // starting seed
+    const uint64_t    * slist;      // candidate list
+    uint64_t            len;        // number of candidates
+    uint64_t            idx;        // current index in candidate buffer
+    uint64_t            sstart;     // starting seed
     int                 scnt;       // number of seeds to process in this item
-    int64_t             seed;       // (out) current seed while processing
+    uint64_t            seed;       // (out) current seed while processing
     bool                isdone;     // (out) has the final seed been reached
     std::atomic_bool  * abort;
 
@@ -72,9 +72,9 @@ public:
 struct SearchItemGenerator
 {
     void init(
-            QObject *mainwin, int mc, const Condition *cond, int ccnt,
-            Gen48Settings gen48, const std::vector<int64_t>& seedlist,
-            int itemsize, int searchtype, int64_t sstart);
+        QObject *mainwin, int mc,
+        const SearchConfig& sc, const Gen48Settings& gen48, const Config& config,
+        const std::vector<uint64_t>& slist, const QVector<Condition>& cv);
 
     void presearch();
 
@@ -84,15 +84,17 @@ struct SearchItemGenerator
     QObject               * mainwin;
     int                     searchtype;
     int                     mc;
-    const Condition       * cond;
-    int                     ccnt;
+    QVector<Condition>      condvec;
     uint64_t                itemid;     // item incrementor
     int                     itemsiz;    // number of seeds per search item
     Gen48Settings           gen48;      // 48-bit generator settings
-    std::vector<int64_t>    slist;      // candidate list
+    std::vector<uint64_t>   slist;      // candidate list
     uint64_t                idx;        // index within candidate list
     uint64_t                scnt;       // size of search space
-    int64_t                 seed;       // current seed (next to be processed)
+    uint64_t                seed;       // current seed (next to be processed)
+    uint64_t                idxmin;     // idx of smin
+    uint64_t                smin;
+    uint64_t                smax;
     bool                    isdone;
     std::atomic_bool      * abort;
 };

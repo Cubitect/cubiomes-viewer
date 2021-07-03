@@ -5,7 +5,7 @@
 
 // Quad monument bases are too expensive to generate on the fly and there are
 // so few of them that they can be hard coded, rather than loading from a file.
-static const int64_t g_qm_90[] = {
+static const uint64_t g_qm_90[] = {
     35624347962,
     775379617447,
     3752024106001,
@@ -115,7 +115,7 @@ static const int64_t g_qm_90[] = {
     265956688913983,
 };
 
-static const int64_t g_qm_95[] = {
+static const uint64_t g_qm_95[] = {
     775379617447,
     40642997855160,
     75345272448242,
@@ -171,7 +171,7 @@ static int qhutQual(int low20)
 
 // returns for a >90% quadmonument the number of blocks, by area, in spawn range
 __attribute__((const, used))
-static int qmonumentQual(int64_t s48)
+static int qmonumentQual(uint64_t s48)
 {
     switch ((s48) & ((1LL<<48)-1))
     {

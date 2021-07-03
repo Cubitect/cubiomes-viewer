@@ -20,6 +20,8 @@ FormSearchControl::FormSearchControl(MainWindow *parent)
     , stimer()
     , slist64path()
     , slist64()
+    , smin(0)
+    , smax(~(uint64_t)0)
 {
     ui->setupUi(this);
 
@@ -51,13 +53,13 @@ FormSearchControl::~FormSearchControl()
     delete ui;
 }
 
-QVector<int64_t> FormSearchControl::getResults()
+QVector<uint64_t> FormSearchControl::getResults()
 {
     int n = ui->listResults->rowCount();
-    QVector<int64_t> results = QVector<int64_t>(n);
+    QVector<uint64_t> results = QVector<uint64_t>(n);
     for (int i = 0; i < n; i++)
     {
-        results[i] = ui->listResults->item(i, 0)->data(Qt::UserRole).toLongLong();
+        results[i] = ui->listResults->item(i, 0)->data(Qt::UserRole).toULongLong();
     }
     return results;
 }
@@ -65,24 +67,26 @@ QVector<int64_t> FormSearchControl::getResults()
 SearchConfig FormSearchControl::getSearchConfig()
 {
     SearchConfig s;
-    s.searchmode = ui->comboSearchType->currentIndex();
+    s.searchtype = ui->comboSearchType->currentIndex();
     s.threads = ui->spinThreads->value();
     s.slist64path = slist64path;
     s.startseed = ui->lineStart->text().toLongLong();
     s.stoponres = ui->checkStop->isChecked();
+    s.smin = smin;
+    s.smax = smax;
     return s;
 }
 
 bool FormSearchControl::setSearchConfig(SearchConfig s, bool quiet)
 {
     bool ok = true;
-    if (s.searchmode >= SEARCH_INC && s.searchmode <= SEARCH_LIST)
-        ui->comboSearchType->setCurrentIndex(s.searchmode);
+    if (s.searchtype >= SEARCH_INC && s.searchtype <= SEARCH_LIST)
+        ui->comboSearchType->setCurrentIndex(s.searchtype);
     else
         ok = false;
 
     ui->spinThreads->setValue(s.threads);
-    ui->lineStart->setText(QString::asprintf("%" PRId64, s.startseed));
+    ui->lineStart->setText(QString::asprintf("%" PRId64, (int64_t)s.startseed));
     ui->checkStop->setChecked(s.stoponres);
 
     return ok && setList64(s.slist64path, quiet);
@@ -100,8 +104,8 @@ bool FormSearchControl::setList64(QString path, bool quiet)
         QFileInfo finfo(path);
         parent->prevdir = finfo.absolutePath();
         slist64path = finfo.fileName();
-        int64_t *l = NULL;
-        int64_t len;
+        uint64_t *l = NULL;
+        uint64_t len;
         QByteArray ba = path.toLatin1();
         l = loadSavedSeeds(ba.data(), &len);
         if (l && len > 0)
@@ -165,21 +169,22 @@ void FormSearchControl::on_buttonStart_clicked()
 {
     if (ui->buttonStart->isChecked())
     {
-        int mc = MC_1_16;
+        int mc = MC_NEWEST;
         parent->getSeed(&mc, NULL);
         const Config& config = parent->config;
         const QVector<Condition>& condvec = parent->formCond->getConditions();
-        int64_t sstart = (int64_t) ui->lineStart->text().toLongLong();
-        int searchtype = ui->comboSearchType->currentIndex();
-        int threads = ui->spinThreads->value();
+        SearchConfig sc = getSearchConfig();
         int ok = true;
+
+        sc.smin = 1L << 47;
+        sc.smax = 2L << 48;
 
         if (condvec.empty())
         {
             QMessageBox::warning(this, "Warning", "Please define some constraints using the \"Add\" button.", QMessageBox::Ok);
             ok = false;
         }
-        if (searchtype == SEARCH_LIST && slist64.empty())
+        if (sc.searchtype == SEARCH_LIST && slist64.empty())
         {
             QMessageBox::warning(this, "Warning", "No seed list file selected.", QMessageBox::Ok);
             ok = false;
@@ -194,19 +199,19 @@ void FormSearchControl::on_buttonStart_clicked()
         {
             Gen48Settings gen48 = parent->formGen48->getSettings(true);
             // the search can either use a full list or a 48-bit list
-            if (searchtype == SEARCH_LIST)
+            if (sc.searchtype == SEARCH_LIST)
                 slist = slist64;
             else if (gen48.mode == GEN48_LIST)
                 slist = parent->formGen48->getList48();
             else
                 slist.clear();
 
-            ok = sthread.set(parent, searchtype, threads, gen48, slist, sstart, mc, condvec, config.seedsPerItem, config.queueSize);
+            ok = sthread.set(parent, mc, sc, gen48, config, slist, condvec);
         }
 
         if (ok)
         {
-            ui->lineStart->setText(QString::asprintf("%" PRId64, sstart));
+            ui->lineStart->setText(QString::asprintf("%" PRId64, (int64_t)sc.startseed));
             ui->buttonStart->setText("Abort search");
             ui->buttonStart->setIcon(QIcon(":/icons/cancel.png"));
             sthread.start();
@@ -244,7 +249,7 @@ void FormSearchControl::on_listResults_itemSelectionChanged()
     int row = ui->listResults->currentRow();
     if (row >= 0 && row < ui->listResults->rowCount())
     {
-        int64_t s = ui->listResults->item(row, 0)->data(Qt::UserRole).toLongLong();
+        uint64_t s = ui->listResults->item(row, 0)->data(Qt::UserRole).toULongLong();
         emit selectedSeedChanged(s);
     }
 }
@@ -303,7 +308,7 @@ int FormSearchControl::pasteList(bool dummy)
 {
     QClipboard *clipboard = QGuiApplication::clipboard();
     QStringList slist = clipboard->text().split('\n');
-    QVector<int64_t> seeds;
+    QVector<uint64_t> seeds;
 
     for (QString s : slist)
     {
@@ -311,7 +316,7 @@ int FormSearchControl::pasteList(bool dummy)
         if (s.isEmpty())
             continue;
         bool ok = true;
-        int64_t seed = s.toLongLong(&ok);
+        uint64_t seed = (uint64_t) s.toLongLong(&ok);
         if (!ok)
             return 0;
         seeds.push_back(seed);
@@ -325,7 +330,7 @@ int FormSearchControl::pasteList(bool dummy)
 }
 
 
-int FormSearchControl::searchResultsAdd(QVector<int64_t> seeds, bool countonly)
+int FormSearchControl::searchResultsAdd(QVector<uint64_t> seeds, bool countonly)
 {
     const Config& config = parent->config;
     int ns = ui->listResults->rowCount();
@@ -337,16 +342,16 @@ int FormSearchControl::searchResultsAdd(QVector<int64_t> seeds, bool countonly)
     if (seeds.empty())
         return 0;
 
-    QSet<int64_t> current;
+    QSet<uint64_t> current;
     current.reserve(n + seeds.size());
     for (int i = 0; i < n; i++)
     {
-        int64_t seed = ui->listResults->item(i, 0)->data(Qt::UserRole).toLongLong();
+        uint64_t seed = ui->listResults->item(i, 0)->data(Qt::UserRole).toULongLong();
         current.insert(seed);
     }
 
     ui->listResults->setSortingEnabled(false);
-    for (int64_t s : seeds)
+    for (uint64_t s : seeds)
     {
         if (current.contains(s))
             continue;
@@ -361,7 +366,7 @@ int FormSearchControl::searchResultsAdd(QVector<int64_t> seeds, bool countonly)
         s48item->setData(Qt::UserRole, QVariant::fromValue(s));
         s48item->setText(QString::asprintf("%012llx|%04x",
                 (qulonglong)(s & MASK48), (uint)(s >> 48) & 0xffff));
-        seeditem->setData(Qt::DisplayRole, QVariant::fromValue(s));
+        seeditem->setData(Qt::DisplayRole, QVariant::fromValue((int64_t)s));
         ui->listResults->insertRow(n);
         ui->listResults->setItem(n, 0, s48item);
         ui->listResults->setItem(n, 1, seeditem);
@@ -455,7 +460,7 @@ void FormSearchControl::copyResults()
     int n = ui->listResults->rowCount();
     for (int i = 0; i < n; i++)
     {
-        int64_t seed = ui->listResults->item(i, 0)->data(Qt::UserRole).toLongLong();
+        uint64_t seed = ui->listResults->item(i, 0)->data(Qt::UserRole).toULongLong();
         text += QString::asprintf("%" PRId64 "\n", seed);
     }
 

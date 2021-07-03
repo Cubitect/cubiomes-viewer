@@ -149,6 +149,7 @@ MainWindow::MainWindow(QWidget *parent)
     addMapAction(D_BASTION, "bastion", "Show bastions");
     ui->toolBar->addSeparator();
     addMapAction(D_ENDCITY, "endcity", "Show end cities");
+    addMapAction(D_GATEWAY, "gateway", "Show end gateways");
 
     saction[D_GRID]->setChecked(true);
 
@@ -159,7 +160,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     qRegisterMetaType< int64_t >("int64_t");
     qRegisterMetaType< uint64_t >("uint64_t");
-    qRegisterMetaType< QVector<int64_t> >("QVector<int64_t>");
+    qRegisterMetaType< QVector<uint64_t> >("QVector<uint64_t>");
     qRegisterMetaType< Config >("Config");
 
     QIntValidator *intval = new QIntValidator(this);
@@ -183,7 +184,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-QAction *MainWindow::addMapAction(int stype, const char *iconpath, const char *tip)
+QAction *MainWindow::addMapAction(int sopt, const char *iconpath, const char *tip)
 {
     QIcon icon;
     QString inam = QString(":icons/") + iconpath;
@@ -192,10 +193,10 @@ QAction *MainWindow::addMapAction(int stype, const char *iconpath, const char *t
     QAction *action = new QAction(icon, tip, this);
     action->setCheckable(true);
     ui->toolBar->addAction(action);
-    if (stype >= 0)
+    if (sopt >= 0)
     {
-        action->connect(action, &QAction::toggled, [=](bool state){ this->onActionMapToggled(stype, state); });
-        saction[stype] = action;
+        action->connect(action, &QAction::toggled, [=](bool state){ this->onActionMapToggled(sopt, state); });
+        saction[sopt] = action;
     }
     return action;
 }
@@ -206,7 +207,7 @@ MapView* MainWindow::getMapView()
     return ui->mapView;
 }
 
-bool MainWindow::getSeed(int *mc, int64_t *seed, bool applyrand)
+bool MainWindow::getSeed(int *mc, uint64_t *seed, bool applyrand)
 {
     bool ok = true;
     if (mc)
@@ -215,7 +216,7 @@ bool MainWindow::getSeed(int *mc, int64_t *seed, bool applyrand)
         *mc = str2mc(mcs.c_str());
         if (*mc < 0)
         {
-            *mc = MC_1_16;
+            *mc = MC_NEWEST;
             qDebug() << "Unknown MC version: " << *mc;
             ok = false;
         }
@@ -225,13 +226,13 @@ bool MainWindow::getSeed(int *mc, int64_t *seed, bool applyrand)
     {
         int v = str2seed(ui->seedEdit->text(), seed);
         if (applyrand && v == S_RANDOM)
-            ui->seedEdit->setText(QString::asprintf("%" PRId64, *seed));
+            ui->seedEdit->setText(QString::asprintf("%" PRId64, (int64_t)*seed));
     }
 
     return ok;
 }
 
-bool MainWindow::setSeed(int mc, int64_t seed, int dim)
+bool MainWindow::setSeed(int mc, uint64_t seed, int dim)
 {
     const char *mcstr = mc2str(mc);
     if (!mcstr)
@@ -244,7 +245,7 @@ bool MainWindow::setSeed(int mc, int64_t seed, int dim)
         dim = getDim();
 
     ui->comboBoxMC->setCurrentText(mcstr);
-    ui->seedEdit->setText(QString::asprintf("%" PRId64, seed));
+    ui->seedEdit->setText(QString::asprintf("%" PRId64, (int64_t)seed));
     ui->mapView->setSeed(mc, seed, dim);
     return true;
 }
@@ -273,8 +274,8 @@ void MainWindow::saveSettings()
     settings.setValue("config/queueSize", config.queueSize);
     settings.setValue("config/maxMatching", config.maxMatching);
 
-    int mc = MC_1_16;
-    int64_t seed = 0;
+    int mc = MC_NEWEST;
+    uint64_t seed = 0;
     getSeed(&mc, &seed, false);
     settings.setValue("map/mc", mc);
     settings.setValue("map/seed", (qlonglong)seed);
@@ -319,11 +320,11 @@ void MainWindow::loadSettings()
     else
         dimactions[0]->setChecked(true);
 
-    int mc = MC_1_16;
-    int64_t seed = 0;
+    int mc = MC_NEWEST;
+    uint64_t seed = 0;
     getSeed(&mc, &seed, true);
     mc = settings.value("map/mc", mc).toInt();
-    seed = settings.value("map/seed", QVariant::fromValue(seed)).toLongLong();
+    seed = (uint64_t) settings.value("map/seed", QVariant::fromValue((qlonglong)seed)).toLongLong();
     setSeed(mc, seed);
 
     qreal x = ui->mapView->getX();
@@ -334,13 +335,14 @@ void MainWindow::loadSettings()
     z = settings.value("map/z", z).toDouble();
     scale = settings.value("map/scale", scale).toDouble();
 
-    for (int stype = 0; stype < STRUCT_NUM; stype++)
+    for (int sopt = 0; sopt < STRUCT_NUM; sopt++)
     {
-        bool show = ui->mapView->getShow(stype);
-        QString sopt = QString("map/show_") + mapopt2str(stype);
-        show = settings.value(sopt, show).toBool();
-        saction[stype]->setChecked(show);
-        ui->mapView->setShow(stype, show);
+        bool show = ui->mapView->getShow(sopt);
+        QString soptstr = QString("map/show_") + mapopt2str(sopt);
+        show = settings.value(soptstr, show).toBool();
+        if (saction[sopt])
+            saction[sopt]->setChecked(show);
+        ui->mapView->setShow(sopt, show);
     }
     mapGoto(x, z, scale);
 
@@ -375,9 +377,9 @@ bool MainWindow::saveProgress(QString fnam, bool quiet)
     SearchConfig searchconf = formControl->getSearchConfig();
     Gen48Settings gen48 = formGen48->getSettings(false);
     QVector<Condition> condvec = formCond->getConditions();
-    QVector<int64_t> results = formControl->getResults();
+    QVector<uint64_t> results = formControl->getResults();
 
-    int mc = MC_1_16;
+    int mc = MC_NEWEST;
     getSeed(&mc, 0);
 
     QTextStream stream(&file);
@@ -386,7 +388,7 @@ bool MainWindow::saveProgress(QString fnam, bool quiet)
     // MC version of the session should take priority over the one in the settings
     stream << "#MC:       " << mc2str(mc) << "\n";
 
-    stream << "#Search:   " << searchconf.searchmode << "\n";
+    stream << "#Search:   " << searchconf.searchtype << "\n";
     if (!searchconf.slist64path.isEmpty())
         stream << "#List64:   " << searchconf.slist64path.replace("\n", "") << "\n";
     stream << "#Progress: " << searchconf.startseed << "\n";
@@ -413,8 +415,8 @@ bool MainWindow::saveProgress(QString fnam, bool quiet)
     for (Condition &c : condvec)
         stream << "#Cond: " << QByteArray((const char*) &c, sizeof(Condition)).toHex() << "\n";
 
-    for (int64_t s : results)
-        stream << QString::asprintf("%" PRId64 "\n", s);
+    for (uint64_t s : results)
+        stream << QString::asprintf("%" PRId64 "\n", (int64_t)s);
 
     return true;
 }
@@ -434,12 +436,12 @@ bool MainWindow::loadProgress(QString fnam, bool quiet)
     SearchConfig searchconf = formControl->getSearchConfig();
     Gen48Settings gen48 = formGen48->getSettings(false);
     QVector<Condition> condvec;
-    QVector<int64_t> seeds;
+    QVector<uint64_t> seeds;
 
     char buf[4096];
     int tmp;
-    int mc = MC_1_16;
-    int64_t seed;
+    int mc = MC_NEWEST;
+    uint64_t seed;
     getSeed(&mc, &seed, true);
 
     QTextStream stream(&file);
@@ -462,7 +464,7 @@ bool MainWindow::loadProgress(QString fnam, bool quiet)
         if (line.startsWith("#Time:")) continue;
         else if (sscanf(p, "#MC:       %8[^\n]", buf) == 1)                     { mc = str2mc(buf); if (mc < 0) return false; }
         // SearchConfig
-        else if (sscanf(p, "#Search:   %d", &searchconf.searchmode) == 1)       {}
+        else if (sscanf(p, "#Search:   %d", &searchconf.searchtype) == 1)       {}
         else if (sscanf(p, "#Progress: %" PRId64, &searchconf.startseed) == 1)  {}
         else if (sscanf(p, "#Threads:  %d", &searchconf.threads) == 1)          {}
         else if (sscanf(p, "#ResStop:  %d", &tmp) == 1)                         { searchconf.stoponres = tmp; }
@@ -492,8 +494,8 @@ bool MainWindow::loadProgress(QString fnam, bool quiet)
         }
         else
         {
-            int64_t s;
-            if (sscanf(line.toLatin1().data(), "%" PRId64, &s) == 1)
+            uint64_t s;
+            if (sscanf(line.toLatin1().data(), "%" PRId64, (int64_t*)&s) == 1)
                 seeds.push_back(s);
             else return false;
         }
@@ -521,7 +523,7 @@ bool MainWindow::loadProgress(QString fnam, bool quiet)
 void MainWindow::updateMapSeed()
 {
     int mc;
-    int64_t seed;
+    uint64_t seed;
     if (getSeed(&mc, &seed))
         setSeed(mc, seed);
 }
@@ -563,7 +565,7 @@ void MainWindow::on_seedEdit_editingFinished()
 
 void MainWindow::on_seedEdit_textChanged(const QString &a)
 {
-    int64_t s;
+    uint64_t s;
     int v = str2seed(a, &s);
     switch (v)
     {
@@ -645,7 +647,7 @@ void MainWindow::on_actionScan_seed_for_Quad_Huts_triggered()
 void MainWindow::on_actionOpen_shadow_seed_triggered()
 {
     int mc;
-    int64_t seed;
+    uint64_t seed;
     if (getSeed(&mc, &seed))
     {
         setSeed(mc, getShadow(seed));
@@ -670,10 +672,10 @@ void MainWindow::on_actionPaste_triggered()
 
 void MainWindow::on_actionAddShadow_triggered()
 {
-    QVector<int64_t> results = formControl->getResults();
-    QVector<int64_t> shadows;
+    QVector<uint64_t> results = formControl->getResults();
+    QVector<uint64_t> shadows;
     shadows.reserve(results.size());
-    for (int64_t s : results)
+    for (uint64_t s : results)
         shadows.push_back( getShadow(s) );
     formControl->searchResultsAdd(shadows, false);
 }
@@ -745,7 +747,7 @@ void MainWindow::on_buttonAnalysis_clicked()
         warning("Warning", "Invalid area for analysis");
         return;
     }
-    if ((int64_t)(x2 - x1) * (int64_t)(z2 - z1) > 100000000LL)
+    if ((uint64_t)(x2 - x1) * (uint64_t)(z2 - z1) > 100000000LL)
     {
         QString msg = QString::asprintf(
                     "Area for analysis is very large (%d, %d).\n"
@@ -759,7 +761,7 @@ void MainWindow::on_buttonAnalysis_clicked()
     bool everything = ui->radioEverything->isChecked();
 
     int mc;
-    int64_t seed;
+    uint64_t seed;
     if (!getSeed(&mc, &seed))
         return;
 
@@ -833,21 +835,29 @@ void MainWindow::on_buttonAnalysis_clicked()
         item->setData(1, Qt::DisplayRole, QVariant::fromValue(cnt));
     }
 
-    tree->insertTopLevelItem(0, item_cat);
+    //tree->insertTopLevelItem(0, item_cat);
 
     std::vector<VarPos> st;
     for (int sopt = D_DESERT; sopt < D_SPAWN; sopt++)
     {
-        if (!everything && !getMapView()->getShow(sopt))
-            continue;
+        int sdim = 0;
+        if (sopt == D_FORTESS || sopt == D_BASTION || sopt == D_PORTALN)
+            sdim = -1;
+        if (sopt == D_ENDCITY || sopt == D_GATEWAY)
+            sdim = 1;
+        if (!everything)
+        {
+            if (!getMapView()->getShow(sopt))
+                continue;
+            if (sdim != dim)
+                continue;
+        }
         int stype = mapopt2stype(sopt);
-        if (dim != structDim(stype))
-            continue;
         st.clear();
         StructureConfig sconf;
         if (!getStructureConfig_override(stype, mc, &sconf))
             continue;
-        getStructs(&st, sconf, mc, seed, x1, z1, x2, z2);
+        getStructs(&st, sconf, mc, sdim, seed, x1, z1, x2, z2);
         if (st.empty())
             continue;
 
@@ -868,7 +878,7 @@ void MainWindow::on_buttonAnalysis_clicked()
                     item->setText(1, "Abandoned");
             }
         }
-        tree->insertTopLevelItem(stype, item_cat);
+        //tree->insertTopLevelItem(stype, item_cat);
     }
 
     if (everything || (dim == 0 && getMapView()->getShow(D_SPAWN)))
@@ -976,9 +986,11 @@ void MainWindow::onAutosaveTimeout()
     }
 }
 
-void MainWindow::onActionMapToggled(int stype, bool show)
+void MainWindow::onActionMapToggled(int sopt, bool show)
 {
-    ui->mapView->setShow(stype, show);
+    if (sopt == D_PORTAL) // overworld porals should also control nether
+        ui->mapView->setShow(D_PORTALN, show);
+    ui->mapView->setShow(sopt, show);
 }
 
 void MainWindow::onConditionsChanged()
@@ -993,9 +1005,9 @@ void MainWindow::onGen48Changed()
     formControl->searchProgressReset();
 }
 
-void MainWindow::onSelectedSeedChanged(int64_t seed)
+void MainWindow::onSelectedSeedChanged(uint64_t seed)
 {
-    ui->seedEdit->setText(QString::asprintf("%" PRId64, seed));
+    ui->seedEdit->setText(QString::asprintf("%" PRId64, (int64_t)seed));
     on_seedEdit_editingFinished();
 }
 

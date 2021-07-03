@@ -63,21 +63,25 @@ enum { SEARCH_INC = 0, SEARCH_BLOCKS = 1, SEARCH_LIST = 2 };
 
 struct SearchConfig
 {
-    int searchmode;
+    int searchtype;
     QString slist64path;
     int threads;
-    int64_t startseed;
+    uint64_t startseed;
     bool stoponres;
+    uint64_t smin;
+    uint64_t smax;
 
     SearchConfig() { reset(); }
 
     void reset()
     {
-        searchmode = SEARCH_INC;
+        searchtype = SEARCH_INC;
         slist64path = "";
         threads = QThread::idealThreadCount();
         startseed = 0;
         stoponres = true;
+        smin = 0;
+        smax = ~(uint64_t)0;
     }
 };
 

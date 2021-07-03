@@ -72,7 +72,7 @@ MapView::~MapView()
     delete overlay;
 }
 
-void MapView::setSeed(int mc, int64_t s, int dim)
+void MapView::setSeed(int mc, uint64_t s, int dim)
 {
     prevx = focusx = getX();
     prevz = focusz = getZ();
@@ -185,8 +185,8 @@ void MapView::paintEvent(QPaintEvent *)
         world->draw(painter, width(), height(), fx, fz, blocks2pix);
 
         QPoint cur = mapFromGlobal(QCursor::pos());
-        qreal bx = (cur.x() -  width()/2) / blocks2pix + fx;
-        qreal bz = (cur.y() - height()/2) / blocks2pix + fz;
+        qreal bx = (cur.x() -  width()/2.0) / blocks2pix + fx;
+        qreal bz = (cur.y() - height()/2.0) / blocks2pix + fz;
         Pos p = {(int)bx, (int)bz};
         overlay->pos = p;
         overlay->id = world->getBiome(p);

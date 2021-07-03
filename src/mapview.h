@@ -36,7 +36,7 @@ public:
     qreal getZ();
     qreal getScale() const { return 1.0 / blocks2pix; }
 
-    void setSeed(int mc, int64_t s, int dim);
+    void setSeed(int mc, uint64_t s, int dim);
     void setView(qreal x, qreal z, qreal scale = 0);
 
     bool getShow(int stype) { return stype >= 0 && stype < STRUCT_NUM ? sshow[stype] : false; }

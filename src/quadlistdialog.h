@@ -20,7 +20,7 @@ public:
     void loadSeed();
     void refresh();
 
-    bool getSeed(int *mc, int64_t *seed);
+    bool getSeed(int *mc, uint64_t *seed);
 
 private slots:
     void on_buttonGo_clicked();

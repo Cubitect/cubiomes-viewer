@@ -23,7 +23,7 @@ public:
     explicit FormSearchControl(MainWindow *parent);
     ~FormSearchControl();
 
-    QVector<int64_t> getResults();
+    QVector<uint64_t> getResults();
     SearchConfig getSearchConfig();
     bool setSearchConfig(SearchConfig s, bool quiet);
 
@@ -35,7 +35,7 @@ public:
     void setSearchMode(int mode);
 
 signals:
-    void selectedSeedChanged(int64_t seed);
+    void selectedSeedChanged(uint64_t seed);
     void searchStatusChanged(bool running);
     void resultsAdded(int cnt);
 
@@ -53,7 +53,7 @@ public slots:
 
     void pasteResults();
     int pasteList(bool dummy);
-    int searchResultsAdd(QVector<int64_t> seeds, bool countonly);
+    int searchResultsAdd(QVector<uint64_t> seeds, bool countonly);
     void searchProgressReset();
     void searchProgress(uint64_t last, uint64_t end, int64_t seed);
     void searchFinish();
@@ -69,10 +69,13 @@ private:
 
     // the seed list option is not stored in a widget but is loaded with the "..." button
     QString slist64path;
-    std::vector<int64_t> slist64;
+    std::vector<uint64_t> slist64;
 
     // buffer for seed candidates while search is running
-    std::vector<int64_t> slist;
+    std::vector<uint64_t> slist;
+
+    // min and max seeds values
+    uint64_t smin, smax;
 };
 
 #endif // FORMSEARCHCONTROL_H

@@ -19,14 +19,14 @@ public:
     struct CheckedSeed
     {
         uint8_t valid;
-        int64_t seed;
+        uint64_t seed;
     };
 
     SearchThread(FormSearchControl *parent);
 
-    bool set(QObject *mainwin, int type, int threads, Gen48Settings gen48,
-             std::vector<int64_t>& slist, int64_t sstart, int mc,
-             const QVector<Condition>& cv, int itemsize, int queuesize);
+    bool set(QObject *mainwin, int mc,
+            const SearchConfig& sc, const Gen48Settings& gen48, const Config& config,
+            std::vector<uint64_t>& slist, const QVector<Condition>& cv);
 
     virtual void run() override;
 
@@ -34,12 +34,12 @@ public:
     SearchItem *startNextItem();
 
 signals:
-    void progress(uint64_t last, uint64_t end, int64_t seed);
+    void progress(uint64_t last, uint64_t end, uint64_t seed);
     void searchEnded();     // search thread is exiting (e.g. abort or done)
     void searchFinish();    // search ended and is comlete
 
 public slots:
-    void onItemDone(uint64_t itemid, int64_t seed, bool isdone);
+    void onItemDone(uint64_t itemid, uint64_t seed, bool isdone);
     void onItemCanceled(uint64_t itemid);
 
 public:

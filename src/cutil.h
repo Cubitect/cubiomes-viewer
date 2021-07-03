@@ -13,81 +13,40 @@ extern unsigned char biomeColors[256][3];
 extern unsigned char tempsColors[256][3];
 
 
-inline const char* mc2str(int mc)
-{
-    switch (mc)
-    {
-    case MC_1_6:  return "1.6"; break;
-    case MC_1_7:  return "1.7"; break;
-    case MC_1_8:  return "1.8"; break;
-    case MC_1_9:  return "1.9"; break;
-    case MC_1_10: return "1.10"; break;
-    case MC_1_11: return "1.11"; break;
-    case MC_1_12: return "1.12"; break;
-    case MC_1_13: return "1.13"; break;
-    case MC_1_14: return "1.14"; break;
-    case MC_1_15: return "1.15"; break;
-    case MC_1_16: return "1.16"; break;
-    default: return NULL;
-    }
-}
-
-inline int str2mc(const char *s)
-{
-    if (!strcmp(s, "1.16")) return MC_1_16;
-    if (!strcmp(s, "1.15")) return MC_1_15;
-    if (!strcmp(s, "1.14")) return MC_1_14;
-    if (!strcmp(s, "1.13")) return MC_1_13;
-    if (!strcmp(s, "1.12")) return MC_1_12;
-    if (!strcmp(s, "1.11")) return MC_1_11;
-    if (!strcmp(s, "1.10")) return MC_1_10;
-    if (!strcmp(s, "1.9")) return MC_1_9;
-    if (!strcmp(s, "1.8")) return MC_1_8;
-    if (!strcmp(s, "1.7")) return MC_1_7;
-    if (!strcmp(s, "1.6")) return MC_1_6;
-    return -1;
-}
-
 inline const char* struct2str(int stype)
 {
     switch (stype)
     {
-    case Desert_Pyramid:    return "Desert_Pyramid";
-    case Jungle_Pyramid:    return "Jungle_Pyramid";
-    case Swamp_Hut:         return "Swamp_Hut";
-    case Igloo:             return "Igloo";
-    case Village:           return "Village";
-    case Ocean_Ruin:        return "Ocean_Ruin";
-    case Shipwreck:         return "Shipwreck";
-    case Monument:          return "Monument";
-    case Mansion:           return "Mansion";
-    case Outpost:           return "Outpost";
-    case Ruined_Portal:     return "Ruined_Portal";
-    case Treasure:          return "Treasure";
-    case Fortress:          return "Fortress";
-    case Bastion:           return "Bastion";
-    case End_City:          return "End_City";
+    case Desert_Pyramid:    return "desert_pyramid";
+    case Jungle_Pyramid:    return "jungle_pyramid";
+    case Swamp_Hut:         return "swamp_hut";
+    case Igloo:             return "igloo";
+    case Village:           return "village";
+    case Ocean_Ruin:        return "ocean_ruin";
+    case Shipwreck:         return "shipwreck";
+    case Monument:          return "monument";
+    case Mansion:           return "mansion";
+    case Outpost:           return "outpost";
+    case Ruined_Portal:     return "ruined_portal";
+    case Ruined_Portal_N:   return "ruined_portal (nether)";
+    case Treasure:          return "treasure";
+    case Fortress:          return "fortress";
+    case Bastion:           return "bastion";
+    case End_City:          return "end_city";
+    case End_Gateway:       return "end_gateway";
     }
     return "?";
 }
 
-inline int structDim(int stype)
-{
-    if (stype == Fortress || stype == Bastion)
-        return -1;
-    if (stype == End_City)
-        return 1;
-    return 0;
-}
 
 // get a random 64-bit integer
-static inline int64_t getRnd64()
+static inline uint64_t getRnd64()
 {
     static QMutex mutex;
     static std::random_device rd;
     static std::mt19937_64 mt(rd());
     static uint64_t x = (uint64_t) time(0);
-    int64_t ret = 0;
+    uint64_t ret = 0;
     mutex.lock();
     if (rd.entropy())
     {
@@ -102,14 +61,14 @@ static inline int64_t getRnd64()
         x ^= x >> 32;
         x *= c;
         x ^= x >> 32;
-        ret = (int64_t) x;
+        ret = x;
     }
     mutex.unlock();
     return ret;
 }
 
 enum { S_TEXT, S_NUMERIC, S_RANDOM };
-inline int str2seed(const QString &str, int64_t *out)
+inline int str2seed(const QString &str, uint64_t *out)
 {
     if (str.isEmpty())
     {
@@ -118,7 +77,7 @@ inline int str2seed(const QString &str, int64_t *out)
     }
 
     bool ok = false;
-    *out = str.toLongLong(&ok);
+    *out = (uint64_t) str.toLongLong(&ok);
     if (ok)
     {
         return S_NUMERIC;

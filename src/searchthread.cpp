@@ -22,9 +22,15 @@ SearchThread::SearchThread(FormSearchControl *parent)
     itemgen.abort = &abort;
 }
 
-bool SearchThread::set(QObject *mainwin, int type, int threads, Gen48Settings gen48,
-                       std::vector<int64_t>& slist, int64_t sstart, int mc,
-                       const QVector<Condition>& cv, int itemsize, int queuesize)
+bool SearchThread::set(
+    QObject *mainwin, int mc,
+    const SearchConfig& sc, const Gen48Settings& gen48, const Config& config,
+    std::vector<uint64_t>& slist, const QVector<Condition>& cv)
+    /*
+        QObject *mainwin, int type, int threads, Gen48Settings gen48,
+        std::vector<uint64_t>& slist, uint64_t smin, uint64_t smax,
+        uint64_t sstart, int mc, const QVector<Condition>& cv,
+        int itemsize, int queuesize)*/
 {
     char refbuf[100] = {};
 
@@ -87,10 +93,10 @@ bool SearchThread::set(QObject *mainwin, int type, int threads, Gen48Settings ge
         }
     }
 
-    condvec = cv;
-    itemgen.init(mainwin, mc, condvec.data(), condvec.size(), gen48, slist, itemsize, type, sstart);
-    pool.setMaxThreadCount(threads);
-    recieved.resize(queuesize);
+    itemgen.init(mainwin, mc, sc, gen48, config, slist, cv);
+
+    pool.setMaxThreadCount(sc.threads);
+    recieved.resize(config.queueSize);
     lastid = itemgen.itemid;
     reqstop = false;
     abort = false;
@@ -107,7 +113,7 @@ void SearchThread::run()
     itemgen.getProgress(&prog, &end);
     emit progress(prog, end, itemgen.seed);
 
-    for (int idx = 0; idx < recieved.size(); idx++)
+    for (int64_t idx = 0; idx < recieved.size(); idx++)
     {
         recieved[idx].valid = false;
         startNextItem();
@@ -133,7 +139,7 @@ SearchItem *SearchThread::startNextItem()
 }
 
 
-void SearchThread::onItemDone(uint64_t itemid, int64_t seed, bool isdone)
+void SearchThread::onItemDone(uint64_t itemid, uint64_t seed, bool isdone)
 {
     --activecnt;
 
@@ -142,8 +148,8 @@ void SearchThread::onItemDone(uint64_t itemid, int64_t seed, bool isdone)
     {
         if (itemid == lastid)
         {
-            int64_t len = recieved.size();
-            int idx;
+            uint64_t len = recieved.size();
+            uint64_t idx;
             for (idx = 1; idx < len; idx++)
             {
                 if (!recieved[idx].valid)
@@ -152,12 +158,12 @@ void SearchThread::onItemDone(uint64_t itemid, int64_t seed, bool isdone)
 
             lastid += idx;
 
-            for (int i = idx; i < len; i++)
+            for (uint64_t i = idx; i < len; i++)
                 recieved[i-idx] = recieved[i];
-            for (int i = len-idx; i < len; i++)
+            for (uint64_t i = len-idx; i < len; i++)
                 recieved[i].valid = false;
 
-            for (int i = 0; i < idx; i++)
+            for (uint64_t i = 0; i < idx; i++)
                 startNextItem();
 
             uint64_t prog, end;
@@ -166,7 +172,7 @@ void SearchThread::onItemDone(uint64_t itemid, int64_t seed, bool isdone)
         }
         else
         {
-            int idx = itemid - lastid;
+            int64_t idx = itemid - lastid;
             if (idx < 0 || idx >= recieved.size())
             {
                 QMessageBox::critical(parent, "Fatal Error",

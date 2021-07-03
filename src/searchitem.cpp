@@ -23,12 +23,12 @@ void SearchItem::run()
     LayerStack g;
     setupGenerator(&g, mc);
     StructPos spos[100] = {};
-    QVector<int64_t> matches;
+    QVector<uint64_t> matches;
 
     if (searchtype == SEARCH_LIST)
     {   // seed = slist[..]
-        int64_t ie = idx+scnt < len ? idx+scnt : len;
-        for (int64_t i = idx; i < ie; i++)
+        uint64_t ie = idx+scnt < len ? idx+scnt : len;
+        for (uint64_t i = idx; i < ie; i++)
         {
             seed = slist[i];
             if (testSeed(spos, seed, &g, true))
@@ -41,8 +41,8 @@ void SearchItem::run()
     {
         if (slist)
         {   // seed = (high << 48) | slist[..]
-            int64_t high = (sstart >> 48) & 0xffff;
-            int64_t lowidx = idx;
+            uint64_t high = (sstart >> 48) & 0xffff;
+            uint64_t lowidx = idx;
 
             for (int i = 0; i < scnt; i++)
             {
@@ -70,7 +70,7 @@ void SearchItem::run()
                 if (testSeed(spos, seed, &g, true))
                     matches.push_back(seed);
 
-                if (seed == ~(int64_t)0)
+                if (seed == ~(uint64_t)0)
                 {
                     isdone = true;
                     break;
@@ -90,8 +90,8 @@ void SearchItem::run()
                 break;
             }
 
-            int64_t high = (sstart >> 48) & 0xffff;
-            int64_t low;
+            uint64_t high = (sstart >> 48) & 0xffff;
+            uint64_t low;
             if (slist)
                 low = slist[idx];
             else
@@ -127,38 +127,40 @@ void SearchItem::run()
 
 
 void SearchItemGenerator::init(
-    QObject *mainwin, int mc, const Condition *cond, int ccnt,
-    Gen48Settings gen48, const std::vector<int64_t>& seedlist,
-    int itemsize, int searchtype, int64_t sstart)
+    QObject *mainwin, int mc,
+    const SearchConfig& sc, const Gen48Settings& gen48, const Config& config,
+    const std::vector<uint64_t>& slist, const QVector<Condition>& cv)
 {
     this->mainwin = mainwin;
-    this->searchtype = searchtype;
+    this->searchtype = sc.searchtype;
     this->mc = mc;
-    this->cond = cond;
-    this->ccnt = ccnt;
+    this->condvec = cv;
     this->itemid = 0;
-    this->itemsiz = itemsize;
-    this->slist = seedlist;
+    this->itemsiz = config.seedsPerItem;
+    this->slist = slist;
     this->gen48 = gen48;
     this->idx = 0;
     this->scnt = ~(uint64_t)0;
-    this->seed = sstart;
+    this->seed = sc.startseed;
+    this->idxmin = 0;
+    this->smin = sc.smin;
+    this->smax = sc.smax;
     this->isdone = false;
 }
 
 
-static int check(int64_t s48, void *data)
+static int check(uint64_t s48, void *data)
 {
     (void) data;
     const StructureConfig sconf = {};
     return isQuadBaseFeature24(sconf, s48, 7+1, 7+1, 9+1) != 0;
 }
 
-static void genQHBases(QObject *qtobj, int qual, int64_t salt, std::vector<int64_t>& list48)
+static void genQHBases(QObject *qtobj, int qual, uint64_t salt, std::vector<uint64_t>& list48)
 {
     const char *lbstr = NULL;
-    const int64_t *lbset = NULL;
-    int64_t lbcnt = 0;
+    const uint64_t *lbset = NULL;
+    uint64_t lbcnt = 0;
     QString path = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
     if (path.isEmpty())
         path = "protobases";
@@ -169,22 +171,22 @@ static void genQHBases(QObject *qtobj, int qual, int64_t salt, std::vector<int64
     case IDEAL:
         lbstr = "ideal";
         lbset = low20QuadIdeal;
-        lbcnt = sizeof(low20QuadIdeal) / sizeof(int64_t);
+        lbcnt = sizeof(low20QuadIdeal) / sizeof(uint64_t);
         break;
     case CLASSIC:
         lbstr = "cassic";
         lbset = low20QuadClassic;
-        lbcnt = sizeof(low20QuadClassic) / sizeof(int64_t);
+        lbcnt = sizeof(low20QuadClassic) / sizeof(uint64_t);
         break;
     case NORMAL:
         lbstr = "normal";
         lbset = low20QuadHutNormal;
-        lbcnt = sizeof(low20QuadHutNormal) / sizeof(int64_t);
+        lbcnt = sizeof(low20QuadHutNormal) / sizeof(uint64_t);
         break;
     case BARELY:
         lbstr = "barely";
         lbset = low20QuadHutBarely;
-        lbcnt = sizeof(low20QuadHutBarely) / sizeof(int64_t);
+        lbcnt = sizeof(low20QuadHutBarely) / sizeof(uint64_t);
         break;
     default:
         return;
@@ -192,8 +194,8 @@ static void genQHBases(QObject *qtobj, int qual, int64_t salt, std::vector<int64
 
     path += QString("/quad_") + lbstr + ".txt";
     QByteArray fnam = path.toLatin1();
-    int64_t *qb = NULL;
-    int64_t qn = 0;
+    uint64_t *qb = NULL;
+    uint64_t qn = 0;
 
     if ((qb = loadSavedSeeds(fnam.data(), &qn)) == NULL)
     {
@@ -228,17 +230,17 @@ static void genQHBases(QObject *qtobj, int qual, int64_t salt, std::vector<int64
     {
         // convert protobases to proper bases by subtracting the salt
         list48.resize(qn);
-        for (int64_t i = 0; i < qn; i++)
+        for (uint64_t i = 0; i < qn; i++)
             list48[i] = qb[i] - salt;
         free(qb);
     }
 }
 
 
-bool applyTranspose(std::vector<int64_t>& slist,
-                    Gen48Settings gen48, int64_t bufmax)
+bool applyTranspose(std::vector<uint64_t>& slist,
+                    const Gen48Settings& gen48, uint64_t bufmax)
 {
-    std::vector<int64_t> list48;
+    std::vector<uint64_t> list48;
 
     int x = gen48.x1;
     int z = gen48.z1;
@@ -246,7 +248,7 @@ bool applyTranspose(std::vector<int64_t>& slist,
     int h = gen48.z2 - z + 1;
 
     // does the set of candidates for this condition fit in memory?
-    if ((int64_t)slist.size() * (int64_t)sizeof(int64_t) * w*h >= bufmax)
+    if ((uint64_t)slist.size() * sizeof(int64_t) * w*h >= bufmax)
         return false;
 
     try {
@@ -255,10 +257,10 @@ bool applyTranspose(std::vector<int64_t>& slist,
         return false;
     }
 
-    int64_t *p = list48.data();
+    uint64_t *p = list48.data();
     for (int j = 0; j < h; j++)
         for (int i = 0; i < w; i++)
-            for (int64_t b : slist)
+            for (uint64_t b : slist)
                 *p++ = moveStructure(b, x+i, z+j);
 
     std::sort(list48.begin(), list48.end());
@@ -270,13 +272,13 @@ bool applyTranspose(std::vector<int64_t>& slist,
 
 void SearchItemGenerator::presearch()
 {
-    int64_t sstart = seed;
+    uint64_t sstart = seed;
 
     if (searchtype != SEARCH_LIST)
     {
         if (gen48.mode == GEN48_QH)
         {
-            int64_t salt = 0;
+            uint64_t salt = 0;
             if (gen48.qual == IDEAL_SALTED)
                 salt = gen48.salt;
             else
@@ -290,11 +292,11 @@ void SearchItemGenerator::presearch()
         }
         else if (gen48.mode == GEN48_QM)
         {
-            const int64_t *qb = g_qm_90;
-            int64_t qn = sizeof(g_qm_90) / sizeof(int64_t);
+            const uint64_t *qb = g_qm_90;
+            uint64_t qn = sizeof(g_qm_90) / sizeof(uint64_t);
             slist.clear();
             slist.reserve(qn);
-            for (int64_t i = 0; i < qn; i++)
+            for (uint64_t i = 0; i < qn; i++)
                 if (qmonumentQual(qb[i]) >= gen48.qmarea)
                     slist.push_back(qb[i]);
         }
@@ -302,8 +304,8 @@ void SearchItemGenerator::presearch()
         {
             if (gen48.listsalt)
             {
-                for (auto& s : slist)
-                    s += gen48.listsalt;
+                for (uint64_t& rs : slist)
+                    rs += gen48.listsalt;
             }
         }
 
@@ -326,24 +328,40 @@ void SearchItemGenerator::presearch()
     {
         if (!slist.empty())
         {
+            seed = sstart;
+            if (seed < smin)
+                seed = smin;
             scnt = 0x10000 * slist.size();
-            int64_t high = (sstart >> 48) & 0xffff;
+            uint64_t high = (seed >> 48) & 0xffff;
             for (idx = 0; idx < slist.size(); idx++)
-                if (slist[idx] >= (sstart & MASK48))
+                if (slist[idx] >= (seed & MASK48))
                     break;
             if (idx == slist.size())
             {
-                if (++high >= 0x10000)
+                if (high++ >= (smax >> 48))
                     isdone = true;
                 idx = 0;
             }
             seed = (high << 48) | slist[idx];
+
+            for (idxmin = 0; idxmin < slist.size(); idxmin++)
+                if (slist[idxmin] >= (smin & MASK48))
+                    break;
+            for (scnt = 0; scnt < slist.size(); scnt++)
+                if (slist[scnt] >= (smax & MASK48))
+                    break;
+            high = ((smax >> 48) - (smin >> 48)) & 0xffff;
+            scnt += high * slist.size() - idxmin;
         }
         else
         {
-            scnt = ~(uint64_t)0;
+            scnt = smax - smin;
             seed = sstart;
+            if (seed < smin)
+                seed = smin;
         }
+        if (seed > smax)
+            isdone = true;
     }
 
     if (searchtype == SEARCH_BLOCKS)
@@ -377,9 +395,14 @@ void SearchItemGenerator::getProgress(uint64_t *prog, uint64_t *end)
     if (searchtype == SEARCH_INC)
     {
         if (!slist.empty())
-            *prog = ((seed >> 48) & 0xffff) * slist.size() + idx;
+        {
+            uint64_t h = ((seed >> 48) - (smin >> 48)) & 0xffff;
+            *prog = h * slist.size() + idx - idxmin;
+        }
         else
-            *prog = (uint64_t) seed;
+        {
+            *prog = seed - smin;
+        }
     }
 
     if (searchtype == SEARCH_BLOCKS)
@@ -395,7 +418,7 @@ void SearchItemGenerator::getProgress(uint64_t *prog, uint64_t *end)
 
 
 // does the 48-bit seed meet the conditions c..ce?
-static bool isCandidate(int64_t s48, int mc, const Condition *c, const Condition *ce, std::atomic_bool *abort)
+static bool isCandidate(uint64_t s48, int mc, const Condition *c, const Condition *ce, std::atomic_bool *abort)
 {
     StructPos spos[100] = {};
     for (; c != ce; c++)
@@ -413,8 +436,8 @@ SearchItem *SearchItemGenerator::requestItem()
 
     item->searchtype = searchtype;
     item->mc        = mc;
-    item->cond      = cond;
-    item->ccnt      = ccnt;
+    item->cond      = condvec.data();
+    item->ccnt      = condvec.size();
     item->itemid    = itemid++;
     item->slist     = slist.empty() ? NULL : slist.data();
     item->len       = slist.size();
@@ -436,28 +459,31 @@ SearchItem *SearchItemGenerator::requestItem()
     {
         if (!slist.empty())
         {
-            int64_t high = (seed >> 48) & 0xffff;
+            uint64_t high = (seed >> 48) & 0xffff;
             idx += itemsiz;
             high += idx / slist.size();
             idx %= slist.size();
             seed = (high << 48) | slist[idx];
-            if (high >= 0x10000)
+            if (high > (smax >> 48))
                 isdone = true;
         }
         else
         {
-            unsigned long long int s;
-            if (__builtin_uaddll_overflow(seed, itemsiz, &s))
-                isdone = true;
-            seed = (int64_t)s;
+            // seed += itemsize; with overflow detection
+            uint64_t s = seed + itemsiz;
+            if (s < seed)
+                isdone = true; // overflow
+            seed = s;
         }
+        if (seed > smax)
+            isdone = true;
     }
 
     if (searchtype == SEARCH_BLOCKS)
     {
         if (!slist.empty())
         {
-            int64_t high = (seed >> 48) & 0xffff;
+            uint64_t high = (seed >> 48) & 0xffff;
             high += itemsiz;
             if (high >= 0x10000)
             {
@@ -471,8 +497,8 @@ SearchItem *SearchItemGenerator::requestItem()
         }
         else
         {
-            int64_t high = (seed >> 48) & 0xffff;
-            int64_t low = seed & MASK48;
+            uint64_t high = (seed >> 48) & 0xffff;
+            uint64_t low = seed & MASK48;
             high += itemsiz;
             if (high >= 0x10000)
             {
@@ -481,11 +507,12 @@ SearchItem *SearchItemGenerator::requestItem()
                 low++;
 
                 unsigned long long ts = __rdtsc() + (1ULL << 27);
-
-                /// === search for next candidate ===
+                const Condition *c = item->cond;
+                const Condition *ce = item->cond+item->ccnt;
+                /// === search for next candiditem->condate ===
                 for (; low <= MASK48; low++)
                 {
-                    if (isCandidate(low, mc, cond, cond+ccnt, abort))
+                    if (isCandidate(low, mc, c, ce, abort))
                         break;
                     if (__rdtsc() > ts)
                     {

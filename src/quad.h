@@ -26,9 +26,11 @@ enum {
     D_TREASURE,
     D_OUTPOST,
     D_PORTAL,
+    D_PORTALN,
     D_FORTESS,
     D_BASTION,
     D_ENDCITY,
+    D_GATEWAY,
     // non-recurring structures
     D_SPAWN,
     D_STRONGHOLD,
@@ -53,11 +55,13 @@ inline const char *mapopt2str(int opt)
     case D_TREASURE:    return "treasure";
     case D_OUTPOST:     return "outpost";
     case D_PORTAL:      return "portal";
+    case D_PORTALN:     return "portaln";
     case D_SPAWN:       return "spawn";
     case D_STRONGHOLD:  return "stronghold";
     case D_FORTESS:     return "fortress";
     case D_BASTION:     return "bastion";
     case D_ENDCITY:     return "endcity";
+    case D_GATEWAY:     return "gateway";
     default:            return "";
     }
 }
@@ -78,11 +82,13 @@ inline int str2mapopt(const char *s)
     if (!strcmp(s, "treasure"))     return D_TREASURE;
     if (!strcmp(s, "outpost"))      return D_OUTPOST;
     if (!strcmp(s, "portal"))       return D_PORTAL;
+    if (!strcmp(s, "portaln"))       return D_PORTALN;
     if (!strcmp(s, "spawn"))        return D_SPAWN;
     if (!strcmp(s, "stronghold"))   return D_STRONGHOLD;
     if (!strcmp(s, "fortress"))     return D_FORTESS;
     if (!strcmp(s, "bastion"))      return D_BASTION;
     if (!strcmp(s, "endcity"))      return D_ENDCITY;
+    if (!strcmp(s, "gateway"))      return D_GATEWAY;
     return D_NONE;
 }
 
@@ -102,9 +108,11 @@ inline int mapopt2stype(int opt)
     case D_TREASURE:    return Treasure;
     case D_OUTPOST:     return Outpost;
     case D_PORTAL:      return Ruined_Portal;
+    case D_PORTALN:     return Ruined_Portal_N;
     case D_FORTESS:     return Fortress;
     case D_BASTION:     return Bastion;
     case D_ENDCITY:     return End_City;
+    case D_GATEWAY:     return End_Gateway;
     default:
         return -1;
     }
@@ -119,7 +127,7 @@ struct VarPos
 };
 
 void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
-        int mc, int64_t seed, int x0, int z0, int x1, int z1);
+        int mc, int dim, uint64_t seed, int x0, int z0, int x1, int z1);
 
 class Quad : public QRunnable
 {
@@ -130,7 +138,7 @@ public:
     void run();
 
     int mc;
-    int64_t seed;
+    uint64_t seed;
     int dim;
     const Layer *entry;
     int ti, tj;
@@ -158,8 +166,8 @@ struct Level
     Level();
     ~Level();
 
-    void init4map(int mc, int64_t ws, int dim, int pix, int layerscale);
-    void init4struct(int mc, int64_t ws, int dim, int blocks, int sopt, int viewlv);
+    void init4map(int mc, uint64_t ws, int dim, int pix, int layerscale);
+    void init4struct(int mc, uint64_t ws, int dim, int blocks, int sopt, int viewlv);
 
     void resizeLevel(std::vector<Quad*>& cache, int x, int z, int w, int h);
     void update(std::vector<Quad*>& cache, qreal bx0, qreal bz0, qreal bx1, qreal bz1);
@@ -167,7 +175,7 @@ struct Level
     std::vector<Quad*> cells;
     LayerStack g;
     Layer *entry;
-    int64_t seed;
+    uint64_t seed;
     int mc;
     int dim;
     int tx, tz, tw, th;
@@ -181,7 +189,7 @@ struct Level
 
 struct QWorld
 {
-    QWorld(int mc, int64_t seed, int dim = 0);
+    QWorld(int mc, uint64_t seed, int dim = 0);
     ~QWorld();
 
     void setDim(int dim);
@@ -193,10 +201,10 @@ struct QWorld
     int getBiome(Pos p);
 
     int mc;
-    int64_t seed;
+    uint64_t seed;
     int dim;
     LayerStack g;
-    int64_t sha;
+    uint64_t sha;
 
     // the visible area is managed in Quads of different scales (for biomes and structures),
     // which are managed in rectangular sections as levels

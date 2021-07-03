@@ -39,7 +39,7 @@ static bool intersectRectLine(double rx1, double rz1, double rx2, double rz2, do
     return false;
 }
 
-static bool isInnerRingOk(int mc, int64_t seed, int x1, int z1, int x2, int z2, int r1, int r2)
+static bool isInnerRingOk(int mc, uint64_t seed, int x1, int z1, int x2, int z2, int r1, int r2)
 {
     StrongholdIter sh;
     Pos p = initFirstStronghold(&sh, mc, seed);
@@ -61,7 +61,7 @@ static bool isInnerRingOk(int mc, int64_t seed, int x1, int z1, int x2, int z2, 
 }
 
 
-int testCond(StructPos *spos, int64_t seed, const Condition *cond, int mc, LayerStack *g, std::atomic_bool *abort)
+int testCond(StructPos *spos, uint64_t seed, const Condition *cond, int mc, LayerStack *g, std::atomic_bool *abort)
 {
     int x1, x2, z1, z2;
     int rx1, rx2, rz1, rz2, rx, rz;
@@ -105,7 +105,7 @@ int testCond(StructPos *spos, int64_t seed, const Condition *cond, int mc, Layer
         }
         if (scanForQuads(
                 sconf, 128, (seed) & MASK48, low20QuadHutBarely,
-                sizeof(low20QuadHutBarely) / sizeof(int64_t), 20, sconf.salt,
+                sizeof(low20QuadHutBarely) / sizeof(uint64_t), 20, sconf.salt,
                 rx1, rz1, rx2 - rx1 + 1, rz2 - rz1 + 1, &pc, 1) >= 1)
         {
             rx = pc.x; rz = pc.z;
@@ -146,7 +146,7 @@ L_qm_any:
         }
         if (scanForQuads(
                 sconf, 160, (seed) & MASK48, g_qm_90,
-                sizeof(g_qm_90) / sizeof(int64_t), 48,
+                sizeof(g_qm_90) / sizeof(uint64_t), 48,
                 0, // 0 for salt offset as g_qm_90 are not protobases
                 rx1, rz1, rx2 - rx1 + 1, rz2 - rz1 + 1, &pc, 1) >= 1)
         {
@@ -180,11 +180,13 @@ L_qm_any:
     case F_SHIPWRECK:
     case F_TREASURE:
     case F_PORTAL:
+    case F_PORTALN:
 
     case F_FORTRESS:
     case F_BASTION:
 
     case F_ENDCITY:
+    case F_GATEWAY:
 
         x1 = cond->x1;
         z1 = cond->z1;
@@ -236,28 +238,30 @@ L_qm_any:
                     continue;
                 if (pc.x >= x1 && pc.x <= x2 && pc.z >= z1 && pc.z <= z2)
                 {
-                    if (g)
+                    if (finfo.dim == 0 && g)
                     {
-                        if (finfo.dim == 0 && !isViableStructurePos(sconf.structType, mc, g, seed, pc.x, pc.z))
+                        if (!isViableStructurePos(sconf.structType, mc, g, seed, pc.x, pc.z))
                             continue;
-                        if (finfo.dim == -1)
+                    }
+                    // TODO: add another search pass?
+                    //       (the g!=0 requirement for nether/end is artificial)
+                    if (finfo.dim == -1 && g)
+                    {
+                        NetherNoise nn;
+                        if (!isViableNetherStructurePos(sconf.structType, mc, &nn, seed, pc.x, pc.z))
+                            continue;
+                    }
+                    if (finfo.dim == +1 && g)
+                    {
+                        EndNoise en;
+                        if (!isViableEndStructurePos(sconf.structType, mc, &en, seed, pc.x, pc.z))
+                            continue;
+                        if (sconf.structType == End_City)
                         {
-                            NetherNoise nn;
-                            if (!isViableNetherStructurePos(sconf.structType, mc, &nn, seed, pc.x, pc.z))
+                            SurfaceNoise sn; // TODO: store for reuse?
+                            initSurfaceNoiseEnd(&sn, seed);
+                            if (!isViableEndCityTerrain(&en, &sn, pc.x, pc.z))
                                 continue;
-                        }
-                        if (finfo.dim == +1)
-                        {
-                            EndNoise en;
-                            if (!isViableEndStructurePos(sconf.structType, mc, &en, seed, pc.x, pc.z))
-                                continue;
-                            if (sconf.structType == End_City)
-                            {
-                                SurfaceNoise sn; // TODO: store for reuse?
-                                initSurfaceNoiseEnd(&sn, seed);
-                                if (!isViableEndCityTerrain(&en, &sn, pc.x, pc.z))
-                                    continue;
-                            }
                         }
                     }
 

@@ -37,11 +37,11 @@ QuadListDialog::~QuadListDialog()
 
 void QuadListDialog::loadSeed()
 {
-    ui->comboBoxMC->setCurrentText("1.16");
+    ui->comboBoxMC->setCurrentText("1.17");
     ui->lineSeed->clear();
 
     int mc;
-    int64_t seed;
+    uint64_t seed;
     mainwindow->getSeed(&mc, &seed, false);
 
     const char *mcstr = mc2str(mc);
@@ -52,10 +52,10 @@ void QuadListDialog::loadSeed()
     }
 
     ui->comboBoxMC->setCurrentText(mcstr);
-    ui->lineSeed->setText(QString::asprintf("%" PRId64, seed));
+    ui->lineSeed->setText(QString::asprintf("%" PRId64, (int64_t)seed));
 }
 
-bool QuadListDialog::getSeed(int *mc, int64_t *seed)
+bool QuadListDialog::getSeed(int *mc, uint64_t *seed)
 {
     const std::string& mcs = ui->comboBoxMC->currentText().toStdString();
     *mc = str2mc(mcs.c_str());
@@ -67,7 +67,7 @@ bool QuadListDialog::getSeed(int *mc, int64_t *seed)
 
     int v = str2seed(ui->lineSeed->text(), seed);
     if (v == S_RANDOM)
-        ui->lineSeed->setText(QString::asprintf("%" PRId64, *seed));
+        ui->lineSeed->setText(QString::asprintf("%" PRId64, (int64_t)*seed));
 
     return true;
 }
@@ -79,7 +79,7 @@ void QuadListDialog::refresh()
     ui->labelMsg->clear();
 
     int mc;
-    int64_t seed;
+    uint64_t seed;
     if (!getSeed(&mc, &seed))
         return;
 
@@ -96,7 +96,7 @@ void QuadListDialog::refresh()
 
     qcnt = scanForQuads(
                 sconf, 128, (seed) & MASK48,
-                low20QuadHutBarely, sizeof(low20QuadHutBarely) / sizeof(int64_t), 20, sconf.salt,
+                low20QuadHutBarely, sizeof(low20QuadHutBarely) / sizeof(uint64_t), 20, sconf.salt,
                 -r, -r, 2*r, 2*r, qlist, maxq);
 
     if (qcnt >= maxq)
@@ -151,10 +151,10 @@ void QuadListDialog::refresh()
     {
         getStructureConfig_override(Monument, mc, &sconf);
         // TODO: check salt delta
-        int64_t salt_delta = sconf.salt - MONUMENT_CONFIG.salt;
+        uint64_t salt_delta = sconf.salt - MONUMENT_CONFIG.salt;
         qcnt = scanForQuads(
                     sconf, 160, seed & MASK48,
-                    g_qm_90, sizeof(g_qm_90) / sizeof(int64_t), 48, salt_delta,
+                    g_qm_90, sizeof(g_qm_90) / sizeof(uint64_t), 48, salt_delta,
                     -r, -r, 2*r, 2*r, qlist, maxq);
 
         if (qcnt >= maxq)
@@ -239,7 +239,7 @@ void QuadListDialog::gotoSwampHut()
         return;
 
     int mc;
-    int64_t seed;
+    uint64_t seed;
     if (!getSeed(&mc, &seed))
         return;
 

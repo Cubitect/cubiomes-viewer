@@ -57,7 +57,7 @@
           <string>Structure</string>
          </property>
          <property name="textAlignment">
-          <set>AlignLeading|AlignVCenter</set>
+          <set>AlignLeft|AlignVCenter</set>
          </property>
         </column>
         <column>
@@ -68,7 +68,7 @@
           <string>distance to origin</string>
          </property>
          <property name="textAlignment">
-          <set>AlignLeading|AlignVCenter</set>
+          <set>AlignLeft|AlignVCenter</set>
          </property>
         </column>
         <column>
@@ -79,7 +79,7 @@
           <string>optimal AFK location</string>
          </property>
          <property name="textAlignment">
-          <set>AlignLeading|AlignVCenter</set>
+          <set>AlignLeft|AlignVCenter</set>
          </property>
         </column>
         <column>
@@ -90,7 +90,7 @@
           <string>distance to furthest spawning space from optimal AFK position</string>
          </property>
          <property name="textAlignment">
-          <set>AlignLeading|AlignVCenter</set>
+          <set>AlignLeft|AlignVCenter</set>
          </property>
         </column>
        </widget>
@@ -122,6 +122,11 @@
        <property name="toolTip">
         <string>Minecraft version</string>
        </property>
+       <item>
+        <property name="text">
+         <string>1.17</string>
+        </property>
+       </item>
        <item>
         <property name="text">
          <string>1.16</string>
@@ -212,7 +217,8 @@
      </property>
      <property name="icon">
       <iconset theme="window-close">
-       <normaloff>.</normaloff>.</iconset>
+       <normaloff/>
+      </iconset>
      </property>
     </widget>
    </item>

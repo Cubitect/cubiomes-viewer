@@ -28,7 +28,7 @@ Quad::~Quad()
 }
 
 void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
-        int mc, int64_t seed, int x0, int z0, int x1, int z1)
+        int mc, int dim, uint64_t seed, int x0, int z0, int x1, int z1)
 {
     union {
         LayerStack g;
@@ -36,14 +36,8 @@ void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
         EndNoise en;
     } u;
 
-    int dim;
-    if (sconf.structType == Fortress || sconf.structType == Bastion)
-        dim = -1;
-    else if (sconf.structType == End_City)
-        dim = +1;
-    else
+    if (dim == 0)
     {
-        dim = 0;
         setupGenerator(&u.g, mc);
     }
 
@@ -74,7 +68,7 @@ void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
                 else if (dim == +1)
                 {
                     id = isViableEndStructurePos(sconf.structType, mc, &u.en, seed, p.x, p.z);
-                    if (id)
+                    if (id && sconf.structType == End_City)
                     {
                         SurfaceNoise sn;
                         initSurfaceNoiseEnd(&sn, seed);
@@ -139,7 +133,7 @@ void Quad::run()
             std::vector<VarPos>* st = new std::vector<VarPos>();
             StructureConfig sconf;
             if (getStructureConfig_override(structureType, mc, &sconf))
-                getStructs(st, sconf, mc, seed, x0, z0, x1, z1);
+                getStructs(st, sconf, mc, dim, seed, x0, z0, x1, z1);
             spos = st;
         }
     }
@@ -215,9 +209,9 @@ int mapOceanMixMod(const Layer * l, int * out, int x, int z, int w, int h)
     return 0;
 }
 
-void Level::init4map(int mcversion, int64_t ws, int dim, int pix, int layerscale)
+void Level::init4map(int mc, uint64_t ws, int dim, int pix, int layerscale)
 {
-    this->mc = mcversion;
+    this->mc = mc;
     this->seed = ws;
     this->dim = dim;
 
@@ -270,7 +264,7 @@ void Level::init4map(int mcversion, int64_t ws, int dim, int pix, int layerscale
     }
 }
 
-void Level::init4struct(int mc, int64_t ws, int dim, int blocks, int sopt, int lv)
+void Level::init4struct(int mc, uint64_t ws, int dim, int blocks, int sopt, int lv)
 {
     this->mc = mc;
     this->dim = dim;
@@ -390,7 +384,7 @@ void Level::update(std::vector<Quad*>& cache, qreal bx0, qreal bz0, qreal bx1, q
 }
 
 
-QWorld::QWorld(int mc, int64_t seed, int dim)
+QWorld::QWorld(int mc, uint64_t seed, int dim)
     : mc(mc)
     , seed(seed)
     , dim(dim)
@@ -435,9 +429,11 @@ QWorld::QWorld(int mc, int64_t seed, int dim)
     lvs[D_TREASURE]     .init4struct(mc, seed, 0, 2048, D_TREASURE, 1);
     lvs[D_OUTPOST]      .init4struct(mc, seed, 0, 2048, D_OUTPOST, 2);
     lvs[D_PORTAL]       .init4struct(mc, seed, 0, 2048, D_PORTAL, 1);
+    lvs[D_PORTALN]      .init4struct(mc, seed,-1, 2048, D_PORTALN, 1);
     lvs[D_FORTESS]      .init4struct(mc, seed,-1, 2048, D_FORTESS, 1);
     lvs[D_BASTION]      .init4struct(mc, seed,-1, 2048, D_BASTION, 1);
-    lvs[D_ENDCITY]      .init4struct(mc, seed, 1, 2048, D_ENDCITY, 1);
+    lvs[D_ENDCITY]      .init4struct(mc, seed, 1, 2048, D_ENDCITY, 2);
+    lvs[D_GATEWAY]      .init4struct(mc, seed, 1, 2048, D_GATEWAY, 2);
 
     if (dim == 0)
     {
@@ -473,11 +469,13 @@ QWorld::QWorld(int mc, int64_t seed, int dim)
     icons[D_TREASURE]   = QPixmap(":/icons/treasure.png");
     icons[D_OUTPOST]    = QPixmap(":/icons/outpost.png");
     icons[D_PORTAL]     = QPixmap(":/icons/portal.png");
+    icons[D_PORTALN]    = QPixmap(":/icons/portal.png");
     icons[D_SPAWN]      = QPixmap(":/icons/spawn.png");
     icons[D_STRONGHOLD] = QPixmap(":/icons/stronghold.png");
     icons[D_FORTESS]    = QPixmap(":/icons/fortress.png");
     icons[D_BASTION]    = QPixmap(":/icons/bastion.png");
     icons[D_ENDCITY]    = QPixmap(":/icons/endcity.png");
+    icons[D_GATEWAY]    = QPixmap(":/icons/gateway.png");
 
     iconzvil = QPixmap(":/icons/zombie.png");
 }
@@ -596,9 +594,9 @@ struct SpawnStronghold : public QRunnable
 {
     QWorld *world;
     int mc;
-    int64_t seed;
+    uint64_t seed;
 
-    SpawnStronghold(QWorld *world, int mc, int64_t seed) :
+    SpawnStronghold(QWorld *world, int mc, uint64_t seed) :
         world(world),mc(mc),seed(seed) {}
 
     void run()
@@ -728,9 +726,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
     for (int sopt = D_DESERT; sopt < D_SPAWN; sopt++)
     {
         Level& l = lvs[sopt];
-        if (!sshow[sopt] || activelv > l.viewlv)
-            continue;
-        if (dim != l.dim)
+        if (!sshow[sopt] || dim != l.dim || activelv > l.viewlv)
             continue;
 
         std::vector<QPainter::PixmapFragment> frags;
