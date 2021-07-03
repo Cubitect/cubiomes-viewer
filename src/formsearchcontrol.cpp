@@ -176,8 +176,8 @@ void FormSearchControl::on_buttonStart_clicked()
         SearchConfig sc = getSearchConfig();
         int ok = true;
 
-        sc.smin = 1L << 47;
-        sc.smax = 2L << 48;
+        //sc.smin = 1L << 47;
+        //sc.smax = 2L << 48;
 
         if (condvec.empty())
         {
