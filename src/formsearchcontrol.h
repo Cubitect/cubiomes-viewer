@@ -42,7 +42,7 @@ signals:
 public slots:
     void on_buttonClear_clicked();
     void on_buttonStart_clicked();
-    void on_buttonLoadList_clicked();
+    void on_buttonMore_clicked();
 
     void on_listResults_itemSelectionChanged();
     void on_listResults_customContextMenuRequested(const QPoint& pos);
@@ -69,6 +69,7 @@ private:
 
     // the seed list option is not stored in a widget but is loaded with the "..." button
     QString slist64path;
+    QString slist64fnam; // file name without directory
     std::vector<uint64_t> slist64;
 
     // buffer for seed candidates while search is running

@@ -411,6 +411,10 @@ bool MainWindow::saveProgress(QString fnam, bool quiet)
         stream << "#Gen48X2:  " << gen48.x2 << "\n";
         stream << "#Gen48Z2:  " << gen48.z2 << "\n";
     }
+    if (searchconf.smin != 0)
+        stream << "#SMin:     " << searchconf.smin << "\n";
+    if (searchconf.smax != ~(uint64_t)0)
+        stream << "#SMax:     " << searchconf.smax << "\n";
 
     for (Condition &c : condvec)
         stream << "#Cond: " << QByteArray((const char*) &c, sizeof(Condition)).toHex() << "\n";
@@ -480,6 +484,8 @@ bool MainWindow::loadProgress(QString fnam, bool quiet)
         else if (sscanf(p, "#Gen48X2:  %d", &gen48.x2) == 1)                    { gen48.manualarea = true; }
         else if (sscanf(p, "#Gen48Z2:  %d", &gen48.z2) == 1)                    { gen48.manualarea = true; }
         else if (line.startsWith("#List48:   "))                                { gen48.slist48path = line.mid(11).trimmed(); }
+        else if (sscanf(p, "#SMin:     %" PRIu64, &searchconf.smin) == 1)       {}
+        else if (sscanf(p, "#SMax:     %" PRIu64, &searchconf.smax) == 1)       {}
         // Conditions
         else if (line.startsWith("#Cond:"))
         {

@@ -20,6 +20,7 @@ FormSearchControl::FormSearchControl(MainWindow *parent)
     , sthread(this)
     , stimer()
     , slist64path()
+    , slist64fnam()
     , slist64()
     , smin(0)
     , smax(~(uint64_t)0)
@@ -94,6 +95,8 @@ bool FormSearchControl::setSearchConfig(SearchConfig s, bool quiet)
     ui->spinThreads->setValue(s.threads);
     ui->lineStart->setText(QString::asprintf("%" PRId64, (int64_t)s.startseed));
     ui->checkStop->setChecked(s.stoponres);
+    smin = s.smin;
+    smax = s.smax;
 
     return ok && setList64(s.slist64path, quiet);
 }
@@ -109,7 +112,8 @@ bool FormSearchControl::setList64(QString path, bool quiet)
     {
         QFileInfo finfo(path);
         parent->prevdir = finfo.absolutePath();
-        slist64path = finfo.fileName();
+        slist64fnam = finfo.fileName();
+        slist64path = path;
         uint64_t *l = NULL;
         uint64_t len;
         QByteArray ba = path.toLatin1();
@@ -136,6 +140,7 @@ void FormSearchControl::searchLockUi(bool lock)
     {
         ui->comboSearchType->setEnabled(false);
         ui->spinThreads->setEnabled(false);
+        ui->buttonMore->setEnabled(false);
     }
     else
     {
@@ -145,6 +150,8 @@ void FormSearchControl::searchLockUi(bool lock)
         ui->buttonStart->setEnabled(true);
         ui->comboSearchType->setEnabled(true);
         ui->spinThreads->setEnabled(true);
+        int st = ui->comboSearchType->currentIndex();
+        ui->buttonMore->setEnabled(st == SEARCH_INC || st == SEARCH_LIST);
     }
     emit searchStatusChanged(lock);
 }
@@ -154,12 +161,13 @@ void FormSearchControl::setSearchMode(int mode)
     ui->comboSearchType->setCurrentIndex(mode);
     if (mode == SEARCH_LIST)
     {
-        on_buttonLoadList_clicked();
+        on_buttonMore_clicked();
     }
     else
     {
         slist64.clear();
         slist64path.clear();
+        slist64fnam.clear();
     }
 }
 
@@ -241,7 +249,7 @@ void FormSearchControl::on_buttonStart_clicked()
     update();
 }
 
-void FormSearchControl::on_buttonLoadList_clicked()
+void FormSearchControl::on_buttonMore_clicked()
 {
     int type = ui->comboSearchType->currentIndex();
     if (type == SEARCH_LIST)
@@ -256,7 +264,7 @@ void FormSearchControl::on_buttonLoadList_clicked()
         if (status == QDialog::Accepted)
         {
             dialog->getBounds(&smin, &smax);
-
+            searchProgressReset();
         }
     }
 }
@@ -294,7 +302,8 @@ void FormSearchControl::on_buttonSearchHelp_clicked()
             "The <b>incremental</b> search checks seeds in numerical order, "
             "save for grouping into work items for parallelization. This type "
             "of search is best suited for a non-exhaustive search space and "
-            "with strong biome dependencies."
+            "with strong biome dependencies. You can restrict this type of "
+            "search to a value range using the &quot;...&quot; button."
             "</p><p>"
             "With <b>48-bit family blocks</b> the search looks for suitable "
             "48-bit seeds first and parallelizes the search through the upper "
@@ -313,7 +322,8 @@ void FormSearchControl::on_buttonSearchHelp_clicked()
 
 void FormSearchControl::on_comboSearchType_currentIndexChanged(int index)
 {
-    ui->buttonLoadList->setEnabled(index == SEARCH_INC || index == SEARCH_LIST);
+    ui->buttonMore->setEnabled(index == SEARCH_INC || index == SEARCH_LIST);
+    searchProgressReset();
 }
 
 void FormSearchControl::pasteResults()
@@ -413,25 +423,36 @@ int FormSearchControl::searchResultsAdd(QVector<uint64_t> seeds, bool countonly)
 
 void FormSearchControl::searchProgressReset()
 {
-    uint64_t cnt = parent->formGen48->estimateSeedCnt();
+    uint64_t cnt;
+    cnt = parent->formGen48->estimateSeedCnt();
     if (cnt > MASK48)
         cnt = ~(uint64_t)0;
     else
         cnt <<= 16;
-    QString fmt = QString::asprintf("0 / %" PRIu64 " (0.00%%)", cnt);
+
+    QString fmt;
     int searchtype = ui->comboSearchType->currentIndex();
     if (searchtype == SEARCH_LIST)
     {
-        if (!slist64path.isEmpty())
-            fmt = slist64path + ": " + fmt;
+        if (!slist64fnam.isEmpty())
+        {
+            fmt = slist64fnam + ": ";
+            cnt = slist64.size();
+        }
     }
     if (searchtype == SEARCH_INC)
     {
         if (smin != 0 || smax != ~(uint64_t)0)
         {
-            fmt += QString::asprintf(" [%" PRIu64 " - %" PRIu64 "]", smin, smax);
+            fmt = QString::asprintf(" [%" PRIu64 " - %" PRIu64 "]: ", smin, smax);
+            cnt = 0;
         }
     }
+
+    if (cnt)
+        fmt += QString::asprintf("0 / %" PRIu64 " (0.00%%)", cnt);
+    else
+        fmt += "0 / ? (0.00%%)";
 
     ui->lineStart->setText("0");
     ui->progressBar->setValue(0);
@@ -440,8 +461,6 @@ void FormSearchControl::searchProgressReset()
 
 void FormSearchControl::searchProgress(uint64_t last, uint64_t end, int64_t seed)
 {
-//    if (sthread.itemgen.searchtype == SEARCH_BLOCKS)
-//        seed &= MASK48;
     ui->lineStart->setText(QString::asprintf("%" PRId64, seed));
 
     if (end)
@@ -449,18 +468,22 @@ void FormSearchControl::searchProgress(uint64_t last, uint64_t end, int64_t seed
         int v = (int) floor(10000 * (double)last / end);
         ui->progressBar->setValue(v);
         QString fmt = QString::asprintf(
-                    "%" PRIu64 " / %" PRIu64 " (%d.%02d%%)", last, end, v / 100, v % 100);
+                    "%" PRIu64 " / %" PRIu64 " (%d.%02d%%)",
+                    last, end, v / 100, v % 100
+                    );
         int searchtype = ui->comboSearchType->currentIndex();
         if (searchtype == SEARCH_LIST)
         {
-            if (!slist64path.isEmpty())
-                fmt = slist64path + ": " + fmt;
+            if (!slist64fnam.isEmpty())
+            {
+                fmt = slist64fnam + ": " + fmt;
+            }
         }
         if (searchtype == SEARCH_INC)
         {
             if (smin != 0 || smax != ~(uint64_t)0)
             {
-                fmt += QString::asprintf(" [%" PRIu64 " - %" PRIu64 "]", smin, smax);
+                fmt = QString::asprintf("[%" PRIu64 " - %" PRIu64 "]: ", smin, smax) + fmt;
             }
         }
         ui->progressBar->setFormat(fmt);

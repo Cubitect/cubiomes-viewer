@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>ConfigDialog</class>
  <widget class="QDialog" name="ConfigDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>411</width>
+    <height>252</height>
+   </rect>
+  </property>
   <property name="windowTitle">
    <string>Preferences</string>
   </property>
@@ -63,7 +71,14 @@
     </widget>
    </item>
    <item row="6" column="1">
-    <widget class="QComboBox" name="cboxItemSize"/>
+    <widget class="QComboBox" name="cboxItemSize">
+     <property name="iconSize">
+      <size>
+       <width>0</width>
+       <height>16</height>
+      </size>
+     </property>
+    </widget>
    </item>
    <item row="8" column="1">
     <widget class="QLineEdit" name="lineMatching"/>
@@ -100,6 +115,12 @@
    </item>
    <item row="5" column="1">
     <widget class="QComboBox" name="comboStyle">
+     <property name="iconSize">
+      <size>
+       <width>0</width>
+       <height>16</height>
+      </size>
+     </property>
      <item>
       <property name="text">
        <string>System</string>
