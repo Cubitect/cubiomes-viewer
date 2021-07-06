@@ -3,6 +3,7 @@
 
 #include "mainwindow.h"
 #include "search.h"
+#include "rangedialog.h"
 
 #include <QMessageBox>
 #include <QMenu>
@@ -81,9 +82,14 @@ bool FormSearchControl::setSearchConfig(SearchConfig s, bool quiet)
 {
     bool ok = true;
     if (s.searchtype >= SEARCH_INC && s.searchtype <= SEARCH_LIST)
+    {
         ui->comboSearchType->setCurrentIndex(s.searchtype);
+        on_comboSearchType_currentIndexChanged(s.searchtype);
+    }
     else
+    {
         ok = false;
+    }
 
     ui->spinThreads->setValue(s.threads);
     ui->lineStart->setText(QString::asprintf("%" PRId64, (int64_t)s.startseed));
@@ -176,9 +182,6 @@ void FormSearchControl::on_buttonStart_clicked()
         SearchConfig sc = getSearchConfig();
         int ok = true;
 
-        //sc.smin = 1L << 47;
-        //sc.smax = 2L << 48;
-
         if (condvec.empty())
         {
             QMessageBox::warning(this, "Warning", "Please define some constraints using the \"Add\" button.", QMessageBox::Ok);
@@ -240,8 +243,22 @@ void FormSearchControl::on_buttonStart_clicked()
 
 void FormSearchControl::on_buttonLoadList_clicked()
 {
-    QString fnam = QFileDialog::getOpenFileName(this, "Load seed list", parent->prevdir, "Text files (*.txt);;Any files (*)");
-    setList64(fnam, false);
+    int type = ui->comboSearchType->currentIndex();
+    if (type == SEARCH_LIST)
+    {
+        QString fnam = QFileDialog::getOpenFileName(this, "Load seed list", parent->prevdir, "Text files (*.txt);;Any files (*)");
+        setList64(fnam, false);
+    }
+    else if (type == SEARCH_INC)
+    {
+        RangeDialog *dialog = new RangeDialog(this, smin, smax);
+        int status = dialog->exec();
+        if (status == QDialog::Accepted)
+        {
+            dialog->getBounds(&smin, &smax);
+
+        }
+    }
 }
 
 void FormSearchControl::on_listResults_itemSelectionChanged()
@@ -296,7 +313,7 @@ void FormSearchControl::on_buttonSearchHelp_clicked()
 
 void FormSearchControl::on_comboSearchType_currentIndexChanged(int index)
 {
-    ui->buttonLoadList->setEnabled(index == SEARCH_LIST);
+    ui->buttonLoadList->setEnabled(index == SEARCH_INC || index == SEARCH_LIST);
 }
 
 void FormSearchControl::pasteResults()
@@ -402,8 +419,19 @@ void FormSearchControl::searchProgressReset()
     else
         cnt <<= 16;
     QString fmt = QString::asprintf("0 / %" PRIu64 " (0.00%%)", cnt);
-    if (!slist64path.isEmpty() && ui->comboSearchType->currentIndex() == SEARCH_LIST)
-        fmt = slist64path + ": " + fmt;
+    int searchtype = ui->comboSearchType->currentIndex();
+    if (searchtype == SEARCH_LIST)
+    {
+        if (!slist64path.isEmpty())
+            fmt = slist64path + ": " + fmt;
+    }
+    if (searchtype == SEARCH_INC)
+    {
+        if (smin != 0 || smax != ~(uint64_t)0)
+        {
+            fmt += QString::asprintf(" [%" PRIu64 " - %" PRIu64 "]", smin, smax);
+        }
+    }
 
     ui->lineStart->setText("0");
     ui->progressBar->setValue(0);
@@ -422,8 +450,19 @@ void FormSearchControl::searchProgress(uint64_t last, uint64_t end, int64_t seed
         ui->progressBar->setValue(v);
         QString fmt = QString::asprintf(
                     "%" PRIu64 " / %" PRIu64 " (%d.%02d%%)", last, end, v / 100, v % 100);
-        if (!slist64path.isEmpty() && ui->comboSearchType->currentIndex() == SEARCH_LIST)
-            fmt = slist64path + ": " + fmt;
+        int searchtype = ui->comboSearchType->currentIndex();
+        if (searchtype == SEARCH_LIST)
+        {
+            if (!slist64path.isEmpty())
+                fmt = slist64path + ": " + fmt;
+        }
+        if (searchtype == SEARCH_INC)
+        {
+            if (smin != 0 || smax != ~(uint64_t)0)
+            {
+                fmt += QString::asprintf(" [%" PRIu64 " - %" PRIu64 "]", smin, smax);
+            }
+        }
         ui->progressBar->setFormat(fmt);
     }
 }

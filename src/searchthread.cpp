@@ -119,14 +119,15 @@ void SearchThread::run()
         startNextItem();
     }
 
-    emit searchEnded();
+    if (activecnt == 0)
+        emit searchFinish();
 }
 
 
 SearchItem *SearchThread::startNextItem()
 {
     SearchItem *item = itemgen.requestItem();
-    if (!item)
+    if (!item || item->isdone)
         return NULL;
     // call back here when done
     QObject::connect(item, &SearchItem::itemDone, this, &SearchThread::onItemDone, Qt::BlockingQueuedConnection);

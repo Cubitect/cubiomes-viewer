@@ -44,6 +44,7 @@ SOURCES += \
         src/quadlistdialog.cpp \
         src/mapview.cpp \
         src/quad.cpp \
+        src/rangedialog.cpp \
         src/search.cpp \
         src/searchitem.cpp \
         src/searchthread.cpp \
@@ -69,6 +70,7 @@ HEADERS += \
         src/mapview.h \
         src/quad.h \
         src/cutil.h \
+        src/rangedialog.h \
         src/search.h \
         src/searchitem.h \
         src/searchthread.h \
@@ -86,7 +88,8 @@ FORMS += \
         src/protobasedialog.ui \
         src/filterdialog.ui \
         src/quadlistdialog.ui\
-        src/mainwindow.ui
+        src/mainwindow.ui \
+        src/rangedialog.ui
 
 RESOURCES += \
         icons.qrc \

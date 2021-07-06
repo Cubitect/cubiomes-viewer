@@ -35,7 +35,6 @@ public:
 
 signals:
     void progress(uint64_t last, uint64_t end, uint64_t seed);
-    void searchEnded();     // search thread is exiting (e.g. abort or done)
     void searchFinish();    // search ended and is comlete
 
 public slots:

@@ -82,7 +82,7 @@ inline int str2mapopt(const char *s)
     if (!strcmp(s, "treasure"))     return D_TREASURE;
     if (!strcmp(s, "outpost"))      return D_OUTPOST;
     if (!strcmp(s, "portal"))       return D_PORTAL;
-    if (!strcmp(s, "portaln"))       return D_PORTALN;
+    if (!strcmp(s, "portaln"))      return D_PORTALN;
     if (!strcmp(s, "spawn"))        return D_SPAWN;
     if (!strcmp(s, "stronghold"))   return D_STRONGHOLD;
     if (!strcmp(s, "fortress"))     return D_FORTESS;
