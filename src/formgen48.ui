@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>435</width>
-    <height>179</height>
+    <height>182</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -50,7 +50,7 @@
       <item row="0" column="0" colspan="2">
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
-         <number>3</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="tabAuto">
          <attribute name="title">

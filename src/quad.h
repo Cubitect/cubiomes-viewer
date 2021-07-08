@@ -24,6 +24,7 @@ enum {
     D_RUINS,
     D_SHIPWRECK,
     D_TREASURE,
+    D_MINESHAFT,
     D_OUTPOST,
     D_PORTAL,
     D_PORTALN,
@@ -53,6 +54,7 @@ inline const char *mapopt2str(int opt)
     case D_RUINS:       return "ruins";
     case D_SHIPWRECK:   return "shipwreck";
     case D_TREASURE:    return "treasure";
+    case D_MINESHAFT:   return "mineshaft";
     case D_OUTPOST:     return "outpost";
     case D_PORTAL:      return "portal";
     case D_PORTALN:     return "portaln";
@@ -80,6 +82,7 @@ inline int str2mapopt(const char *s)
     if (!strcmp(s, "ruins"))        return D_RUINS;
     if (!strcmp(s, "shipwreck"))    return D_SHIPWRECK;
     if (!strcmp(s, "treasure"))     return D_TREASURE;
+    if (!strcmp(s, "mineshaft"))    return D_MINESHAFT;
     if (!strcmp(s, "outpost"))      return D_OUTPOST;
     if (!strcmp(s, "portal"))       return D_PORTAL;
     if (!strcmp(s, "portaln"))      return D_PORTALN;
@@ -106,6 +109,7 @@ inline int mapopt2stype(int opt)
     case D_RUINS:       return Ocean_Ruin;
     case D_SHIPWRECK:   return Shipwreck;
     case D_TREASURE:    return Treasure;
+    case D_MINESHAFT:   return Mineshaft;
     case D_OUTPOST:     return Outpost;
     case D_PORTAL:      return Ruined_Portal;
     case D_PORTALN:     return Ruined_Portal_N;

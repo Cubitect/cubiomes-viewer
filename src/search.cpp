@@ -179,6 +179,7 @@ L_qm_any:
     case F_RUINS:
     case F_SHIPWRECK:
     case F_TREASURE:
+    case F_MINESHAFT:
     case F_PORTAL:
     case F_PORTALN:
 

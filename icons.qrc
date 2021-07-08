@@ -1,20 +1,23 @@
 <RCC>
     <qresource prefix="/">
         <file>icons/desert.png</file>
+        <file>icons/desert_d.png</file>
         <file>icons/igloo.png</file>
+        <file>icons/igloo_d.png</file>
         <file>icons/jungle.png</file>
+        <file>icons/jungle_d.png</file>
         <file>icons/shipwreck.png</file>
+        <file>icons/shipwreck_d.png</file>
         <file>icons/spawn.png</file>
+        <file>icons/spawn_d.png</file>
         <file>icons/stronghold.png</file>
+        <file>icons/stronghold_d.png</file>
         <file>icons/village.png</file>
+        <file>icons/village_d.png</file>
         <file>icons/mansion.png</file>
         <file>icons/mansion_d.png</file>
-        <file>icons/village_d.png</file>
-        <file>icons/desert_d.png</file>
         <file>icons/hut.png</file>
         <file>icons/hut_d.png</file>
-        <file>icons/igloo_d.png</file>
-        <file>icons/jungle_d.png</file>
         <file>icons/monument.png</file>
         <file>icons/monument_d.png</file>
         <file>icons/outpost.png</file>
@@ -23,9 +26,6 @@
         <file>icons/portal_d.png</file>
         <file>icons/ruins.png</file>
         <file>icons/ruins_d.png</file>
-        <file>icons/shipwreck_d.png</file>
-        <file>icons/spawn_d.png</file>
-        <file>icons/stronghold_d.png</file>
         <file>icons/map.png</file>
         <file>icons/quad.png</file>
         <file>icons/tempcat.png</file>
@@ -33,23 +33,23 @@
         <file>icons/check1.png</file>
         <file>icons/check2.png</file>
         <file>icons/origin.png</file>
-        <file>icons/treasure_d.png</file>
         <file>icons/treasure.png</file>
-        <file>icons/zombie_d.png</file>
+        <file>icons/treasure_d.png</file>
         <file>icons/zombie.png</file>
+        <file>icons/zombie_d.png</file>
         <file>icons/grid.png</file>
+        <file>icons/grid_d.png</file>
         <file>icons/slime_d.png</file>
         <file>icons/slime.png</file>
-        <file>icons/grid_d.png</file>
         <file>icons/search.png</file>
         <file>icons/cancel.png</file>
         <file>icons/clear.png</file>
         <file>icons/info.png</file>
         <file>icons/overworld.png</file>
-        <file>icons/nether.png</file>
         <file>icons/overworld_d.png</file>
         <file>icons/the_end_d.png</file>
         <file>icons/the_end.png</file>
+        <file>icons/nether.png</file>
         <file>icons/nether_d.png</file>
         <file>icons/fortress_d.png</file>
         <file>icons/fortress.png</file>
@@ -59,5 +59,7 @@
         <file>icons/bastion.png</file>
         <file>icons/gateway.png</file>
         <file>icons/gateway_d.png</file>
+        <file>icons/mineshaft.png</file>
+        <file>icons/mineshaft_d.png</file>
     </qresource>
 </RCC>

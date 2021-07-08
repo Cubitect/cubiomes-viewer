@@ -79,6 +79,7 @@ enum
     F_BIOME_END_64,
     F_PORTALN,
     F_GATEWAY,
+    F_MINESHAFT,
     // new filters should be added here at the end to keep some downwards compatibility
     FILTER_MAX,
 };
@@ -350,6 +351,13 @@ static const struct FilterList
             CAT_STRUCT, 1, 1, 0, Treasure, 1, 1, MC_1_13, 0,
             ":icons/treasure.png",
             "Buried treasure",
+            ""
+        };
+
+        list[F_MINESHAFT] = FilterInfo{
+            CAT_STRUCT, 1, 1, 0, Mineshaft, 1, 1, MC_1_0, 0,
+            ":icons/mineshaft.png",
+            "Abandoned mineshaft",
             ""
         };
 

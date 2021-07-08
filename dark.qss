@@ -779,12 +779,12 @@ QToolBar::handle:vertical {
 }
 
 QToolBar::separator:horizontal {
-  width: 16px;
+  width: 10px;
   image: url(":/rc/toolbar_separator_horizontal.png");
 }
 
 QToolBar::separator:vertical {
-  height: 16px;
+  height: 10px;
   image: url(":/rc/toolbar_separator_vertical.png");
 }
 

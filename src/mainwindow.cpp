@@ -140,6 +140,7 @@ MainWindow::MainWindow(QWidget *parent)
     addMapAction(D_RUINS, "ruins", "Show ocean ruins");
     addMapAction(D_SHIPWRECK, "shipwreck", "Show shipwrecks");
     addMapAction(D_TREASURE, "treasure", "Show buried treasures");
+    addMapAction(D_MINESHAFT, "mineshaft", "Show abandoned mineshafts");
     addMapAction(D_OUTPOST, "outpost", "Show illager outposts");
     addMapAction(D_PORTAL, "portal", "Show ruined portals");
     addMapAction(D_SPAWN, "spawn", "Show world spawn");

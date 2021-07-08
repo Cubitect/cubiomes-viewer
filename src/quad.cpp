@@ -434,6 +434,7 @@ QWorld::QWorld(int mc, uint64_t seed, int dim)
     lvs[D_BASTION]      .init4struct(mc, seed,-1, 2048, D_BASTION, 1);
     lvs[D_ENDCITY]      .init4struct(mc, seed, 1, 2048, D_ENDCITY, 2);
     lvs[D_GATEWAY]      .init4struct(mc, seed, 1, 2048, D_GATEWAY, 2);
+    lvs[D_MINESHAFT]    .init4struct(mc, seed, 0, 2048, D_MINESHAFT, 1);
 
     if (dim == 0)
     {
@@ -467,6 +468,7 @@ QWorld::QWorld(int mc, uint64_t seed, int dim)
     icons[D_RUINS]      = QPixmap(":/icons/ruins.png");
     icons[D_SHIPWRECK]  = QPixmap(":/icons/shipwreck.png");
     icons[D_TREASURE]   = QPixmap(":/icons/treasure.png");
+    icons[D_MINESHAFT]  = QPixmap(":/icons/mineshaft.png");
     icons[D_OUTPOST]    = QPixmap(":/icons/outpost.png");
     icons[D_PORTAL]     = QPixmap(":/icons/portal.png");
     icons[D_PORTALN]    = QPixmap(":/icons/portal.png");
