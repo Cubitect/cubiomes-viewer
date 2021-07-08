@@ -1,6 +1,7 @@
 #include "src/rangedialog.h"
 #include "ui_rangedialog.h"
 
+#define __STDC_FORMAT_MACROS 1
 #include <inttypes.h>
 
 RangeDialog::RangeDialog(QWidget *parent, uint64_t smin, uint64_t smax)
