@@ -183,8 +183,8 @@ void FormSearchControl::on_buttonStart_clicked()
 {
     if (ui->buttonStart->isChecked())
     {
-        int mc = MC_NEWEST;
-        parent->getSeed(&mc, NULL);
+        WorldInfo wi;
+        parent->getSeed(&wi);
         const Config& config = parent->config;
         const QVector<Condition>& condvec = parent->formCond->getConditions();
         SearchConfig sc = getSearchConfig();
@@ -217,7 +217,7 @@ void FormSearchControl::on_buttonStart_clicked()
             else
                 slist.clear();
 
-            ok = sthread.set(parent, mc, sc, gen48, config, slist, condvec);
+            ok = sthread.set(parent, wi, sc, gen48, config, slist, condvec);
         }
 
         if (ok)

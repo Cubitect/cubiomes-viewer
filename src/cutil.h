@@ -30,6 +30,7 @@ inline const char* struct2str(int stype)
     case Ruined_Portal:     return "ruined_portal";
     case Ruined_Portal_N:   return "ruined_portal (nether)";
     case Treasure:          return "treasure";
+    case Mineshaft:         return "mineshaft";
     case Fortress:          return "fortress";
     case Bastion:           return "bastion";
     case End_City:          return "end_city";

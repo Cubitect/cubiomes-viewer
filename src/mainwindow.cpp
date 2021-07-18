@@ -6,6 +6,7 @@
 #include "aboutdialog.h"
 #include "protobasedialog.h"
 #include "filterdialog.h"
+#include "extgendialog.h"
 
 #include "quad.h"
 #include "cutil.h"
@@ -27,11 +28,22 @@
 #include <QDebug>
 #include <QFile>
 
+// Keep the extended generator settings in global scope, but we mainly need
+// them in this file. (Pass through via pointer elsewhere.)
+static ExtGenSettings g_extgen;
+
 extern "C"
 int getStructureConfig_override(int stype, int mc, StructureConfig *sconf)
 {
+    if U(mc == INT_MAX) // to check if override is enabled in cubiomes
+        mc = 0;
     int ok = getStructureConfig(stype, mc, sconf);
-    // TODO: add and apply config settings
+    if (ok && g_extgen.saltOverride)
+    {
+        uint64_t salt = g_extgen.salts[stype];
+        if (salt <= MASK48)
+            sconf->salt = salt;
+    }
     return ok;
 }
 
@@ -208,46 +220,46 @@ MapView* MainWindow::getMapView()
     return ui->mapView;
 }
 
-bool MainWindow::getSeed(int *mc, uint64_t *seed, bool applyrand)
+bool MainWindow::getSeed(WorldInfo *wi, bool applyrand)
 {
     bool ok = true;
-    if (mc)
+    const std::string& mcs = ui->comboBoxMC->currentText().toStdString();
+    wi->mc = str2mc(mcs.c_str());
+    if (wi->mc < 0)
     {
-        const std::string& mcs = ui->comboBoxMC->currentText().toStdString();
-        *mc = str2mc(mcs.c_str());
-        if (*mc < 0)
-        {
-            *mc = MC_NEWEST;
-            qDebug() << "Unknown MC version: " << *mc;
-            ok = false;
-        }
+        wi->mc = MC_NEWEST;
+        qDebug() << "Unknown MC version: " << wi->mc;
+        ok = false;
     }
 
-    if (seed)
+    int v = str2seed(ui->seedEdit->text(), &wi->seed);
+    if (applyrand && v == S_RANDOM)
     {
-        int v = str2seed(ui->seedEdit->text(), seed);
-        if (applyrand && v == S_RANDOM)
-            ui->seedEdit->setText(QString::asprintf("%" PRId64, (int64_t)*seed));
+        ui->seedEdit->setText(QString::asprintf("%" PRId64, (int64_t)wi->seed));
     }
+
+    wi->large = g_extgen.largeBiomes;
 
     return ok;
 }
 
-bool MainWindow::setSeed(int mc, uint64_t seed, int dim)
+bool MainWindow::setSeed(WorldInfo wi, int dim)
 {
-    const char *mcstr = mc2str(mc);
+    const char *mcstr = mc2str(wi.mc);
     if (!mcstr)
     {
-        qDebug() << "Unknown MC version: " << mc;
+        qDebug() << "Unknown MC version: " << wi.mc;
         return false;
     }
 
     if (dim == INT_MAX)
         dim = getDim();
 
+    g_extgen.largeBiomes = wi.large;
+
     ui->comboBoxMC->setCurrentText(mcstr);
-    ui->seedEdit->setText(QString::asprintf("%" PRId64, (int64_t)seed));
-    ui->mapView->setSeed(mc, seed, dim);
+    ui->seedEdit->setText(QString::asprintf("%" PRId64, (int64_t)wi.seed));
+    ui->mapView->setSeed(wi, dim);
     return true;
 }
 
@@ -275,11 +287,20 @@ void MainWindow::saveSettings()
     settings.setValue("config/queueSize", config.queueSize);
     settings.setValue("config/maxMatching", config.maxMatching);
 
-    int mc = MC_NEWEST;
-    uint64_t seed = 0;
-    getSeed(&mc, &seed, false);
-    settings.setValue("map/mc", mc);
-    settings.setValue("map/seed", (qlonglong)seed);
+    settings.setValue("world/largeBiomes", g_extgen.largeBiomes);
+    settings.setValue("world/saltOverride", g_extgen.saltOverride);
+    for (int st = 0; st < FEATURE_NUM; st++)
+    {
+        uint64_t salt = g_extgen.salts[st];
+        if (salt <= MASK48)
+            settings.setValue(QString("world/salt_") + struct2str(st), (qulonglong)salt);
+    }
+
+    WorldInfo wi;
+    getSeed(&wi, false);
+    settings.setValue("map/mc", wi.mc);
+    settings.setValue("map/large", wi.large);
+    settings.setValue("map/seed", (qlonglong)wi.seed);
     settings.setValue("map/dim", getDim());
     settings.setValue("map/x", ui->mapView->getX());
     settings.setValue("map/z", ui->mapView->getZ());
@@ -313,6 +334,14 @@ void MainWindow::loadSettings()
     ui->mapView->setSmoothMotion(config.smoothMotion);
     onStyleChanged(config.uistyle);
 
+    g_extgen.largeBiomes = settings.value("world/largeBiomes", g_extgen.largeBiomes).toBool();
+    g_extgen.saltOverride = settings.value("world/saltOverride", g_extgen.saltOverride).toBool();
+    for (int st = 0; st < FEATURE_NUM; st++)
+    {
+        QVariant v = QVariant::fromValue(~(qulonglong)0);
+        g_extgen.salts[st] = settings.value(QString("world/salt_") + struct2str(st), v).toULongLong();
+    }
+
     int dim = settings.value("map/dim", getDim()).toInt();
     if (dim == -1)
         dimactions[1]->setChecked(true);
@@ -321,12 +350,12 @@ void MainWindow::loadSettings()
     else
         dimactions[0]->setChecked(true);
 
-    int mc = MC_NEWEST;
-    uint64_t seed = 0;
-    getSeed(&mc, &seed, true);
-    mc = settings.value("map/mc", mc).toInt();
-    seed = (uint64_t) settings.value("map/seed", QVariant::fromValue((qlonglong)seed)).toLongLong();
-    setSeed(mc, seed);
+    WorldInfo wi;
+    getSeed(&wi, true);
+    wi.mc = settings.value("map/mc", wi.mc).toInt();
+    wi.large = settings.value("map/large", wi.large).toBool();
+    wi.seed = (uint64_t) settings.value("map/seed", QVariant::fromValue((qlonglong)wi.seed)).toLongLong();
+    setSeed(wi);
 
     qreal x = ui->mapView->getX();
     qreal z = ui->mapView->getZ();
@@ -380,14 +409,14 @@ bool MainWindow::saveProgress(QString fnam, bool quiet)
     QVector<Condition> condvec = formCond->getConditions();
     QVector<uint64_t> results = formControl->getResults();
 
-    int mc = MC_NEWEST;
-    getSeed(&mc, 0);
+    WorldInfo wi;
+    getSeed(&wi);
 
     QTextStream stream(&file);
     stream << "#Version:  " << VERS_MAJOR << "." << VERS_MINOR << "." << VERS_PATCH << "\n";
     stream << "#Time:     " << QDateTime::currentDateTime().toString() << "\n";
     // MC version of the session should take priority over the one in the settings
-    stream << "#MC:       " << mc2str(mc) << "\n";
+    stream << "#MC:       " << mc2str(wi.mc) << "\n";
 
     stream << "#Search:   " << searchconf.searchtype << "\n";
     if (!searchconf.slist64path.isEmpty())
@@ -445,9 +474,8 @@ bool MainWindow::loadProgress(QString fnam, bool quiet)
 
     char buf[4096];
     int tmp;
-    int mc = MC_NEWEST;
-    uint64_t seed;
-    getSeed(&mc, &seed, true);
+    WorldInfo wi;
+    getSeed(&wi, true);
 
     QTextStream stream(&file);
     QString line;
@@ -467,7 +495,7 @@ bool MainWindow::loadProgress(QString fnam, bool quiet)
             break;
 
         if (line.startsWith("#Time:")) continue;
-        else if (sscanf(p, "#MC:       %8[^\n]", buf) == 1)                     { mc = str2mc(buf); if (mc < 0) return false; }
+        else if (sscanf(p, "#MC:       %8[^\n]", buf) == 1)                     { wi.mc = str2mc(buf); if (wi.mc < 0) return false; }
         // SearchConfig
         else if (sscanf(p, "#Search:   %d", &searchconf.searchtype) == 1)       {}
         else if (sscanf(p, "#Progress: %" PRId64, &searchconf.startseed) == 1)  {}
@@ -508,7 +536,7 @@ bool MainWindow::loadProgress(QString fnam, bool quiet)
         }
     }
 
-    setSeed(mc, seed);
+    setSeed(wi);
 
     formControl->on_buttonClear_clicked();
     formControl->searchResultsAdd(seeds, false);
@@ -529,10 +557,9 @@ bool MainWindow::loadProgress(QString fnam, bool quiet)
 
 void MainWindow::updateMapSeed()
 {
-    int mc;
-    uint64_t seed;
-    if (getSeed(&mc, &seed))
-        setSeed(mc, seed);
+    WorldInfo wi;
+    if (getSeed(&wi))
+        setSeed(wi);
 }
 
 
@@ -653,11 +680,11 @@ void MainWindow::on_actionScan_seed_for_Quad_Huts_triggered()
 
 void MainWindow::on_actionOpen_shadow_seed_triggered()
 {
-    int mc;
-    uint64_t seed;
-    if (getSeed(&mc, &seed))
+    WorldInfo wi;
+    if (getSeed(&wi))
     {
-        setSeed(mc, getShadow(seed));
+        wi.seed = getShadow(wi.seed);
+        setSeed(wi);
     }
 }
 
@@ -685,6 +712,18 @@ void MainWindow::on_actionAddShadow_triggered()
     for (uint64_t s : results)
         shadows.push_back( getShadow(s) );
     formControl->searchResultsAdd(shadows, false);
+}
+
+void MainWindow::on_actionExtGen_triggered()
+{
+    ExtGenDialog *dialog = new ExtGenDialog(this, &g_extgen);
+    int status = dialog->exec();
+    if (status == QDialog::Accepted)
+    {
+        g_extgen = dialog->getSettings();
+        updateMapSeed();
+        update();
+    }
 }
 
 void MainWindow::on_mapView_customContextMenuRequested(const QPoint &pos)
@@ -767,9 +806,8 @@ void MainWindow::on_buttonAnalysis_clicked()
 
     bool everything = ui->radioEverything->isChecked();
 
-    int mc;
-    uint64_t seed;
-    if (!getSeed(&mc, &seed))
+    WorldInfo wi;
+    if (!getSeed(&wi))
         return;
 
     ui->buttonAnalysis->setEnabled(false);
@@ -781,8 +819,8 @@ void MainWindow::on_buttonAnalysis_clicked()
     int dim = getDim();
 
     LayerStack g;
-    setupGenerator(&g, mc);
-    applySeed(&g, seed);
+    setupGeneratorLargeBiomes(&g, wi.mc, wi.large);
+    applySeed(&g, wi.seed);
     int *ids = allocCache(g.entry_1, step, step);
 
     for (int x = x1; x <= x2; x += step)
@@ -800,13 +838,13 @@ void MainWindow::on_buttonAnalysis_clicked()
             }
             if (everything || dim == -1)
             {
-                genNetherScaled(mc, seed, 1, ids, x, z, w, h, 0, 0);
+                genNetherScaled(wi.mc, wi.seed, 1, ids, x, z, w, h, 0, 0);
                 for (int i = 0; i < w*h; i++)
                     idcnt[ ids[i] & 0xff ]++;
             }
             if (everything || dim == +1)
             {
-                genEndScaled(mc, seed, 1, ids, x, z, w, h);
+                genEndScaled(wi.mc, wi.seed, 1, ids, x, z, w, h);
                 for (int i = 0; i < w*h; i++)
                     idcnt[ ids[i] & 0xff ]++;
             }
@@ -862,9 +900,9 @@ void MainWindow::on_buttonAnalysis_clicked()
         int stype = mapopt2stype(sopt);
         st.clear();
         StructureConfig sconf;
-        if (!getStructureConfig_override(stype, mc, &sconf))
+        if (!getStructureConfig_override(stype, wi.mc, &sconf))
             continue;
-        getStructs(&st, sconf, mc, sdim, seed, x1, z1, x2, z2);
+        getStructs(&st, sconf, wi, sdim, x1, z1, x2, z2);
         if (st.empty())
             continue;
 
@@ -890,7 +928,7 @@ void MainWindow::on_buttonAnalysis_clicked()
 
     if (everything || (dim == 0 && getMapView()->getShow(D_SPAWN)))
     {
-        Pos pos = getSpawn(mc, &g, NULL, seed);
+        Pos pos = getSpawn(wi.mc, &g, NULL, wi.seed);
         if (pos.x >= x1 && pos.x <= x2 && pos.z >= z1 && pos.z <= z2)
         {
             item_cat = new QTreeWidgetItem(tree);
@@ -905,7 +943,7 @@ void MainWindow::on_buttonAnalysis_clicked()
     if (everything || (dim == 0 && getMapView()->getShow(D_STRONGHOLD)))
     {
         StrongholdIter sh;
-        initFirstStronghold(&sh, mc, seed);
+        initFirstStronghold(&sh, wi.mc, wi.seed);
         std::vector<Pos> shp;
         while (nextStronghold(&sh, &g, NULL) > 0)
         {

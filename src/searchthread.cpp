@@ -23,7 +23,7 @@ SearchThread::SearchThread(FormSearchControl *parent)
 }
 
 bool SearchThread::set(
-    QObject *mainwin, int mc,
+    QObject *mainwin, WorldInfo wi,
     const SearchConfig& sc, const Gen48Settings& gen48, const Config& config,
     std::vector<uint64_t>& slist, const QVector<Condition>& cv)
     /*
@@ -58,7 +58,7 @@ bool SearchThread::set(
             QMessageBox::warning(NULL, "Error", QString::asprintf("Encountered invalid filter type %d in condition ID [%02d].", c.type, c.save));
             return false;
         }
-        if (mc < g_filterinfo.list[c.type].mcmin)
+        if (wi.mc < g_filterinfo.list[c.type].mcmin)
         {
             const char *mcs = mc2str(g_filterinfo.list[c.type].mcmin);
             QString s = QString::asprintf("Condition [%02d] requires a minimum Minecraft version of %s.", c.save, mcs);
@@ -93,7 +93,7 @@ bool SearchThread::set(
         }
     }
 
-    itemgen.init(mainwin, mc, sc, gen48, config, slist, cv);
+    itemgen.init(mainwin, wi, sc, gen48, config, slist, cv);
 
     pool.setMaxThreadCount(sc.threads);
     recieved.resize(config.queueSize);

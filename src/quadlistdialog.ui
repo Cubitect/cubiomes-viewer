@@ -117,6 +117,30 @@
        </property>
       </widget>
      </item>
+     <item row="0" column="3">
+      <widget class="QLineEdit" name="lineSeed">
+       <property name="toolTip">
+        <string>press enter to accept</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="labeMC">
+       <property name="toolTip">
+        <string>Minecraft version</string>
+       </property>
+       <property name="text">
+        <string>MC</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="4">
+      <widget class="QPushButton" name="buttonGo">
+       <property name="text">
+        <string>Go</string>
+       </property>
+      </widget>
+     </item>
      <item row="0" column="1">
       <widget class="QComboBox" name="comboBoxMC">
        <property name="toolTip">
@@ -188,30 +212,6 @@
          <string>1.6</string>
         </property>
        </item>
-      </widget>
-     </item>
-     <item row="0" column="3">
-      <widget class="QLineEdit" name="lineSeed">
-       <property name="toolTip">
-        <string>press enter to accept</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="labeMC">
-       <property name="toolTip">
-        <string>Minecraft version</string>
-       </property>
-       <property name="text">
-        <string>MC</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="4">
-      <widget class="QPushButton" name="buttonGo">
-       <property name="text">
-        <string>Go</string>
-       </property>
       </widget>
      </item>
     </layout>

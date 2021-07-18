@@ -1,7 +1,10 @@
 #ifndef QUADLISTDIALOG_H
 #define QUADLISTDIALOG_H
 
+#include "settings.h"
+
 #include <QDialog>
+
 
 class MainWindow;
 
@@ -20,7 +23,7 @@ public:
     void loadSeed();
     void refresh();
 
-    bool getSeed(int *mc, uint64_t *seed);
+    bool getSeed(WorldInfo *wi);
 
 private slots:
     void on_buttonGo_clicked();

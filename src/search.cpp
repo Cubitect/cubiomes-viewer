@@ -179,7 +179,6 @@ L_qm_any:
     case F_RUINS:
     case F_SHIPWRECK:
     case F_TREASURE:
-    case F_MINESHAFT:
     case F_PORTAL:
     case F_PORTALN:
 
@@ -281,6 +280,37 @@ L_qm_any:
         }
         return 0;
 
+    case F_MINESHAFT:
+        x1 = cond->x1;
+        z1 = cond->z1;
+        x2 = cond->x2;
+        z2 = cond->z2;
+        if (cond->relative)
+        {
+            x1 += spos[cond->relative].cx;
+            z1 += spos[cond->relative].cz;
+            x2 += spos[cond->relative].cx;
+            z2 += spos[cond->relative].cz;
+        }
+        rx1 = x1 >> 4;
+        rz1 = z1 >> 4;
+        rx2 = x2 >> 4;
+        rz2 = z2 >> 4;
+        qual = getMineshafts(mc, seed, rx1, rz1, rx2, rz2, p, 128);
+        if (qual >= cond->count)
+        {
+            xt = zt = 0;
+            for (int i = 0; i < qual; i++)
+            {
+                xt += p[i].x;
+                zt += p[i].z;
+            }
+            sout->sconf = sconf;
+            sout->cx = xt / qual;
+            sout->cz = zt / qual;
+            return 1;
+        }
+        return 0;
 
     case F_SPAWN:
         // TODO: warn if spawn is used for relative positioning

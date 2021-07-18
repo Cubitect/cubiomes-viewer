@@ -40,36 +40,40 @@ void QuadListDialog::loadSeed()
     ui->comboBoxMC->setCurrentText("1.17");
     ui->lineSeed->clear();
 
-    int mc;
-    uint64_t seed;
-    mainwindow->getSeed(&mc, &seed, false);
+    WorldInfo wi;
+    mainwindow->getSeed(&wi, false);
 
-    const char *mcstr = mc2str(mc);
+    const char *mcstr = mc2str(wi.mc);
     if (!mcstr)
     {
-        qDebug() << "Unknown MC version: " << mc;
+        qDebug() << "Unknown MC version: " << wi.mc;
         return;
     }
 
     ui->comboBoxMC->setCurrentText(mcstr);
-    ui->lineSeed->setText(QString::asprintf("%" PRId64, (int64_t)seed));
+    ui->lineSeed->setText(QString::asprintf("%" PRId64, (int64_t)wi.seed));
 }
 
-bool QuadListDialog::getSeed(int *mc, uint64_t *seed)
+bool QuadListDialog::getSeed(WorldInfo *wi)
 {
+    // init using mainwindow
+    bool ok = mainwindow->getSeed(wi, false);
     const std::string& mcs = ui->comboBoxMC->currentText().toStdString();
-    *mc = str2mc(mcs.c_str());
-    if (*mc < 0)
+    wi->mc = str2mc(mcs.c_str());
+    if (wi->mc < 0)
     {
-        qDebug() << "Unknown MC version: " << *mc;
-        return false;
+        wi->mc = MC_NEWEST;
+        qDebug() << "Unknown MC version: " << wi->mc;
+        ok = false;
     }
 
-    int v = str2seed(ui->lineSeed->text(), seed);
+    int v = str2seed(ui->lineSeed->text(), &wi->seed);
     if (v == S_RANDOM)
-        ui->lineSeed->setText(QString::asprintf("%" PRId64, (int64_t)*seed));
+    {
+        ui->lineSeed->setText(QString::asprintf("%" PRId64, (int64_t)wi->seed));
+    }
 
-    return true;
+    return ok;
 }
 
 
@@ -78,16 +82,15 @@ void QuadListDialog::refresh()
     ui->listQuadStruct->setRowCount(0);
     ui->labelMsg->clear();
 
-    int mc;
-    uint64_t seed;
-    if (!getSeed(&mc, &seed))
+    WorldInfo wi;
+    if (!getSeed(&wi))
         return;
 
     LayerStack g;
-    setupGenerator(&g, mc);
+    setupGeneratorLargeBiomes(&g, wi.mc, wi.large);
 
     StructureConfig sconf;
-    getStructureConfig_override(Swamp_Hut, mc, &sconf);
+    getStructureConfig_override(Swamp_Hut, wi.mc, &sconf);
 
     const int maxq = 1000;
     Pos *qlist = new Pos[maxq];
@@ -95,7 +98,7 @@ void QuadListDialog::refresh()
     int qcnt;
 
     qcnt = scanForQuads(
-                sconf, 128, (seed) & MASK48,
+                sconf, 128, (wi.seed) & MASK48,
                 low20QuadHutBarely, sizeof(low20QuadHutBarely) / sizeof(uint64_t), 20, sconf.salt,
                 -r, -r, 2*r, 2*r, qlist, maxq);
 
@@ -107,20 +110,19 @@ void QuadListDialog::refresh()
     for (int i = 0; i < qcnt; i++)
     {
         Pos qh[4];
-        getStructurePos(sconf.structType, mc, seed, qlist[i].x+0, qlist[i].z+0, qh+0);
-        getStructurePos(sconf.structType, mc, seed, qlist[i].x+0, qlist[i].z+1, qh+1);
-        getStructurePos(sconf.structType, mc, seed, qlist[i].x+1, qlist[i].z+0, qh+2);
-        getStructurePos(sconf.structType, mc, seed, qlist[i].x+1, qlist[i].z+1, qh+3);
-
-        if (isViableStructurePos(sconf.structType, mc, &g, seed, qh[0].x, qh[0].z) &&
-            isViableStructurePos(sconf.structType, mc, &g, seed, qh[1].x, qh[1].z) &&
-            isViableStructurePos(sconf.structType, mc, &g, seed, qh[2].x, qh[2].z) &&
-            isViableStructurePos(sconf.structType, mc, &g, seed, qh[3].x, qh[3].z))
+        getStructurePos(sconf.structType, wi.mc, wi.seed, qlist[i].x+0, qlist[i].z+0, qh+0);
+        getStructurePos(sconf.structType, wi.mc, wi.seed, qlist[i].x+0, qlist[i].z+1, qh+1);
+        getStructurePos(sconf.structType, wi.mc, wi.seed, qlist[i].x+1, qlist[i].z+0, qh+2);
+        getStructurePos(sconf.structType, wi.mc, wi.seed, qlist[i].x+1, qlist[i].z+1, qh+3);
+        if (isViableStructurePos(sconf.structType, wi.mc, &g, wi.seed, qh[0].x, qh[0].z) &&
+            isViableStructurePos(sconf.structType, wi.mc, &g, wi.seed, qh[1].x, qh[1].z) &&
+            isViableStructurePos(sconf.structType, wi.mc, &g, wi.seed, qh[2].x, qh[2].z) &&
+            isViableStructurePos(sconf.structType, wi.mc, &g, wi.seed, qh[3].x, qh[3].z))
         {
             ui->listQuadStruct->insertRow(row);
             Pos afk;
             afk = getOptimalAfk(qh, 7,7,9, 0);
-            float rad = isQuadBase(sconf, moveStructure(seed, -qlist[i].x, -qlist[i].z), 128);
+            float rad = isQuadBase(sconf, moveStructure(wi.seed, -qlist[i].x, -qlist[i].z), 128);
             int dist = (int) round(sqrt(afk.x * (qreal)afk.x + afk.z * (qreal)afk.z));
             QVariant var = QVariant::fromValue(afk);
 
@@ -147,13 +149,13 @@ void QuadListDialog::refresh()
     }
     qhn = row;
 
-    if (mc >= MC_1_8)
+    if (wi.mc >= MC_1_8)
     {
-        getStructureConfig_override(Monument, mc, &sconf);
+        getStructureConfig_override(Monument, wi.mc, &sconf);
         // TODO: check salt delta
         uint64_t salt_delta = sconf.salt - MONUMENT_CONFIG.salt;
         qcnt = scanForQuads(
-                    sconf, 160, seed & MASK48,
+                    sconf, 160, wi.seed & MASK48,
                     g_qm_90, sizeof(g_qm_90) / sizeof(uint64_t), 48, salt_delta,
                     -r, -r, 2*r, 2*r, qlist, maxq);
 
@@ -163,20 +165,20 @@ void QuadListDialog::refresh()
         for (int i = 0; i < qcnt; i++)
         {
             Pos qm[4];
-            getStructurePos(sconf.structType, mc, seed, qlist[i].x+0, qlist[i].z+0, qm+0);
-            getStructurePos(sconf.structType, mc, seed, qlist[i].x+0, qlist[i].z+1, qm+1);
-            getStructurePos(sconf.structType, mc, seed, qlist[i].x+1, qlist[i].z+0, qm+2);
-            getStructurePos(sconf.structType, mc, seed, qlist[i].x+1, qlist[i].z+1, qm+3);
-            if (isViableStructurePos(sconf.structType, mc, &g, seed, qm[0].x, qm[0].z) &&
-                isViableStructurePos(sconf.structType, mc, &g, seed, qm[1].x, qm[1].z) &&
-                isViableStructurePos(sconf.structType, mc, &g, seed, qm[2].x, qm[2].z) &&
-                isViableStructurePos(sconf.structType, mc, &g, seed, qm[3].x, qm[3].z))
+            getStructurePos(sconf.structType, wi.mc, wi.seed, qlist[i].x+0, qlist[i].z+0, qm+0);
+            getStructurePos(sconf.structType, wi.mc, wi.seed, qlist[i].x+0, qlist[i].z+1, qm+1);
+            getStructurePos(sconf.structType, wi.mc, wi.seed, qlist[i].x+1, qlist[i].z+0, qm+2);
+            getStructurePos(sconf.structType, wi.mc, wi.seed, qlist[i].x+1, qlist[i].z+1, qm+3);
+            if (isViableStructurePos(sconf.structType, wi.mc, &g, wi.seed, qm[0].x, qm[0].z) &&
+                isViableStructurePos(sconf.structType, wi.mc, &g, wi.seed, qm[1].x, qm[1].z) &&
+                isViableStructurePos(sconf.structType, wi.mc, &g, wi.seed, qm[2].x, qm[2].z) &&
+                isViableStructurePos(sconf.structType, wi.mc, &g, wi.seed, qm[3].x, qm[3].z))
             {
                 ui->listQuadStruct->insertRow(row);
                 Pos afk;
                 afk = getOptimalAfk(qm, 58,23,58, 0);
                 afk.x -= 29; afk.z -= 29; // monuments position is centered
-                float rad = isQuadBase(sconf, moveStructure(seed, -qlist[i].x, -qlist[i].z), 160);
+                float rad = isQuadBase(sconf, moveStructure(wi.seed, -qlist[i].x, -qlist[i].z), 160);
                 int dist = (int) round(sqrt(afk.x * (qreal)afk.x + afk.z * (qreal)afk.z));
                 QVariant var = QVariant::fromValue(afk);
 
@@ -238,16 +240,15 @@ void QuadListDialog::gotoSwampHut()
     if (!item)
         return;
 
-    int mc;
-    uint64_t seed;
-    if (!getSeed(&mc, &seed))
+    WorldInfo wi;
+    if (!getSeed(&wi))
         return;
 
     QVariant dat = item->data(Qt::UserRole);
     if (dat.isValid())
     {
         Pos p = qvariant_cast<Pos>(dat);
-        mainwindow->setSeed(mc, seed);
+        mainwindow->setSeed(wi);
         mapView->setView(p.x+0.5, p.z+0.5);
     }
 }

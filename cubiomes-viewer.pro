@@ -35,6 +35,7 @@ SOURCES += \
         src/aboutdialog.cpp \
         src/collapsible.cpp \
         src/configdialog.cpp \
+        src/extgendialog.cpp \
         src/formconditions.cpp \
         src/formgen48.cpp \
         src/formsearchcontrol.cpp \
@@ -60,6 +61,7 @@ HEADERS += \
         src/aboutdialog.h \
         src/collapsible.h \
         src/configdialog.h \
+        src/extgendialog.h \
         src/formconditions.h \
         src/formgen48.h \
         src/formsearchcontrol.h \
@@ -81,6 +83,7 @@ HEADERS += \
 FORMS += \
         src/aboutdialog.ui \
         src/configdialog.ui \
+        src/extgendialog.ui \
         src/formconditions.ui \
         src/formgen48.ui \
         src/formsearchcontrol.ui \

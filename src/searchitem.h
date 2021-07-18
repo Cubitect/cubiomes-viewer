@@ -52,6 +52,7 @@ signals:
 public:
     int                 searchtype;
     int                 mc;
+    int                 large;
     const Condition   * cond;
     int                 ccnt;
     uint64_t            itemid;     // item identifier
@@ -72,7 +73,7 @@ public:
 struct SearchItemGenerator
 {
     void init(
-        QObject *mainwin, int mc,
+        QObject *mainwin, WorldInfo wi,
         const SearchConfig& sc, const Gen48Settings& gen48, const Config& config,
         const std::vector<uint64_t>& slist, const QVector<Condition>& cv);
 
@@ -84,6 +85,7 @@ struct SearchItemGenerator
     QObject               * mainwin;
     int                     searchtype;
     int                     mc;
+    int                     large;
     QVector<Condition>      condvec;
     uint64_t                itemid;     // item incrementor
     int                     itemsiz;    // number of seeds per search item

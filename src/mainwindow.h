@@ -45,8 +45,8 @@ public:
 
     QAction *addMapAction(int sopt, const char *iconpath, const char *tip);
 
-    bool getSeed(int *mc, uint64_t *seed, bool applyrand = true);
-    bool setSeed(int mc, uint64_t seed, int dim = INT_MAX);
+    bool getSeed(WorldInfo *wi, bool applyrand = true);
+    bool setSeed(WorldInfo wi, int dim = INT_MAX);
     int getDim();
     MapView *getMapView();
 
@@ -80,6 +80,7 @@ private slots:
     void on_actionCopy_triggered();
     void on_actionPaste_triggered();
     void on_actionAddShadow_triggered();
+    void on_actionExtGen_triggered();
 
     void on_mapView_customContextMenuRequested(const QPoint &pos);
 

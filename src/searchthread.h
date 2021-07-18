@@ -24,7 +24,7 @@ public:
 
     SearchThread(FormSearchControl *parent);
 
-    bool set(QObject *mainwin, int mc,
+    bool set(QObject *mainwin, WorldInfo wi,
             const SearchConfig& sc, const Gen48Settings& gen48, const Config& config,
             std::vector<uint64_t>& slist, const QVector<Condition>& cv);
 

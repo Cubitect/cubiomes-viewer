@@ -1,7 +1,50 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
+#include "cubiomes/finders.h"
+
 #include <QThread>
+
+#include <vector>
+
+
+struct ExtGenSettings
+{
+    bool largeBiomes;
+    bool saltOverride;
+    uint64_t salts[FEATURE_NUM];
+
+    ExtGenSettings() { reset(); }
+
+    void reset()
+    {
+        largeBiomes = false;
+        saltOverride = false;
+        for (int i = 0; i < FEATURE_NUM; i++)
+            salts[i] = ~(uint64_t)0;
+    }
+};
+
+struct WorldInfo
+{
+    int mc;
+    bool large;
+    uint64_t seed;
+
+    WorldInfo() { reset(); }
+
+    bool equals(const WorldInfo& wi) const
+    {
+        return mc == wi.mc && large == wi.large && seed == wi.seed;
+    }
+
+    void reset()
+    {
+        mc = MC_NEWEST;
+        large = false;
+        seed = 0;
+    }
+};
 
 enum { STYLE_SYSTEM, STYLE_DARK };
 
@@ -22,7 +65,7 @@ struct Config
         smoothMotion = true;
         restoreSession = true;
         autosaveCycle = 10;
-        uistyle = STYLE_DARK;
+        uistyle = STYLE_SYSTEM;
         seedsPerItem = 256;
         queueSize = QThread::idealThreadCount();
         maxMatching = 65536;

@@ -72,15 +72,15 @@ MapView::~MapView()
     delete overlay;
 }
 
-void MapView::setSeed(int mc, uint64_t s, int dim)
+void MapView::setSeed(WorldInfo wi, int dim)
 {
     prevx = focusx = getX();
     prevz = focusz = getZ();
     velx = velz = 0;
-    if (world == NULL || world->mc != mc || world->seed != s)
+    if (world == NULL || !wi.equals(world->wi))
     {
         delete world;
-        world = new QWorld(mc, s, dim);
+        world = new QWorld(wi, dim);
     }
     else if (world->dim != dim)
     {

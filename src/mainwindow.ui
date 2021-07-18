@@ -643,6 +643,7 @@ QToolButton:checked {
     <addaction name="separator"/>
     <addaction name="actionAddShadow"/>
     <addaction name="separator"/>
+    <addaction name="actionExtGen"/>
     <addaction name="actionPreferences"/>
    </widget>
    <addaction name="menuFile"/>
@@ -716,6 +717,11 @@ QToolButton:checked {
   <action name="actionAddShadow">
    <property name="text">
     <string>Add shadow for all seeds</string>
+   </property>
+  </action>
+  <action name="actionExtGen">
+   <property name="text">
+    <string>World settings...</string>
    </property>
   </action>
  </widget>

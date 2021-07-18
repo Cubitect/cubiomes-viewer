@@ -1,12 +1,15 @@
 #ifndef QUAD_H
 #define QUAD_H
 
+#include "settings.h"
+
 #include <QRunnable>
 #include <QImage>
 #include <QPainter>
 #include <QAtomicPointer>
 
 #include "cubiomes/finders.h"
+
 
 enum {
     D_NONE = -1,
@@ -131,7 +134,7 @@ struct VarPos
 };
 
 void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
-        int mc, int dim, uint64_t seed, int x0, int z0, int x1, int z1);
+        WorldInfo wi, int dim, int x0, int z0, int x1, int z1);
 
 class Quad : public QRunnable
 {
@@ -141,8 +144,7 @@ public:
 
     void run();
 
-    int mc;
-    uint64_t seed;
+    WorldInfo wi;
     int dim;
     const Layer *entry;
     int ti, tj;
@@ -170,8 +172,8 @@ struct Level
     Level();
     ~Level();
 
-    void init4map(int mc, uint64_t ws, int dim, int pix, int layerscale);
-    void init4struct(int mc, uint64_t ws, int dim, int blocks, int sopt, int viewlv);
+    void init4map(WorldInfo wi, int dim, int pix, int layerscale);
+    void init4struct(WorldInfo wi, int dim, int blocks, int sopt, int viewlv);
 
     void resizeLevel(std::vector<Quad*>& cache, int x, int z, int w, int h);
     void update(std::vector<Quad*>& cache, qreal bx0, qreal bz0, qreal bx1, qreal bz1);
@@ -179,8 +181,7 @@ struct Level
     std::vector<Quad*> cells;
     LayerStack g;
     Layer *entry;
-    uint64_t seed;
-    int mc;
+    WorldInfo wi;
     int dim;
     int tx, tz, tw, th;
     int scale;
@@ -193,7 +194,7 @@ struct Level
 
 struct QWorld
 {
-    QWorld(int mc, uint64_t seed, int dim = 0);
+    QWorld(WorldInfo wi, int dim = 0);
     ~QWorld();
 
     void setDim(int dim);
@@ -204,8 +205,7 @@ struct QWorld
 
     int getBiome(Pos p);
 
-    int mc;
-    uint64_t seed;
+    WorldInfo wi;
     int dim;
     LayerStack g;
     uint64_t sha;

@@ -21,7 +21,7 @@ SearchItem::~SearchItem()
 void SearchItem::run()
 {
     LayerStack g;
-    setupGenerator(&g, mc);
+    setupGeneratorLargeBiomes(&g, mc, large);
     StructPos spos[100] = {};
     QVector<uint64_t> matches;
 
@@ -127,13 +127,14 @@ void SearchItem::run()
 
 
 void SearchItemGenerator::init(
-    QObject *mainwin, int mc,
+    QObject *mainwin, WorldInfo wi,
     const SearchConfig& sc, const Gen48Settings& gen48, const Config& config,
     const std::vector<uint64_t>& slist, const QVector<Condition>& cv)
 {
     this->mainwin = mainwin;
     this->searchtype = sc.searchtype;
-    this->mc = mc;
+    this->mc = wi.mc;
+    this->large = wi.large;
     this->condvec = cv;
     this->itemid = 0;
     this->itemsiz = config.seedsPerItem;
@@ -436,6 +437,7 @@ SearchItem *SearchItemGenerator::requestItem()
 
     item->searchtype = searchtype;
     item->mc        = mc;
+    item->large     = large;
     item->cond      = condvec.data();
     item->ccnt      = condvec.size();
     item->itemid    = itemid++;
