@@ -72,6 +72,12 @@ MapView::~MapView()
     delete overlay;
 }
 
+void MapView::deleteWorld()
+{
+    delete world;
+    world = NULL;
+}
+
 void MapView::setSeed(WorldInfo wi, int dim)
 {
     prevx = focusx = getX();

@@ -293,13 +293,15 @@ void SearchItemGenerator::presearch()
         }
         else if (gen48.mode == GEN48_QM)
         {
+            StructureConfig sconf;
+            getStructureConfig_override(Monument, mc, &sconf);
             const uint64_t *qb = g_qm_90;
             uint64_t qn = sizeof(g_qm_90) / sizeof(uint64_t);
             slist.clear();
             slist.reserve(qn);
             for (uint64_t i = 0; i < qn; i++)
                 if (qmonumentQual(qb[i]) >= gen48.qmarea)
-                    slist.push_back(qb[i]);
+                    slist.push_back((qb[i] - sconf.salt) & MASK48);
         }
         else if (gen48.mode == GEN48_LIST)
         {

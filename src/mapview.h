@@ -36,6 +36,7 @@ public:
     qreal getZ();
     qreal getScale() const { return 1.0 / blocks2pix; }
 
+    void deleteWorld();
     void setSeed(WorldInfo wi, int dim);
     void setView(qreal x, qreal z, qreal scale = 0);
 

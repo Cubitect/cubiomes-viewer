@@ -60,8 +60,8 @@ ExtGenDialog::~ExtGenDialog()
 
 void ExtGenDialog::initSettings(ExtGenSettings *extgen)
 {
-    ui->checkLarge->setChecked(extgen->largeBiomes);
-    ui->groupSalts->setChecked(extgen->saltOverride);
+    // start checked, otherwise Qt doesn't respond to initial uncheck
+    ui->groupSalts->setChecked(true);
 
     for (int i = 0; i < FEATURE_NUM; i++)
     {
@@ -71,17 +71,18 @@ void ExtGenDialog::initSettings(ExtGenSettings *extgen)
         if (salt != ~(uint64_t)0)
         {
             checkSalts[i]->setChecked(salt <= MASK48);
-            lineSalts[i]->setEnabled(salt <= MASK48);
             lineSalts[i]->setText(QString::asprintf("%" PRIu64, salt & MASK48));
         }
         else
         {
             checkSalts[i]->setChecked(false);
-            lineSalts[i]->setEnabled(false);
             lineSalts[i]->setText("");
         }
     }
     updateToggles();
+
+    ui->checkLarge->setChecked(extgen->largeBiomes);
+    ui->groupSalts->setChecked(extgen->saltOverride);
 }
 
 ExtGenSettings ExtGenDialog::getSettings()

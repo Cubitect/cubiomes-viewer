@@ -152,11 +152,9 @@ void QuadListDialog::refresh()
     if (wi.mc >= MC_1_8)
     {
         getStructureConfig_override(Monument, wi.mc, &sconf);
-        // TODO: check salt delta
-        uint64_t salt_delta = sconf.salt - MONUMENT_CONFIG.salt;
         qcnt = scanForQuads(
                     sconf, 160, wi.seed & MASK48,
-                    g_qm_90, sizeof(g_qm_90) / sizeof(uint64_t), 48, salt_delta,
+                    g_qm_90, sizeof(g_qm_90) / sizeof(uint64_t), 48, sconf.salt,
                     -r, -r, 2*r, 2*r, qlist, maxq);
 
         if (qcnt >= maxq)

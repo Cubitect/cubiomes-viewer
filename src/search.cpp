@@ -146,13 +146,12 @@ L_qm_any:
         }
         if (scanForQuads(
                 sconf, 160, (seed) & MASK48, g_qm_90,
-                sizeof(g_qm_90) / sizeof(uint64_t), 48,
-                0, // 0 for salt offset as g_qm_90 are not protobases
+                sizeof(g_qm_90) / sizeof(uint64_t), 48, sconf.salt,
                 rx1, rz1, rx2 - rx1 + 1, rz2 - rz1 + 1, &pc, 1) >= 1)
         {
             rx = pc.x; rz = pc.z;
             s = moveStructure(seed, -rx, -rz);
-            if (qmonumentQual(s) >= qual)
+            if (qmonumentQual(s + sconf.salt) >= qual)
             {
                 sout->sconf = sconf;
                 getStructurePos(sconf.structType, mc, seed, rx+0, rz+0, p+0);

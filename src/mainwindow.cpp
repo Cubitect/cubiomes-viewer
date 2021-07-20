@@ -721,6 +721,8 @@ void MainWindow::on_actionExtGen_triggered()
     if (status == QDialog::Accepted)
     {
         g_extgen = dialog->getSettings();
+        // invalidate the map world, forcing an update
+        getMapView()->deleteWorld();
         updateMapSeed();
         update();
     }
