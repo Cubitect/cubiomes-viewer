@@ -84,11 +84,9 @@ MainWindow::MainWindow(QWidget *parent)
         "The generator mode <b>Auto</b> is recommended for general use, which "
         "automatically selects suitable options based on the conditions list."
         "</p><p>"
-        "The <b>Quad-feature</b> generator mode uses certain low bits to "
-        "produce a list of candidates for structures in ideal proximity. This "
-        "only works for structures with uniform distributions of region-size=32 "
-        "and chunk-gap=8. For swamp huts this can be extended to include more "
-        "constellations with all bounding boxes within 128 blocks."
+        "The <b>Quad-feature</b> mode produces candidates for "
+        "quad&#8209;structures that have a uniform distribution of "
+        "region&#8209;size=32 and chunk&#8209;gap=8, such as swamp huts."
         "</p><p>"
         "A perfect <b>Quad-monument</b> structure constellation does not "
         "actually exist, but some extremely rare structure seed bases get close, "
@@ -280,6 +278,7 @@ void MainWindow::saveSettings()
     settings.setValue("mainwindow/pos", pos());
     settings.setValue("mainwindow/prevdir", prevdir);
     settings.setValue("config/restoreSession", config.restoreSession);
+    settings.setValue("config/showBBoxes", config.showBBoxes);
     settings.setValue("config/autosaveCycle", config.autosaveCycle);
     settings.setValue("config/smoothMotion", config.smoothMotion);
     settings.setValue("config/uistyle", config.uistyle);
@@ -324,6 +323,7 @@ void MainWindow::loadSettings()
     move(settings.value("mainwindow/pos", pos()).toPoint());
     prevdir = settings.value("mainwindow/prevdir", pos()).toString();
     config.smoothMotion = settings.value("config/smoothMotion", config.smoothMotion).toBool();
+    config.showBBoxes = settings.value("config/showBBoxes", config.showBBoxes).toBool();
     config.restoreSession = settings.value("config/restoreSession", config.restoreSession).toBool();
     config.autosaveCycle = settings.value("config/autosaveCycle", config.autosaveCycle).toInt();
     config.uistyle = settings.value("config/uistyle", config.uistyle).toInt();
@@ -331,6 +331,7 @@ void MainWindow::loadSettings()
     config.queueSize = settings.value("config/queueSize", config.queueSize).toInt();
     config.maxMatching = settings.value("config/maxMatching", config.maxMatching).toInt();
 
+    ui->mapView->setShowBB(config.showBBoxes);
     ui->mapView->setSmoothMotion(config.smoothMotion);
     onStyleChanged(config.uistyle);
 
@@ -650,6 +651,7 @@ void MainWindow::on_actionPreferences_triggered()
     {
         Config oldConfig = config;
         config = dialog->getSettings();
+        ui->mapView->setShowBB(config.showBBoxes);
         ui->mapView->setSmoothMotion(config.smoothMotion);
         if (oldConfig.uistyle != config.uistyle)
             onStyleChanged(config.uistyle);
@@ -866,7 +868,7 @@ void MainWindow::on_buttonAnalysis_clicked()
 
     QTreeWidgetItem* item_cat;
     item_cat = new QTreeWidgetItem(tree);
-    item_cat->setText(0, "Biomes");
+    item_cat->setText(0, "biomes");
     item_cat->setData(1, Qt::DisplayRole, QVariant::fromValue(bcnt));
 
     for (int id = 0; id < 256; id++)
@@ -922,7 +924,7 @@ void MainWindow::on_buttonAnalysis_clicked()
             if (vp.variant)
             {
                 if (stype == Village)
-                    item->setText(1, "Abandoned");
+                    item->setText(1, "abandoned");
             }
         }
         //tree->insertTopLevelItem(stype, item_cat);
@@ -934,7 +936,7 @@ void MainWindow::on_buttonAnalysis_clicked()
         if (pos.x >= x1 && pos.x <= x2 && pos.z >= z1 && pos.z <= z2)
         {
             item_cat = new QTreeWidgetItem(tree);
-            item_cat->setText(0, "Spawn");
+            item_cat->setText(0, "spawn");
             item_cat->setData(1, Qt::DisplayRole, QVariant::fromValue(1));
             QTreeWidgetItem* item = new QTreeWidgetItem(item_cat);
             item->setData(0, Qt::UserRole, QVariant::fromValue(pos));
@@ -957,7 +959,7 @@ void MainWindow::on_buttonAnalysis_clicked()
         if (!shp.empty())
         {
             item_cat = new QTreeWidgetItem(tree);
-            item_cat->setText(0, "Stronghold");
+            item_cat->setText(0, "stronghold");
             item_cat->setData(1, Qt::DisplayRole, QVariant::fromValue(shp.size()));
             for (Pos pos : shp)
             {

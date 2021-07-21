@@ -61,7 +61,12 @@ static bool isInnerRingOk(int mc, uint64_t seed, int x1, int z1, int x2, int z2,
 }
 
 
-int testCond(StructPos *spos, uint64_t seed, const Condition *cond, int mc, LayerStack *g, std::atomic_bool *abort)
+int
+testCond(
+        StructPos *spos, const Condition *cond,
+        int mc, LayerStack *g, uint64_t seed,
+        std::atomic_bool *abort
+    )
 {
     int x1, x2, z1, z2;
     int rx1, rx2, rz1, rz2, rx, rz;
@@ -607,3 +612,94 @@ L_nether_end:
 
     return 1;
 }
+
+
+void findQuadStructs(
+        int styp, int mc, LayerStack *g, uint64_t seed,
+        std::vector<QuadInfo> *out
+    )
+{
+    StructureConfig sconf;
+    if (!getStructureConfig_override(styp, mc, &sconf))
+        return;
+
+    int qmax = 1000;
+    Pos *qlist = new Pos[qmax];
+    int r = 3e7 / 512;
+    int qcnt;
+
+    if (styp == Swamp_Hut)
+    {
+        qcnt = scanForQuads(
+            sconf, 128, seed & MASK48,
+            low20QuadHutBarely, sizeof(low20QuadHutBarely) / sizeof(uint64_t),
+            20, sconf.salt,
+            -r, -r, 2*r, 2*r, qlist, qmax
+        );
+
+        for (int i = 0; i < qcnt; i++)
+        {
+            Pos qr = qlist[i];
+            Pos qs[4];
+            getStructurePos(styp, mc, seed, qr.x+0, qr.z+0, qs+0);
+            getStructurePos(styp, mc, seed, qr.x+0, qr.z+1, qs+1);
+            getStructurePos(styp, mc, seed, qr.x+1, qr.z+0, qs+2);
+            getStructurePos(styp, mc, seed, qr.x+1, qr.z+1, qs+3);
+            if (isViableStructurePos(styp, mc, g, seed, qs[0].x, qs[0].z) &&
+                isViableStructurePos(styp, mc, g, seed, qs[1].x, qs[1].z) &&
+                isViableStructurePos(styp, mc, g, seed, qs[2].x, qs[2].z) &&
+                isViableStructurePos(styp, mc, g, seed, qs[3].x, qs[3].z))
+            {
+                QuadInfo qinfo;
+                for (int j = 0; j < 4; j++)
+                    qinfo.p[j] = qs[j];
+                qinfo.typ = styp;
+                qinfo.afk = getOptimalAfk(qs, 7,7,9, &qinfo.spcnt);
+                qinfo.rad = isQuadBase(sconf, moveStructure(seed,-qr.x,-qr.z), 160);
+                out->push_back(qinfo);
+            }
+        }
+    }
+    else if (styp == Monument)
+    {
+        qcnt = scanForQuads(
+            sconf, 160, seed & MASK48,
+            g_qm_90, sizeof(g_qm_90) / sizeof(uint64_t),
+            48, sconf.salt,
+            -r, -r, 2*r, 2*r, qlist, qmax
+        );
+
+        for (int i = 0; i < qcnt; i++)
+        {
+            Pos qr = qlist[i];
+            Pos qs[4];
+            getStructurePos(styp, mc, seed, qr.x+0, qr.z+0, qs+0);
+            getStructurePos(styp, mc, seed, qr.x+0, qr.z+1, qs+1);
+            getStructurePos(styp, mc, seed, qr.x+1, qr.z+0, qs+2);
+            getStructurePos(styp, mc, seed, qr.x+1, qr.z+1, qs+3);
+            if (isViableStructurePos(styp, mc, g, seed, qs[0].x, qs[0].z) &&
+                isViableStructurePos(styp, mc, g, seed, qs[1].x, qs[1].z) &&
+                isViableStructurePos(styp, mc, g, seed, qs[2].x, qs[2].z) &&
+                isViableStructurePos(styp, mc, g, seed, qs[3].x, qs[3].z))
+            {
+                QuadInfo qinfo;
+                for (int j = 0; j < 4; j++)
+                    qinfo.p[j] = qs[j];
+                qinfo.typ = styp;
+                qinfo.afk = getOptimalAfk(qs, 58,0/*23*/,58, &qinfo.spcnt);
+                qinfo.afk.x -= 29;
+                qinfo.afk.z -= 29;
+                qinfo.rad = isQuadBase(sconf, moveStructure(seed,-qr.x,-qr.z), 160);
+                out->push_back(qinfo);
+            }
+        }
+    }
+
+    delete[] qlist;
+}
+
+
+
+
+
+

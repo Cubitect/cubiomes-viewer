@@ -409,8 +409,10 @@ QWorld::QWorld(WorldInfo wi, int dim)
     , cachedbiomes()
     , cachedstruct()
     , cachesize()
+    , showBB()
     , spawn()
     , strongholds()
+    , qsinfo()
     , isdel()
     , slimeimg()
     , slimex()
@@ -509,6 +511,7 @@ QWorld::~QWorld()
     {
         delete spawn;
         delete strongholds;
+        delete qsinfo;
     }
 }
 
@@ -642,6 +645,15 @@ struct SpawnStronghold : public QRunnable
         }
 
         world->strongholds = shp;
+
+        std::vector<QuadInfo> *qsinfo = new std::vector<QuadInfo>;
+
+        if (!world->isdel)
+            findQuadStructs(Swamp_Hut, wi.mc, &g, wi.seed, qsinfo);
+        if (!world->isdel)
+            findQuadStructs(Monument, wi.mc, &g, wi.seed, qsinfo);
+
+        world->qsinfo = qsinfo;
     }
 };
 
@@ -738,6 +750,26 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
     }
 
 
+    if (showBB && blocks2pix >= 1.0 && qsinfo && dim == 0)
+    {
+        for (QuadInfo qi : *qsinfo)
+        {
+            if (qi.typ == Swamp_Hut && !sshow[D_HUT])
+                continue;
+            if (qi.typ == Monument && !sshow[D_MONUMENT])
+                continue;
+
+            qreal x = vw/2.0 + (qi.afk.x - focusx) * blocks2pix;
+            qreal y = vh/2.0 + (qi.afk.z - focusz) * blocks2pix;
+            qreal r = 128.0 * blocks2pix;
+            painter.setPen(QPen(QColor(192, 0, 0, 160), 1));
+            painter.drawEllipse(QRectF(x-r, y-r, 2*r, 2*r));
+            r = 16;
+            painter.drawLine(QPointF(x-r,y), QPointF(x+r,y));
+            painter.drawLine(QPointF(x,y-r), QPointF(x,y+r));
+        }
+    }
+
     for (int sopt = D_DESERT; sopt < D_SPAWN; sopt++)
     {
         Level& l = lvs[sopt];
@@ -759,29 +791,67 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
                 if (x < 0 || x >= vw || y < 0 || y >= vh)
                     continue;
 
-                QPointF d = QPointF(x, y);
-                QRectF r = icons[sopt].rect();
-                if (sopt == D_VILLAGE)
+                if (showBB && blocks2pix > 1.0)
                 {
-                    if (vp.variant) {
-                        painter.drawPixmap(x-r.width()/2, y-r.height()/2, iconzvil);
-                    } else {
-                        frags.push_back(QPainter::PixmapFragment::create(d, r));
+                    int sx = 0, sz = 0;
+                    if (sopt == D_DESERT)
+                    {
+                        sx = 21; sz = 21;
+                    }
+                    else if (sopt == D_JUNGLE)
+                    {
+                        sx = 12; sz = 15;
+                    }
+                    else if (sopt == D_HUT)
+                    {
+                        sx = 7; sz = 9;
+                    }
+                    else if (sopt == D_MONUMENT)
+                    {
+                        x -= 29 * blocks2pix;
+                        y -= 29 * blocks2pix;
+                        sx = 58; sz = 58;
+                    }
+
+                    if (sx && sz)
+                    {   // draw bounding box and move icon to its center
+                        qreal dx = sx * blocks2pix;
+                        qreal dy = sz * blocks2pix;
+                        painter.setPen(QPen(QColor(192, 0, 0, 160), 1));
+                        painter.drawRect(QRect(x, y, dx, dy));
+                        x += dx / 2;
+                        y += dy / 2;
                     }
                 }
-                else
-                {
-                    frags.push_back(QPainter::PixmapFragment::create(d, r));
-                }
+
+                QPointF d = QPointF(x, y);
 
                 if (seldo)
-                {
+                {   // check for structure selection
+                    QRectF r = icons[sopt].rect();
                     r.moveCenter(d);
                     if (r.contains(selx, selz))
                     {
                         seltype = sopt;
                         selpos = vp.p;
                         selvar = vp.variant;
+                    }
+                }
+                if (seltype != sopt || selpos.x != vp.p.x || selpos.z != vp.p.z)
+                {   // draw unselected structures
+                    QRectF r = icons[sopt].rect();
+                    if (sopt == D_VILLAGE)
+                    {
+                        if (vp.variant) {
+                            int ix = d.x()-r.width()/2, iy = d.y()-r.height()/2;
+                            painter.drawPixmap(ix, iy, iconzvil);
+                        } else {
+                            frags.push_back(QPainter::PixmapFragment::create(d, r));
+                        }
+                    }
+                    else
+                    {
+                        frags.push_back(QPainter::PixmapFragment::create(d, r));
                     }
                 }
             }
@@ -857,10 +927,13 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
     }
 
     // start the spawn and stronghold worker thread if this is the first run
-    if (spawn == NULL && (sshow[D_SPAWN] || sshow[D_STRONGHOLD]))
+    if (spawn == NULL)
     {
-        spawn = (Pos*) -1;
-        QThreadPool::globalInstance()->start(new SpawnStronghold(this, wi));
+        if (sshow[D_SPAWN] || sshow[D_STRONGHOLD] || (showBB && blocks2pix >= 1.0))
+        {
+            spawn = (Pos*) -1;
+            QThreadPool::globalInstance()->start(new SpawnStronghold(this, wi));
+        }
     }
 
     if (seldo)

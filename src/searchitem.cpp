@@ -425,7 +425,7 @@ static bool isCandidate(uint64_t s48, int mc, const Condition *c, const Conditio
 {
     StructPos spos[100] = {};
     for (; c != ce; c++)
-        if (!testCond(spos, s48, c, mc, NULL, abort))
+        if (!testCond(spos, c, mc, NULL, s48, abort))
             return false;
     return true;
 }

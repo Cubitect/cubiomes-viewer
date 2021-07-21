@@ -120,11 +120,16 @@ static const uint64_t g_qm_95[] = {
      40643008242473ULL,
      75345282835555ULL,
      85241165147001ULL,
-    143737608964985ULL,
+    117558666299491ULL,
+    141849622061865ULL,
+    157050661340383ULL,
+    184103120915339ULL,
+    197672678105184ULL,
     201305970722015ULL,
-    206145729365528ULL,
     220178926586908ULL,
+    206145729365528ULL,
     226043537443714ULL,
+    143737608964985ULL,
 };
 
 
@@ -168,6 +173,7 @@ static int qhutQual(int low20)
     default: return 0;
     }
 }
+
 
 // returns for a >90% quadmonument the number of blocks, by area, in spawn range
 __attribute__((const, used))
@@ -224,24 +230,24 @@ static int qmonumentQual(uint64_t s48)
     case  96363295408208ULL: return 12253;
     case  96666172090448ULL: return 12470;
     case  97326737469569ULL: return 12165;
-    case 108818308997907ULL: return 12150;
-    case 110070523643664ULL: return 12400;
-    case 110929723321216ULL: return 12348;
-    case 113209246256383ULL: return 12130;
-    case 117558666299491ULL: return 12687;
-    case 121197818285311ULL: return 12130;
-    case 141209514904082ULL: return 12147;
-    case 141849622061865ULL: return 12630;
-    case 143737608964985ULL: return 12938;
-    case 152637010423035ULL: return 12130;
-    case 157050661340383ULL: return 12588;
-    case 170156314248098ULL: return 12348;
-    case 177801560427026ULL: return 12389;
-    case 183906223213433ULL: return 12358;
-    case 184103120915339ULL: return 12630;
-    case 185417015970809ULL: return 12186;
-    case 195760082985897ULL: return 12118;
-    case 197672678105184ULL: return 12553;
+    case 108818308997907ULL: return 12609;
+    case 110070523643664ULL: return 12758;
+    case 110929723321216ULL: return 12780;
+    case 113209246256383ULL: return 12499;
+    case 117558666299491ULL: return 12948;
+    case 121197818285311ULL: return 12499;
+    case 141209514904082ULL: return 12583;
+    case 141849622061865ULL: return 12983;
+    case 143737608964985ULL: return 13188; // < best
+    case 152637010423035ULL: return 12499;
+    case 157050661340383ULL: return 12912;
+    case 170156314248098ULL: return 12780;
+    case 177801560427026ULL: return 12762;
+    case 183906223213433ULL: return 12748;
+    case 184103120915339ULL: return 12983;
+    case 185417015970809ULL: return 12632;
+    case 195760082985897ULL: return 12589;
+    case 197672678105184ULL: return 12895;
     case 201305970722015ULL: return 12948;
     case 206145729365528ULL: return 12796;
     case 208212283032595ULL: return 12317;
@@ -257,7 +263,7 @@ static int qmonumentQual(uint64_t s48)
     case 222407767385304ULL: return 12458;
     case 222506989413161ULL: return 12632;
     case 223366727763152ULL: return 12296;
-    case 226043537443714ULL: return 13028; // best
+    case 226043537443714ULL: return 13028;
     case 226089485745383ULL: return 12285;
     case 226837069851090ULL: return 12305;
     case 228023683672163ULL: return 12742;

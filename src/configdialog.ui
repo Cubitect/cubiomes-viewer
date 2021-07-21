@@ -2,14 +2,6 @@
 <ui version="4.0">
  <class>ConfigDialog</class>
  <widget class="QDialog" name="ConfigDialog">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>411</width>
-    <height>252</height>
-   </rect>
-  </property>
   <property name="windowTitle">
    <string>Preferences</string>
   </property>
@@ -18,14 +10,14 @@
     <normaloff>:/icons/map.png</normaloff>:/icons/map.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="8" column="0">
+   <item row="10" column="0">
     <widget class="QLabel" name="label_3">
      <property name="text">
       <string>Maximum number of matching seeds:</string>
      </property>
     </widget>
    </item>
-   <item row="9" column="0" colspan="2">
+   <item row="11" column="0" colspan="2">
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -35,7 +27,7 @@
      </property>
     </widget>
    </item>
-   <item row="7" column="0">
+   <item row="9" column="0">
     <widget class="QLabel" name="label_2">
      <property name="text">
       <string>Size of search item queue:
@@ -43,7 +35,7 @@
      </property>
     </widget>
    </item>
-   <item row="6" column="0">
+   <item row="8" column="0">
     <widget class="QLabel" name="label">
      <property name="text">
       <string>Seeds per thread search item:</string>
@@ -60,17 +52,10 @@
      </property>
     </widget>
    </item>
-   <item row="7" column="1">
+   <item row="9" column="1">
     <widget class="QLineEdit" name="lineQueueSize"/>
    </item>
-   <item row="3" column="0" colspan="2">
-    <widget class="QCheckBox" name="checkRestore">
-     <property name="text">
-      <string>Restore previous session at launch</string>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="1">
+   <item row="8" column="1">
     <widget class="QComboBox" name="cboxItemSize">
      <property name="iconSize">
       <size>
@@ -80,17 +65,17 @@
      </property>
     </widget>
    </item>
-   <item row="8" column="1">
+   <item row="10" column="1">
     <widget class="QLineEdit" name="lineMatching"/>
    </item>
-   <item row="4" column="0">
+   <item row="6" column="0">
     <widget class="QCheckBox" name="checkAutosave">
      <property name="text">
       <string>Autosave every:</string>
      </property>
     </widget>
    </item>
-   <item row="4" column="1">
+   <item row="6" column="1">
     <widget class="QSpinBox" name="spinAutosave">
      <property name="suffix">
       <string> min</string>
@@ -106,14 +91,14 @@
      </property>
     </widget>
    </item>
-   <item row="5" column="0">
+   <item row="7" column="0">
     <widget class="QLabel" name="label_4">
      <property name="text">
       <string>GUI style:</string>
      </property>
     </widget>
    </item>
-   <item row="5" column="1">
+   <item row="7" column="1">
     <widget class="QComboBox" name="comboStyle">
      <property name="iconSize">
       <size>
@@ -131,6 +116,20 @@
        <string>Dark</string>
       </property>
      </item>
+    </widget>
+   </item>
+   <item row="3" column="0" colspan="2">
+    <widget class="QCheckBox" name="checkBBoxes">
+     <property name="text">
+      <string>Outline known bounding boxes</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0">
+    <widget class="QCheckBox" name="checkRestore">
+     <property name="text">
+      <string>Restore previous session at launch</string>
+     </property>
     </widget>
    </item>
   </layout>

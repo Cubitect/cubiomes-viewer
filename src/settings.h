@@ -51,6 +51,7 @@ enum { STYLE_SYSTEM, STYLE_DARK };
 struct Config
 {
     bool smoothMotion;
+    bool showBBoxes;
     bool restoreSession;
     int autosaveCycle;
     int uistyle;
@@ -63,6 +64,7 @@ struct Config
     void reset()
     {
         smoothMotion = true;
+        showBBoxes = true;
         restoreSession = true;
         autosaveCycle = 10;
         uistyle = STYLE_SYSTEM;

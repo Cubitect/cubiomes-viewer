@@ -96,13 +96,6 @@ void MapView::setSeed(WorldInfo wi, int dim)
     update(2);
 }
 
-void MapView::setShow(int stype, bool v)
-{
-    sshow[stype] = v;
-    settingsToWorld();
-    update(2);
-}
-
 void MapView::setView(qreal x, qreal z, qreal scale)
 {
     if (scale > 0)
@@ -112,6 +105,20 @@ void MapView::setView(qreal x, qreal z, qreal scale)
     prevx = focusx = x;
     prevz = focusz = z;
     velx = velz = 0;
+    update(2);
+}
+
+void MapView::setShow(int stype, bool v)
+{
+    sshow[stype] = v;
+    settingsToWorld();
+    update(2);
+}
+
+void MapView::setShowBB(bool show)
+{
+    showBB = show;
+    settingsToWorld();
     update(2);
 }
 
@@ -126,6 +133,7 @@ void MapView::settingsToWorld()
         return;
     for (int s = 0; s < STRUCT_NUM; s++)
         world->sshow[s] = sshow[s];
+    world->showBB = showBB;
 }
 
 qreal MapView::getX()

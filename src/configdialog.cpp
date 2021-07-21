@@ -23,6 +23,7 @@ ConfigDialog::~ConfigDialog()
 void ConfigDialog::initSettings(Config *config)
 {
     ui->checkSmooth->setChecked(config->smoothMotion);
+    ui->checkBBoxes->setChecked(config->showBBoxes);
     ui->checkRestore->setChecked(config->restoreSession);
     ui->checkAutosave->setChecked(config->autosaveCycle != 0);
     if (config->autosaveCycle)
@@ -36,6 +37,7 @@ void ConfigDialog::initSettings(Config *config)
 Config ConfigDialog::getSettings()
 {
     conf.restoreSession = ui->checkRestore->isChecked();
+    conf.showBBoxes = ui->checkBBoxes->isChecked();
     conf.autosaveCycle = ui->checkAutosave->isChecked() ? ui->spinAutosave->value() : 0;
     conf.smoothMotion = ui->checkSmooth->isChecked();
     conf.uistyle = ui->comboStyle->currentIndex();

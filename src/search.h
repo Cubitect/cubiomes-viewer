@@ -4,6 +4,7 @@
 #include "cubiomes/finders.h"
 
 #include <atomic>
+#include <vector>
 
 #define PRECOMPUTE48_BUFSIZ ((int64_t)1 << 30)
 
@@ -442,8 +443,22 @@ struct StructPos
     int cx, cz; // effective center position
 };
 
+int testCond(
+        StructPos *spos, const Condition *cond,
+        int mc, LayerStack *g, uint64_t seed, std::atomic_bool *abort);
 
-int testCond(StructPos *spos, uint64_t seed, const Condition *cond, int mc, LayerStack *g, std::atomic_bool *abort);
+struct QuadInfo
+{
+    Pos p[4];   // individual positions
+    Pos afk;    // optimal afk position
+    int typ;    // type of structure
+    int spcnt;  // number of planar spawning spaces
+    float rad;  // enclosing radius
+};
+
+void findQuadStructs(
+        int styp, int mc, LayerStack *g, uint64_t seed,
+        std::vector<QuadInfo> *out);
 
 
 #endif // SEARCH_H

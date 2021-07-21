@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>540</width>
-    <height>333</height>
+    <width>700</width>
+    <height>321</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,7 +21,7 @@
    <item row="1" column="0">
     <widget class="QGroupBox" name="groupBox_3">
      <property name="title">
-      <string>Quad-Huts</string>
+      <string>Quad-Structures</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_8">
       <item row="0" column="0">
@@ -43,6 +43,9 @@
         <property name="selectionBehavior">
          <enum>QAbstractItemView::SelectRows</enum>
         </property>
+        <property name="horizontalScrollMode">
+         <enum>QAbstractItemView::ScrollPerPixel</enum>
+        </property>
         <property name="sortingEnabled">
          <bool>true</bool>
         </property>
@@ -57,7 +60,7 @@
           <string>Structure</string>
          </property>
          <property name="textAlignment">
-          <set>AlignLeading|AlignVCenter</set>
+          <set>AlignLeft|AlignVCenter</set>
          </property>
         </column>
         <column>
@@ -68,7 +71,7 @@
           <string>distance to origin</string>
          </property>
          <property name="textAlignment">
-          <set>AlignLeading|AlignVCenter</set>
+          <set>AlignLeft|AlignVCenter</set>
          </property>
         </column>
         <column>
@@ -79,18 +82,29 @@
           <string>optimal AFK location</string>
          </property>
          <property name="textAlignment">
-          <set>AlignLeading|AlignVCenter</set>
+          <set>AlignLeft|AlignVCenter</set>
          </property>
         </column>
         <column>
          <property name="text">
-          <string>Spawn range</string>
+          <string>Enclosing range</string>
          </property>
          <property name="toolTip">
           <string>distance to furthest spawning space from optimal AFK position</string>
          </property>
          <property name="textAlignment">
-          <set>AlignLeading|AlignVCenter</set>
+          <set>AlignLeft|AlignVCenter</set>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Spawn area</string>
+         </property>
+         <property name="toolTip">
+          <string>horizontal area in a 128 block range</string>
+         </property>
+         <property name="textAlignment">
+          <set>AlignLeft|AlignVCenter</set>
          </property>
         </column>
        </widget>
@@ -223,7 +237,8 @@
      </property>
      <property name="icon">
       <iconset theme="window-close">
-       <normaloff>.</normaloff>.</iconset>
+       <normaloff/>
+      </iconset>
      </property>
     </widget>
    </item>

@@ -2,6 +2,7 @@
 #define QUAD_H
 
 #include "settings.h"
+#include "search.h"
 
 #include <QRunnable>
 #include <QImage>
@@ -222,10 +223,13 @@ struct QWorld
     unsigned int cachesize;
 
     bool sshow[STRUCT_NUM];
+    bool showBB;
 
-    // spawn and strongholds will be filled by a designated worker thread once results are done
+    // some features such as the world spawn and strongholds will be filled by
+    // a designated worker thread once results are done
     QAtomicPointer<Pos> spawn;
     QAtomicPointer<std::vector<Pos>> strongholds;
+    QAtomicPointer<std::vector<QuadInfo>> qsinfo;
     // isdel is a flag for the worker thread to stop
     std::atomic_bool isdel;
 

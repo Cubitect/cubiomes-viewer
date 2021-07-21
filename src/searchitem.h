@@ -31,14 +31,14 @@ public:
         if (s48check)
         {
             for (c = cond; c != ce; c++)
-                if (!testCond(spos, seed, c, mc, NULL, abort))
+                if (!testCond(spos, c, mc, NULL, seed, abort))
                     return false;
         }
         for (c = cond; c != ce; c++)
         {
             if (g_filterinfo.list[c->type].cat == CAT_QUAD)
                 continue;
-            if (!testCond(spos, seed, c, mc, g, abort))
+            if (!testCond(spos, c, mc, g, seed, abort))
                return false;
         }
         return true;

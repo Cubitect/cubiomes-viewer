@@ -21,9 +21,10 @@ QuadListDialog::QuadListDialog(MainWindow *mainwindow)
     QFont mono = QFont("Monospace", 9);
     mono.setStyleHint(QFont::TypeWriter);
     ui->listQuadStruct->setFont(mono);
-    ui->listQuadStruct->setColumnWidth(0, 100);
+    ui->listQuadStruct->setColumnWidth(0, 120);
     ui->listQuadStruct->setColumnWidth(1, 80);
     ui->listQuadStruct->setColumnWidth(2, 160);
+    ui->listQuadStruct->setColumnWidth(3, 120);
 
     loadSeed();
     refresh();
@@ -89,120 +90,57 @@ void QuadListDialog::refresh()
     LayerStack g;
     setupGeneratorLargeBiomes(&g, wi.mc, wi.large);
 
-    StructureConfig sconf;
-    getStructureConfig_override(Swamp_Hut, wi.mc, &sconf);
+    std::vector<QuadInfo> qsinfo;
 
-    const int maxq = 1000;
-    Pos *qlist = new Pos[maxq];
-    int r = 3e7 / 512;
-    int qcnt;
+    findQuadStructs(Swamp_Hut, wi.mc, &g, wi.seed, &qsinfo);
+    findQuadStructs(Monument, wi.mc, &g, wi.seed, &qsinfo);
 
-    qcnt = scanForQuads(
-                sconf, 128, (wi.seed) & MASK48,
-                low20QuadHutBarely, sizeof(low20QuadHutBarely) / sizeof(uint64_t), 20, sconf.salt,
-                -r, -r, 2*r, 2*r, qlist, maxq);
-
-    if (qcnt >= maxq)
-        QMessageBox::warning(this, "Warning", "Quad-hut scanning buffer exhausted, results will be incomplete.");
-
-    ui->listQuadStruct->setSortingEnabled(false);
     int row = 0, qhn = 0, qmn = 0;
-    for (int i = 0; i < qcnt; i++)
+    for (QuadInfo& qi : qsinfo)
     {
-        Pos qh[4];
-        getStructurePos(sconf.structType, wi.mc, wi.seed, qlist[i].x+0, qlist[i].z+0, qh+0);
-        getStructurePos(sconf.structType, wi.mc, wi.seed, qlist[i].x+0, qlist[i].z+1, qh+1);
-        getStructurePos(sconf.structType, wi.mc, wi.seed, qlist[i].x+1, qlist[i].z+0, qh+2);
-        getStructurePos(sconf.structType, wi.mc, wi.seed, qlist[i].x+1, qlist[i].z+1, qh+3);
-        if (isViableStructurePos(sconf.structType, wi.mc, &g, wi.seed, qh[0].x, qh[0].z) &&
-            isViableStructurePos(sconf.structType, wi.mc, &g, wi.seed, qh[1].x, qh[1].z) &&
-            isViableStructurePos(sconf.structType, wi.mc, &g, wi.seed, qh[2].x, qh[2].z) &&
-            isViableStructurePos(sconf.structType, wi.mc, &g, wi.seed, qh[3].x, qh[3].z))
+        const char *label;
+        if (qi.typ == Swamp_Hut)
         {
-            ui->listQuadStruct->insertRow(row);
-            Pos afk;
-            afk = getOptimalAfk(qh, 7,7,9, 0);
-            float rad = isQuadBase(sconf, moveStructure(wi.seed, -qlist[i].x, -qlist[i].z), 128);
-            int dist = (int) round(sqrt(afk.x * (qreal)afk.x + afk.z * (qreal)afk.z));
-            QVariant var = QVariant::fromValue(afk);
-
-            QTableWidgetItem* stritem = new QTableWidgetItem("Quad-Hut");
-            stritem->setData(Qt::UserRole, var);
-            ui->listQuadStruct->setItem(row, 0, stritem);
-
-            QTableWidgetItem* distitem = new QTableWidgetItem();
-            distitem->setData(Qt::UserRole, var);
-            distitem->setData(Qt::DisplayRole, dist);
-            ui->listQuadStruct->setItem(row, 1, distitem);
-
-            QTableWidgetItem* afkitem = new QTableWidgetItem();
-            afkitem->setData(Qt::UserRole, var);
-            afkitem->setText(QString::asprintf("(%d,%d)", afk.x, afk.z));
-            ui->listQuadStruct->setItem(row, 2, afkitem);
-
-            QTableWidgetItem* raditem = new QTableWidgetItem();
-            raditem->setData(Qt::UserRole, var);
-            raditem->setText(QString::asprintf("%.1f", rad));
-            ui->listQuadStruct->setItem(row, 3, raditem);
-            row++;
+            label = "Quad-Hut";
+            qhn++;
         }
-    }
-    qhn = row;
-
-    if (wi.mc >= MC_1_8)
-    {
-        getStructureConfig_override(Monument, wi.mc, &sconf);
-        qcnt = scanForQuads(
-                    sconf, 160, wi.seed & MASK48,
-                    g_qm_90, sizeof(g_qm_90) / sizeof(uint64_t), 48, sconf.salt,
-                    -r, -r, 2*r, 2*r, qlist, maxq);
-
-        if (qcnt >= maxq)
-            QMessageBox::warning(this, "Warning", "Quad-monument scanning buffer exhausted, results will be incomplete.");
-
-        for (int i = 0; i < qcnt; i++)
+        else
         {
-            Pos qm[4];
-            getStructurePos(sconf.structType, wi.mc, wi.seed, qlist[i].x+0, qlist[i].z+0, qm+0);
-            getStructurePos(sconf.structType, wi.mc, wi.seed, qlist[i].x+0, qlist[i].z+1, qm+1);
-            getStructurePos(sconf.structType, wi.mc, wi.seed, qlist[i].x+1, qlist[i].z+0, qm+2);
-            getStructurePos(sconf.structType, wi.mc, wi.seed, qlist[i].x+1, qlist[i].z+1, qm+3);
-            if (isViableStructurePos(sconf.structType, wi.mc, &g, wi.seed, qm[0].x, qm[0].z) &&
-                isViableStructurePos(sconf.structType, wi.mc, &g, wi.seed, qm[1].x, qm[1].z) &&
-                isViableStructurePos(sconf.structType, wi.mc, &g, wi.seed, qm[2].x, qm[2].z) &&
-                isViableStructurePos(sconf.structType, wi.mc, &g, wi.seed, qm[3].x, qm[3].z))
-            {
-                ui->listQuadStruct->insertRow(row);
-                Pos afk;
-                afk = getOptimalAfk(qm, 58,23,58, 0);
-                afk.x -= 29; afk.z -= 29; // monuments position is centered
-                float rad = isQuadBase(sconf, moveStructure(wi.seed, -qlist[i].x, -qlist[i].z), 160);
-                int dist = (int) round(sqrt(afk.x * (qreal)afk.x + afk.z * (qreal)afk.z));
-                QVariant var = QVariant::fromValue(afk);
-
-                QTableWidgetItem* stritem = new QTableWidgetItem("Quad-Monument");
-                stritem->setData(Qt::UserRole, var);
-                ui->listQuadStruct->setItem(row, 0, stritem);
-
-                QTableWidgetItem* distitem = new QTableWidgetItem();
-                distitem->setData(Qt::UserRole, var);
-                distitem->setData(Qt::DisplayRole, dist);
-                ui->listQuadStruct->setItem(row, 1, distitem);
-
-                QTableWidgetItem* afkitem = new QTableWidgetItem();
-                afkitem->setData(Qt::UserRole, var);
-                afkitem->setText(QString::asprintf("(%d,%d)", afk.x, afk.z));
-                ui->listQuadStruct->setItem(row, 2, afkitem);
-
-                QTableWidgetItem* raditem = new QTableWidgetItem();
-                raditem->setData(Qt::UserRole, var);
-                raditem->setText(QString::asprintf("%.1f", rad));
-                ui->listQuadStruct->setItem(row, 3, raditem);
-                row++;
-            }
+            label = "Quad-Monument";
+            qmn++;
         }
+
+        QVariant var = QVariant::fromValue(qi.afk);
+        qreal dist = qi.afk.x*(qreal)qi.afk.x + qi.afk.z*(qreal)qi.afk.z;
+        dist = sqrt(dist);
+
+        ui->listQuadStruct->insertRow(row);
+
+        QTableWidgetItem* stritem = new QTableWidgetItem(label);
+        stritem->setData(Qt::UserRole, var);
+        ui->listQuadStruct->setItem(row, 0, stritem);
+
+        QTableWidgetItem* distitem = new QTableWidgetItem();
+        distitem->setData(Qt::UserRole, var);
+        distitem->setData(Qt::DisplayRole, (int)round(dist));
+        ui->listQuadStruct->setItem(row, 1, distitem);
+
+        QTableWidgetItem* afkitem = new QTableWidgetItem();
+        afkitem->setData(Qt::UserRole, var);
+        afkitem->setText(QString::asprintf("(%d,%d)", qi.afk.x, qi.afk.z));
+        ui->listQuadStruct->setItem(row, 2, afkitem);
+
+        QTableWidgetItem* raditem = new QTableWidgetItem();
+        raditem->setData(Qt::UserRole, var);
+        raditem->setText(QString::asprintf("%.1f", qi.rad));
+        ui->listQuadStruct->setItem(row, 3, raditem);
+
+        QTableWidgetItem* cntitem = new QTableWidgetItem();
+        cntitem->setData(Qt::UserRole, var);
+        cntitem->setText(QString::asprintf("%d", qi.spcnt));
+        ui->listQuadStruct->setItem(row, 4, cntitem);
+        row++;
     }
-    qmn = row - qhn;
 
     ui->listQuadStruct->setSortingEnabled(true);
     ui->listQuadStruct->sortByColumn(1, Qt::AscendingOrder);
@@ -215,8 +153,6 @@ void QuadListDialog::refresh()
         ui->labelMsg->setText(QString::asprintf("World contains %d quad-hut%s.", qhn, qhn==1?"":"s"));
     else if (qmn)
         ui->labelMsg->setText(QString::asprintf("World contains %d quad-monument%s.", qmn, qmn==1?"":"s"));
-
-    delete[] qlist;
 }
 
 void QuadListDialog::on_buttonGo_clicked()

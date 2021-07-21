@@ -12,6 +12,7 @@ class FormGen48;
 }
 
 class MainWindow;
+class SetSpinBox;
 
 class FormGen48 : public QWidget
 {
@@ -52,6 +53,7 @@ private slots:
 private:
     MainWindow *parent;
     Ui::FormGen48 *ui;
+    SetSpinBox *spinMonumentArea;
 
     // main condition for "auto" mode (updated when conditions change)
     Condition cond;

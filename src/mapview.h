@@ -42,6 +42,7 @@ public:
 
     bool getShow(int stype) { return stype >= 0 && stype < STRUCT_NUM ? sshow[stype] : false; }
     void setShow(int stype, bool v);
+    void setShowBB(bool show);
     void setSmoothMotion(bool smooth);
 
     void timeout();
@@ -87,6 +88,7 @@ private:
     int updatecounter;
 
     bool sshow[STRUCT_NUM];
+    bool showBB;
     bool hasinertia;
 };
 

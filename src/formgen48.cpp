@@ -8,7 +8,48 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QMessageBox>
+#include <QSpinBox>
+#include <QList>
 
+#include <set>
+
+class SetSpinBox : public QSpinBox
+{
+public:
+    SetSpinBox(QWidget *parent)
+    : QSpinBox(parent)
+    {
+        std::set<int> vset;
+        for (int i = 0, n = sizeof(g_qm_90) / sizeof(int64_t); i < n; i++)
+            vset.insert(qmonumentQual(g_qm_90[i]));
+        for (int v : vset)
+            vlist.push_back(v);
+
+        setRange(vlist.front(), vlist.last());
+        setValue(vlist.front());
+    }
+    virtual ~SetSpinBox() {}
+
+    virtual void stepBy(int steps) override
+    {
+        int val = value();
+        int idx = 0;
+        for (int i = 0, n = vlist.size(); i < n; i++)
+        {
+            if (vlist[i] > val)
+                break;
+            idx = i;
+        }
+        idx += steps;
+        if (idx < 0)
+            idx = 0;
+        if (idx >= vlist.size())
+            idx = vlist.size() - 1;
+        setValue(vlist[idx]);
+    }
+
+    QList<int> vlist;
+};
 
 FormGen48::FormGen48(MainWindow *parent)
     : QWidget(parent)
@@ -29,7 +70,10 @@ FormGen48::FormGen48(MainWindow *parent)
     connect(ui->lineEditX2, SIGNAL(editingFinished()), SLOT(onChange()));
     connect(ui->lineEditZ2, SIGNAL(editingFinished()), SLOT(onChange()));
 
-    connect(ui->spinMonumentArea, SIGNAL(editingFinished()), SLOT(onChange()));
+    spinMonumentArea = new SetSpinBox(this);
+    ui->tabQuadM->layout()->addWidget(spinMonumentArea);
+
+    connect(spinMonumentArea, SIGNAL(editingFinished()), SLOT(onChange()));
     connect(ui->lineSalt, SIGNAL(editingFinished()), SLOT(onChange()));
     connect(ui->lineListSalt, SIGNAL(editingFinished()), SLOT(onChange()));
 
@@ -45,6 +89,7 @@ FormGen48::FormGen48(MainWindow *parent)
 FormGen48::~FormGen48()
 {
     delete ui;
+    delete spinMonumentArea;
 }
 
 bool FormGen48::setList48(QString path, bool quiet)
@@ -89,7 +134,7 @@ void FormGen48::setSettings(const Gen48Settings& gen48, bool quiet)
 {
     ui->tabWidget->setCurrentIndex(gen48.mode);
     ui->comboLow20->setCurrentIndex(gen48.qual);
-    ui->spinMonumentArea->setValue(gen48.qmarea);
+    spinMonumentArea->setValue(gen48.qmarea);
     ui->lineSalt->setText(QString::number(gen48.salt));
     ui->lineListSalt->setText(QString::number(gen48.listsalt));
     ui->lineEditX1->setText(QString::number(gen48.x1));
@@ -113,7 +158,7 @@ Gen48Settings FormGen48::getSettings(bool resolveauto)
 
     s.mode = ui->tabWidget->currentIndex();
     s.qual = ui->comboLow20->currentIndex();
-    s.qmarea = ui->spinMonumentArea->value();
+    s.qmarea = spinMonumentArea->value();
     s.salt = ui->lineSalt->text().toLongLong();
     s.listsalt = ui->lineListSalt->text().toLongLong();
     s.manualarea = ui->radioManual->isChecked();
@@ -238,7 +283,7 @@ void FormGen48::updateAutoUi()
             if (isqh)
                 ui->comboLow20->setCurrentIndex(cond.type - F_QH_IDEAL);
             else if (isqm)
-                ui->spinMonumentArea->setValue((int) ceil( 58*58*4 * (cond.type == F_QM_95 ? 0.95 : 0.90) ));
+                spinMonumentArea->setValue((int) ceil( 58*58*4 * (cond.type == F_QM_95 ? 0.95 : 0.90) ));
         }
         if (ui->radioAuto->isChecked())
         {
