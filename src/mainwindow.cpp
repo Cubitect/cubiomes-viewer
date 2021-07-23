@@ -56,6 +56,8 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    QCoreApplication::setApplicationName("cubiomes-viewer");
+
     formCond = new FormConditions(this);
     ui->collapseConstraints->init("Conditions", formCond, false);
     connect(formCond, &FormConditions::changed, this, &MainWindow::onConditionsChanged);
