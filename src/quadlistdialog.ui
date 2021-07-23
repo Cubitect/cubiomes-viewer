@@ -59,6 +59,9 @@
          <property name="text">
           <string>Structure</string>
          </property>
+         <property name="toolTip">
+          <string>qype of quad-structure</string>
+         </property>
          <property name="textAlignment">
           <set>AlignLeft|AlignVCenter</set>
          </property>
@@ -101,7 +104,7 @@
           <string>Spawn area</string>
          </property>
          <property name="toolTip">
-          <string>horizontal area in a 128 block range</string>
+          <string>horizontal bounding box area inside a 128 block range</string>
          </property>
          <property name="textAlignment">
           <set>AlignLeft|AlignVCenter</set>
@@ -224,6 +227,36 @@
        <item>
         <property name="text">
          <string>1.6</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>1.5</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>1.4</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>1.3</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>1.2</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>1.1</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>1.0</string>
         </property>
        </item>
       </widget>

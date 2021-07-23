@@ -6,6 +6,7 @@
 #include <QSpinBox>
 #include <QLineEdit>
 #include <QListWidgetItem>
+#include <QTextEdit>
 
 #include "search.h"
 #include "formconditions.h"
@@ -46,18 +47,12 @@ public:
 public slots:
     void change(int v)
     {
+        const char *style = "";
         if (v < 0)
-        {
-            setStyleSheet("background: #28ff0000");
-        }
-        else if (v > 0)
-        {
-            setStyleSheet("background: #2800ff00");
-        }
-        else
-        {
-            setStyleSheet("");
-        }
+            style = "background: #28ff0000";
+        if (v > 0)
+            style = "background: #2800ff00";
+        setStyleSheet(style);
         findChild<QLineEdit*>()->deselect();
     }
 };
@@ -102,6 +97,8 @@ private slots:
 
 private:
     Ui::FilterDialog *ui;
+    QTextEdit *textDescription;
+
     QCheckBox *biomecboxes[256];
     SpinExclude *tempsboxes[9];
     bool custom;

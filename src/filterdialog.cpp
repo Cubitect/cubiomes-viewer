@@ -10,6 +10,7 @@
 #include <QPixmap>
 #include <QPainter>
 #include <QPainterPath>
+#include <QMessageBox>
 
 
 #define SETUP_BIOME_CHECKBOX(B) do {\
@@ -49,6 +50,10 @@ FilterDialog::FilterDialog(FormConditions *parent, int mcversion, QListWidgetIte
 {
     memset(&cond, 0, sizeof(cond));
     ui->setupUi(this);
+
+    textDescription = new QTextEdit(this);
+    textDescription->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
+    ui->collapseDescription->init("Description", textDescription, true);
 
     QString mcs = "MC ";
     mcs += (mc2str(mc) ? mc2str(mc) : "?");
@@ -360,8 +365,8 @@ void FilterDialog::updateMode()
     ui->lineEditZ1->setToolTip(lowtip);
     ui->lineEditX2->setToolTip(uptip);
     ui->lineEditZ2->setToolTip(uptip);
-    ui->textDescription->setText(ft.desription);
     ui->buttonOk->setEnabled(filterindex != F_SELECT);
+    textDescription->setText(ft.description);
 }
 
 void FilterDialog::enableSet(const int *ids, int n)
@@ -610,19 +615,34 @@ void FilterDialog::on_comboBoxCat_currentIndexChanged(int idx)
     int slot = 0;
     ui->comboBoxType->insertItem(slot, "Select filter", QVariant::fromValue((int)F_SELECT));
 
+    const FilterInfo *ft_list[FILTER_MAX] = {};
+    const FilterInfo *ft;
+
     for (int i = 1; i < FILTER_MAX; i++)
     {
-        const FilterInfo &ft = g_filterinfo.list[i];
-        if (ft.cat != idx)
+        ft = &g_filterinfo.list[i];
+        if (ft->cat == idx)
+            ft_list[ft->disp] = ft;
+    }
+
+    for (int i = 1; i < FILTER_MAX; i++)
+    {
+        ft = ft_list[i];
+        if (!ft)
             continue;
         slot++;
-        if (ft.icon)
-            ui->comboBoxType->insertItem(slot, QIcon(ft.icon), ft.name, i);
+        QVariant vidx = QVariant::fromValue((int)(ft - g_filterinfo.list));
+        if (ft->icon)
+            ui->comboBoxType->insertItem(slot, QIcon(ft->icon), ft->name, vidx);
         else
-            ui->comboBoxType->insertItem(slot, ft.name, i);
+            ui->comboBoxType->insertItem(slot, ft->name, vidx);
 
-        if (mc < ft.mcmin)
+        if (mc < ft->mcmin)
             ui->comboBoxType->setItemData(slot, false, Qt::UserRole-1); // deactivate
+        if (ft == g_filterinfo.list + F_FORTRESS)
+            ui->comboBoxType->insertSeparator(slot++);
+        if (ft == g_filterinfo.list + F_ENDCITY)
+            ui->comboBoxType->insertSeparator(slot++);
     }
 
     updateMode();

@@ -15,12 +15,109 @@
   </property>
   <layout class="QGridLayout" name="gridLayout_3">
    <item row="4" column="0" colspan="2">
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <property name="usesScrollButtons">
+      <bool>false</bool>
+     </property>
+     <widget class="QWidget" name="tabBiomes">
+      <attribute name="title">
+       <string>Biomes</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <item>
+          <widget class="QPushButton" name="buttonUncheck">
+           <property name="text">
+            <string>uncheck all</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="buttonInclude">
+           <property name="text">
+            <string>include all</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="buttonExclude">
+           <property name="text">
+            <string>exclude all</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QScrollArea" name="scrollArea">
+         <property name="widgetResizable">
+          <bool>true</bool>
+         </property>
+         <widget class="QWidget" name="scrollAreaWidgetContents">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>570</width>
+            <height>315</height>
+           </rect>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_2">
+           <property name="sizeConstraint">
+            <enum>QLayout::SetMinAndMaxSize</enum>
+           </property>
+           <item>
+            <layout class="QGridLayout" name="gridLayoutBiomes"/>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabTemps">
+      <attribute name="title">
+       <string>Temperature Categories</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>Select how many entries of each temperature category are required.</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QGridLayout" name="gridLayoutTemps"/>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item row="3" column="0" colspan="2">
     <widget class="QGroupBox" name="groupBoxPosition">
      <property name="title">
       <string>Location</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="6" column="0">
+      <item row="3" column="0">
        <widget class="QLabel" name="labelRelative">
         <property name="text">
          <string>Location is relative to:</string>
@@ -37,7 +134,7 @@
         </property>
        </widget>
       </item>
-      <item row="6" column="1" colspan="2">
+      <item row="3" column="1" colspan="2">
        <widget class="QComboBox" name="comboBoxRelative">
         <item>
          <property name="text">
@@ -189,42 +286,7 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="0" colspan="4">
-      <widget class="QGroupBox" name="verticalGroupBox">
-       <property name="title">
-        <string>Description</string>
-       </property>
-       <layout class="QVBoxLayout" name="verticalLayout">
-        <item>
-         <widget class="QTextEdit" name="textDescription">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>80</height>
-           </size>
-          </property>
-          <property name="textInteractionFlags">
-           <set>Qt::NoTextInteraction</set>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </item>
-     <item row="0" column="1" alignment="Qt::AlignRight">
-      <widget class="QLabel" name="labelFilterType">
-       <property name="text">
-        <string>Filter type:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="2">
+     <item row="0" column="3">
       <widget class="QComboBox" name="comboBoxCat">
        <property name="minimumSize">
         <size>
@@ -261,7 +323,7 @@
         </property>
         <property name="icon">
          <iconset resource="../icons.qrc">
-          <normaloff>:/icons/village.png</normaloff>:/icons/village.png</iconset>
+          <normaloff>:/icons/stronghold.png</normaloff>:/icons/stronghold.png</iconset>
         </property>
        </item>
        <item>
@@ -302,14 +364,14 @@
        </item>
       </widget>
      </item>
-     <item row="0" column="3">
+     <item row="0" column="4">
       <widget class="QComboBox" name="comboBoxType">
        <property name="enabled">
         <bool>false</bool>
        </property>
        <property name="minimumSize">
         <size>
-         <width>240</width>
+         <width>260</width>
          <height>0</height>
         </size>
        </property>
@@ -332,9 +394,19 @@
        </item>
       </widget>
      </item>
+     <item row="0" column="1">
+      <widget class="QLabel" name="labelFilterType">
+       <property name="text">
+        <string>Filter type:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
-   <item row="7" column="0" rowspan="3" colspan="2">
+   <item row="6" column="0" rowspan="3" colspan="2">
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
       <spacer name="horizontalSpacer_2">
@@ -356,7 +428,8 @@
        </property>
        <property name="icon">
         <iconset theme="dialog-cancel">
-         <normaloff>.</normaloff>.</iconset>
+         <normaloff/>
+        </iconset>
        </property>
       </widget>
      </item>
@@ -367,115 +440,31 @@
        </property>
        <property name="icon">
         <iconset theme="dialog-ok">
-         <normaloff>.</normaloff>.</iconset>
+         <normaloff/>
+        </iconset>
        </property>
       </widget>
      </item>
     </layout>
    </item>
-   <item row="5" column="0" colspan="2">
-    <widget class="QTabWidget" name="tabWidget">
-     <property name="currentIndex">
-      <number>0</number>
-     </property>
-     <property name="usesScrollButtons">
-      <bool>false</bool>
-     </property>
-     <widget class="QWidget" name="tabBiomes">
-      <attribute name="title">
-       <string>Biomes</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_3">
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_3">
-         <item>
-          <widget class="QPushButton" name="buttonUncheck">
-           <property name="text">
-            <string>uncheck all</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="buttonInclude">
-           <property name="text">
-            <string>include all</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="buttonExclude">
-           <property name="text">
-            <string>exclude all</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="QScrollArea" name="scrollArea">
-         <property name="widgetResizable">
-          <bool>true</bool>
-         </property>
-         <widget class="QWidget" name="scrollAreaWidgetContents">
-          <property name="geometry">
-           <rect>
-            <x>0</x>
-            <y>0</y>
-            <width>562</width>
-            <height>188</height>
-           </rect>
-          </property>
-          <layout class="QVBoxLayout" name="verticalLayout_2">
-           <property name="sizeConstraint">
-            <enum>QLayout::SetMinAndMaxSize</enum>
-           </property>
-           <item>
-            <layout class="QGridLayout" name="gridLayoutBiomes"/>
-           </item>
-          </layout>
-         </widget>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="tabTemps">
-      <attribute name="title">
-       <string>Temperature Categories</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_4">
-       <item>
-        <widget class="QLabel" name="label">
-         <property name="text">
-          <string>Select how many entries of each temperature category are required.</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <layout class="QGridLayout" name="gridLayoutTemps"/>
-       </item>
-       <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-     </widget>
-    </widget>
+   <item row="1" column="0" colspan="2">
+    <widget class="Collapsible" name="collapseDescription" native="true"/>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>Collapsible</class>
+   <extends>QWidget</extends>
+   <header>src/collapsible.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>buttonOk</tabstop>
   <tabstop>buttonCancel</tabstop>
-  <tabstop>textDescription</tabstop>
+  <tabstop>comboBoxCat</tabstop>
+  <tabstop>comboBoxType</tabstop>
   <tabstop>spinBox</tabstop>
   <tabstop>lineRadius</tabstop>
   <tabstop>buttonArea</tabstop>
@@ -487,6 +476,7 @@
   <tabstop>tabWidget</tabstop>
   <tabstop>buttonUncheck</tabstop>
   <tabstop>buttonInclude</tabstop>
+  <tabstop>buttonExclude</tabstop>
   <tabstop>scrollArea</tabstop>
  </tabstops>
  <resources>

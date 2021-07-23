@@ -26,6 +26,17 @@ QuadListDialog::QuadListDialog(MainWindow *mainwindow)
     ui->listQuadStruct->setColumnWidth(2, 160);
     ui->listQuadStruct->setColumnWidth(3, 120);
 
+    for (int i = 0, n = ui->comboBoxMC->count(); i < n; i++)
+    {
+        const std::string& mcs = ui->comboBoxMC->itemText(i).toStdString();
+        int mc = str2mc(mcs.c_str());
+        if (mc < 0)
+            qDebug() << "Unknown MC version: " << mcs.c_str();
+        ui->comboBoxMC->setItemData(i, QVariant::fromValue(mc), Qt::UserRole);
+        if (mc < MC_1_4)
+            ui->comboBoxMC->setItemData(i, false, Qt::UserRole-1);
+    }
+
     loadSeed();
     refresh();
 }
@@ -59,8 +70,7 @@ bool QuadListDialog::getSeed(WorldInfo *wi)
 {
     // init using mainwindow
     bool ok = mainwindow->getSeed(wi, false);
-    const std::string& mcs = ui->comboBoxMC->currentText().toStdString();
-    wi->mc = str2mc(mcs.c_str());
+    wi->mc = ui->comboBoxMC->currentData(Qt::UserRole).toInt();
     if (wi->mc < 0)
     {
         wi->mc = MC_NEWEST;
