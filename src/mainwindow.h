@@ -103,6 +103,7 @@ private slots:
     void onSearchStatusChanged(bool running);
     void onStyleChanged(int style);
     void copyCoord();
+    void copyTeleportCommand();
 
 
 public:
