@@ -735,6 +735,7 @@ void MainWindow::on_mapView_customContextMenuRequested(const QPoint &pos)
 {
     QMenu menu(this);
     menu.addAction("Copy coordinates", this, &MainWindow::copyCoord);
+    menu.addAction("Copy teleport command", this, &MainWindow::copyTeleportCommand);
     menu.addAction("Go to coordinates...", this, &MainWindow::on_actionGo_to_triggered);
     menu.exec(ui->mapView->mapToGlobal(pos));
 }
@@ -1088,3 +1089,9 @@ void MainWindow::copyCoord()
     clipboard->setText(QString::asprintf("%d, %d", p.x, p.z));
 }
 
+void MainWindow::copyTeleportCommand()
+{
+    Pos p = ui->mapView->getActivePos();
+    QClipboard *clipboard = QGuiApplication::clipboard();
+    clipboard->setText(QString::asprintf("/tp @p %d ~ %d", p.x, p.z));
+}
