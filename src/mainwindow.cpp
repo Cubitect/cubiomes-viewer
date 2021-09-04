@@ -71,6 +71,11 @@ MainWindow::MainWindow(QWidget *parent)
         "The conditions will be checked in the same order they are listed, "
         "so make sure that references are not broken. Conditions can be reordered "
         "by dragging the list items."
+        "\n\n"
+        "Relative conditions use the center point of their parent. For structure "
+        "clusters this is the average of all instances, while for biome filters "
+        "it is simply the geometric center. The reference point helper conditions "
+        "can be used for more control when locations should be checked separately."
     );
 
     formGen48 = new FormGen48(this);
@@ -181,11 +186,13 @@ MainWindow::MainWindow(QWidget *parent)
     ui->lineEditZ1->setValidator(intval);
     ui->lineEditX2->setValidator(intval);
     ui->lineEditZ2->setValidator(intval);
-    on_cboxArea_toggled(false);
+    on_checkArea_toggled(false);
 
     formCond->updateSensitivity();
 
     connect(&autosaveTimer, &QTimer::timeout, this, &MainWindow::onAutosaveTimeout);
+
+    ui->treeAnalysis->sortByColumn(0, Qt::AscendingOrder);
 
     loadSettings();
 }
@@ -275,9 +282,21 @@ int MainWindow::getDim()
 void MainWindow::saveSettings()
 {
     QSettings settings("cubiomes-viewer", "cubiomes-viewer");
+
     settings.setValue("mainwindow/size", size());
     settings.setValue("mainwindow/pos", pos());
     settings.setValue("mainwindow/prevdir", prevdir);
+
+    settings.setValue("analysis/structs", ui->checkStructs->isChecked());
+    settings.setValue("analysis/biomes", ui->checkBiomes->isChecked());
+    settings.setValue("analysis/conditions", ui->checkConditions->isChecked());
+    settings.setValue("analysis/maponly", ui->checkMapOnly->isChecked());
+    settings.setValue("analysis/customarea", ui->checkArea->isChecked());
+    settings.setValue("analysis/x1", ui->lineEditX1->text().toInt());
+    settings.setValue("analysis/z1", ui->lineEditZ1->text().toInt());
+    settings.setValue("analysis/x2", ui->lineEditX2->text().toInt());
+    settings.setValue("analysis/z2", ui->lineEditZ2->text().toInt());
+
     settings.setValue("config/restoreSession", config.restoreSession);
     settings.setValue("config/showBBoxes", config.showBBoxes);
     settings.setValue("config/autosaveCycle", config.autosaveCycle);
@@ -317,12 +336,37 @@ void MainWindow::saveSettings()
     }
 }
 
+
+static void loadCheck(QSettings *s, QCheckBox *cb, const char *key)
+{
+    cb->setChecked( s->value(key, cb->isChecked()).toBool() );
+}
+
+static void loadLine(QSettings *s, QLineEdit *line, const char *key)
+{
+    // only load as integer
+    qlonglong x = line->text().toLongLong();
+    line->setText( QString::number(s->value(key, x).toLongLong()) );
+}
+
 void MainWindow::loadSettings()
 {
     QSettings settings("cubiomes-viewer", "cubiomes-viewer");
+
     resize(settings.value("mainwindow/size", size()).toSize());
     move(settings.value("mainwindow/pos", pos()).toPoint());
     prevdir = settings.value("mainwindow/prevdir", pos()).toString();
+
+    loadCheck(&settings, ui->checkStructs, "analysis/structs");
+    loadCheck(&settings, ui->checkBiomes, "analysis/biomes");
+    loadCheck(&settings, ui->checkConditions, "analysis/conditions");
+    loadCheck(&settings, ui->checkMapOnly, "analysis/maponly");
+    loadCheck(&settings, ui->checkArea, "analysis/customarea");
+    loadLine(&settings, ui->lineEditX1, "analysis/x1");
+    loadLine(&settings, ui->lineEditZ1, "analysis/z1");
+    loadLine(&settings, ui->lineEditX2, "analysis/x2");
+    loadLine(&settings, ui->lineEditZ2, "analysis/z2");
+
     config.smoothMotion = settings.value("config/smoothMotion", config.smoothMotion).toBool();
     config.showBBoxes = settings.value("config/showBBoxes", config.showBBoxes).toBool();
     config.restoreSession = settings.value("config/restoreSession", config.restoreSession).toBool();
@@ -540,18 +584,17 @@ bool MainWindow::loadProgress(QString fnam, bool quiet)
 
     setSeed(wi);
 
-    formControl->on_buttonClear_clicked();
-    formControl->searchResultsAdd(seeds, false);
-    formControl->setSearchConfig(searchconf, quiet);
-
-    formGen48->setSettings(gen48, quiet);
-
     formCond->on_buttonRemoveAll_clicked();
     for (Condition &c : condvec)
     {
         QListWidgetItem *item = new QListWidgetItem();
         formCond->addItemCondition(item, c);
     }
+
+    formGen48->setSettings(gen48, quiet);
+    formControl->on_buttonClear_clicked();
+    formControl->setSearchConfig(searchconf, quiet);
+    formControl->searchResultsAdd(seeds, false);
 
     return true;
 }
@@ -740,7 +783,7 @@ void MainWindow::on_mapView_customContextMenuRequested(const QPoint &pos)
     menu.exec(ui->mapView->mapToGlobal(pos));
 }
 
-void MainWindow::on_cboxArea_toggled(bool checked)
+void MainWindow::on_checkArea_toggled(bool checked)
 {
     ui->labelSquareArea->setEnabled(!checked);
     ui->lineRadius->setEnabled(!checked);
@@ -768,7 +811,7 @@ void MainWindow::on_buttonFromVisible_clicked()
     int bx1 = (int) ceil(ui->mapView->getX() + uiw/2);
     int bz1 = (int) ceil(ui->mapView->getZ() + uih/2);
 
-    ui->cboxArea->setChecked(true);
+    ui->checkArea->setChecked(true);
     ui->lineEditX1->setText( QString::number(bx0) );
     ui->lineEditZ1->setText( QString::number(bz0) );
     ui->lineEditX2->setText( QString::number(bx1) );
@@ -799,7 +842,56 @@ void MainWindow::on_buttonAnalysis_clicked()
         warning("Warning", "Invalid area for analysis");
         return;
     }
-    if ((uint64_t)(x2 - x1) * (uint64_t)(z2 - z1) > 100000000LL)
+
+    bool ck_struct = ui->checkStructs->isChecked();
+    bool ck_biome = ui->checkBiomes->isChecked();
+    bool ck_conds = ui->checkConditions->isChecked();
+    bool map_only = ui->checkMapOnly->isChecked();
+
+    QTreeWidget *tree = ui->treeAnalysis;
+    while (tree->topLevelItemCount() > 0)
+        delete tree->takeTopLevelItem(0);
+
+
+    WorldInfo wi;
+    if (!getSeed(&wi))
+        return;
+
+    QVector<Condition> conds;
+    if (ck_conds)
+        conds = formCond->getConditions();
+
+    uint64_t areasiz = (uint64_t)(x2 - x1) * (uint64_t)(z2 - z1);
+    int64_t cstepx = 1, cstepz = 1;
+
+    bool areawarn = false;
+    if (ck_struct && areasiz > 1e10)
+        areawarn = true;
+    if (ck_biome && areasiz > 1e8)
+        areawarn = true;
+    if (ck_conds && !conds.empty())
+    {
+        Condition *c = &conds[0];
+        const FilterInfo& finfo = g_filterinfo.list[c->type];
+        cstepx = (c->x2 - c->x1);
+        cstepz = (c->z2 - c->z1);
+
+        if (cstepx < 1) cstepx = 1;
+        if (cstepz < 1) cstepz = 1;
+
+        if (finfo.step > 1)
+        {
+            cstepx *= finfo.step;
+            cstepz *= finfo.step;
+        }
+        else if (finfo.stype > 0)
+        {
+            if (cstepx < 16) cstepx = 16;
+            if (cstepz < 16) cstepz = 16;
+        }
+    }
+
+    if (areawarn)
     {
         QString msg = QString::asprintf(
                     "Area for analysis is very large (%d, %d).\n"
@@ -808,167 +900,262 @@ void MainWindow::on_buttonAnalysis_clicked()
         int button = QMessageBox::warning(this, "Warning", msg, QMessageBox::Cancel, QMessageBox::Yes);
         if (button != QMessageBox::Yes)
             return;
+
+        // update to close message box
+        update();
+        QApplication::processEvents();
     }
 
-    bool everything = ui->radioEverything->isChecked();
-
-    WorldInfo wi;
-    if (!getSeed(&wi))
-        return;
-
     ui->buttonAnalysis->setEnabled(false);
-    update();
-    QApplication::processEvents();
 
-    const int step = 512;
-    long idcnt[256] = {0};
+
     int dim = getDim();
-
     LayerStack g;
     setupGeneratorLargeBiomes(&g, wi.mc, wi.large);
     applySeed(&g, wi.seed);
-    int *ids = allocCache(g.entry_1, step, step);
 
-    for (int x = x1; x <= x2; x += step)
+    if (ck_biome)
     {
-        for (int z = z1; z <= z2; z += step)
-        {
-            int w = x2-x+1 < step ? x2-x+1 : step;
-            int h = z2-z+1 < step ? z2-z+1 : step;
+        const int step = 512;
+        long idcnt[256] = {0};
+        int *ids = allocCache(g.entry_1, step, step);
 
-            if (everything || dim == 0)
+        for (int x = x1; x <= x2; x += step)
+        {
+            for (int z = z1; z <= z2; z += step)
             {
-                genArea(g.entry_1, ids, x, z, w, h);
-                for (int i = 0; i < w*h; i++)
-                    idcnt[ ids[i] & 0xff ]++;
-            }
-            if (everything || dim == -1)
-            {
-                genNetherScaled(wi.mc, wi.seed, 1, ids, x, z, w, h, 0, 0);
-                for (int i = 0; i < w*h; i++)
-                    idcnt[ ids[i] & 0xff ]++;
-            }
-            if (everything || dim == +1)
-            {
-                genEndScaled(wi.mc, wi.seed, 1, ids, x, z, w, h);
-                for (int i = 0; i < w*h; i++)
-                    idcnt[ ids[i] & 0xff ]++;
+                int w = x2-x+1 < step ? x2-x+1 : step;
+                int h = z2-z+1 < step ? z2-z+1 : step;
+
+                if (dim == 0 || !map_only)
+                {
+                    genArea(g.entry_1, ids, x, z, w, h);
+                    for (int i = 0; i < w*h; i++)
+                        idcnt[ ids[i] & 0xff ]++;
+                }
+                if (dim == -1 || !map_only)
+                {
+                    genNetherScaled(wi.mc, wi.seed, 1, ids, x, z, w, h, 0, 0);
+                    for (int i = 0; i < w*h; i++)
+                        idcnt[ ids[i] & 0xff ]++;
+                }
+                if (dim == +1 || !map_only)
+                {
+                    genEndScaled(wi.mc, wi.seed, 1, ids, x, z, w, h);
+                    for (int i = 0; i < w*h; i++)
+                        idcnt[ ids[i] & 0xff ]++;
+                }
             }
         }
-    }
 
-    int bcnt = 0;
-    for (int i = 0; i < 256; i++)
-        bcnt += !!idcnt[i];
+        int bcnt = 0;
+        for (int i = 0; i < 256; i++)
+            bcnt += !!idcnt[i];
 
-    free(ids);
-    ids = NULL;
+        free(ids);
+        ids = NULL;
 
-    QTreeWidget *tree = ui->treeAnalysis;
-    while (tree->topLevelItemCount() > 0)
-        delete tree->takeTopLevelItem(0);
+        QTreeWidgetItem* item_cat = new QTreeWidgetItem(tree);
+        item_cat->setText(0, "biomes");
+        item_cat->setData(1, Qt::DisplayRole, QVariant::fromValue(bcnt));
 
-    QTreeWidgetItem* item_cat;
-    item_cat = new QTreeWidgetItem(tree);
-    item_cat->setText(0, "biomes");
-    item_cat->setData(1, Qt::DisplayRole, QVariant::fromValue(bcnt));
-
-    for (int id = 0; id < 256; id++)
-    {
-        long cnt = idcnt[id];
-        if (cnt <= 0)
-            continue;
-        const char *s;
-        if (!(s = biome2str(id)))
-            continue;
-        QTreeWidgetItem* item = new QTreeWidgetItem(item_cat, QTreeWidgetItem::UserType + id);
-        item->setText(0, s);
-        item->setData(1, Qt::DisplayRole, QVariant::fromValue(cnt));
-    }
-
-    //tree->insertTopLevelItem(0, item_cat);
-
-    std::vector<VarPos> st;
-    for (int sopt = D_DESERT; sopt < D_SPAWN; sopt++)
-    {
-        int sdim = 0;
-        if (sopt == D_FORTESS || sopt == D_BASTION || sopt == D_PORTALN)
-            sdim = -1;
-        if (sopt == D_ENDCITY || sopt == D_GATEWAY)
-            sdim = 1;
-        if (!everything)
+        for (int id = 0; id < 256; id++)
         {
-            if (!getMapView()->getShow(sopt))
+            long cnt = idcnt[id];
+            if (cnt <= 0)
                 continue;
-            if (sdim != dim)
+            const char *s;
+            if (!(s = biome2str(id)))
                 continue;
+            QTreeWidgetItem* item =
+                new QTreeWidgetItem(item_cat, QTreeWidgetItem::UserType + id);
+            item->setText(0, s);
+            item->setData(1, Qt::DisplayRole, QVariant::fromValue(cnt));
         }
-        int stype = mapopt2stype(sopt);
-        st.clear();
-        StructureConfig sconf;
-        if (!getStructureConfig_override(stype, wi.mc, &sconf))
-            continue;
-        getStructs(&st, sconf, wi, sdim, x1, z1, x2, z2);
-        if (st.empty())
-            continue;
+    }
 
-        item_cat = new QTreeWidgetItem(tree);
-        const char *s = struct2str(stype);
-        item_cat->setText(0, s);
-        item_cat->setData(1, Qt::DisplayRole, QVariant::fromValue(st.size()));
-
-        for (size_t i = 0; i < st.size(); i++)
+    if (ck_struct)
+    {
+        std::vector<VarPos> st;
+        for (int sopt = D_DESERT; sopt < D_SPAWN; sopt++)
         {
-            VarPos vp = st[i];
-            QTreeWidgetItem* item = new QTreeWidgetItem(item_cat);
-            item->setData(0, Qt::UserRole, QVariant::fromValue(vp.p));
-            item->setText(0, QString::asprintf("%d,\t%d", vp.p.x, vp.p.z));
-            if (vp.variant)
+            int sdim = 0;
+            if (sopt == D_FORTESS || sopt == D_BASTION || sopt == D_PORTALN)
+                sdim = -1;
+            if (sopt == D_ENDCITY || sopt == D_GATEWAY)
+                sdim = 1;
+            if (map_only)
             {
-                if (stype == Village)
-                    item->setText(1, "abandoned");
+                if (!getMapView()->getShow(sopt))
+                    continue;
+                if (sdim != dim)
+                    continue;
+            }
+            int stype = mapopt2stype(sopt);
+            st.clear();
+            StructureConfig sconf;
+            if (!getStructureConfig_override(stype, wi.mc, &sconf))
+                continue;
+            getStructs(&st, sconf, wi, sdim, x1, z1, x2, z2);
+            if (st.empty())
+                continue;
+
+            QTreeWidgetItem* item_cat = new QTreeWidgetItem(tree);
+            const char *s = struct2str(stype);
+            item_cat->setText(0, s);
+            item_cat->setData(1, Qt::DisplayRole, QVariant::fromValue(st.size()));
+
+            for (size_t i = 0; i < st.size(); i++)
+            {
+                VarPos vp = st[i];
+                QTreeWidgetItem* item = new QTreeWidgetItem(item_cat);
+                item->setData(0, Qt::UserRole, QVariant::fromValue(vp.p));
+                item->setText(0, QString::asprintf("%d,\t%d", vp.p.x, vp.p.z));
+                if (vp.variant)
+                {
+                    if (stype == Village)
+                        item->setText(1, "abandoned");
+                }
             }
         }
-        //tree->insertTopLevelItem(stype, item_cat);
-    }
 
-    if (everything || (dim == 0 && getMapView()->getShow(D_SPAWN)))
-    {
-        Pos pos = getSpawn(wi.mc, &g, NULL, wi.seed);
-        if (pos.x >= x1 && pos.x <= x2 && pos.z >= z1 && pos.z <= z2)
+        if ((dim == 0 && getMapView()->getShow(D_SPAWN)) || !map_only)
         {
-            item_cat = new QTreeWidgetItem(tree);
-            item_cat->setText(0, "spawn");
-            item_cat->setData(1, Qt::DisplayRole, QVariant::fromValue(1));
-            QTreeWidgetItem* item = new QTreeWidgetItem(item_cat);
-            item->setData(0, Qt::UserRole, QVariant::fromValue(pos));
-            item->setText(0, QString::asprintf("%d,\t%d", pos.x, pos.z));
-        }
-    }
-
-    if (everything || (dim == 0 && getMapView()->getShow(D_STRONGHOLD)))
-    {
-        StrongholdIter sh;
-        initFirstStronghold(&sh, wi.mc, wi.seed);
-        std::vector<Pos> shp;
-        while (nextStronghold(&sh, &g, NULL) > 0)
-        {
-            Pos pos = sh.pos;
+            Pos pos = getSpawn(wi.mc, &g, NULL, wi.seed);
             if (pos.x >= x1 && pos.x <= x2 && pos.z >= z1 && pos.z <= z2)
-                shp.push_back(pos);
-        }
-
-        if (!shp.empty())
-        {
-            item_cat = new QTreeWidgetItem(tree);
-            item_cat->setText(0, "stronghold");
-            item_cat->setData(1, Qt::DisplayRole, QVariant::fromValue(shp.size()));
-            for (Pos pos : shp)
             {
+                QTreeWidgetItem* item_cat = new QTreeWidgetItem(tree);
+                item_cat->setText(0, "spawn");
+                item_cat->setData(1, Qt::DisplayRole, QVariant::fromValue(1));
                 QTreeWidgetItem* item = new QTreeWidgetItem(item_cat);
                 item->setData(0, Qt::UserRole, QVariant::fromValue(pos));
                 item->setText(0, QString::asprintf("%d,\t%d", pos.x, pos.z));
             }
+        }
+
+        if ((dim == 0 && getMapView()->getShow(D_STRONGHOLD)) || !map_only)
+        {
+            StrongholdIter sh;
+            initFirstStronghold(&sh, wi.mc, wi.seed);
+            std::vector<Pos> shp;
+            while (nextStronghold(&sh, &g, NULL) > 0)
+            {
+                Pos pos = sh.pos;
+                if (pos.x >= x1 && pos.x <= x2 && pos.z >= z1 && pos.z <= z2)
+                    shp.push_back(pos);
+            }
+
+            if (!shp.empty())
+            {
+                QTreeWidgetItem* item_cat = new QTreeWidgetItem(tree);
+                item_cat->setText(0, "stronghold");
+                item_cat->setData(1, Qt::DisplayRole, QVariant::fromValue(shp.size()));
+                for (Pos pos : shp)
+                {
+                    QTreeWidgetItem* item = new QTreeWidgetItem(item_cat);
+                    item->setData(0, Qt::UserRole, QVariant::fromValue(pos));
+                    item->setText(0, QString::asprintf("%d,\t%d", pos.x, pos.z));
+                }
+            }
+        }
+    }
+
+    QElapsedTimer timer;
+    timer.start();
+    int64_t warn_ms = 1000;
+
+    if (ck_conds && !conds.empty())
+    {
+        WorldGen gen;
+        Pos cpos[100];
+        gen.init(wi.mc, wi.large);
+        gen.setSeed(wi.seed);
+
+        //Condition& c0 = conds[0];
+        int xr1 = 0; //(int)( cstepx * floor( (x1+c0.x1) / (double)cstepx ) );
+        int zr1 = 0; //(int)( cstepz * floor( (z1+c0.z1) / (double)cstepz ) );
+        int xr2 = 0; //(int)( cstepx * ceil( (x2+c0.x2) / (double)cstepx ) );
+        int zr2 = 0; //(int)( cstepz * ceil( (z2+c0.z2) / (double)cstepz ) );
+
+        QList<QTreeWidgetItem*> items;
+
+        for (int x = xr1; x <= xr2; x += cstepx)
+        {
+            //if (x + c0.x1 > x2 || x + c0.x2 < x1)
+            //    continue;
+            for (int z = zr1; z <= zr2; z += cstepz)
+            {
+                //if (z + c0.z1 > z2 || z + c0.z2 < z1)
+                //    continue;
+
+                if (timer.elapsed() > warn_ms)
+                {
+                    int button = QMessageBox::warning(
+                        this, "Warning",
+                        QString::asprintf(
+                            "The search is taking some time.\n"
+                            "Locations found so far: %d\n"
+                            "Continue search?", items.size()),
+                        QMessageBox::Abort, QMessageBox::Yes);
+                    if (button != QMessageBox::Yes)
+                        goto L_scan_end;
+                    update();
+                    QApplication::processEvents();
+                    warn_ms *= 4;
+                    timer.start();
+                }
+
+                Pos origin = {x, z};
+                std::atomic_bool ab;
+                ab = false;
+                if (testSeedAt(origin, cpos, &conds, PASS_FULL_64, &gen, &ab)
+                    != COND_OK)
+                {
+                    continue;
+                }
+                //Pos p = cpos[conds[0].save];
+                //if (p.x < x1 || p.x > x2 || p.z < z1 || p.z > z2)
+                //    continue;
+
+                QTreeWidgetItem* loc = new QTreeWidgetItem();
+                loc->setData(0, Qt::UserRole, QVariant::fromValue(origin));
+                loc->setText(0, QString::asprintf(
+                    "condition @[%d, %d]", origin.x, origin.z));
+
+                for (int i = 0; i < conds.size(); i++)
+                {
+                    Pos p = cpos[conds[i].save];
+                    QTreeWidgetItem* item = new QTreeWidgetItem(loc);
+                    item->setText(0, cond2str(&conds[i]));
+                    item->setData(0, Qt::UserRole, QVariant::fromValue(p));
+                    item->setText(1, QString::asprintf("%d,\t%d", p.x, p.z));
+                }
+
+                items.push_back(loc);
+
+                if (items.size() >= 65536)
+                {
+                    QMessageBox::warning(
+                        this, "Warning",
+                        QString::asprintf(
+                            "Reached maximum number of results (%d).\n"
+                            "Stopping search.", items.size()),
+                        QMessageBox::Ok);
+                    goto L_scan_end;
+                }
+            }
+        }
+L_scan_end:
+
+        if (!items.empty())
+        {
+            /*
+            QTreeWidgetItem* item_cat = new QTreeWidgetItem(tree);
+            item_cat->setText(0, "conditions");
+            item_cat->setData(1, Qt::DisplayRole, QVariant::fromValue(items.size()));
+            item_cat->addChildren(items);
+            */
+            tree->addTopLevelItems(items);
         }
     }
 
@@ -1095,3 +1282,4 @@ void MainWindow::copyTeleportCommand()
     QClipboard *clipboard = QGuiApplication::clipboard();
     clipboard->setText(QString::asprintf("/tp @p %d ~ %d", p.x, p.z));
 }
+

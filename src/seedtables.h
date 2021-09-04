@@ -133,48 +133,6 @@ static const uint64_t g_qm_95[] = {
 };
 
 
-__attribute__((const, used))
-static int qhutQual(int low20)
-{
-    switch (low20)
-    {
-    case 0x1272d: return F_QH_BARELY;
-    case 0x17908: return F_QH_BARELY;
-    case 0x367b9: return F_QH_BARELY;
-    case 0x43f18: return F_QH_IDEAL;
-    case 0x487c9: return F_QH_BARELY;
-    case 0x487ce: return F_QH_BARELY;
-    case 0x50aa7: return F_QH_BARELY;
-    case 0x647b5: return F_QH_NORMAL;
-
-    case 0x65118: return F_QH_BARELY;
-    case 0x75618: return F_QH_NORMAL;
-    case 0x79a0a: return F_QH_IDEAL;
-    case 0x89718: return F_QH_NORMAL;
-    case 0x9371a: return F_QH_NORMAL;
-    case 0x967ec: return F_QH_BARELY;
-    case 0xa3d0a: return F_QH_BARELY;
-    case 0xa5918: return F_QH_BARELY;
-
-    case 0xa591d: return F_QH_BARELY;
-    case 0xa5a08: return F_QH_NORMAL;
-    case 0xb5e18: return F_QH_NORMAL;
-    case 0xc6749: return F_QH_BARELY;
-    case 0xc6d9a: return F_QH_BARELY;
-    case 0xc751a: return F_QH_CLASSIC;
-    case 0xd7108: return F_QH_BARELY;
-    case 0xd717a: return F_QH_BARELY;
-
-    case 0xe2739: return F_QH_BARELY;
-    case 0xe9918: return F_QH_BARELY;
-    case 0xee1c4: return F_QH_BARELY;
-    case 0xf520a: return F_QH_IDEAL;
-
-    default: return 0;
-    }
-}
-
-
 // returns for a >90% quadmonument the number of blocks, by area, in spawn range
 __attribute__((const, used))
 static int qmonumentQual(uint64_t s48)

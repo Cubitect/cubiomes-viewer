@@ -310,6 +310,15 @@
        </item>
        <item>
         <property name="text">
+         <string>Algorithm helpers</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icons.qrc">
+          <normaloff>:/icons/helper.png</normaloff>:/icons/helper.png</iconset>
+        </property>
+       </item>
+       <item>
+        <property name="text">
          <string>Quad-structure</string>
         </property>
         <property name="icon">

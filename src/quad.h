@@ -229,7 +229,7 @@ struct QWorld
     // a designated worker thread once results are done
     QAtomicPointer<Pos> spawn;
     QAtomicPointer<std::vector<Pos>> strongholds;
-    QAtomicPointer<std::vector<QuadInfo>> qsinfo;
+    QAtomicPointer<QVector<QuadInfo>> qsinfo;
     // isdel is a flag for the worker thread to stop
     std::atomic_bool isdel;
 

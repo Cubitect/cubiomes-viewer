@@ -265,8 +265,8 @@ QToolButton {
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>1225</width>
-                 <height>702</height>
+                 <width>1232</width>
+                 <height>699</height>
                 </rect>
                </property>
                <property name="sizePolicy">
@@ -346,7 +346,7 @@ QSplitter {
               </property>
              </widget>
             </item>
-            <item row="6" column="0">
+            <item row="7" column="0">
              <widget class="QPushButton" name="buttonExport">
               <property name="enabled">
                <bool>false</bool>
@@ -356,7 +356,7 @@ QSplitter {
               </property>
              </widget>
             </item>
-            <item row="5" column="0" colspan="5">
+            <item row="6" column="0" colspan="5">
              <widget class="QTreeWidget" name="treeAnalysis">
               <property name="minimumSize">
                <size>
@@ -399,7 +399,7 @@ QSplitter {
               </column>
              </widget>
             </item>
-            <item row="1" column="0" colspan="3">
+            <item row="2" column="0" colspan="3">
              <layout class="QHBoxLayout" name="layoutArea">
               <item>
                <widget class="QLabel" name="labelX1">
@@ -496,7 +496,7 @@ QSplitter {
               </item>
              </layout>
             </item>
-            <item row="1" column="3" colspan="2">
+            <item row="2" column="3" colspan="2">
              <widget class="QPushButton" name="buttonFromVisible">
               <property name="text">
                <string>From visible</string>
@@ -511,7 +511,7 @@ QSplitter {
              </widget>
             </item>
             <item row="0" column="3" colspan="2">
-             <widget class="QCheckBox" name="cboxArea">
+             <widget class="QCheckBox" name="checkArea">
               <property name="toolTip">
                <string>Specify manual rectangle rather than square</string>
               </property>
@@ -523,29 +523,55 @@ QSplitter {
               </property>
              </widget>
             </item>
-            <item row="4" column="0" colspan="5">
-             <widget class="QPushButton" name="buttonAnalysis">
-              <property name="text">
-               <string>Analyze</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="0" colspan="5">
-             <layout class="QHBoxLayout" name="horizontalLayout">
-              <item>
-               <widget class="QRadioButton" name="radioStructs">
+            <item row="3" column="0" colspan="5">
+             <layout class="QGridLayout" name="gridLayout_3">
+              <item row="0" column="2">
+               <widget class="QCheckBox" name="checkConditions">
+                <property name="toolTip">
+                 <string>Features that trigger the search conditions, provided the seed matches</string>
+                </property>
                 <property name="text">
-                 <string>Selected structures</string>
+                 <string>Condition trigger</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0" colspan="2">
+               <widget class="QPushButton" name="buttonAnalysis">
+                <property name="text">
+                 <string>Analyze</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="2">
+               <widget class="QCheckBox" name="checkMapOnly">
+                <property name="toolTip">
+                 <string>limits analysis to the selected structures and dimension in the map view</string>
+                </property>
+                <property name="text">
+                 <string>Restrict to map selections</string>
                 </property>
                 <property name="checked">
                  <bool>true</bool>
                 </property>
                </widget>
               </item>
-              <item>
-               <widget class="QRadioButton" name="radioEverything">
+              <item row="0" column="1">
+               <widget class="QCheckBox" name="checkBiomes">
+                <property name="toolTip">
+                 <string>statistic of biome occurances in area</string>
+                </property>
                 <property name="text">
-                 <string>Everything</string>
+                 <string>Biomes</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QCheckBox" name="checkStructs">
+                <property name="toolTip">
+                 <string>structure positions in area</string>
+                </property>
+                <property name="text">
+                 <string>Structures</string>
                 </property>
                </widget>
               </item>
@@ -641,7 +667,7 @@ QToolButton:checked {
      <x>0</x>
      <y>0</y>
      <width>1280</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuMap">
@@ -764,15 +790,15 @@ QToolButton:checked {
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>MapView</class>
-   <extends>QWidget</extends>
-   <header>src/mapview.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>Collapsible</class>
    <extends>QWidget</extends>
    <header>src/collapsible.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MapView</class>
+   <extends>QWidget</extends>
+   <header>src/mapview.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

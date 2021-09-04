@@ -93,12 +93,16 @@ bool FormSearchControl::setSearchConfig(SearchConfig s, bool quiet)
     }
 
     ui->spinThreads->setValue(s.threads);
-    ui->lineStart->setText(QString::asprintf("%" PRId64, (int64_t)s.startseed));
     ui->checkStop->setChecked(s.stoponres);
     smin = s.smin;
     smax = s.smax;
 
-    return ok && setList64(s.slist64path, quiet);
+    if (ok)
+        ok &= setList64(s.slist64path, quiet);
+
+    ui->lineStart->setText(QString::asprintf("%" PRId64, (int64_t)s.startseed));
+
+    return ok;
 }
 
 bool FormSearchControl::isbusy()

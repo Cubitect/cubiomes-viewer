@@ -4,13 +4,7 @@
 #include <QMessageBox>
 #include <QStandardPaths>
 #include <QApplication>
-
-#ifdef _WIN32
-#include <intrin.h>
-#else
-#include <x86intrin.h>
-#endif
-
+#include <QElapsedTimer>
 
 SearchItem::~SearchItem()
 {
@@ -18,12 +12,14 @@ SearchItem::~SearchItem()
         emit canceled(itemid);
 }
 
+
 void SearchItem::run()
 {
-    LayerStack g;
-    setupGeneratorLargeBiomes(&g, mc, large);
-    StructPos spos[100] = {};
     QVector<uint64_t> matches;
+    WorldGen gen;
+    Pos cpos[100];
+    Pos origin = {0,0};
+    gen.init(mc, large);
 
     if (searchtype == SEARCH_LIST)
     {   // seed = slist[..]
@@ -31,8 +27,13 @@ void SearchItem::run()
         for (uint64_t i = idx; i < ie; i++)
         {
             seed = slist[i];
-            if (testSeed(spos, seed, &g, true))
+            gen.setSeed(seed);
+            if (testSeedAt(origin, cpos, pcvec, PASS_FULL_64, &gen, abort)
+                == COND_OK
+            )
+            {
                 matches.push_back(seed);
+            }
         }
         isdone = (ie == len);
     }
@@ -48,8 +49,13 @@ void SearchItem::run()
             {
                 seed = (high << 48) | slist[lowidx];
 
-                if (testSeed(spos, seed, &g, true))
+                gen.setSeed(seed);
+                if (testSeedAt(origin, cpos, pcvec, PASS_FULL_64, &gen, abort)
+                    == COND_OK
+                )
+                {
                     matches.push_back(seed);
+                }
 
                 if (++lowidx >= len)
                 {
@@ -67,8 +73,13 @@ void SearchItem::run()
             seed = sstart;
             for (int i = 0; i < scnt; i++)
             {
-                if (testSeed(spos, seed, &g, true))
+                gen.setSeed(seed);
+                if (testSeedAt(origin, cpos, pcvec, PASS_FULL_64, &gen, abort)
+                    == COND_OK
+                )
+                {
                     matches.push_back(seed);
+                }
 
                 if (seed == ~(uint64_t)0)
                 {
@@ -97,9 +108,11 @@ void SearchItem::run()
             else
                 low = sstart & MASK48;
 
-            if (!testSeed(spos, low, NULL, true))
+            gen.setSeed(low);
+            if (testSeedAt(origin, cpos, pcvec, PASS_FULL_48, &gen, abort)
+                == COND_FAILED
+            )
             {
-                // warning: block search should only cover candidates
                 break;
             }
 
@@ -107,8 +120,13 @@ void SearchItem::run()
             {
                 seed = (high << 48) | low;
 
-                if (testSeed(spos, seed, &g, false))
+                gen.setSeed(seed);
+                if (testSeedAt(origin, cpos, pcvec, PASS_FULL_64, &gen, abort)
+                    == COND_OK
+                )
+                {
                     matches.push_back(seed);
+                }
 
                 if (++high >= 0x10000)
                     break;
@@ -419,17 +437,6 @@ void SearchItemGenerator::getProgress(uint64_t *prog, uint64_t *end)
     *end = scnt;
 }
 
-
-// does the 48-bit seed meet the conditions c..ce?
-static bool isCandidate(uint64_t s48, int mc, const Condition *c, const Condition *ce, std::atomic_bool *abort)
-{
-    StructPos spos[100] = {};
-    for (; c != ce; c++)
-        if (!testCond(spos, c, mc, NULL, s48, abort))
-            return false;
-    return true;
-}
-
 SearchItem *SearchItemGenerator::requestItem()
 {
     if (isdone)
@@ -440,8 +447,7 @@ SearchItem *SearchItemGenerator::requestItem()
     item->searchtype = searchtype;
     item->mc        = mc;
     item->large     = large;
-    item->cond      = condvec.data();
-    item->ccnt      = condvec.size();
+    item->pcvec     = &condvec;
     item->itemid    = itemid++;
     item->slist     = slist.empty() ? NULL : slist.data();
     item->len       = slist.size();
@@ -501,6 +507,13 @@ SearchItem *SearchItemGenerator::requestItem()
         }
         else
         {
+            WorldGen gen;
+            Pos cpos[100];
+            Pos origin = {0,0};
+            gen.init(mc, large);
+
+            QElapsedTimer timer;
+
             uint64_t high = (seed >> 48) & 0xffff;
             uint64_t low = seed & MASK48;
             high += itemsiz;
@@ -510,17 +523,19 @@ SearchItem *SearchItemGenerator::requestItem()
                 high = 0;
                 low++;
 
-                unsigned long long ts = __rdtsc() + (1ULL << 27);
-                const Condition *c = item->cond;
-                const Condition *ce = item->cond+item->ccnt;
-                /// === search for next candiditem->condate ===
+                timer.start();
+
                 for (; low <= MASK48; low++)
                 {
-                    if (isCandidate(low, mc, c, ce, abort))
-                        break;
-                    if (__rdtsc() > ts)
+                    gen.setSeed(low);
+                    if (testSeedAt(origin, cpos, &condvec, PASS_FAST_48, &gen,
+                        abort) != COND_FAILED)
                     {
-                        ts = __rdtsc() + (1ULL << 27);
+                        break;
+                    }
+
+                    if (timer.elapsed() > 200)
+                    {
                         high = 0xffff;
                         break;
                     }

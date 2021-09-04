@@ -100,7 +100,7 @@ void QuadListDialog::refresh()
     LayerStack g;
     setupGeneratorLargeBiomes(&g, wi.mc, wi.large);
 
-    std::vector<QuadInfo> qsinfo;
+    QVector<QuadInfo> qsinfo;
 
     findQuadStructs(Swamp_Hut, wi.mc, &g, wi.seed, &qsinfo);
     findQuadStructs(Monument, wi.mc, &g, wi.seed, &qsinfo);

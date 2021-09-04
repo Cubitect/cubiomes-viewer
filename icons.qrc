@@ -61,5 +61,7 @@
         <file>icons/gateway_d.png</file>
         <file>icons/mineshaft.png</file>
         <file>icons/mineshaft_d.png</file>
+        <file>icons/helper.png</file>
+        <file>icons/reference.png</file>
     </qresource>
 </RCC>

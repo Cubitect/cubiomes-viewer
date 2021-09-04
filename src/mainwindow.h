@@ -84,7 +84,7 @@ private slots:
 
     void on_mapView_customContextMenuRequested(const QPoint &pos);
 
-    void on_cboxArea_toggled(bool checked);
+    void on_checkArea_toggled(bool checked);
     void on_lineRadius_editingFinished();
     void on_buttonFromVisible_clicked();
     void on_buttonAnalysis_clicked();

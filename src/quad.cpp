@@ -646,7 +646,7 @@ struct SpawnStronghold : public QRunnable
 
         world->strongholds = shp;
 
-        std::vector<QuadInfo> *qsinfo = new std::vector<QuadInfo>;
+        QVector<QuadInfo> *qsinfo = new QVector<QuadInfo>;
 
         if (!world->isdel)
             findQuadStructs(Swamp_Hut, wi.mc, &g, wi.seed, qsinfo);

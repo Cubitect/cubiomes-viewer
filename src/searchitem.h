@@ -25,25 +25,6 @@ public:
 
     virtual void run();
 
-    inline bool testSeed(StructPos *spos, uint64_t seed, LayerStack *g, bool s48check)
-    {
-        const Condition *c, *ce = cond + ccnt;
-        if (s48check)
-        {
-            for (c = cond; c != ce; c++)
-                if (!testCond(spos, c, mc, NULL, seed, abort))
-                    return false;
-        }
-        for (c = cond; c != ce; c++)
-        {
-            if (g_filterinfo.list[c->type].cat == CAT_QUAD)
-                continue;
-            if (!testCond(spos, c, mc, g, seed, abort))
-               return false;
-        }
-        return true;
-    }
-
 signals:
     int results(QVector<uint64_t> seeds, bool countonly);
     void itemDone(uint64_t itemid, uint64_t seed, bool isdone);
@@ -53,8 +34,7 @@ public:
     int                 searchtype;
     int                 mc;
     int                 large;
-    const Condition   * cond;
-    int                 ccnt;
+    QVector<Condition>* pcvec;
     uint64_t            itemid;     // item identifier
     const uint64_t    * slist;      // candidate list
     uint64_t            len;        // number of candidates

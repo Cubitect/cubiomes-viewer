@@ -19,6 +19,24 @@ QDataStream& operator>>(QDataStream& in, Condition& v)
     return in;
 }
 
+QString cond2str(Condition *cond)
+{
+    const FilterInfo& ft = g_filterinfo.list[cond->type];
+    QString s = QString::asprintf("[%02d] %-28sx%-3d", cond->save, ft.name, cond->count);
+
+    if (cond->relative)
+        s += QString::asprintf("[%02d]+", cond->relative);
+    else
+        s += "     ";
+
+    if (ft.coord)
+        s += QString::asprintf("(%d,%d)", cond->x1*ft.step, cond->z1*ft.step);
+    if (ft.area)
+        s += QString::asprintf(",(%d,%d)", (cond->x2+1)*ft.step-1, (cond->z2+1)*ft.step-1);
+
+    return s;
+}
+
 
 FormConditions::FormConditions(MainWindow *parent)
     : QWidget(parent)
@@ -115,6 +133,7 @@ bool list_contains(QListWidget *list, QListWidgetItem *item)
     return false;
 }
 
+
 // [ID] Condition Cnt Rel Area
 void FormConditions::setItemCondition(QListWidget *list, QListWidgetItem *item, Condition *cond)
 {
@@ -132,20 +151,9 @@ void FormConditions::setItemCondition(QListWidget *list, QListWidgetItem *item, 
         cond->save = getIndex(cond->save);
     }
 
+    QString s = cond2str(cond);
+
     const FilterInfo& ft = g_filterinfo.list[cond->type];
-    QString s = QString::asprintf("[%02d] %-28sx%-3d", cond->save, ft.name, cond->count);
-
-    if (cond->relative)
-        s += QString::asprintf("[%02d]+", cond->relative);
-    else
-        s += "     ";
-
-    if (ft.coord)
-        s += QString::asprintf("(%d,%d)", cond->x1*ft.step, cond->z1*ft.step);
-    if (ft.area)
-        s += QString::asprintf(",(%d,%d)", (cond->x2+1)*ft.step-1, (cond->z2+1)*ft.step-1);
-
-
     if (ft.cat == CAT_QUAD)
         item->setBackground(QColor(255, 255, 0, 80));
 

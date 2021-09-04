@@ -11,6 +11,7 @@
 #include <QPainter>
 #include <QPainterPath>
 #include <QMessageBox>
+#include <QScrollBar>
 
 
 #define SETUP_BIOME_CHECKBOX(B) do {\

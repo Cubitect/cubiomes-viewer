@@ -14,6 +14,8 @@ class MainWindow;
 
 Q_DECLARE_METATYPE(Condition)
 
+QString cond2str(Condition *cond);
+
 class FormConditions : public QWidget
 {
     Q_OBJECT
