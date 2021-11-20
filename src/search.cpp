@@ -459,36 +459,23 @@ L_qm_any:
                     continue;
                 if (pc.x < x1 || pc.x > x2 || pc.z < z1 || pc.z > z2)
                     continue;
-                if (finfo.dim == 0 && pass >= PASS_FULL_64)
+                if (pass < PASS_FULL_48)
+                    continue;
+                if (pass == PASS_FAST_48)
                 {
-                    if (!isViableStructurePos(
-                        st, gen->mc, &gen->g, gen->seed, pc.x, pc.z))
+                    if (finfo.dim == 0)
                         continue;
                 }
-                if (finfo.dim == -1 && pass >= PASS_FULL_48)
+                gen->init4Dim(finfo.dim);
+                if (!isViableStructurePos(st, &gen->g, pc.x, pc.z))
+                    continue;
+                if (st == End_City)
                 {
-                    if (!isViableNetherStructurePos(
-                        st, gen->mc, &gen->nn, gen->seed, pc.x, pc.z))
+                    gen->setSurfaceNoise();
+                    if (!isViableEndCityTerrain(
+                        &gen->g.en, &gen->sn, pc.x, pc.z))
                         continue;
                 }
-                if (finfo.dim == +1 && pass >= PASS_FULL_48)
-                {
-                    if (!isViableEndStructurePos(
-                        st, gen->mc, &gen->en, gen->seed, pc.x, pc.z))
-                        continue;
-                    if (st == End_City)
-                    {
-                        if (!gen->initsn)
-                        {
-                            initSurfaceNoiseEnd(&gen->sn, gen->seed);
-                            gen->initsn = true;
-                        }
-                        if (!isViableEndCityTerrain(
-                            &gen->en, &gen->sn, pc.x, pc.z))
-                            continue;
-                    }
-                }
-
                 xt += pc.x;
                 zt += pc.z;
                 n++;
@@ -547,9 +534,9 @@ L_qm_any:
         x2 = cond->x2 + at.x;
         z2 = cond->z2 + at.z;
 
-        applySeed(&gen->g, gen->seed);
         if (*abort) return COND_FAILED;
-        pc = getSpawn(gen->mc, &gen->g, NULL, gen->seed);
+        gen->init4Dim(0);
+        pc = getSpawn(&gen->g);
         if (pc.x >= x1 && pc.x <= x2 && pc.z >= z1 && pc.z <= z2)
         {
             *cent = pc;
@@ -624,9 +611,9 @@ L_qm_any:
         {
             StrongholdIter sh;
             initFirstStronghold(&sh, gen->mc, gen->seed);
-            applySeed(&gen->g, gen->seed);
             n = 0;
-            while (nextStronghold(&sh, &gen->g, NULL) > 0)
+            gen->init4Dim(0);
+            while (nextStronghold(&sh, &gen->g) > 0)
             {
                 if (*abort || sh.ringnum > r)
                     break;
@@ -677,14 +664,15 @@ L_qm_any:
 
     // biome filters reference specific layers
     // MAYBE: options for layers in different versions?
-    case F_BIOME:           s = 0; goto L_biome_filter_any;
+    case F_BIOME:           s = 0;
+        if (gen->mc >= MC_1_18)    goto L_noise_biome;
+        else                       goto L_biome_filter_any;
     case F_BIOME_4_RIVER:   s = 2; goto L_biome_filter_any;
-    case F_BIOME_16_SHORE:  s = 4; goto L_biome_filter_any;
-    case F_BIOME_64_RARE:   s = 6; goto L_biome_filter_any;
-    case F_BIOME_256_BIOME: s = 8; goto L_biome_filter_any;
     case F_BIOME_256_OTEMP: s = 8; goto L_biome_filter_any;
 
 L_biome_filter_any:
+        if (gen->mc >= MC_1_18)
+            return COND_FAILED;
         rx1 = ((cond->x1 << s) + at.x) >> s;
         rz1 = ((cond->z1 << s) + at.z) >> s;
         rx2 = ((cond->x2 << s) + at.x) >> s;
@@ -703,28 +691,19 @@ L_biome_filter_any:
         {
             int w = rx2-rx1+1;
             int h = rz2-rz1+1;
-            int *area = allocCache(&gen->g.layers[finfo.layer], w, h);
-            if (checkForBiomes(&gen->g, finfo.layer, area, gen->seed,
-                rx1, rz1, w, h, cond->bfilter, 0) > 0)
+            //gen->init4Dim(0); // seed gets applied by checkForBiomesAtLayer
+            if (checkForBiomesAtLayer(&gen->g.ls, &gen->g.ls.layers[finfo.layer],
+                NULL, gen->seed, rx1, rz1, w, h, cond->bfilter, 0) > 0)
             {
-                // check biome exclusion
-                uint64_t b = 0, bm = 0;
-                for (int i = 0; i < w*h; i++)
-                {
-                    int id = area[i];
-                    if (id < 128) b |= (1ULL << id);
-                    else bm |= (1ULL << (id-128));
-                }
-                if ((b & cond->exclb) == 0 && (bm & cond->exclm) == 0)
-                    valid = COND_OK;
+                valid = COND_OK;
             }
-            free(area);
         }
         return valid;
 
 
     case F_TEMPS:
-
+        if (gen->mc >= MC_1_18)
+            return COND_FAILED;
         rx1 = ((cond->x1 << 10) + at.x) >> 10;
         rz1 = ((cond->z1 << 10) + at.z) >> 10;
         rx2 = ((cond->x2 << 10) + at.x) >> 10;
@@ -733,55 +712,48 @@ L_biome_filter_any:
         cent->z = ((rz1 + rz2) << 10) >> 1;
         if (pass != PASS_FULL_64)
             return COND_MAYBE_POS_VALID;
-        if (checkForTemps(&gen->g, gen->seed, rx1, rz1, rx2-rx1+1, rz2-rz1+1, cond->temps))
+        gen->init4Dim(0);
+        if (checkForTemps(&gen->g.ls, gen->seed, rx1, rz1, rx2-rx1+1, rz2-rz1+1, cond->temps))
             return COND_OK;
         return COND_FAILED;
 
-    case F_BIOME_NETHER_1:  s = 0;  goto L_nether_end;
-    case F_BIOME_NETHER_4:  s = 2;  goto L_nether_end;
-    case F_BIOME_NETHER_16: s = 4;  goto L_nether_end;
-    case F_BIOME_NETHER_64: s = 6;  goto L_nether_end;
-    case F_BIOME_END_1:     s = 0;  goto L_nether_end;
-    case F_BIOME_END_4:     s = 2;  goto L_nether_end;
-    case F_BIOME_END_16:    s = 4;  goto L_nether_end;
-    case F_BIOME_END_64:    s = 6;  goto L_nether_end;
 
-L_nether_end:
+    case F_BIOME_4:         s = 2;  goto L_noise_biome;
+    case F_BIOME_16:        s = 4;  goto L_noise_biome;
+    case F_BIOME_64:        s = 6;  goto L_noise_biome;
+    case F_BIOME_256:       s = 8;  goto L_noise_biome;
+    case F_BIOME_NETHER_1:  s = 0;  goto L_noise_biome;
+    case F_BIOME_NETHER_4:  s = 2;  goto L_noise_biome;
+    case F_BIOME_NETHER_16: s = 4;  goto L_noise_biome;
+    case F_BIOME_NETHER_64: s = 6;  goto L_noise_biome;
+    case F_BIOME_END_1:     s = 0;  goto L_noise_biome;
+    case F_BIOME_END_4:     s = 2;  goto L_noise_biome;
+    case F_BIOME_END_16:    s = 4;  goto L_noise_biome;
+    case F_BIOME_END_64:    s = 6;  goto L_noise_biome;
+
+L_noise_biome:
+        if (pass == PASS_FAST_48)
+            return COND_MAYBE_POS_VALID;
+        // the Nether and End require only the 48-bit seed
+        // (except voronoi uses the full 64-bits)
+        if (pass == PASS_FULL_48)
+        {
+            if (s == 0 || finfo.dim == 0)
+                return COND_MAYBE_POS_VALID;
+        }
         rx1 = ((cond->x1 << s) + at.x) >> s;
         rz1 = ((cond->z1 << s) + at.z) >> s;
         rx2 = ((cond->x2 << s) + at.x) >> s;
         rz2 = ((cond->z2 << s) + at.z) >> s;
         cent->x = ((rx1 + rx2) << s) >> 1;
         cent->z = ((rz1 + rz2) << s) >> 1;
-
-        if (pass == PASS_FAST_48)
-            return COND_MAYBE_POS_VALID;
-        if (pass != PASS_FULL_64 && s == 0)
-            return COND_MAYBE_POS_VALID; // (voronoi uses the full 64-bits)
-        else
-        {   // in general, the nether and end require only the 48-bit seed
+        {
             int w = rx2 - rx1 + 1;
             int h = rz2 - rz1 + 1;
-            int *area = (int*) malloc((w+7) * (h+7) * sizeof(int));
-
-            if (finfo.dim == -1)
-                genNetherScaled(gen->mc, gen->seed, 1 << s, area, rx1, rz1, w, h, 0, 0);
-            else
-                genEndScaled(gen->mc, gen->seed, 1 << s, area, rx1, rz1, w, h);
-
-            uint64_t b = 0, bm = 0;
-            for (int i = 0; i < w*h; i++)
-            {
-                int id = area[i];
-                if (id < 128) b |= (1ULL << id);
-                else bm |= (1ULL << (id-128));
-            }
-            valid = ((b & cond->bfilter.riverToFind) ^ cond->bfilter.riverToFind) == 0 &&
-                    ((bm & cond->bfilter.riverToFindM) ^ cond->bfilter.riverToFindM) == 0 &&
-                    (b & cond->exclb) == 0 &&
-                    (bm & cond->exclm) == 0;
-
-            free(area);
+            int y = (s == 0 ? cond->y : cond->y >> 2);
+            Range r = {1<<s, rx1, rz1, w, h, y, 1};
+            valid = checkForBiomes(&gen->g, NULL, r, finfo.dim, gen->seed,
+                cond->bfilter, 0, 0) > 0;
         }
         return valid ? COND_OK : COND_FAILED;
 
@@ -793,13 +765,10 @@ L_nether_end:
 }
 
 
-void findQuadStructs(
-        int styp, int mc, LayerStack *g, uint64_t seed,
-        QVector<QuadInfo> *out
-    )
+void findQuadStructs(int styp, Generator *g, QVector<QuadInfo> *out)
 {
     StructureConfig sconf;
-    if (!getStructureConfig_override(styp, mc, &sconf))
+    if (!getStructureConfig_override(styp, g->mc, &sconf))
         return;
 
     int qmax = 1000;
@@ -810,7 +779,7 @@ void findQuadStructs(
     if (styp == Swamp_Hut)
     {
         qcnt = scanForQuads(
-            sconf, 128, seed & MASK48,
+            sconf, 128, g->seed & MASK48,
             low20QuadHutBarely, sizeof(low20QuadHutBarely) / sizeof(uint64_t),
             20, sconf.salt,
             -r, -r, 2*r, 2*r, qlist, qmax
@@ -820,23 +789,23 @@ void findQuadStructs(
         {
             Pos qr = qlist[i];
             Pos qs[4];
-            getStructurePos(styp, mc, seed, qr.x+0, qr.z+0, qs+0);
-            getStructurePos(styp, mc, seed, qr.x+0, qr.z+1, qs+1);
-            getStructurePos(styp, mc, seed, qr.x+1, qr.z+0, qs+2);
-            getStructurePos(styp, mc, seed, qr.x+1, qr.z+1, qs+3);
-            if (isViableStructurePos(styp, mc, g, seed, qs[0].x, qs[0].z) &&
-                isViableStructurePos(styp, mc, g, seed, qs[1].x, qs[1].z) &&
-                isViableStructurePos(styp, mc, g, seed, qs[2].x, qs[2].z) &&
-                isViableStructurePos(styp, mc, g, seed, qs[3].x, qs[3].z))
+            getStructurePos(styp, g->mc, g->seed, qr.x+0, qr.z+0, qs+0);
+            getStructurePos(styp, g->mc, g->seed, qr.x+0, qr.z+1, qs+1);
+            getStructurePos(styp, g->mc, g->seed, qr.x+1, qr.z+0, qs+2);
+            getStructurePos(styp, g->mc, g->seed, qr.x+1, qr.z+1, qs+3);
+            if (isViableStructurePos(styp, g, qs[0].x, qs[0].z) &&
+                isViableStructurePos(styp, g, qs[1].x, qs[1].z) &&
+                isViableStructurePos(styp, g, qs[2].x, qs[2].z) &&
+                isViableStructurePos(styp, g, qs[3].x, qs[3].z))
             {
                 QuadInfo qinfo;
                 for (int j = 0; j < 4; j++)
                     qinfo.p[j] = qs[j];
-                qinfo.c = (seed + sconf.salt) & 0xfffff;
+                qinfo.c = (g->seed + sconf.salt) & 0xfffff;
                 qinfo.flt = 0; // TODO
                 qinfo.typ = styp;
                 qinfo.afk = getOptimalAfk(qs, 7,7,9, &qinfo.spcnt);
-                qinfo.rad = isQuadBase(sconf, moveStructure(seed,-qr.x,-qr.z), 160);
+                qinfo.rad = isQuadBase(sconf, moveStructure(g->seed,-qr.x,-qr.z), 160);
                 out->push_back(qinfo);
             }
         }
@@ -844,7 +813,7 @@ void findQuadStructs(
     else if (styp == Monument)
     {
         qcnt = scanForQuads(
-            sconf, 160, seed & MASK48,
+            sconf, 160, g->seed & MASK48,
             g_qm_90, sizeof(g_qm_90) / sizeof(uint64_t),
             48, sconf.salt,
             -r, -r, 2*r, 2*r, qlist, qmax
@@ -854,25 +823,25 @@ void findQuadStructs(
         {
             Pos qr = qlist[i];
             Pos qs[4];
-            getStructurePos(styp, mc, seed, qr.x+0, qr.z+0, qs+0);
-            getStructurePos(styp, mc, seed, qr.x+0, qr.z+1, qs+1);
-            getStructurePos(styp, mc, seed, qr.x+1, qr.z+0, qs+2);
-            getStructurePos(styp, mc, seed, qr.x+1, qr.z+1, qs+3);
-            if (isViableStructurePos(styp, mc, g, seed, qs[0].x, qs[0].z) &&
-                isViableStructurePos(styp, mc, g, seed, qs[1].x, qs[1].z) &&
-                isViableStructurePos(styp, mc, g, seed, qs[2].x, qs[2].z) &&
-                isViableStructurePos(styp, mc, g, seed, qs[3].x, qs[3].z))
+            getStructurePos(styp, g->mc, g->seed, qr.x+0, qr.z+0, qs+0);
+            getStructurePos(styp, g->mc, g->seed, qr.x+0, qr.z+1, qs+1);
+            getStructurePos(styp, g->mc, g->seed, qr.x+1, qr.z+0, qs+2);
+            getStructurePos(styp, g->mc, g->seed, qr.x+1, qr.z+1, qs+3);
+            if (isViableStructurePos(styp, g, qs[0].x, qs[0].z) &&
+                isViableStructurePos(styp, g, qs[1].x, qs[1].z) &&
+                isViableStructurePos(styp, g, qs[2].x, qs[2].z) &&
+                isViableStructurePos(styp, g, qs[3].x, qs[3].z))
             {
                 QuadInfo qinfo;
                 for (int j = 0; j < 4; j++)
                     qinfo.p[j] = qs[j];
-                qinfo.c = (seed + sconf.salt) & MASK48;
+                qinfo.c = (g->seed + sconf.salt) & MASK48;
                 qinfo.flt = 0; // TODO
                 qinfo.typ = styp;
                 qinfo.afk = getOptimalAfk(qs, 58,0/*23*/,58, &qinfo.spcnt);
                 qinfo.afk.x -= 29;
                 qinfo.afk.z -= 29;
-                qinfo.rad = isQuadBase(sconf, moveStructure(seed,-qr.x,-qr.z), 160);
+                qinfo.rad = isQuadBase(sconf, moveStructure(g->seed,-qr.x,-qr.z), 160);
                 out->push_back(qinfo);
             }
         }

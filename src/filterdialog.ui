@@ -26,8 +26,25 @@
       <attribute name="title">
        <string>Biomes</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_3">
-       <item>
+      <layout class="QGridLayout" name="gridLayout_4">
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="lineY">
+         <property name="toolTip">
+          <string>Vertical position in blocks</string>
+         </property>
+         <property name="text">
+          <string>63</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="labelY">
+         <property name="text">
+          <string>At height (Y):</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0" colspan="2">
         <layout class="QHBoxLayout" name="horizontalLayout_3">
          <item>
           <widget class="QPushButton" name="buttonUncheck">
@@ -52,7 +69,7 @@
          </item>
         </layout>
        </item>
-       <item>
+       <item row="3" column="0" colspan="2">
         <widget class="QScrollArea" name="scrollArea">
          <property name="widgetResizable">
           <bool>true</bool>
@@ -63,7 +80,7 @@
             <x>0</x>
             <y>0</y>
             <width>570</width>
-            <height>315</height>
+            <height>286</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -117,7 +134,7 @@
       <string>Location</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="3" column="0">
+      <item row="4" column="0">
        <widget class="QLabel" name="labelRelative">
         <property name="text">
          <string>Location is relative to:</string>
@@ -134,7 +151,7 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="1" colspan="2">
+      <item row="4" column="1" colspan="2">
        <widget class="QComboBox" name="comboBoxRelative">
         <item>
          <property name="text">
@@ -166,14 +183,14 @@
       <item row="0" column="0">
        <widget class="QLabel" name="labelSpinBox">
         <property name="text">
-         <string>Instances within area =</string>
+         <string>Instances within area:</string>
         </property>
        </widget>
       </item>
       <item row="1" column="0">
        <widget class="QLabel" name="labelSquareArea">
         <property name="text">
-         <string>Within centred square of side =</string>
+         <string>Within centred square of side:</string>
         </property>
        </widget>
       </item>
@@ -185,7 +202,7 @@
            <string>Lower bound (inclusive)</string>
           </property>
           <property name="text">
-           <string>X&lt;sub&gt;1&lt;/sub&gt;=</string>
+           <string>X&lt;sub&gt;1&lt;/sub&gt;:</string>
           </property>
          </widget>
         </item>
@@ -205,7 +222,7 @@
            <string>Lower bound (inclusive)</string>
           </property>
           <property name="text">
-           <string>Z&lt;sub&gt;1&lt;/sub&gt;=</string>
+           <string>Z&lt;sub&gt;1&lt;/sub&gt;:</string>
           </property>
          </widget>
         </item>
@@ -238,7 +255,7 @@
            <string>Upper bound (inclusive)</string>
           </property>
           <property name="text">
-           <string>X&lt;sub&gt;2&lt;/sub&gt;=</string>
+           <string>X&lt;sub&gt;2&lt;/sub&gt;:</string>
           </property>
          </widget>
         </item>
@@ -258,7 +275,7 @@
            <string>Upper bound (inclusive)</string>
           </property>
           <property name="text">
-           <string>Z&lt;sub&gt;2&lt;/sub&gt;=</string>
+           <string>Z&lt;sub&gt;2&lt;/sub&gt;:</string>
           </property>
          </widget>
         </item>

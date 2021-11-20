@@ -10,7 +10,6 @@
 
 struct ExtGenSettings
 {
-    bool largeBiomes;
     bool saltOverride;
     uint64_t salts[FEATURE_NUM];
 
@@ -18,7 +17,6 @@ struct ExtGenSettings
 
     void reset()
     {
-        largeBiomes = false;
         saltOverride = false;
         for (int i = 0; i < FEATURE_NUM; i++)
             salts[i] = ~(uint64_t)0;
@@ -30,12 +28,13 @@ struct WorldInfo
     int mc;
     bool large;
     uint64_t seed;
+    int y;
 
     WorldInfo() { reset(); }
 
     bool equals(const WorldInfo& wi) const
     {
-        return mc == wi.mc && large == wi.large && seed == wi.seed;
+        return mc == wi.mc && large == wi.large && seed == wi.seed && y == wi.y;
     }
 
     void reset()
@@ -43,6 +42,7 @@ struct WorldInfo
         mc = MC_NEWEST;
         large = false;
         seed = 0;
+        y = 63;
     }
 };
 
@@ -68,7 +68,7 @@ struct Config
         restoreSession = true;
         autosaveCycle = 10;
         uistyle = STYLE_SYSTEM;
-        seedsPerItem = 256;
+        seedsPerItem = 64;
         queueSize = QThread::idealThreadCount();
         maxMatching = 65536;
     }

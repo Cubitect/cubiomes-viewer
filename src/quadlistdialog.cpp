@@ -49,7 +49,7 @@ QuadListDialog::~QuadListDialog()
 
 void QuadListDialog::loadSeed()
 {
-    ui->comboBoxMC->setCurrentText("1.17");
+    ui->comboBoxMC->setCurrentText("1.18");
     ui->lineSeed->clear();
 
     WorldInfo wi;
@@ -97,13 +97,14 @@ void QuadListDialog::refresh()
     if (!getSeed(&wi))
         return;
 
-    LayerStack g;
-    setupGeneratorLargeBiomes(&g, wi.mc, wi.large);
+    Generator g;
+    setupGenerator(&g, wi.mc, wi.large);
+    applySeed(&g, 0, wi.seed);
 
     QVector<QuadInfo> qsinfo;
 
-    findQuadStructs(Swamp_Hut, wi.mc, &g, wi.seed, &qsinfo);
-    findQuadStructs(Monument, wi.mc, &g, wi.seed, &qsinfo);
+    findQuadStructs(Swamp_Hut, &g, &qsinfo);
+    findQuadStructs(Monument, &g, &qsinfo);
 
     int row = 0, qhn = 0, qmn = 0;
     for (QuadInfo& qi : qsinfo)

@@ -63,7 +63,7 @@
           <string>type of quad-structure</string>
          </property>
          <property name="textAlignment">
-          <set>AlignLeading|AlignVCenter</set>
+          <set>AlignLeft|AlignVCenter</set>
          </property>
         </column>
         <column>
@@ -74,7 +74,7 @@
           <string>distance to origin</string>
          </property>
          <property name="textAlignment">
-          <set>AlignLeading|AlignVCenter</set>
+          <set>AlignLeft|AlignVCenter</set>
          </property>
         </column>
         <column>
@@ -85,7 +85,7 @@
           <string>optimal AFK location</string>
          </property>
          <property name="textAlignment">
-          <set>AlignLeading|AlignVCenter</set>
+          <set>AlignLeft|AlignVCenter</set>
          </property>
         </column>
         <column>
@@ -96,7 +96,7 @@
           <string>distance to furthest spawning space from optimal AFK position</string>
          </property>
          <property name="textAlignment">
-          <set>AlignLeading|AlignVCenter</set>
+          <set>AlignLeft|AlignVCenter</set>
          </property>
         </column>
         <column>
@@ -107,7 +107,7 @@
           <string>horizontal bounding box area inside a 128 block range</string>
          </property>
          <property name="textAlignment">
-          <set>AlignLeading|AlignVCenter</set>
+          <set>AlignLeft|AlignVCenter</set>
          </property>
         </column>
        </widget>
@@ -175,6 +175,11 @@
          <height>16</height>
         </size>
        </property>
+       <item>
+        <property name="text">
+         <string>1.18</string>
+        </property>
+       </item>
        <item>
         <property name="text">
          <string>1.17</string>
@@ -276,7 +281,8 @@
      </property>
      <property name="icon">
       <iconset theme="window-close">
-       <normaloff>.</normaloff>.</iconset>
+       <normaloff/>
+      </iconset>
      </property>
     </widget>
    </item>

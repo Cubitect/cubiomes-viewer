@@ -81,13 +81,11 @@ void ExtGenDialog::initSettings(ExtGenSettings *extgen)
     }
     updateToggles();
 
-    ui->checkLarge->setChecked(extgen->largeBiomes);
     ui->groupSalts->setChecked(extgen->saltOverride);
 }
 
 ExtGenSettings ExtGenDialog::getSettings()
 {
-    extgen.largeBiomes = ui->checkLarge->isChecked();
     extgen.saltOverride = ui->groupSalts->isChecked();
 
     for (int i = 0; i < FEATURE_NUM; i++)

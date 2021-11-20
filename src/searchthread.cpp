@@ -68,10 +68,17 @@ bool SearchThread::set(
             QMessageBox::warning(NULL, "Warning", s);
             return false;
         }
+        if (wi.mc > finfo.mcmax)
+        {
+            const char *mcs = mc2str(finfo.mcmax);
+            QString s = QString::asprintf("Condition [%02d] not available for Minecraft versions above %s.", c.save, mcs);
+            QMessageBox::warning(NULL, "Warning", s);
+            return false;
+        }
         if (c.type >= F_BIOME && c.type <= F_BIOME_256_OTEMP)
         {
-            if ((c.exclb & (c.bfilter.riverToFind | c.bfilter.oceanToFind)) ||
-                (c.exclm & c.bfilter.riverToFindM))
+            if ((c.bfilter.biomeToExcl & (c.bfilter.riverToFind | c.bfilter.oceanToFind)) ||
+                (c.bfilter.biomeToExclM & c.bfilter.riverToFindM))
             {
                 QMessageBox::warning(NULL, "Warning", QString::asprintf("Biome filter condition with ID [%02d] has contradicting flags for include and exclude.", c.save));
                 return false;

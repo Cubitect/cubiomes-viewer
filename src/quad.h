@@ -147,7 +147,8 @@ public:
 
     WorldInfo wi;
     int dim;
-    const Layer *entry;
+    const Generator *g;
+    int scale;
     int ti, tj;
     int blocks;
     int pixs;
@@ -160,6 +161,7 @@ public:
     QAtomicPointer<std::vector<VarPos>> spos;
 
     std::atomic_bool done; // indicates that no further processing will occur
+    std::atomic_bool *isdel;
 
 public:
     // externally managed (read/write in controller thread only)
@@ -167,20 +169,20 @@ public:
     int stopped; // not done, and also not in processing queue
 };
 
-
+struct QWorld;
 struct Level
 {
     Level();
     ~Level();
 
-    void init4map(WorldInfo wi, int dim, int pix, int layerscale);
-    void init4struct(WorldInfo wi, int dim, int blocks, int sopt, int viewlv);
+    void init4map(QWorld *w, int dim, int pix, int layerscale);
+    void init4struct(QWorld *w, int dim, int blocks, int sopt, int viewlv);
 
     void resizeLevel(std::vector<Quad*>& cache, int x, int z, int w, int h);
     void update(std::vector<Quad*>& cache, qreal bx0, qreal bz0, qreal bx1, qreal bz1);
 
     std::vector<Quad*> cells;
-    LayerStack g;
+    Generator g;
     Layer *entry;
     WorldInfo wi;
     int dim;
@@ -190,6 +192,7 @@ struct Level
     int pixs;
     int sopt;
     int viewlv;
+    std::atomic_bool *isdel;
 };
 
 
@@ -197,6 +200,8 @@ struct QWorld
 {
     QWorld(WorldInfo wi, int dim = 0);
     ~QWorld();
+
+    void clearPool();
 
     void setDim(int dim);
 
@@ -208,8 +213,7 @@ struct QWorld
 
     WorldInfo wi;
     int dim;
-    LayerStack g;
-    uint64_t sha;
+    Generator g;
 
     // the visible area is managed in Quads of different scales (for biomes and structures),
     // which are managed in rectangular sections as levels

@@ -68,6 +68,8 @@ private slots:
     void on_comboBoxMC_currentIndexChanged(int a);
     void on_seedEdit_editingFinished();
     void on_seedEdit_textChanged(const QString &arg1);
+    void on_checkLarge_toggled();
+    void on_lineY_editingFinished();
 
     void on_actionSave_triggered();
     void on_actionLoad_triggered();

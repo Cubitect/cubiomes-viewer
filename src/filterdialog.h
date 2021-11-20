@@ -77,6 +77,8 @@ signals:
 private slots:
     void on_comboBoxType_activated(int);
 
+    void on_comboBoxRelative_activated(int);
+
     void on_buttonUncheck_clicked();
 
     void on_buttonInclude_clicked();

@@ -188,6 +188,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->lineEditZ2->setValidator(intval);
     on_checkArea_toggled(false);
 
+    ui->lineY->setValidator(new QIntValidator(-64, 320, this));
+
     formCond->updateSensitivity();
 
     connect(&autosaveTimer, &QTimer::timeout, this, &MainWindow::onAutosaveTimeout);
@@ -244,7 +246,8 @@ bool MainWindow::getSeed(WorldInfo *wi, bool applyrand)
         ui->seedEdit->setText(QString::asprintf("%" PRId64, (int64_t)wi->seed));
     }
 
-    wi->large = g_extgen.largeBiomes;
+    wi->large = ui->checkLarge->isChecked();
+    wi->y = ui->lineY->text().toInt();
 
     return ok;
 }
@@ -261,11 +264,15 @@ bool MainWindow::setSeed(WorldInfo wi, int dim)
     if (dim == INT_MAX)
         dim = getDim();
 
-    g_extgen.largeBiomes = wi.large;
+    ui->checkLarge->setChecked(wi.large);
+    ui->lineY->setText(QString::number(wi.y));
 
     ui->comboBoxMC->setCurrentText(mcstr);
     ui->seedEdit->setText(QString::asprintf("%" PRId64, (int64_t)wi.seed));
     ui->mapView->setSeed(wi, dim);
+
+    ui->checkLarge->setEnabled(wi.mc >= MC_1_3);
+    ui->lineY->setEnabled(wi.mc >= MC_1_16);
     return true;
 }
 
@@ -306,7 +313,6 @@ void MainWindow::saveSettings()
     settings.setValue("config/queueSize", config.queueSize);
     settings.setValue("config/maxMatching", config.maxMatching);
 
-    settings.setValue("world/largeBiomes", g_extgen.largeBiomes);
     settings.setValue("world/saltOverride", g_extgen.saltOverride);
     for (int st = 0; st < FEATURE_NUM; st++)
     {
@@ -322,6 +328,7 @@ void MainWindow::saveSettings()
     settings.setValue("map/seed", (qlonglong)wi.seed);
     settings.setValue("map/dim", getDim());
     settings.setValue("map/x", ui->mapView->getX());
+    settings.setValue("map/y", wi.y);
     settings.setValue("map/z", ui->mapView->getZ());
     settings.setValue("map/scale", ui->mapView->getScale());
     for (int stype = 0; stype < STRUCT_NUM; stype++)
@@ -380,7 +387,6 @@ void MainWindow::loadSettings()
     ui->mapView->setSmoothMotion(config.smoothMotion);
     onStyleChanged(config.uistyle);
 
-    g_extgen.largeBiomes = settings.value("world/largeBiomes", g_extgen.largeBiomes).toBool();
     g_extgen.saltOverride = settings.value("world/saltOverride", g_extgen.saltOverride).toBool();
     for (int st = 0; st < FEATURE_NUM; st++)
     {
@@ -401,6 +407,7 @@ void MainWindow::loadSettings()
     wi.mc = settings.value("map/mc", wi.mc).toInt();
     wi.large = settings.value("map/large", wi.large).toBool();
     wi.seed = (uint64_t) settings.value("map/seed", QVariant::fromValue((qlonglong)wi.seed)).toLongLong();
+    wi.y = settings.value("map/y", wi.mc).toInt();
     setSeed(wi);
 
     qreal x = ui->mapView->getX();
@@ -635,8 +642,17 @@ void MainWindow::on_comboBoxMC_currentIndexChanged(int)
     updateMapSeed();
     update();
 }
-
 void MainWindow::on_seedEdit_editingFinished()
+{
+    updateMapSeed();
+    update();
+}
+void MainWindow::on_checkLarge_toggled()
+{
+    updateMapSeed();
+    update();
+}
+void MainWindow::on_lineY_editingFinished()
 {
     updateMapSeed();
     update();
@@ -910,15 +926,13 @@ void MainWindow::on_buttonAnalysis_clicked()
 
 
     int dim = getDim();
-    LayerStack g;
-    setupGeneratorLargeBiomes(&g, wi.mc, wi.large);
-    applySeed(&g, wi.seed);
+    Generator g;
+    setupGenerator(&g, wi.mc, wi.large);
 
     if (ck_biome)
     {
         const int step = 512;
         long idcnt[256] = {0};
-        int *ids = allocCache(g.entry_1, step, step);
 
         for (int x = x1; x <= x2; x += step)
         {
@@ -926,34 +940,27 @@ void MainWindow::on_buttonAnalysis_clicked()
             {
                 int w = x2-x+1 < step ? x2-x+1 : step;
                 int h = z2-z+1 < step ? z2-z+1 : step;
+                Range r = {1, x, z, w, h, wi.y, 1};
+                int *ids = allocCache(&g, r);
 
-                if (dim == 0 || !map_only)
+                int dims[] = {0, -1, +1};
+                for (int d = 0; d < 3; d++)
                 {
-                    genArea(g.entry_1, ids, x, z, w, h);
-                    for (int i = 0; i < w*h; i++)
-                        idcnt[ ids[i] & 0xff ]++;
+                    if (dims[d] == dim || !map_only)
+                    {
+                        applySeed(&g, dims[d], wi.seed);
+                        genBiomes(&g, ids, r);
+                        for (int i = 0; i < w*h; i++)
+                            idcnt[ ids[i] & 0xff ]++;
+                    }
                 }
-                if (dim == -1 || !map_only)
-                {
-                    genNetherScaled(wi.mc, wi.seed, 1, ids, x, z, w, h, 0, 0);
-                    for (int i = 0; i < w*h; i++)
-                        idcnt[ ids[i] & 0xff ]++;
-                }
-                if (dim == +1 || !map_only)
-                {
-                    genEndScaled(wi.mc, wi.seed, 1, ids, x, z, w, h);
-                    for (int i = 0; i < w*h; i++)
-                        idcnt[ ids[i] & 0xff ]++;
-                }
+                free(ids);
             }
         }
 
         int bcnt = 0;
         for (int i = 0; i < 256; i++)
             bcnt += !!idcnt[i];
-
-        free(ids);
-        ids = NULL;
 
         QTreeWidgetItem* item_cat = new QTreeWidgetItem(tree);
         item_cat->setText(0, "biomes");
@@ -1021,7 +1028,8 @@ void MainWindow::on_buttonAnalysis_clicked()
 
         if ((dim == 0 && getMapView()->getShow(D_SPAWN)) || !map_only)
         {
-            Pos pos = getSpawn(wi.mc, &g, NULL, wi.seed);
+            applySeed(&g, 0, wi.seed);
+            Pos pos = getSpawn(&g);
             if (pos.x >= x1 && pos.x <= x2 && pos.z >= z1 && pos.z <= z2)
             {
                 QTreeWidgetItem* item_cat = new QTreeWidgetItem(tree);
@@ -1038,7 +1046,8 @@ void MainWindow::on_buttonAnalysis_clicked()
             StrongholdIter sh;
             initFirstStronghold(&sh, wi.mc, wi.seed);
             std::vector<Pos> shp;
-            while (nextStronghold(&sh, &g, NULL) > 0)
+            applySeed(&g, dim, wi.seed);
+            while (nextStronghold(&sh, &g) > 0)
             {
                 Pos pos = sh.pos;
                 if (pos.x >= x1 && pos.x <= x2 && pos.z >= z1 && pos.z <= z2)
