@@ -100,7 +100,7 @@ void Quad::run()
             fprintf(
                 stderr,
                 "Failed to generate tile - "
-                "MC:%s seed:%ld dim:%d @ [%d %d] (%d %d) 1:%d\n",
+                "MC:%s seed:%" PRId64 " dim:%d @ [%d %d] (%d %d) 1:%d\n",
                 mc2str(g->mc), g->seed, g->dim,
                 x, z, w, h, scale);
             for (int i = 0; i < w*h; i++)
