@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>ExtGenDialog</class>
  <widget class="QDialog" name="ExtGenDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>321</width>
+    <height>110</height>
+   </rect>
+  </property>
   <property name="windowTitle">
    <string>World Settings (experimental)</string>
   </property>
@@ -10,7 +18,7 @@
     <normaloff>:/icons/map.png</normaloff>:/icons/map.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="2" column="0" colspan="2">
+   <item row="1" column="0" colspan="2">
     <widget class="QGroupBox" name="groupSalts">
      <property name="title">
       <string>Override structure salt</string>
@@ -23,17 +31,7 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="0" colspan="2">
-    <widget class="QCheckBox" name="checkLarge">
-     <property name="toolTip">
-      <string>Simulate innertia for the map view</string>
-     </property>
-     <property name="text">
-      <string>Large biomes</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="0" colspan="2">
+   <item row="2" column="0" colspan="2">
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
