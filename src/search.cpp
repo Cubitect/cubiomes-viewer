@@ -467,13 +467,18 @@ L_qm_any:
                         continue;
                 }
                 gen->init4Dim(finfo.dim);
-                if (!isViableStructurePos(st, &gen->g, pc.x, pc.z))
+                if (!isViableStructurePos(st, &gen->g, pc.x, pc.z, 0))
                     continue;
                 if (st == End_City)
                 {
                     gen->setSurfaceNoise();
                     if (!isViableEndCityTerrain(
                         &gen->g.en, &gen->sn, pc.x, pc.z))
+                        continue;
+                }
+                else if (gen->mc >= MC_1_18)
+                {
+                    if (!isViableStructureTerrain(st, &gen->g, pc.x, pc.z))
                         continue;
                 }
                 xt += pc.x;
@@ -793,10 +798,10 @@ void findQuadStructs(int styp, Generator *g, QVector<QuadInfo> *out)
             getStructurePos(styp, g->mc, g->seed, qr.x+0, qr.z+1, qs+1);
             getStructurePos(styp, g->mc, g->seed, qr.x+1, qr.z+0, qs+2);
             getStructurePos(styp, g->mc, g->seed, qr.x+1, qr.z+1, qs+3);
-            if (isViableStructurePos(styp, g, qs[0].x, qs[0].z) &&
-                isViableStructurePos(styp, g, qs[1].x, qs[1].z) &&
-                isViableStructurePos(styp, g, qs[2].x, qs[2].z) &&
-                isViableStructurePos(styp, g, qs[3].x, qs[3].z))
+            if (isViableStructurePos(styp, g, qs[0].x, qs[0].z, 0) &&
+                isViableStructurePos(styp, g, qs[1].x, qs[1].z, 0) &&
+                isViableStructurePos(styp, g, qs[2].x, qs[2].z, 0) &&
+                isViableStructurePos(styp, g, qs[3].x, qs[3].z, 0))
             {
                 QuadInfo qinfo;
                 for (int j = 0; j < 4; j++)
@@ -827,10 +832,10 @@ void findQuadStructs(int styp, Generator *g, QVector<QuadInfo> *out)
             getStructurePos(styp, g->mc, g->seed, qr.x+0, qr.z+1, qs+1);
             getStructurePos(styp, g->mc, g->seed, qr.x+1, qr.z+0, qs+2);
             getStructurePos(styp, g->mc, g->seed, qr.x+1, qr.z+1, qs+3);
-            if (isViableStructurePos(styp, g, qs[0].x, qs[0].z) &&
-                isViableStructurePos(styp, g, qs[1].x, qs[1].z) &&
-                isViableStructurePos(styp, g, qs[2].x, qs[2].z) &&
-                isViableStructurePos(styp, g, qs[3].x, qs[3].z))
+            if (isViableStructurePos(styp, g, qs[0].x, qs[0].z, 0) &&
+                isViableStructurePos(styp, g, qs[1].x, qs[1].z, 0) &&
+                isViableStructurePos(styp, g, qs[2].x, qs[2].z, 0) &&
+                isViableStructurePos(styp, g, qs[3].x, qs[3].z, 0))
             {
                 QuadInfo qinfo;
                 for (int j = 0; j < 4; j++)

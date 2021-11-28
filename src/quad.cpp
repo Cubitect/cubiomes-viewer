@@ -51,24 +51,31 @@ void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
 
             if (p.x >= x0 && p.x < x1 && p.z >= z0 && p.z < z1)
             {
-                int id = isViableStructurePos(sconf.structType, &g, p.x, p.z);
-                if (id && sconf.structType == End_City)
+                int id = isViableStructurePos(sconf.structType, &g, p.x, p.z, 0);
+                if (!id)
+                    continue;
+
+                if (sconf.structType == End_City)
                 {
                     SurfaceNoise sn;
                     initSurfaceNoiseEnd(&sn, wi.seed);
                     id = isViableEndCityTerrain(&g.en, &sn, p.x, p.z);
+                    if (!id)
+                        continue;
+                }
+                else if (g.mc >= MC_1_18)
+                {
+                    if (!isViableStructureTerrain(sconf.structType, &g, p.x, p.z))
+                        continue;
                 }
 
-                if (id)
+                VarPos vp = { p, 0 };
+                if (sconf.structType == Village)
                 {
-                    VarPos vp = { p, 0 };
-                    if (sconf.structType == Village)
-                    {
-                        VillageType vt = getVillageType(wi.mc, wi.seed, p.x, p.z, id);
-                        vp.variant = vt.abandoned;
-                    }
-                    out->push_back(vp);
+                    VillageType vt = getVillageType(wi.mc, wi.seed, p.x, p.z, id);
+                    vp.variant = vt.abandoned;
                 }
+                out->push_back(vp);
             }
         }
     }
@@ -810,14 +817,6 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
         painter.drawPixmapFragments(frags.data(), frags.size(), icons[D_STRONGHOLD]);
     }
 
-    for (int li = lvb.size()-1; li >= 0; --li)
-    {
-        Level& l = lvb[li];
-        if (li == activelv || li == activelv+1)
-            l.update(cachedbiomes, bx0, bz0, bx1, bz1);
-        else
-            l.update(cachedbiomes, 0, 0, 0, 0);
-    }
     for (int sopt = D_DESERT; sopt < D_SPAWN; sopt++)
     {
         Level& l = lvs[sopt];
@@ -825,6 +824,14 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
             l.update(cachedstruct, bx0, bz0, bx1, bz1);
         else if (activelv > l.viewlv+1)
             l.update(cachedstruct, 0, 0, 0, 0);
+    }
+    for (int li = lvb.size()-1; li >= 0; --li)
+    {
+        Level& l = lvb[li];
+        if (li == activelv || li == activelv+1)
+            l.update(cachedbiomes, bx0, bz0, bx1, bz1);
+        else
+            l.update(cachedbiomes, 0, 0, 0, 0);
     }
 
     // start the spawn and stronghold worker thread if this is the first run

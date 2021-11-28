@@ -300,25 +300,25 @@ static const struct FilterList
             "Nether biomes after voronoi scaling to 1:1."
         };
         list[F_BIOME_NETHER_4] = FilterInfo{
-            CAT_NETHER, 0, 1, 1, 0, 0, 4, 0, MC_1_16, MC_NEWEST, -1, 1, disp++,
+            CAT_NETHER, 0, 1, 1, 0, 0, 4, 0, MC_1_16, MC_NEWEST, -1, 0, disp++,
             ":icons/nether.png",
             "Nether biome filter 1:4",
             "Nether biomes with normal noise sampling at scale 1:4."
         };
         list[F_BIOME_NETHER_16] = FilterInfo{
-            CAT_NETHER, 0, 1, 1, 0, 0, 16, 0, MC_1_16, MC_NEWEST, -1, 1, disp++,
+            CAT_NETHER, 0, 1, 1, 0, 0, 16, 0, MC_1_16, MC_NEWEST, -1, 0, disp++,
             ":icons/nether.png",
             "Nether biome filter 1:16",
             "Nether biomes, but only sampled at scale 1:16."
         };
         list[F_BIOME_NETHER_64] = FilterInfo{
-            CAT_NETHER, 0, 1, 1, 0, 0, 64, 0, MC_1_16, MC_NEWEST, -1, 1, disp++,
+            CAT_NETHER, 0, 1, 1, 0, 0, 64, 0, MC_1_16, MC_NEWEST, -1, 0, disp++,
             ":icons/nether.png",
             "Nether biome filter 1:64",
             "Nether biomes, but only sampled at scale 1:64."
         };
         list[F_BIOME_NETHER_256] = FilterInfo{
-            CAT_NETHER, 0, 1, 1, 0, 0, 256, 0, MC_1_16, MC_NEWEST, -1, 1, disp++,
+            CAT_NETHER, 0, 1, 1, 0, 0, 256, 0, MC_1_16, MC_NEWEST, -1, 0, disp++,
             ":icons/nether.png",
             "Nether biome filter 1:256",
             "Nether biomes, but only sampled at scale 1:256."
@@ -388,14 +388,16 @@ static const struct FilterList
             CAT_STRUCT, 1, 1, 1, 0, Desert_Pyramid, 1, 1, MC_1_3, MC_NEWEST, 0, 0, disp++,
             ":icons/desert.png",
             "Desert pyramid",
-            ""
+            "In version 1.18, desert pyramids depend on surface height and may fail to "
+            "generate near caves/aquifers, rivers and oceans."
         };
 
         list[F_JUNGLE] = FilterInfo{
-            CAT_STRUCT, 1, 1, 1, 0, Jungle_Pyramid, 1, 1, MC_1_3, MC_NEWEST, 0, 0, disp++,
+            CAT_STRUCT, 1, 1, 1, 0, Jungle_Temple, 1, 1, MC_1_3, MC_NEWEST, 0, 0, disp++,
             ":icons/jungle.png",
             "Jungle temple",
-            ""
+            "In version 1.18, jungle temples depend on surface height and may fail to "
+            "generate near caves/aquifers, rivers and oceans."
         };
 
         list[F_HUT] = FilterInfo{
@@ -423,7 +425,8 @@ static const struct FilterList
             CAT_STRUCT, 1, 1, 1, 0, Mansion, 1, 1, MC_1_11, MC_NEWEST, 0, 0, disp++,
             ":icons/mansion.png",
             "Woodland mansion",
-            ""
+            "In version 1.18, mansions depend on surface height and may fail to "
+            "generate near caves/aquifers, rivers and oceans."
         };
 
         list[F_RUINS] = FilterInfo{

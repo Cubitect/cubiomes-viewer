@@ -55,7 +55,6 @@ SOURCES += \
 HEADERS += \
         $$CUPATH/finders.h \
         $$CUPATH/generator.h \
-        $$CUPATH/javarnd.h \
         $$CUPATH/layers.h \
         $$CUPATH/util.h \
         src/aboutdialog.h \

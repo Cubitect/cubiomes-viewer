@@ -26,7 +26,16 @@
       </property>
       <widget class="QFrame" name="controlFrame">
        <layout class="QVBoxLayout" name="verticalLayout_5">
-        <property name="margin">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
          <number>0</number>
         </property>
         <item>
@@ -39,10 +48,17 @@
            </widget>
           </item>
           <item row="1" column="3">
-           <widget class="QLineEdit" name="lineY"/>
+           <widget class="QLineEdit" name="lineY">
+            <property name="toolTip">
+             <string>Show map for this y-level</string>
+            </property>
+           </widget>
           </item>
           <item row="1" column="2">
            <widget class="QLabel" name="labelY">
+            <property name="toolTip">
+             <string>Show map for this y-level</string>
+            </property>
             <property name="text">
              <string>Y:</string>
             </property>
@@ -229,7 +245,16 @@
             <string>Search</string>
            </attribute>
            <layout class="QGridLayout" name="gridLayout">
-            <property name="margin">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
              <number>0</number>
             </property>
             <item row="0" column="0">
@@ -275,8 +300,8 @@ QToolButton {
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>1233</width>
-                 <height>676</height>
+                 <width>1232</width>
+                 <height>669</height>
                 </rect>
                </property>
                <property name="sizePolicy">
@@ -601,7 +626,16 @@ QSplitter {
         <enum>QFrame::Raised</enum>
        </property>
        <layout class="QGridLayout" name="gridLayout_4">
-        <property name="margin">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
          <number>0</number>
         </property>
         <item row="0" column="0">
@@ -668,7 +702,7 @@ QToolButton:checked {
      <x>0</x>
      <y>0</y>
      <width>1280</width>
-     <height>23</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuMap">
