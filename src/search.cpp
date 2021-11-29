@@ -547,7 +547,7 @@ L_qm_any:
             *cent = pc;
             return COND_OK;
         }
-        return COND_OK;
+        return COND_FAILED;
 
     case F_STRONGHOLD:
 
