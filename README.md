@@ -17,9 +17,24 @@ For Arch linux users, the tool may be found in the [AUR](https://aur.archlinux.o
 ## Build from source
 
 Install Qt5 development files
+
+### Linux
 ```
 $ sudo apt install build-essential qt5-default
 ```
+
+### MacOS
+You must have XCode installed as well as XCode's command-line tools. If you don't, download XCode from the AppStore and then execute the following at the terminal:
+```
+$ xcode-select --install
+```
+You must have [Homebrew](https://brew.sh) installed for the next steps.
+
+```
+$ brew install qt@5
+$ brew link qt@5
+```
+
 get sources
 ```
 $ git clone --recursive https://github.com/Cubitect/cubiomes-viewer.git
