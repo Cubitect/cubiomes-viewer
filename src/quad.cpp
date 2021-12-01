@@ -72,7 +72,7 @@ void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
                 VarPos vp = { p, 0 };
                 if (sconf.structType == Village)
                 {
-                    VillageType vt = getVillageType(wi.mc, wi.seed, p.x, p.z, id);
+                    StructureVariant vt = getVillageType(wi.mc, wi.seed, p.x, p.z, id);
                     vp.variant = vt.abandoned;
                 }
                 out->push_back(vp);
