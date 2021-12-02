@@ -168,7 +168,7 @@ void FormConditions::editCondition(QListWidgetItem *item)
         return;
     WorldInfo wi;
     parent->getSeed(&wi);
-    FilterDialog *dialog = new FilterDialog(this, wi.mc, item, (Condition*)item->data(Qt::UserRole).data());
+    FilterDialog *dialog = new FilterDialog(this, &parent->config, wi.mc, item, (Condition*)item->data(Qt::UserRole).data());
     QObject::connect(dialog, SIGNAL(setCond(QListWidgetItem*,Condition)), this, SLOT(addItemCondition(QListWidgetItem*,Condition)), Qt::QueuedConnection);
     dialog->show();
 }
@@ -214,7 +214,7 @@ void FormConditions::on_buttonAddFilter_clicked()
 {
     WorldInfo wi;
     parent->getSeed(&wi);
-    FilterDialog *dialog = new FilterDialog(this, wi.mc);
+    FilterDialog *dialog = new FilterDialog(this, &parent->config, wi.mc);
     QObject::connect(dialog, SIGNAL(setCond(QListWidgetItem*,Condition)), this, SLOT(addItemCondition(QListWidgetItem*,Condition)), Qt::QueuedConnection);
     dialog->show();
 }

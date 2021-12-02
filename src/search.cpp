@@ -459,12 +459,12 @@ L_qm_any:
                     continue;
                 if (pc.x < x1 || pc.x > x2 || pc.z < z1 || pc.z > z2)
                     continue;
-                if (pass < PASS_FULL_48)
-                    continue;
-                if (pass == PASS_FAST_48)
+                if (pass < PASS_FULL_48 || (pass == PASS_FAST_48 && finfo.dim == 0))
                 {
-                    if (finfo.dim == 0)
-                        continue;
+                    xt += pc.x;
+                    zt += pc.z;
+                    n++;
+                    continue;
                 }
                 gen->init4Dim(finfo.dim);
                 if (!isViableStructurePos(st, &gen->g, pc.x, pc.z, 0))
@@ -758,7 +758,7 @@ L_noise_biome:
             int y = (s == 0 ? cond->y : cond->y >> 2);
             Range r = {1<<s, rx1, rz1, w, h, y, 1};
             valid = checkForBiomes(&gen->g, NULL, r, finfo.dim, gen->seed,
-                cond->bfilter, 0, 0) > 0;
+                cond->bfilter, 0, (volatile char*)abort) > 0;
         }
         return valid ? COND_OK : COND_FAILED;
 

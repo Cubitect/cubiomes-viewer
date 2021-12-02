@@ -534,7 +534,7 @@ SearchItem *SearchItemGenerator::requestItem()
                         break;
                     }
 
-                    if (timer.elapsed() > 200)
+                    if (timer.elapsed() > 500)
                     {
                         high = 0xffff;
                         break;

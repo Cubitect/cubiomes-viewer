@@ -236,7 +236,7 @@
         </font>
        </property>
        <property name="toolTip">
-        <string>Progress within the set of all 48-bit seeds.</string>
+        <string>Queued progress within search set</string>
        </property>
        <property name="layoutDirection">
         <enum>Qt::LeftToRight</enum>

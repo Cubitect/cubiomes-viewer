@@ -78,6 +78,7 @@ struct SearchItemGenerator
     uint64_t                smin;
     uint64_t                smax;
     bool                    isdone;
+    bool                    isstart;
     std::atomic_bool      * abort;
 };
 

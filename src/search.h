@@ -232,7 +232,7 @@ static const struct FilterList
         };
 
         list[F_BIOME] = FilterInfo{
-            CAT_BIOMES, 1, 1, 1, L_VORONOI_1, 0, 1, 0, MC_1_0, MC_NEWEST, 0, 1, disp++,
+            CAT_BIOMES, 1, 1, 1, L_VORONOI_1, 0, 1, 0, MC_1_0, MC_1_17, 0, 1, disp++, // disable for 1.18
             ":icons/map.png",
             "Biome filter 1:1",
             "Only seeds with the included (+) biomes in the specified area and "
@@ -294,9 +294,9 @@ static const struct FilterList
         };
 
         list[F_BIOME_NETHER_1] = FilterInfo{
-            CAT_NETHER, 1, 1, 1, 0, 0, 1, 0, MC_1_16, MC_NEWEST, -1, 1, disp++,
+            CAT_NETHER, 1, 1, 1, 0, 0, 1, 0, MC_1_16, 0, -1, 1, disp++, // disabled
             ":icons/nether.png",
-            "Nether biome filter 1:1",
+            "Nether biome filter 1:1 (disabled)",
             "Nether biomes after voronoi scaling to 1:1."
         };
         list[F_BIOME_NETHER_4] = FilterInfo{
@@ -325,9 +325,9 @@ static const struct FilterList
         };
 
         list[F_BIOME_END_1] = FilterInfo{
-            CAT_END, 1, 1, 1, 0, 0, 1, 0, MC_1_9, MC_NEWEST, +1, 1, disp++,
+            CAT_END, 1, 1, 1, 0, 0, 1, 0, MC_1_9, 0, +1, 1, disp++, // disabled
             ":icons/the_end.png",
-            "End biome filter 1:1",
+            "End biome filter 1:1 (disabled)",
             "End biomes after voronoi scaling to 1:1."
         };
         list[F_BIOME_END_4] = FilterInfo{

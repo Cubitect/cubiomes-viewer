@@ -42,9 +42,10 @@ static QString getTip(int mc, int layer, int id)
     return tip;
 }
 
-FilterDialog::FilterDialog(FormConditions *parent, int mcversion, QListWidgetItem *item, Condition *initcond)
+FilterDialog::FilterDialog(FormConditions *parent, Config *config, int mcversion, QListWidgetItem *item, Condition *initcond)
     : QDialog(parent, Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint)
     , ui(new Ui::FilterDialog)
+    , config(config)
     , item(item)
     , mc(mcversion)
 {
@@ -523,6 +524,30 @@ void FilterDialog::updateBiomeSelection()
     }
 }
 
+int FilterDialog::warnIfBad(Condition cond)
+{
+    const FilterInfo &ft = g_filterinfo.list[cond.type];
+    if (ft.cat == CAT_BIOMES)
+    {
+        int w = cond.x2 - cond.x1 + 1;
+        int h = cond.z2 - cond.z1 + 1;
+        uint64_t workitemsize = (uint64_t)config->seedsPerItem * w * h;
+        uint64_t workwarn = (mc >= MC_1_18 ? 1e6 : 1e9);
+
+        if (workitemsize > workwarn)
+        {
+            QString text =
+                    "The biome filter you have entered may take a while to check. "
+                    "You should consider using a smaller area with a larger scaling "
+                    "instead and/or reduce the number of seeds per work item "
+                    "under Edit>Perferences."
+                    "\n\n"
+                    "Are you sure you want to continue?";
+            return QMessageBox::warning(this, "Performance Expensive Condition", text, QMessageBox::Ok | QMessageBox::Cancel);
+        }
+    }
+    return QMessageBox::Ok;
+}
 
 void FilterDialog::on_comboBoxType_activated(int)
 {
@@ -643,6 +668,9 @@ void FilterDialog::on_buttonOk_clicked()
     }
 
     cond.y = ui->lineY->text().toInt();
+
+    if (warnIfBad(cond) != QMessageBox::Ok)
+        return;
 
     emit setCond(item, cond);
     item = 0;

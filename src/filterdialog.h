@@ -64,12 +64,13 @@ class FilterDialog : public QDialog
 
 public:
 
-    explicit FilterDialog(FormConditions *parent, int mc, QListWidgetItem *item = 0, Condition *initcond = 0);
+    explicit FilterDialog(FormConditions *parent, Config *config, int mc, QListWidgetItem *item = 0, Condition *initcond = 0);
     virtual ~FilterDialog();
 
     void updateMode();
     void updateBiomeSelection();
     void enableSet(const int *ids, int n);
+    int warnIfBad(Condition cond);
 
 signals:
     void setCond(QListWidgetItem *item, Condition cond);
@@ -106,6 +107,7 @@ private:
     bool custom;
 
 public:
+    Config *config;
     QListWidgetItem *item;
     Condition cond;
     int mc;
