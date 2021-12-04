@@ -24,8 +24,14 @@ public:
 
     Config getSettings();
 
+    void setBiomeColorPath(QString path);
+
 private slots:
     void on_buttonBox_clicked(QAbstractButton *button);
+
+    void on_buttonBiomeColor_clicked();
+
+    void on_buttonClear_clicked();
 
 private:
     Ui::ConfigDialog *ui;

@@ -58,6 +58,7 @@ struct Config
     int seedsPerItem;
     int queueSize;
     int maxMatching;
+    QString biomeColorPath;
 
     Config() { reset(); }
 
@@ -71,6 +72,7 @@ struct Config
         seedsPerItem = 64;
         queueSize = QThread::idealThreadCount();
         maxMatching = 65536;
+        biomeColorPath = "";
     }
 };
 

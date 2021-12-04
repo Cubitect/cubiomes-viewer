@@ -104,6 +104,7 @@ private slots:
     void onSelectedSeedChanged(uint64_t seed);
     void onSearchStatusChanged(bool running);
     void onStyleChanged(int style);
+    void onBiomeColorChange();
     void copyCoord();
     void copyTeleportCommand();
 

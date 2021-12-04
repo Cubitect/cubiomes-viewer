@@ -18,7 +18,7 @@ inline const char* struct2str(int stype)
     switch (stype)
     {
     case Desert_Pyramid:    return "desert_pyramid";
-    case Jungle_Pyramid:    return "jungle_pyramid";
+    case Jungle_Temple:     return "jungle_temple";
     case Swamp_Hut:         return "swamp_hut";
     case Igloo:             return "igloo";
     case Village:           return "village";

@@ -818,7 +818,7 @@ QToolButton:checked {
   </action>
   <action name="actionExtGen">
    <property name="text">
-    <string>World settings...</string>
+    <string>Advanced world settings...</string>
    </property>
   </action>
  </widget>

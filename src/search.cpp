@@ -459,27 +459,24 @@ L_qm_any:
                     continue;
                 if (pc.x < x1 || pc.x > x2 || pc.z < z1 || pc.z > z2)
                     continue;
-                if (pass < PASS_FULL_48 || (pass == PASS_FAST_48 && finfo.dim == 0))
+                if (pass == PASS_FULL_64 || (pass == PASS_FULL_48 && !finfo.dep64))
                 {
-                    xt += pc.x;
-                    zt += pc.z;
-                    n++;
-                    continue;
-                }
-                gen->init4Dim(finfo.dim);
-                if (!isViableStructurePos(st, &gen->g, pc.x, pc.z, 0))
-                    continue;
-                if (st == End_City)
-                {
-                    gen->setSurfaceNoise();
-                    if (!isViableEndCityTerrain(
-                        &gen->g.en, &gen->sn, pc.x, pc.z))
+                    if (*abort) return COND_FAILED;
+                    gen->init4Dim(finfo.dim);
+                    if (!isViableStructurePos(st, &gen->g, pc.x, pc.z, 0))
                         continue;
-                }
-                else if (gen->mc >= MC_1_18)
-                {
-                    if (!isViableStructureTerrain(st, &gen->g, pc.x, pc.z))
-                        continue;
+                    if (st == End_City)
+                    {
+                        gen->setSurfaceNoise();
+                        if (!isViableEndCityTerrain(
+                            &gen->g.en, &gen->sn, pc.x, pc.z))
+                            continue;
+                    }
+                    else if (gen->mc >= MC_1_18)
+                    {
+                        if (!isViableStructureTerrain(st, &gen->g, pc.x, pc.z))
+                            continue;
+                    }
                 }
                 xt += pc.x;
                 zt += pc.z;
@@ -492,14 +489,13 @@ L_qm_any:
             cent->x = xt / n;
             cent->z = zt / n;
 
-            if (pass != PASS_FULL_64 && finfo.dep64)
-            {   // some non-exhaustive structure clusters do not
-                // have known center positions with 48-bit seeds
-                if (cond->count != (1+rx2-rx1) * (1+rz2-rz1))
-                    return COND_MAYBE_POS_INVAL;
-                return COND_MAYBE_POS_VALID;
-            }
-            return COND_OK;
+            if (pass == PASS_FULL_64 || (pass == PASS_FULL_48 && !finfo.dep64))
+                return COND_OK;
+            // some non-exhaustive structure clusters do not
+            // have known center positions with 48-bit seeds
+            if (cond->count != (1+rx2-rx1) * (1+rz2-rz1))
+                return COND_MAYBE_POS_INVAL;
+            return COND_MAYBE_POS_VALID;
         }
         return COND_FAILED;
 
@@ -741,11 +737,8 @@ L_noise_biome:
             return COND_MAYBE_POS_VALID;
         // the Nether and End require only the 48-bit seed
         // (except voronoi uses the full 64-bits)
-        if (pass == PASS_FULL_48)
-        {
-            if (s == 0 || finfo.dim == 0)
-                return COND_MAYBE_POS_VALID;
-        }
+        if (pass == PASS_FULL_48 && finfo.dep64)
+            return COND_MAYBE_POS_VALID;
         rx1 = ((cond->x1 << s) + at.x) >> s;
         rz1 = ((cond->z1 << s) + at.z) >> s;
         rx2 = ((cond->x2 << s) + at.x) >> s;

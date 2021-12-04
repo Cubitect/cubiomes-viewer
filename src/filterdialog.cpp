@@ -15,7 +15,7 @@
 
 
 #define SETUP_BIOME_CHECKBOX(B) do {\
-        biomecboxes[B] = new QCheckBox(#B);\
+        biomecboxes[B] = new QCheckBox(biome2str(mc, B));\
         ui->gridLayoutBiomes->addWidget(biomecboxes[B], (B) % 128, (B) / 128);\
         biomecboxes[B]->setTristate(true);\
     } while (0)
@@ -35,10 +35,10 @@ static QString getTip(int mc, int layer, int id)
     QString tip = "Generates any of:";
     for (int j = 0; j < 64; j++)
         if (mL & (1ULL << j))
-            tip += QString("\n") + biome2str(j);
+            tip += QString("\n") + biome2str(mc, j);
     for (int j = 0; j < 64; j++)
         if (mM & (1ULL << j))
-            tip += QString("\n") + biome2str(128+j);
+            tip += QString("\n") + biome2str(mc, 128+j);
     return tip;
 }
 
@@ -490,12 +490,12 @@ void FilterDialog::updateBiomeSelection()
                     for (int j = 0; j < 64; j++)
                     {
                         if (mL & (1ULL << j))
-                            tip += QString("\n") + biome2str(j);
+                            tip += QString("\n") + biome2str(mc, j);
                     }
                     for (int j = 0; j < 64; j++)
                     {
                         if (mM & (1ULL << j))
-                            tip += QString("\n") + biome2str(j+128);
+                            tip += QString("\n") + biome2str(mc, j+128);
                     }
                     cb->setToolTip(tip);
                 }

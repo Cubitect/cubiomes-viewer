@@ -22,8 +22,6 @@ bool MapOverlay::event(QEvent *e)
 void MapOverlay::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
-
-    const char *bname = biome2str(id);
     if (bname)
     {
         QString s = QString::asprintf("%s [%d,%d]", bname, pos.x, pos.z);
@@ -76,6 +74,17 @@ void MapView::deleteWorld()
 {
     delete world;
     world = NULL;
+}
+
+void MapView::refresh()
+{
+    if (world)
+    {
+        WorldInfo wi = world->wi;
+        int dim = world->dim;
+        delete world;
+        world = new QWorld(wi, dim);
+    }
 }
 
 void MapView::setSeed(WorldInfo wi, int dim)
@@ -203,7 +212,7 @@ void MapView::paintEvent(QPaintEvent *)
         qreal bz = (cur.y() - height()/2.0) / blocks2pix + fz;
         Pos p = {(int)bx, (int)bz};
         overlay->pos = p;
-        overlay->id = world->getBiome(p);
+        overlay->bname = biome2str(world->wi.mc, world->getBiome(p));
 
         if (QThreadPool::globalInstance()->activeThreadCount() > 0 || velx || velz)
             updatecounter = 2;

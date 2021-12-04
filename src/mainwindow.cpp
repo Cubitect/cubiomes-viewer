@@ -312,6 +312,7 @@ void MainWindow::saveSettings()
     settings.setValue("config/seedsPerItem", config.seedsPerItem);
     settings.setValue("config/queueSize", config.queueSize);
     settings.setValue("config/maxMatching", config.maxMatching);
+    settings.setValue("config/biomeColorPath", config.biomeColorPath);
 
     settings.setValue("world/saltOverride", g_extgen.saltOverride);
     for (int st = 0; st < FEATURE_NUM; st++)
@@ -382,6 +383,10 @@ void MainWindow::loadSettings()
     config.seedsPerItem = settings.value("config/seedsPerItem", config.seedsPerItem).toInt();
     config.queueSize = settings.value("config/queueSize", config.queueSize).toInt();
     config.maxMatching = settings.value("config/maxMatching", config.maxMatching).toInt();
+    config.biomeColorPath = settings.value("config/biomeColorPath", config.biomeColorPath).toString();
+
+    if (!config.biomeColorPath.isEmpty())
+        onBiomeColorChange();
 
     ui->mapView->setShowBB(config.showBBoxes);
     ui->mapView->setSmoothMotion(config.smoothMotion);
@@ -725,7 +730,34 @@ void MainWindow::on_actionPreferences_triggered()
         {
             autosaveTimer.stop();
         }
+
+        if (!config.biomeColorPath.isEmpty() || !oldConfig.biomeColorPath.isEmpty())
+        {
+            onBiomeColorChange();
+        }
     }
+}
+
+void MainWindow::onBiomeColorChange()
+{
+    QFile file(config.biomeColorPath);
+    if (file.open(QIODevice::ReadOnly))
+    {
+        char buf[32*1024];
+        qint64 siz = file.read(buf, sizeof(buf)-1);
+        file.close();
+        if (siz >= 0)
+        {
+            buf[siz] = 0;
+            initBiomeColors(biomeColors);
+            parseBiomeColors(biomeColors, buf);
+        }
+    }
+    else
+    {
+        initBiomeColors(biomeColors);
+    }
+    ui->mapView->refresh();
 }
 
 void MainWindow::on_actionGo_to_triggered()
@@ -972,7 +1004,7 @@ void MainWindow::on_buttonAnalysis_clicked()
             if (cnt <= 0)
                 continue;
             const char *s;
-            if (!(s = biome2str(id)))
+            if (!(s = biome2str(wi.mc, id)))
                 continue;
             QTreeWidgetItem* item =
                 new QTreeWidgetItem(item_cat, QTreeWidgetItem::UserType + id);

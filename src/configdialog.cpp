@@ -1,13 +1,21 @@
 #include "configdialog.h"
 #include "ui_configdialog.h"
+#include "cutil.h"
 
 #include <QThread>
+#include <QFileInfo>
+#include <QFileDialog>
 
 ConfigDialog::ConfigDialog(QWidget *parent, Config *config) :
     QDialog(parent),
     ui(new Ui::ConfigDialog)
 {
     ui->setupUi(this);
+
+    QFont mono = QFont("Monospace", 9);
+    mono.setStyleHint(QFont::TypeWriter);
+    ui->buttonBiomeColor->setFont(mono);
+
     ui->lineQueueSize->setValidator(new QIntValidator(1, 9999, ui->lineQueueSize));
     ui->lineMatching->setValidator(new QIntValidator(1, 99999999, ui->lineMatching));
     for (int i = 0; i < 16; i++)
@@ -32,6 +40,8 @@ void ConfigDialog::initSettings(Config *config)
     ui->cboxItemSize->setCurrentText(QString::number(config->seedsPerItem));
     ui->lineQueueSize->setText(QString::number(config->queueSize));
     ui->lineMatching->setText(QString::number(config->maxMatching));
+
+    setBiomeColorPath(config->biomeColorPath);
 }
 
 Config ConfigDialog::getSettings()
@@ -52,6 +62,51 @@ Config ConfigDialog::getSettings()
     return conf;
 }
 
+void ConfigDialog::setBiomeColorPath(QString path)
+{
+    unsigned char cols[256][3];
+    initBiomeColors(cols);
+    QPalette pal = this->palette();
+
+    conf.biomeColorPath = path;
+
+    if (path.isEmpty())
+    {
+        ui->buttonBiomeColor->setText("...");
+    }
+    else
+    {
+        QFileInfo finfo(path);
+        QFile file(path);
+        int n = -1;
+
+        if (file.open(QIODevice::ReadOnly))
+        {
+            char buf[32*1024];
+            qint64 siz = file.read(buf, sizeof(buf)-1);
+            file.close();
+            if (siz >= 0)
+            {
+                buf[siz] = 0;
+                n = parseBiomeColors(cols, buf);
+            }
+        }
+
+        if (n >= 0)
+        {
+            QString txt = QString::asprintf("[%d biomes] ", n) + finfo.baseName();
+            ui->buttonBiomeColor->setText(txt);
+        }
+        else
+        {
+            ui->buttonBiomeColor->setText(finfo.baseName());
+            pal.setColor(QPalette::ButtonText, QColor(Qt::red));
+        }
+    }
+
+    ui->buttonBiomeColor->setPalette(pal);
+}
+
 void ConfigDialog::on_buttonBox_clicked(QAbstractButton *button)
 {
     if (ui->buttonBox->buttonRole(button) == QDialogButtonBox::ResetRole)
@@ -59,4 +114,21 @@ void ConfigDialog::on_buttonBox_clicked(QAbstractButton *button)
         conf.reset();
         initSettings(&conf);
     }
+}
+
+void ConfigDialog::on_buttonBiomeColor_clicked()
+{
+    QFileInfo finfo(conf.biomeColorPath);
+    QString fnam = QFileDialog::getOpenFileName(this, "Load biome color map", finfo.absolutePath(), "Text files (*.txt);;Any files (*)");
+    if (!fnam.isNull())
+    {
+        conf.biomeColorPath = fnam;
+        setBiomeColorPath(fnam);
+    }
+}
+
+void ConfigDialog::on_buttonClear_clicked()
+{
+    conf.biomeColorPath.clear();
+    setBiomeColorPath("");
 }
