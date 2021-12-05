@@ -57,6 +57,18 @@ public slots:
     }
 };
 
+class VariantCheckBox : public QCheckBox
+{
+public:
+    VariantCheckBox(QString name, int b, int v) : QCheckBox(name),biome(b),variant(v) {}
+    virtual ~VariantCheckBox() {}
+    int biome;
+    int variant;
+    uint64_t getMask()
+    {
+        return 1ULL << Condition::toVariantBit(biome, variant);
+    }
+};
 
 class FilterDialog : public QDialog
 {
@@ -67,6 +79,7 @@ public:
     explicit FilterDialog(FormConditions *parent, Config *config, int mc, QListWidgetItem *item = 0, Condition *initcond = 0);
     virtual ~FilterDialog();
 
+    void addVariant(QString name, int biome, int variant);
     void updateMode();
     void updateBiomeSelection();
     void enableSet(const int *ids, int n);
@@ -98,12 +111,15 @@ private slots:
 
     void on_comboBoxCat_currentIndexChanged(int index);
 
+    void on_checkStartPiece_stateChanged(int state);
+
 private:
     Ui::FilterDialog *ui;
     QTextEdit *textDescription;
 
     QCheckBox *biomecboxes[256];
     SpinExclude *tempsboxes[9];
+    QVector<VariantCheckBox*> variantboxes;
     bool custom;
 
 public:

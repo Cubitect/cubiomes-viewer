@@ -515,6 +515,33 @@ struct Condition
     int temps[9];
     int count;
     int y;
+    int approx;
+    int pad; // unused
+    uint64_t variants;
+
+
+    static int toVariantBit(int biome, int variant) {
+        int bit = 0;
+        switch (biome) {
+        case meadow:
+        case plains:        bit = 1; break;
+        case desert:        bit = 2; break;
+        case savanna:       bit = 3; break;
+        case taiga:         bit = 4; break;
+        case snowy_tundra:  bit = 5; break;
+        }
+        return (bit << 3) + variant;
+    }
+    static void fromVariantBit(int bit, int *biome, int *variant) {
+        *variant = bit & 0x7;
+        switch (bit >> 3) {
+        case 1: *biome = plains; break;
+        case 2: *biome = desert; break;
+        case 3: *biome = savanna; break;
+        case 4: *biome = taiga; break;
+        case 5: *biome = snowy_tundra; break;
+        }
+    }
 };
 
 struct StructPos

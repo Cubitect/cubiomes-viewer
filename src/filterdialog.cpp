@@ -42,6 +42,13 @@ static QString getTip(int mc, int layer, int id)
     return tip;
 }
 
+void FilterDialog::addVariant(QString name, int biome, int variant)
+{
+    VariantCheckBox *cb = new VariantCheckBox(name, biome, variant);
+    ui->gridLayoutVariants->addWidget(cb, variantboxes.size(), 0);
+    variantboxes.push_back(cb);
+}
+
 FilterDialog::FilterDialog(FormConditions *parent, Config *config, int mcversion, QListWidgetItem *item, Condition *initcond)
     : QDialog(parent, Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint)
     , ui(new Ui::FilterDialog)
@@ -201,8 +208,24 @@ FilterDialog::FilterDialog(FormConditions *parent, Config *config, int mcversion
     SETUP_TEMPCAT_SPINBOX(Special+Lush);
     SETUP_TEMPCAT_SPINBOX(Special+Cold);
 
+    addVariant("plains_fountain_01", plains, 0);
+    addVariant("plains_meeting_point_1", plains, 1);
+    addVariant("plains_meeting_point_2", plains, 2);
+    addVariant("plains_meeting_point_3", plains, 3);
+    addVariant("desert_meeting_point_1", desert, 1);
+    addVariant("desert_meeting_point_2", desert, 2);
+    addVariant("desert_meeting_point_3", desert, 3);
+    addVariant("savanna_meeting_point_1", savanna, 1);
+    addVariant("savanna_meeting_point_2", savanna, 2);
+    addVariant("savanna_meeting_point_3", savanna, 3);
+    addVariant("savanna_meeting_point_4", savanna, 4);
+    addVariant("taiga_meeting_point_1", taiga, 1);
+    addVariant("taiga_meeting_point_2", taiga, 2);
+    addVariant("snowy_meeting_point_1", snowy_tundra, 1);
+    addVariant("snowy_meeting_point_2", snowy_tundra, 2);
+    addVariant("snowy_meeting_point_3", snowy_tundra, 3);
 
-    ui->tabWidget->setStyleSheet(
+    ui->scrollBiomes->setStyleSheet(
             "QCheckBox::indicator:unchecked     { image: url(:/icons/check0.png); }\n"
             "QCheckBox::indicator:indeterminate { image: url(:/icons/check1.png); }\n"
             "QCheckBox::indicator:checked       { image: url(:/icons/check2.png); }\n"
@@ -257,6 +280,7 @@ FilterDialog::FilterDialog(FormConditions *parent, Config *config, int mcversion
         ui->lineEditX2->setText(QString::number(cond.x2));
         ui->lineEditZ2->setText(QString::number(cond.z2));
 
+        ui->checkApprox->setChecked(cond.approx);
         ui->lineY->setText(QString::number(cond.y));
 
         if (cond.x1 == cond.z1 && cond.x1 == -cond.x2 && cond.x1 == -cond.z2)
@@ -310,6 +334,14 @@ FilterDialog::FilterDialog(FormConditions *parent, Config *config, int mcversion
                 tempsboxes[i]->setValue(cond.temps[i]);
             }
         }
+
+        ui->scrollVariants->setEnabled(cond.variants & (1ULL << 63));
+        ui->checkStartPiece->setChecked(cond.variants & (1ULL << 63));
+        ui->checkAbandoned->setChecked(cond.variants & (1ULL << 62));
+        for (VariantCheckBox *cb : variantboxes)
+        {
+            cb->setChecked(cond.variants & cb->getMask());
+        }
     }
 
     on_lineRadius_editingFinished();
@@ -356,6 +388,38 @@ void FilterDialog::updateMode()
 
     ui->labelY->setEnabled(ft.hasy);
     ui->lineY->setEnabled(ft.hasy);
+
+    if (filterindex == F_TEMPS)
+    {
+        ui->tabWidget->setEnabled(true);
+        ui->tabWidget->setCurrentWidget(ui->tabTemps);
+        ui->tabTemps->setEnabled(true);
+        ui->tabBiomes->setEnabled(false);
+        ui->tabVariants->setEnabled(false);
+    }
+    else if (ft.cat == CAT_BIOMES || ft.cat == CAT_NETHER || ft.cat == CAT_END)
+    {
+        ui->tabWidget->setEnabled(true);
+        ui->tabWidget->setCurrentWidget(ui->tabBiomes);
+        ui->tabTemps->setEnabled(false);
+        ui->tabBiomes->setEnabled(true);
+        ui->tabVariants->setEnabled(false);
+    }
+    else if (filterindex == F_VILLAGE)
+    {
+        ui->tabWidget->setEnabled(true);
+        ui->tabWidget->setCurrentWidget(ui->tabVariants);
+        ui->tabTemps->setEnabled(false);
+        ui->tabBiomes->setEnabled(false);
+        ui->tabVariants->setEnabled(true);
+    }
+    else
+    {
+        ui->tabWidget->setEnabled(false);
+        ui->tabTemps->setEnabled(false);
+        ui->tabBiomes->setEnabled(false);
+        ui->tabVariants->setEnabled(false);
+    }
 
     updateBiomeSelection();
 
@@ -410,27 +474,6 @@ void FilterDialog::updateBiomeSelection()
 {
     int filterindex = ui->comboBoxType->currentData().toInt();
     const FilterInfo &ft = g_filterinfo.list[filterindex];
-
-    if (filterindex == F_TEMPS)
-    {
-        ui->tabWidget->setEnabled(true);
-        ui->tabWidget->setCurrentWidget(ui->tabTemps);
-        ui->tabTemps->setEnabled(true);
-        ui->tabBiomes->setEnabled(false);
-    }
-    else if (ft.cat == CAT_BIOMES || ft.cat == CAT_NETHER || ft.cat == CAT_END)
-    {
-        ui->tabWidget->setEnabled(true);
-        ui->tabWidget->setCurrentWidget(ui->tabBiomes);
-        ui->tabTemps->setEnabled(false);
-        ui->tabBiomes->setEnabled(true);
-    }
-    else
-    {
-        ui->tabWidget->setEnabled(false);
-        ui->tabTemps->setEnabled(false);
-        ui->tabBiomes->setEnabled(false);
-    }
 
     if (ft.cat == CAT_NETHER)
     {
@@ -669,6 +712,14 @@ void FilterDialog::on_buttonOk_clicked()
 
     cond.y = ui->lineY->text().toInt();
 
+    cond.approx = ui->checkApprox->isChecked();
+
+    cond.variants = (1ULL << 63) * ui->checkStartPiece->isChecked();
+    cond.variants = (1ULL << 62) * ui->checkAbandoned->isChecked();
+    for (VariantCheckBox *cb : variantboxes)
+        if (cb->isChecked())
+            cond.variants |= cb->getMask();
+
     if (warnIfBad(cond) != QMessageBox::Ok)
         return;
 
@@ -725,5 +776,7 @@ void FilterDialog::on_comboBoxCat_currentIndexChanged(int idx)
     updateMode();
 }
 
-
-
+void FilterDialog::on_checkStartPiece_stateChanged(int state)
+{
+    ui->scrollVariants->setEnabled(state);
+}
