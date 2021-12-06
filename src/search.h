@@ -94,7 +94,9 @@ enum
     F_REFERENCE_256,
     F_REFERENCE_512,
     F_REFERENCE_1024,
-    F_BIOME_4, // differs from F_BIOME_4_RIVER, as this may include oceans
+    F_BIOME_4, // differs from F_BIOME_4_RIVER, since this may include oceans
+    F_SCALE_TO_NETHER,
+    F_SCALE_TO_OVERWORLD,
     // new filters should be added here at the end to keep some downwards compatibility
     FILTER_MAX,
 };
@@ -126,7 +128,7 @@ static const struct FilterList
             "Example - \"Double Swamp Hut\":"
             "</p><table>"
             "<tr><td>[1]</td><td width=\"10\"/><td>"
-            "Reference Point with scale 1:512 for a square of side 3."
+            "Reference point with scale 1:512 for a square of side 3."
             "</td></tr><tr><td/><td/><td>"
             "(traverses the structure regions for the range -1024 to 1023)"
             "</td></tr><tr><td>[2]</td><td/><td>"
@@ -142,38 +144,50 @@ static const struct FilterList
         list[F_REFERENCE_1] = FilterInfo{
             CAT_HELPER, 0, 1, 1, 0, 0, 1, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
             ":icons/reference.png",
-            "Reference Point 1:1",
+            "Reference point 1:1",
             ref_desc
         };
         list[F_REFERENCE_16] = FilterInfo{
             CAT_HELPER, 0, 1, 1, 0, 0, 16, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
             ":icons/reference.png",
-            "Reference Point 1:16",
+            "Reference point 1:16",
             ref_desc
         };
         list[F_REFERENCE_64] = FilterInfo{
             CAT_HELPER, 0, 1, 1, 0, 0, 64, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
             ":icons/reference.png",
-            "Reference Point 1:64",
+            "Reference point 1:64",
             ref_desc
         };
         list[F_REFERENCE_256] = FilterInfo{
             CAT_HELPER, 0, 1, 1, 0, 0, 256, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
             ":icons/reference.png",
-            "Reference Point 1:256",
+            "Reference point 1:256",
             ref_desc
         };
         list[F_REFERENCE_512] = FilterInfo{
             CAT_HELPER, 0, 1, 1, 0, 0, 512, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
             ":icons/reference.png",
-            "Reference Point 1:512",
+            "Reference point 1:512",
             ref_desc
         };
         list[F_REFERENCE_1024] = FilterInfo{
             CAT_HELPER, 0, 1, 1, 0, 0, 1024, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
             ":icons/reference.png",
-            "Reference Point 1:1024",
+            "Reference point 1:1024",
             ref_desc
+        };
+        list[F_SCALE_TO_NETHER] = FilterInfo{
+            CAT_HELPER, 0, 0, 0, 0, 0, 1, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
+            ":icons/portal.png",
+            "Coordinate factor x/8",
+            "Divides relative location by 8, from Overworld to Nether."
+        };
+        list[F_SCALE_TO_OVERWORLD] = FilterInfo{
+            CAT_HELPER, 0, 0, 0, 0, 0, 1, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
+            ":icons/portal.png",
+            "Coordinate factor x*8",
+            "Multiplies relative location by 8, from Nether to Overworld."
         };
 
         list[F_QH_IDEAL] = FilterInfo{
@@ -519,7 +533,10 @@ struct Condition
     int pad; // unused
     uint64_t variants;
 
-
+    enum { // variant flags
+        START_PIECE_MASK = (1ULL << 63),
+        ABANDONED_MASK   = (1ULL << 62),
+    };
     static int toVariantBit(int biome, int variant) {
         int bit = 0;
         switch (biome) {
@@ -541,6 +558,13 @@ struct Condition
         case 4: *biome = taiga; break;
         case 5: *biome = snowy_tundra; break;
         }
+    }
+    inline bool villageOk(int mc, StructureVariant sv) {
+        if ((variants & ABANDONED_MASK) && !sv.abandoned) return false;
+        if (mc < MC_1_14) return true;
+        if (!(variants & START_PIECE_MASK)) return true;
+        uint64_t mask = 1ULL << toVariantBit(sv.biome, sv.variant);
+        return mask & variants;
     }
 };
 

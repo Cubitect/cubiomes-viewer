@@ -130,7 +130,9 @@ struct Level;
 
 struct VarPos
 {
+    VarPos(Pos p) : p(p),sx(),sz(),variant() {}
     Pos p;
+    int sx, sz;
     int variant;
 };
 

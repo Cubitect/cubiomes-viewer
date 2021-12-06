@@ -116,7 +116,7 @@ int testSeedAt(
 
 
             int rx1, rz1, rx2, rz2;
-            int sref;
+            int sref = -1;
 
             switch (c->type)
             {
@@ -133,11 +133,11 @@ int testSeedAt(
                 rz2 = ((c->z2 << sref) + at.z) >> sref;
                 break;
             default:
-                sref = 0;
+                sref = -1;
                 break;
             }
 
-            if (sref)
+            if (sref >= 0)
             {
                 // helper condition -
                 // iterating over an area at a given scale with recursion
@@ -170,6 +170,20 @@ int testSeedAt(
                             return COND_FAILED;
                     }
                 }
+            }
+            else if (c->type == F_SCALE_TO_NETHER)
+            {
+                states[sav] = COND_OK;
+                cpos[sav].x = cpos[rel].x / 8;
+                cpos[sav].z = cpos[rel].z / 8;
+                st = testCondAt(cpos[sav], cpos+sav, c, pass, gen, abort);
+            }
+            else if (c->type == F_SCALE_TO_OVERWORLD)
+            {
+                states[sav] = COND_OK;
+                cpos[sav].x = cpos[rel].x * 8;
+                cpos[sav].z = cpos[rel].z * 8;
+                st = testCondAt(cpos[sav], cpos+sav, c, pass, gen, abort);
             }
             else
             {
@@ -310,6 +324,8 @@ testCondAt(
     case F_REFERENCE_256:
     case F_REFERENCE_512:
     case F_REFERENCE_1024:
+    case F_SCALE_TO_NETHER:
+    case F_SCALE_TO_OVERWORLD:
         // helper conditions should not reach here
         //exit(1);
         return COND_OK;
@@ -462,8 +478,29 @@ L_qm_any:
                 if (pass == PASS_FULL_64 || (pass == PASS_FULL_48 && !finfo.dep64))
                 {
                     if (*abort) return COND_FAILED;
+
+                    if (st == Village && cond->variants)
+                    {
+                        int vv[] = {
+                            plains, desert, savanna, taiga, snowy_tundra,
+                            // plains village variant covers meadows
+                        };
+                        int vn = sizeof(vv) / sizeof(int);
+                        int i;
+                        for (i = 0; i < vn; i++)
+                        {
+                            StructureVariant vt = getVillageType(
+                                gen->mc, gen->seed, pc.x, pc.z, vv[i]);
+                            if (cond->villageOk(gen->mc, vt))
+                                break;
+                        }
+                        if (i >= vn) // no suitable village variants here
+                            continue;
+                    }
+
                     gen->init4Dim(finfo.dim);
-                    if (!isViableStructurePos(st, &gen->g, pc.x, pc.z, 0))
+                    int id = isViableStructurePos(st, &gen->g, pc.x, pc.z, 0);
+                    if (!id)
                         continue;
                     if (st == End_City)
                     {
@@ -472,7 +509,17 @@ L_qm_any:
                             &gen->g.en, &gen->sn, pc.x, pc.z))
                             continue;
                     }
-                    else if (gen->mc >= MC_1_18)
+                    else if (st == Village)
+                    {
+                        if (cond->variants)
+                        {
+                            StructureVariant vt = getVillageType(
+                                gen->mc, gen->seed, pc.x, pc.z, id);
+                            if (!cond->villageOk(gen->mc, vt))
+                                continue;
+                        }
+                    }
+                    if (gen->mc >= MC_1_18)
                     {
                         if (!isViableStructureTerrain(st, &gen->g, pc.x, pc.z))
                             continue;

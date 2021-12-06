@@ -335,9 +335,8 @@ FilterDialog::FilterDialog(FormConditions *parent, Config *config, int mcversion
             }
         }
 
-        ui->scrollVariants->setEnabled(cond.variants & (1ULL << 63));
-        ui->checkStartPiece->setChecked(cond.variants & (1ULL << 63));
-        ui->checkAbandoned->setChecked(cond.variants & (1ULL << 62));
+        ui->checkStartPiece->setChecked(cond.variants & Condition::START_PIECE_MASK);
+        ui->checkAbandoned->setChecked(cond.variants & Condition::ABANDONED_MASK);
         for (VariantCheckBox *cb : variantboxes)
         {
             cb->setChecked(cond.variants & cb->getMask());
@@ -374,12 +373,12 @@ void FilterDialog::updateMode()
     ui->labelSquareArea->setEnabled(!custom && ft.area);
     ui->lineRadius->setEnabled(!custom && ft.area);
 
-    ui->labelX1->setEnabled((custom && ft.coord) || !ft.area);
-    ui->labelZ1->setEnabled((custom && ft.coord) || !ft.area);
+    ui->labelX1->setEnabled(ft.coord && (custom || !ft.area));
+    ui->labelZ1->setEnabled(ft.coord && (custom || !ft.area));
     ui->labelX2->setEnabled(custom && ft.area);
     ui->labelZ2->setEnabled(custom && ft.area);
-    ui->lineEditX1->setEnabled((custom && ft.coord) || !ft.area);
-    ui->lineEditZ1->setEnabled((custom && ft.coord) || !ft.area);
+    ui->lineEditX1->setEnabled(ft.coord && (custom || !ft.area));
+    ui->lineEditZ1->setEnabled(ft.coord && (custom || !ft.area));
     ui->lineEditX2->setEnabled(custom && ft.area);
     ui->lineEditZ2->setEnabled(custom && ft.area);
 
@@ -420,6 +419,9 @@ void FilterDialog::updateMode()
         ui->tabBiomes->setEnabled(false);
         ui->tabVariants->setEnabled(false);
     }
+
+    ui->checkStartPiece->setEnabled(mc >= MC_1_14);
+    ui->scrollVariants->setEnabled(mc >= MC_1_14 && (cond.variants & Condition::START_PIECE_MASK));
 
     updateBiomeSelection();
 
@@ -570,6 +572,16 @@ void FilterDialog::updateBiomeSelection()
 int FilterDialog::warnIfBad(Condition cond)
 {
     const FilterInfo &ft = g_filterinfo.list[cond.type];
+    if (ui->scrollVariants->isEnabled())
+    {
+        if ((cond.variants & ((1ULL << 60) - 1)) == 0)
+        {
+            QString text =
+                    "No allowed start pieces specified. Condition can never be true.";
+            QMessageBox::warning(this, "Invalid condition", text, QMessageBox::Ok);
+            return QMessageBox::Cancel;
+        }
+    }
     if (ft.cat == CAT_BIOMES)
     {
         int w = cond.x2 - cond.x1 + 1;
@@ -714,8 +726,9 @@ void FilterDialog::on_buttonOk_clicked()
 
     cond.approx = ui->checkApprox->isChecked();
 
-    cond.variants = (1ULL << 63) * ui->checkStartPiece->isChecked();
-    cond.variants = (1ULL << 62) * ui->checkAbandoned->isChecked();
+    cond.variants = 0;
+    cond.variants |= ui->checkStartPiece->isChecked() * Condition::START_PIECE_MASK;
+    cond.variants |= ui->checkAbandoned->isChecked() * Condition::ABANDONED_MASK;
     for (VariantCheckBox *cb : variantboxes)
         if (cb->isChecked())
             cond.variants |= cb->getMask();
@@ -780,3 +793,4 @@ void FilterDialog::on_checkStartPiece_stateChanged(int state)
 {
     ui->scrollVariants->setEnabled(state);
 }
+

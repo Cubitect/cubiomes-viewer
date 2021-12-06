@@ -69,11 +69,29 @@ void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
                         continue;
                 }
 
-                VarPos vp = { p, 0 };
+                VarPos vp = VarPos(p);
+                StructureVariant sv = {};
                 if (sconf.structType == Village)
                 {
-                    StructureVariant vt = getVillageType(wi.mc, wi.seed, p.x, p.z, id);
-                    vp.variant = vt.abandoned;
+                    sv = getVillageType(wi.mc, wi.seed, p.x, p.z, id);
+                    vp.variant = sv.abandoned;
+                }
+                else if (sconf.structType == Bastion)
+                {
+                    sv = getBastionType(wi.mc, wi.seed, p.x, p.z);
+                }
+                else if (sconf.structType == Outpost && wi.mc >= MC_1_18)
+                {
+                    sv.sx = sv.sz = 16;
+                }
+                if (sv.sx || sv.sz)
+                {
+                    switch (sv.rotation) {
+                        case 0: vp.sx = +sv.sx; vp.sz = +sv.sz; break;
+                        case 1: vp.sx = -sv.sz; vp.sz = +sv.sx; break;
+                        case 2: vp.sx = -sv.sx; vp.sz = -sv.sz; break;
+                        case 3: vp.sx = +sv.sz; vp.sz = -sv.sx; break;
+                    }
                 }
                 out->push_back(vp);
             }
@@ -701,7 +719,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
 
                 if (showBB && blocks2pix > 1.0)
                 {
-                    int sx = 0, sz = 0;
+                    int sx = vp.sx, sz = vp.sz;
                     if (sopt == D_DESERT)
                     {
                         sx = 21; sz = 21;
