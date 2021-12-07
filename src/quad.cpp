@@ -310,6 +310,7 @@ QWorld::QWorld(WorldInfo wi, int dim)
     , cachedstruct()
     , cachesize()
     , showBB()
+    , gridspacing()
     , spawn()
     , strongholds()
     , qsinfo()
@@ -571,6 +572,33 @@ struct SpawnStronghold : public QRunnable
     }
 };
 
+static bool draw_grid_rec(QPainter& painter, QRect &rec, qreal pix, int x, int z)
+{
+    painter.setPen(QPen(QColor(0, 0, 0, 96), 1));
+    painter.drawRect(rec);
+
+    QFont font = painter.font();
+    if (pix < 100)
+    {
+        if (pix < 50)
+            return false;
+        QFont smallfont = font;
+        smallfont.setPointSize(8);
+        painter.setFont(smallfont);
+    }
+
+    QString s = QString::asprintf("%d,%d", x, z);
+    QRect textrec = painter.fontMetrics()
+            .boundingRect(rec, Qt::AlignLeft | Qt::AlignTop, s);
+
+    painter.fillRect(textrec, QBrush(QColor(0, 0, 0, 128), Qt::SolidPattern));
+
+    painter.setPen(QColor(255, 255, 255));
+    painter.drawText(textrec, s);
+
+    painter.setFont(font);
+    return true;
+}
 
 void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz, qreal blocks2pix)
 {
@@ -607,31 +635,30 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
             QRect rec(px,pz,ps,ps);
             painter.drawImage(rec, *q->img);
 
-            if (sshow[D_GRID])
+            if (sshow[D_GRID] && !gridspacing)
             {
-                painter.setPen(QPen(QColor(0, 0, 0, 96), 1));
-                painter.drawRect(rec);
+                draw_grid_rec(painter, rec, ps, q->ti*q->blocks, q->tj*q->blocks);
+            }
+        }
+    }
 
-                QFont font = painter.font();
-                if (ps < 100)
+    if (sshow[D_GRID] && gridspacing)
+    {
+        long x = floor(bx0 / gridspacing), w = floor(bx1 / gridspacing) - x + 1;
+        long z = floor(bz0 / gridspacing), h = floor(bz1 / gridspacing) - z + 1;
+        qreal ps = gridspacing * blocks2pix;
+
+        if (ps > 50)
+        {
+            for (int j = 0; j < h; j++)
+            {
+                for (int i = 0; i < w; i++)
                 {
-                    if (ps < 50)
-                        continue;
-                    QFont smallfont = font;
-                    smallfont.setPointSize(8);
-                    painter.setFont(smallfont);
+                    qreal px = vw/2.0 + (x+i) * ps - focusx * blocks2pix;
+                    qreal pz = vh/2.0 + (z+j) * ps - focusz * blocks2pix;
+                    QRect rec(px, pz, ps, ps);
+                    draw_grid_rec(painter, rec, ps, (x+i)*gridspacing, (z+j)*gridspacing);
                 }
-
-                QString s = QString::asprintf("%d,%d", q->ti*q->blocks, q->tj*q->blocks);
-                QRect textrec = painter.fontMetrics()
-                        .boundingRect(rec, Qt::AlignLeft | Qt::AlignTop, s);
-
-                painter.fillRect(textrec, QBrush(QColor(0, 0, 0, 128), Qt::SolidPattern));
-
-                painter.setPen(QColor(255, 255, 255));
-                painter.drawText(textrec, s);
-
-                painter.setFont(font);
             }
         }
     }

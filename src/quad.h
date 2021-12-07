@@ -230,6 +230,7 @@ struct QWorld
 
     bool sshow[STRUCT_NUM];
     bool showBB;
+    int gridspacing;
 
     // some features such as the world spawn and strongholds will be filled by
     // a designated worker thread once results are done

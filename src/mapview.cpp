@@ -47,6 +47,7 @@ MapView::MapView(QWidget *parent)
 , updatecounter()
 , sshow()
 , hasinertia(true)
+, gridspacing()
 {
     memset(sshow, 0, sizeof(sshow));
 
@@ -136,6 +137,13 @@ void MapView::setSmoothMotion(bool smooth)
     hasinertia = smooth;
 }
 
+void MapView::setSetGridSpacing(int spacing)
+{
+    gridspacing = spacing;
+    settingsToWorld();
+    update(2);
+}
+
 void MapView::settingsToWorld()
 {
     if (!world)
@@ -143,6 +151,7 @@ void MapView::settingsToWorld()
     for (int s = 0; s < STRUCT_NUM; s++)
         world->sshow[s] = sshow[s];
     world->showBB = showBB;
+    world->gridspacing = gridspacing;
 }
 
 qreal MapView::getX()

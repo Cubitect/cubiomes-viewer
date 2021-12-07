@@ -45,6 +45,7 @@ public:
     void setShow(int stype, bool v);
     void setShowBB(bool show);
     void setSmoothMotion(bool smooth);
+    void setSetGridSpacing(int spacing);
 
     void timeout();
 
@@ -91,6 +92,7 @@ private:
     bool sshow[STRUCT_NUM];
     bool showBB;
     bool hasinertia;
+    int gridspacing;
 };
 
 #endif // MAPVIEW_H

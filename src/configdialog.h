@@ -33,6 +33,8 @@ private slots:
 
     void on_buttonClear_clicked();
 
+    void on_buttonColorHelp_clicked();
+
 private:
     Ui::ConfigDialog *ui;
     Config conf;

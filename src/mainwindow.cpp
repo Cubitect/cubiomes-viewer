@@ -312,6 +312,7 @@ void MainWindow::saveSettings()
     settings.setValue("config/seedsPerItem", config.seedsPerItem);
     settings.setValue("config/queueSize", config.queueSize);
     settings.setValue("config/maxMatching", config.maxMatching);
+    settings.setValue("config/gridSpacing", config.gridSpacing);
     settings.setValue("config/biomeColorPath", config.biomeColorPath);
 
     settings.setValue("world/saltOverride", g_extgen.saltOverride);
@@ -383,6 +384,7 @@ void MainWindow::loadSettings()
     config.seedsPerItem = settings.value("config/seedsPerItem", config.seedsPerItem).toInt();
     config.queueSize = settings.value("config/queueSize", config.queueSize).toInt();
     config.maxMatching = settings.value("config/maxMatching", config.maxMatching).toInt();
+    config.gridSpacing = settings.value("config/gridSpacing", config.gridSpacing).toInt();
     config.biomeColorPath = settings.value("config/biomeColorPath", config.biomeColorPath).toString();
 
     if (!config.biomeColorPath.isEmpty())
@@ -390,6 +392,7 @@ void MainWindow::loadSettings()
 
     ui->mapView->setShowBB(config.showBBoxes);
     ui->mapView->setSmoothMotion(config.smoothMotion);
+    ui->mapView->setSetGridSpacing(config.gridSpacing);
     onStyleChanged(config.uistyle);
 
     g_extgen.saltOverride = settings.value("world/saltOverride", g_extgen.saltOverride).toBool();
@@ -718,6 +721,7 @@ void MainWindow::on_actionPreferences_triggered()
         config = dialog->getSettings();
         ui->mapView->setShowBB(config.showBBoxes);
         ui->mapView->setSmoothMotion(config.smoothMotion);
+        ui->mapView->setSetGridSpacing(config.gridSpacing);
         if (oldConfig.uistyle != config.uistyle)
             onStyleChanged(config.uistyle);
 

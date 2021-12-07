@@ -741,7 +741,7 @@ L_biome_filter_any:
             int h = rz2-rz1+1;
             //gen->init4Dim(0); // seed gets applied by checkForBiomesAtLayer
             if (checkForBiomesAtLayer(&gen->g.ls, &gen->g.ls.layers[finfo.layer],
-                NULL, gen->seed, rx1, rz1, w, h, cond->bfilter, 0) > 0)
+                NULL, gen->seed, rx1, rz1, w, h, cond->bfilter, cond->approx) > 0)
             {
                 valid = COND_OK;
             }
@@ -798,7 +798,7 @@ L_noise_biome:
             int y = (s == 0 ? cond->y : cond->y >> 2);
             Range r = {1<<s, rx1, rz1, w, h, y, 1};
             valid = checkForBiomes(&gen->g, NULL, r, finfo.dim, gen->seed,
-                cond->bfilter, 0, (volatile char*)abort) > 0;
+                cond->bfilter, cond->approx, (volatile char*)abort) > 0;
         }
         return valid ? COND_OK : COND_FAILED;
 
