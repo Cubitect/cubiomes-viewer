@@ -25,6 +25,7 @@ win32: {
 
 # also compile cubiomes
 QMAKE_PRE_LINK += $(MAKE) -C $$CUPATH -f $$CUPATH/makefile CFLAGS="-DSTRUCT_CONFIG_OVERRIDE=1" all
+QMAKE_CLEAN += $$CUPATH/*.o $$CUPATH/libcubiomes.a
 
 TARGET = cubiomes-viewer
 

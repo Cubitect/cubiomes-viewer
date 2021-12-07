@@ -268,11 +268,15 @@ bool applyTranspose(std::vector<uint64_t>& slist,
 
     // does the set of candidates for this condition fit in memory?
     if ((uint64_t)slist.size() * sizeof(int64_t) * w*h >= bufmax)
+    {
+        slist.clear();
         return false;
+    }
 
     try {
         list48.resize(slist.size() * w*h);
     } catch (...) {
+        slist.clear();
         return false;
     }
 
