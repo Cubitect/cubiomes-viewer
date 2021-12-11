@@ -581,9 +581,10 @@ bool MainWindow::loadProgress(QString fnam, bool quiet)
         {
             QString hex = line.mid(6).trimmed();
             QByteArray ba = QByteArray::fromHex(QByteArray(hex.toLatin1().data()));
-            if (ba.size() == sizeof(Condition))
+            if ((size_t)ba.size() <= sizeof(Condition))
             {
-                Condition c = *(Condition*) ba.data();
+                Condition c = {};
+                memcpy(&c, ba.data(), ba.size());
                 condvec.push_back(c);
             }
             else return false;
