@@ -300,8 +300,8 @@ QToolButton {
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>1232</width>
-                 <height>669</height>
+                 <width>1228</width>
+                 <height>643</height>
                 </rect>
                </property>
                <property name="sizePolicy">
@@ -702,7 +702,7 @@ QToolButton:checked {
      <x>0</x>
      <y>0</y>
      <width>1280</width>
-     <height>22</height>
+     <height>30</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuMap">
@@ -717,6 +717,7 @@ QToolButton:checked {
     <property name="title">
      <string>Help</string>
     </property>
+    <addaction name="actionUpdates"/>
     <addaction name="actionAbout"/>
    </widget>
    <widget class="QMenu" name="menuFile">
@@ -819,6 +820,11 @@ QToolButton:checked {
   <action name="actionExtGen">
    <property name="text">
     <string>Advanced world settings...</string>
+   </property>
+  </action>
+  <action name="actionUpdates">
+   <property name="text">
+    <string>Search for Updates</string>
    </property>
   </action>
  </widget>

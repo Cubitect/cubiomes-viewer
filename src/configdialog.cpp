@@ -23,6 +23,12 @@ ConfigDialog::ConfigDialog(QWidget *parent, Config *config) :
         ui->cboxItemSize->addItem(QString::number(1 << i));
     ui->lineGridSpacing->setValidator(new QIntValidator(0, 1048576, ui->lineQueueSize));
 
+    #if not ENABLE_UPDATER
+        delete ui->verticalLayout->takeAt(3);
+        ui->groupBox_4->hide();
+        this->resize(this->minimumSize());
+    #endif
+
     initSettings(config);
 }
 
@@ -44,6 +50,7 @@ void ConfigDialog::initSettings(Config *config)
     ui->lineQueueSize->setText(QString::number(config->queueSize));
     ui->lineMatching->setText(QString::number(config->maxMatching));
     ui->lineGridSpacing->setText(config->gridSpacing ? QString::number(config->gridSpacing) : "");
+    ui->checkUpdates->setChecked(config->searchUpdatesStartup);
 
     setBiomeColorPath(config->biomeColorPath);
 }
@@ -59,6 +66,7 @@ Config ConfigDialog::getSettings()
     conf.queueSize = ui->lineQueueSize->text().toInt();
     conf.maxMatching = ui->lineMatching->text().toInt();
     conf.gridSpacing = ui->lineGridSpacing->text().toInt();
+    conf.searchUpdatesStartup = ui->checkUpdates->isChecked();
 
     if (!conf.seedsPerItem) conf.seedsPerItem = 1024;
     if (!conf.queueSize) conf.queueSize = QThread::idealThreadCount();

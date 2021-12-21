@@ -60,6 +60,7 @@ struct Config
     int maxMatching;
     int gridSpacing;
     QString biomeColorPath;
+    bool searchUpdatesStartup;
 
     Config() { reset(); }
 
@@ -75,6 +76,7 @@ struct Config
         maxMatching = 65536;
         gridSpacing = 0;
         biomeColorPath = "";
+        searchUpdatesStartup = true;
     }
 };
 

@@ -11,6 +11,8 @@
 #include "quad.h"
 #include "cutil.h"
 
+#include "updater.h"
+
 #include <QIntValidator>
 #include <QMetaType>
 #include <QMessageBox>
@@ -197,6 +199,15 @@ MainWindow::MainWindow(QWidget *parent)
     ui->treeAnalysis->sortByColumn(0, Qt::AscendingOrder);
 
     loadSettings();
+
+    #if ENABLE_UPDATER
+        if (config.searchUpdatesStartup) {
+            Updater* up = new Updater(true);
+            up->searchForUpdates();
+        }
+    #else
+        ui->actionUpdates->setVisible(false);
+    #endif
 }
 
 MainWindow::~MainWindow()
@@ -314,6 +325,7 @@ void MainWindow::saveSettings()
     settings.setValue("config/maxMatching", config.maxMatching);
     settings.setValue("config/gridSpacing", config.gridSpacing);
     settings.setValue("config/biomeColorPath", config.biomeColorPath);
+    settings.setValue("config/searchUpdatesStartup", config.searchUpdatesStartup);
 
     settings.setValue("world/saltOverride", g_extgen.saltOverride);
     for (int st = 0; st < FEATURE_NUM; st++)
@@ -386,6 +398,7 @@ void MainWindow::loadSettings()
     config.maxMatching = settings.value("config/maxMatching", config.maxMatching).toInt();
     config.gridSpacing = settings.value("config/gridSpacing", config.gridSpacing).toInt();
     config.biomeColorPath = settings.value("config/biomeColorPath", config.biomeColorPath).toString();
+    config.searchUpdatesStartup = settings.value("config/searchUpdatesStartup", config.searchUpdatesStartup).toBool();
 
     if (!config.biomeColorPath.isEmpty())
         onBiomeColorChange();
@@ -785,6 +798,12 @@ void MainWindow::on_actionOpen_shadow_seed_triggered()
         wi.seed = getShadow(wi.seed);
         setSeed(wi);
     }
+}
+
+void MainWindow::on_actionUpdates_triggered()
+{
+    Updater *up = new Updater(false);
+    up->searchForUpdates();
 }
 
 void MainWindow::on_actionAbout_triggered()

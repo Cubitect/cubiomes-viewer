@@ -8,7 +8,7 @@
 # default achitecture.
 
 CUPATH   = $$PWD/cubiomes
-QT      += core widgets
+QT      += core widgets network
 LIBS    += -lm $$CUPATH/libcubiomes.a
 
 # comment out to use the profile compiler
@@ -22,6 +22,8 @@ QMAKE_CXXFLAGS_RELEASE *= -O3
 win32: {
     LIBS += -static -static-libgcc -static-libstdc++
 }
+
+DEFINES += "ENABLE_UPDATER=1"
 
 # also compile cubiomes
 QMAKE_PRE_LINK += $(MAKE) -C $$CUPATH -f $$CUPATH/makefile CFLAGS="-DSTRUCT_CONFIG_OVERRIDE=1" all
@@ -51,6 +53,7 @@ SOURCES += \
         src/searchitem.cpp \
         src/searchthread.cpp \
         src/mainwindow.cpp \
+        src/updater.cpp \
         src/main.cpp
 
 HEADERS += \
@@ -78,7 +81,8 @@ HEADERS += \
         src/searchthread.h \
         src/seedtables.h \
         src/mainwindow.h \
-        src/settings.h
+        src/settings.h \
+        src/updater.h
 
 FORMS += \
         src/aboutdialog.ui \
