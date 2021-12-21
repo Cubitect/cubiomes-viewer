@@ -8,6 +8,7 @@
 #include <QWidget>
 #include <QAction>
 #include <QActionGroup>
+#include <QTranslator>
 
 #include <QTimer>
 #include <QThreadPool>
@@ -101,6 +102,7 @@ private slots:
     void onActionMapToggled(int sopt, bool a);
     void onConditionsChanged();
     void onGen48Changed();
+    void onLanguageChanged(QString lang);
     void onSelectedSeedChanged(uint64_t seed);
     void onSearchStatusChanged(bool running);
     void onStyleChanged(int style);

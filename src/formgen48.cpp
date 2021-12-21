@@ -110,25 +110,40 @@ bool FormGen48::setList48(QString path, bool quiet)
         {
             slist48.assign(l, l+len);
             free(l);
-            ui->lineList48->setText("[" + QString::number(len) + " seeds] " + finfo.baseName());
             ok = true;
         }
-        else
+        else if (!quiet)
         {
-            if (!quiet)
-                QMessageBox::warning(this, "Warning", "Failed to load seed list from file", QMessageBox::Ok);
-            ui->lineList48->setText("[no seeds!] " + finfo.baseName());
+            QMessageBox::warning(this, tr("Warning"), tr("Failed to load seed list from file"), QMessageBox::Ok);
         }
     }
     else
     {
         slist48path.clear();
-        ui->lineList48->setText("[none]");
         slist48.clear();
     }
+    updateList48Info();
     emit changed();
     return ok;
 }
+
+void FormGen48::updateList48Info()
+{
+    if(this->slist48path.isEmpty())
+    {
+        ui->lineList48->setText(tr("[none]"));
+    }
+    else
+    {
+        QFileInfo finfo(this->slist48path);
+        ui->lineList48->setText(
+                    this->slist48.size() == 0
+                    ? tr("[no seeds!] %1").arg(finfo.baseName())
+                    : tr("[%n seed(s)] %1", 0, this->slist48.size())
+                      .arg(finfo.baseName()));
+    }
+}
+
 
 void FormGen48::setSettings(const Gen48Settings& gen48, bool quiet)
 {
@@ -235,7 +250,7 @@ void FormGen48::updateCount()
 
     if (cnt >= MASK48+1)
     {
-        ui->labelCount->setText("all");
+        ui->labelCount->setText(tr("all", "Meaning that there is no optimization by filter 48bits."));
     }
     else
     {
@@ -266,11 +281,11 @@ void FormGen48::updateAutoUi()
     bool isqh = cond.type >= F_QH_IDEAL && cond.type <= F_QH_BARELY;
     bool isqm = cond.type >= F_QM_95 && cond.type <= F_QM_90;
     if (isqh)
-        modestr = "[Quad-hut]";
+        modestr = tr("[Quad-hut]", "Quad Structure Filter Mode");
     else if (isqm)
-        modestr = "[Quad-monument]";
+        modestr = tr("[Quad-monument]", "Quad Structure Filter Mode");
     else
-        modestr = "[None]";
+        modestr = tr("[None]", "Quad Structure Filter Mode");
 
     ui->labelAuto->setText(modestr);
 
@@ -359,7 +374,7 @@ void FormGen48::on_comboLow20_currentIndexChanged(int)
 
 void FormGen48::on_buttonBrowse_clicked()
 {
-    QString fnam = QFileDialog::getOpenFileName(this, "Load seed list", parent->prevdir, "Text files (*.txt);;Any files (*)");
+    QString fnam = QFileDialog::getOpenFileName(this, tr("Load seed list"), parent->prevdir, tr("Text files (*.txt);;Any files (*))"));
     if (!fnam.isEmpty())
         setList48(fnam, false);
 }

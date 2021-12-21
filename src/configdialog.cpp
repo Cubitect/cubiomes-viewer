@@ -6,6 +6,7 @@
 #include <QFileInfo>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QDirIterator>
 
 ConfigDialog::ConfigDialog(QWidget *parent, Config *config) :
     QDialog(parent),
@@ -22,6 +23,23 @@ ConfigDialog::ConfigDialog(QWidget *parent, Config *config) :
     for (int i = 0; i < 16; i++)
         ui->cboxItemSize->addItem(QString::number(1 << i));
     ui->lineGridSpacing->setValidator(new QIntValidator(0, 1048576, ui->lineQueueSize));
+
+    QDirIterator it(":/i18n/", QDirIterator::Subdirectories);
+    while(it.hasNext())
+    {
+        QString name = it.next();
+
+        if(!name.endsWith(".qm"))
+            continue;
+        name = name.mid(7, name.length() - 10);
+
+        QLocale locale(name);
+
+        ui->comboLang->addItem(QString("%1 (%2)").arg(
+                                   QLocale::languageToString(locale.language()),
+                                   QLocale::countryToString(locale.country())),
+                               name);
+    }
 
     initSettings(config);
 }
@@ -40,6 +58,7 @@ void ConfigDialog::initSettings(Config *config)
     if (config->autosaveCycle)
         ui->spinAutosave->setValue(config->autosaveCycle);
     ui->comboStyle->setCurrentIndex(config->uistyle);
+    ui->comboLang->setCurrentIndex(ui->comboLang->findData(config->language));
     ui->cboxItemSize->setCurrentText(QString::number(config->seedsPerItem));
     ui->lineQueueSize->setText(QString::number(config->queueSize));
     ui->lineMatching->setText(QString::number(config->maxMatching));
@@ -55,6 +74,7 @@ Config ConfigDialog::getSettings()
     conf.autosaveCycle = ui->checkAutosave->isChecked() ? ui->spinAutosave->value() : 0;
     conf.smoothMotion = ui->checkSmooth->isChecked();
     conf.uistyle = ui->comboStyle->currentIndex();
+    conf.language = ui->comboLang->currentData().toString();
     conf.seedsPerItem = ui->cboxItemSize->currentText().toInt();
     conf.queueSize = ui->lineQueueSize->text().toInt();
     conf.maxMatching = ui->lineMatching->text().toInt();
@@ -99,7 +119,7 @@ void ConfigDialog::setBiomeColorPath(QString path)
 
         if (n >= 0)
         {
-            QString txt = QString::asprintf("[%d biomes] ", n) + finfo.baseName();
+            QString txt = tr("[%n biomes] %1", 0, n).arg(finfo.baseName());
             ui->buttonBiomeColor->setText(txt);
         }
         else
@@ -124,7 +144,7 @@ void ConfigDialog::on_buttonBox_clicked(QAbstractButton *button)
 void ConfigDialog::on_buttonBiomeColor_clicked()
 {
     QFileInfo finfo(conf.biomeColorPath);
-    QString fnam = QFileDialog::getOpenFileName(this, "Load biome color map", finfo.absolutePath(), "Text files (*.txt);;Any files (*)");
+    QString fnam = QFileDialog::getOpenFileName(this, tr("Load biome color map"), finfo.absolutePath(), tr("Text files (*.txt);;Any files (*)"));
     if (!fnam.isNull())
     {
         conf.biomeColorPath = fnam;
@@ -140,20 +160,20 @@ void ConfigDialog::on_buttonClear_clicked()
 
 void ConfigDialog::on_buttonColorHelp_clicked()
 {
-    const char* msg =
-            "<html><head/><body><p>"
-            "<b>Custom biome colors</b> should be defined in an ASCII text file, "
-            "with one biome-color mapping per line. Each mapping should consist "
-            "of a biome ID or biome resource name followed by a color that can be "
-            "written as a hex code (prefixed with # or 0x) or as an RGB triplet. "
-            "Special characters are ignored."
-            "</p><p>"
-            "<b>Examples:</b>"
-            "</p><p>"
-            "sunflower_plains:&nbsp;#FFFF00"
-            "</p><p>"
-            "128&nbsp;[255&nbsp;255&nbsp;0]"
-            "</p></body></html>"
-            ;
-    QMessageBox::information(this, "Help: custom biome colors", msg, QMessageBox::Ok);
+    QString msg = tr(
+                "<html><head/><body><p>"
+                "<b>Custom biome colors</b> should be defined in an ASCII text file, "
+                "with one biome-color mapping per line. Each mapping should consist "
+                "of a biome ID or biome resource name followed by a color that can be "
+                "written as a hex code (prefixed with # or 0x) or as an RGB triplet. "
+                "Special characters are ignored."
+                "</p><p>"
+                "<b>Examples:</b>"
+                "</p><p>"
+                "sunflower_plains:&nbsp;#FFFF00"
+                "</p><p>"
+                "128&nbsp;[255&nbsp;255&nbsp;0]"
+                "</p></body></html>"
+                );
+    QMessageBox::information(this, tr("Help: custom biome colors"), msg, QMessageBox::Ok);
 }

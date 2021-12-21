@@ -30,6 +30,7 @@ public:
 
     uint64_t estimateSeedCnt();
     void updateCount();
+    void updateList48Info();
 
     void updateAutoConditions(const QVector<Condition>& condlist);
     void updateAutoUi();

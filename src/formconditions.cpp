@@ -5,6 +5,7 @@
 #include "mainwindow.h"
 
 #include <QMessageBox>
+#include <QLatin1Char>
 
 
 QDataStream& operator<<(QDataStream& out, const Condition& v)
@@ -22,7 +23,10 @@ QDataStream& operator>>(QDataStream& in, Condition& v)
 QString cond2str(Condition *cond)
 {
     const FilterInfo& ft = g_filterinfo.list[cond->type];
-    QString s = QString::asprintf("[%02d] %-28sx%-3d", cond->save, ft.name, cond->count);
+    QString s = QString("[%1] %2x%3")
+            .arg(cond->save, 2, 10, QLatin1Char('0'))
+            .arg(QApplication::translate("Filter", ft.name), -28, ' ')
+            .arg(cond->count, -3, 10, QLatin1Char(' '));
 
     if (cond->relative)
         s += QString::asprintf("[%02d]+", cond->relative);

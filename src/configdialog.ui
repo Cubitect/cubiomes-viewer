@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>ConfigDialog</class>
  <widget class="QDialog" name="ConfigDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>401</width>
+    <height>476</height>
+   </rect>
+  </property>
   <property name="windowTitle">
    <string>Preferences</string>
   </property>
@@ -10,6 +18,55 @@
     <normaloff>:/icons/map.png</normaloff>:/icons/map.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout">
+   <item row="4" column="0" colspan="2">
+    <widget class="QGroupBox" name="groupBox_3">
+     <property name="title">
+      <string>Session</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_4">
+      <item row="0" column="0" rowspan="2" colspan="3">
+       <widget class="QCheckBox" name="checkRestore">
+        <property name="text">
+         <string>Restore previous session at launch</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QCheckBox" name="checkAutosave">
+        <property name="text">
+         <string>Autosave every:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QSpinBox" name="spinAutosave">
+        <property name="suffix">
+         <string> min</string>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>120</number>
+        </property>
+        <property name="value">
+         <number>10</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="11" column="0" colspan="2">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok|QDialogButtonBox::RestoreDefaults</set>
+     </property>
+    </widget>
+   </item>
    <item row="3" column="0" colspan="2">
     <widget class="QGroupBox" name="groupBox_2">
      <property name="title">
@@ -70,30 +127,14 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="2" colspan="2">
-       <widget class="QComboBox" name="comboStyle">
-        <property name="iconSize">
-         <size>
-          <width>0</width>
-          <height>16</height>
-         </size>
+      <item row="3" column="0" colspan="2">
+       <widget class="QLabel" name="label_6">
+        <property name="toolTip">
+         <string>Use a fixed grid in blocks instead of outlining the generated map tiles
+Leave blank for the default behaviour</string>
         </property>
-        <item>
-         <property name="text">
-          <string>System</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Dark</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="4" column="0" colspan="4">
-       <widget class="QCheckBox" name="checkBBoxes">
         <property name="text">
-         <string>Outline known bounding boxes</string>
+         <string>Custom grid spacing:</string>
         </property>
        </widget>
       </item>
@@ -104,7 +145,7 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="0" colspan="4">
+      <item row="4" column="0" colspan="4">
        <widget class="QCheckBox" name="checkSmooth">
         <property name="toolTip">
          <string>Simulate innertia for the map view</string>
@@ -114,24 +155,20 @@
         </property>
        </widget>
       </item>
+      <item row="5" column="0" colspan="4">
+       <widget class="QCheckBox" name="checkBBoxes">
+        <property name="text">
+         <string>Outline known bounding boxes</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2" colspan="2">
+       <widget class="QLineEdit" name="lineGridSpacing"/>
+      </item>
       <item row="1" column="2">
        <widget class="QPushButton" name="buttonBiomeColor">
         <property name="text">
          <string>[none]</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="3">
-       <widget class="QPushButton" name="buttonClear">
-        <property name="maximumSize">
-         <size>
-          <width>20</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="icon">
-         <iconset resource="../icons.qrc">
-          <normaloff>:/icons/clear.png</normaloff>:/icons/clear.png</iconset>
         </property>
        </widget>
       </item>
@@ -161,68 +198,49 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0" colspan="2">
-       <widget class="QLabel" name="label_6">
-        <property name="toolTip">
-         <string>Use a fixed grid in blocks instead of outlining the generated map tiles
-Leave blank for the default behaviour</string>
+      <item row="0" column="2" colspan="2">
+       <widget class="QComboBox" name="comboStyle">
+        <property name="iconSize">
+         <size>
+          <width>0</width>
+          <height>16</height>
+         </size>
         </property>
-        <property name="text">
-         <string>Custom grid spacing:</string>
-        </property>
+        <item>
+         <property name="text">
+          <string>System</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Dark</string>
+         </property>
+        </item>
        </widget>
       </item>
-      <item row="2" column="2" colspan="2">
-       <widget class="QLineEdit" name="lineGridSpacing"/>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="11" column="0" colspan="2">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok|QDialogButtonBox::RestoreDefaults</set>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="0" colspan="2">
-    <widget class="QGroupBox" name="groupBox_3">
-     <property name="title">
-      <string>Session</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_4">
-      <item row="0" column="0" rowspan="2" colspan="3">
-       <widget class="QCheckBox" name="checkRestore">
-        <property name="text">
-         <string>Restore previous session at launch</string>
+      <item row="1" column="3">
+       <widget class="QPushButton" name="buttonClear">
+        <property name="maximumSize">
+         <size>
+          <width>20</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="icon">
+         <iconset resource="../icons.qrc">
+          <normaloff>:/icons/clear.png</normaloff>:/icons/clear.png</iconset>
         </property>
        </widget>
       </item>
       <item row="2" column="0">
-       <widget class="QCheckBox" name="checkAutosave">
+       <widget class="QLabel" name="label_7">
         <property name="text">
-         <string>Autosave every:</string>
+         <string>Language:</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="2">
-       <widget class="QSpinBox" name="spinAutosave">
-        <property name="suffix">
-         <string> min</string>
-        </property>
-        <property name="minimum">
-         <number>1</number>
-        </property>
-        <property name="maximum">
-         <number>120</number>
-        </property>
-        <property name="value">
-         <number>10</number>
-        </property>
-       </widget>
+      <item row="2" column="2" colspan="2">
+       <widget class="QComboBox" name="comboLang"/>
       </item>
      </layout>
     </widget>

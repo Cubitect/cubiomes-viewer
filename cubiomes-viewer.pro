@@ -31,6 +31,11 @@ TARGET = cubiomes-viewer
 
 CONFIG += static
 
+CONFIG += lrelease embed_translations
+
+TRANSLATIONS += \
+	languages/en_US.ts
+
 
 SOURCES += \
         src/aboutdialog.cpp \

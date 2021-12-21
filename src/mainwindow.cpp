@@ -27,6 +27,8 @@
 #include <QStandardPaths>
 #include <QDebug>
 #include <QFile>
+#include <QTranslator>
+#include <QProcess>
 
 // Keep the extended generator settings in global scope, but we mainly need
 // them in this file. (Pass through via pointer elsewhere.)
@@ -59,65 +61,68 @@ MainWindow::MainWindow(QWidget *parent)
     QCoreApplication::setApplicationName("cubiomes-viewer");
 
     formCond = new FormConditions(this);
-    ui->collapseConstraints->init("Conditions", formCond, false);
+    ui->collapseConstraints->init(tr("Conditions"), formCond, false);
     connect(formCond, &FormConditions::changed, this, &MainWindow::onConditionsChanged);
     ui->collapseConstraints->setInfo(
-        "Help: Conditions",
-        "The search conditions define the properties by which potential seeds "
-        "are filtered."
-        "\n\n"
-        "Conditions can reference each other to produce relative positionial "
-        "dependencies (indicated with the ID in square brackets [XY]). "
-        "The conditions will be checked in the same order they are listed, "
-        "so make sure that references are not broken. Conditions can be reordered "
-        "by dragging the list items."
-        "\n\n"
-        "Relative conditions use the center point of their parent. For structure "
-        "clusters this is the average of all instances, while for biome filters "
-        "it is simply the geometric center. The reference point helper conditions "
-        "can be used for more control when locations should be checked separately."
-    );
+        tr("Help: Conditions"),
+        tr(
+            "The search conditions define the properties by which potential seeds "
+            "are filtered."
+            "\n\n"
+            "Conditions can reference each other to produce relative positionial "
+            "dependencies (indicated with the ID in square brackets [XY]). "
+            "The conditions will be checked in the same order they are listed, "
+            "so make sure that references are not broken. Conditions can be reordered "
+            "by dragging the list items."
+            "\n\n"
+            "Relative conditions use the center point of their parent. For structure "
+            "clusters this is the average of all instances, while for biome filters "
+            "it is simply the geometric center. The reference point helper conditions "
+            "can be used for more control when locations should be checked separately."
+    ));
 
     formGen48 = new FormGen48(this);
-    ui->collapseGen48->init("Seed generator (48-bit)", formGen48, false);
+    ui->collapseGen48->init(tr("Seed generator (48-bit)"), formGen48, false);
     connect(formGen48, &FormGen48::changed, this, &MainWindow::onGen48Changed);
     ui->collapseGen48->setInfo(
-        "Help: Seed generator",
-        "<html><head/><body><p>"
-        "For some searches, the 48-bit structure seed candidates can be "
-        "generated without searching, which can vastly reduce the search space "
-        "that has to be checked."
-        "</p><p>"
-        "The generator mode <b>Auto</b> is recommended for general use, which "
-        "automatically selects suitable options based on the conditions list."
-        "</p><p>"
-        "The <b>Quad-feature</b> mode produces candidates for "
-        "quad&#8209;structures that have a uniform distribution of "
-        "region&#8209;size=32 and chunk&#8209;gap=8, such as swamp huts."
-        "</p><p>"
-        "A perfect <b>Quad-monument</b> structure constellation does not "
-        "actually exist, but some extremely rare structure seed bases get close, "
-        "with over 90&#37; of the area within 128 blocks. The generator uses a "
-        "precomputed list of these seed bases."
-        "</p><p>"
-        "Using a <b>Seed list</b> you can provide a custom set of 48-bit "
-        "candidates. Optionally, a salt value can be added and the seeds can "
-        "be region transposed."
-        "</p></body></html>"
-    );
+        tr("Help: Seed generator"),
+        tr(
+            "<html><head/><body><p>"
+            "For some searches, the 48-bit structure seed candidates can be "
+            "generated without searching, which can vastly reduce the search space "
+            "that has to be checked."
+            "</p><p>"
+            "The generator mode <b>Auto</b> is recommended for general use, which "
+            "automatically selects suitable options based on the conditions list."
+            "</p><p>"
+            "The <b>Quad-feature</b> mode produces candidates for "
+            "quad&#8209;structures that have a uniform distribution of "
+            "region&#8209;size=32 and chunk&#8209;gap=8, such as swamp huts."
+            "</p><p>"
+            "A perfect <b>Quad-monument</b> structure constellation does not "
+            "actually exist, but some extremely rare structure seed bases get close, "
+            "with over 90&#37; of the area within 128 blocks. The generator uses a "
+            "precomputed list of these seed bases."
+            "</p><p>"
+            "Using a <b>Seed list</b> you can provide a custom set of 48-bit "
+            "candidates. Optionally, a salt value can be added and the seeds can "
+            "be region transposed."
+            "</p></body></html>"
+    ));
 
     formControl = new FormSearchControl(this);
-    ui->collapseControl->init("Matching seeds", formControl, false);
+    ui->collapseControl->init(tr("Matching seeds"), formControl, false);
     connect(formControl, &FormSearchControl::selectedSeedChanged, this, &MainWindow::onSelectedSeedChanged);
     connect(formControl, &FormSearchControl::searchStatusChanged, this, &MainWindow::onSearchStatusChanged);
     ui->collapseControl->setInfo(
-        "Help: Matching seeds",
-        "<html><head/><body><p>"
-        "The list of seeds acts as a buffer onto which suitable seeds are added "
-        "when they are found. You can also copy the seed list, or paste seeds "
-        "into the list. Selecting a seed will open it in the map view."
-        "</p></body></html>"
-    );
+        tr("Help: Matching seeds"),
+        tr(
+            "<html><head/><body><p>"
+            "The list of seeds acts as a buffer onto which suitable seeds are added "
+            "when they are found. You can also copy the seed list, or paste seeds "
+            "into the list. Selecting a seed will open it in the map view."
+            "</p></body></html>"
+    ));
 
     this->update();
 
@@ -129,9 +134,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->toolBar->addAction(toorigin);
     ui->toolBar->addSeparator();
 
-    dimactions[0] = addMapAction(-1, "overworld", "Overworld");
-    dimactions[1] = addMapAction(-1, "nether", "Nether");
-    dimactions[2] = addMapAction(-1, "the_end", "End");
+    dimactions[0] = addMapAction(-1, "overworld", QT_TR_NOOP("Overworld"));
+    dimactions[1] = addMapAction(-1, "nether", QT_TR_NOOP("Nether"));
+    dimactions[2] = addMapAction(-1, "the_end", QT_TR_NOOP("End"));
     dimgroup = new QActionGroup(this);
 
     for (int i = 0; i < 3; i++)
@@ -144,29 +149,29 @@ MainWindow::MainWindow(QWidget *parent)
     ui->toolBar->addSeparator();
 
     saction.resize(STRUCT_NUM);
-    addMapAction(D_GRID, "grid", "Show grid");
-    addMapAction(D_SLIME, "slime", "Show slime chunks");
-    addMapAction(D_SPAWN, "spawn", "Show world spawn");
-    addMapAction(D_STRONGHOLD, "stronghold", "Show strongholds");
-    addMapAction(D_VILLAGE, "village", "Show villages");
-    addMapAction(D_MINESHAFT, "mineshaft", "Show abandoned mineshafts");
-    addMapAction(D_DESERT, "desert", "Show desert pyramid");
-    addMapAction(D_JUNGLE, "jungle", "Show jungle temples");
-    addMapAction(D_HUT, "hut", "Show swamp huts");
-    addMapAction(D_MONUMENT, "monument", "Show ocean monuments");
-    addMapAction(D_IGLOO, "igloo", "Show igloos");
-    addMapAction(D_MANSION, "mansion", "Show woodland mansions");
-    addMapAction(D_RUINS, "ruins", "Show ocean ruins");
-    addMapAction(D_SHIPWRECK, "shipwreck", "Show shipwrecks");
-    addMapAction(D_TREASURE, "treasure", "Show buried treasures");
-    addMapAction(D_OUTPOST, "outpost", "Show illager outposts");
-    addMapAction(D_PORTAL, "portal", "Show ruined portals");
+    addMapAction(D_GRID, "grid", QT_TR_NOOP("Show grid"));
+    addMapAction(D_SLIME, "slime", QT_TR_NOOP("Show slime chunks"));
+    addMapAction(D_SPAWN, "spawn", QT_TR_NOOP("Show world spawn"));
+    addMapAction(D_STRONGHOLD, "stronghold", QT_TR_NOOP("Show strongholds"));
+    addMapAction(D_VILLAGE, "village", QT_TR_NOOP("Show villages"));
+    addMapAction(D_MINESHAFT, "mineshaft", QT_TR_NOOP("Show abandoned mineshafts"));
+    addMapAction(D_DESERT, "desert", QT_TR_NOOP("Show desert pyramid"));
+    addMapAction(D_JUNGLE, "jungle", QT_TR_NOOP("Show jungle temples"));
+    addMapAction(D_HUT, "hut", QT_TR_NOOP("Show swamp huts"));
+    addMapAction(D_MONUMENT, "monument", QT_TR_NOOP("Show ocean monuments"));
+    addMapAction(D_IGLOO, "igloo", QT_TR_NOOP("Show igloos"));
+    addMapAction(D_MANSION, "mansion", QT_TR_NOOP("Show woodland mansions"));
+    addMapAction(D_RUINS, "ruins", QT_TR_NOOP("Show ocean ruins"));
+    addMapAction(D_SHIPWRECK, "shipwreck", QT_TR_NOOP("Show shipwrecks"));
+    addMapAction(D_TREASURE, "treasure", QT_TR_NOOP("Show buried treasures"));
+    addMapAction(D_OUTPOST, "outpost", QT_TR_NOOP("Show illager outposts"));
+    addMapAction(D_PORTAL, "portal", QT_TR_NOOP("Show ruined portals"));
     ui->toolBar->addSeparator();
-    addMapAction(D_FORTESS, "fortress", "Show nether fortresses");
-    addMapAction(D_BASTION, "bastion", "Show bastions");
+    addMapAction(D_FORTESS, "fortress", QT_TR_NOOP("Show nether fortresses"));
+    addMapAction(D_BASTION, "bastion", QT_TR_NOOP("Show bastions"));
     ui->toolBar->addSeparator();
-    addMapAction(D_ENDCITY, "endcity", "Show end cities");
-    addMapAction(D_GATEWAY, "gateway", "Show end gateways");
+    addMapAction(D_ENDCITY, "endcity", QT_TR_NOOP("Show end cities"));
+    addMapAction(D_GATEWAY, "gateway", QT_TR_NOOP("Show end gateways"));
 
     saction[D_GRID]->setChecked(true);
 
@@ -211,7 +216,7 @@ QAction *MainWindow::addMapAction(int sopt, const char *iconpath, const char *ti
     QString inam = QString(":icons/") + iconpath;
     icon.addPixmap(QPixmap(inam + ".png"), QIcon::Normal, QIcon::On);
     icon.addPixmap(QPixmap(inam + "_d.png"), QIcon::Normal, QIcon::Off);
-    QAction *action = new QAction(icon, tip, this);
+    QAction *action = new QAction(icon, tr(tip), this);
     action->setCheckable(true);
     ui->toolBar->addAction(action);
     if (sopt >= 0)
@@ -309,6 +314,7 @@ void MainWindow::saveSettings()
     settings.setValue("config/autosaveCycle", config.autosaveCycle);
     settings.setValue("config/smoothMotion", config.smoothMotion);
     settings.setValue("config/uistyle", config.uistyle);
+    settings.setValue("config/language", config.language);
     settings.setValue("config/seedsPerItem", config.seedsPerItem);
     settings.setValue("config/queueSize", config.queueSize);
     settings.setValue("config/maxMatching", config.maxMatching);
@@ -381,6 +387,7 @@ void MainWindow::loadSettings()
     config.restoreSession = settings.value("config/restoreSession", config.restoreSession).toBool();
     config.autosaveCycle = settings.value("config/autosaveCycle", config.autosaveCycle).toInt();
     config.uistyle = settings.value("config/uistyle", config.uistyle).toInt();
+    config.language = settings.value("config/language", QLocale::system().name()).toString();
     config.seedsPerItem = settings.value("config/seedsPerItem", config.seedsPerItem).toInt();
     config.queueSize = settings.value("config/queueSize", config.queueSize).toInt();
     config.maxMatching = settings.value("config/maxMatching", config.maxMatching).toInt();
@@ -461,7 +468,7 @@ bool MainWindow::saveProgress(QString fnam, bool quiet)
     if (!file.open(QIODevice::WriteOnly))
     {
         if (!quiet)
-            warning("Warning", "Failed to open file.");
+            warning(tr("Warning"), tr("Failed to open file."));
         return false;
     }
 
@@ -523,7 +530,7 @@ bool MainWindow::loadProgress(QString fnam, bool quiet)
     if (!file.open(QIODevice::ReadOnly))
     {
         if (!quiet)
-            warning("Warning", "Failed to open file.");
+            warning(tr("Warning"), tr("Failed to open file."));
         return false;
     }
 
@@ -544,7 +551,7 @@ bool MainWindow::loadProgress(QString fnam, bool quiet)
     if (sscanf(line.toLatin1().data(), "#Version: %d.%d.%d", &major, &minor, &patch) != 3)
         return false;
     if (cmpVers(major, minor, patch) > 0 && !quiet)
-        warning("Warning", "Progress file was created with a newer version.");
+        warning(tr("Warning"), tr("Progress file was created with a newer version."));
 
     while (stream.status() == QTextStream::Ok)
     {
@@ -673,15 +680,15 @@ void MainWindow::on_seedEdit_textChanged(const QString &a)
     int v = str2seed(a, &s);
     switch (v)
     {
-        case 0: ui->labelSeedType->setText("(text)"); break;
-        case 1: ui->labelSeedType->setText("(numeric)"); break;
-        case 2: ui->labelSeedType->setText("(random)"); break;
+        case 0: ui->labelSeedType->setText(tr("(text)", "Seed input type")); break;
+        case 1: ui->labelSeedType->setText(tr("(numeric)", "Seed input type")); break;
+        case 2: ui->labelSeedType->setText(tr("(random)", "Seed input type")); break;
     }
 }
 
 void MainWindow::on_actionSave_triggered()
 {
-    QString fnam = QFileDialog::getSaveFileName(this, "Save progress", prevdir, "Text files (*.txt);;Any files (*)");
+    QString fnam = QFileDialog::getSaveFileName(this, tr("Save progress"), prevdir, tr("Text files (*.txt);;Any files (*)"));
     if (!fnam.isEmpty())
     {
         QFileInfo finfo(fnam);
@@ -694,16 +701,16 @@ void MainWindow::on_actionLoad_triggered()
 {
     if (formControl->isbusy())
     {
-        warning("Warning", "Cannot load progress: search is still active.");
+        warning(tr("Warning"), tr("Cannot load progress: search is still active."));
         return;
     }
-    QString fnam = QFileDialog::getOpenFileName(this, "Load progress", prevdir, "Text files (*.txt);;Any files (*)");
+    QString fnam = QFileDialog::getOpenFileName(this, tr("Load progress"), prevdir, tr("Text files (*.txt);;Any files (*)"));
     if (!fnam.isEmpty())
     {
         QFileInfo finfo(fnam);
         prevdir = finfo.absolutePath();
         if (!loadProgress(fnam))
-            warning("Warning", "Failed to parse progress file.");
+            warning(tr("Warning"), tr("Failed to parse progress file."));
     }
 }
 
@@ -725,6 +732,8 @@ void MainWindow::on_actionPreferences_triggered()
         ui->mapView->setSetGridSpacing(config.gridSpacing);
         if (oldConfig.uistyle != config.uistyle)
             onStyleChanged(config.uistyle);
+        if (oldConfig.language != config.language)
+            onLanguageChanged(config.language);
 
         if (config.autosaveCycle)
         {
@@ -830,9 +839,9 @@ void MainWindow::on_actionExtGen_triggered()
 void MainWindow::on_mapView_customContextMenuRequested(const QPoint &pos)
 {
     QMenu menu(this);
-    menu.addAction("Copy coordinates", this, &MainWindow::copyCoord);
-    menu.addAction("Copy teleport command", this, &MainWindow::copyTeleportCommand);
-    menu.addAction("Go to coordinates...", this, &MainWindow::on_actionGo_to_triggered);
+    menu.addAction(tr("Copy coordinates"), this, &MainWindow::copyCoord);
+    menu.addAction(tr("Copy teleport command"), this, &MainWindow::copyTeleportCommand);
+    menu.addAction(tr("Go to coordinates..."), this, &MainWindow::on_actionGo_to_triggered);
     menu.exec(ui->mapView->mapToGlobal(pos));
 }
 
@@ -892,7 +901,7 @@ void MainWindow::on_buttonAnalysis_clicked()
     }
     if (x2 < x1 || z2 < z1)
     {
-        warning("Warning", "Invalid area for analysis");
+        warning(tr("Warning"), tr("Invalid area for analysis"));
         return;
     }
 
@@ -946,11 +955,10 @@ void MainWindow::on_buttonAnalysis_clicked()
 
     if (areawarn)
     {
-        QString msg = QString::asprintf(
-                    "Area for analysis is very large (%d, %d).\n"
-                    "The analysis might take a while. Do you want to continue?",
-                    x2-x1+1, z2-z1+1);
-        int button = QMessageBox::warning(this, "Warning", msg, QMessageBox::Cancel, QMessageBox::Yes);
+        QString msg = tr("Area for analysis is very large (%1, %2).\n"
+                    "The analysis might take a while. Do you want to continue?"
+        ).arg(x2-x1+1).arg(z2-z1+1);
+        int button = QMessageBox::warning(this, tr("Warning"), msg, QMessageBox::Cancel, QMessageBox::Yes);
         if (button != QMessageBox::Yes)
             return;
 
@@ -1058,7 +1066,7 @@ void MainWindow::on_buttonAnalysis_clicked()
                 if (vp.variant)
                 {
                     if (stype == Village)
-                        item->setText(1, "abandoned");
+                        item->setText(1, tr("abandoned", "village variant"));
                 }
             }
         }
@@ -1070,7 +1078,7 @@ void MainWindow::on_buttonAnalysis_clicked()
             if (pos.x >= x1 && pos.x <= x2 && pos.z >= z1 && pos.z <= z2)
             {
                 QTreeWidgetItem* item_cat = new QTreeWidgetItem(tree);
-                item_cat->setText(0, "spawn");
+                item_cat->setText(0, tr("spawn"));
                 item_cat->setData(1, Qt::DisplayRole, QVariant::fromValue(1));
                 QTreeWidgetItem* item = new QTreeWidgetItem(item_cat);
                 item->setData(0, Qt::UserRole, QVariant::fromValue(pos));
@@ -1094,7 +1102,7 @@ void MainWindow::on_buttonAnalysis_clicked()
             if (!shp.empty())
             {
                 QTreeWidgetItem* item_cat = new QTreeWidgetItem(tree);
-                item_cat->setText(0, "stronghold");
+                item_cat->setText(0, tr("stronghold"));
                 item_cat->setData(1, Qt::DisplayRole, QVariant::fromValue(shp.size()));
                 for (Pos pos : shp)
                 {
@@ -1137,11 +1145,11 @@ void MainWindow::on_buttonAnalysis_clicked()
                 if (timer.elapsed() > warn_ms)
                 {
                     int button = QMessageBox::warning(
-                        this, "Warning",
-                        QString::asprintf(
+                        this, tr("Warning"),
+                        tr(
                             "The search is taking some time.\n"
-                            "Locations found so far: %d\n"
-                            "Continue search?", items.size()),
+                            "Locations found so far: %1\n"
+                            "Continue search?").arg(items.size()),
                         QMessageBox::Abort, QMessageBox::Yes);
                     if (button != QMessageBox::Yes)
                         goto L_scan_end;
@@ -1165,8 +1173,7 @@ void MainWindow::on_buttonAnalysis_clicked()
 
                 QTreeWidgetItem* loc = new QTreeWidgetItem();
                 loc->setData(0, Qt::UserRole, QVariant::fromValue(origin));
-                loc->setText(0, QString::asprintf(
-                    "condition @[%d, %d]", origin.x, origin.z));
+                loc->setText(0, tr("condition @[%1, %2]").arg(origin.x).arg(origin.z));
 
                 for (int i = 0; i < conds.size(); i++)
                 {
@@ -1182,10 +1189,10 @@ void MainWindow::on_buttonAnalysis_clicked()
                 if (items.size() >= 65536)
                 {
                     QMessageBox::warning(
-                        this, "Warning",
-                        QString::asprintf(
+                        this, tr("Warning"),
+                        tr(
                             "Reached maximum number of results (%d).\n"
-                            "Stopping search.", items.size()),
+                            "Stopping search.").arg(items.size()),
                         QMessageBox::Ok);
                     goto L_scan_end;
                 }
@@ -1211,8 +1218,8 @@ L_scan_end:
 
 void MainWindow::on_buttonExport_clicked()
 {
-    QString fnam = QFileDialog::getSaveFileName(this, "Export analysis", prevdir,
-        "Text files (*.txt *csv);;Any files (*)");
+    QString fnam = QFileDialog::getSaveFileName(this, tr("Export analysis"), prevdir,
+        tr("Text files (*.txt *csv);;Any files (*)"));
     if (fnam.isEmpty())
         return;
 
@@ -1222,7 +1229,7 @@ void MainWindow::on_buttonExport_clicked()
 
     if (!file.open(QIODevice::WriteOnly))
     {
-        warning("Warning", "Failed to open file.");
+        warning(tr("Warning"), tr("Failed to open file."));
         return;
     }
 
@@ -1281,6 +1288,30 @@ void MainWindow::onConditionsChanged()
 {
     QVector<Condition> conds = formCond->getConditions();
     formGen48->updateAutoConditions(conds);
+}
+
+void MainWindow::onLanguageChanged(QString lang)
+{
+    const char *ktitle = QT_TR_NOOP("Restart Required!");
+    const char *ktext = QT_TR_NOOP("The language change will take effect after restart.\n"
+                                   "Restart?");
+    QString title(""), text("");
+    QTranslator translator;
+    if(translator.load(QLocale(lang), "", "", ":/i18n", ".qm"))
+    {
+        title = translator.translate("MainWindow", ktitle);
+        text = translator.translate("MainWindow", ktext);
+    }
+    if (title.isEmpty())
+        title = tr(ktitle);
+    if (text.isEmpty())
+        text = tr(ktext);
+
+    if (QMessageBox::warning(this, title, text, QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
+    {
+        qApp->quit();
+        QProcess::startDetached(qApp->arguments()[0], qApp->arguments());
+    }
 }
 
 void MainWindow::onGen48Changed()

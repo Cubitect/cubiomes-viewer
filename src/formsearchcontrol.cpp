@@ -132,7 +132,7 @@ bool FormSearchControl::setList64(QString path, bool quiet)
         else
         {
             if (!quiet)
-                QMessageBox::warning(this, "Warning", "Failed to load seed list from file", QMessageBox::Ok);
+                QMessageBox::warning(this, tr("Warning"), tr("Failed to load seed list from file"), QMessageBox::Ok);
         }
     }
     return false;
@@ -148,7 +148,7 @@ void FormSearchControl::searchLockUi(bool lock)
     }
     else
     {
-        ui->buttonStart->setText("Start search");
+        ui->buttonStart->setText(tr("Start search"));
         ui->buttonStart->setIcon(QIcon(":/icons/search.png"));
         ui->buttonStart->setChecked(false);
         ui->buttonStart->setEnabled(true);
@@ -196,17 +196,17 @@ void FormSearchControl::on_buttonStart_clicked()
 
         if (condvec.empty())
         {
-            QMessageBox::warning(this, "Warning", "Please define some constraints using the \"Add\" button.", QMessageBox::Ok);
+            QMessageBox::warning(this, tr("Warning"), tr("Please define some constraints using the \"Add\" button."), QMessageBox::Ok);
             ok = false;
         }
         if (sc.searchtype == SEARCH_LIST && slist64.empty())
         {
-            QMessageBox::warning(this, "Warning", "No seed list file selected.", QMessageBox::Ok);
+            QMessageBox::warning(this, tr("Warning"), tr("No seed list file selected."), QMessageBox::Ok);
             ok = false;
         }
         if (sthread.isRunning())
         {
-            QMessageBox::warning(this, "Warning", "Search is still running.", QMessageBox::Ok);
+            QMessageBox::warning(this, tr("Warning"), tr("Search is still running."), QMessageBox::Ok);
             ok = false;
         }
 
@@ -227,7 +227,7 @@ void FormSearchControl::on_buttonStart_clicked()
         if (ok)
         {
             ui->lineStart->setText(QString::asprintf("%" PRId64, (int64_t)sc.startseed));
-            ui->buttonStart->setText("Abort search");
+            ui->buttonStart->setText(tr("Abort search"));
             ui->buttonStart->setIcon(QIcon(":/icons/cancel.png"));
             sthread.start();
             searchLockUi(true);
@@ -242,7 +242,7 @@ void FormSearchControl::on_buttonStart_clicked()
         sthread.stop(); // tell search to stop at next convenience
         //sthread.quit(); // tell the event loop to exit
         //sthread.wait(); // wait for search to finish
-        ui->buttonStart->setText("Start search");
+        ui->buttonStart->setText(tr("Start search"));
         ui->buttonStart->setIcon(QIcon(":/icons/search.png"));
         ui->buttonStart->setChecked(false);
 
@@ -258,7 +258,7 @@ void FormSearchControl::on_buttonMore_clicked()
     int type = ui->comboSearchType->currentIndex();
     if (type == SEARCH_LIST)
     {
-        QString fnam = QFileDialog::getOpenFileName(this, "Load seed list", parent->prevdir, "Text files (*.txt);;Any files (*)");
+        QString fnam = QFileDialog::getOpenFileName(this, tr("Load seed list"), parent->prevdir, tr("Text files (*.txt);;Any files (*)"));
         setList64(fnam, false);
     }
     else if (type == SEARCH_INC)
@@ -287,21 +287,21 @@ void FormSearchControl::on_listResults_customContextMenuRequested(const QPoint &
 {
     QMenu menu(this);
 
-    QAction *actremove = menu.addAction(QIcon::fromTheme("list-remove"), "Remove selected seed", this, &FormSearchControl::removeCurrent);
+    QAction *actremove = menu.addAction(QIcon::fromTheme("list-remove"), tr("Remove selected seed"), this, &FormSearchControl::removeCurrent);
     actremove->setEnabled(!ui->listResults->selectedItems().empty());
 
-    QAction *actcopy = menu.addAction(QIcon::fromTheme("edit-copy"), "Copy list to clipboard", this, &FormSearchControl::copyResults);
+    QAction *actcopy = menu.addAction(QIcon::fromTheme("edit-copy"), tr("Copy list to clipboard"), this, &FormSearchControl::copyResults);
     actcopy->setEnabled(ui->listResults->rowCount() > 0);
 
     int n = pasteList(true);
-    QAction *actpaste = menu.addAction(QIcon::fromTheme("edit-paste"), QString::asprintf("Paste %d seeds from clipboard", n), this, &FormSearchControl::pasteResults);
+    QAction *actpaste = menu.addAction(QIcon::fromTheme("edit-paste"), tr("Paste %n seed(s) from clipboard", 0, n), this, &FormSearchControl::pasteResults);
     actpaste->setEnabled(n > 0);
     menu.exec(ui->listResults->mapToGlobal(pos));
 }
 
 void FormSearchControl::on_buttonSearchHelp_clicked()
 {
-    const char* msg =
+    QString msg = tr(
             "<html><head/><body><p>"
             "The <b>incremental</b> search checks seeds in numerical order, "
             "save for grouping into work items for parallelization. This type "
@@ -320,8 +320,8 @@ void FormSearchControl::on_buttonSearchHelp_clicked()
             "the &quot;...&quot; button. (The seed generator is ignored with "
             "this option.)"
             "</p></body></html>"
-            ;
-    QMessageBox::information(this, "Help: search types", msg, QMessageBox::Ok);
+            );
+    QMessageBox::information(this, tr("Help: search types"), msg, QMessageBox::Ok);
 }
 
 void FormSearchControl::on_comboSearchType_currentIndexChanged(int index)
@@ -408,8 +408,8 @@ int FormSearchControl::searchResultsAdd(QVector<uint64_t> seeds, bool countonly)
     if (countonly == false && n >= config.maxMatching)
     {
         sthread.stop();
-        QString msg = QString::asprintf("Maximum number of results reached (%d).", config.maxMatching);
-        QMessageBox::warning(this, "Warning", msg, QMessageBox::Ok);
+        QString msg = tr("Maximum number of results reached (%1).").arg(config.maxMatching);
+        QMessageBox::warning(this, tr("Warning"), msg, QMessageBox::Ok);
     }
 
     int addcnt = n - ns;
@@ -503,7 +503,7 @@ void FormSearchControl::searchFinish()
     if (sthread.itemgen.isdone)
     {
         ui->progressBar->setValue(10000);
-        ui->progressBar->setFormat(QString::asprintf("Done"));
+        ui->progressBar->setFormat(tr("Done", "show in progress bar when finished"));
     }
     searchLockUi(false);
 }
