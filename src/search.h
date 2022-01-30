@@ -30,7 +30,7 @@ struct FilterInfo
     int layer;  // associated generator layer
     int stype;  // structure type
     int step;   // coordinate multiplier
-    int count;  //
+    int count;  // can have instances
     int mcmin;  // minimum version
     int mcmax;  // maximum version
     int dim;    // dimension
@@ -87,7 +87,6 @@ enum
     F_PORTALN,
     F_GATEWAY,
     F_MINESHAFT,
-    // possibly add scales: 4, 240, 256, 320, 384, 400, 432, 512, 1280
     F_REFERENCE_1,
     F_REFERENCE_16,
     F_REFERENCE_64,
@@ -97,6 +96,8 @@ enum
     F_BIOME_4, // differs from F_BIOME_4_RIVER, since this may include oceans
     F_SCALE_TO_NETHER,
     F_SCALE_TO_OVERWORLD,
+    F_LOGIC_OR,
+    F_REFERENCE_4,
     // new filters should be added here at the end to keep some downwards compatibility
     FILTER_MAX,
 };
@@ -117,34 +118,40 @@ static const struct FilterList
             ""
         };
 
+        list[F_LOGIC_OR] = FilterInfo{
+            CAT_HELPER, 0, 0, 0, 0, 0, 1, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
+            ":icons/helper.png",
+            "OR logic gate",
+            "This helper is satisfied iff any of the conditions which use it "
+            "for a relative reference are met."
+        };
+        list[F_SCALE_TO_NETHER] = FilterInfo{
+            CAT_HELPER, 0, 0, 0, 0, 0, 1, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
+            ":icons/portal.png",
+            "Coordinate factor x/8",
+            "Divides relative location by 8, from Overworld to Nether."
+        };
+        list[F_SCALE_TO_OVERWORLD] = FilterInfo{
+            CAT_HELPER, 0, 0, 0, 0, 0, 1, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
+            ":icons/portal.png",
+            "Coordinate factor x*8",
+            "Multiplies relative location by 8, from Nether to Overworld."
+        };
         const char *ref_desc =
-            "<html><head/><body><p>"
-            "A basic search will test each condition once, where relative "
-            "locations refer to the center of their parent. "
-            "This can be undesirable if the parent can have multiple triggering "
-            "instances. To address this, a <b>reference point</b> traverses an "
-            "origin-aligned grid that can be referred to by other conditions."
-            "</p><p>"
-            "Example - \"Double Swamp Hut\":"
-            "</p><table>"
-            "<tr><td>[1]</td><td width=\"10\"/><td>"
-            "Reference point with scale 1:512 for a square of side 3."
-            "</td></tr><tr><td/><td/><td>"
-            "(traverses the structure regions for the range -1024 to 1023)"
-            "</td></tr><tr><td>[2]</td><td/><td>"
-            "Swamp Hut x1 in blocks (0,0) to (511,511) relative to [1]."
-            "</td></tr><tr><td/><td/><td>"
-            "(gets the position of the single swamp hut inside the region)"
-            "</td></tr><tr><td>[3]</td><td/><td>"
-            "Swamp Hut x2 in a 128 block square relative to [2]."
-            "</td></tr><tr><td/><td/><td>"
-            "(checks there is a second swamp hut in range of the first)"
-            "</td></tr></table></body></html>";
-
+            "<html><head/><body>"
+            "Reference points can be used to iterate over an area with a "
+            "certain step size."
+            "</body></html>";
         list[F_REFERENCE_1] = FilterInfo{
             CAT_HELPER, 0, 1, 1, 0, 0, 1, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
             ":icons/reference.png",
             "Reference point 1:1",
+            ref_desc
+        };
+        list[F_REFERENCE_4] = FilterInfo{
+            CAT_HELPER, 0, 1, 1, 0, 0, 4, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
+            ":icons/reference.png",
+            "Reference point 1:4",
             ref_desc
         };
         list[F_REFERENCE_16] = FilterInfo{
@@ -176,18 +183,6 @@ static const struct FilterList
             ":icons/reference.png",
             "Reference point 1:1024",
             ref_desc
-        };
-        list[F_SCALE_TO_NETHER] = FilterInfo{
-            CAT_HELPER, 0, 0, 0, 0, 0, 1, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
-            ":icons/portal.png",
-            "Coordinate factor x/8",
-            "Divides relative location by 8, from Overworld to Nether."
-        };
-        list[F_SCALE_TO_OVERWORLD] = FilterInfo{
-            CAT_HELPER, 0, 0, 0, 0, 0, 1, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
-            ":icons/portal.png",
-            "Coordinate factor x*8",
-            "Multiplies relative location by 8, from Nether to Overworld."
         };
 
         list[F_QH_IDEAL] = FilterInfo{
@@ -622,6 +617,30 @@ struct WorldGen
     }
 };
 
+struct ConditionTree
+{
+    QVector<Condition> condvec;
+    QVector<QVector<char>> references;
+
+    void set(const QVector<Condition>& cv)
+    {
+        int cmax = 0;
+        for (const Condition& c : cv)
+            if (c.save > cmax)
+                cmax = c.save;
+        condvec.resize(cmax + 1);
+        references.resize(cmax + 1);
+        for (const Condition& c : cv)
+        {
+            condvec[c.save] = c;
+            if (c.relative <= cmax)
+                references[c.relative].push_back(c.save);
+        }
+    }
+};
+
+
+#define MAX_INSTANCES 4096 // should be at least 128
 
 enum
 {
@@ -638,21 +657,22 @@ enum
     PASS_FULL_64,       // run full test on a 64-bit seed
 };
 
-/* Checks if a seeds satisfies the conditions vector.
- * Returns the lowest condition check status.
+/* Checks if a seeds satisfies the conditions tree.
+ * Returns the lowest condition fulfillment status.
  */
-int testSeedAt(
-    Pos                         at,             // origin for conditions
-    Pos                         cpos[100],      // [out] condition centers
-    QVector<Condition>        * condvec,        // conditions vector
-    int                         pass,           // final search pass
-    WorldGen                  * gen,            // buffer for generator
-    std::atomic_bool          * abort           // search abort signals
+int testTreeAt(
+    Pos                         at,             // relative origin
+    ConditionTree             * tree,           // condition tree
+    int                         pass,           // search pass
+    WorldGen                  * gen,            // world generator
+    std::atomic_bool          * abort,          // abort signal
+    Pos                       * path = 0        // ok trigger positions
 );
 
 int testCondAt(
     Pos                         at,             // relative origin
-    Pos                       * cent,           // output center position
+    Pos                       * cent,           // output center position(s)
+    int                       * icnt,           // max instances (NULL for avg)
     Condition                 * cond,           // condition to check
     int                         pass,
     WorldGen                  * gen,

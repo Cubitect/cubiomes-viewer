@@ -32,6 +32,8 @@ FormSearchControl::FormSearchControl(MainWindow *parent)
     ui->listResults->setFont(mono);
     ui->progressBar->setFont(mono);
 
+    ui->listResults->horizontalHeader()->setFont(mono);
+
     //connect(&sthread, &SearchThread::results, this, &MainWindow::searchResultsAdd, Qt::BlockingQueuedConnection);
     connect(&sthread, &SearchThread::progress, this, &FormSearchControl::searchProgress, Qt::QueuedConnection);
     connect(&sthread, &SearchThread::searchFinish, this, &FormSearchControl::searchFinish, Qt::QueuedConnection);

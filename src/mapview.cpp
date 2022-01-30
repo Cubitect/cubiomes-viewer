@@ -51,6 +51,10 @@ MapView::MapView(QWidget *parent)
 {
     memset(sshow, 0, sizeof(sshow));
 
+    QFont mono = QFont("Monospace", 9);
+    mono.setStyleHint(QFont::TypeWriter);
+    setFont(mono);
+
     QPalette pal = palette();
     pal.setColor(QPalette::Background, Qt::black);
     setAutoFillBackground(true);
@@ -61,6 +65,7 @@ MapView::MapView(QWidget *parent)
 
     overlay = new MapOverlay(this);
     overlay->setMouseTracking(true);
+    overlay->setFont(mono);
 
     setContextMenuPolicy(Qt::CustomContextMenu);
 }

@@ -63,6 +63,30 @@
       <string>Interface</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
+      <item row="2" column="2" colspan="3">
+       <widget class="QLineEdit" name="lineGridSpacing"/>
+      </item>
+      <item row="1" column="2" colspan="2">
+       <widget class="QPushButton" name="buttonBiomeColor">
+        <property name="text">
+         <string>[none]</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="4">
+       <widget class="QPushButton" name="buttonClear">
+        <property name="maximumSize">
+         <size>
+          <width>20</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="icon">
+         <iconset resource="../icons.qrc">
+          <normaloff>:/icons/clear.png</normaloff>:/icons/clear.png</iconset>
+        </property>
+       </widget>
+      </item>
       <item row="1" column="0">
        <widget class="QLabel" name="label_5">
         <property name="text">
@@ -70,7 +94,21 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="2" colspan="2">
+      <item row="4" column="0" colspan="4">
+       <widget class="QCheckBox" name="checkBBoxes">
+        <property name="text">
+         <string>Outline known bounding boxes</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>GUI style:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2" colspan="3">
        <widget class="QComboBox" name="comboStyle">
         <property name="iconSize">
          <size>
@@ -90,20 +128,6 @@
         </item>
        </widget>
       </item>
-      <item row="4" column="0" colspan="4">
-       <widget class="QCheckBox" name="checkBBoxes">
-        <property name="text">
-         <string>Outline known bounding boxes</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>GUI style:</string>
-        </property>
-       </widget>
-      </item>
       <item row="3" column="0" colspan="4">
        <widget class="QCheckBox" name="checkSmooth">
         <property name="toolTip">
@@ -111,27 +135,6 @@
         </property>
         <property name="text">
          <string>Smooth map motion</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QPushButton" name="buttonBiomeColor">
-        <property name="text">
-         <string>[none]</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="3">
-       <widget class="QPushButton" name="buttonClear">
-        <property name="maximumSize">
-         <size>
-          <width>20</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="icon">
-         <iconset resource="../icons.qrc">
-          <normaloff>:/icons/clear.png</normaloff>:/icons/clear.png</iconset>
         </property>
        </widget>
       </item>
@@ -171,9 +174,6 @@ Leave blank for the default behaviour</string>
          <string>Custom grid spacing:</string>
         </property>
        </widget>
-      </item>
-      <item row="2" column="2" colspan="2">
-       <widget class="QLineEdit" name="lineGridSpacing"/>
       </item>
      </layout>
     </widget>

@@ -34,7 +34,7 @@ public:
     int                 searchtype;
     int                 mc;
     int                 large;
-    QVector<Condition>* pcvec;
+    ConditionTree     * pctree;
     uint64_t            itemid;     // item identifier
     const uint64_t    * slist;      // candidate list
     uint64_t            len;        // number of candidates
@@ -66,7 +66,7 @@ struct SearchItemGenerator
     int                     searchtype;
     int                     mc;
     int                     large;
-    QVector<Condition>      condvec;
+    ConditionTree           condtree;
     uint64_t                itemid;     // item incrementor
     int                     itemsiz;    // number of seeds per search item
     Gen48Settings           gen48;      // 48-bit generator settings

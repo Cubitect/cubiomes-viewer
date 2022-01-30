@@ -4,6 +4,7 @@
 #include "cubiomes/finders.h"
 
 #include <QThread>
+#include <QString>
 
 #include <vector>
 

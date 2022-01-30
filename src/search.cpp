@@ -7,219 +7,253 @@
 #include <algorithm>
 
 
-static bool intersectLineLine(double ax1, double az1, double ax2, double az2, double bx1, double bz1, double bx2, double bz2)
-{
-    double ax = ax2 - ax1, az = az2 - az1;
-    double bx = bx2 - bx1, bz = bz2 - bz1;
-    double adotb = ax * bz - az * bx;
-    if (adotb == 0)
-        return false; // parallel
-
-    double cx = bx1 - ax1, cz = bz1 - az1;
-    double t;
-    t = (cx * az - cz * ax) / adotb;
-    if (t < 0 || t > 1)
-        return false;
-    t = (cx * bz - cz * bx) / adotb;
-    if (t < 0 || t > 1)
-        return false;
-
-    return true;
-}
-
-// does the line segment l1->l2 intersect the rectangle r1->r2
-static bool intersectRectLine(double rx1, double rz1, double rx2, double rz2, double lx1, double lz1, double lx2, double lz2)
-{
-    if (lx1 >= rx1 && lx1 <= rx2 && lz1 >= rz1 && lz1 <= rz2) return true;
-    if (lx2 >= rx1 && lx2 <= rx2 && lz2 >= rz1 && lz2 <= rz2) return true;
-    if (intersectLineLine(lx1, lz1, lx2, lz2, rx1, rz1, rx1, rz2)) return true;
-    if (intersectLineLine(lx1, lz1, lx2, lz2, rx1, rz2, rx2, rz2)) return true;
-    if (intersectLineLine(lx1, lz1, lx2, lz2, rx2, rz2, rx2, rz1)) return true;
-    if (intersectLineLine(lx1, lz1, lx2, lz2, rx2, rz1, rx1, rz1)) return true;
-    return false;
-}
-
-static bool isInnerRingOk(int mc, uint64_t seed, int x1, int z1, int x2, int z2, int r1, int r2)
-{
-    StrongholdIter sh;
-    Pos p = initFirstStronghold(&sh, mc, seed);
-
-    if (p.x >= x1 && p.x <= x2 && p.z >= z1 && p.z <= z2)
-        return true;
-    // Do a ray cast analysis, checking if any of the generation angles intersect the area.
-    double c, s;
-    c = cos(sh.angle + M_PI*2/3);
-    s = sin(sh.angle + M_PI*2/3);
-    if (intersectRectLine(x1-112, z1-112, x2+112, z2+112, c*r1, s*r1, c*r2, s*r2))
-        return true;
-    c = cos(sh.angle + M_PI*4/3);
-    s = sin(sh.angle + M_PI*4/3);
-    if (intersectRectLine(x1-112, z1-112, x2+112, z2+112, c*r1, s*r1, c*r2, s*r2))
-        return true;
-
-    return false;
-}
-
-
-/* Checks if a seeds satisfies the conditions list.
- */
-int testSeedAt(
+static
+int testTreeAt(
     Pos                         at,
-    Pos                         cpos[100],
-    QVector<Condition>        * condvec,
+    ConditionTree             * tree,
+    int                         node,
     int                         pass,
     WorldGen                  * gen,
     std::atomic_bool          * abort,
-    char                        states[100],
-    int                         idxc0
+    Pos                       * path
 )
 {
-    Condition *cond = condvec->data();
-    int n = condvec->size();
-    int p = PASS_FAST_48;
-    int ret;
+    Condition& c = tree->condvec[node];
+    QVector<char>& branches = tree->references[c.save];
+    int st;
+    int rx1, rz1, rx2, rz2;
+    int sref;
+    Pos pos;
+    Pos inst[MAX_INSTANCES];
+    const FilterInfo *finfo;
 
-    cpos[0] = at;
-
-    for (int i = idxc0; i < n; i++)
+    switch (c.type)
     {
-        states[ cond[i].save ] = 0;
-    }
-
-    // check fast 48-bit first and then the specified pass (if not equal)
-    for (;;)
-    {
-        ret = COND_OK;
-        for (int i = idxc0; i < n; i++)
+    case F_REFERENCE_1:     sref = 0;  goto L_ref_pow2;
+    case F_REFERENCE_4:     sref = 2;  goto L_ref_pow2;
+    case F_REFERENCE_16:    sref = 4;  goto L_ref_pow2;
+    case F_REFERENCE_64:    sref = 6;  goto L_ref_pow2;
+    case F_REFERENCE_256:   sref = 8;  goto L_ref_pow2;
+    case F_REFERENCE_512:   sref = 9;  goto L_ref_pow2;
+    case F_REFERENCE_1024:  sref = 10; goto L_ref_pow2;
+    L_ref_pow2:
+        rx1 = ((c.x1 << sref) + at.x) >> sref;
+        rz1 = ((c.z1 << sref) + at.z) >> sref;
+        rx2 = ((c.x2 << sref) + at.x) >> sref;
+        rz2 = ((c.z2 << sref) + at.z) >> sref;
+        st = COND_FAILED;
+        for (int z = rz1; z <= rz2; z++)
         {
-            Condition *c = cond + i;
-
-            int sav = c->save;
-            int rel = c->relative;
-            int st;
-
-            if (rel)
+            for (int x = rx1; x <= rx2; x++)
             {
-                if (states[rel] != COND_OK &&
-                    states[rel] != COND_MAYBE_POS_VALID)
-                {   // condition is relative to something we don't know yet
-                    st = COND_MAYBE_POS_INVAL;
-                    states[sav] = st;
-                    if (ret > st)
-                        ret = st;
-                    continue;
-                }
-            }
+                pos.x = (x << sref);
+                pos.z = (z << sref);
 
-            if (states[sav] == COND_OK)
-                continue; // already checked and satisfied
-
-
-            int rx1, rz1, rx2, rz2;
-            int sref = -1;
-
-            switch (c->type)
-            {
-            case F_REFERENCE_1:     sref = 0;  goto L_ref_pow2;
-            case F_REFERENCE_16:    sref = 4;  goto L_ref_pow2;
-            case F_REFERENCE_64:    sref = 6;  goto L_ref_pow2;
-            case F_REFERENCE_256:   sref = 8;  goto L_ref_pow2;
-            case F_REFERENCE_512:   sref = 9;  goto L_ref_pow2;
-            case F_REFERENCE_1024:  sref = 10; goto L_ref_pow2;
-            L_ref_pow2:
-                rx1 = ((c->x1 << sref) + at.x) >> sref;
-                rz1 = ((c->z1 << sref) + at.z) >> sref;
-                rx2 = ((c->x2 << sref) + at.x) >> sref;
-                rz2 = ((c->z2 << sref) + at.z) >> sref;
-                break;
-            default:
-                sref = -1;
-                break;
-            }
-
-            if (sref >= 0)
-            {
-                // helper condition -
-                // iterating over an area at a given scale with recursion
-
-                states[sav] = COND_OK; // relatives need OK parent state
-                st = COND_FAILED;
-                for (int z = rz1; z <= rz2; z++)
+                // children are combined via AND
+                int sta = COND_OK;
+                for (int b : branches)
                 {
-                    for (int x = rx1; x <= rx2; x++)
-                    {
-                        cpos[sav].x = (x << sref);
-                        cpos[sav].z = (z << sref);
-
-                        int sta = testSeedAt(
-                            cpos[sav],
-                            cpos,
-                            condvec,
-                            p,
-                            gen,
-                            abort,
-                            states,
-                            i+1
-                        );
-
-                        if (sta > st)
-                            st = sta;
-                        if (st == COND_OK)
-                            goto L_ref_finish;
-                        if (*abort)
-                            return COND_FAILED;
-                    }
+                    int stb = testTreeAt(
+                        pos,
+                        tree,
+                        b,
+                        pass,
+                        gen,
+                        abort,
+                        path
+                    );
+                    if (*abort)
+                        return COND_FAILED;
+                    if (stb < sta)
+                        sta = stb;
+                    if (sta == COND_FAILED)
+                        break;
                 }
+
+                if (sta > st)
+                    st = sta;
+                if (st == COND_OK)
+                    return COND_OK;
             }
-            else if (c->type == F_SCALE_TO_NETHER)
+        }
+        return st;
+
+
+    case F_SCALE_TO_NETHER:
+        pos.x = at.x / 8;
+        pos.z = at.z / 8;
+        goto L_scaled_to_dim;
+    case F_SCALE_TO_OVERWORLD:
+        pos.x = at.x * 8;
+        pos.z = at.z * 8;
+        goto L_scaled_to_dim;
+
+    L_scaled_to_dim:
+        st = COND_OK;
+        for (int b : branches)
+        {
+            int sta = testTreeAt(
+                pos,
+                tree,
+                b,
+                pass,
+                gen,
+                abort,
+                path
+            );
+            if (*abort)
+                return COND_FAILED;
+            if (sta < st)
+                st = sta;
+            if (st == COND_FAILED)
+                break;
+        }
+        return st;
+
+
+    case F_LOGIC_OR:
+        if (branches.empty())
+            return COND_OK; // empty ORs are ignored
+        st = COND_FAILED;
+        for (int b : branches)
+        {
+            int sta = testTreeAt(
+                at,
+                tree,
+                b,
+                pass,
+                gen,
+                abort,
+                path
+            );
+            if (*abort)
+                return COND_FAILED;
+            if (sta > st)
+                st = sta;
+            if (st == COND_OK)
+                break;
+        }
+        return st;
+
+
+    default:
+
+        if (branches.empty())
+        {   // this is a leaf node => check only for presence of instances
+            int icnt = c.count;
+            st = testCondAt(at, inst, &icnt, &c, pass, gen, abort);
+            if (path && st == COND_OK)
+                path[c.save] = at;
+            return st;
+        }
+        finfo = g_filterinfo.list + c.type;
+        if (c.count == 1 && (finfo->count || finfo->cat == CAT_QUAD))
+        {   // condition has exactly one required instance => we can check
+            // each one individually, i.e. this is a branch that can have
+            // multiple independent branches (combined via OR)
+            // quad conditions are also processed here since we want to
+            // examine all instances without support for averaging
+            int icnt = MAX_INSTANCES;
+            st = testCondAt(at, inst, &icnt, &c, pass, gen, abort);
+            if (st == COND_FAILED)
+                return COND_FAILED;
+            int sta = COND_FAILED;
+            int iok = 0;
+            for (int i = 0; i < icnt; i++)
             {
-                states[sav] = COND_OK;
-                cpos[sav].x = cpos[rel].x / 8;
-                cpos[sav].z = cpos[rel].z / 8;
-                st = testCondAt(cpos[sav], cpos+sav, c, pass, gen, abort);
+                int stb = COND_OK;
+                pos = inst[i]; // position of instance
+                for (int b : branches)
+                {
+                    int stc = testTreeAt(
+                        pos,
+                        tree,
+                        b,
+                        pass,
+                        gen,
+                        abort,
+                        path
+                    );
+                    if (*abort)
+                        return COND_FAILED;
+                    // worst branch dictates status for instance
+                    if (stc < stb)
+                        stb = stc;
+                    if (stb == COND_FAILED)
+                        break;
+                }
+                // best instance dictates status
+                if (stb > sta) {
+                    sta = stb;
+                    if (sta == COND_OK)
+                        iok = i; // save position with ok path
+                }
+                if (sta > st)
+                    break;
             }
-            else if (c->type == F_SCALE_TO_OVERWORLD)
-            {
-                states[sav] = COND_OK;
-                cpos[sav].x = cpos[rel].x * 8;
-                cpos[sav].z = cpos[rel].z * 8;
-                st = testCondAt(cpos[sav], cpos+sav, c, pass, gen, abort);
+            // status cannot be better than it was for this condition
+            if (sta < st)
+                st = sta;
+            if (path && st == COND_OK)
+                path[c.save] = inst[iok];
+            return st;
+        }
+        else
+        {   // this condition cannot branch, position of multiple instances
+            // will be averaged to a center point
+            if (c.type == 0)
+            {   // this is the root condition
+                st = COND_OK;
+                pos = at;
             }
             else
             {
-                st = testCondAt(cpos[rel], cpos+sav, c, pass, gen, abort);
+                st = testCondAt(at, inst, NULL, &c, pass, gen, abort);
+                pos = inst[0]; // center point of instances
             }
-
-        L_ref_finish:;
-            if (st == COND_FAILED)
-                return COND_FAILED;
-            if (st < ret)
-                ret = st;
-            states[sav] = st;
-
-            if (sref > 0)
-                break;
+            for (int b : branches)
+            {
+                if (st == COND_FAILED)
+                    break;
+                int sta = testTreeAt(
+                    pos,
+                    tree,
+                    b,
+                    pass,
+                    gen,
+                    abort,
+                    path
+                );
+                if (*abort)
+                    return COND_FAILED;
+                if (sta < st)
+                    st = sta;
+            }
+            if (path && st == COND_OK)
+                path[c.save] = pos;
+            return st;
         }
-        if (p == pass)
-            break;
-        p = pass;
     }
-
-    return ret;
 }
 
-int testSeedAt(
+int testTreeAt(
     Pos                         at,
-    Pos                         cpos[100],
-    QVector<Condition>        * condvec,
+    ConditionTree             * tree,
     int                         pass,
     WorldGen                  * gen,
-    std::atomic_bool          * abort
+    std::atomic_bool          * abort,
+    Pos                       * path
 )
 {
-    char states[100];
-    return testSeedAt(at, cpos, condvec, pass, gen, abort, states, 0);
+    if (pass != PASS_FAST_48)
+    {   // do a fast check first
+        int st = testTreeAt(at, tree, 0, PASS_FAST_48, gen, abort, NULL);
+        if (st == COND_FAILED)
+            return st;
+    }
+    return testTreeAt(at, tree, 0, pass, gen, abort, path);
 }
+
 
 static const int g_qh_c_n = sizeof(low20QuadHutBarely) / sizeof(uint64_t);
 static QuadInfo qh_constellations[g_qh_c_n];
@@ -282,14 +316,72 @@ void _init(void)
 }
 
 
+static bool intersectLineLine(double ax1, double az1, double ax2, double az2, double bx1, double bz1, double bx2, double bz2)
+{
+    double ax = ax2 - ax1, az = az2 - az1;
+    double bx = bx2 - bx1, bz = bz2 - bz1;
+    double adotb = ax * bz - az * bx;
+    if (adotb == 0)
+        return false; // parallel
+
+    double cx = bx1 - ax1, cz = bz1 - az1;
+    double t;
+    t = (cx * az - cz * ax) / adotb;
+    if (t < 0 || t > 1)
+        return false;
+    t = (cx * bz - cz * bx) / adotb;
+    if (t < 0 || t > 1)
+        return false;
+
+    return true;
+}
+
+// does the line segment l1->l2 intersect the rectangle r1->r2
+static bool intersectRectLine(double rx1, double rz1, double rx2, double rz2, double lx1, double lz1, double lx2, double lz2)
+{
+    if (lx1 >= rx1 && lx1 <= rx2 && lz1 >= rz1 && lz1 <= rz2) return true;
+    if (lx2 >= rx1 && lx2 <= rx2 && lz2 >= rz1 && lz2 <= rz2) return true;
+    if (intersectLineLine(lx1, lz1, lx2, lz2, rx1, rz1, rx1, rz2)) return true;
+    if (intersectLineLine(lx1, lz1, lx2, lz2, rx1, rz2, rx2, rz2)) return true;
+    if (intersectLineLine(lx1, lz1, lx2, lz2, rx2, rz2, rx2, rz1)) return true;
+    if (intersectLineLine(lx1, lz1, lx2, lz2, rx2, rz1, rx1, rz1)) return true;
+    return false;
+}
+
+static bool isInnerRingOk(int mc, uint64_t seed, int x1, int z1, int x2, int z2, int r1, int r2)
+{
+    StrongholdIter sh;
+    Pos p = initFirstStronghold(&sh, mc, seed);
+
+    if (p.x >= x1 && p.x <= x2 && p.z >= z1 && p.z <= z2)
+        return true;
+    // Do a ray cast analysis, checking if any of the generation angles intersect the area.
+    double c, s;
+    c = cos(sh.angle + M_PI*2/3);
+    s = sin(sh.angle + M_PI*2/3);
+    if (intersectRectLine(x1-112, z1-112, x2+112, z2+112, c*r1, s*r1, c*r2, s*r2))
+        return true;
+    c = cos(sh.angle + M_PI*4/3);
+    s = sin(sh.angle + M_PI*4/3);
+    if (intersectRectLine(x1-112, z1-112, x2+112, z2+112, c*r1, s*r1, c*r2, s*r2))
+        return true;
+
+    return false;
+}
+
+
 /* Tests if a condition is satisfied with 'at' as origin for a search pass.
- * If sufficiently satisfied (check return value) the center point is stored
- * in 'cent'.
+ * If sufficiently satisfied (check return value) then:
+ * when 'inst' is NULL, the center position is written to 'cent[0]'
+ * otherwise a maximum number of '*inst' instance positions are stored in 'cent'
+ * and '*inst' is overwritten with the number of found instances.
+ * ('*inst' should be at most MAX_INSTANCES)
  */
 int
 testCondAt(
     Pos                 at,     // relative origin
-    Pos               * cent,   // output center position
+    Pos               * cent,   // output center position(s)
+    int               * inst,   // max instances (NULL for avg)
     Condition         * cond,   // condition to check
     int                 pass,
     WorldGen          * gen,
@@ -303,10 +395,10 @@ testCondAt(
     int qual, valid;
     int xt, zt;
     int st;
-    int i, j, n;
+    int i, j, n, icnt;
     int64_t s, r, rmin, rmax;
     const uint64_t *seeds;
-    Pos p[128];
+    Pos p[MAX_INSTANCES];
 
     const FilterInfo& finfo = g_filterinfo.list[cond->type];
 
@@ -319,6 +411,7 @@ testCondAt(
     switch (cond->type)
     {
     case F_REFERENCE_1:
+    case F_REFERENCE_4:
     case F_REFERENCE_16:
     case F_REFERENCE_64:
     case F_REFERENCE_256:
@@ -326,6 +419,7 @@ testCondAt(
     case F_REFERENCE_1024:
     case F_SCALE_TO_NETHER:
     case F_SCALE_TO_OVERWORLD:
+    case F_LOGIC_OR:
         // helper conditions should not reach here
         //exit(1);
         return COND_OK;
@@ -354,10 +448,10 @@ L_qh_any:
 
         n = scanForQuads(
                 sconf, 128, (gen->seed) & MASK48, seeds, n, 20, sconf.salt,
-                rx1, rz1, rx2 - rx1 + 1, rz2 - rz1 + 1, p, 128);
+                rx1, rz1, rx2 - rx1 + 1, rz2 - rz1 + 1, p, MAX_INSTANCES);
         if (n < 1)
             return COND_FAILED;
-        valid = COND_FAILED;
+        icnt = 0;
         for (i = 0; i < n; i++)
         {
             pc = p[i];
@@ -376,14 +470,22 @@ L_qh_any:
             }
             if (!qi || qi->flt > cond->type)
                 continue;
-            //if (!isQuadBaseFeature24(sconf, s, 7,7,9))
-            //    return COND_FAILED;
-            valid = COND_OK;
-            cent->x = (pc.x << 9) + qi->afk.x;
-            cent->z = (pc.z << 9) + qi->afk.z;
-            break;
+            // we don't support finding the center of multiple
+            // quad huts, instead we just return the first one
+            // (unless we are looking for all instances)
+            cent[icnt].x = (pc.x << 9) + qi->afk.x;
+            cent[icnt].z = (pc.z << 9) + qi->afk.z;
+            icnt++;
+            if (inst && icnt >= *inst)
+                return COND_OK;
+            if (inst == NULL)
+                break;
         }
-        return valid;
+        if (inst)
+            *inst = icnt;
+        if (icnt > 0)
+            return COND_OK;
+        return COND_FAILED;
 
     case F_QM_95:   qual = 58*58*4 * 95 / 100;  goto L_qm_any;
     case F_QM_90:   qual = 58*58*4 * 90 / 100;
@@ -393,12 +495,17 @@ L_qm_any:
         rz1 = ((cond->z1 << 9) + at.z) >> 9;
         rx2 = ((cond->x2 << 9) + at.x) >> 9;
         rz2 = ((cond->z2 << 9) + at.z) >> 9;
-        if (scanForQuads(
+        // we don't really need to check for more than one instance here
+        n = scanForQuads(
                 sconf, 160, (gen->seed) & MASK48, g_qm_90,
                 sizeof(g_qm_90) / sizeof(uint64_t), 48, sconf.salt,
-                rx1, rz1, rx2 - rx1 + 1, rz2 - rz1 + 1, &pc, 1) >= 1)
+                rx1, rz1, rx2 - rx1 + 1, rz2 - rz1 + 1, p, 1);
+        if (n < 1)
+            return COND_FAILED;
+        icnt = 0;
+        for (i = 0; i < n; i++)
         {
-            rx = pc.x; rz = pc.z;
+            rx = p[i].x; rz = p[i].z;
             s = moveStructure(gen->seed, -rx, -rz);
             if (qmonumentQual(s + sconf.salt) >= qual)
             {
@@ -406,12 +513,21 @@ L_qm_any:
                 getStructurePos(st, gen->mc, gen->seed, rx+0, rz+1, p+1);
                 getStructurePos(st, gen->mc, gen->seed, rx+1, rz+0, p+2);
                 getStructurePos(st, gen->mc, gen->seed, rx+1, rz+1, p+3);
-                *cent = getOptimalAfk(p, 58,23,58, 0);
-                cent->x -= 29; // monument is centered
-                cent->z -= 29;
-                return COND_OK;
+                pc = getOptimalAfk(p, 58,23,58, 0);
+                pc.x -= 29; // monument is centered
+                pc.z -= 29;
+                cent[icnt] = pc;
+                icnt++;
+                if (inst && icnt >= *inst)
+                    return COND_OK;
+                if (inst == NULL)
+                    break;
             }
         }
+        if (inst)
+            *inst = icnt;
+        if (icnt > 0)
+            return COND_OK;
         return COND_FAILED;
 
 
@@ -464,7 +580,7 @@ L_qm_any:
 
         cent->x = xt = 0;
         cent->z = zt = 0;
-        n = 0;
+        icnt = 0;
 
         // Note "<="
         for (rz = rz1; rz <= rz2 && !*abort; rz++)
@@ -525,18 +641,39 @@ L_qm_any:
                             continue;
                     }
                 }
-                xt += pc.x;
-                zt += pc.z;
-                n++;
+
+                if (inst == NULL)
+                {
+                    xt += pc.x;
+                    zt += pc.z;
+                    icnt++;
+                }
+                else
+                {
+                    cent[icnt] = pc;
+                    icnt++;
+                    if (icnt >= *inst)
+                        return COND_OK;
+                }
             }
         }
 
-        if (n >= cond->count)
+        if (icnt >= cond->count)
         {
-            cent->x = xt / n;
-            cent->z = zt / n;
+            if (inst)
+            {
+                *inst = icnt;
+                return COND_OK;
+            }
+            else
+            {
+                cent->x = xt / icnt;
+                cent->z = zt / icnt;
+            }
 
-            if (pass == PASS_FULL_64 || (pass == PASS_FULL_48 && !finfo.dep64))
+            if (pass == PASS_FULL_64)
+                return COND_OK;
+            if (pass == PASS_FULL_48 && !finfo.dep64)
                 return COND_OK;
             // some non-exhaustive structure clusters do not
             // have known center positions with 48-bit seeds
@@ -556,19 +693,28 @@ L_qm_any:
         rz1 = z1 >> 4;
         rx2 = x2 >> 4;
         rz2 = z2 >> 4;
-        n = getMineshafts(gen->mc, gen->seed, rx1, rz1, rx2, rz2, p, 128);
-        if (n >= cond->count)
+        if (inst)
         {
-            xt = zt = 0;
-            for (int i = 0; i < n; i++)
-            {
-                xt += p[i].x;
-                zt += p[i].z;
-            }
-            cent->x = xt / n;
-            cent->z = zt / n;
-            return COND_OK;
+            *inst = icnt =
+                getMineshafts(gen->mc, gen->seed, rx1, rz1, rx2, rz2, cent, *inst);
         }
+        else
+        {
+            icnt = getMineshafts(gen->mc, gen->seed, rx1, rz1, rx2, rz2, p, MAX_INSTANCES);
+            if (icnt >= cond->count)
+            {
+                xt = zt = 0;
+                for (int i = 0; i < icnt; i++)
+                {
+                    xt += p[i].x;
+                    zt += p[i].z;
+                }
+                cent->x = xt / icnt;
+                cent->z = zt / icnt;
+            }
+        }
+        if (icnt >= cond->count)
+            return COND_OK;
         return COND_FAILED;
 
     case F_SPAWN:
@@ -659,7 +805,8 @@ L_qm_any:
         {
             StrongholdIter sh;
             initFirstStronghold(&sh, gen->mc, gen->seed);
-            n = 0;
+            icnt = 0;
+            xt = zt = 0;
             gen->init4Dim(0);
             while (nextStronghold(&sh, &gen->g) > 0)
             {
@@ -668,16 +815,35 @@ L_qm_any:
 
                 if (sh.pos.x >= x1 && sh.pos.x <= x2 && sh.pos.z >= z1 && sh.pos.z <= z2)
                 {
-                    if (++n >= cond->count)
-                    {   // should the center use all strongholds for consitency?
-                        *cent = sh.pos;
-                        return COND_OK;
+                    if (inst)
+                    {
+                        cent[icnt] = sh.pos;
+                        icnt++;
+                        if (icnt >= *inst)
+                            return COND_OK;
+                    }
+                    else
+                    {
+                        xt += sh.pos.x;
+                        zt += sh.pos.z;
+                        icnt++;
                     }
                 }
 
                 if (sh.ringnum == r && sh.ringidx+1 == sh.ringmax)
                     break;
             }
+            if (inst)
+            {
+                *inst = icnt;
+            }
+            else
+            {
+                cent->x = xt / icnt;
+                cent->z = zt / icnt;
+            }
+            if (icnt >= cond->count)
+                return COND_OK;
         }
         return COND_FAILED;
 
@@ -688,7 +854,7 @@ L_qm_any:
         rx2 = ((cond->x2 << 4) + at.x) >> 4;
         rz2 = ((cond->z2 << 4) + at.z) >> 4;
 
-        n = 0;
+        icnt = 0;
         xt = zt = 0;
         for (int rz = rz1; rz <= rz2; rz++)
         {
@@ -696,18 +862,35 @@ L_qm_any:
             {
                 if (isSlimeChunk(gen->seed, rx, rz))
                 {
-                    xt += rx;
-                    zt += rz;
-                    n++;
+                    if (inst)
+                    {
+                        cent[icnt].x = rx << 4;
+                        cent[icnt].z = rz << 4;
+                        icnt++;
+                        if (icnt >= *inst)
+                            return COND_OK;
+                    }
+                    else
+                    {
+                        xt += rx;
+                        zt += rz;
+                        icnt++;
+                    }
                 }
             }
         }
-        if (n >= cond->count)
+
+        if (inst)
         {
-            cent->x = (xt << 4) / n;
-            cent->z = (zt << 4) / n;
-            return COND_OK;
+            *inst = icnt;
         }
+        else
+        {
+            cent->x = (xt << 4) / icnt;
+            cent->z = (zt << 4) / icnt;
+        }
+        if (icnt >= cond->count)
+            return COND_OK;
         return COND_FAILED;
 
     // biome filters reference specific layers

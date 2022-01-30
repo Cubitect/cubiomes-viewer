@@ -17,7 +17,6 @@ void SearchItem::run()
 {
     QVector<uint64_t> matches;
     WorldGen gen;
-    Pos cpos[100];
     Pos origin = {0,0};
     gen.init(mc, large);
 
@@ -28,7 +27,7 @@ void SearchItem::run()
         {
             seed = slist[i];
             gen.setSeed(seed);
-            if (testSeedAt(origin, cpos, pcvec, PASS_FULL_64, &gen, abort)
+            if (testTreeAt(origin, pctree, PASS_FULL_64, &gen, abort)
                 == COND_OK
             )
             {
@@ -50,7 +49,7 @@ void SearchItem::run()
                 seed = (high << 48) | slist[lowidx];
 
                 gen.setSeed(seed);
-                if (testSeedAt(origin, cpos, pcvec, PASS_FULL_64, &gen, abort)
+                if (testTreeAt(origin, pctree, PASS_FULL_64, &gen, abort)
                     == COND_OK
                 )
                 {
@@ -74,7 +73,7 @@ void SearchItem::run()
             for (int i = 0; i < scnt; i++)
             {
                 gen.setSeed(seed);
-                if (testSeedAt(origin, cpos, pcvec, PASS_FULL_64, &gen, abort)
+                if (testTreeAt(origin, pctree, PASS_FULL_64, &gen, abort)
                     == COND_OK
                 )
                 {
@@ -109,7 +108,7 @@ void SearchItem::run()
                 low = sstart & MASK48;
 
             gen.setSeed(low);
-            if (testSeedAt(origin, cpos, pcvec, PASS_FULL_48, &gen, abort)
+            if (testTreeAt(origin, pctree, PASS_FULL_48, &gen, abort)
                 == COND_FAILED
             )
             {
@@ -121,7 +120,7 @@ void SearchItem::run()
                 seed = (high << 48) | low;
 
                 gen.setSeed(seed);
-                if (testSeedAt(origin, cpos, pcvec, PASS_FULL_64, &gen, abort)
+                if (testTreeAt(origin, pctree, PASS_FULL_64, &gen, abort)
                     == COND_OK
                 )
                 {
@@ -153,7 +152,7 @@ void SearchItemGenerator::init(
     this->searchtype = sc.searchtype;
     this->mc = wi.mc;
     this->large = wi.large;
-    this->condvec = cv;
+    this->condtree.set(cv);
     this->itemid = 0;
     this->itemsiz = config.seedsPerItem;
     this->slist = slist;
@@ -451,7 +450,7 @@ SearchItem *SearchItemGenerator::requestItem()
     item->searchtype = searchtype;
     item->mc        = mc;
     item->large     = large;
-    item->pcvec     = &condvec;
+    item->pctree    = &condtree;
     item->itemid    = itemid++;
     item->slist     = slist.empty() ? NULL : slist.data();
     item->len       = slist.size();
@@ -512,7 +511,6 @@ SearchItem *SearchItemGenerator::requestItem()
         else
         {
             WorldGen gen;
-            Pos cpos[100];
             Pos origin = {0,0};
             gen.init(mc, large);
 
@@ -532,8 +530,8 @@ SearchItem *SearchItemGenerator::requestItem()
                 for (; low <= MASK48; low++)
                 {
                     gen.setSeed(low);
-                    if (testSeedAt(origin, cpos, &condvec, PASS_FAST_48, &gen,
-                        abort) != COND_FAILED)
+                    if (testTreeAt(origin, &condtree, PASS_FAST_48, &gen, abort)
+                        != COND_FAILED)
                     {
                         break;
                     }

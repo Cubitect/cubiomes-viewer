@@ -97,5 +97,3 @@ FORMS += \
 RESOURCES += \
         icons.qrc \
         style.qrc
-
-DISTFILES +=

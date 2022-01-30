@@ -46,11 +46,6 @@
        <height>20</height>
       </size>
      </property>
-     <property name="font">
-      <font>
-       <family>Monospace</family>
-      </font>
-     </property>
      <property name="contextMenuPolicy">
       <enum>Qt::CustomContextMenu</enum>
      </property>
@@ -70,7 +65,7 @@
       <bool>true</bool>
      </property>
      <attribute name="horizontalHeaderDefaultSectionSize">
-      <number>160</number>
+      <number>180</number>
      </attribute>
      <attribute name="horizontalHeaderHighlightSections">
       <bool>false</bool>
@@ -83,7 +78,7 @@
      </attribute>
      <column>
       <property name="text">
-       <string>Hex  (Low-48 | Top-16)</string>
+       <string>Hex  low-48 | top-16</string>
       </property>
       <property name="textAlignment">
        <set>AlignLeading|AlignVCenter</set>
@@ -230,11 +225,6 @@
      </item>
      <item row="3" column="0" colspan="7">
       <widget class="QProgressBar" name="progressBar">
-       <property name="font">
-        <font>
-         <family>Monospace</family>
-        </font>
-       </property>
        <property name="toolTip">
         <string>Queued progress within search set</string>
        </property>

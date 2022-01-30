@@ -10,7 +10,6 @@
 SearchThread::SearchThread(FormSearchControl *parent)
     : QThread()
     , parent(parent)
-    , condvec()
     , itemgen()
     , pool()
     , activecnt()
@@ -26,11 +25,6 @@ bool SearchThread::set(
     QObject *mainwin, WorldInfo wi,
     const SearchConfig& sc, const Gen48Settings& gen48, const Config& config,
     std::vector<uint64_t>& slist, const QVector<Condition>& cv)
-    /*
-        QObject *mainwin, int type, int threads, Gen48Settings gen48,
-        std::vector<uint64_t>& slist, uint64_t smin, uint64_t smax,
-        uint64_t sstart, int mc, const QVector<Condition>& cv,
-        int itemsize, int queuesize)*/
 {
     char refbuf[100] = {};
 

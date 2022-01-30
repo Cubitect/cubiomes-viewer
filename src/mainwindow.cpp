@@ -18,6 +18,7 @@
 #include <QDataStream>
 #include <QMenu>
 #include <QClipboard>
+#include <QFontDatabase>
 #include <QFont>
 #include <QFileDialog>
 #include <QTextStream>
@@ -54,6 +55,13 @@ MainWindow::MainWindow(QWidget *parent)
     , prevdir(".")
     , protodialog()
 {
+    int fontid = QFontDatabase::addApplicationFont(":/rc/DejaVuSans.ttf");
+    QFontDatabase::addApplicationFont(":/rc/DejaVuSans-Bold.ttf");
+    QFontDatabase::addApplicationFont(":/rc/DejaVuSansMono.ttf");
+    QFont fontdef = QFontDatabase::applicationFontFamilies(fontid).at(0);
+    fontdef.setPointSize(10);
+    QApplication::setFont(fontdef);
+
     ui->setupUi(this);
 
     QCoreApplication::setApplicationName("cubiomes-viewer");
@@ -173,7 +181,7 @@ MainWindow::MainWindow(QWidget *parent)
     protodialog = new ProtoBaseDialog(this);
 
     ui->splitterMap->setSizes(QList<int>({6000, 10000}));
-    ui->splitterSearch->setSizes(QList<int>({800, 1200, 2000}));
+    ui->splitterSearch->setSizes(QList<int>({1000, 1000, 2000}));
 
     qRegisterMetaType< int64_t >("int64_t");
     qRegisterMetaType< uint64_t >("uint64_t");
@@ -1113,9 +1121,11 @@ void MainWindow::on_buttonAnalysis_clicked()
     if (ck_conds && !conds.empty())
     {
         WorldGen gen;
-        Pos cpos[100];
         gen.init(wi.mc, wi.large);
         gen.setSeed(wi.seed);
+
+        ConditionTree condtree;
+        condtree.set(conds);
 
         //Condition& c0 = conds[0];
         int xr1 = 0; //(int)( cstepx * floor( (x1+c0.x1) / (double)cstepx ) );
@@ -1152,9 +1162,10 @@ void MainWindow::on_buttonAnalysis_clicked()
                 }
 
                 Pos origin = {x, z};
+                Pos cpos[MAX_INSTANCES] = {};
                 std::atomic_bool ab;
                 ab = false;
-                if (testSeedAt(origin, cpos, &conds, PASS_FULL_64, &gen, &ab)
+                if (testTreeAt(origin, &condtree, PASS_FULL_64, &gen, &ab, cpos)
                     != COND_OK)
                 {
                     continue;

@@ -44,7 +44,6 @@ public slots:
 public:
     FormSearchControl     * parent;
 
-    QVector<Condition>      condvec;
     SearchItemGenerator     itemgen;
     QThreadPool             pool;
     QAtomicInt              activecnt;  // running + queued items
