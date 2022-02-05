@@ -22,18 +22,28 @@ QDataStream& operator>>(QDataStream& in, Condition& v)
 QString cond2str(Condition *cond)
 {
     const FilterInfo& ft = g_filterinfo.list[cond->type];
-    QString s = QString::asprintf("[%02d] %-28sx%-3d", cond->save, ft.name, cond->count);
+    QString s = QString("[%1] %2%3%4")
+        .arg(cond->save, 2, 10, QLatin1Char('0'))
+        .arg(QApplication::translate("Filter", ft.name), -28, ' ')
+        .arg(QChar(0xD7))
+        .arg(cond->count, -3, 10, QLatin1Char(' '));
 
     if (cond->relative)
         s += QString::asprintf("[%02d]+", cond->relative);
     else
         s += "     ";
 
-    if (ft.coord)
-        s += QString::asprintf("(%d,%d)", cond->x1*ft.step, cond->z1*ft.step);
-    if (ft.area)
-        s += QString::asprintf(",(%d,%d)", (cond->x2+1)*ft.step-1, (cond->z2+1)*ft.step-1);
-
+    if (cond->rmax > 0)
+    {
+        s += QString::asprintf("r<%d", cond->rmax-1);
+    }
+    else
+    {
+        if (ft.coord)
+            s += QString::asprintf("(%d,%d)", cond->x1*ft.step, cond->z1*ft.step);
+        if (ft.area)
+            s += QString::asprintf(",(%d,%d)", (cond->x2+1)*ft.step-1, (cond->z2+1)*ft.step-1);
+    }
     return s;
 }
 
@@ -287,3 +297,4 @@ void FormConditions::on_listConditionsFull_indexesMoved(const QModelIndexList &)
 {
     emit changed();
 }
+

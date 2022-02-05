@@ -43,7 +43,7 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    QAction *addMapAction(int sopt, const char *iconpath, const char *tip);
+    QAction *addMapAction(int sopt, const char *iconpath, QString tip);
 
     bool getSeed(WorldInfo *wi, bool applyrand = true);
     bool setSeed(WorldInfo wi, int dim = INT_MAX);

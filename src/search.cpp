@@ -372,16 +372,16 @@ static bool isInnerRingOk(int mc, uint64_t seed, int x1, int z1, int x2, int z2,
 
 /* Tests if a condition is satisfied with 'at' as origin for a search pass.
  * If sufficiently satisfied (check return value) then:
- * when 'inst' is NULL, the center position is written to 'cent[0]'
- * otherwise a maximum number of '*inst' instance positions are stored in 'cent'
- * and '*inst' is overwritten with the number of found instances.
- * ('*inst' should be at most MAX_INSTANCES)
+ * when 'imax' is NULL, the center position is written to 'cent[0]'
+ * otherwise a maximum number of '*imax' instance positions are stored in 'cent'
+ * and '*imax' is overwritten with the number of found instances.
+ * ('*imax' should be at most MAX_INSTANCES)
  */
 int
 testCondAt(
     Pos                 at,     // relative origin
     Pos               * cent,   // output center position(s)
-    int               * inst,   // max instances (NULL for avg)
+    int               * imax,   // max instances (NULL for avg)
     Condition         * cond,   // condition to check
     int                 pass,
     WorldGen          * gen,
@@ -476,13 +476,13 @@ L_qh_any:
             cent[icnt].x = (pc.x << 9) + qi->afk.x;
             cent[icnt].z = (pc.z << 9) + qi->afk.z;
             icnt++;
-            if (inst && icnt >= *inst)
+            if (imax && icnt >= *imax)
                 return COND_OK;
-            if (inst == NULL)
+            if (imax == NULL)
                 break;
         }
-        if (inst)
-            *inst = icnt;
+        if (imax)
+            *imax = icnt;
         if (icnt > 0)
             return COND_OK;
         return COND_FAILED;
@@ -518,14 +518,14 @@ L_qm_any:
                 pc.z -= 29;
                 cent[icnt] = pc;
                 icnt++;
-                if (inst && icnt >= *inst)
+                if (imax && icnt >= *imax)
                     return COND_OK;
-                if (inst == NULL)
+                if (imax == NULL)
                     break;
             }
         }
-        if (inst)
-            *inst = icnt;
+        if (imax)
+            *imax = icnt;
         if (icnt > 0)
             return COND_OK;
         return COND_FAILED;
@@ -551,10 +551,22 @@ L_qm_any:
     case F_ENDCITY:
     case F_GATEWAY:
 
-        x1 = cond->x1 + at.x;
-        z1 = cond->z1 + at.z;
-        x2 = cond->x2 + at.x;
-        z2 = cond->z2 + at.z;
+        if (cond->rmax > 0)
+        {
+            rmax = (cond->rmax-1) * (cond->rmax-1) + 1;
+            x1 = at.x - cond->rmax;
+            z1 = at.z - cond->rmax;
+            x2 = at.x + cond->rmax;
+            z2 = at.z + cond->rmax;
+        }
+        else
+        {
+            rmax = 0;
+            x1 = cond->x1 + at.x;
+            z1 = cond->z1 + at.z;
+            x2 = cond->x2 + at.x;
+            z2 = cond->z2 + at.z;
+        }
 
         if (sconf.regionSize == 32)
         {
@@ -589,8 +601,18 @@ L_qm_any:
             {
                 if (!getStructurePos(st, gen->mc, gen->seed, rx+0, rz+0, &pc))
                     continue;
-                if (pc.x < x1 || pc.x > x2 || pc.z < z1 || pc.z > z2)
+                if (rmax)
+                {
+                    int dx = pc.x - at.x;
+                    int dz = pc.z - at.z;
+                    int64_t rsq = dx*(int64_t)dx + dz*(int64_t)dz;
+                    if (rsq >= rmax)
+                        continue;
+                }
+                else if (pc.x < x1 || pc.x > x2 || pc.z < z1 || pc.z > z2)
+                {
                     continue;
+                }
                 if (pass == PASS_FULL_64 || (pass == PASS_FULL_48 && !finfo.dep64))
                 {
                     if (*abort) return COND_FAILED;
@@ -625,15 +647,12 @@ L_qm_any:
                             &gen->g.en, &gen->sn, pc.x, pc.z))
                             continue;
                     }
-                    else if (st == Village)
+                    else if (st == Village && cond->variants)
                     {
-                        if (cond->variants)
-                        {
-                            StructureVariant vt = getVillageType(
-                                gen->mc, gen->seed, pc.x, pc.z, id);
-                            if (!cond->villageOk(gen->mc, vt))
-                                continue;
-                        }
+                        StructureVariant vt = getVillageType(
+                            gen->mc, gen->seed, pc.x, pc.z, id);
+                        if (!cond->villageOk(gen->mc, vt))
+                            continue;
                     }
                     if (gen->mc >= MC_1_18)
                     {
@@ -642,27 +661,46 @@ L_qm_any:
                     }
                 }
 
-                if (inst == NULL)
+                icnt++;
+                if (imax == NULL)
                 {
                     xt += pc.x;
                     zt += pc.z;
-                    icnt++;
+                }
+                else if (*imax)
+                {
+                    cent[icnt-1] = pc;
+                    if (icnt >= *imax)
+                        return COND_OK;
                 }
                 else
                 {
-                    cent[icnt] = pc;
-                    icnt++;
-                    if (icnt >= *inst)
-                        return COND_OK;
+                    goto L_struct_failed_exclusion;
                 }
             }
         }
-
-        if (icnt >= cond->count)
-        {
-            if (inst)
+        if (cond->count == 0)
+        {   // structure exclusion filter
+    L_struct_failed_exclusion:
+            cent->x = (x1 + x2) >> 1;
+            cent->z = (z1 + z2) >> 1;
+            if (imax) *imax = 1;
+            if (icnt == 0)
+                return COND_OK;
+            else
             {
-                *inst = icnt;
+                if (pass == PASS_FULL_64)
+                    return COND_FAILED;
+                if (pass == PASS_FULL_48 && !finfo.dep64)
+                    return COND_FAILED;
+                return COND_MAYBE_POS_VALID;
+            }
+        }
+        else if (icnt >= cond->count)
+        {
+            if (imax)
+            {
+                *imax = icnt;
                 return COND_OK;
             }
             else
@@ -693,13 +731,27 @@ L_qm_any:
         rz1 = z1 >> 4;
         rx2 = x2 >> 4;
         rz2 = z2 >> 4;
-        if (inst)
-        {
-            *inst = icnt =
-                getMineshafts(gen->mc, gen->seed, rx1, rz1, rx2, rz2, cent, *inst);
+
+        if (cond->count == 0)
+        {   // exclusion
+            icnt = getMineshafts(gen->mc, gen->seed, rx1, rz1, rx2, rz2, cent, 1);
+            cent->x = (x1 + x2) >> 1;
+            cent->z = (z1 + z2) >> 1;
+            if (icnt == 0)
+            {
+                if (imax) *imax = 1;
+                return COND_OK;
+            }
+        }
+        else if (imax)
+        {   // just check there are at least *inst (== cond->count) instances
+            *imax = icnt =
+                getMineshafts(gen->mc, gen->seed, rx1, rz1, rx2, rz2, cent, *imax);
+            if (icnt >= cond->count)
+                return COND_OK;
         }
         else
-        {
+        {   // we need the average position of all instances
             icnt = getMineshafts(gen->mc, gen->seed, rx1, rz1, rx2, rz2, p, MAX_INSTANCES);
             if (icnt >= cond->count)
             {
@@ -711,10 +763,9 @@ L_qm_any:
                 }
                 cent->x = xt / icnt;
                 cent->z = zt / icnt;
+                return COND_OK;
             }
         }
-        if (icnt >= cond->count)
-            return COND_OK;
         return COND_FAILED;
 
     case F_SPAWN:
@@ -738,14 +789,39 @@ L_qm_any:
         }
         return COND_FAILED;
 
+
+    case F_FIRST_STRONGHOLD:
+        {
+            StrongholdIter sh;
+            *cent = pc = initFirstStronghold(&sh, gen->mc, gen->seed);
+        }
+        if (cond->rmax > 0)
+        {
+            uint64_t rsqmax = (cond->rmax-1) * (cond->rmax-1);
+            int dx = pc.x - at.x;
+            int dz = pc.z - at.z;
+            uint64_t rsq = dx*(int64_t)dx + dz*(int64_t)dz;
+            if (rsq <= rsqmax)
+                return COND_OK;
+        }
+        else
+        {
+            x1 = cond->x1 + at.x;
+            z1 = cond->z1 + at.z;
+            x2 = cond->x2 + at.x;
+            z2 = cond->z2 + at.z;
+            if (pc.x >= x1 && pc.x <= x2 && pc.z >= z1 && pc.z <= z2)
+                return COND_OK;
+        }
+        return COND_FAILED;
+
+
     case F_STRONGHOLD:
 
         x1 = cond->x1 + at.x;
         z1 = cond->z1 + at.z;
         x2 = cond->x2 + at.x;
         z2 = cond->z2 + at.z;
-
-        // TODO: add option for looking for the first stronghold only (which would be faster)
 
         rx1 = abs(x1); rx2 = abs(x2);
         rz1 = abs(z1); rz2 = abs(z2);
@@ -763,15 +839,22 @@ L_qm_any:
         zt = (rz1 > rz2 ? rz1 : rz2) + 112;
         rmax = xt*xt + zt*zt;
 
+        cent->x = (x1 + x2) >> 1;
+        cent->z = (z1 + z2) >> 1;
+
         // -MC_1_8 formula:
         // r = 640 + [0,1]*512 (+/-112)
         // MC_1_9+ formula:
         // r = 1408 + 3072*n + 1280*[0,1] (+/-112)
 
+        // TODO:
+        // the formula output is rounded to the nearest chunk and then centered on (8,8)
+        // this isn't considered yet and means the pre-selection can cause false negatives
+
         if (gen->mc < MC_1_9)
         {
             if (rmax < 640*640 || rmin > 1152*1152)
-                return COND_FAILED;
+                return cond->count == 0 ? COND_OK : COND_FAILED;
             r = 0;
             rmin = 640;
             rmax = 1152;
@@ -785,20 +868,19 @@ L_qm_any:
             r = (rmax - 1408) / 3072;       // maximum relevant ring number
             if (rmax - rmin < 3072-1280)    // area does not span more than one ring
             {
-                if (rmin > 1408+1280+3072*r)
-                    return COND_FAILED;     // area is between rings
+                if (rmin > 1408+1280+3072*r)// area is between rings
+                    return cond->count == 0 ? COND_OK : COND_FAILED;
             }
             rmin = 1408;
             rmax = 1408+1280;
         }
         // if we are only looking at the inner ring, we can check if the generation angles are suitable
         if (r == 0 && !isInnerRingOk(gen->mc, gen->seed, x1, z1, x2, z2, rmin, rmax))
-            return COND_FAILED;
+            return cond->count == 0 ? COND_OK : COND_FAILED;
 
         // pre-biome-checks complete, the area appears to line up with possible generation positions
         if (pass != PASS_FULL_64)
         {
-            cent->x = cent->z = 0;
             return COND_MAYBE_POS_INVAL;
         }
         else
@@ -815,11 +897,15 @@ L_qm_any:
 
                 if (sh.pos.x >= x1 && sh.pos.x <= x2 && sh.pos.z >= z1 && sh.pos.z <= z2)
                 {
-                    if (inst)
+                    if (cond->count == 0)
+                    {
+                        return COND_FAILED;
+                    }
+                    else if (imax)
                     {
                         cent[icnt] = sh.pos;
                         icnt++;
-                        if (icnt >= *inst)
+                        if (icnt >= *imax)
                             return COND_OK;
                     }
                     else
@@ -833,9 +919,14 @@ L_qm_any:
                 if (sh.ringnum == r && sh.ringidx+1 == sh.ringmax)
                     break;
             }
-            if (inst)
+            if (cond->count == 0)
+            {   // exclusion
+                if (imax) *imax = 1;
+                return COND_OK;
+            }
+            else if (imax)
             {
-                *inst = icnt;
+                *imax = icnt;
             }
             else
             {
@@ -862,12 +953,16 @@ L_qm_any:
             {
                 if (isSlimeChunk(gen->seed, rx, rz))
                 {
-                    if (inst)
+                    if (cond->count == 0)
+                    {
+                        return COND_FAILED;
+                    }
+                    else if (imax)
                     {
                         cent[icnt].x = rx << 4;
                         cent[icnt].z = rz << 4;
                         icnt++;
-                        if (icnt >= *inst)
+                        if (icnt >= *imax)
                             return COND_OK;
                     }
                     else
@@ -879,10 +974,16 @@ L_qm_any:
                 }
             }
         }
-
-        if (inst)
+        if (cond->count == 0)
+        {   // exclusion filter
+            cent->x = (rx1 + rx2) << 3;
+            cent->z = (rz1 + rz2) << 3;
+            if (imax) *imax = 1;
+            return COND_OK;
+        }
+        else if (imax)
         {
-            *inst = icnt;
+            *imax = icnt;
         }
         else
         {
@@ -897,11 +998,11 @@ L_qm_any:
     // MAYBE: options for layers in different versions?
     case F_BIOME:           s = 0;
         if (gen->mc >= MC_1_18)    goto L_noise_biome;
-        else                       goto L_biome_filter_any;
-    case F_BIOME_4_RIVER:   s = 2; goto L_biome_filter_any;
-    case F_BIOME_256_OTEMP: s = 8; goto L_biome_filter_any;
+        else                       goto L_biome_filter_layered;
+    case F_BIOME_4_RIVER:   s = 2; goto L_biome_filter_layered;
+    case F_BIOME_256_OTEMP: s = 8; goto L_biome_filter_layered;
 
-L_biome_filter_any:
+L_biome_filter_layered:
         if (gen->mc >= MC_1_18)
             return COND_FAILED;
         rx1 = ((cond->x1 << s) + at.x) >> s;

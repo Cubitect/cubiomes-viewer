@@ -106,29 +106,43 @@ bool FormGen48::setList48(QString path, bool quiet)
         uint64_t len;
         QByteArray ba = path.toLatin1();
         l = loadSavedSeeds(ba.data(), &len);
-        if (l && len > 0)
+        if (l != NULL)
         {
             slist48.assign(l, l+len);
             free(l);
-            ui->lineList48->setText("[" + QString::number(len) + " seeds] " + finfo.baseName());
             ok = true;
         }
-        else
+        else if (!quiet)
         {
-            if (!quiet)
-                QMessageBox::warning(this, "Warning", "Failed to load seed list from file", QMessageBox::Ok);
-            ui->lineList48->setText("[no seeds!] " + finfo.baseName());
+            QMessageBox::warning(
+                this, tr("Warning"), tr("Failed to load seed list from file"),
+                QMessageBox::Ok);
         }
     }
     else
     {
         slist48path.clear();
-        ui->lineList48->setText("[none]");
         slist48.clear();
     }
+
+    if (slist48path.isEmpty())
+    {
+        ui->lineList48->setText(tr("[none]"));
+    }
+    else
+    {
+        QString fname = QFileInfo(path).baseName();
+        if (slist48.empty())
+            ui->lineList48->setText(tr("[no seeds!] %1").arg(fname));
+        else
+            ui->lineList48->setText(tr("[%n seed(s)] %1", "", slist48.size()).arg(fname));
+    }
+
     emit changed();
     return ok;
 }
+
+
 
 void FormGen48::setSettings(const Gen48Settings& gen48, bool quiet)
 {
@@ -235,12 +249,12 @@ void FormGen48::updateCount()
 
     if (cnt >= MASK48+1)
     {
-        ui->labelCount->setText("all");
+        ui->labelCount->setText(tr("all", "Checking all 64-bit seeds"));
     }
     else
     {
         uint64_t total = cnt << 16;
-        ui->labelCount->setText(QString::asprintf("%" PRIu64 " * 65536 = %" PRIu64, cnt, total));
+        ui->labelCount->setText(tr("%1 %2 65536 = %3").arg(cnt).arg(QChar(0xD7)).arg(total));
     }
 }
 
@@ -266,11 +280,11 @@ void FormGen48::updateAutoUi()
     bool isqh = cond.type >= F_QH_IDEAL && cond.type <= F_QH_BARELY;
     bool isqm = cond.type >= F_QM_95 && cond.type <= F_QM_90;
     if (isqh)
-        modestr = "[Quad-hut]";
+        modestr = tr("[Quad-hut]");
     else if (isqm)
-        modestr = "[Quad-monument]";
+        modestr = tr("[Quad-monument]");
     else
-        modestr = "[None]";
+        modestr = tr("[None]");
 
     ui->labelAuto->setText(modestr);
 
@@ -359,7 +373,8 @@ void FormGen48::on_comboLow20_currentIndexChanged(int)
 
 void FormGen48::on_buttonBrowse_clicked()
 {
-    QString fnam = QFileDialog::getOpenFileName(this, "Load seed list", parent->prevdir, "Text files (*.txt);;Any files (*)");
+    QString fnam = QFileDialog::getOpenFileName(
+        this, tr("Load seed list"), parent->prevdir, tr("Text files (*.txt);;Any files (*)"));
     if (!fnam.isEmpty())
         setList48(fnam, false);
 }

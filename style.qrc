@@ -209,7 +209,6 @@
         <file>rc/window_undock_pressed.png</file>
         <file>rc/window_undock_pressed@2x.png</file>
         <file>dark.qss</file>
-        <file>rc/DejaVuSansMono.ttf</file>
         <file>rc/DejaVuSans-Bold.ttf</file>
         <file>rc/DejaVuSans.ttf</file>
     </qresource>

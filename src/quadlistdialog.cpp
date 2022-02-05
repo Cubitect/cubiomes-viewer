@@ -109,15 +109,15 @@ void QuadListDialog::refresh()
     int row = 0, qhn = 0, qmn = 0;
     for (QuadInfo& qi : qsinfo)
     {
-        const char *label;
+        QString label;
         if (qi.typ == Swamp_Hut)
         {
-            label = "Quad-Hut";
+            label = tr("Quad-Hut");
             qhn++;
         }
         else
         {
-            label = "Quad-Monument";
+            label = tr("Quad-Monument");
             qmn++;
         }
 
@@ -156,14 +156,17 @@ void QuadListDialog::refresh()
     ui->listQuadStruct->setSortingEnabled(true);
     ui->listQuadStruct->sortByColumn(1, Qt::AscendingOrder);
 
+    QString qhnText = tr("%n quad-hut(s)", 0, qhn);
+    QString qmnText = tr("%n quad-monument(s)", 0, qmn);
+
     if (qhn == 0 && qmn == 0)
-        ui->labelMsg->setText("World contains no quad-structures.");
+        ui->labelMsg->setText(tr("World contains no quad-structures."));
     else if (qhn && qmn)
-        ui->labelMsg->setText(QString::asprintf("World contains %d quad-hut%s and %d quad-monument%s.", qhn, qhn==1?"":"s", qmn, qmn==1?"":"s"));
+        ui->labelMsg->setText(tr("World contains %1 and %1.").arg(qhnText).arg(qmnText));
     else if (qhn)
-        ui->labelMsg->setText(QString::asprintf("World contains %d quad-hut%s.", qhn, qhn==1?"":"s"));
+        ui->labelMsg->setText(tr("World contains %1.").arg(qhnText));
     else if (qmn)
-        ui->labelMsg->setText(QString::asprintf("World contains %d quad-monument%s.", qmn, qmn==1?"":"s"));
+        ui->labelMsg->setText(tr("World contains %1.").arg(qmnText));
 }
 
 void QuadListDialog::on_buttonGo_clicked()
@@ -174,7 +177,7 @@ void QuadListDialog::on_buttonGo_clicked()
 void QuadListDialog::on_listQuadStruct_customContextMenuRequested(const QPoint &pos)
 {
     QMenu menu(this);
-    menu.addAction("Show in map viewer", this, &QuadListDialog::gotoSwampHut);
+    menu.addAction(tr("Show in map viewer"), this, &QuadListDialog::gotoSwampHut);
     menu.exec(ui->listQuadStruct->mapToGlobal(pos));
 }
 
@@ -202,3 +205,4 @@ void QuadListDialog::on_buttonClose_clicked()
 {
     close();
 }
+

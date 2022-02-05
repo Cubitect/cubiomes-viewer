@@ -229,8 +229,8 @@ static void genQHBases(QObject *qtobj, int qual, uint64_t salt, std::vector<uint
         {
             QMetaObject::invokeMethod(
                     qtobj, "warning", Qt::BlockingQueuedConnection,
-                    Q_ARG(QString, QString("Warning")),
-                    Q_ARG(QString, QString("Failed to generate protobases.")));
+                    Q_ARG(QString, SearchItem::tr("Warning")),
+                    Q_ARG(QString, SearchItem::tr("Failed to generate protobases.")));
             return;
         }
         else

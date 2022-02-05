@@ -20,7 +20,9 @@ bool ProtoBaseDialog::closeOnDone()
 
 void ProtoBaseDialog::setPath(QString path)
 {
-    ui->label->setText(
+    QString msg = tr(
             "This may take a moment.\n"
-            "Results will be saved to \"" + path + "\" so subsequent searches will start faster.");
+            "Results will be saved to \"%1\" "
+            "so subsequent searches will start faster.").arg(path);
+    ui->label->setText(msg);
 }

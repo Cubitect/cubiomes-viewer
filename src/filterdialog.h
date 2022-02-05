@@ -29,19 +29,16 @@ public:
     virtual ~SpinExclude() {}
     virtual int valueFromText(const QString &text) const override
     {
-        if (text == "0 (ignore)")
-            return 0;
-        if (text == "-1 (exclude)")
-            return -1;
-        return QSpinBox::valueFromText(text);
+        return QSpinBox::valueFromText(text.section(" ", 0, 0));
     }
     virtual QString textFromValue(int value) const override
     {
+        QString txt = QSpinBox::textFromValue(value);
         if (value == 0)
-            return "0 (ignore)";
+            txt += " " + tr("(ignore)");
         if (value == -1)
-            return "-1 (exclude)";
-        return QSpinBox::textFromValue(value);
+            txt += " " + tr("(exclude)");
+        return txt;
     }
 
 public slots:
@@ -54,6 +51,31 @@ public slots:
             style = "background: #2800ff00";
         setStyleSheet(style);
         findChild<QLineEdit*>()->deselect();
+    }
+};
+
+class SpinInstances : public QSpinBox
+{
+    Q_OBJECT
+public:
+    SpinInstances(QWidget *parent = nullptr)
+        : QSpinBox(parent)
+    {
+        setRange(0, 99);
+    }
+    virtual ~SpinInstances() {}
+    virtual int valueFromText(const QString &text) const override
+    {
+        return QSpinBox::valueFromText(text.section(" ", 0, 0));
+    }
+    virtual QString textFromValue(int value) const override
+    {
+        QString txt = QSpinBox::textFromValue(value);
+        if (value == 0)
+            txt += " " + tr("(exclude)");
+        if (value > 1)
+            txt += " " + tr("(cluster)");
+        return txt;
     }
 };
 
@@ -99,9 +121,12 @@ private slots:
 
     void on_buttonExclude_clicked();
 
-    void on_buttonArea_toggled(bool checked);
+    void on_checkRadius_toggled(bool checked);
+    void on_radioSquare_toggled(bool checked);
+    void on_radioCustom_toggled(bool checked);
 
-    void on_lineRadius_editingFinished();
+    void on_lineSquare_editingFinished();
+    //void on_lineRadius_editingFinished();
 
     void on_buttonCancel_clicked();
 
@@ -120,7 +145,6 @@ private:
     QCheckBox *biomecboxes[256];
     SpinExclude *tempsboxes[9];
     QVector<VariantCheckBox*> variantboxes;
-    bool custom;
 
 public:
     Config *config;

@@ -21,6 +21,7 @@ SearchThread::SearchThread(FormSearchControl *parent)
     itemgen.abort = &abort;
 }
 
+
 bool SearchThread::set(
     QObject *mainwin, WorldInfo wi,
     const SearchConfig& sc, const Gen48Settings& gen48, const Config& config,
@@ -30,9 +31,19 @@ bool SearchThread::set(
 
     for (const Condition& c : cv)
     {
+        char cid[8];
+        snprintf(cid, sizeof(cid), "[%02d]", c.save);
         if (c.save < 1 || c.save > 99)
         {
-            QMessageBox::warning(NULL, "Warning", QString::asprintf("Condition with invalid ID [%02d].", c.save));
+            QMessageBox::warning(NULL, tr("Warning"),
+                tr("Condition with invalid ID %1.").arg(cid));
+            return false;
+        }
+        if (c.type < 0 || c.type >= FILTER_MAX)
+        {
+            QMessageBox::warning(NULL, tr("Error"),
+                    tr("Encountered invalid filter type %1 in condition ID %2.")
+                    .arg(c.type).arg(cid));
             return false;
         }
 
@@ -40,33 +51,31 @@ bool SearchThread::set(
 
         if (c.relative && refbuf[c.relative] == 0)
         {
-            QMessageBox::warning(NULL, "Warning", QString::asprintf(
-                    "Condition with ID [%02d] has a broken reference position:\n"
-                    "condition missing or out of order.", c.save));
+            QMessageBox::warning(NULL, "Warning",
+                    tr("Condition with ID %1 has a broken reference position:\n"
+                    "condition missing or out of order.").arg(cid));
             return false;
         }
         if (++refbuf[c.save] > 1)
         {
-            QMessageBox::warning(NULL, "Warning", QString::asprintf("More than one condition with ID [%02d].", c.save));
-            return false;
-        }
-        if (c.type < 0 || c.type >= FILTER_MAX)
-        {
-            QMessageBox::warning(NULL, "Error", QString::asprintf("Encountered invalid filter type %d in condition ID [%02d].", c.type, c.save));
+            QMessageBox::warning(NULL, tr("Warning"),
+                    tr("More than one condition with ID %1.").arg(cid));
             return false;
         }
         if (wi.mc < finfo.mcmin)
         {
             const char *mcs = mc2str(finfo.mcmin);
-            QString s = QString::asprintf("Condition [%02d] requires a minimum Minecraft version of %s.", c.save, mcs);
-            QMessageBox::warning(NULL, "Warning", s);
+            QMessageBox::warning(NULL, tr("Warning"),
+                    tr("Condition %1 requires a minimum Minecraft version of %2.")
+                    .arg(cid).arg(mcs));
             return false;
         }
         if (wi.mc > finfo.mcmax)
         {
             const char *mcs = mc2str(finfo.mcmax);
-            QString s = QString::asprintf("Condition [%02d] not available for Minecraft versions above %s.", c.save, mcs);
-            QMessageBox::warning(NULL, "Warning", s);
+            QMessageBox::warning(NULL, tr("Warning"),
+                    tr("Condition %1 not available for Minecraft versions above %2.")
+                    .arg(cid).arg(mcs));
             return false;
         }
         if (c.type >= F_BIOME && c.type <= F_BIOME_256_OTEMP)
@@ -74,13 +83,19 @@ bool SearchThread::set(
             if ((c.bfilter.biomeToExcl & (c.bfilter.riverToFind | c.bfilter.oceanToFind)) ||
                 (c.bfilter.biomeToExclM & c.bfilter.riverToFindM))
             {
-                QMessageBox::warning(NULL, "Warning", QString::asprintf("Biome filter condition with ID [%02d] has contradicting flags for include and exclude.", c.save));
+                QMessageBox::warning(NULL, tr("Warning"),
+                        tr("Biome filter condition with ID %1 has contradicting "
+                        "flags for include and exclude.").arg(cid));
                 return false;
             }
             // TODO: compare mc version and available biomes
             if (c.count == 0)
             {
-                QMessageBox::information(NULL, "Info", QString::asprintf("Biome filter condition with ID [%02d] specifies no biomes.", c.save));
+                int button = QMessageBox::information(NULL, tr("Info"),
+                        tr("Biome filter condition with ID %1 specifies no biomes.")
+                        .arg(cid), QMessageBox::Abort, QMessageBox::Ignore);
+                if (button == QMessageBox::Abort)
+                    return false;
             }
         }
         if (c.type == F_TEMPS)
@@ -89,9 +104,10 @@ bool SearchThread::set(
             int h = c.z2 - c.z1 + 1;
             if (c.count > w * h)
             {
-                QMessageBox::warning(NULL, "Warning", QString::asprintf(
-                        "Temperature category condition with ID [%02d] has too many restrictions (%d) for the area (%d x %d).",
-                        c.save, c.count, w, h));
+                QMessageBox::warning(NULL, tr("Warning"),
+                        tr("Temperature category condition with ID %1 has too "
+                        "many restrictions (%2) for the area (%3 x %4).")
+                        .arg(cid).arg(c.count).arg(w).arg(h));
                 return false;
             }
         }
@@ -99,7 +115,9 @@ bool SearchThread::set(
         {
             if (c.count >= 128)
             {
-                QMessageBox::warning(NULL, "Warning", QString::asprintf("Structure condition [%02d] checks for too many instances (>= 128).", c.save));
+                QMessageBox::warning(NULL, tr("Warning"),
+                        tr("Structure condition %1 checks for too many instances (>= 128).")
+                        .arg(cid));
                 return false;
             }
         }
@@ -188,10 +206,10 @@ void SearchThread::onItemDone(uint64_t itemid, uint64_t seed, bool isdone)
             int64_t idx = itemid - lastid;
             if (idx < 0 || idx >= recieved.size())
             {
-                QMessageBox::critical(parent, "Fatal Error",
-                                      "Encountered invalid state of seed generator. "
-                                      "This is likely a issue with the search thread logic.",
-                                      QMessageBox::Abort);
+                QMessageBox::critical(parent, tr("Fatal Error"),
+                        tr("Encountered invalid state of seed generator. "
+                        "This is likely a issue with the search thread logic."),
+                        QMessageBox::Abort);
                 QApplication::exit();
                 ::exit(1);
             }

@@ -334,3 +334,4 @@ void MapView::mouseReleaseEvent(QMouseEvent *e)
 void MapView::keyPressEvent(QKeyEvent *)
 {
 }
+

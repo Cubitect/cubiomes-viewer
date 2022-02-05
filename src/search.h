@@ -27,6 +27,7 @@ struct FilterInfo
     bool dep64; // depends on 64-bit seed
     bool coord; // requires coordinate entry
     bool area;  // requires area entry
+    bool rmax;  // supports radial range
     int layer;  // associated generator layer
     int stype;  // structure type
     int step;   // coordinate multiplier
@@ -98,6 +99,7 @@ enum
     F_SCALE_TO_OVERWORLD,
     F_LOGIC_OR,
     F_REFERENCE_4,
+    F_FIRST_STRONGHOLD,
     // new filters should be added here at the end to keep some downwards compatibility
     FILTER_MAX,
 };
@@ -112,403 +114,418 @@ static const struct FilterList
         int disp = 0; // display order
 
         list[F_SELECT] = FilterInfo{
-            CAT_NONE, 0, 0, 0, 0, 0, 0, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
+            CAT_NONE, 0, 0, 0, 0, 0, 0, 0, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
             NULL,
             "",
             ""
         };
 
+#define _(S) QT_TRANSLATE_NOOP("Filter", S)
+
         list[F_LOGIC_OR] = FilterInfo{
-            CAT_HELPER, 0, 0, 0, 0, 0, 1, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
+            CAT_HELPER, 0, 0, 0, 0, 0, 0, 1, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
             ":icons/helper.png",
-            "OR logic gate",
-            "This helper is satisfied iff any of the conditions which use it "
-            "for a relative reference are met."
+            _("OR logic gate"),
+            _("This helper is satisfied iff any of the conditions which use it "
+            "for a relative reference are met.")
         };
         list[F_SCALE_TO_NETHER] = FilterInfo{
-            CAT_HELPER, 0, 0, 0, 0, 0, 1, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
+            CAT_HELPER, 0, 0, 0, 0, 0, 0, 1, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
             ":icons/portal.png",
-            "Coordinate factor x/8",
-            "Divides relative location by 8, from Overworld to Nether."
+            _("Coordinate factor x/8"),
+            _("Divides relative location by 8, from Overworld to Nether.")
         };
         list[F_SCALE_TO_OVERWORLD] = FilterInfo{
-            CAT_HELPER, 0, 0, 0, 0, 0, 1, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
+            CAT_HELPER, 0, 0, 0, 0, 0, 0, 1, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
             ":icons/portal.png",
-            "Coordinate factor x*8",
-            "Multiplies relative location by 8, from Nether to Overworld."
+            _("Coordinate factor x*8"),
+            _("Multiplies relative location by 8, from Nether to Overworld.")
         };
-        const char *ref_desc =
+        const char *ref_desc = _(
             "<html><head/><body>"
             "Reference points can be used to iterate over an area with a "
             "certain step size."
-            "</body></html>";
+            "</body></html>"
+        );
         list[F_REFERENCE_1] = FilterInfo{
-            CAT_HELPER, 0, 1, 1, 0, 0, 1, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
+            CAT_HELPER, 0, 1, 1, 0, 0, 0, 1, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
             ":icons/reference.png",
-            "Reference point 1:1",
+            _("Reference point 1:1"),
             ref_desc
         };
         list[F_REFERENCE_4] = FilterInfo{
-            CAT_HELPER, 0, 1, 1, 0, 0, 4, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
+            CAT_HELPER, 0, 1, 1, 0, 0, 0, 4, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
             ":icons/reference.png",
-            "Reference point 1:4",
+            _("Reference point 1:4"),
             ref_desc
         };
         list[F_REFERENCE_16] = FilterInfo{
-            CAT_HELPER, 0, 1, 1, 0, 0, 16, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
+            CAT_HELPER, 0, 1, 1, 0, 0, 0, 16, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
             ":icons/reference.png",
-            "Reference point 1:16",
+            _("Reference point 1:16"),
             ref_desc
         };
         list[F_REFERENCE_64] = FilterInfo{
-            CAT_HELPER, 0, 1, 1, 0, 0, 64, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
+            CAT_HELPER, 0, 1, 1, 0, 0, 0, 64, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
             ":icons/reference.png",
-            "Reference point 1:64",
+            _("Reference point 1:64"),
             ref_desc
         };
         list[F_REFERENCE_256] = FilterInfo{
-            CAT_HELPER, 0, 1, 1, 0, 0, 256, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
+            CAT_HELPER, 0, 1, 1, 0, 0, 0, 256, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
             ":icons/reference.png",
-            "Reference point 1:256",
+            _("Reference point 1:256"),
             ref_desc
         };
         list[F_REFERENCE_512] = FilterInfo{
-            CAT_HELPER, 0, 1, 1, 0, 0, 512, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
+            CAT_HELPER, 0, 1, 1, 0, 0, 0, 512, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
             ":icons/reference.png",
-            "Reference point 1:512",
+            _("Reference point 1:512"),
             ref_desc
         };
         list[F_REFERENCE_1024] = FilterInfo{
-            CAT_HELPER, 0, 1, 1, 0, 0, 1024, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
+            CAT_HELPER, 0, 1, 1, 0, 0, 0, 1024, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
             ":icons/reference.png",
-            "Reference point 1:1024",
+            _("Reference point 1:1024"),
             ref_desc
         };
 
         list[F_QH_IDEAL] = FilterInfo{
-            CAT_QUAD, 0, 1, 1, 0, Swamp_Hut, 512, 0, MC_1_4, MC_NEWEST, 0, 0, disp++,
+            CAT_QUAD, 0, 1, 1, 0, 0, Swamp_Hut, 512, 0, MC_1_4, MC_NEWEST, 0, 0, disp++,
             ":icons/quad.png",
-            "Quad-hut (ideal)",
-            "The lower 48-bits provide potential for four swamp huts in "
-            "spawning range, in one of the best configurations that exist."
+            _("Quad-hut (ideal)"),
+            _("The lower 48-bits provide potential for four swamp huts in "
+            "spawning range, in one of the best configurations that exist.")
         };
 
         list[F_QH_CLASSIC] = FilterInfo{
-            CAT_QUAD, 0, 1, 1, 0, Swamp_Hut, 512, 0, MC_1_4, MC_NEWEST, 0, 0, disp++,
+            CAT_QUAD, 0, 1, 1, 0, 0, Swamp_Hut, 512, 0, MC_1_4, MC_NEWEST, 0, 0, disp++,
             ":icons/quad.png",
-            "Quad-hut (classic)",
-            "The lower 48-bits provide potential for four swamp huts in "
+            _("Quad-hut (classic)"),
+            _("The lower 48-bits provide potential for four swamp huts in "
             "spawning range, in one of the \"classic\" configurations. "
             "(Checks for huts in the nearest 2x2 chunk corners of each "
-            "region.)"
+            "region.)")
         };
 
         list[F_QH_NORMAL] = FilterInfo{
-            CAT_QUAD, 0, 1, 1, 0, Swamp_Hut, 512, 0, MC_1_4, MC_NEWEST, 0, 0, disp++,
+            CAT_QUAD, 0, 1, 1, 0, 0, Swamp_Hut, 512, 0, MC_1_4, MC_NEWEST, 0, 0, disp++,
             ":icons/quad.png",
-            "Quad-hut (normal)",
-            "The lower 48-bits provide potential for four swamp huts in "
+            _("Quad-hut (normal)"),
+            _("The lower 48-bits provide potential for four swamp huts in "
             "spawning range, such that all of them are within 128 blocks "
             "of a single AFK location, including a vertical tollerance "
-            "for a fall damage chute."
+            "for a fall damage chute.")
         };
 
         list[F_QH_BARELY] = FilterInfo{
-            CAT_QUAD, 0, 1, 1, 0, Swamp_Hut, 512, 0, MC_1_4, MC_NEWEST, 0, 0, disp++,
+            CAT_QUAD, 0, 1, 1, 0, 0, Swamp_Hut, 512, 0, MC_1_4, MC_NEWEST, 0, 0, disp++,
             ":icons/quad.png",
-            "Quad-hut (barely)",
-            "The lower 48-bits provide potential for four swamp huts in "
+            _("Quad-hut (barely)"),
+            _("The lower 48-bits provide potential for four swamp huts in "
             "spawning range, in any configuration, such that the bounding "
-            "boxes are within 128 blocks of a single AFK location."
+            "boxes are within 128 blocks of a single AFK location.")
         };
 
         list[F_QM_95] = FilterInfo{
-            CAT_QUAD, 0, 1, 1, 0, Monument, 512, 0, MC_1_8, MC_NEWEST, 0, 0, disp++,
+            CAT_QUAD, 0, 1, 1, 0, 0, Monument, 512, 0, MC_1_8, MC_NEWEST, 0, 0, disp++,
             ":icons/quad.png",
-            "Quad-ocean-monument (>95%)",
-            "The lower 48-bits provide potential for 95% of the area of "
+            _("Quad-ocean-monument (>95%)"),
+            _("The lower 48-bits provide potential for 95% of the area of "
             "four ocean monuments to be within 128 blocks of an AFK "
-            "location."
+            "location.")
         };
 
         list[F_QM_90] = FilterInfo{
-            CAT_QUAD, 0, 1, 1, 0, Monument, 512, 0, MC_1_8, MC_NEWEST, 0, 0, disp++,
+            CAT_QUAD, 0, 1, 1, 0, 0, Monument, 512, 0, MC_1_8, MC_NEWEST, 0, 0, disp++,
             ":icons/quad.png",
-            "Quad-ocean-monument (>90%)",
-            "The lower 48-bits provide potential for 90% of the area of "
+            _("Quad-ocean-monument (>90%)"),
+            _("The lower 48-bits provide potential for 90% of the area of "
             "four ocean monuments to be within 128 blocks of an AFK "
-            "location."
+            "location.")
         };
 
         list[F_BIOME] = FilterInfo{
-            CAT_BIOMES, 1, 1, 1, L_VORONOI_1, 0, 1, 0, MC_1_0, MC_1_17, 0, 1, disp++, // disable for 1.18
+            CAT_BIOMES, 1, 1, 1, 0, L_VORONOI_1, 0, 1, 0, MC_1_0, MC_1_17, 0, 1, disp++, // disable for 1.18
             ":icons/map.png",
-            "Biome filter 1:1",
-            "Only seeds with the included (+) biomes in the specified area and "
-            "discard those that have biomes that are explicitly excluded (-)."
+            _("Biome filter 1:1"),
+            _("Only seeds with the included (+) biomes in the specified area and "
+            "discard those that have biomes that are explicitly excluded (-).")
         };
 
         list[F_BIOME_4] = FilterInfo{
-            CAT_BIOMES, 1, 1, 1, 0, 0, 4, 0, MC_1_0, MC_NEWEST, 0, 1, disp++,
+            CAT_BIOMES, 1, 1, 1, 0, 0, 0, 4, 0, MC_1_0, MC_NEWEST, 0, 1, disp++,
             ":icons/map.png",
-            "Biome filter 1:4",
-            "Only seeds with the included (+) biomes in the specified area and "
-            "discard those that have biomes that are explicitly excluded (-)."
+            _("Biome filter 1:4"),
+            _("Only seeds with the included (+) biomes in the specified area and "
+            "discard those that have biomes that are explicitly excluded (-).")
         };
         list[F_BIOME_16] = FilterInfo{
-            CAT_BIOMES, 1, 1, 1, 0, 0, 16, 0, MC_1_0, MC_NEWEST, 0, 1, disp++,
+            CAT_BIOMES, 1, 1, 1, 0, 0, 0, 16, 0, MC_1_0, MC_NEWEST, 0, 1, disp++,
             ":icons/map.png",
-            "Biome filter 1:16",
-            "Only seeds with the included (+) biomes in the specified area and "
-            "discard those that have biomes that are explicitly excluded (-)."
+            _("Biome filter 1:16"),
+            _("Only seeds with the included (+) biomes in the specified area and "
+            "discard those that have biomes that are explicitly excluded (-).")
         };
         list[F_BIOME_64] = FilterInfo{
-            CAT_BIOMES, 1, 1, 1, 0, 0, 64, 0, MC_1_0, MC_NEWEST, 0, 1, disp++,
+            CAT_BIOMES, 1, 1, 1, 0, 0, 0, 64, 0, MC_1_0, MC_NEWEST, 0, 1, disp++,
             ":icons/map.png",
-            "Biome filter 1:64",
-            "Only seeds with the included (+) biomes in the specified area and "
-            "discard those that have biomes that are explicitly excluded (-)."
+            _("Biome filter 1:64"),
+            _("Only seeds with the included (+) biomes in the specified area and "
+            "discard those that have biomes that are explicitly excluded (-).")
         };
         list[F_BIOME_256] = FilterInfo{
-            CAT_BIOMES, 1, 1, 1, 0, 0, 256, 0, MC_1_0, MC_NEWEST, 0, 1, disp++,
+            CAT_BIOMES, 1, 1, 1, 0, 0, 0, 256, 0, MC_1_0, MC_NEWEST, 0, 1, disp++,
             ":icons/map.png",
-            "Biome filter 1:256",
-            "Only seeds with the included (+) biomes in the specified area and "
-            "discard those that have biomes that are explicitly excluded (-)."
+            _("Biome filter 1:256"),
+            _("Only seeds with the included (+) biomes in the specified area and "
+            "discard those that have biomes that are explicitly excluded (-).")
         };
 
         list[F_BIOME_4_RIVER] = FilterInfo{
-            CAT_BIOMES, 1, 1, 1, L_RIVER_MIX_4, 0, 4, 0, MC_1_13, MC_1_17, 0, 0, disp++,
+            CAT_BIOMES, 1, 1, 1, 0, L_RIVER_MIX_4, 0, 4, 0, MC_1_13, MC_1_17, 0, 0, disp++,
             ":icons/map.png",
-            "Biome filter 1:4 RIVER",
-            "Only seeds with the included (+) biomes in the specified area and "
+            _("Biome filter 1:4 RIVER"),
+            _("Only seeds with the included (+) biomes in the specified area and "
             "discard those that have biomes that are explicitly excluded (-) "
             "at layer RIVER with scale 1:4. "
-            "This layer does not generate ocean variants."
+            "This layer does not generate ocean variants.")
         };
         list[F_BIOME_256_OTEMP] = FilterInfo{
-            CAT_BIOMES, 0, 1, 1, L_OCEAN_TEMP_256, 0, 256, 0, MC_1_13, MC_1_17, 0, 0, disp++,
+            CAT_BIOMES, 0, 1, 1, 0, L_OCEAN_TEMP_256, 0, 256, 0, MC_1_13, MC_1_17, 0, 0, disp++,
             ":icons/map.png",
-            "Biome filter 1:256 O.TEMP",
-            "Only seeds with the included (+) biomes in the specified area and "
+            _("Biome filter 1:256 O.TEMP"),
+            _("Only seeds with the included (+) biomes in the specified area and "
             "discard those that have biomes that are explicitly excluded (-) "
             "at layer OCEAN TEMPERATURE with scale 1:256. "
-            "This generation layer depends only on the lower 48-bits of the seed."
+            "This generation layer depends only on the lower 48-bits of the seed.")
         };
         list[F_TEMPS] = FilterInfo{
-            CAT_BIOMES, 1, 1, 1, 0, 0, 1024, 0, MC_1_7, MC_1_17, 0, 0, disp++,
+            CAT_BIOMES, 1, 1, 1, 0, 0, 0, 1024, 0, MC_1_7, MC_1_17, 0, 0, disp++,
             ":icons/tempcat.png",
-            "Temperature categories",
-            "Checks that the area has a minimum of all the required temperature categories."
+            _("Temperature categories"),
+            _("Checks that the area has a minimum of all the required temperature categories.")
         };
 
         list[F_BIOME_NETHER_1] = FilterInfo{
-            CAT_NETHER, 1, 1, 1, 0, 0, 1, 0, MC_1_16, 0, -1, 1, disp++, // disabled
+            CAT_NETHER, 1, 1, 1, 0, 0, 0, 1, 0, MC_1_16, 0, -1, 1, disp++, // disabled
             ":icons/nether.png",
-            "Nether biome filter 1:1 (disabled)",
-            "Nether biomes after voronoi scaling to 1:1."
+            _("Nether biome filter 1:1 (disabled)"),
+            _("Nether biomes after voronoi scaling to 1:1.")
         };
         list[F_BIOME_NETHER_4] = FilterInfo{
-            CAT_NETHER, 0, 1, 1, 0, 0, 4, 0, MC_1_16, MC_NEWEST, -1, 0, disp++,
+            CAT_NETHER, 0, 1, 1, 0, 0, 0, 4, 0, MC_1_16, MC_NEWEST, -1, 0, disp++,
             ":icons/nether.png",
-            "Nether biome filter 1:4",
-            "Nether biomes with normal noise sampling at scale 1:4."
+            _("Nether biome filter 1:4"),
+            _("Nether biomes with normal noise sampling at scale 1:4.")
         };
         list[F_BIOME_NETHER_16] = FilterInfo{
-            CAT_NETHER, 0, 1, 1, 0, 0, 16, 0, MC_1_16, MC_NEWEST, -1, 0, disp++,
+            CAT_NETHER, 0, 1, 1, 0, 0, 0, 16, 0, MC_1_16, MC_NEWEST, -1, 0, disp++,
             ":icons/nether.png",
-            "Nether biome filter 1:16",
-            "Nether biomes, but only sampled at scale 1:16."
+            _("Nether biome filter 1:16"),
+            _("Nether biomes, but only sampled at scale 1:16.")
         };
         list[F_BIOME_NETHER_64] = FilterInfo{
-            CAT_NETHER, 0, 1, 1, 0, 0, 64, 0, MC_1_16, MC_NEWEST, -1, 0, disp++,
+            CAT_NETHER, 0, 1, 1, 0, 0, 0, 64, 0, MC_1_16, MC_NEWEST, -1, 0, disp++,
             ":icons/nether.png",
-            "Nether biome filter 1:64",
-            "Nether biomes, but only sampled at scale 1:64."
+            _("Nether biome filter 1:64"),
+            _("Nether biomes, but only sampled at scale 1:64.")
         };
         list[F_BIOME_NETHER_256] = FilterInfo{
-            CAT_NETHER, 0, 1, 1, 0, 0, 256, 0, MC_1_16, MC_NEWEST, -1, 0, disp++,
+            CAT_NETHER, 0, 1, 1, 0, 0, 0, 256, 0, MC_1_16, MC_NEWEST, -1, 0, disp++,
             ":icons/nether.png",
-            "Nether biome filter 1:256",
-            "Nether biomes, but only sampled at scale 1:256."
+            _("Nether biome filter 1:256"),
+            _("Nether biomes, but only sampled at scale 1:256.")
         };
 
         list[F_BIOME_END_1] = FilterInfo{
-            CAT_END, 1, 1, 1, 0, 0, 1, 0, MC_1_9, 0, +1, 1, disp++, // disabled
+            CAT_END, 1, 1, 1, 0, 0, 0, 1, 0, MC_1_9, 0, +1, 1, disp++, // disabled
             ":icons/the_end.png",
-            "End biome filter 1:1 (disabled)",
-            "End biomes after voronoi scaling to 1:1."
+            _("End biome filter 1:1 (disabled)"),
+            _("End biomes after voronoi scaling to 1:1.")
         };
         list[F_BIOME_END_4] = FilterInfo{
-            CAT_END, 0, 1, 1, 0, 0, 4, 0, MC_1_9, MC_NEWEST, +1, 0, disp++,
+            CAT_END, 0, 1, 1, 0, 0, 0, 4, 0, MC_1_9, MC_NEWEST, +1, 0, disp++,
             ":icons/the_end.png",
-            "End biome filter 1:4",
-            "End biomes sampled at scale 1:4. Note this is just a simple upscale of 1:16. "
+            _("End biome filter 1:4"),
+            _("End biomes sampled at scale 1:4. Note this is just a simple upscale of 1:16.")
         };
         list[F_BIOME_END_16] = FilterInfo{
-            CAT_END, 0, 1, 1, 0, 0, 16, 0, MC_1_9, MC_NEWEST, +1, 0, disp++,
+            CAT_END, 0, 1, 1, 0, 0, 0, 16, 0, MC_1_9, MC_NEWEST, +1, 0, disp++,
             ":icons/the_end.png",
-            "End biome filter 1:16",
-            "End biomes with normal sampling at scale 1:16. "
+            _("End biome filter 1:16"),
+            _("End biomes with normal sampling at scale 1:16. ")
         };
         list[F_BIOME_END_64] = FilterInfo{
-            CAT_END, 0, 1, 1, 0, 0, 64, 0, MC_1_9, MC_NEWEST, +1, 0, disp++,
+            CAT_END, 0, 1, 1, 0, 0, 0, 64, 0, MC_1_9, MC_NEWEST, +1, 0, disp++,
             ":icons/the_end.png",
-            "End biome filter 1:64",
-            "End biomes with lossy sampling at scale 1:64. "
+            _("End biome filter 1:64"),
+            _("End biomes with lossy sampling at scale 1:64. ")
         };
 
         list[F_SPAWN] = FilterInfo{
-            CAT_OTHER, 1, 1, 1, 0, 0, 1, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
+            CAT_OTHER, 1, 1, 1, 0, 0, 0, 1, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
             ":icons/spawn.png",
-            "Spawn",
+            _("Spawn"),
             ""
         };
 
         list[F_SLIME] = FilterInfo{
-            CAT_OTHER, 0, 1, 1, 0, 0, 16, 1, MC_1_0, MC_NEWEST, 0, 0, disp++,
+            CAT_OTHER, 0, 1, 1, 0, 0, 0, 16, 1, MC_1_0, MC_NEWEST, 0, 0, disp++,
             ":icons/slime.png",
-            "Slime chunk",
+            _("Slime chunk"),
             ""
         };
 
-        list[F_STRONGHOLD] = FilterInfo{
-            CAT_STRUCT, 1, 1, 1, 0, 0, 1, 1, MC_1_0, MC_NEWEST, 0, 0, disp++,
+        list[F_FIRST_STRONGHOLD] = FilterInfo{
+            CAT_OTHER, 0, 1, 1, 1, 0, 0, 1, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
             ":icons/stronghold.png",
-            "Stronghold",
+            _("First stronghold"),
+            _("Finds the approxmiate location of the first stronghold "
+            "(+/-112 blocks). Depends only on the 48-bit seed.")
+        };
+
+        list[F_STRONGHOLD] = FilterInfo{
+            CAT_STRUCT, 1, 1, 1, 0, 0, 0, 1, 1, MC_1_0, MC_NEWEST, 0, 0, disp++,
+            ":icons/stronghold.png",
+            _("Stronghold"),
             ""
         };
 
         list[F_VILLAGE] = FilterInfo{
-            CAT_STRUCT, 1, 1, 1, 0, Village, 1, 1, MC_1_0, MC_NEWEST, 0, 0, disp++,
+            CAT_STRUCT, 1, 1, 1, 1, 0, Village, 1, 1, MC_1_0, MC_NEWEST, 0, 0, disp++,
             ":icons/village.png",
-            "Village",
+            _("Village"),
             ""
         };
 
         list[F_MINESHAFT] = FilterInfo{
-            CAT_STRUCT, 1, 1, 1, 0, Mineshaft, 1, 1, MC_1_0, MC_NEWEST, 0, 0, disp++,
+            CAT_STRUCT, 1, 1, 1, 0, 0, Mineshaft, 1, 1, MC_1_0, MC_NEWEST, 0, 0, disp++,
             ":icons/mineshaft.png",
-            "Abandoned mineshaft",
+            _("Abandoned mineshaft"),
             ""
         };
 
         list[F_DESERT] = FilterInfo{
-            CAT_STRUCT, 1, 1, 1, 0, Desert_Pyramid, 1, 1, MC_1_3, MC_NEWEST, 0, 0, disp++,
+            CAT_STRUCT, 1, 1, 1, 1, 0, Desert_Pyramid, 1, 1, MC_1_3, MC_NEWEST, 0, 0, disp++,
             ":icons/desert.png",
-            "Desert pyramid",
-            "In version 1.18, desert pyramids depend on surface height and may fail to "
-            "generate near caves/aquifers, rivers and oceans."
+            _("Desert pyramid"),
+            _("In version 1.18, desert pyramids depend on surface height and may fail to "
+            "generate near caves/aquifers, rivers and oceans.")
         };
 
         list[F_JUNGLE] = FilterInfo{
-            CAT_STRUCT, 1, 1, 1, 0, Jungle_Temple, 1, 1, MC_1_3, MC_NEWEST, 0, 0, disp++,
+            CAT_STRUCT, 1, 1, 1, 1, 0, Jungle_Temple, 1, 1, MC_1_3, MC_NEWEST, 0, 0, disp++,
             ":icons/jungle.png",
-            "Jungle temple",
-            "In version 1.18, jungle temples depend on surface height and may fail to "
-            "generate near caves/aquifers, rivers and oceans."
+            _("Jungle temple"),
+            _("In version 1.18, jungle temples depend on surface height and may fail to "
+            "generate near caves/aquifers, rivers and oceans.")
         };
 
         list[F_HUT] = FilterInfo{
-            CAT_STRUCT, 1, 1, 1, 0, Swamp_Hut, 1, 1, MC_1_4, MC_NEWEST, 0, 0, disp++,
+            CAT_STRUCT, 1, 1, 1, 1, 0, Swamp_Hut, 1, 1, MC_1_4, MC_NEWEST, 0, 0, disp++,
             ":icons/hut.png",
-            "Swamp hut",
+            _("Swamp hut"),
             ""
         };
 
         list[F_MONUMENT] = FilterInfo{
-            CAT_STRUCT, 1, 1, 1, 0, Monument, 1, 1, MC_1_8, MC_NEWEST, 0, 0, disp++,
+            CAT_STRUCT, 1, 1, 1, 1, 0, Monument, 1, 1, MC_1_8, MC_NEWEST, 0, 0, disp++,
             ":icons/monument.png",
-            "Ocean monument",
+            _("Ocean monument"),
             ""
         };
 
         list[F_IGLOO] = FilterInfo{
-            CAT_STRUCT, 1, 1, 1, 0, Igloo, 1, 1, MC_1_9, MC_NEWEST, 0, 0, disp++,
+            CAT_STRUCT, 1, 1, 1, 1, 0, Igloo, 1, 1, MC_1_9, MC_NEWEST, 0, 0, disp++,
             ":icons/igloo.png",
-            "Igloo",
+            _("Igloo"),
             ""
         };
 
         list[F_MANSION] = FilterInfo{
-            CAT_STRUCT, 1, 1, 1, 0, Mansion, 1, 1, MC_1_11, MC_NEWEST, 0, 0, disp++,
+            CAT_STRUCT, 1, 1, 1, 1, 0, Mansion, 1, 1, MC_1_11, MC_NEWEST, 0, 0, disp++,
             ":icons/mansion.png",
-            "Woodland mansion",
-            "In version 1.18, mansions depend on surface height and may fail to "
-            "generate near caves/aquifers, rivers and oceans."
+            _("Woodland mansion"),
+            _("In version 1.18, mansions depend on surface height and may fail to "
+            "generate near caves/aquifers, rivers and oceans.")
         };
 
         list[F_RUINS] = FilterInfo{
-            CAT_STRUCT, 1, 1, 1, 0, Ocean_Ruin, 1, 1, MC_1_13, MC_NEWEST, 0, 0, disp++,
+            CAT_STRUCT, 1, 1, 1, 1, 0, Ocean_Ruin, 1, 1, MC_1_13, MC_NEWEST, 0, 0, disp++,
             ":icons/ruins.png",
-            "Ocean ruins",
+            _("Ocean ruins"),
             ""
         };
 
         list[F_SHIPWRECK] = FilterInfo{
-            CAT_STRUCT, 1, 1, 1, 0, Shipwreck, 1, 1, MC_1_13, MC_NEWEST, 0, 0, disp++,
+            CAT_STRUCT, 1, 1, 1, 1, 0, Shipwreck, 1, 1, MC_1_13, MC_NEWEST, 0, 0, disp++,
             ":icons/shipwreck.png",
-            "Shipwreck",
+            _("Shipwreck"),
             ""
         };
 
         list[F_TREASURE] = FilterInfo{
-            CAT_STRUCT, 1, 1, 1, 0, Treasure, 1, 1, MC_1_13, MC_NEWEST, 0, 0, disp++,
+            CAT_STRUCT, 1, 1, 1, 1, 0, Treasure, 1, 1, MC_1_13, MC_NEWEST, 0, 0, disp++,
             ":icons/treasure.png",
-            "Buried treasure",
-            ""
+            _("Buried treasure"),
+            _("Buried treasures are always positioned near the center of a chunk "
+            "rather than a chunk boarder. Make sure the testing area is set "
+            "accordingly.")
         };
 
         list[F_OUTPOST] = FilterInfo{
-            CAT_STRUCT, 1, 1, 1, 0, Outpost, 1, 1, MC_1_14, MC_NEWEST, 0, 0, disp++,
+            CAT_STRUCT, 1, 1, 1, 1, 0, Outpost, 1, 1, MC_1_14, MC_NEWEST, 0, 0, disp++,
             ":icons/outpost.png",
-            "Pillager outpost",
+            _("Pillager outpost"),
             ""
         };
 
         list[F_PORTAL] = FilterInfo{
-            CAT_STRUCT, 0, 1, 1, 0, Ruined_Portal, 1, 1, MC_1_16, MC_NEWEST, 0, 0, disp++,
+            CAT_STRUCT, 0, 1, 1, 1, 0, Ruined_Portal, 1, 1, MC_1_16, MC_NEWEST, 0, 0, disp++,
             ":icons/portal.png",
-            "Ruined portal (overworld)",
+            _("Ruined portal (overworld)"),
             ""
         };
 
         list[F_PORTALN] = FilterInfo{
-            CAT_STRUCT, 0, 1, 1, 0, Ruined_Portal_N, 1, 1, MC_1_16, MC_NEWEST, -1, 0, disp++,
+            CAT_STRUCT, 0, 1, 1, 1, 0, Ruined_Portal_N, 1, 1, MC_1_16, MC_NEWEST, -1, 0, disp++,
             ":icons/portal.png",
-            "Ruined portal (nether)",
+            _("Ruined portal (nether)"),
             ""
         };
 
         list[F_FORTRESS] = FilterInfo{
-            CAT_STRUCT, 0, 1, 1, 0, Fortress, 1, 1, MC_1_0, MC_NEWEST, -1, 0, disp++,
+            CAT_STRUCT, 0, 1, 1, 1, 0, Fortress, 1, 1, MC_1_0, MC_NEWEST, -1, 0, disp++,
             ":icons/fortress.png",
-            "Nether fortress",
+            _("Nether fortress"),
             ""
         };
 
         list[F_BASTION] = FilterInfo{
-            CAT_STRUCT, 0, 1, 1, 0, Bastion, 1, 1, MC_1_16, MC_NEWEST, -1, 0, disp++,
+            CAT_STRUCT, 0, 1, 1, 1, 0, Bastion, 1, 1, MC_1_16, MC_NEWEST, -1, 0, disp++,
             ":icons/bastion.png",
-            "Bastion remnant",
+            _("Bastion remnant"),
             ""
         };
 
         list[F_ENDCITY] = FilterInfo{
-            CAT_STRUCT, 0, 1, 1, 0, End_City, 1, 1, MC_1_9, MC_NEWEST, +1, 0, disp++,
+            CAT_STRUCT, 0, 1, 1, 1, 0, End_City, 1, 1, MC_1_9, MC_NEWEST, +1, 0, disp++,
             ":icons/endcity.png",
-            "End city",
+            _("End city"),
             ""
         };
 
         list[F_GATEWAY] = FilterInfo{
-            CAT_STRUCT, 0, 1, 1, 0, End_Gateway, 1, 1, MC_1_13, MC_NEWEST, +1, 0, disp++,
+            CAT_STRUCT, 0, 1, 1, 1, 0, End_Gateway, 1, 1, MC_1_13, MC_NEWEST, +1, 0, disp++,
             ":icons/gateway.png",
-            "End gateway",
-            "Scattered end gateway return portals, not including those "
-            "generated when defeating the dragon. "
-            ""
+            _("End gateway"),
+            _("Scattered end gateway return portals, not including those "
+            "generated when defeating the dragon.")
         };
+
+#undef _ // translation macro
+
     }
 }
 g_filterinfo;
@@ -525,7 +542,7 @@ struct Condition
     int count;
     int y;
     int approx;
-    int pad; // unused
+    int rmax; // (<=0):disabled; (>0):strict upper radius
     uint64_t variants;
 
     enum { // variant flags
@@ -560,6 +577,28 @@ struct Condition
         if (!(variants & START_PIECE_MASK)) return true;
         uint64_t mask = 1ULL << toVariantBit(sv.biome, sv.variant);
         return mask & variants;
+    }
+};
+
+struct ConditionTree
+{
+    QVector<Condition> condvec;
+    QVector<QVector<char>> references;
+
+    void set(const QVector<Condition>& cv)
+    {
+        int cmax = 0;
+        for (const Condition& c : cv)
+            if (c.save > cmax)
+                cmax = c.save;
+        condvec.resize(cmax + 1);
+        references.resize(cmax + 1);
+        for (const Condition& c : cv)
+        {
+            condvec[c.save] = c;
+            if (c.relative <= cmax)
+                references[c.relative].push_back(c.save);
+        }
     }
 };
 
@@ -617,28 +656,6 @@ struct WorldGen
     }
 };
 
-struct ConditionTree
-{
-    QVector<Condition> condvec;
-    QVector<QVector<char>> references;
-
-    void set(const QVector<Condition>& cv)
-    {
-        int cmax = 0;
-        for (const Condition& c : cv)
-            if (c.save > cmax)
-                cmax = c.save;
-        condvec.resize(cmax + 1);
-        references.resize(cmax + 1);
-        for (const Condition& c : cv)
-        {
-            condvec[c.save] = c;
-            if (c.relative <= cmax)
-                references[c.relative].push_back(c.save);
-        }
-    }
-};
-
 
 #define MAX_INSTANCES 4096 // should be at least 128
 
@@ -672,7 +689,7 @@ int testTreeAt(
 int testCondAt(
     Pos                         at,             // relative origin
     Pos                       * cent,           // output center position(s)
-    int                       * icnt,           // max instances (NULL for avg)
+    int                       * imax,           // max instances (NULL for avg)
     Condition                 * cond,           // condition to check
     int                         pass,
     WorldGen                  * gen,

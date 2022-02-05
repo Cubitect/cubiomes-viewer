@@ -32,7 +32,7 @@ static QString getTip(int mc, int layer, int id)
 {
     uint64_t mL = 0, mM = 0;
     genPotential(&mL, &mM, layer, mc, id);
-    QString tip = "Generates any of:";
+    QString tip = FilterDialog::tr("Generates any of:");
     for (int j = 0; j < 64; j++)
         if (mL & (1ULL << j))
             tip += QString("\n") + biome2str(mc, j);
@@ -49,6 +49,8 @@ void FilterDialog::addVariant(QString name, int biome, int variant)
     variantboxes.push_back(cb);
 }
 
+#define BROKEN_CHAR QChar(0x26A0)
+
 FilterDialog::FilterDialog(FormConditions *parent, Config *config, int mcversion, QListWidgetItem *item, Condition *initcond)
     : QDialog(parent, Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint)
     , ui(new Ui::FilterDialog)
@@ -61,10 +63,10 @@ FilterDialog::FilterDialog(FormConditions *parent, Config *config, int mcversion
 
     textDescription = new QTextEdit(this);
     textDescription->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
-    ui->collapseDescription->init("Description", textDescription, true);
+    ui->collapseDescription->init(tr("Description"), textDescription, true);
 
-    QString mcs = "MC ";
-    mcs += (mc2str(mc) ? mc2str(mc) : "?");
+    const char *p_mcs = mc2str(mc);
+    QString mcs = tr("MC %1", "Minecraft version").arg(p_mcs ? p_mcs : "?");
     ui->labelMC->setText(mcs);
 
 
@@ -80,15 +82,20 @@ FilterDialog::FilterDialog(FormConditions *parent, Config *config, int mcversion
             if (c.save == initcond->relative)
                 initindex = ui->comboBoxRelative->count();
         }
-        ui->comboBoxRelative->addItem(QString::asprintf("[%02d] %s", c.save, ft.name), c.save);
+        QString condstr = QString("[%1] %2")
+            .arg(c.save, 2, 10, QLatin1Char('0'))
+            .arg(QApplication::translate("Filter", ft.name));
+        ui->comboBoxRelative->addItem(condstr, c.save);
     }
     if (initindex < 0)
     {
         if (initcond && initcond->relative > 0)
         {
             initindex = ui->comboBoxRelative->count();
-            ui->comboBoxRelative->addItem(
-                QString::asprintf("[%02d] broken reference", initcond->relative), initcond->relative);
+            QString condstr = QString("[%1] %2 broken reference")
+                .arg(initcond->relative, 2, 10, QLatin1Char('0'))
+                .arg(BROKEN_CHAR);
+            ui->comboBoxRelative->addItem(condstr, initcond->relative);
         }
         else
         {
@@ -97,11 +104,14 @@ FilterDialog::FilterDialog(FormConditions *parent, Config *config, int mcversion
     }
 
     QIntValidator *intval = new QIntValidator(this);
-    ui->lineRadius->setValidator(intval);
     ui->lineEditX1->setValidator(intval);
     ui->lineEditZ1->setValidator(intval);
     ui->lineEditX2->setValidator(intval);
     ui->lineEditZ2->setValidator(intval);
+
+    QIntValidator *uintval = new QIntValidator(0, INT_MAX, this);
+    ui->lineSquare->setValidator(uintval);
+    ui->lineRadius->setValidator(uintval);
 
     ui->lineY->setValidator(new QIntValidator(-64, 320, this));
 
@@ -250,7 +260,10 @@ FilterDialog::FilterDialog(FormConditions *parent, Config *config, int mcversion
         biomecboxes[i]->setIcon(QIcon(pixmap));
     }
 
-    custom = false;
+    // defaults
+    ui->spinBox->setValue(1);
+    ui->radioSquare->setChecked(true);
+    ui->checkRadius->setChecked(false);
 
     if (initcond)
     {
@@ -269,12 +282,11 @@ FilterDialog::FilterDialog(FormConditions *parent, Config *config, int mcversion
         }
 
         ui->comboBoxRelative->setCurrentIndex(initindex);
+        on_comboBoxRelative_activated(initindex);
 
         updateMode();
 
-        if (!ui->tabWidget->isEnabled())
-            ui->spinBox->setValue(cond.count);
-
+        ui->spinBox->setValue(cond.count);
         ui->lineEditX1->setText(QString::number(cond.x1));
         ui->lineEditZ1->setText(QString::number(cond.z1));
         ui->lineEditX2->setText(QString::number(cond.x2));
@@ -285,29 +297,23 @@ FilterDialog::FilterDialog(FormConditions *parent, Config *config, int mcversion
 
         if (cond.x1 == cond.z1 && cond.x1 == -cond.x2 && cond.x1 == -cond.z2)
         {
-            ui->lineRadius->setText(QString::number(cond.x2 * 2));
-            if (ui->buttonArea->isEnabled())
-            {
-                custom = false;
-                ui->buttonArea->setChecked(false);
-            }
+            ui->lineSquare->setText(QString::number(cond.x2 * 2));
+            ui->radioSquare->setChecked(true);
         }
         else if (cond.x1 == cond.z1 && cond.x1+1 == -cond.x2 && cond.x1+1 == -cond.z2)
         {
-            ui->lineRadius->setText(QString::number(cond.x2 * 2 + 1));
-            if (ui->buttonArea->isEnabled())
-            {
-                custom = false;
-                ui->buttonArea->setChecked(false);
-            }
+            ui->lineSquare->setText(QString::number(cond.x2 * 2 + 1));
+            ui->radioSquare->setChecked(true);
         }
         else
         {
-            if (ui->buttonArea->isEnabled())
-            {
-                ui->buttonArea->setChecked(true);
-                custom = true;
-            }
+            ui->radioCustom->setChecked(true);
+        }
+
+        if (cond.rmax > 0)
+        {
+            ui->lineRadius->setText(QString::number(cond.rmax - 1));
+            ui->checkRadius->setChecked(true);
         }
 
         // remember bamboo_jungle=168 has a bit at (bamboo_jungle & 0x3f) in cond.bfilter.edgesToFind
@@ -343,7 +349,7 @@ FilterDialog::FilterDialog(FormConditions *parent, Config *config, int mcversion
         }
     }
 
-    on_lineRadius_editingFinished();
+    on_lineSquare_editingFinished();
 
     updateMode();
 }
@@ -368,19 +374,47 @@ void FilterDialog::updateMode()
 
     ui->groupBoxPosition->setEnabled(filterindex != F_SELECT);
 
-    ui->buttonArea->setEnabled(ft.area);
 
-    ui->labelSquareArea->setEnabled(!custom && ft.area);
-    ui->lineRadius->setEnabled(!custom && ft.area);
+    ui->checkRadius->setEnabled(ft.rmax);
 
-    ui->labelX1->setEnabled(ft.coord && (custom || !ft.area));
-    ui->labelZ1->setEnabled(ft.coord && (custom || !ft.area));
-    ui->labelX2->setEnabled(custom && ft.area);
-    ui->labelZ2->setEnabled(custom && ft.area);
-    ui->lineEditX1->setEnabled(ft.coord && (custom || !ft.area));
-    ui->lineEditZ1->setEnabled(ft.coord && (custom || !ft.area));
-    ui->lineEditX2->setEnabled(custom && ft.area);
-    ui->lineEditZ2->setEnabled(custom && ft.area);
+    if (ui->checkRadius->isEnabled() && ui->checkRadius->isChecked())
+    {
+        ui->lineRadius->setEnabled(true);
+
+        ui->radioSquare->setEnabled(false);
+        ui->radioCustom->setEnabled(false);
+
+        ui->lineSquare->setEnabled(false);
+
+        ui->labelX1->setEnabled(false);
+        ui->labelZ1->setEnabled(false);
+        ui->labelX2->setEnabled(false);
+        ui->labelZ2->setEnabled(false);
+        ui->lineEditX1->setEnabled(false);
+        ui->lineEditZ1->setEnabled(false);
+        ui->lineEditX2->setEnabled(false);
+        ui->lineEditZ2->setEnabled(false);
+    }
+    else
+    {
+        bool custom = ui->radioCustom->isChecked();
+
+        ui->lineRadius->setEnabled(false);
+
+        ui->radioSquare->setEnabled(ft.area);
+        ui->radioCustom->setEnabled(ft.area);
+
+        ui->lineSquare->setEnabled(!custom && ft.area);
+
+        ui->labelX1->setEnabled(ft.coord && (custom || !ft.area));
+        ui->labelZ1->setEnabled(ft.coord && (custom || !ft.area));
+        ui->labelX2->setEnabled(custom && ft.area);
+        ui->labelZ2->setEnabled(custom && ft.area);
+        ui->lineEditX1->setEnabled(ft.coord && (custom || !ft.area));
+        ui->lineEditZ1->setEnabled(ft.coord && (custom || !ft.area));
+        ui->lineEditX2->setEnabled(custom && ft.area);
+        ui->lineEditZ2->setEnabled(custom && ft.area);
+    }
 
     ui->labelSpinBox->setEnabled(ft.count);
     ui->spinBox->setEnabled(ft.count);
@@ -432,20 +466,21 @@ void FilterDialog::updateMode()
 
     if (ft.step > 1)
     {
-        loc = QString::asprintf("Location (coordinates are multiplied by x%d)", ft.step);
-        areatip = QString::asprintf("From floor(-[S] / 2) x%d to floor([S] / 2) x%d on both axes (inclusive)", ft.step, ft.step);
-        lowtip = QString::asprintf("Lower bound x%d (inclusive)", ft.step);
-        uptip = QString::asprintf("Upper bound x%d (inclusive)", ft.step);
+        QString multxt = QString("%1%2").arg(QChar(0xD7)).arg(ft.step);
+        loc = tr("Location (coordinates are multiplied by %1)").arg(multxt);
+        areatip = tr("From floor(-x/2)%1 to floor(x/2)%1 on both axes (inclusive)").arg(multxt);
+        lowtip = tr("Lower bound %1 (inclusive)").arg(multxt);
+        uptip = tr("Upper bound %1 (inclusive)").arg(multxt);
     }
     else
     {
-        loc = "Location";
-        areatip = "From floor(-[S] / 2) to floor([S] / 2) on both axes (inclusive)";
-        lowtip = QString::asprintf("Lower bound (inclusive)");
-        uptip = QString::asprintf("Upper bound (inclusive)");
+        loc = tr("Location");
+        areatip = tr("From floor(-x/2) to floor(x/2) on both axes (inclusive)");
+        lowtip = tr("Lower bound (inclusive)");
+        uptip = tr("Upper bound (inclusive)");
     }
     ui->groupBoxPosition->setTitle(loc);
-    ui->labelSquareArea->setToolTip(areatip);
+    ui->radioSquare->setToolTip(areatip);
     ui->labelX1->setToolTip(lowtip);
     ui->labelZ1->setToolTip(lowtip);
     ui->labelX2->setToolTip(uptip);
@@ -531,7 +566,7 @@ void FilterDialog::updateBiomeSelection()
                 cb->setEnabled(true);
                 if (ft.layer != L_VORONOI_1)
                 {
-                    QString tip = "Generates any of:";
+                    QString tip = tr("Generates any of:");
                     for (int j = 0; j < 64; j++)
                     {
                         if (mL & (1ULL << j))
@@ -576,9 +611,8 @@ int FilterDialog::warnIfBad(Condition cond)
     {
         if ((cond.variants & ((1ULL << 60) - 1)) == 0)
         {
-            QString text =
-                    "No allowed start pieces specified. Condition can never be true.";
-            QMessageBox::warning(this, "Invalid condition", text, QMessageBox::Ok);
+            QString text = tr("No allowed start pieces specified. Condition can never be true.");
+            QMessageBox::warning(this, tr("Invalid condition"), text, QMessageBox::Ok);
             return QMessageBox::Cancel;
         }
     }
@@ -591,14 +625,16 @@ int FilterDialog::warnIfBad(Condition cond)
 
         if (workitemsize > workwarn)
         {
-            QString text =
+            QString text = tr(
                     "The biome filter you have entered may take a while to check. "
                     "You should consider using a smaller area with a larger scaling "
                     "instead and/or reduce the number of seeds per work item "
                     "under Edit>Perferences."
                     "\n\n"
-                    "Are you sure you want to continue?";
-            return QMessageBox::warning(this, "Performance Expensive Condition", text, QMessageBox::Ok | QMessageBox::Cancel);
+                    "Are you sure you want to continue?"
+                    );
+            return QMessageBox::warning(this, tr("Performance Expensive Condition"), text,
+                QMessageBox::Ok | QMessageBox::Cancel);
         }
     }
     return QMessageBox::Ok;
@@ -612,7 +648,7 @@ void FilterDialog::on_comboBoxType_activated(int)
 void FilterDialog::on_comboBoxRelative_activated(int)
 {
     QPalette pal;
-    if (ui->comboBoxRelative->currentText().contains("broken"))
+    if (ui->comboBoxRelative->currentText().contains(BROKEN_CHAR))
         pal.setColor(QPalette::Normal, QPalette::Button, QColor(255,0,0,127));
     ui->comboBoxRelative->setPalette(pal);
 }
@@ -647,15 +683,24 @@ void FilterDialog::on_buttonExclude_clicked()
     }
 }
 
-void FilterDialog::on_buttonArea_toggled(bool checked)
+void FilterDialog::on_checkRadius_toggled(bool)
 {
-    custom = checked;
     updateMode();
 }
 
-void FilterDialog::on_lineRadius_editingFinished()
+void FilterDialog::on_radioSquare_toggled(bool)
 {
-    int v = ui->lineRadius->text().toInt();
+    updateMode();
+}
+
+void FilterDialog::on_radioCustom_toggled(bool)
+{
+    updateMode();
+}
+
+void FilterDialog::on_lineSquare_editingFinished()
+{
+    int v = ui->lineSquare->text().toInt();
     int area = (v+1) * (v+1);
     for (int i = 0; i < 9; i++)
     {
@@ -673,11 +718,11 @@ void FilterDialog::on_buttonOk_clicked()
 {
     cond.type = ui->comboBoxType->currentData().toInt();
     cond.relative = ui->comboBoxRelative->currentData().toInt();
-    cond.count = ui->spinBox->text().toInt();
+    cond.count = ui->spinBox->value();
 
-    if (ui->lineRadius->isEnabled())
+    if (ui->radioSquare->isChecked())
     {
-        int d = ui->lineRadius->text().toInt();
+        int d = ui->lineSquare->text().toInt();
         cond.x1 = (-d) >> 1;
         cond.z1 = (-d) >> 1;
         cond.x2 = (d) >> 1;
@@ -690,6 +735,11 @@ void FilterDialog::on_buttonOk_clicked()
         cond.x2 = ui->lineEditX2->text().toInt();
         cond.z2 = ui->lineEditZ2->text().toInt();
     }
+
+    if (ui->checkRadius->isChecked())
+        cond.rmax = ui->lineRadius->text().toInt() + 1;
+    else
+        cond.rmax = 0;
 
     if (ui->tabBiomes->isEnabled())
     {
@@ -754,7 +804,7 @@ void FilterDialog::on_comboBoxCat_currentIndexChanged(int idx)
     ui->comboBoxType->clear();
 
     int slot = 0;
-    ui->comboBoxType->insertItem(slot, "Select filter", QVariant::fromValue((int)F_SELECT));
+    ui->comboBoxType->insertItem(slot, tr("Select filter"), QVariant::fromValue((int)F_SELECT));
 
     const FilterInfo *ft_list[FILTER_MAX] = {};
     const FilterInfo *ft;
@@ -776,7 +826,7 @@ void FilterDialog::on_comboBoxCat_currentIndexChanged(int idx)
         if (ft->icon)
             ui->comboBoxType->insertItem(slot, QIcon(ft->icon), ft->name, vidx);
         else
-            ui->comboBoxType->insertItem(slot, ft->name, vidx);
+            ui->comboBoxType->insertItem(slot, QApplication::translate("Filter", ft->name), vidx);
 
         if (mc < ft->mcmin || mc > ft->mcmax)
             ui->comboBoxType->setItemData(slot, false, Qt::UserRole-1); // deactivate

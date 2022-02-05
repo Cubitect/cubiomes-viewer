@@ -99,7 +99,7 @@ void ConfigDialog::setBiomeColorPath(QString path)
 
         if (n >= 0)
         {
-            QString txt = QString::asprintf("[%d biomes] ", n) + finfo.baseName();
+            QString txt = tr("[%n biome(s)] %1", "", n).arg(finfo.baseName());
             ui->buttonBiomeColor->setText(txt);
         }
         else
@@ -124,7 +124,8 @@ void ConfigDialog::on_buttonBox_clicked(QAbstractButton *button)
 void ConfigDialog::on_buttonBiomeColor_clicked()
 {
     QFileInfo finfo(conf.biomeColorPath);
-    QString fnam = QFileDialog::getOpenFileName(this, "Load biome color map", finfo.absolutePath(), "Text files (*.txt);;Any files (*)");
+    QString fnam = QFileDialog::getOpenFileName(
+        this, tr("Load biome color map"), finfo.absolutePath(), tr("Text files (*.txt);;Any files (*)"));
     if (!fnam.isNull())
     {
         conf.biomeColorPath = fnam;
@@ -140,7 +141,7 @@ void ConfigDialog::on_buttonClear_clicked()
 
 void ConfigDialog::on_buttonColorHelp_clicked()
 {
-    const char* msg =
+    QString msg = tr(
             "<html><head/><body><p>"
             "<b>Custom biome colors</b> should be defined in an ASCII text file, "
             "with one biome-color mapping per line. Each mapping should consist "
@@ -154,6 +155,7 @@ void ConfigDialog::on_buttonColorHelp_clicked()
             "</p><p>"
             "128&nbsp;[255&nbsp;255&nbsp;0]"
             "</p></body></html>"
-            ;
-    QMessageBox::information(this, "Help: custom biome colors", msg, QMessageBox::Ok);
+            );
+    QMessageBox::information(this, tr("Help: custom biome colors"), msg, QMessageBox::Ok);
 }
+
