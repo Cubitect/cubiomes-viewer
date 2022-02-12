@@ -4,14 +4,11 @@
 #
 #-------------------------------------------------
 
-# For a release with binary compatibility, cubiomes should be compiled for the
-# default achitecture.
-
 CUPATH   = $$PWD/cubiomes
 QT      += core widgets
 LIBS    += -lm $$CUPATH/libcubiomes.a
 
-# comment out to use the profile compiler
+# uncomment to override the profile compiler
 #QMAKE_CC = clang
 #QMAKE_CXX = clang++
 

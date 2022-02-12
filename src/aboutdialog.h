@@ -2,10 +2,11 @@
 #define ABOUTDIALOG_H
 
 #include <QDialog>
+#include <QString>
 
 #define VERS_MAJOR 2
 #define VERS_MINOR 0
-#define VERS_PATCH -1   // negative patch number designates a development version
+#define VERS_PATCH -2   // negative patch number designates a development version
 
 // returns +1 if newer, -1 if older  and 0 if equal
 inline int cmpVers(int major, int minor, int patch)
@@ -20,6 +21,17 @@ inline int cmpVers(int major, int minor, int patch)
     s = (p1 > p0) - (p1 < p0);
     return s;
 }
+
+inline QString getVersStr()
+{
+    QString s = QString("%1.%2.").arg(VERS_MAJOR).arg(VERS_MINOR);
+    if (VERS_PATCH < 0)
+        s += QString("dev%1").arg(-1-VERS_PATCH);
+    else
+        s += QString("%1").arg(VERS_PATCH);
+    return s;
+}
+
 
 namespace Ui {
 class AboutDialog;

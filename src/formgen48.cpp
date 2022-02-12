@@ -114,9 +114,15 @@ bool FormGen48::setList48(QString path, bool quiet)
         }
         else if (!quiet)
         {
-            QMessageBox::warning(
-                this, tr("Warning"), tr("Failed to load seed list from file"),
-                QMessageBox::Ok);
+            int button = QMessageBox::warning(
+                    this, tr("Warning"),
+                    tr("Failed to load 48-bit seed list from file:\n\"%1\"").arg(path),
+                    QMessageBox::Reset, QMessageBox::Ignore);
+            if (button == QMessageBox::Reset)
+            {
+                slist48path.clear();
+                slist48.clear();
+            }
         }
     }
     else

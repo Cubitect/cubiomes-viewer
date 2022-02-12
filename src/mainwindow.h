@@ -58,7 +58,7 @@ protected:
     void updateMapSeed();
 
 public slots:
-    void warning(QString title, QString text);
+    void warning(QString text);
     void mapGoto(qreal x, qreal z, qreal scale);
 
     void openProtobaseMsg(QString path);

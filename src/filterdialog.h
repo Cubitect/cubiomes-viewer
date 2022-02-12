@@ -21,7 +21,8 @@ class SpinExclude : public QSpinBox
 {
     Q_OBJECT
 public:
-    SpinExclude()
+    SpinExclude(QWidget *parent = nullptr)
+        : QSpinBox(parent)
     {
         setMinimum(-1);
         QObject::connect(this, SIGNAL(valueChanged(int)), this, SLOT(change(int)), Qt::QueuedConnection);

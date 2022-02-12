@@ -103,6 +103,11 @@ void Collapsible::init(const QString& title, QWidget *widget, bool collapsed)
         content->setMinimumHeight(0);
         content->setMaximumHeight(0);
     }
+    else
+    {
+        toggleButton->setArrowType(Qt::ArrowType::DownArrow);
+        animgroup->setDirection(QAbstractAnimation::Forward);
+    }
 }
 
 void Collapsible::setInfo(const QString& title, const QString& text)
@@ -123,5 +128,11 @@ void Collapsible::setInfo(const QString& title, const QString& text)
 
 void Collapsible::showInfo()
 {
-    QMessageBox::information(this, infotitle, infomsg, QMessageBox::Ok);
+    // windows plays an annoying sound when you use QMessageBox::information()
+    QMessageBox mb(this);
+    mb.setIcon(QMessageBox::Information);
+    mb.setWindowTitle(infotitle);
+    mb.setText(infomsg);
+    mb.exec();
 }
+

@@ -452,7 +452,7 @@ void MainWindow::loadSettings()
     if (config.restoreSession)
     {
         QString path = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
-        loadProgress(path + "/session.save", true);
+        loadProgress(path + "/session.save", false);
     }
 
     if (config.autosaveCycle > 0)
@@ -473,7 +473,7 @@ bool MainWindow::saveProgress(QString fnam, bool quiet)
     if (!file.open(QIODevice::WriteOnly))
     {
         if (!quiet)
-            warning(tr("Warning"), tr("Failed to open file."));
+            warning(tr("Failed to open file:\n\"%1\"").arg(fnam));
         return false;
     }
 
@@ -535,7 +535,7 @@ bool MainWindow::loadProgress(QString fnam, bool quiet)
     if (!file.open(QIODevice::ReadOnly))
     {
         if (!quiet)
-            warning(tr("Warning"), tr("Failed to open file."));
+            warning(tr("Failed to open progress file:\n\"%1\"").arg(fnam));
         return false;
     }
 
@@ -553,22 +553,47 @@ bool MainWindow::loadProgress(QString fnam, bool quiet)
     QTextStream stream(&file);
     QString line;
     line = stream.readLine();
-    if (sscanf(line.toLatin1().data(), "#Version: %d.%d.%d", &major, &minor, &patch) != 3)
-        return false;
-    if (cmpVers(major, minor, patch) > 0 && !quiet)
-        warning(tr("Warning"), tr("Progress file was created with a newer version."));
+    int lno = 1;
 
-    while (stream.status() == QTextStream::Ok)
+    if (sscanf(line.toLatin1().data(), "#Version: %d.%d.%d", &major, &minor, &patch) != 3)
     {
+        if (quiet)
+            return false;
+        int button = QMessageBox::warning(this, tr("Warning"),
+            tr("File does not look like a progress file.\n"
+            "Progress may be incomplete or broken.\n\n"
+            "Continue anyway?"),
+            QMessageBox::Abort|QMessageBox::Yes);
+        if (button == QMessageBox::Abort)
+            return false;
+    }
+    else if (cmpVers(major, minor, patch) > 0)
+    {
+        if (quiet)
+            return false;
+        int button = QMessageBox::warning(this, tr("Warning"),
+            tr("File was created with a newer version.\n"
+            "Progress may be incomplete or broken.\n\n"
+            "Continue anyway?"),
+            QMessageBox::Abort|QMessageBox::Yes);
+        if (button == QMessageBox::Abort)
+            return false;
+    }
+
+    while (stream.status() == QTextStream::Ok && !stream.atEnd())
+    {
+        lno++;
         line = stream.readLine();
         QByteArray ba = line.toLatin1();
         const char *p = ba.data();
 
         if (line.isEmpty())
-            break;
+        {
+            continue;
+        }
 
         if (line.startsWith("#Time:")) continue;
-        else if (sscanf(p, "#MC:       %8[^\n]", buf) == 1)                     { wi.mc = str2mc(buf); if (wi.mc < 0) return false; }
+        else if (sscanf(p, "#MC:       %8[^\n]", buf) == 1)                     { wi.mc = str2mc(buf); if (wi.mc < 0) wi.mc = MC_NEWEST; }
         // SearchConfig
         else if (sscanf(p, "#Search:   %d", &searchconf.searchtype) == 1)       {}
         else if (sscanf(p, "#Progress: %" PRId64, &searchconf.startseed) == 1)  {}
@@ -588,25 +613,53 @@ bool MainWindow::loadProgress(QString fnam, bool quiet)
         else if (line.startsWith("#List48:   "))                                { gen48.slist48path = line.mid(11).trimmed(); }
         else if (sscanf(p, "#SMin:     %" PRIu64, &searchconf.smin) == 1)       {}
         else if (sscanf(p, "#SMax:     %" PRIu64, &searchconf.smax) == 1)       {}
-        // Conditions
         else if (line.startsWith("#Cond:"))
-        {
+        {   // Conditions
             QString hex = line.mid(6).trimmed();
             QByteArray ba = QByteArray::fromHex(QByteArray(hex.toLatin1().data()));
-            if ((size_t)ba.size() <= sizeof(Condition))
+            size_t minsize = (size_t)ba.size();
+            if (sizeof(Condition) < minsize)
+                minsize = sizeof(Condition);
+            Condition c;
+            memset(&c, 0, sizeof(c));
+            memcpy(&c, ba.data(), minsize);
+
+            if ((size_t)ba.size() > minsize ||
+                c.save < 0 || c.save >= 100 ||
+                c.type < 0 || c.type >= FILTER_MAX)
             {
-                Condition c = {};
-                memcpy(&c, ba.data(), ba.size());
+                if (quiet)
+                    return false;
+                int button = QMessageBox::warning(this, tr("Warning"),
+                    tr("Condition [%1] at line %2 is not supported.\n\n"
+                    "Continue anyway?").arg(c.save).arg(lno),
+                    QMessageBox::Abort|QMessageBox::Yes);
+                if (button == QMessageBox::Abort)
+                    return false;
+            }
+            else
+            {
                 condvec.push_back(c);
             }
-            else return false;
         }
         else
-        {
+        {   // Seeds
             uint64_t s;
             if (sscanf(line.toLatin1().data(), "%" PRId64, (int64_t*)&s) == 1)
+            {
                 seeds.push_back(s);
-            else return false;
+            }
+            else
+            {
+                if (quiet)
+                    return false;
+                int button = QMessageBox::warning(this, tr("Warning"),
+                    tr("Failed to parse line %1 of progress file:\n%2\n\n"
+                    "Continue anyway?").arg(lno).arg(line),
+                    QMessageBox::Abort|QMessageBox::Yes);
+                if (button == QMessageBox::Abort)
+                    return false;
+            }
         }
     }
 
@@ -623,6 +676,7 @@ bool MainWindow::loadProgress(QString fnam, bool quiet)
     formControl->on_buttonClear_clicked();
     formControl->setSearchConfig(searchconf, quiet);
     formControl->searchResultsAdd(seeds, false);
+    formControl->searchProgressReset();
 
     return true;
 }
@@ -636,9 +690,9 @@ void MainWindow::updateMapSeed()
 }
 
 
-void MainWindow::warning(QString title, QString text)
+void MainWindow::warning(QString text)
 {
-    QMessageBox::warning(this, title, text, QMessageBox::Ok);
+    QMessageBox::warning(this, tr("Warning"), text, QMessageBox::Ok);
 }
 
 void MainWindow::mapGoto(qreal x, qreal z, qreal scale)
@@ -707,7 +761,7 @@ void MainWindow::on_actionLoad_triggered()
 {
     if (formControl->isbusy())
     {
-        warning(tr("Warning"), tr("Cannot load progress: search is still active."));
+        warning(tr("Cannot load progress: search is still active."));
         return;
     }
     QString fnam = QFileDialog::getOpenFileName(
@@ -716,8 +770,7 @@ void MainWindow::on_actionLoad_triggered()
     {
         QFileInfo finfo(fnam);
         prevdir = finfo.absolutePath();
-        if (!loadProgress(fnam))
-            warning(tr("Warning"), tr("Failed to parse progress file."));
+        loadProgress(fnam, false);
     }
 }
 
@@ -906,7 +959,7 @@ void MainWindow::on_buttonAnalysis_clicked()
     }
     if (x2 < x1 || z2 < z1)
     {
-        warning(tr("Warning"), tr("Invalid area for analysis"));
+        warning(tr("Invalid area for analysis"));
         return;
     }
 
@@ -965,7 +1018,7 @@ void MainWindow::on_buttonAnalysis_clicked()
                 "The analysis might take a while. Do you want to continue?")
                 .arg(x2-x1+1).arg(z2-z1+1);
         int button = QMessageBox::warning(
-            this, tr("Warning"), msg, QMessageBox::Cancel, QMessageBox::Yes);
+            this, tr("Warning"), msg, QMessageBox::Cancel|QMessageBox::Yes);
         if (button != QMessageBox::Yes)
             return;
 
@@ -1159,7 +1212,7 @@ void MainWindow::on_buttonAnalysis_clicked()
                             "Continue search?")
                             .arg(items.size());
                     int button = QMessageBox::warning(
-                        this, tr("Warning"), msg, QMessageBox::Abort, QMessageBox::Yes);
+                        this, tr("Warning"), msg, QMessageBox::Abort|QMessageBox::Yes);
                     if (button != QMessageBox::Yes)
                         goto L_scan_end;
                     update();
@@ -1198,12 +1251,8 @@ void MainWindow::on_buttonAnalysis_clicked()
 
                 if (items.size() >= 65536)
                 {
-                    QString msg = tr(
-                            "Reached maximum number of results (%1).\n"
-                            "Stopping search.")
-                            .arg(items.size());
-                    QMessageBox::warning(
-                        this, tr("Warning"), msg, QMessageBox::Ok);
+                    warning(tr("Reached maximum number of results (%1).\n"
+                        "Stopping search.").arg(items.size()));
                     goto L_scan_end;
                 }
             }
@@ -1239,7 +1288,7 @@ void MainWindow::on_buttonExport_clicked()
 
     if (!file.open(QIODevice::WriteOnly))
     {
-        warning(tr("Warning"), tr("Failed to open file."));
+        warning(tr("Failed to open file for export:\n\"%1\"").arg(fnam));
         return;
     }
 
@@ -1284,6 +1333,11 @@ void MainWindow::onAutosaveTimeout()
     {
         QString path = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
         saveProgress(path + "/session.save", true);
+        //int dispms = 10000;
+        //if (saveProgress(path + "/session.save", true))
+        //    ui->statusBar->showMessage(tr("Session autosaved"), dispms);
+        //else
+        //    ui->statusBar->showMessage(tr("Autosave failed"), dispms);
     }
 }
 

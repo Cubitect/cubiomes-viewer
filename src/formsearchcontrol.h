@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QTimer>
+#include <QKeyEvent>
 
 #include "searchthread.h"
 #include "protobasedialog.h"
@@ -60,6 +61,9 @@ public slots:
     void resultTimeout();
     void removeCurrent();
     void copyResults();
+
+protected:
+    void keyReleaseEvent(QKeyEvent *event) override;
 
 private:
     MainWindow *parent;

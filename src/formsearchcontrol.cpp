@@ -133,7 +133,16 @@ bool FormSearchControl::setList64(QString path, bool quiet)
         }
         else if (!quiet)
         {
-            QMessageBox::warning(this, tr("Warning"), tr("Failed to load seed list from file"), QMessageBox::Ok);
+            int button = QMessageBox::warning(
+                this, tr("Warning"),
+                tr("Failed to load 64-bit seed list from file:\n\"%1\"").arg(path),
+                QMessageBox::Reset, QMessageBox::Ignore);
+            if (button == QMessageBox::Reset)
+            {
+                slist64fnam.clear();
+                slist64path.clear();
+                slist64.clear();
+            }
         }
     }
     return false;
@@ -289,44 +298,53 @@ void FormSearchControl::on_listResults_customContextMenuRequested(const QPoint &
 {
     QMenu menu(this);
 
+    // this is a contextual temporary menu so shortcuts are only indicated here,
+    // but will not function - see keyReleaseEvent() for shortcut implementation
+
     QAction *actremove = menu.addAction(QIcon::fromTheme("list-remove"),
-        tr("Remove selected seed"), this, &FormSearchControl::removeCurrent);
+        tr("Remove selected seed"), this,
+        &FormSearchControl::removeCurrent, QKeySequence::Delete);
     actremove->setEnabled(!ui->listResults->selectedItems().empty());
 
     QAction *actcopy = menu.addAction(QIcon::fromTheme("edit-copy"),
-        tr("Copy list to clipboard"), this, &FormSearchControl::copyResults);
+        tr("Copy list to clipboard"), this,
+        &FormSearchControl::copyResults, QKeySequence::Copy);
     actcopy->setEnabled(ui->listResults->rowCount() > 0);
 
     int n = pasteList(true);
     QAction *actpaste = menu.addAction(QIcon::fromTheme("edit-paste"),
-        tr("Paste %n seed(s) from clipboard", "", n), this, &FormSearchControl::pasteResults);
+        tr("Paste %n seed(s) from clipboard", "", n), this,
+        &FormSearchControl::pasteResults, QKeySequence::Paste);
     actpaste->setEnabled(n > 0);
     menu.exec(ui->listResults->mapToGlobal(pos));
 }
 
 void FormSearchControl::on_buttonSearchHelp_clicked()
 {
-    QString msg = tr(
-            "<html><head/><body><p>"
-            "The <b>incremental</b> search checks seeds in numerical order, "
-            "save for grouping into work items for parallelization. This type "
-            "of search is best suited for a non-exhaustive search space and "
-            "with strong biome dependencies. You can restrict this type of "
-            "search to a value range using the &quot;...&quot; button."
-            "</p><p>"
-            "With <b>48-bit family blocks</b> the search looks for suitable "
-            "48-bit seeds first and parallelizes the search through the upper "
-            "16-bits. This type of search is best suited for exhaustive "
-            "searches and for many types of structure restrictions."
-            "</p><p>"
-            "Load a <b>seed list from a file</b> to search through an "
-            "existing set of seeds. The seeds should be in decimal ASCII text, "
-            "separated by newline characters. You can browse for a file using "
-            "the &quot;...&quot; button. (The seed generator is ignored with "
-            "this option.)"
-            "</p></body></html>"
-            );
-    QMessageBox::information(this, tr("Help: search types"), msg, QMessageBox::Ok);
+    QMessageBox mb(this);
+    mb.setIcon(QMessageBox::Information);
+    mb.setWindowTitle(tr("Help: search types"));
+    mb.setText(tr(
+        "<html><head/><body><p>"
+        "The <b>incremental</b> search checks seeds in numerical order, "
+        "save for grouping into work items for parallelization. This type "
+        "of search is best suited for a non-exhaustive search space and "
+        "with strong biome dependencies. You can restrict this type of "
+        "search to a value range using the &quot;...&quot; button."
+        "</p><p>"
+        "With <b>48-bit family blocks</b> the search looks for suitable "
+        "48-bit seeds first and parallelizes the search through the upper "
+        "16-bits. This type of search is best suited for exhaustive "
+        "searches and for many types of structure restrictions."
+        "</p><p>"
+        "Load a <b>seed list from a file</b> to search through an "
+        "existing set of seeds. The seeds should be in decimal ASCII text, "
+        "separated by newline characters. You can browse for a file using "
+        "the &quot;...&quot; button. (The seed generator is ignored with "
+        "this option.)"
+        "</p></body></html>"
+        ));
+    mb.exec();
 }
 
 void FormSearchControl::on_comboSearchType_currentIndexChanged(int index)
@@ -538,4 +556,16 @@ void FormSearchControl::copyResults()
     QClipboard *clipboard = QGuiApplication::clipboard();
     clipboard->setText(text);
 }
+
+void FormSearchControl::keyReleaseEvent(QKeyEvent *event)
+{
+    if (event->matches(QKeySequence::Delete))
+        removeCurrent();
+    else if (event->matches(QKeySequence::Copy))
+        copyResults();
+    else if (event->matches(QKeySequence::Paste))
+        pasteResults();
+    QWidget::keyReleaseEvent(event);
+}
+
 

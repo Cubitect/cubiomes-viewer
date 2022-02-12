@@ -26,16 +26,7 @@
       </property>
       <widget class="QFrame" name="controlFrame">
        <layout class="QVBoxLayout" name="verticalLayout_5">
-        <property name="leftMargin">
-         <number>0</number>
-        </property>
-        <property name="topMargin">
-         <number>0</number>
-        </property>
-        <property name="rightMargin">
-         <number>0</number>
-        </property>
-        <property name="bottomMargin">
+        <property name="margin">
          <number>0</number>
         </property>
         <item>
@@ -245,16 +236,7 @@
             <string>Search</string>
            </attribute>
            <layout class="QGridLayout" name="gridLayout">
-            <property name="leftMargin">
-             <number>0</number>
-            </property>
-            <property name="topMargin">
-             <number>0</number>
-            </property>
-            <property name="rightMargin">
-             <number>0</number>
-            </property>
-            <property name="bottomMargin">
+            <property name="margin">
              <number>0</number>
             </property>
             <item row="0" column="0">
@@ -300,8 +282,8 @@ QToolButton {
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>1232</width>
-                 <height>669</height>
+                 <width>1233</width>
+                 <height>676</height>
                 </rect>
                </property>
                <property name="sizePolicy">
@@ -626,16 +608,7 @@ QSplitter {
         <enum>QFrame::Raised</enum>
        </property>
        <layout class="QGridLayout" name="gridLayout_4">
-        <property name="leftMargin">
-         <number>0</number>
-        </property>
-        <property name="topMargin">
-         <number>0</number>
-        </property>
-        <property name="rightMargin">
-         <number>0</number>
-        </property>
-        <property name="bottomMargin">
+        <property name="margin">
          <number>0</number>
         </property>
         <item row="0" column="0">
@@ -702,7 +675,7 @@ QToolButton:checked {
      <x>0</x>
      <y>0</y>
      <width>1280</width>
-     <height>22</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuMap">
