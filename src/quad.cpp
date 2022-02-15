@@ -7,8 +7,6 @@
 #include <cmath>
 #include <algorithm>
 
-#include <alloca.h>
-
 
 #define SEAM_BUF 8
 
