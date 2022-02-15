@@ -226,7 +226,7 @@ struct QWorld
     // processed Quads are cached until they are too far out of view
     std::vector<Quad*> cachedbiomes;
     std::vector<Quad*> cachedstruct;
-    unsigned int cachesize;
+    uint64_t memlimit;
 
     bool sshow[STRUCT_NUM];
     bool showBB;

@@ -45,9 +45,7 @@ MapView::MapView(QWidget *parent)
 , holding()
 , mstart(),mprev()
 , updatecounter()
-, sshow()
-, hasinertia(true)
-, gridspacing()
+, config()
 {
     memset(sshow, 0, sizeof(sshow));
 
@@ -130,21 +128,9 @@ void MapView::setShow(int stype, bool v)
     update(2);
 }
 
-void MapView::setShowBB(bool show)
+void MapView::setConfig(const Config& c)
 {
-    showBB = show;
-    settingsToWorld();
-    update(2);
-}
-
-void MapView::setSmoothMotion(bool smooth)
-{
-    hasinertia = smooth;
-}
-
-void MapView::setSetGridSpacing(int spacing)
-{
-    gridspacing = spacing;
+    config = c;
     settingsToWorld();
     update(2);
 }
@@ -155,8 +141,9 @@ void MapView::settingsToWorld()
         return;
     for (int s = 0; s < STRUCT_NUM; s++)
         world->sshow[s] = sshow[s];
-    world->showBB = showBB;
-    world->gridspacing = gridspacing;
+    world->showBB = config.showBBoxes;
+    world->gridspacing = config.gridSpacing;
+    world->memlimit = (uint64_t) config.mapCacheSize * 1024 * 1024;
 }
 
 qreal MapView::getX()
@@ -313,8 +300,8 @@ void MapView::mouseReleaseEvent(QMouseEvent *e)
             frameelapsed.start();
             update();
         }
-        if (!hasinertia)
-        {
+        if (!config.smoothMotion)
+        {   // i.e. without interia
             velx = velz = 0;
         }
 

@@ -325,6 +325,7 @@ void MainWindow::saveSettings()
     settings.setValue("config/queueSize", config.queueSize);
     settings.setValue("config/maxMatching", config.maxMatching);
     settings.setValue("config/gridSpacing", config.gridSpacing);
+    settings.setValue("config/mapCacheSize", config.mapCacheSize);
     settings.setValue("config/biomeColorPath", config.biomeColorPath);
 
     settings.setValue("world/saltOverride", g_extgen.saltOverride);
@@ -397,14 +398,13 @@ void MainWindow::loadSettings()
     config.queueSize = settings.value("config/queueSize", config.queueSize).toInt();
     config.maxMatching = settings.value("config/maxMatching", config.maxMatching).toInt();
     config.gridSpacing = settings.value("config/gridSpacing", config.gridSpacing).toInt();
+    config.mapCacheSize = settings.value("config/mapCacheSize", config.mapCacheSize).toInt();
     config.biomeColorPath = settings.value("config/biomeColorPath", config.biomeColorPath).toString();
 
     if (!config.biomeColorPath.isEmpty())
         onBiomeColorChange();
 
-    ui->mapView->setShowBB(config.showBBoxes);
-    ui->mapView->setSmoothMotion(config.smoothMotion);
-    ui->mapView->setSetGridSpacing(config.gridSpacing);
+    ui->mapView->setConfig(config);
     onStyleChanged(config.uistyle);
 
     g_extgen.saltOverride = settings.value("world/saltOverride", g_extgen.saltOverride).toBool();
@@ -787,9 +787,7 @@ void MainWindow::on_actionPreferences_triggered()
     {
         Config oldConfig = config;
         config = dialog->getSettings();
-        ui->mapView->setShowBB(config.showBBoxes);
-        ui->mapView->setSmoothMotion(config.smoothMotion);
-        ui->mapView->setSetGridSpacing(config.gridSpacing);
+        ui->mapView->setConfig(config);
         if (oldConfig.uistyle != config.uistyle)
             onStyleChanged(config.uistyle);
 

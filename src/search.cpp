@@ -155,8 +155,8 @@ int testTreeAt(
             // examine all instances without support for averaging
             int icnt = MAX_INSTANCES;
             st = testCondAt(at, inst, &icnt, &c, pass, gen, abort);
-            if (st == COND_FAILED)
-                return COND_FAILED;
+            if (st == COND_FAILED || st == COND_MAYBE_POS_INVAL)
+                return st;
             int sta = COND_FAILED;
             int iok = 0;
             for (int i = 0; i < icnt; i++)
@@ -209,6 +209,8 @@ int testTreeAt(
             else
             {
                 st = testCondAt(at, inst, NULL, &c, pass, gen, abort);
+                if (st == COND_FAILED || st == COND_MAYBE_POS_INVAL)
+                    return st;
                 pos = inst[0]; // center point of instances
             }
             for (int b : branches)
@@ -359,11 +361,11 @@ static bool isInnerRingOk(int mc, uint64_t seed, int x1, int z1, int x2, int z2,
     double c, s;
     c = cos(sh.angle + M_PI*2/3);
     s = sin(sh.angle + M_PI*2/3);
-    if (intersectRectLine(x1-112, z1-112, x2+112, z2+112, c*r1, s*r1, c*r2, s*r2))
+    if (intersectRectLine(x1, z1, x2, z2, c*r1, s*r1, c*r2, s*r2))
         return true;
     c = cos(sh.angle + M_PI*4/3);
     s = sin(sh.angle + M_PI*4/3);
-    if (intersectRectLine(x1-112, z1-112, x2+112, z2+112, c*r1, s*r1, c*r2, s*r2))
+    if (intersectRectLine(x1, z1, x2, z2, c*r1, s*r1, c*r2, s*r2))
         return true;
 
     return false;
@@ -774,20 +776,39 @@ L_qm_any:
         if (pass != PASS_FULL_64)
             return COND_MAYBE_POS_INVAL;
 
-        x1 = cond->x1 + at.x;
-        z1 = cond->z1 + at.z;
-        x2 = cond->x2 + at.x;
-        z2 = cond->z2 + at.z;
-
+        if (cond->rmax > 0)
+        {
+            rmax = (cond->rmax-1) * (cond->rmax-1) + 1;
+            x1 = at.x - cond->rmax;
+            z1 = at.z - cond->rmax;
+            x2 = at.x + cond->rmax;
+            z2 = at.z + cond->rmax;
+        }
+        else
+        {
+            rmax = 0;
+            x1 = cond->x1 + at.x;
+            z1 = cond->z1 + at.z;
+            x2 = cond->x2 + at.x;
+            z2 = cond->z2 + at.z;
+        }
         if (*abort) return COND_FAILED;
         gen->init4Dim(0);
         pc = getSpawn(&gen->g);
-        if (pc.x >= x1 && pc.x <= x2 && pc.z >= z1 && pc.z <= z2)
+        if (rmax)
         {
-            *cent = pc;
-            return COND_OK;
+            int dx = pc.x - at.x;
+            int dz = pc.z - at.z;
+            int64_t rsq = dx*(int64_t)dx + dz*(int64_t)dz;
+            if (rsq >= rmax)
+                return COND_FAILED;
         }
-        return COND_FAILED;
+        else if (pc.x < x1 || pc.x > x2 || pc.z < z1 || pc.z > z2)
+        {
+            return COND_FAILED;
+        }
+        *cent = pc;
+        return COND_OK;
 
 
     case F_FIRST_STRONGHOLD:
@@ -818,27 +839,42 @@ L_qm_any:
 
     case F_STRONGHOLD:
 
-        x1 = cond->x1 + at.x;
-        z1 = cond->z1 + at.z;
-        x2 = cond->x2 + at.x;
-        z2 = cond->z2 + at.z;
-
+        // the position is rounded to the nearest chunk and then centered on (8,8)
+        // for the pre-selection we will subtract this offset
+        if (cond->rmax > 0)
+        {
+            x1 = at.x - cond->rmax - 8;
+            z1 = at.z - cond->rmax - 8;
+            x2 = at.x + cond->rmax - 8;
+            z2 = at.z + cond->rmax - 8;
+        }
+        else
+        {
+            x1 = cond->x1 + at.x - 8;
+            z1 = cond->z1 + at.z - 8;
+            x2 = cond->x2 + at.x - 8;
+            z2 = cond->z2 + at.z - 8;
+        }
         rx1 = abs(x1); rx2 = abs(x2);
         rz1 = abs(z1); rz2 = abs(z2);
-        if (x1 <= 112 && x2 >= -112 && z1 <= 112 && z2 >= -112)
+        // lets treat the final (+/-112) blocks as (+/-120) to account for chunk rounding
+        if (x1 <= 112+8 && x2 >= -112-8 && z1 <= 112+8 && z2 >= -112-8)
         {
             rmin = 0;
         }
         else
         {
-            xt = (rx1 < rx2 ? rx1 : rx2) - 112;
-            zt = (rz1 < rz2 ? rz1 : rz2) - 112;
+            xt = (rx1 < rx2 ? rx1 : rx2) - 112-8;
+            zt = (rz1 < rz2 ? rz1 : rz2) - 112-8;
             rmin = xt*xt + zt*zt;
         }
-        xt = (rx1 > rx2 ? rx1 : rx2) + 112;
-        zt = (rz1 > rz2 ? rz1 : rz2) + 112;
+        xt = (rx1 > rx2 ? rx1 : rx2) + 112+8;
+        zt = (rz1 > rz2 ? rz1 : rz2) + 112+8;
         rmax = xt*xt + zt*zt;
 
+        // undo (8,8) offset
+        x1 += 8; z1 += 8;
+        x2 += 8; z2 += 8;
         cent->x = (x1 + x2) >> 1;
         cent->z = (z1 + z2) >> 1;
 
@@ -846,10 +882,6 @@ L_qm_any:
         // r = 640 + [0,1]*512 (+/-112)
         // MC_1_9+ formula:
         // r = 1408 + 3072*n + 1280*[0,1] (+/-112)
-
-        // TODO:
-        // the formula output is rounded to the nearest chunk and then centered on (8,8)
-        // this isn't considered yet and means the pre-selection can cause false negatives
 
         if (gen->mc < MC_1_9)
         {
@@ -875,7 +907,7 @@ L_qm_any:
             rmax = 1408+1280;
         }
         // if we are only looking at the inner ring, we can check if the generation angles are suitable
-        if (r == 0 && !isInnerRingOk(gen->mc, gen->seed, x1, z1, x2, z2, rmin, rmax))
+        if (r == 0 && !isInnerRingOk(gen->mc, gen->seed, x1-112-8, z1-112-8, x2+112+8, z2+112+8, rmin, rmax))
             return cond->count == 0 ? COND_OK : COND_FAILED;
 
         // pre-biome-checks complete, the area appears to line up with possible generation positions
@@ -885,6 +917,11 @@ L_qm_any:
         }
         else
         {
+            if (cond->rmax > 0)
+                rmax = (cond->rmax-1) * (cond->rmax-1) + 1;
+            else
+                rmax = 0;
+
             StrongholdIter sh;
             initFirstStronghold(&sh, gen->mc, gen->seed);
             icnt = 0;
@@ -894,8 +931,20 @@ L_qm_any:
             {
                 if (*abort || sh.ringnum > r)
                     break;
-
-                if (sh.pos.x >= x1 && sh.pos.x <= x2 && sh.pos.z >= z1 && sh.pos.z <= z2)
+                bool inside;
+                if (rmax)
+                {
+                    int dx = sh.pos.x - at.x;
+                    int dz = sh.pos.z - at.z;
+                    int64_t rsq = dx*(int64_t)dx + dz*(int64_t)dz;
+                    inside = (rsq < rmax);
+                }
+                else
+                {
+                    inside = (sh.pos.x >= x1 && sh.pos.x <= x2 &&
+                              sh.pos.z >= z1 && sh.pos.z <= z2);
+                }
+                if (inside)
                 {
                     if (cond->count == 0)
                     {

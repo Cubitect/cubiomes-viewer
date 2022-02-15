@@ -44,6 +44,7 @@ void ConfigDialog::initSettings(Config *config)
     ui->lineQueueSize->setText(QString::number(config->queueSize));
     ui->lineMatching->setText(QString::number(config->maxMatching));
     ui->lineGridSpacing->setText(config->gridSpacing ? QString::number(config->gridSpacing) : "");
+    ui->spinCacheSize->setValue(config->mapCacheSize);
 
     setBiomeColorPath(config->biomeColorPath);
 }
@@ -59,6 +60,7 @@ Config ConfigDialog::getSettings()
     conf.queueSize = ui->lineQueueSize->text().toInt();
     conf.maxMatching = ui->lineMatching->text().toInt();
     conf.gridSpacing = ui->lineGridSpacing->text().toInt();
+    conf.mapCacheSize = ui->spinCacheSize->value();
 
     if (!conf.seedsPerItem) conf.seedsPerItem = 1024;
     if (!conf.queueSize) conf.queueSize = QThread::idealThreadCount();

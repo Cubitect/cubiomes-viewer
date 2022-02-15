@@ -20,8 +20,13 @@ win32: {
     LIBS += -static -static-libgcc -static-libstdc++
 }
 
-# also compile cubiomes
-QMAKE_PRE_LINK += $(MAKE) -C $$CUPATH -f $$CUPATH/makefile CFLAGS="-DSTRUCT_CONFIG_OVERRIDE=1" all
+# compile cubiomes
+release: {
+    CUTARGET = release
+} else: { # may need the release target to be disabled: qmake CONFIG-=release
+    CUTARGET = debug
+}
+QMAKE_PRE_LINK += $(MAKE) -C $$CUPATH -f $$CUPATH/makefile CFLAGS="-DSTRUCT_CONFIG_OVERRIDE=1" $$CUTARGET
 QMAKE_CLEAN += $$CUPATH/*.o $$CUPATH/libcubiomes.a
 
 TARGET = cubiomes-viewer

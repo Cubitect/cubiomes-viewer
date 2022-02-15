@@ -364,7 +364,7 @@ static const struct FilterList
         };
 
         list[F_SPAWN] = FilterInfo{
-            CAT_OTHER, 1, 1, 1, 0, 0, 0, 1, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
+            CAT_OTHER, 1, 1, 1, 1, 0, 0, 1, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
             ":icons/spawn.png",
             _("Spawn"),
             ""
@@ -386,7 +386,7 @@ static const struct FilterList
         };
 
         list[F_STRONGHOLD] = FilterInfo{
-            CAT_STRUCT, 1, 1, 1, 0, 0, 0, 1, 1, MC_1_0, MC_NEWEST, 0, 0, disp++,
+            CAT_STRUCT, 1, 1, 1, 1, 0, 0, 1, 1, MC_1_0, MC_NEWEST, 0, 0, disp++,
             ":icons/stronghold.png",
             _("Stronghold"),
             ""

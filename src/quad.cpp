@@ -7,6 +7,9 @@
 #include <cmath>
 #include <algorithm>
 
+#include <alloca.h>
+
+
 #define SEAM_BUF 8
 
 
@@ -22,9 +25,9 @@ Quad::Quad(const Level* l, int i, int j)
 
 Quad::~Quad()
 {
-    delete [] rgb;
     delete img;
     delete spos;
+    delete [] rgb;
 }
 
 void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
@@ -100,7 +103,6 @@ void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
 }
 
 
-
 void Quad::run()
 {
     if (done || *isdel)
@@ -112,6 +114,8 @@ void Quad::run()
         int x = ti*pixs, z = tj*pixs, w = pixs+SEAM_BUF, h = pixs+SEAM_BUF;
         Range r = {scale, x, z, w, h, y, 1};
         int *b = allocCache(g, r);
+        if (!b) return;
+
         int err = genBiomes(g, b, r);
         if (err)
         {
@@ -124,11 +128,10 @@ void Quad::run()
             for (int i = 0; i < w*h; i++)
                 b[i] = -1;
         }
-
         rgb = new uchar[w*h * 3];
         biomesToImage(rgb, biomeColors, b, w, h, 1, 1);
-        img = new QImage(rgb, w, h, 3*w, QImage::Format_RGB888);
         free(b);
+        img = new QImage(rgb, w, h, 3*w, QImage::Format_RGB888);
     }
     else
     {
@@ -225,7 +228,6 @@ void Level::resizeLevel(std::vector<Quad*>& cache, int x, int z, int w, int h)
             {
                 c->stopped = true;
             }
-
             if (gx >= 0 && gx < w && gz >= 0 && gz < h)
             {
                 Quad *& g = grid[gz*w + gx];
@@ -308,7 +310,7 @@ QWorld::QWorld(WorldInfo wi, int dim)
     , activelv()
     , cachedbiomes()
     , cachedstruct()
-    , cachesize()
+    , memlimit()
     , showBB()
     , gridspacing()
     , spawn()
@@ -327,23 +329,12 @@ QWorld::QWorld(WorldInfo wi, int dim)
     , qual()
 {
     setupGenerator(&g, wi.mc,  wi.large);
-    applySeed(&g, dim, wi.seed);
 
     activelv = 0;
 
-    int pixs;
-    if (g.mc >= MC_1_18)
-    {
-        pixs = 128;
-        cachesize = 1000;
-        qual = 1.7;
-    }
-    else
-    {
-        pixs = 512;
-        cachesize = 100;
-        qual = 1.0;
-    }
+    memlimit = 256ULL * 1024*1024;
+
+    setDim(dim);
 
     lvs.resize(D_SPAWN);
     lvs[D_DESERT]       .init4struct(this, 0, 2048, D_DESERT, 2);
@@ -364,24 +355,6 @@ QWorld::QWorld(WorldInfo wi, int dim)
     lvs[D_ENDCITY]      .init4struct(this, 1, 2048, D_ENDCITY, 2);
     lvs[D_GATEWAY]      .init4struct(this, 1, 2048, D_GATEWAY, 2);
     lvs[D_MINESHAFT]    .init4struct(this, 0, 2048, D_MINESHAFT, 1);
-
-    if (dim == 0)
-    {
-        lvb.resize(5);
-        lvb[0].init4map(this, dim, pixs, 1);
-        lvb[1].init4map(this, dim, pixs, 4);
-        lvb[2].init4map(this, dim, pixs, 16);
-        lvb[3].init4map(this, dim, pixs, 64);
-        lvb[4].init4map(this, dim, pixs, 256);
-    }
-    else
-    {
-        lvb.resize(4);
-        lvb[0].init4map(this, dim, pixs, 1);
-        lvb[1].init4map(this, dim, pixs, 4);
-        lvb[2].init4map(this, dim, pixs, 16);
-        lvb[3].init4map(this, dim, pixs, 64);
-    }
 
     memset(sshow, 0, sizeof(sshow));
 
@@ -456,17 +429,13 @@ void QWorld::setDim(int dim)
     if (g.mc >= MC_1_18)
     {
         pixs = 128;
-        cachesize = 1000;
         qual = 1.7;
     }
     else
     {
         pixs = 512;
-        cachesize = 100;
         qual = 1.0;
     }
-
-    cleancache(cachedbiomes, (int)(cachesize));
 
     lvb.clear();
 
@@ -489,6 +458,7 @@ void QWorld::setDim(int dim)
     }
 }
 
+
 int QWorld::getBiome(Pos p)
 {
     int id = getBiomeAt(&g, 1, p.x, wi.y, p.z);
@@ -497,30 +467,33 @@ int QWorld::getBiome(Pos p)
 
 void QWorld::cleancache(std::vector<Quad*>& cache, unsigned int maxsize)
 {
-    // try to delete the oldest entries in the cache
-    if (cache.size() > maxsize)
+    size_t n = cache.size();
+    if (n < maxsize)
+        return;
+
+    size_t targetsize = 4 * maxsize / 5;
+
+    std::vector<Quad*> newcache;
+    for (size_t i = 0; i < n; i++)
     {
-        std::vector<Quad*> newcache;
-        int i;
-        for (i = cache.size()-1; i >= 0; --i)
+        Quad *q = cache[i];
+        if (q->stopped)
         {
-            Quad *q = cache[i];
-            if (newcache.size() + i < maxsize * 0.8)
+            delete q;
+            continue;
+        }
+        if (n - i >= targetsize)
+        {
+            if (q->done || QThreadPool::globalInstance()->tryTake(q))
             {
-                newcache.push_back(q);
-            }
-            else
-            {
-                if (q->done || q->stopped || QThreadPool::globalInstance()->tryTake(q))
-                    delete q;
-                else
-                    newcache.push_back(q);
+                delete q;
+                continue;
             }
         }
-
-        cache.resize(newcache.size());
-        std::copy(newcache.rbegin(), newcache.rend(), cache.begin());
+        newcache.push_back(q);
     }
+    //printf("%zu -> %zu [%u]\n", n, newcache.size(), maxsize);
+    cache.swap(newcache);
 }
 
 
@@ -931,6 +904,9 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
 
         painter.drawPixmap(iconrec.translated(pad,pad), *icon);
     }
+
+    int pixs = lvb[0].pixs + SEAM_BUF;
+    unsigned int cachesize = memlimit / pixs / pixs / 3;
 
     cleancache(cachedbiomes, cachesize);
     cleancache(cachedstruct, cachesize);

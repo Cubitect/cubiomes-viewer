@@ -60,6 +60,7 @@ struct Config
     int queueSize;
     int maxMatching;
     int gridSpacing;
+    int mapCacheSize;
     QString biomeColorPath;
 
     Config() { reset(); }
@@ -75,6 +76,7 @@ struct Config
         queueSize = QThread::idealThreadCount();
         maxMatching = 65536;
         gridSpacing = 0;
+        mapCacheSize = 256;
         biomeColorPath = "";
     }
 };

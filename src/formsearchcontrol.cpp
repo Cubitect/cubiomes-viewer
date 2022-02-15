@@ -559,12 +559,15 @@ void FormSearchControl::copyResults()
 
 void FormSearchControl::keyReleaseEvent(QKeyEvent *event)
 {
-    if (event->matches(QKeySequence::Delete))
-        removeCurrent();
-    else if (event->matches(QKeySequence::Copy))
-        copyResults();
-    else if (event->matches(QKeySequence::Paste))
-        pasteResults();
+    if (ui->listResults->hasFocus())
+    {
+        if (event->matches(QKeySequence::Delete))
+            removeCurrent();
+        else if (event->matches(QKeySequence::Copy))
+            copyResults();
+        else if (event->matches(QKeySequence::Paste))
+            pasteResults();
+    }
     QWidget::keyReleaseEvent(event);
 }
 
