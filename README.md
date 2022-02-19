@@ -13,7 +13,7 @@ For the linux build you will probably have to add the executable flags to the bi
 
 For Arch linux users, the tool may be found in the [AUR](https://aur.archlinux.org/packages/cubiomes-viewer/) thanks to [JakobDev](https://github.com/JakobDev).
 
-Non-PC platforms, such as macOS are not formally supported, but you can check [this issue](https://github.com/Cubitect/cubiomes-viewer/issues/108) for help regarding unofficial builds.
+Non-PC platforms, such as macOS, are not formally supported, but you can check [here](https://github.com/Cubitect/cubiomes-viewer/issues/107) for more information on this issue.
 
 
 ## Build from source
