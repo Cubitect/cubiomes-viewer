@@ -38,6 +38,7 @@ SOURCES += \
         src/aboutdialog.cpp \
         src/collapsible.cpp \
         src/configdialog.cpp \
+        src/examplesdialog.cpp \
         src/extgendialog.cpp \
         src/formconditions.cpp \
         src/formgen48.cpp \
@@ -63,6 +64,7 @@ HEADERS += \
         src/aboutdialog.h \
         src/collapsible.h \
         src/configdialog.h \
+        src/examplesdialog.h \
         src/extgendialog.h \
         src/formconditions.h \
         src/formgen48.h \
@@ -85,6 +87,7 @@ HEADERS += \
 FORMS += \
         src/aboutdialog.ui \
         src/configdialog.ui \
+        src/examplesdialog.ui \
         src/extgendialog.ui \
         src/formconditions.ui \
         src/formgen48.ui \
@@ -97,5 +100,8 @@ FORMS += \
         src/rangedialog.ui
 
 RESOURCES += \
-        icons.qrc \
-        style.qrc
+        rc/icons.qrc \
+        rc/style.qrc \
+        rc/examples.qrc
+
+

@@ -14,7 +14,7 @@
    <string>Quad-Structure Scan</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../icons.qrc">
+   <iconset resource="../rc/icons.qrc">
     <normaloff>:/icons/quad.png</normaloff>:/icons/quad.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout">
@@ -63,7 +63,7 @@
           <string>type of quad-structure</string>
          </property>
          <property name="textAlignment">
-          <set>AlignLeft|AlignVCenter</set>
+          <set>AlignLeading|AlignVCenter</set>
          </property>
         </column>
         <column>
@@ -74,7 +74,7 @@
           <string>distance to origin</string>
          </property>
          <property name="textAlignment">
-          <set>AlignLeft|AlignVCenter</set>
+          <set>AlignLeading|AlignVCenter</set>
          </property>
         </column>
         <column>
@@ -85,7 +85,7 @@
           <string>optimal AFK location</string>
          </property>
          <property name="textAlignment">
-          <set>AlignLeft|AlignVCenter</set>
+          <set>AlignLeading|AlignVCenter</set>
          </property>
         </column>
         <column>
@@ -96,7 +96,7 @@
           <string>distance to furthest spawning space from optimal AFK position</string>
          </property>
          <property name="textAlignment">
-          <set>AlignLeft|AlignVCenter</set>
+          <set>AlignLeading|AlignVCenter</set>
          </property>
         </column>
         <column>
@@ -107,7 +107,7 @@
           <string>horizontal bounding box area inside a 128 block range</string>
          </property>
          <property name="textAlignment">
-          <set>AlignLeft|AlignVCenter</set>
+          <set>AlignLeading|AlignVCenter</set>
          </property>
         </column>
        </widget>
@@ -281,15 +281,14 @@
      </property>
      <property name="icon">
       <iconset theme="window-close">
-       <normaloff/>
-      </iconset>
+       <normaloff>.</normaloff>.</iconset>
      </property>
     </widget>
    </item>
   </layout>
  </widget>
  <resources>
-  <include location="../icons.qrc"/>
+  <include location="../rc/icons.qrc"/>
  </resources>
  <connections/>
 </ui>

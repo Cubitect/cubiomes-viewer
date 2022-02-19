@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>examples/village_portal_stronghold.txt</file>
+        <file>examples/quadhut_stronghold_mushroom.txt</file>
+        <file>examples/mushroom_icespike.txt</file>
+    </qresource>
+</RCC>

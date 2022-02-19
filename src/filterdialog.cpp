@@ -545,7 +545,7 @@ void FilterDialog::updateBiomeSelection()
         if (layerId == 0)
         {
             Generator tmp;
-            tmp.mc = mc;
+            setupGenerator(&tmp, mc, 0);
             const Layer *l = getLayerForScale(&tmp, ft.step);
             if (l)
                 layerId = l - tmp.ls.layers;

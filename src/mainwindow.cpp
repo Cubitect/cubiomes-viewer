@@ -3,6 +3,7 @@
 
 #include "gotodialog.h"
 #include "quadlistdialog.h"
+#include "examplesdialog.h"
 #include "aboutdialog.h"
 #include "protobasedialog.h"
 #include "filterdialog.h"
@@ -55,11 +56,19 @@ MainWindow::MainWindow(QWidget *parent)
     , prevdir(".")
     , protodialog()
 {
-    int fontid = QFontDatabase::addApplicationFont(":/rc/DejaVuSans.ttf");
-    QFontDatabase::addApplicationFont(":/rc/DejaVuSans-Bold.ttf");
-    QFont fontdef = QFontDatabase::applicationFontFamilies(fontid).at(0);
-    fontdef.setPointSize(10);
-    QApplication::setFont(fontdef);
+    int fontid = QFontDatabase::addApplicationFont(":/fonts/DejaVuSans.ttf");
+    if (fontid >= 0)
+    {
+        QFontDatabase::addApplicationFont(":/fonts/DejaVuSans-Bold.ttf");
+        QFont fontdef = QFontDatabase::applicationFontFamilies(fontid).at(0);
+        fontdef.setPointSize(10);
+        QApplication::setFont(fontdef);
+    }
+    else
+    {
+        fprintf(stderr, "Failed to load recources.\n");
+        exit(1);
+    }
 
     ui->setupUi(this);
 
@@ -82,9 +91,9 @@ MainWindow::MainWindow(QWidget *parent)
         "same seed <b>and the required instance count is exactly one</b>, the "
         "instances are checked individually instead."
         "</p><p>"
-        "Biome conditions do not have trigger instances and always yield the "
-        "center point of the testing area. You can use reference point helpers "
-        "to construct relative biome dependencies."
+        "Biome conditions <b>do not have trigger instances</b> and always yield "
+        "the center point of the testing area. You can use reference point "
+        "helpers to construct relative biome dependencies."
         "</p></body></html>"
     ));
 
@@ -490,6 +499,7 @@ bool MainWindow::saveProgress(QString fnam, bool quiet)
     stream << "#Time:     " << QDateTime::currentDateTime().toString() << "\n";
     // MC version of the session should take priority over the one in the settings
     stream << "#MC:       " << mc2str(wi.mc) << "\n";
+    stream << "#Large:    " << wi.large << "\n";
 
     stream << "#Search:   " << searchconf.searchtype << "\n";
     if (!searchconf.slist64path.isEmpty())
@@ -594,6 +604,7 @@ bool MainWindow::loadProgress(QString fnam, bool quiet)
 
         if (line.startsWith("#Time:")) continue;
         else if (sscanf(p, "#MC:       %8[^\n]", buf) == 1)                     { wi.mc = str2mc(buf); if (wi.mc < 0) wi.mc = MC_NEWEST; }
+        else if (sscanf(p, "#Large:    %d", &tmp) == 1)                         { wi.large = tmp; }
         // SearchConfig
         else if (sscanf(p, "#Search:   %d", &searchconf.searchtype) == 1)       {}
         else if (sscanf(p, "#Progress: %" PRId64, &searchconf.startseed) == 1)  {}
@@ -849,6 +860,21 @@ void MainWindow::on_actionOpen_shadow_seed_triggered()
     {
         wi.seed = getShadow(wi.seed);
         setSeed(wi);
+    }
+}
+
+void MainWindow::on_actionExamples_triggered()
+{
+    WorldInfo wi;
+    getSeed(&wi);
+    ExamplesDialog *dialog = new ExamplesDialog(this, wi);
+    if (dialog->exec())
+    {
+        QString example = dialog->getExample();
+        if (!example.isEmpty())
+        {
+            loadProgress(example);
+        }
     }
 }
 

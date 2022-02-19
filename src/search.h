@@ -591,7 +591,9 @@ struct ConditionTree
         for (const Condition& c : cv)
             if (c.save > cmax)
                 cmax = c.save;
+        condvec.clear();
         condvec.resize(cmax + 1);
+        references.clear();
         references.resize(cmax + 1);
         for (const Condition& c : cv)
         {

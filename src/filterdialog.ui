@@ -50,7 +50,7 @@
          <string>Algorithm helpers</string>
         </property>
         <property name="icon">
-         <iconset resource="../icons.qrc">
+         <iconset resource="../rc/icons.qrc">
           <normaloff>:/icons/helper.png</normaloff>:/icons/helper.png</iconset>
         </property>
        </item>
@@ -59,7 +59,7 @@
          <string>Quad-structure</string>
         </property>
         <property name="icon">
-         <iconset resource="../icons.qrc">
+         <iconset resource="../rc/icons.qrc">
           <normaloff>:/icons/quad.png</normaloff>:/icons/quad.png</iconset>
         </property>
        </item>
@@ -68,7 +68,7 @@
          <string>Structures</string>
         </property>
         <property name="icon">
-         <iconset resource="../icons.qrc">
+         <iconset resource="../rc/icons.qrc">
           <normaloff>:/icons/stronghold.png</normaloff>:/icons/stronghold.png</iconset>
         </property>
        </item>
@@ -77,7 +77,7 @@
          <string>Biome filter</string>
         </property>
         <property name="icon">
-         <iconset resource="../icons.qrc">
+         <iconset resource="../rc/icons.qrc">
           <normaloff>:/icons/overworld.png</normaloff>:/icons/overworld.png</iconset>
         </property>
        </item>
@@ -86,7 +86,7 @@
          <string>Nether biomes</string>
         </property>
         <property name="icon">
-         <iconset resource="../icons.qrc">
+         <iconset resource="../rc/icons.qrc">
           <normaloff>:/icons/nether.png</normaloff>:/icons/nether.png</iconset>
         </property>
        </item>
@@ -95,7 +95,7 @@
          <string>End biomes</string>
         </property>
         <property name="icon">
-         <iconset resource="../icons.qrc">
+         <iconset resource="../rc/icons.qrc">
           <normaloff>:/icons/the_end.png</normaloff>:/icons/the_end.png</iconset>
         </property>
        </item>
@@ -104,7 +104,7 @@
          <string>Others</string>
         </property>
         <property name="icon">
-         <iconset resource="../icons.qrc">
+         <iconset resource="../rc/icons.qrc">
           <normaloff>:/icons/slime.png</normaloff>:/icons/slime.png</iconset>
         </property>
        </item>
@@ -603,7 +603,7 @@
   <tabstop>scrollArea</tabstop>
  </tabstops>
  <resources>
-  <include location="../icons.qrc"/>
+  <include location="../rc/icons.qrc"/>
  </resources>
  <connections/>
 </ui>

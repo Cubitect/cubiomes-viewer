@@ -78,6 +78,7 @@ private slots:
     void on_actionGo_to_triggered();
     void on_actionScan_seed_for_Quad_Huts_triggered();
     void on_actionOpen_shadow_seed_triggered();
+    void on_actionExamples_triggered();
     void on_actionAbout_triggered();
     void on_actionCopy_triggered();
     void on_actionPaste_triggered();
@@ -107,7 +108,6 @@ private slots:
     void onBiomeColorChange();
     void copyCoord();
     void copyTeleportCommand();
-
 
 public:
     Ui::MainWindow *ui;

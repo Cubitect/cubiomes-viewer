@@ -723,12 +723,25 @@ L_qm_any:
         }
         return COND_FAILED;
 
+
     case F_MINESHAFT:
 
-        x1 = cond->x1 + at.x;
-        z1 = cond->z1 + at.z;
-        x2 = cond->x2 + at.x;
-        z2 = cond->z2 + at.z;
+        if (cond->rmax > 0)
+        {
+            rmax = (cond->rmax-1) * (cond->rmax-1) + 1;
+            x1 = at.x - cond->rmax;
+            z1 = at.z - cond->rmax;
+            x2 = at.x + cond->rmax;
+            z2 = at.z + cond->rmax;
+        }
+        else
+        {
+            rmax = 0;
+            x1 = cond->x1 + at.x;
+            z1 = cond->z1 + at.z;
+            x2 = cond->x2 + at.x;
+            z2 = cond->z2 + at.z;
+        }
         rx1 = x1 >> 4;
         rz1 = z1 >> 4;
         rx2 = x2 >> 4;
@@ -749,26 +762,52 @@ L_qm_any:
         {   // just check there are at least *inst (== cond->count) instances
             *imax = icnt =
                 getMineshafts(gen->mc, gen->seed, rx1, rz1, rx2, rz2, cent, *imax);
+            if (rmax)
+            {   // filter out the instances that are outside the radius
+                int j = 0;
+                for (int i = 0; i < icnt; i++)
+                {
+                    int dx = cent[i].x - at.x;
+                    int dz = cent[i].z - at.z;
+                    int64_t rsq = dx*(int64_t)dx + dz*(int64_t)dz;
+                    if (rsq < rmax)
+                        cent[j++] = cent[i];
+                }
+                *imax = icnt = j;
+            }
             if (icnt >= cond->count)
                 return COND_OK;
         }
         else
         {   // we need the average position of all instances
             icnt = getMineshafts(gen->mc, gen->seed, rx1, rz1, rx2, rz2, p, MAX_INSTANCES);
-            if (icnt >= cond->count)
+            if (icnt < cond->count)
+                return COND_FAILED;
+            xt = zt = 0;
+            int j = 0;
+            for (int i = 0; i < icnt; i++)
             {
-                xt = zt = 0;
-                for (int i = 0; i < icnt; i++)
-                {
-                    xt += p[i].x;
-                    zt += p[i].z;
+                if (rmax)
+                {   // skip instances outside the radius
+                    int dx = cent[i].x - at.x;
+                    int dz = cent[i].z - at.z;
+                    int64_t rsq = dx*(int64_t)dx + dz*(int64_t)dz;
+                    if (rsq >= rmax)
+                        continue;
                 }
-                cent->x = xt / icnt;
-                cent->z = zt / icnt;
+                xt += p[i].x;
+                zt += p[i].z;
+                j++;
+            }
+            if (j >= cond->count)
+            {
+                cent->x = xt / j;
+                cent->z = zt / j;
                 return COND_OK;
             }
         }
         return COND_FAILED;
+
 
     case F_SPAWN:
 
@@ -986,6 +1025,7 @@ L_qm_any:
                 return COND_OK;
         }
         return COND_FAILED;
+
 
     case F_SLIME:
 
