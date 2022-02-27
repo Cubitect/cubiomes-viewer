@@ -41,7 +41,8 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+    virtual ~MainWindow();
+    virtual void closeEvent(QCloseEvent *event) override;
 
     QAction *addMapAction(int sopt, const char *iconpath, QString tip);
 

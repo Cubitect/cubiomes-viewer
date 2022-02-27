@@ -100,6 +100,7 @@ enum
     F_LOGIC_OR,
     F_REFERENCE_4,
     F_FIRST_STRONGHOLD,
+    F_CLIMATE_NOISE,
     // new filters should be added here at the end to keep some downwards compatibility
     FILTER_MAX,
 };
@@ -299,6 +300,13 @@ static const struct FilterList
             "discard those that have biomes that are explicitly excluded (-) "
             "at layer OCEAN TEMPERATURE with scale 1:256. "
             "This generation layer depends only on the lower 48-bits of the seed.")
+        };
+        list[F_CLIMATE_NOISE] = FilterInfo{
+            CAT_BIOMES, 0, 1, 1, 0, 0, 0, 4, 0, MC_1_18, MC_NEWEST, 0, 0, disp++,
+            ":icons/map.png",
+            _("Climate Parameters 1:4"),
+            _("Custom limits for the required and allowed climate noise parameters that "
+            "the specified area should cover.")
         };
         list[F_TEMPS] = FilterInfo{
             CAT_BIOMES, 1, 1, 1, 0, 0, 0, 1024, 0, MC_1_7, MC_1_17, 0, 0, disp++,
@@ -544,6 +552,8 @@ struct Condition
     int approx;
     int rmax; // (<=0):disabled; (>0):strict upper radius
     uint64_t variants;
+    int limok[6][2];
+    int limex[6][2];
 
     enum { // variant flags
         START_PIECE_MASK = (1ULL << 63),

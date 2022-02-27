@@ -222,9 +222,17 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-    saveSettings();
     delete ui;
 }
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    formControl->stopSearch();
+    QThreadPool::globalInstance()->clear();
+    saveSettings();
+    QMainWindow::closeEvent(event);
+}
+
 
 QAction *MainWindow::addMapAction(int sopt, const char *iconpath, QString tip)
 {
@@ -688,6 +696,7 @@ bool MainWindow::loadProgress(QString fnam, bool quiet)
     formControl->setSearchConfig(searchconf, quiet);
     formControl->searchResultsAdd(seeds, false);
     formControl->searchProgressReset();
+    formControl->searchProgress(0, 0, searchconf.startseed);
 
     return true;
 }

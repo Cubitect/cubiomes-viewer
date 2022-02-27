@@ -371,6 +371,13 @@ static bool isInnerRingOk(int mc, uint64_t seed, int x1, int z1, int x2, int z2,
     return false;
 }
 
+static int f_confine(void *data, int x, int z, double p)
+{
+    (void) x; (void) z;
+    double *lim = (double*) data;
+    return p < lim[0] || p > lim[1];
+}
+
 
 /* Tests if a condition is satisfied with 'at' as origin for a search pass.
  * If sufficiently satisfied (check return value) then:
@@ -1153,18 +1160,18 @@ L_biome_filter_layered:
     case F_BIOME_END_64:    s = 6;  goto L_noise_biome;
 
 L_noise_biome:
-        if (pass == PASS_FAST_48)
-            return COND_MAYBE_POS_VALID;
-        // the Nether and End require only the 48-bit seed
-        // (except voronoi uses the full 64-bits)
-        if (pass == PASS_FULL_48 && finfo.dep64)
-            return COND_MAYBE_POS_VALID;
         rx1 = ((cond->x1 << s) + at.x) >> s;
         rz1 = ((cond->z1 << s) + at.z) >> s;
         rx2 = ((cond->x2 << s) + at.x) >> s;
         rz2 = ((cond->z2 << s) + at.z) >> s;
         cent->x = ((rx1 + rx2) << s) >> 1;
         cent->z = ((rz1 + rz2) << s) >> 1;
+        if (pass == PASS_FAST_48)
+            return COND_MAYBE_POS_VALID;
+        // the Nether and End require only the 48-bit seed
+        // (except voronoi uses the full 64-bits)
+        if (pass == PASS_FULL_48 && finfo.dep64)
+            return COND_MAYBE_POS_VALID;
         {
             int w = rx2 - rx1 + 1;
             int h = rz2 - rz1 + 1;
@@ -1172,6 +1179,73 @@ L_noise_biome:
             Range r = {1<<s, rx1, rz1, w, h, y, 1};
             valid = checkForBiomes(&gen->g, NULL, r, finfo.dim, gen->seed,
                 cond->bfilter, cond->approx, (volatile char*)abort) > 0;
+        }
+        return valid ? COND_OK : COND_FAILED;
+
+
+    case F_CLIMATE_NOISE:
+        if (gen->mc < MC_1_18)
+            return COND_FAILED;
+        rx1 = ((cond->x1 << 2) + at.x) >> 2;
+        rz1 = ((cond->z1 << 2) + at.z) >> 2;
+        rx2 = ((cond->x2 << 2) + at.x) >> 2;
+        rz2 = ((cond->z2 << 2) + at.z) >> 2;
+        cent->x = ((rx1 + rx2) << 2) >> 1;
+        cent->z = ((rz1 + rz2) << 2) >> 1;
+        if (pass != PASS_FULL_64)
+            return COND_MAYBE_POS_VALID;
+        {
+            int w = rx2 - rx1 + 1;
+            int h = rz2 - rz1 + 1;
+            //int y = cond->y >> 2;
+            gen->init4Dim(0);
+
+            const DoublePerlinNoise *cn[6] =
+            {
+                &gen->g.bn.temperature,
+                &gen->g.bn.humidity,
+                &gen->g.bn.continentalness,
+                &gen->g.bn.erosion,
+                NULL,
+                &gen->g.bn.weirdness,
+            };
+            valid = 1;
+            for (int i = 0; i < 6; i++)
+            {
+                if (cn[i] == NULL)
+                    continue;
+                if (cond->limok[i][0] == INT_MIN && cond->limok[i][1] == INT_MAX &&
+                    cond->limex[i][0] == INT_MIN && cond->limex[i][1] == INT_MAX)
+                {
+                    continue;
+                }
+                double pmin, pmax;
+                double bounds[] = {
+                    (double)cond->limex[i][0],
+                    (double)cond->limex[i][1],
+                };
+                int err = getParaRange(cn[i], &pmin, &pmax, rx1, rz1, w, h, (void*)bounds, f_confine);
+                if (err)
+                {
+                    valid = 0;
+                    break;
+                }
+                int lmin, lmax;
+                lmin = cond->limok[i][0];
+                lmax = cond->limok[i][1];
+                if (pmin > lmax || pmax < lmin)
+                {   // outside required limits
+                    valid = 0;
+                    break;
+                }
+                lmin = cond->limex[i][0];
+                lmax = cond->limex[i][1];
+                if (pmin < lmin || pmax > lmax)
+                {   // ouside exclusion limits
+                    valid = 0;
+                    break;
+                }
+            }
         }
         return valid ? COND_OK : COND_FAILED;
 

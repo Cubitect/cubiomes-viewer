@@ -20,16 +20,7 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
-   <property name="leftMargin">
-    <number>0</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
+   <property name="margin">
     <number>0</number>
    </property>
    <item row="0" column="0">
@@ -81,7 +72,7 @@
        <string>Hex  low-48 | top-16</string>
       </property>
       <property name="textAlignment">
-       <set>AlignLeading|AlignVCenter</set>
+       <set>AlignLeft|AlignVCenter</set>
       </property>
      </column>
      <column>
@@ -89,7 +80,7 @@
        <string>Seed</string>
       </property>
       <property name="textAlignment">
-       <set>AlignLeading|AlignVCenter</set>
+       <set>AlignLeft|AlignVCenter</set>
       </property>
      </column>
     </widget>
@@ -170,7 +161,7 @@
         <string/>
        </property>
        <property name="icon">
-        <iconset resource="../icons.qrc">
+        <iconset resource="../rc/icons.qrc">
          <normaloff>:/icons/info.png</normaloff>:/icons/info.png</iconset>
        </property>
        <property name="iconSize">
@@ -250,7 +241,7 @@
           <string>Clear results</string>
          </property>
          <property name="icon">
-          <iconset resource="../icons.qrc">
+          <iconset resource="../rc/icons.qrc">
            <normaloff>:/icons/clear.png</normaloff>:/icons/clear.png</iconset>
          </property>
         </widget>
@@ -261,7 +252,7 @@
           <string>Start search</string>
          </property>
          <property name="icon">
-          <iconset resource="../icons.qrc">
+          <iconset resource="../rc/icons.qrc">
            <normaloff>:/icons/search.png</normaloff>:/icons/search.png</iconset>
          </property>
          <property name="checkable">
@@ -276,7 +267,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../icons.qrc"/>
+  <include location="../rc/icons.qrc"/>
  </resources>
  <connections/>
 </ui>

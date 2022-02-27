@@ -9,7 +9,7 @@ namespace Ui {
 class ExamplesDialog;
 }
 
-class QListWidgetItem;
+class QRadioButton;
 
 class ExamplesDialog : public QDialog
 {
@@ -19,16 +19,18 @@ public:
     explicit ExamplesDialog(QWidget *parent, WorldInfo wi);
     ~ExamplesDialog();
 
-    void addExample(QString rc, QString desc, bool enabled);
+    void addExample(QString rc, QString title, QString desc, QString comment, bool enabled);
     QString getExample();
 
 private slots:
-    void on_listExamples_currentRowChanged(int currentRow);
-
-    void on_listExamples_itemDoubleClicked(QListWidgetItem *item);
+    void onSelectionChange(QRadioButton *radio);
 
 private:
     Ui::ExamplesDialog *ui;
+    struct Texts {
+        QString rc, title, desc, comment;
+    };
+    std::map<QRadioButton*, Texts> examples;
 };
 
 #endif // EXAMPLESDIALOG_H

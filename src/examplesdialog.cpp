@@ -1,7 +1,10 @@
 #include "examplesdialog.h"
 #include "ui_examplesdialog.h"
 
+#include "cutil.h"
+
 #include <QPushButton>
+#include <QRadioButton>
 
 
 ExamplesDialog::ExamplesDialog(QWidget *parent, WorldInfo wi) :
@@ -9,19 +12,28 @@ ExamplesDialog::ExamplesDialog(QWidget *parent, WorldInfo wi) :
     ui(new Ui::ExamplesDialog)
 {
     ui->setupUi(this);
+    ui->labelMC->setText(tr("MC ") + mc2str(wi.mc));
     ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 
-    addExample(":/examples/quadhut_stronghold_mushroom.txt", tr(
-        "Quad-Hut with Stronghold and a close by Mushroom Island"
-    ), wi.mc >= MC_1_4);
+    addExample(":/examples/quadhut_stronghold_mushroom.txt",
+        tr("Technical Base (1.4+)"),
+        tr("An ideal Quad-hut next to a Stronghold with a Mushroom Island close by."),
+        "", wi.mc >= MC_1_4);
 
-    addExample(":/examples/village_portal_stronghold.txt", tr(
-        "Village near Spawn with a Portal to a Stronghold"
-    ), true);
+    /*
+    addExample(":/examples/mushroom_icespike.txt",
+        tr("Analyze for location with rare biomes together (1.7+)"),
+        tr("Check a large area for a Mushroom Island that is next to Ice Spikes."),
+        tr("Use this in the Analysis Tab with the Condition trigger enabled to "
+        "find an instance in the current seed."),
+        wi.mc >= MC_1_7);
+    */
 
-    addExample(":/examples/mushroom_icespike.txt", tr(
-        "Mushroom Island anywhere next to an Ice Spike biome"
-    ), wi.mc >= MC_1_7);
+    addExample(":/examples/village_portal_stronghold.txt",
+        tr("Speedrunner Village (1.16+)"),
+        tr("Spawn in a Village with a Ruined Portal leading to a Stronghold."),
+        tr("Works best with a large search item size and with the 48-bit family search."),
+        wi.mc >= MC_1_16);
 }
 
 ExamplesDialog::~ExamplesDialog()
@@ -29,35 +41,36 @@ ExamplesDialog::~ExamplesDialog()
     delete ui;
 }
 
-void ExamplesDialog::addExample(QString rc, QString desc, bool enabled)
+void ExamplesDialog::addExample(QString rc, QString title, QString desc, QString comment, bool enabled)
 {
-    QListWidgetItem *item = new QListWidgetItem(desc);
-    item->setData(Qt::UserRole, QVariant::fromValue(rc));
-    if (!enabled)
-    {
-        item->setFlags(item->flags() & ~Qt::ItemIsSelectable);
-        item->setSelected(false);
-        item->setBackground(QColor(128, 128, 128, 192));
-    }
-    ui->listExamples->addItem(item);
+    QRadioButton *radio = new QRadioButton(title, this);
+    examples[radio] = Texts{rc, title, desc, comment};
+    radio->setEnabled(enabled);
+    connect(radio, &QRadioButton::toggled, [=]() { this->onSelectionChange(radio); });
+
+    int row = ui->gridLayout->rowCount();
+    ui->gridLayout->addWidget(radio, row, 0);
 }
 
 QString ExamplesDialog::getExample()
 {
-    QListWidgetItem *item = ui->listExamples->currentItem();
-    if (item)
-        return item->data(Qt::UserRole).toString();
+    for (auto& e : examples)
+    {
+        if (e.first->isChecked())
+            return e.second.rc;
+    }
     return "";
 }
 
-
-void ExamplesDialog::on_listExamples_currentRowChanged(int currentRow)
+void ExamplesDialog::onSelectionChange(QRadioButton *ex)
 {
-    ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(currentRow >= 0);
+    ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
+    if (ex)
+    {
+        QString txt = examples[ex].desc;
+        if (!examples[ex].comment.isEmpty())
+            txt += "\n\n" + examples[ex].comment;
+        ui->textDesc->setText(txt);
+    }
 }
 
-void ExamplesDialog::on_listExamples_itemDoubleClicked(QListWidgetItem *item)
-{
-    (void) item;
-    done(1);
-}

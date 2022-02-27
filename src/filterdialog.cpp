@@ -235,11 +235,76 @@ FilterDialog::FilterDialog(FormConditions *parent, Config *config, int mcversion
     addVariant("snowy_meeting_point_2", snowy_tundra, 2);
     addVariant("snowy_meeting_point_3", snowy_tundra, 3);
 
-    ui->scrollBiomes->setStyleSheet(
-            "QCheckBox::indicator:unchecked     { image: url(:/icons/check0.png); }\n"
-            "QCheckBox::indicator:indeterminate { image: url(:/icons/check1.png); }\n"
-            "QCheckBox::indicator:checked       { image: url(:/icons/check2.png); }\n"
-            );
+    QString tristyle =
+        "QCheckBox::indicator:unchecked     { image: url(:/icons/check0.png); }\n"
+        "QCheckBox::indicator:indeterminate { image: url(:/icons/check1.png); }\n"
+        "QCheckBox::indicator:checked       { image: url(:/icons/check2.png); }\n";
+    ui->scrollBiomes->setStyleSheet(tristyle);
+    ui->scrollNoiseBiomes->setStyleSheet(tristyle);
+
+    memset(climaterange, 0, sizeof(climaterange));
+    memset(climatecomplete, 0, sizeof(climatecomplete));
+    struct { QString name; int idx; int min, max; } climates[] =
+    {
+        {tr("Temperature:"), 0, -4501, 5500},
+        {tr("Humidity:"), 1, -3500, 6999},
+        {tr("Continentalness:"), 2, -10500, 300},
+        {tr("Erosion:"), 3, -7799, 5500},
+        // depth has more dependencies and is not supported
+        {tr("Weirdness:"), 5, -9333, 9333},
+    };
+    for (int i = 0; i < 5; i++)
+    {
+        QLabel *label = new QLabel(climates[i].name, this);
+        LabeledRange *ok = new LabeledRange(this, climates[i].min-1, climates[i].max+1);
+        LabeledRange *ex = new LabeledRange(this, climates[i].min-1, climates[i].max+1);
+        ok->setLimitText(tr("-Inf"), tr("+Inf"));
+        ex->setLimitText(tr("-Inf"), tr("+Inf"));
+        ex->setHighlight(QColor(0,0,0,0), QColor(Qt::red));
+        connect(ok, SIGNAL(onRangeChange(void)), this, SLOT(onClimateLimitChanged(void)));
+        connect(ex, SIGNAL(onRangeChange(void)), this, SLOT(onClimateLimitChanged(void)));
+        climaterange[0][climates[i].idx] = ok;
+        climaterange[1][climates[i].idx] = ex;
+
+        QCheckBox *all = new QCheckBox(this);
+        all->setFixedWidth(20);
+        all->setToolTip(tr("Require the complete range"));
+        connect(all, SIGNAL(stateChanged(int)), this, SLOT(onClimateLimitChanged(void)));
+        climatecomplete[climates[i].idx] = all;
+
+        int row = ui->gridNoiseAllowed->rowCount();
+        ui->gridNoiseName->addWidget(label, row, 0, 1, 2);
+        ui->gridNoiseRequired->addWidget(all, row, 0, 1, 1);
+        ui->gridNoiseRequired->addWidget(ok, row, 1, 1, 2);
+        ui->gridNoiseAllowed->addWidget(ex, row, 0, 1, 2);
+    }
+
+    for (int i = 0; i < 256; i++)
+    {
+        const int *lim = getBiomeParaLimits(mc, i);
+        if (lim == NULL)
+            continue;
+        NoiseBiomeIndicator *cb = new NoiseBiomeIndicator(biome2str(mc, i), this);
+        QString tip = "<pre>";
+        for (int j = 0; j < 5; j++)
+        {
+            tip += climates[j].name.leftJustified(18);
+            const int *l = lim + 2 * climates[j].idx;
+            tip += (l[0] == INT_MIN) ? tr("  -Inf") : QString::asprintf("%6d", (int)l[0]);
+            tip += " - ";
+            tip += (l[1] == INT_MAX) ? tr("  +Inf") : QString::asprintf("%6d", (int)l[1]);
+            if (j < 4) tip += "\n";
+        }
+        tip += "</pre>";
+        cb->setFocusPolicy(Qt::NoFocus);
+        cb->setCheckState(Qt::Unchecked);
+        cb->setToolTip(tip);
+        cb->setTristate(true);
+        int cols = 3;
+        int n = noisebiomes.size();
+        ui->gridNoiseBiomes->addWidget(cb, n/cols, n%cols);
+        noisebiomes[i] = cb;
+    }
 
     QPixmap pixmap(14,14);
     pixmap.fill(QColor(0,0,0,0));
@@ -258,6 +323,8 @@ FilterDialog::FilterDialog(FormConditions *parent, Config *config, int mcversion
         p.fillPath(path, col);
         p.drawPath(path);
         biomecboxes[i]->setIcon(QIcon(pixmap));
+        if (noisebiomes.find(i) != noisebiomes.end())
+            noisebiomes[i]->setIcon(QIcon(pixmap));
     }
 
     // defaults
@@ -347,10 +414,23 @@ FilterDialog::FilterDialog(FormConditions *parent, Config *config, int mcversion
         {
             cb->setChecked(cond.variants & cb->getMask());
         }
+
+        int *lim = (int*) &cond.limok[0][0];
+        if (lim[0] == 0 && !memcmp(lim, lim + 1, (6 * 4 - 1) * sizeof(int)))
+        {   // limits are all zero -> assume uninitialzed
+            for (int i = 0; i < 6; i++)
+            {
+                cond.limok[i][0] = cond.limex[i][0] = INT_MIN;
+                cond.limok[i][1] = cond.limex[i][1] = INT_MAX;
+            }
+        }
+        setClimateLimits(climaterange[0], cond.limok, true);
+        setClimateLimits(climaterange[1], cond.limex, false);
     }
 
     on_lineSquare_editingFinished();
 
+    onClimateLimitChanged();
     updateMode();
 }
 
@@ -359,6 +439,16 @@ FilterDialog::~FilterDialog()
     if (item)
         delete item;
     delete ui;
+}
+
+void FilterDialog::setActiveTab(QWidget *tab)
+{
+    ui->tabWidget->setEnabled(true);
+    ui->tabWidget->setCurrentWidget(tab);
+    ui->tabBiomes->setEnabled(ui->tabBiomes == tab);
+    ui->tabTemps->setEnabled(ui->tabTemps == tab);
+    ui->tabNoise->setEnabled(ui->tabNoise == tab);
+    ui->tabVariants->setEnabled(ui->tabVariants == tab);
 }
 
 void FilterDialog::updateMode()
@@ -424,27 +514,19 @@ void FilterDialog::updateMode()
 
     if (filterindex == F_TEMPS)
     {
-        ui->tabWidget->setEnabled(true);
-        ui->tabWidget->setCurrentWidget(ui->tabTemps);
-        ui->tabTemps->setEnabled(true);
-        ui->tabBiomes->setEnabled(false);
-        ui->tabVariants->setEnabled(false);
+        setActiveTab(ui->tabTemps);
+    }
+    else if (filterindex == F_CLIMATE_NOISE)
+    {
+        setActiveTab(ui->tabNoise);
     }
     else if (ft.cat == CAT_BIOMES || ft.cat == CAT_NETHER || ft.cat == CAT_END)
     {
-        ui->tabWidget->setEnabled(true);
-        ui->tabWidget->setCurrentWidget(ui->tabBiomes);
-        ui->tabTemps->setEnabled(false);
-        ui->tabBiomes->setEnabled(true);
-        ui->tabVariants->setEnabled(false);
+        setActiveTab(ui->tabBiomes);
     }
     else if (filterindex == F_VILLAGE)
     {
-        ui->tabWidget->setEnabled(true);
-        ui->tabWidget->setCurrentWidget(ui->tabVariants);
-        ui->tabTemps->setEnabled(false);
-        ui->tabBiomes->setEnabled(false);
-        ui->tabVariants->setEnabled(true);
+        setActiveTab(ui->tabVariants);
     }
     else
     {
@@ -616,7 +698,7 @@ int FilterDialog::warnIfBad(Condition cond)
             return QMessageBox::Cancel;
         }
     }
-    if (ft.cat == CAT_BIOMES)
+    if (ft.cat == CAT_BIOMES && cond.type != F_CLIMATE_NOISE)
     {
         int w = cond.x2 - cond.x1 + 1;
         int h = cond.z2 - cond.z1 + 1;
@@ -783,6 +865,8 @@ void FilterDialog::on_buttonOk_clicked()
         if (cb->isChecked())
             cond.variants |= cb->getMask();
 
+    getClimateLimits(cond.limok, cond.limex);
+
     if (warnIfBad(cond) != QMessageBox::Ok)
         return;
 
@@ -843,4 +927,98 @@ void FilterDialog::on_checkStartPiece_stateChanged(int state)
 {
     ui->scrollVariants->setEnabled(state);
 }
+
+void FilterDialog::getClimateLimits(int limok[6][2], int limex[6][2])
+{
+    getClimateLimits(climaterange[0], limok);
+    getClimateLimits(climaterange[1], limex);
+
+    // the required climates can be complete or partial
+    // for the partial (default) requirement, we flip the bounds
+    for (int i = 0; i < 6; i++)
+    {
+        if (!climatecomplete[i])
+            continue;
+        if (climatecomplete[i]->isChecked())
+        {
+            int tmp = limok[i][0];
+            limok[i][0] = limok[i][1];
+            limok[i][1] = tmp;
+        }
+        if (climaterange[0][i])
+        {
+            QColor col = QColor(Qt::darkCyan);
+            if (climatecomplete[i]->isChecked())
+                col = QColor(Qt::darkGreen);
+            climaterange[0][i]->setHighlight(col, QColor(0,0,0,0));
+        }
+    }
+}
+
+void FilterDialog::getClimateLimits(LabeledRange *ranges[6], int limits[6][2])
+{
+    for (int i = 0; i < 6; i++)
+    {
+        int lmin = INT_MIN, lmax = INT_MAX;
+        if (ranges[i])
+        {
+            lmin = ranges[i]->slider->pos0;
+            if (lmin == ranges[i]->slider->vmin)
+                lmin = INT_MIN;
+            lmax = ranges[i]->slider->pos1;
+            if (lmax == ranges[i]->slider->vmax)
+                lmax = INT_MAX;
+        }
+        limits[i][0] = lmin;
+        limits[i][1] = lmax;
+    }
+}
+
+void FilterDialog::setClimateLimits(LabeledRange *ranges[6], int limits[6][2], bool complete)
+{
+    for (int i = 0; i < 6; i++)
+    {
+        if (!ranges[i])
+            continue;
+        int lmin = limits[i][0], lmax = limits[i][1];
+        if (complete && climatecomplete[i])
+        {
+            climatecomplete[i]->setChecked(lmin > lmax);
+        }
+        if (lmin > lmax)
+        {
+            int tmp = lmin;
+            lmin = lmax;
+            lmax = tmp;
+        }
+        if (lmin == INT_MIN)
+            lmin = ranges[i]->slider->vmin;
+        if (lmax == INT_MAX)
+            lmax = ranges[i]->slider->vmax;
+        ranges[i]->setValues(lmin, lmax);
+    }
+}
+
+void FilterDialog::onClimateLimitChanged()
+{
+    int limok[6][2], limex[6][2];
+    char ok[256], ex[256];
+
+    getClimateLimits(limok, limex);
+
+    getPossibleBiomesForLimits(ok, mc, limok);
+    getPossibleBiomesForLimits(ex, mc, limex);
+
+    for (auto& it : noisebiomes)
+    {
+        int id = it.first;
+        NoiseBiomeIndicator *cb = it.second;
+
+        Qt::CheckState state = Qt::Unchecked;
+        if (ok[id]) state = Qt::PartiallyChecked;
+        if (!ex[id]) state = Qt::Checked;
+        cb->setCheckState(state);
+    }
+}
+
 

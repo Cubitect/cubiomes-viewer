@@ -112,6 +112,13 @@ bool FormSearchControl::isbusy()
     return ui->buttonStart->isChecked() || sthread.isRunning();
 }
 
+void FormSearchControl::stopSearch()
+{
+    sthread.stop();
+    //sthread.quit(); // tell the event loop to exit
+    //sthread.wait(); // wait for search to finish
+}
+
 bool FormSearchControl::setList64(QString path, bool quiet)
 {
     if (!path.isEmpty())
@@ -249,9 +256,7 @@ void FormSearchControl::on_buttonStart_clicked()
     }
     else
     {
-        sthread.stop(); // tell search to stop at next convenience
-        //sthread.quit(); // tell the event loop to exit
-        //sthread.wait(); // wait for search to finish
+        stopSearch();
         ui->buttonStart->setText(tr("Start search"));
         ui->buttonStart->setIcon(QIcon(":/icons/search.png"));
         ui->buttonStart->setChecked(false);

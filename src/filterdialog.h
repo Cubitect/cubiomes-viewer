@@ -7,9 +7,11 @@
 #include <QLineEdit>
 #include <QListWidgetItem>
 #include <QTextEdit>
+#include <QMouseEvent>
 
 #include "search.h"
 #include "formconditions.h"
+#include "rangeslider.h"
 
 class MainWindow;
 
@@ -80,8 +82,26 @@ public:
     }
 };
 
+
+class NoiseBiomeIndicator : public QCheckBox
+{
+    Q_OBJECT
+public:
+    NoiseBiomeIndicator(QString title, QWidget *parent)
+        : QCheckBox(title, parent)
+    {
+    }
+    virtual ~NoiseBiomeIndicator() {}
+    void mousePressEvent(QMouseEvent *event)
+    {   // make read only
+        if (event->button() == 0)
+            QCheckBox::mousePressEvent(event);
+    }
+};
+
 class VariantCheckBox : public QCheckBox
 {
+    Q_OBJECT
 public:
     VariantCheckBox(QString name, int b, int v) : QCheckBox(name),biome(b),variant(v) {}
     virtual ~VariantCheckBox() {}
@@ -103,10 +123,15 @@ public:
     virtual ~FilterDialog();
 
     void addVariant(QString name, int biome, int variant);
+    void setActiveTab(QWidget *tab);
     void updateMode();
     void updateBiomeSelection();
     void enableSet(const int *ids, int n);
     int warnIfBad(Condition cond);
+
+    void getClimateLimits(int limok[6][2], int limex[6][2]);
+    void getClimateLimits(LabeledRange *ranges[6], int limits[6][2]);
+    void setClimateLimits(LabeledRange *ranges[6], int limits[6][2], bool complete);
 
 signals:
     void setCond(QListWidgetItem *item, Condition cond);
@@ -139,6 +164,8 @@ private slots:
 
     void on_checkStartPiece_stateChanged(int state);
 
+    void onClimateLimitChanged();
+
 private:
     Ui::FilterDialog *ui;
     QTextEdit *textDescription;
@@ -146,6 +173,9 @@ private:
     QCheckBox *biomecboxes[256];
     SpinExclude *tempsboxes[9];
     QVector<VariantCheckBox*> variantboxes;
+    LabeledRange *climaterange[2][6];
+    QCheckBox *climatecomplete[6];
+    std::map<int, NoiseBiomeIndicator*> noisebiomes;
 
 public:
     Config *config;

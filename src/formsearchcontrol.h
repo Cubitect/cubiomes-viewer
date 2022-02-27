@@ -29,6 +29,7 @@ public:
     bool setSearchConfig(SearchConfig s, bool quiet);
 
     bool isbusy();
+    void stopSearch();
     bool setList64(QString path, bool quiet);
 
     void searchLockUi(bool lock);

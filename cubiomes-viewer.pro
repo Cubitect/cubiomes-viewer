@@ -50,6 +50,7 @@ SOURCES += \
         src/mapview.cpp \
         src/quad.cpp \
         src/rangedialog.cpp \
+        src/rangeslider.cpp \
         src/search.cpp \
         src/searchitem.cpp \
         src/searchthread.cpp \
@@ -77,6 +78,7 @@ HEADERS += \
         src/quad.h \
         src/cutil.h \
         src/rangedialog.h \
+        src/rangeslider.h \
         src/search.h \
         src/searchitem.h \
         src/searchthread.h \
