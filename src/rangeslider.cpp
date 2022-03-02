@@ -127,10 +127,15 @@ void RangeSlider::wheelEvent(QWheelEvent *e)
     QRect groove = style()->subControlRect(QStyle::CC_Slider, &opt, QStyle::SC_SliderGroove, this);
 
     int delta = e->angleDelta().y() / 8 / 15;
-    int x = e->pos().x() - groove.x();
+    int x;
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
+    x = e->x() - groove.x();
+#else
+    x = (int)e->position.x() - groove.x();
+#endif
     x = style()->sliderValueFromPosition(vmin, vmax, x, groove.width());
 
-    int h;
+    int h = 0;
     if (x < pos0)
         h = -1;
     else if (x > pos1)
@@ -173,7 +178,7 @@ void RangeSlider::mouseMoveEvent(QMouseEvent *e)
 
     QRect groove = style()->subControlRect(QStyle::CC_Slider, &opt, QStyle::SC_SliderGroove, this);
 
-    int x = e->pos().x() - groove.x();
+    int x = e->x() - groove.x();
     x = style()->sliderValueFromPosition(vmin, vmax, x, groove.width());
 
     if (holding < 0)
@@ -194,7 +199,7 @@ LabeledRange::LabeledRange(QWidget *parent, int vmin, int vmax)
     maxlabel = new QLabel(this);
     minlabel->setAlignment(Qt::AlignRight);
     maxlabel->setAlignment(Qt::AlignLeft);
-    int w = fontMetrics().width("+01234");
+    int w = fontMetrics().tightBoundingRect("+012345").width();
     minlabel->setFixedWidth(w);
     maxlabel->setFixedWidth(w);
 
