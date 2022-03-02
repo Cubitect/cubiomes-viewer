@@ -356,7 +356,7 @@
            <string>Biomes</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_4">
-           <item row="1" column="3">
+           <item row="1" column="4">
             <widget class="QLineEdit" name="lineY">
              <property name="toolTip">
               <string>Vertical position in blocks</string>
@@ -369,21 +369,21 @@
            <item row="1" column="0">
             <widget class="QCheckBox" name="checkApprox">
              <property name="toolTip">
-              <string>Enables optimizations that trade accuracy for speed</string>
+              <string>Enables optimizations that trade some accuracy for speed</string>
              </property>
              <property name="text">
               <string>Approximate</string>
              </property>
             </widget>
            </item>
-           <item row="1" column="2">
+           <item row="1" column="3">
             <widget class="QLabel" name="labelY">
              <property name="text">
               <string>Sample at height (Y):</string>
              </property>
             </widget>
            </item>
-           <item row="3" column="0" colspan="4">
+           <item row="3" column="0" colspan="5">
             <widget class="QScrollArea" name="scrollArea">
              <property name="widgetResizable">
               <bool>true</bool>
@@ -393,8 +393,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>640</width>
-                <height>362</height>
+                <width>648</width>
+                <height>377</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -408,7 +408,7 @@
              </widget>
             </widget>
            </item>
-           <item row="2" column="0" colspan="4">
+           <item row="2" column="0" colspan="5">
             <layout class="QHBoxLayout" name="horizontalLayout_3">
              <item>
               <widget class="QPushButton" name="buttonUncheck">
@@ -433,7 +433,7 @@
              </item>
             </layout>
            </item>
-           <item row="1" column="1">
+           <item row="1" column="2">
             <spacer name="horizontalSpacer_3">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
@@ -445,6 +445,16 @@
               </size>
              </property>
             </spacer>
+           </item>
+           <item row="1" column="1">
+            <widget class="QCheckBox" name="checkMatchAny">
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p style=&quot;white-space:pre&quot;&gt;Satisfied if &lt;span style=&quot; font-weight:600;&quot;&gt;any&lt;/span&gt; of the checked biomes are present&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+             <property name="text">
+              <string>Match any</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>
@@ -602,8 +612,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>640</width>
-                <height>316</height>
+                <width>94</width>
+                <height>24</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -651,8 +661,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>640</width>
-                <height>395</height>
+                <width>94</width>
+                <height>24</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -693,7 +703,8 @@
        </property>
        <property name="icon">
         <iconset theme="dialog-cancel">
-         <normaloff>.</normaloff>.</iconset>
+         <normaloff/>
+        </iconset>
        </property>
       </widget>
      </item>
@@ -704,7 +715,8 @@
        </property>
        <property name="icon">
         <iconset theme="dialog-ok">
-         <normaloff>.</normaloff>.</iconset>
+         <normaloff/>
+        </iconset>
        </property>
       </widget>
      </item>

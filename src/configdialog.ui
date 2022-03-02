@@ -2,19 +2,11 @@
 <ui version="4.0">
  <class>ConfigDialog</class>
  <widget class="QDialog" name="ConfigDialog">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>426</width>
-    <height>469</height>
-   </rect>
-  </property>
   <property name="windowTitle">
    <string>Preferences</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../icons.qrc">
+   <iconset resource="../rc/icons.qrc">
     <normaloff>:/icons/map.png</normaloff>:/icons/map.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout">
@@ -90,7 +82,7 @@
          </size>
         </property>
         <property name="icon">
-         <iconset resource="../icons.qrc">
+         <iconset resource="../rc/icons.qrc">
           <normaloff>:/icons/clear.png</normaloff>:/icons/clear.png</iconset>
         </property>
        </widget>
@@ -161,7 +153,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../icons.qrc">
+         <iconset resource="../rc/icons.qrc">
           <normaloff>:/icons/info.png</normaloff>:/icons/info.png</iconset>
         </property>
         <property name="iconSize">
@@ -212,7 +204,7 @@ Leave blank for the default behaviour</string>
      </layout>
     </widget>
    </item>
-   <item row="11" column="0" colspan="2">
+   <item row="12" column="0" colspan="2">
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -261,10 +253,26 @@ Leave blank for the default behaviour</string>
      </layout>
     </widget>
    </item>
+   <item row="11" column="0" colspan="2">
+    <widget class="QGroupBox" name="groupBox_4">
+     <property name="title">
+      <string>Miscellaneous</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_5">
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="checkUpdates">
+        <property name="text">
+         <string>Check GitHub for updates at startup</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
   </layout>
  </widget>
  <resources>
-  <include location="../icons.qrc"/>
+  <include location="../rc/icons.qrc"/>
  </resources>
  <connections>
   <connection>

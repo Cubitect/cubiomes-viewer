@@ -36,6 +36,7 @@ void ConfigDialog::initSettings(Config *config)
     ui->checkSmooth->setChecked(config->smoothMotion);
     ui->checkBBoxes->setChecked(config->showBBoxes);
     ui->checkRestore->setChecked(config->restoreSession);
+    ui->checkUpdates->setChecked(config->checkForUpdates);
     ui->checkAutosave->setChecked(config->autosaveCycle != 0);
     if (config->autosaveCycle)
         ui->spinAutosave->setValue(config->autosaveCycle);
@@ -51,10 +52,11 @@ void ConfigDialog::initSettings(Config *config)
 
 Config ConfigDialog::getSettings()
 {
-    conf.restoreSession = ui->checkRestore->isChecked();
-    conf.showBBoxes = ui->checkBBoxes->isChecked();
-    conf.autosaveCycle = ui->checkAutosave->isChecked() ? ui->spinAutosave->value() : 0;
     conf.smoothMotion = ui->checkSmooth->isChecked();
+    conf.showBBoxes = ui->checkBBoxes->isChecked();
+    conf.restoreSession = ui->checkRestore->isChecked();
+    conf.checkForUpdates = ui->checkUpdates->isChecked();
+    conf.autosaveCycle = ui->checkAutosave->isChecked() ? ui->spinAutosave->value() : 0;
     conf.uistyle = ui->comboStyle->currentIndex();
     conf.seedsPerItem = ui->cboxItemSize->currentText().toInt();
     conf.queueSize = ui->lineQueueSize->text().toInt();

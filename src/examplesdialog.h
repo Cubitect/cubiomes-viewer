@@ -2,6 +2,7 @@
 #define EXAMPLESDIALOG_H
 
 #include "settings.h"
+#include "formconditions.h"
 
 #include <QDialog>
 
@@ -31,6 +32,7 @@ private:
         QString rc, title, desc, comment;
     };
     std::map<QRadioButton*, Texts> examples;
+    FormConditions *formconds;
 };
 
 #endif // EXAMPLESDIALOG_H

@@ -359,7 +359,8 @@ FilterDialog::FilterDialog(FormConditions *parent, Config *config, int mcversion
         ui->lineEditX2->setText(QString::number(cond.x2));
         ui->lineEditZ2->setText(QString::number(cond.z2));
 
-        ui->checkApprox->setChecked(cond.approx);
+        ui->checkApprox->setChecked(cond.flags & CFB_APPROX);
+        ui->checkMatchAny->setChecked(cond.flags & CFB_MATCH_ANY);
         ui->lineY->setText(QString::number(cond.y));
 
         if (cond.x1 == cond.z1 && cond.x1 == -cond.x2 && cond.x1 == -cond.z2)
@@ -523,6 +524,8 @@ void FilterDialog::updateMode()
     else if (ft.cat == CAT_BIOMES || ft.cat == CAT_NETHER || ft.cat == CAT_END)
     {
         setActiveTab(ui->tabBiomes);
+        ui->checkApprox->setEnabled(mc <= MC_1_17 || ft.step == 4);
+        ui->checkMatchAny->setEnabled(mc >= MC_1_18);
     }
     else if (filterindex == F_VILLAGE)
     {
@@ -694,16 +697,34 @@ int FilterDialog::warnIfBad(Condition cond)
         if ((cond.variants & ((1ULL << 60) - 1)) == 0)
         {
             QString text = tr("No allowed start pieces specified. Condition can never be true.");
-            QMessageBox::warning(this, tr("Invalid condition"), text, QMessageBox::Ok);
+            QMessageBox::warning(this, tr("Missing Start Piece"), text, QMessageBox::Ok);
             return QMessageBox::Cancel;
         }
     }
-    if (ft.cat == CAT_BIOMES && cond.type != F_CLIMATE_NOISE)
+    if (cond.type == F_CLIMATE_NOISE)
+    {
+        for (int i = 0; i < 6; i++)
+        {
+            if (cond.limok[i][0] == INT_MAX || cond.limok[i][1] == INT_MIN)
+            {
+                QString text = tr(
+                    "The condition contains a climate range which is unbounded "
+                    "with the full range required, which can never be satisfied."
+                    );
+                QMessageBox::warning(this, tr("Bad Climate Range"), text,
+                    QMessageBox::Ok);
+                return QMessageBox::Cancel;
+            }
+        }
+    }
+    else if (ft.cat == CAT_BIOMES)
     {
         int w = cond.x2 - cond.x1 + 1;
         int h = cond.z2 - cond.z1 + 1;
         uint64_t workitemsize = (uint64_t)config->seedsPerItem * w * h;
         uint64_t workwarn = (mc >= MC_1_18 ? 1e6 : 1e9);
+        if (mc >= MC_1_18 && (cond.flags & CFB_APPROX))
+            workwarn *= 100;
 
         if (workitemsize > workwarn)
         {
@@ -798,30 +819,31 @@ void FilterDialog::on_buttonCancel_clicked()
 
 void FilterDialog::on_buttonOk_clicked()
 {
-    cond.type = ui->comboBoxType->currentData().toInt();
-    cond.relative = ui->comboBoxRelative->currentData().toInt();
-    cond.count = ui->spinBox->value();
+    Condition c = cond;
+    c.type = ui->comboBoxType->currentData().toInt();
+    c.relative = ui->comboBoxRelative->currentData().toInt();
+    c.count = ui->spinBox->value();
 
     if (ui->radioSquare->isChecked())
     {
         int d = ui->lineSquare->text().toInt();
-        cond.x1 = (-d) >> 1;
-        cond.z1 = (-d) >> 1;
-        cond.x2 = (d) >> 1;
-        cond.z2 = (d) >> 1;
+        c.x1 = (-d) >> 1;
+        c.z1 = (-d) >> 1;
+        c.x2 = (d) >> 1;
+        c.z2 = (d) >> 1;
     }
     else
     {
-        cond.x1 = ui->lineEditX1->text().toInt();
-        cond.z1 = ui->lineEditZ1->text().toInt();
-        cond.x2 = ui->lineEditX2->text().toInt();
-        cond.z2 = ui->lineEditZ2->text().toInt();
+        c.x1 = ui->lineEditX1->text().toInt();
+        c.z1 = ui->lineEditZ1->text().toInt();
+        c.x2 = ui->lineEditX2->text().toInt();
+        c.z2 = ui->lineEditZ2->text().toInt();
     }
 
     if (ui->checkRadius->isChecked())
-        cond.rmax = ui->lineRadius->text().toInt() + 1;
+        c.rmax = ui->lineRadius->text().toInt() + 1;
     else
-        cond.rmax = 0;
+        c.rmax = 0;
 
     if (ui->tabBiomes->isEnabled())
     {
@@ -837,48 +859,52 @@ void FilterDialog::on_buttonOk_clicked()
                     bex[ex++] = i;
             }
         }
-        cond.bfilter = setupBiomeFilter(bin, in, bex, ex);
-        cond.count = in + ex;
+        c.bfilter = setupBiomeFilter(bin, in, bex, ex);
+        c.count = in + ex;
     }
     if (ui->tabTemps->isEnabled())
     {
-        cond.count = 0;
+        c.count = 0;
         for (int i = 0; i < 9; i++)
         {
             if (!tempsboxes[i])
                 continue;
             int cnt = tempsboxes[i]->value();
-            cond.temps[i] = cnt;
+            c.temps[i] = cnt;
             if (cnt > 0)
-                cond.count += cnt;
+                c.count += cnt;
         }
     }
 
-    cond.y = ui->lineY->text().toInt();
+    c.y = ui->lineY->text().toInt();
 
-    cond.approx = ui->checkApprox->isChecked();
+    c.flags = 0;
+    if (ui->checkApprox->isChecked())
+        c.flags |= CFB_APPROX;
+    if (ui->checkMatchAny->isChecked())
+        c.flags |= CFB_MATCH_ANY;
 
-    cond.variants = 0;
-    cond.variants |= ui->checkStartPiece->isChecked() * Condition::START_PIECE_MASK;
-    cond.variants |= ui->checkAbandoned->isChecked() * Condition::ABANDONED_MASK;
+    c.variants = 0;
+    c.variants |= ui->checkStartPiece->isChecked() * Condition::START_PIECE_MASK;
+    c.variants |= ui->checkAbandoned->isChecked() * Condition::ABANDONED_MASK;
     for (VariantCheckBox *cb : variantboxes)
         if (cb->isChecked())
-            cond.variants |= cb->getMask();
+            c.variants |= cb->getMask();
 
-    getClimateLimits(cond.limok, cond.limex);
+    getClimateLimits(c.limok, c.limex);
 
-    if (warnIfBad(cond) != QMessageBox::Ok)
+    if (warnIfBad(c) != QMessageBox::Ok)
         return;
-
-    emit setCond(item, cond);
+    cond = c;
+    emit setCond(item, cond, 1);
     item = 0;
     close();
 }
 
-void FilterDialog::on_FilterDialog_finished(int)
+void FilterDialog::on_FilterDialog_finished(int result)
 {
     if (item)
-        emit setCond(item, cond);
+        emit setCond(item, cond, result);
     item = 0;
 }
 

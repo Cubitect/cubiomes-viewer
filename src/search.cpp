@@ -1121,7 +1121,7 @@ L_biome_filter_layered:
             int h = rz2-rz1+1;
             //gen->init4Dim(0); // seed gets applied by checkForBiomesAtLayer
             if (checkForBiomesAtLayer(&gen->g.ls, &gen->g.ls.layers[finfo.layer],
-                NULL, gen->seed, rx1, rz1, w, h, cond->bfilter, cond->approx) > 0)
+                NULL, gen->seed, rx1, rz1, w, h, cond->bfilter, cond->flags) > 0)
             {
                 valid = COND_OK;
             }
@@ -1178,7 +1178,7 @@ L_noise_biome:
             int y = (s == 0 ? cond->y : cond->y >> 2);
             Range r = {1<<s, rx1, rz1, w, h, y, 1};
             valid = checkForBiomes(&gen->g, NULL, r, finfo.dim, gen->seed,
-                cond->bfilter, cond->approx, (volatile char*)abort) > 0;
+                cond->bfilter, cond->flags, (volatile char*)abort) > 0;
         }
         return valid ? COND_OK : COND_FAILED;
 
@@ -1209,9 +1209,11 @@ L_noise_biome:
                 NULL,
                 &gen->g.bn.weirdness,
             };
+            int order[] = { 0, 1, 5, 3, 2 }; // use this order for performance
             valid = 1;
-            for (int i = 0; i < 6; i++)
+            for (uint j = 0; j < sizeof(order)/sizeof(int); j++)
             {
+                int i = order[j];
                 if (cn[i] == NULL)
                     continue;
                 if (cond->limok[i][0] == INT_MIN && cond->limok[i][1] == INT_MAX &&

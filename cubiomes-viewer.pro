@@ -107,3 +107,13 @@ RESOURCES += \
         rc/examples.qrc
 
 
+# disable network features completely with: qmake CONFIG+=without_network
+!without_network: {
+    QT += network
+    DEFINES += "WITH_UPDATER=1"
+    SOURCES += src/updater.cpp
+    HEADERS += src/updater.h
+}
+
+
+

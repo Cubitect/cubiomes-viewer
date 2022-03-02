@@ -549,7 +549,7 @@ struct Condition
     int temps[9];
     int count;
     int y;
-    int approx;
+    uint32_t flags;
     int rmax; // (<=0):disabled; (>0):strict upper radius
     uint64_t variants;
     int limok[6][2];

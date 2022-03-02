@@ -9,6 +9,10 @@
 #include "filterdialog.h"
 #include "extgendialog.h"
 
+#if WITH_UPDATER
+#include "updater.h"
+#endif
+
 #include "quad.h"
 #include "cutil.h"
 
@@ -218,6 +222,16 @@ MainWindow::MainWindow(QWidget *parent)
     ui->treeAnalysis->sortByColumn(0, Qt::AscendingOrder);
 
     loadSettings();
+
+#if WITH_UPDATER
+    QAction *updateaction = new QAction("Check for updates", this);
+    connect(updateaction, &QAction::triggered, [=]() { searchForUpdates(false); });
+    ui->menuHelp->insertAction(ui->actionAbout, updateaction);
+    ui->menuHelp->insertSeparator(ui->actionAbout);
+
+    if (config.checkForUpdates)
+        searchForUpdates(true);
+#endif
 }
 
 MainWindow::~MainWindow()
@@ -333,10 +347,11 @@ void MainWindow::saveSettings()
     settings.setValue("analysis/x2", ui->lineEditX2->text().toInt());
     settings.setValue("analysis/z2", ui->lineEditZ2->text().toInt());
 
-    settings.setValue("config/restoreSession", config.restoreSession);
-    settings.setValue("config/showBBoxes", config.showBBoxes);
-    settings.setValue("config/autosaveCycle", config.autosaveCycle);
     settings.setValue("config/smoothMotion", config.smoothMotion);
+    settings.setValue("config/showBBoxes", config.showBBoxes);
+    settings.setValue("config/restoreSession", config.restoreSession);
+    settings.setValue("config/checkForUpdates", config.checkForUpdates);
+    settings.setValue("config/autosaveCycle", config.autosaveCycle);
     settings.setValue("config/uistyle", config.uistyle);
     settings.setValue("config/seedsPerItem", config.seedsPerItem);
     settings.setValue("config/queueSize", config.queueSize);
@@ -409,6 +424,7 @@ void MainWindow::loadSettings()
     config.smoothMotion = settings.value("config/smoothMotion", config.smoothMotion).toBool();
     config.showBBoxes = settings.value("config/showBBoxes", config.showBBoxes).toBool();
     config.restoreSession = settings.value("config/restoreSession", config.restoreSession).toBool();
+    config.checkForUpdates = settings.value("config/checkForUpdates", config.checkForUpdates).toBool();
     config.autosaveCycle = settings.value("config/autosaveCycle", config.autosaveCycle).toInt();
     config.uistyle = settings.value("config/uistyle", config.uistyle).toInt();
     config.seedsPerItem = settings.value("config/seedsPerItem", config.seedsPerItem).toInt();
@@ -1360,6 +1376,7 @@ void MainWindow::on_actionSearch_full_seed_space_triggered()
     formControl->setSearchMode(SEARCH_BLOCKS);
 }
 
+
 void MainWindow::onAutosaveTimeout()
 {
     if (config.autosaveCycle)
@@ -1432,4 +1449,6 @@ void MainWindow::copyTeleportCommand()
     QClipboard *clipboard = QGuiApplication::clipboard();
     clipboard->setText(QString::asprintf("/tp @p %d ~ %d", p.x, p.z));
 }
+
+
 

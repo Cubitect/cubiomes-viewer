@@ -134,7 +134,7 @@ public:
     void setClimateLimits(LabeledRange *ranges[6], int limits[6][2], bool complete);
 
 signals:
-    void setCond(QListWidgetItem *item, Condition cond);
+    void setCond(QListWidgetItem *item, Condition cond, int modified);
 
 private slots:
     void on_comboBoxType_activated(int);

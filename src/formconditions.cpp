@@ -174,12 +174,12 @@ void FormConditions::setItemCondition(QListWidget *list, QListWidgetItem *item, 
 
 void FormConditions::editCondition(QListWidgetItem *item)
 {
-    if (!(item->flags() & Qt::ItemIsSelectable))
+    if (!(item->flags() & Qt::ItemIsSelectable) || parent == NULL)
         return;
     WorldInfo wi;
     parent->getSeed(&wi);
     FilterDialog *dialog = new FilterDialog(this, &parent->config, wi.mc, item, (Condition*)item->data(Qt::UserRole).data());
-    QObject::connect(dialog, SIGNAL(setCond(QListWidgetItem*,Condition)), this, SLOT(addItemCondition(QListWidgetItem*,Condition)), Qt::QueuedConnection);
+    QObject::connect(dialog, SIGNAL(setCond(QListWidgetItem*,Condition,int)), this, SLOT(addItemCondition(QListWidgetItem*,Condition,int)), Qt::QueuedConnection);
     dialog->show();
 }
 
@@ -222,10 +222,12 @@ void FormConditions::on_buttonEdit_clicked()
 
 void FormConditions::on_buttonAddFilter_clicked()
 {
+    if (parent == NULL)
+        return;
     WorldInfo wi;
     parent->getSeed(&wi);
     FilterDialog *dialog = new FilterDialog(this, &parent->config, wi.mc);
-    QObject::connect(dialog, SIGNAL(setCond(QListWidgetItem*,Condition)), this, SLOT(addItemCondition(QListWidgetItem*,Condition)), Qt::QueuedConnection);
+    QObject::connect(dialog, SIGNAL(setCond(QListWidgetItem*,Condition,int)), this, SLOT(addItemCondition(QListWidgetItem*,Condition)), Qt::QueuedConnection);
     dialog->show();
 }
 
@@ -239,14 +241,16 @@ void FormConditions::on_listConditionsFull_itemSelectionChanged()
     updateSensitivity();
 }
 
-void FormConditions::addItemCondition(QListWidgetItem *item, Condition cond)
+void FormConditions::addItemCondition(QListWidgetItem *item, Condition cond, int modified)
 {
     const FilterInfo& ft = g_filterinfo.list[cond.type];
 
     if (ft.cat != CAT_QUAD)
     {
-        if (!item)
+        if (!item) {
             item = new QListWidgetItem();
+            modified = 1;
+        }
         setItemCondition(ui->listConditionsFull, item, &cond);
     }
     else if (item)
@@ -255,6 +259,7 @@ void FormConditions::addItemCondition(QListWidgetItem *item, Condition cond)
     }
     else
     {
+        modified = 1;
         item = new QListWidgetItem();
         setItemCondition(ui->listConditionsFull, item, &cond);
 
@@ -290,7 +295,8 @@ void FormConditions::addItemCondition(QListWidgetItem *item, Condition cond)
         }
     }
 
-    emit changed();
+    if (modified)
+        emit changed();
 }
 
 void FormConditions::on_listConditionsFull_indexesMoved(const QModelIndexList &)

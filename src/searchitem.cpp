@@ -136,7 +136,8 @@ void SearchItem::run()
 
     if (!matches.empty())
     {
-        emit results(matches, false);
+        if (!*abort)
+            emit results(matches, false);
     }
     emit itemDone(itemid, seed, isdone);
     searchtype = -1;

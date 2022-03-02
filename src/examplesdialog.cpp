@@ -34,6 +34,39 @@ ExamplesDialog::ExamplesDialog(QWidget *parent, WorldInfo wi) :
         tr("Spawn in a Village with a Ruined Portal leading to a Stronghold."),
         tr("Works best with a large search item size and with the 48-bit family search."),
         wi.mc >= MC_1_16);
+
+    /*
+    addExample(":/examples/biome_diversity_1_17.txt",
+        tr("Biome Diverity (1.7-1.17)"),
+        tr("Get a large biomes diversity within 1000 blocks of the origin."),
+        "", wi.mc >= MC_1_7 && wi.mc <= MC_1_17);
+    */
+
+    addExample(":/examples/biome_diversity_1_18.txt",
+        tr("Biome Diverity (1.18)"),
+        tr("A wide range of climates near the origin."),
+        tr("(Does not look for any particular biomes.)"),
+        wi.mc >= MC_1_18);
+
+    addExample(":/examples/huge_jungle_1_18.txt",
+        tr("Large Jungle (1.18)"),
+        tr("A large Jungle biome at the origin."),
+        tr("Looks for a suitable climate that primarily supports Jungle variants."),
+        wi.mc >= MC_1_18);
+
+    addExample(":/examples/large_birch_forest_1_18.txt",
+        tr("Large Birch Forest (1.18)"),
+        tr("A large Birch Forest biome at the origin."),
+        tr("Looks for a climate that supports Birch Forest variants. "
+        "Swamps and Meadows can generate in the same climates and are explicitly excluded."),
+        wi.mc >= MC_1_18);
+
+    addExample(":/examples/old_growth_taiga_somewhere.txt",
+        tr("Large Old Growth Taiga somewhere (1.18)"),
+        tr("A large Old Growth Taiga biome somewhere within 2500 blocks."),
+        tr("Searches an area of +/-2500 blocks for a large climate region that "
+        "primarily supports Old Growth Taiga variants"),
+        wi.mc >= MC_1_18);
 }
 
 ExamplesDialog::~ExamplesDialog()

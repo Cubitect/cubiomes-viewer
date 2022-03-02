@@ -44,7 +44,7 @@ public slots:
     void on_listConditionsFull_itemDoubleClicked(QListWidgetItem *item);
     void on_listConditionsFull_itemSelectionChanged();
 
-    void addItemCondition(QListWidgetItem *item, Condition cond);
+    void addItemCondition(QListWidgetItem *item, Condition cond, int modified = 1);
 
 private slots:
     void on_listConditionsFull_indexesMoved(const QModelIndexList &indexes);

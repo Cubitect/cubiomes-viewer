@@ -30,7 +30,7 @@ public:
 
     virtual void run() override;
 
-    void stop() { abort = true; pool.clear(); }
+    void stop() { abort = true; }
     SearchItem *startNextItem();
 
 signals:

@@ -54,6 +54,7 @@ struct Config
     bool smoothMotion;
     bool showBBoxes;
     bool restoreSession;
+    bool checkForUpdates;
     int autosaveCycle;
     int uistyle;
     int seedsPerItem;
@@ -70,6 +71,7 @@ struct Config
         smoothMotion = true;
         showBBoxes = true;
         restoreSession = true;
+        checkForUpdates = false;
         autosaveCycle = 10;
         uistyle = STYLE_SYSTEM;
         seedsPerItem = 64;

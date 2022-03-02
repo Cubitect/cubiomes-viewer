@@ -160,7 +160,7 @@ SearchItem *SearchThread::startNextItem()
     if (!item || item->isdone)
         return NULL;
     // call back here when done
-    QObject::connect(item, &SearchItem::itemDone, this, &SearchThread::onItemDone, Qt::BlockingQueuedConnection);
+    QObject::connect(item, &SearchItem::itemDone, this, &SearchThread::onItemDone, Qt::QueuedConnection);
     QObject::connect(item, &SearchItem::canceled, this, &SearchThread::onItemCanceled, Qt::QueuedConnection);
     // redirect results to mainwindow
     QObject::connect(item, &SearchItem::results, parent, &FormSearchControl::searchResultsAdd, Qt::BlockingQueuedConnection);
