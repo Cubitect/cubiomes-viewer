@@ -131,7 +131,7 @@ void RangeSlider::wheelEvent(QWheelEvent *e)
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
     x = e->x() - groove.x();
 #else
-    x = (int)e->position.x() - groove.x();
+    x = (int)e->position().x() - groove.x();
 #endif
     x = style()->sliderValueFromPosition(vmin, vmax, x, groove.width());
 
