@@ -23,6 +23,11 @@ ConfigDialog::ConfigDialog(QWidget *parent, Config *config) :
         ui->cboxItemSize->addItem(QString::number(1 << i));
     ui->lineGridSpacing->setValidator(new QIntValidator(0, 1048576, ui->lineQueueSize));
 
+    #if not WITH_UPDATER
+        delete ui->gridLayout->takeAt(4);
+        ui->groupBox_4->hide();
+    #endif
+
     initSettings(config);
 }
 
