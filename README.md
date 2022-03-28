@@ -19,8 +19,14 @@ Non-PC platforms, such as macOS, are not formally supported, but you can check [
 ## Build from source
 
 Install Qt5 development files
+
+Debian
 ```
 $ sudo apt install build-essential qt5-default
+```
+Fedora
+```
+$ sudo dnf install qt5-qtbase-devel
 ```
 get sources
 ```
@@ -33,8 +39,15 @@ $ mkdir build
 $ cd build
 ```
 build cubiomes-viewer
+
+Debian
 ```
 $ qmake ..
+$ make
+```
+Fedora
+```
+$ qmake-qt5 ..
 $ make
 ```
 
