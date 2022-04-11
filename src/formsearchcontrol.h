@@ -4,6 +4,10 @@
 #include <QWidget>
 #include <QTimer>
 #include <QKeyEvent>
+#include <QMessageBox>
+#include <QElapsedTimer>
+
+#include <deque>
 
 #include "searchthread.h"
 #include "protobasedialog.h"
@@ -28,7 +32,6 @@ public:
     SearchConfig getSearchConfig();
     bool setSearchConfig(SearchConfig s, bool quiet);
 
-    bool isbusy();
     void stopSearch();
     bool setList64(QString path, bool quiet);
 
@@ -42,6 +45,10 @@ signals:
     void resultsAdded(int cnt);
 
 public slots:
+    int warning(QString text, QMessageBox::StandardButtons buttons = QMessageBox::Ok);
+    void openProtobaseMsg(QString path);
+    void closeProtobaseMsg();
+
     void on_buttonClear_clicked();
     void on_buttonStart_clicked();
     void on_buttonMore_clicked();
@@ -58,7 +65,7 @@ public slots:
     int searchResultsAdd(QVector<uint64_t> seeds, bool countonly);
     void searchProgressReset();
     void searchProgress(uint64_t last, uint64_t end, int64_t seed);
-    void searchFinish();
+    void searchFinish(bool done);
     void resultTimeout();
     void removeCurrent();
     void copyResults();
@@ -66,11 +73,16 @@ public slots:
 protected:
     void keyReleaseEvent(QKeyEvent *event) override;
 
+public: 
+    struct TProg { uint64_t ns, prog; };
 private:
     MainWindow *parent;
     Ui::FormSearchControl *ui;
-    SearchThread sthread;
+    ProtoBaseDialog *protodialog;
+    SearchMaster sthread;
     QTimer stimer;
+    QElapsedTimer elapsed;
+    std::deque<TProg> proghist;
 
     // the seed list option is not stored in a widget but is loaded with the "..." button
     QString slist64path;

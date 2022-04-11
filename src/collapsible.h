@@ -14,6 +14,7 @@ public:
     explicit Collapsible(QWidget *parent = nullptr);
     void init(const QString& title, QWidget *widget, bool collapsed);
     void setInfo(const QString& title, const QString& text);
+    void setCollapsed(bool collapsed); // without animation
 
 public slots:
     void toggle(bool collapsed);

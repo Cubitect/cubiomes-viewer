@@ -5,7 +5,6 @@
 #include "search.h"
 #include "rangedialog.h"
 
-#include <QMessageBox>
 #include <QMenu>
 #include <QAction>
 #include <QClipboard>
@@ -17,8 +16,11 @@ FormSearchControl::FormSearchControl(MainWindow *parent)
     : QWidget(parent)
     , parent(parent)
     , ui(new Ui::FormSearchControl)
+    , protodialog()
     , sthread(this)
     , stimer()
+    , elapsed()
+    , proghist()
     , slist64path()
     , slist64fnam()
     , slist64()
@@ -26,20 +28,19 @@ FormSearchControl::FormSearchControl(MainWindow *parent)
     , smax(~(uint64_t)0)
 {
     ui->setupUi(this);
+    protodialog = new ProtoBaseDialog(this);
 
     QFont mono = QFont("Monospace", 9);
     mono.setStyleHint(QFont::TypeWriter);
     ui->listResults->setFont(mono);
     ui->progressBar->setFont(mono);
+    ui->labelStatus->setFont(mono);
 
     ui->listResults->horizontalHeader()->setFont(mono);
 
-    //connect(&sthread, &SearchThread::results, this, &MainWindow::searchResultsAdd, Qt::BlockingQueuedConnection);
-    connect(&sthread, &SearchThread::progress, this, &FormSearchControl::searchProgress, Qt::QueuedConnection);
-    connect(&sthread, &SearchThread::searchFinish, this, &FormSearchControl::searchFinish, Qt::QueuedConnection);
+    connect(&sthread, &SearchMaster::searchFinish, this, &FormSearchControl::searchFinish, Qt::QueuedConnection);
 
     connect(&stimer, &QTimer::timeout, this, QOverload<>::of(&FormSearchControl::resultTimeout));
-    stimer.start(500);
 
     searchProgressReset();
     ui->spinThreads->setMaximum(QThread::idealThreadCount());
@@ -105,11 +106,6 @@ bool FormSearchControl::setSearchConfig(SearchConfig s, bool quiet)
     ui->lineStart->setText(QString::asprintf("%" PRId64, (int64_t)s.startseed));
 
     return ok;
-}
-
-bool FormSearchControl::isbusy()
-{
-    return ui->buttonStart->isChecked() || sthread.isRunning();
 }
 
 void FormSearchControl::stopSearch()
@@ -193,11 +189,29 @@ void FormSearchControl::setSearchMode(int mode)
 }
 
 
+int FormSearchControl::warning(QString text, QMessageBox::StandardButtons buttons)
+{
+    return QMessageBox::warning(this, tr("Warning"), text, buttons);
+}
+
+void FormSearchControl::openProtobaseMsg(QString path)
+{
+    protodialog->setPath(path);
+    protodialog->show();
+}
+
+void FormSearchControl::closeProtobaseMsg()
+{
+    if (protodialog->closeOnDone())
+        protodialog->close();
+}
+
 void FormSearchControl::on_buttonClear_clicked()
 {
     ui->listResults->clearContents();
     ui->listResults->setRowCount(0);
     searchProgressReset();
+    ui->lineStart->setText("0");
 }
 
 void FormSearchControl::on_buttonStart_clicked()
@@ -238,7 +252,7 @@ void FormSearchControl::on_buttonStart_clicked()
             else
                 slist.clear();
 
-            ok = sthread.set(parent, wi, sc, gen48, config, slist, condvec);
+            ok = sthread.set(wi, sc, gen48, config, slist, condvec);
         }
 
         if (ok)
@@ -246,8 +260,10 @@ void FormSearchControl::on_buttonStart_clicked()
             ui->lineStart->setText(QString::asprintf("%" PRId64, (int64_t)sc.startseed));
             ui->buttonStart->setText(tr("Abort search"));
             ui->buttonStart->setIcon(QIcon(":/icons/cancel.png"));
-            sthread.start();
             searchLockUi(true);
+            sthread.start();
+            elapsed.start();
+            stimer.start(250);
         }
         else
         {
@@ -256,13 +272,13 @@ void FormSearchControl::on_buttonStart_clicked()
     }
     else
     {
-        stopSearch();
         ui->buttonStart->setText(tr("Start search"));
         ui->buttonStart->setIcon(QIcon(":/icons/search.png"));
         ui->buttonStart->setChecked(false);
 
         // disable until finish
         ui->buttonStart->setEnabled(false);
+        stopSearch();
     }
 
     update();
@@ -339,8 +355,8 @@ void FormSearchControl::on_buttonSearchHelp_clicked()
         "</p><p>"
         "With <b>48-bit family blocks</b> the search looks for suitable "
         "48-bit seeds first and parallelizes the search through the upper "
-        "16-bits. This type of search is best suited for exhaustive "
-        "searches and for many types of structure restrictions."
+        "16-bits. This search type is best suited for exhaustive searches and "
+        "those with very restrictive structure requirements."
         "</p><p>"
         "Load a <b>seed list from a file</b> to search through an "
         "existing set of seeds. The seeds should be in decimal ASCII text, "
@@ -442,10 +458,7 @@ int FormSearchControl::searchResultsAdd(QVector<uint64_t> seeds, bool countonly)
 
     int addcnt = n - ns;
     if (ui->checkStop->isChecked() && addcnt)
-    {
-        sthread.reqstop = true;
-        sthread.pool.clear();
-    }
+        sthread.abort = true;
 
     if (addcnt)
         emit resultsAdded(addcnt);
@@ -486,22 +499,21 @@ void FormSearchControl::searchProgressReset()
     else
         fmt += "0 / ? (0.00%%)";
 
-    ui->lineStart->setText("0");
     ui->progressBar->setValue(0);
     ui->progressBar->setFormat(fmt);
 }
 
-void FormSearchControl::searchProgress(uint64_t last, uint64_t end, int64_t seed)
+void FormSearchControl::searchProgress(uint64_t prog, uint64_t end, int64_t seed)
 {
     ui->lineStart->setText(QString::asprintf("%" PRId64, seed));
 
     if (end)
     {
-        int v = (int) floor(10000 * (double)last / end);
+        int v = (int) floor(10000 * (double)prog / end);
         ui->progressBar->setValue(v);
         QString fmt = QString::asprintf(
                     "%" PRIu64 " / %" PRIu64 " (%d.%02d%%)",
-                    last, end, v / 100, v % 100
+                    prog, end, v / 100, v % 100
                     );
         int searchtype = ui->comboSearchType->currentIndex();
         if (searchtype == SEARCH_LIST)
@@ -522,22 +534,101 @@ void FormSearchControl::searchProgress(uint64_t last, uint64_t end, int64_t seed
     }
 }
 
-void FormSearchControl::searchFinish()
+void FormSearchControl::searchFinish(bool done)
 {
-    if (!sthread.abort)
-    {
-        searchProgress(0, 0, sthread.itemgen.seed);
-    }
-    if (sthread.itemgen.isdone)
+    stimer.stop();
+    resultTimeout();
+    if (done)
     {
         ui->progressBar->setValue(10000);
         ui->progressBar->setFormat(tr("Done", "Progressbar when finished"));
     }
+    ui->labelStatus->setText("Idle");
+    proghist.clear();
     searchLockUi(false);
+}
+
+#define SAMPLE_SEC 20
+
+static void estmateSpeed(const std::deque<FormSearchControl::TProg>& hist,
+    double *min, double *avg, double *max)
+{   // We will try to get a decent estimate for the search speed.
+    std::vector<double> samples;
+    samples.reserve(hist.size());
+    auto it_last = hist.begin();
+    auto it = it_last;
+    while (++it != hist.end())
+    {
+        double dp = it_last->prog - it->prog;
+        double dt = 1e-9 * (it_last->ns - it->ns);
+        if (dt > 0)
+            samples.push_back(dp / dt);
+        it_last = it;
+    }
+    std::sort(samples.begin(), samples.end());
+    double speedtot = 0;
+    double weightot = 1e-6;
+    int n = (int) samples.size();
+    int r = (int) (n / SAMPLE_SEC);
+    int has_zeros = 0;
+    for (int i = -r; i <= r; i++)
+    {
+        int j = n/2 + i;
+        if (j < 0 || j >= n)
+            continue;
+        has_zeros += samples[j] == 0;
+        speedtot += samples[j];
+        weightot += 1.0;
+    }
+    if (min) *min = samples[n*1/4]; // lower quartile
+    if (avg) *avg = speedtot / weightot; // median
+    if (max) *max = samples[n*3/4]; // upper quartile
+    if (avg && has_zeros)
+    {   // probably a slow sampling regime, use whole range for estimate
+        speedtot = 0;
+        for (double s : samples)
+            speedtot += s;
+        *avg = speedtot / n;
+    }
+}
+
+static QString getAbbrNum(double x)
+{
+    if (x >= 10e9)
+        return QString::asprintf("%.1fG", x * 1e-9);
+    if (x >= 10e6)
+        return QString::asprintf("%.1fM", x * 1e-6);
+    if (x >= 10e3)
+        return QString::asprintf("%.1fK", x * 1e-3);
+    return QString::asprintf("%.2f", x);
 }
 
 void FormSearchControl::resultTimeout()
 {
+    uint64_t prog, end, seed;
+    if (!sthread.getProgress(&prog, &end, &seed))
+        return;
+    searchProgress(prog, end, seed);
+
+    // track the progress over a few seconds so we can estimate the search speed
+    TProg tp = { (uint64_t) elapsed.nsecsElapsed(), prog };
+    proghist.push_front(tp);
+    while (proghist.size() > 1 && proghist.back().ns < tp.ns - SAMPLE_SEC*1e9)
+        proghist.pop_back();
+
+    QString status = tr("Running...");
+    if (proghist.size() > 1 && proghist.front().ns > proghist.back().ns)
+    {
+        double min, avg, max;
+        estmateSpeed(proghist, &min, &avg, &max);
+        status = tr("seeds/sec: %1 min: %2 max: %3 isize: %4")
+            .arg(getAbbrNum(avg), -8)
+            .arg(getAbbrNum(min), -8)
+            .arg(getAbbrNum(max), -8)
+            .arg(sthread.itemsize);
+    }
+    ui->labelStatus->setText(status);
+
     update();
 }
 

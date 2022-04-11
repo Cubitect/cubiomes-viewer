@@ -3,9 +3,122 @@
 #include "mainwindow.h"
 
 #include <QThread>
+#include <QByteArray>
+#include <QApplication>
 
 #include <algorithm>
 
+
+QString Condition::summary() const
+{
+    const FilterInfo& ft = g_filterinfo.list[type];
+    QString s;
+    if (meta & Condition::DISABLED)
+        s = QString("#%1#").arg(save, 2, 10, QLatin1Char('0'));
+    else
+        s = QString("[%1]").arg(save, 2, 10, QLatin1Char('0'));
+
+    s += QString(" %2%3%4")
+        .arg(QApplication::translate("Filter", ft.name), -28, ' ')
+        .arg(QChar(0xD7))
+        .arg(count, -3, 10, QLatin1Char(' '));
+
+    if (relative)
+        s += QString::asprintf("[%02d]+", relative);
+    else
+        s += "     ";
+
+    if (rmax > 0)
+    {
+        s += QString::asprintf("r<%d", rmax-1);
+    }
+    else
+    {
+        if (ft.coord)
+            s += QString::asprintf("(%d,%d)", x1*ft.step, z1*ft.step);
+        if (ft.area)
+            s += QString::asprintf(",(%d,%d)", (x2+1)*ft.step-1, (z2+1)*ft.step-1);
+    }
+    return s;
+}
+
+QString Condition::toHex() const
+{
+    return QByteArray((const char*) this, sizeof(Condition)).toHex();
+}
+
+bool Condition::readHex(const QString& hex)
+{
+    if (hex.length()/2 < (char*)&count - (char*)this)
+        return false;
+    QByteArray ba = QByteArray::fromHex(QByteArray(hex.toLatin1().data()));
+    size_t minsize = (size_t)ba.size();
+    if (sizeof(Condition) < minsize)
+        minsize = sizeof(Condition);
+    memset(this, 0, sizeof(Condition));
+    memcpy(this, ba.data(), minsize);
+    return (size_t)ba.size() >= minsize &&
+            save >= 0 && save < 100 &&
+            type >= 0 && type < FILTER_MAX;
+}
+
+
+int Condition::toVariantBit(int biome, int variant)
+{
+    int bit = 0;
+    switch (biome)
+    {
+    case meadow:
+    case plains:        bit = 1; break;
+    case desert:        bit = 2; break;
+    case savanna:       bit = 3; break;
+    case taiga:         bit = 4; break;
+    case snowy_tundra:  bit = 5; break;
+    }
+    return (bit << 3) + variant;
+}
+
+void Condition::fromVariantBit(int bit, int *biome, int *variant)
+{
+    *variant = bit & 0x7;
+    switch (bit >> 3)
+    {
+    case 1: *biome = plains;        break;
+    case 2: *biome = desert;        break;
+    case 3: *biome = savanna;       break;
+    case 4: *biome = taiga;         break;
+    case 5: *biome = snowy_tundra;  break;
+    }
+}
+
+bool Condition::villageOk(int mc, StructureVariant sv) const
+{
+    if ((variants & ABANDONED_MASK) && !sv.abandoned) return false;
+    if (mc < MC_1_14) return true;
+    if (!(variants & START_PIECE_MASK)) return true;
+    uint64_t mask = 1ULL << toVariantBit(sv.biome, sv.variant);
+    return mask & variants;
+}
+
+void ConditionTree::set(const QVector<Condition>& cv)
+{
+    int cmax = 0;
+    for (const Condition& c : cv)
+        if (!(c.meta & Condition::DISABLED) && c.save > cmax)
+            cmax = c.save;
+    condvec.clear();
+    condvec.resize(cmax + 1);
+    references.clear();
+    references.resize(cmax + 1);
+    for (const Condition& c : cv)
+    {
+        if (c.meta & Condition::DISABLED)
+            continue;
+        condvec[c.save] = c;
+        if (c.relative <= cmax)
+            references[c.relative].push_back(c.save);
+    }
+}
 
 static
 int testTreeAt(

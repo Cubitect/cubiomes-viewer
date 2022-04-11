@@ -51,16 +51,20 @@ void replyFinished(QNetworkReply *reply, bool quiet)
         return;
     }
 
-    QJsonArray arr = document.array();
+    QJsonArray jarr = document.array();
     QString newest;
 
-    if (getVersStr().contains("dev")) {
-        newest = arr[0].toObject().take("tag_name").toString();
+    if (getVersStr().contains("dev"))
+    {
+        newest = jarr[0].toObject().take("tag_name").toString();
     }
-    else {
-        for (auto i : arr) {
-            if (!i.toObject().take("prerelease").toBool()) {
-                newest = i.toObject().take("tag_name").toString();
+    else
+    {
+        for (auto jval : jarr)
+        {
+            if (!jval.toObject().take("prerelease").toBool())
+            {
+                newest = jval.toObject().take("tag_name").toString();
                 break;
             }
         }

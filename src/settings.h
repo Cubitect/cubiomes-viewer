@@ -43,7 +43,7 @@ struct WorldInfo
         mc = MC_NEWEST;
         large = false;
         seed = 0;
-        y = 63;
+        y = 255;
     }
 };
 
@@ -57,8 +57,6 @@ struct Config
     bool checkForUpdates;
     int autosaveCycle;
     int uistyle;
-    int seedsPerItem;
-    int queueSize;
     int maxMatching;
     int gridSpacing;
     int mapCacheSize;
@@ -74,8 +72,6 @@ struct Config
         checkForUpdates = false;
         autosaveCycle = 10;
         uistyle = STYLE_SYSTEM;
-        seedsPerItem = 64;
-        queueSize = QThread::idealThreadCount();
         maxMatching = 65536;
         gridSpacing = 0;
         mapCacheSize = 256;

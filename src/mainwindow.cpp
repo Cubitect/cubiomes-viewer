@@ -3,9 +3,8 @@
 
 #include "gotodialog.h"
 #include "quadlistdialog.h"
-#include "examplesdialog.h"
+#include "presetdialog.h"
 #include "aboutdialog.h"
-#include "protobasedialog.h"
 #include "filterdialog.h"
 #include "extgendialog.h"
 
@@ -18,7 +17,6 @@
 
 #include <QIntValidator>
 #include <QMetaType>
-#include <QMessageBox>
 #include <QtDebug>
 #include <QDataStream>
 #include <QMenu>
@@ -57,8 +55,14 @@ int getStructureConfig_override(int stype, int mc, StructureConfig *sconf)
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
+    , formCond()
+    , formGen48()
+    , formControl()
+    , config()
     , prevdir(".")
-    , protodialog()
+    , autosaveTimer()
+    , dimactions{}
+    , dimgroup()
 {
     int fontid = QFontDatabase::addApplicationFont(":/fonts/DejaVuSans.ttf");
     if (fontid >= 0)
@@ -79,75 +83,8 @@ MainWindow::MainWindow(QWidget *parent)
     QCoreApplication::setApplicationName("cubiomes-viewer");
 
     formCond = new FormConditions(this);
-    ui->collapseConstraints->init(tr("Conditions"), formCond, false);
-    connect(formCond, &FormConditions::changed, this, &MainWindow::onConditionsChanged);
-    ui->collapseConstraints->setInfo(
-        tr("Help: Conditions"),
-        tr(
-        "<html><head/><body><p>"
-        "The search conditions define the properties by which potential seeds "
-        "are filtered."
-        "</p><p>"
-        "Conditions can reference each other to produce relative positionial "
-        "dependencies (indicated with the ID in square brackets [XY]). These "
-        "will usually be checked at the geometric <b>average position</b> of the "
-        "parent trigger. When multiple trigger positions are encountered in the "
-        "same seed <b>and the required instance count is exactly one</b>, the "
-        "instances are checked individually instead."
-        "</p><p>"
-        "Biome conditions <b>do not have trigger instances</b> and always yield "
-        "the center point of the testing area. You can use reference point "
-        "helpers to construct relative biome dependencies."
-        "</p></body></html>"
-    ));
-
     formGen48 = new FormGen48(this);
-    ui->collapseGen48->init(tr("Seed generator (48-bit)"), formGen48, false);
-    connect(formGen48, &FormGen48::changed, this, &MainWindow::onGen48Changed);
-    ui->collapseGen48->setInfo(
-        tr("Help: Seed generator"),
-        tr(
-        "<html><head/><body><p>"
-        "For some searches, the 48-bit structure seed candidates can be "
-        "generated without searching, which can vastly reduce the search space "
-        "that has to be checked."
-        "</p><p>"
-        "The generator mode <b>Auto</b> is recommended for general use, which "
-        "automatically selects suitable options based on the conditions list."
-        "</p><p>"
-        "The <b>Quad-feature</b> mode produces candidates for "
-        "quad&#8209;structures that have a uniform distribution of "
-        "region&#8209;size=32 and chunk&#8209;gap=8, such as swamp huts."
-        "</p><p>"
-        "A perfect <b>Quad-monument</b> structure constellation does not "
-        "actually exist, but some extremely rare structure seed bases get close, "
-        "with over 90&#37; of the area within 128 blocks. The generator uses a "
-        "precomputed list of these seed bases."
-        "</p><p>"
-        "Using a <b>Seed list</b> you can provide a custom set of 48-bit "
-        "candidates. Optionally, a salt value can be added and the seeds can "
-        "be region transposed."
-        "</p></body></html>"
-    ));
-
     formControl = new FormSearchControl(this);
-    ui->collapseControl->init("Matching seeds", formControl, false);
-    connect(formControl, &FormSearchControl::selectedSeedChanged, this, &MainWindow::onSelectedSeedChanged);
-    connect(formControl, &FormSearchControl::searchStatusChanged, this, &MainWindow::onSearchStatusChanged);
-    ui->collapseControl->setInfo(
-        tr("Help: Matching seeds"),
-        tr(
-        "<html><head/><body><p>"
-        "The list of seeds acts as a buffer onto which suitable seeds are added "
-        "when they are found. You can also copy the seed list, or paste seeds "
-        "into the list. Selecting a seed will open it in the map view."
-        "</p></body></html>"
-    ));
-
-    this->update();
-
-    //ui->frameMap->layout()->addWidget(ui->toolBar);
-    //ui->toolBar->setContentsMargins(0, 0, 0, 0);
 
     QAction *toorigin = new QAction(QIcon(":/icons/origin.png"), "Goto origin", this);
     connect(toorigin, &QAction::triggered, [=](){ this->mapGoto(0,0,16); });
@@ -195,8 +132,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     saction[D_GRID]->setChecked(true);
 
-    protodialog = new ProtoBaseDialog(this);
-
     ui->splitterMap->setSizes(QList<int>({6000, 10000}));
     ui->splitterSearch->setSizes(QList<int>({1000, 1000, 2000}));
 
@@ -222,6 +157,75 @@ MainWindow::MainWindow(QWidget *parent)
     ui->treeAnalysis->sortByColumn(0, Qt::AscendingOrder);
 
     loadSettings();
+
+    ui->collapseConstraints->init(tr("Conditions"), formCond, false);
+    connect(formCond, &FormConditions::changed, this, &MainWindow::onConditionsChanged);
+    ui->collapseConstraints->setInfo(
+        tr("Help: Conditions"),
+        tr(
+        "<html><head/><body><p>"
+        "The search conditions define the properties by which potential seeds "
+        "are filtered."
+        "</p><p>"
+        "Conditions can reference each other to produce relative positionial "
+        "dependencies (indicated with the ID in square brackets [XY]). These "
+        "will usually be checked at the geometric <b>average position</b> of the "
+        "parent trigger. When multiple trigger positions are encountered in the "
+        "same seed <b>and the required instance count is exactly one</b>, the "
+        "instances are checked individually instead."
+        "</p><p>"
+        "Biome conditions <b>do not have trigger instances</b> and always yield "
+        "the center point of the testing area. You can use reference point "
+        "helpers to construct relative biome dependencies."
+        "</p></body></html>"
+    ));
+
+    // 48-bit generator settings are not all that interesting unless we are
+    // using them, so start as collapsed if they are on the "Auto" setting.
+    Gen48Settings gen48 = formGen48->getSettings(false);
+    ui->collapseGen48->init(tr("Seed generator (48-bit)"), formGen48, gen48.mode == GEN48_AUTO);
+    connect(formGen48, &FormGen48::changed, this, &MainWindow::onGen48Changed);
+    ui->collapseGen48->setInfo(
+        tr("Help: Seed generator"),
+        tr(
+        "<html><head/><body><p>"
+        "For some searches, the 48-bit structure seed candidates can be "
+        "generated without searching, which can vastly reduce the search space "
+        "that has to be checked."
+        "</p><p>"
+        "The generator mode <b>Auto</b> is recommended for general use, which "
+        "automatically selects suitable options based on the conditions list."
+        "</p><p>"
+        "The <b>Quad-feature</b> mode produces candidates for "
+        "quad&#8209;structures that have a uniform distribution of "
+        "region&#8209;size=32 and chunk&#8209;gap=8, such as swamp huts."
+        "</p><p>"
+        "A perfect <b>Quad-monument</b> structure constellation does not "
+        "actually exist, but some extremely rare structure seed bases get close, "
+        "with over 90&#37; of the area within 128 blocks. The generator uses a "
+        "precomputed list of these seed bases."
+        "</p><p>"
+        "Using a <b>Seed list</b> you can provide a custom set of 48-bit "
+        "candidates. Optionally, a salt value can be added and the seeds can "
+        "be region transposed."
+        "</p></body></html>"
+    ));
+
+    ui->collapseControl->init("Matching seeds", formControl, false);
+    connect(formControl, &FormSearchControl::selectedSeedChanged, this, &MainWindow::onSelectedSeedChanged);
+    connect(formControl, &FormSearchControl::searchStatusChanged, this, &MainWindow::onSearchStatusChanged);
+    ui->collapseControl->setInfo(
+        tr("Help: Matching seeds"),
+        tr(
+        "<html><head/><body><p>"
+        "The list of seeds acts as a buffer onto which suitable seeds are added "
+        "when they are found. You can also copy the seed list, or paste seeds "
+        "into the list. Selecting a seed will open it in the map view."
+        "</p></body></html>"
+    ));
+
+    onConditionsChanged();
+    update();
 
 #if WITH_UPDATER
     QAction *updateaction = new QAction("Check for updates", this);
@@ -321,6 +325,8 @@ bool MainWindow::setSeed(WorldInfo wi, int dim)
 
 int MainWindow::getDim()
 {
+    if (!dimgroup)
+        return 0;
     QAction *active = dimgroup->checkedAction();
     if (active == dimactions[1])
         return -1; // nether
@@ -353,8 +359,6 @@ void MainWindow::saveSettings()
     settings.setValue("config/checkForUpdates", config.checkForUpdates);
     settings.setValue("config/autosaveCycle", config.autosaveCycle);
     settings.setValue("config/uistyle", config.uistyle);
-    settings.setValue("config/seedsPerItem", config.seedsPerItem);
-    settings.setValue("config/queueSize", config.queueSize);
     settings.setValue("config/maxMatching", config.maxMatching);
     settings.setValue("config/gridSpacing", config.gridSpacing);
     settings.setValue("config/mapCacheSize", config.mapCacheSize);
@@ -427,8 +431,6 @@ void MainWindow::loadSettings()
     config.checkForUpdates = settings.value("config/checkForUpdates", config.checkForUpdates).toBool();
     config.autosaveCycle = settings.value("config/autosaveCycle", config.autosaveCycle).toInt();
     config.uistyle = settings.value("config/uistyle", config.uistyle).toInt();
-    config.seedsPerItem = settings.value("config/seedsPerItem", config.seedsPerItem).toInt();
-    config.queueSize = settings.value("config/queueSize", config.queueSize).toInt();
     config.maxMatching = settings.value("config/maxMatching", config.maxMatching).toInt();
     config.gridSpacing = settings.value("config/gridSpacing", config.gridSpacing).toInt();
     config.mapCacheSize = settings.value("config/mapCacheSize", config.mapCacheSize).toInt();
@@ -499,6 +501,7 @@ void MainWindow::loadSettings()
     }
 }
 
+
 bool MainWindow::saveProgress(QString fnam, bool quiet)
 {
     QFile file(fnam);
@@ -554,7 +557,7 @@ bool MainWindow::saveProgress(QString fnam, bool quiet)
         stream << "#SMax:     " << searchconf.smax << "\n";
 
     for (Condition &c : condvec)
-        stream << "#Cond: " << QByteArray((const char*) &c, sizeof(Condition)).toHex() << "\n";
+        stream << "#Cond: " << c.toHex() << "\n";
 
     for (uint64_t s : results)
         stream << QString::asprintf("%" PRId64 "\n", (int64_t)s);
@@ -621,12 +624,10 @@ bool MainWindow::loadProgress(QString fnam, bool quiet)
         QByteArray ba = line.toLatin1();
         const char *p = ba.data();
 
-        if (line.isEmpty())
-        {
-            continue;
-        }
-
+        if (line.isEmpty()) continue;
         if (line.startsWith("#Time:")) continue;
+        if (line.startsWith("#Title:")) continue;
+        if (line.startsWith("#Desc:")) continue;
         else if (sscanf(p, "#MC:       %8[^\n]", buf) == 1)                     { wi.mc = str2mc(buf); if (wi.mc < 0) wi.mc = MC_NEWEST; }
         else if (sscanf(p, "#Large:    %d", &tmp) == 1)                         { wi.large = tmp; }
         // SearchConfig
@@ -650,18 +651,12 @@ bool MainWindow::loadProgress(QString fnam, bool quiet)
         else if (sscanf(p, "#SMax:     %" PRIu64, &searchconf.smax) == 1)       {}
         else if (line.startsWith("#Cond:"))
         {   // Conditions
-            QString hex = line.mid(6).trimmed();
-            QByteArray ba = QByteArray::fromHex(QByteArray(hex.toLatin1().data()));
-            size_t minsize = (size_t)ba.size();
-            if (sizeof(Condition) < minsize)
-                minsize = sizeof(Condition);
             Condition c;
-            memset(&c, 0, sizeof(c));
-            memcpy(&c, ba.data(), minsize);
-
-            if ((size_t)ba.size() > minsize ||
-                c.save < 0 || c.save >= 100 ||
-                c.type < 0 || c.type >= FILTER_MAX)
+            if (c.readHex(line.mid(6).trimmed()))
+            {
+                condvec.push_back(c);
+            }
+            else
             {
                 if (quiet)
                     return false;
@@ -671,10 +666,6 @@ bool MainWindow::loadProgress(QString fnam, bool quiet)
                     QMessageBox::Abort|QMessageBox::Yes);
                 if (button == QMessageBox::Abort)
                     return false;
-            }
-            else
-            {
-                condvec.push_back(c);
             }
         }
         else
@@ -708,11 +699,11 @@ bool MainWindow::loadProgress(QString fnam, bool quiet)
     }
 
     formGen48->setSettings(gen48, quiet);
+    formGen48->updateCount();
     formControl->on_buttonClear_clicked();
     formControl->setSearchConfig(searchconf, quiet);
     formControl->searchResultsAdd(seeds, false);
     formControl->searchProgressReset();
-    formControl->searchProgress(0, 0, searchconf.startseed);
 
     return true;
 }
@@ -726,26 +717,14 @@ void MainWindow::updateMapSeed()
 }
 
 
-void MainWindow::warning(QString text)
+int MainWindow::warning(QString text, QMessageBox::StandardButtons buttons)
 {
-    QMessageBox::warning(this, tr("Warning"), text, QMessageBox::Ok);
+    return QMessageBox::warning(this, tr("Warning"), text, buttons);
 }
 
 void MainWindow::mapGoto(qreal x, qreal z, qreal scale)
 {
     ui->mapView->setView(x, z, scale);
-}
-
-void MainWindow::openProtobaseMsg(QString path)
-{
-    protodialog->setPath(path);
-    protodialog->show();
-}
-
-void MainWindow::closeProtobaseMsg()
-{
-    if (protodialog->closeOnDone())
-        protodialog->close();
 }
 
 void MainWindow::on_comboBoxMC_currentIndexChanged(int)
@@ -795,11 +774,6 @@ void MainWindow::on_actionSave_triggered()
 
 void MainWindow::on_actionLoad_triggered()
 {
-    if (formControl->isbusy())
-    {
-        warning(tr("Cannot load progress: search is still active."));
-        return;
-    }
     QString fnam = QFileDialog::getOpenFileName(
         this, tr("Load progress"), prevdir, tr("Text files (*.txt);;Any files (*)"));
     if (!fnam.isEmpty())
@@ -888,19 +862,24 @@ void MainWindow::on_actionOpen_shadow_seed_triggered()
     }
 }
 
+void MainWindow::on_actionPresetLoad_triggered()
+{
+    WorldInfo wi;
+    getSeed(&wi);
+    PresetDialog *dialog = new PresetDialog(this, wi, false);
+    dialog->setActiveFilter(formCond->getConditions());
+    if (dialog->exec() && !dialog->rc.isEmpty())
+        loadProgress(dialog->rc);
+}
+
 void MainWindow::on_actionExamples_triggered()
 {
     WorldInfo wi;
     getSeed(&wi);
-    ExamplesDialog *dialog = new ExamplesDialog(this, wi);
-    if (dialog->exec())
-    {
-        QString example = dialog->getExample();
-        if (!example.isEmpty())
-        {
-            loadProgress(example);
-        }
-    }
+    PresetDialog *dialog = new PresetDialog(this, wi, true);
+    dialog->setActiveFilter(formCond->getConditions());
+    if (dialog->exec() && !dialog->rc.isEmpty())
+        loadProgress(dialog->rc);
 }
 
 void MainWindow::on_actionAbout_triggered()
@@ -1291,7 +1270,7 @@ void MainWindow::on_buttonAnalysis_clicked()
                 {
                     Pos p = cpos[conds[i].save];
                     QTreeWidgetItem* item = new QTreeWidgetItem(loc);
-                    item->setText(0, cond2str(&conds[i]));
+                    item->setText(0, conds[i].summary());
                     item->setData(0, Qt::UserRole, QVariant::fromValue(p));
                     item->setText(1, QString::asprintf("%d,\t%d", p.x, p.z));
                 }

@@ -262,6 +262,19 @@
        </item>
       </layout>
      </item>
+     <item row="4" column="0" colspan="7">
+      <widget class="QLabel" name="labelStatus">
+       <property name="font">
+        <font>
+         <family>Monospace</family>
+         <pointsize>9</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Idle</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
   </layout>

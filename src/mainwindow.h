@@ -8,6 +8,7 @@
 #include <QWidget>
 #include <QAction>
 #include <QActionGroup>
+#include <QMessageBox>
 
 #include <QTimer>
 #include <QThreadPool>
@@ -33,7 +34,6 @@ Q_DECLARE_METATYPE(Pos)
 Q_DECLARE_METATYPE(Config)
 
 class MapView;
-class ProtoBaseDialog;
 
 class MainWindow : public QMainWindow
 {
@@ -52,6 +52,7 @@ public:
     MapView *getMapView();
 
 protected:
+
     void saveSettings();
     void loadSettings();
     bool saveProgress(QString fnam, bool quiet = false);
@@ -59,11 +60,8 @@ protected:
     void updateMapSeed();
 
 public slots:
-    void warning(QString text);
+    int warning(QString text, QMessageBox::StandardButtons buttons = QMessageBox::Ok);
     void mapGoto(qreal x, qreal z, qreal scale);
-
-    void openProtobaseMsg(QString path);
-    void closeProtobaseMsg();
 
 private slots:
     void on_comboBoxMC_currentIndexChanged(int a);
@@ -79,6 +77,7 @@ private slots:
     void on_actionGo_to_triggered();
     void on_actionScan_seed_for_Quad_Huts_triggered();
     void on_actionOpen_shadow_seed_triggered();
+    void on_actionPresetLoad_triggered();
     void on_actionExamples_triggered();
     void on_actionAbout_triggered();
     void on_actionCopy_triggered();
@@ -122,8 +121,6 @@ public:
     QVector<QAction*> saction;
     QAction *dimactions[3];
     QActionGroup *dimgroup;
-
-    ProtoBaseDialog *protodialog;
 };
 
 #endif // MAINWINDOW_H

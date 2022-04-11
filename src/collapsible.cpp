@@ -54,6 +54,10 @@ void Collapsible::toggle(bool collapsed)
     if (!content)
         return;
 
+    int height = content->size().height();
+    if (height)
+        contentHeight = height;
+
     if (collapsed)
     {
         content->setMinimumHeight(0);
@@ -63,7 +67,6 @@ void Collapsible::toggle(bool collapsed)
     }
     else
     {
-        contentHeight = content->size().height();
         toggleButton->setArrowType(Qt::ArrowType::RightArrow);
         animgroup->setDirection(QAbstractAnimation::Backward);
     }
@@ -74,7 +77,7 @@ void Collapsible::toggle(bool collapsed)
         anim = (QPropertyAnimation*) animgroup->animationAt(i);
         anim->setStartValue(0);
         anim->setEndValue(contentHeight);
-        anim->setDuration(150);
+        anim->setDuration(200);
     }
 
     animgroup->start();
@@ -92,22 +95,33 @@ void Collapsible::finishAnimation()
 void Collapsible::init(const QString& title, QWidget *widget, bool collapsed)
 {
     toggleButton->setText(title);
-    toggleButton->setChecked(!collapsed);
     layoutContent->addWidget(widget);
     contentHeight = widget->sizeHint().height();
     content = widget;
     animgroup->addAnimation(new QPropertyAnimation(content, "minimumHeight"));
     animgroup->addAnimation(new QPropertyAnimation(content, "maximumHeight"));
+    setCollapsed(collapsed);
+}
+
+void Collapsible::setCollapsed(bool collapsed)
+{
     if (collapsed)
     {
+        toggleButton->setChecked(false);
         content->setMinimumHeight(0);
         content->setMaximumHeight(0);
+        toggleButton->setArrowType(Qt::ArrowType::RightArrow);
+        animgroup->setDirection(QAbstractAnimation::Backward);
     }
     else
     {
+        toggleButton->setChecked(true);
+        content->setMinimumHeight(0);
+        content->setMaximumHeight(16777215);
         toggleButton->setArrowType(Qt::ArrowType::DownArrow);
         animgroup->setDirection(QAbstractAnimation::Forward);
     }
+    animgroup->stop();
 }
 
 void Collapsible::setInfo(const QString& title, const QString& text)
@@ -135,4 +149,5 @@ void Collapsible::showInfo()
     mb.setText(infomsg);
     mb.exec();
 }
+
 

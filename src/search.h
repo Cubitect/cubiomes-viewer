@@ -4,6 +4,7 @@
 #include "cubiomes/finders.h"
 
 #include <QVector>
+#include <QString>
 #include <atomic>
 
 #define PRECOMPUTE48_BUFSIZ ((int64_t)1 << 30)
@@ -538,56 +539,41 @@ static const struct FilterList
 }
 g_filterinfo;
 
-
-struct Condition
-{
-    int type;
-    int x1, z1, x2, z2;
-    int save;
-    int relative;
-    BiomeFilter bfilter;
-    int temps[9];
-    int count;
-    int y;
-    uint32_t flags;
-    int rmax; // (<=0):disabled; (>0):strict upper radius
-    uint64_t variants;
-    int limok[6][2];
-    int limex[6][2];
-
+struct /*__attribute__((packed))*/ Condition
+{   // data - needs to supports memset/memcpy and memory layout should be
+    // consistent across versions
+    enum { // meta flags
+        DISABLED = 0x0001,
+    };
     enum { // variant flags
         START_PIECE_MASK = (1ULL << 63),
         ABANDONED_MASK   = (1ULL << 62),
     };
-    static int toVariantBit(int biome, int variant) {
-        int bit = 0;
-        switch (biome) {
-        case meadow:
-        case plains:        bit = 1; break;
-        case desert:        bit = 2; break;
-        case savanna:       bit = 3; break;
-        case taiga:         bit = 4; break;
-        case snowy_tundra:  bit = 5; break;
-        }
-        return (bit << 3) + variant;
-    }
-    static void fromVariantBit(int bit, int *biome, int *variant) {
-        *variant = bit & 0x7;
-        switch (bit >> 3) {
-        case 1: *biome = plains; break;
-        case 2: *biome = desert; break;
-        case 3: *biome = savanna; break;
-        case 4: *biome = taiga; break;
-        case 5: *biome = snowy_tundra; break;
-        }
-    }
-    inline bool villageOk(int mc, StructureVariant sv) {
-        if ((variants & ABANDONED_MASK) && !sv.abandoned) return false;
-        if (mc < MC_1_14) return true;
-        if (!(variants & START_PIECE_MASK)) return true;
-        uint64_t mask = 1ULL << toVariantBit(sv.biome, sv.variant);
-        return mask & variants;
-    }
+    int16_t     type;
+    uint16_t    meta;
+    int32_t     x1, z1, x2, z2;
+    int32_t     save;
+    int32_t     relative;
+    uint32_t    pad1; // unused
+    BiomeFilter bfilter;
+    int32_t     temps[9];
+    int32_t     count;
+    int32_t     y;
+    uint32_t    flags;
+    int32_t     rmax; // (<=0):disabled; (>0):strict upper radius
+    uint32_t    pad2; // unused
+    uint64_t    variants;
+    int32_t     limok[6][2];
+    int32_t     limex[6][2];
+
+    QString toHex() const;
+    bool readHex(const QString& hex);
+
+    QString summary() const;
+
+    static int toVariantBit(int biome, int variant);
+    static void fromVariantBit(int bit, int *biome, int *variant);
+    bool villageOk(int mc, StructureVariant sv) const;
 };
 
 struct ConditionTree
@@ -595,23 +581,7 @@ struct ConditionTree
     QVector<Condition> condvec;
     QVector<QVector<char>> references;
 
-    void set(const QVector<Condition>& cv)
-    {
-        int cmax = 0;
-        for (const Condition& c : cv)
-            if (c.save > cmax)
-                cmax = c.save;
-        condvec.clear();
-        condvec.resize(cmax + 1);
-        references.clear();
-        references.resize(cmax + 1);
-        for (const Condition& c : cv)
-        {
-            condvec[c.save] = c;
-            if (c.relative <= cmax)
-                references[c.relative].push_back(c.save);
-        }
-    }
+    void set(const QVector<Condition>& cv);
 };
 
 struct StructPos
@@ -635,7 +605,7 @@ struct WorldGen
         this->mc = mc;
         this->large = large;
         this->seed = 0;
-        initsurf = false;
+        this->initsurf = false;
         setupGenerator(&g, mc, large);
     }
 

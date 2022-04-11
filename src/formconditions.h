@@ -14,14 +14,12 @@ class MainWindow;
 
 Q_DECLARE_METATYPE(Condition)
 
-QString cond2str(Condition *cond);
-
 class FormConditions : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit FormConditions(MainWindow *parent);
+    explicit FormConditions(QWidget *parent = nullptr);
     ~FormConditions();
 
     QVector<Condition> getConditions() const;
@@ -38,16 +36,28 @@ signals:
 public slots:
     void on_buttonRemoveAll_clicked();
     void on_buttonRemove_clicked();
+    void on_buttonDisable_clicked();
     void on_buttonEdit_clicked();
     void on_buttonAddFilter_clicked();
 
+    void on_listConditionsFull_customContextMenuRequested(const QPoint &pos);
     void on_listConditionsFull_itemDoubleClicked(QListWidgetItem *item);
     void on_listConditionsFull_itemSelectionChanged();
+
+    void conditionsAdd();
+    void conditionsEdit();
+    void conditionsCut();
+    void conditionsCopy();
+    int conditionsPaste(bool countonly = false);
+    void conditionsDelete();
 
     void addItemCondition(QListWidgetItem *item, Condition cond, int modified = 1);
 
 private slots:
     void on_listConditionsFull_indexesMoved(const QModelIndexList &indexes);
+
+protected:
+    void keyReleaseEvent(QKeyEvent *event) override;
 
 private:
     MainWindow *parent;

@@ -191,6 +191,9 @@
           </item>
           <item row="4" column="3">
            <widget class="QComboBox" name="comboBoxRelative">
+            <property name="sizeAdjustPolicy">
+             <enum>QComboBox::AdjustToContentsOnFirstShow</enum>
+            </property>
             <item>
              <property name="text">
               <string>World origin</string>
@@ -362,7 +365,7 @@
               <string>Vertical position in blocks</string>
              </property>
              <property name="text">
-              <string>63</string>
+              <string>255</string>
              </property>
             </widget>
            </item>
@@ -612,8 +615,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>94</width>
-                <height>24</height>
+                <width>86</width>
+                <height>16</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -661,8 +664,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>94</width>
-                <height>24</height>
+                <width>86</width>
+                <height>16</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_3">

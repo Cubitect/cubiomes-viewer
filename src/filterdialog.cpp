@@ -49,7 +49,7 @@ void FilterDialog::addVariant(QString name, int biome, int variant)
     variantboxes.push_back(cb);
 }
 
-#define BROKEN_CHAR QChar(0x26A0)
+#define WARNING_CHAR QChar(0x26A0)
 
 FilterDialog::FilterDialog(FormConditions *parent, Config *config, int mcversion, QListWidgetItem *item, Condition *initcond)
     : QDialog(parent, Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint)
@@ -74,7 +74,6 @@ FilterDialog::FilterDialog(FormConditions *parent, Config *config, int mcversion
     QVector<Condition> existing = parent->getConditions();
     for (Condition c : existing)
     {
-        const FilterInfo &ft = g_filterinfo.list[c.type];
         if (initcond)
         {
             if (c.save == initcond->save)
@@ -82,9 +81,7 @@ FilterDialog::FilterDialog(FormConditions *parent, Config *config, int mcversion
             if (c.save == initcond->relative)
                 initindex = ui->comboBoxRelative->count();
         }
-        QString condstr = QString("[%1] %2")
-            .arg(c.save, 2, 10, QLatin1Char('0'))
-            .arg(QApplication::translate("Filter", ft.name));
+        QString condstr = c.summary().simplified();
         ui->comboBoxRelative->addItem(condstr, c.save);
     }
     if (initindex < 0)
@@ -94,7 +91,7 @@ FilterDialog::FilterDialog(FormConditions *parent, Config *config, int mcversion
             initindex = ui->comboBoxRelative->count();
             QString condstr = QString("[%1] %2 broken reference")
                 .arg(initcond->relative, 2, 10, QLatin1Char('0'))
-                .arg(BROKEN_CHAR);
+                .arg(WARNING_CHAR);
             ui->comboBoxRelative->addItem(condstr, initcond->relative);
         }
         else
@@ -719,25 +716,19 @@ int FilterDialog::warnIfBad(Condition cond)
     }
     else if (ft.cat == CAT_BIOMES)
     {
-        int w = cond.x2 - cond.x1 + 1;
-        int h = cond.z2 - cond.z1 + 1;
-        uint64_t workitemsize = (uint64_t)config->seedsPerItem * w * h;
-        uint64_t workwarn = (mc >= MC_1_18 ? 1e6 : 1e9);
-        if (mc >= MC_1_18 && (cond.flags & CFB_APPROX))
-            workwarn *= 100;
-
-        if (workitemsize > workwarn)
+        if (mc >= MC_1_18)
         {
-            QString text = tr(
-                    "The biome filter you have entered may take a while to check. "
-                    "You should consider using a smaller area with a larger scaling "
-                    "instead and/or reduce the number of seeds per work item "
-                    "under Edit>Perferences."
+            uint64_t m = cond.bfilter.riverToFindM;
+            uint64_t underground = (1ULL << (dripstone_caves-128)) | (1ULL << (lush_caves-128));
+            if ((m & underground) && cond.y > 246)
+            {
+                return QMessageBox::warning(this, tr("Bad Surface Height"),
+                    tr("Cave biomes do not generate above Y = 246. "
+                    "You should consider lowering the sampling height."
                     "\n\n"
-                    "Are you sure you want to continue?"
-                    );
-            return QMessageBox::warning(this, tr("Performance Expensive Condition"), text,
-                QMessageBox::Ok | QMessageBox::Cancel);
+                    "Continue anyway?"),
+                    QMessageBox::Ok | QMessageBox::Cancel);
+            }
         }
     }
     return QMessageBox::Ok;
@@ -751,7 +742,7 @@ void FilterDialog::on_comboBoxType_activated(int)
 void FilterDialog::on_comboBoxRelative_activated(int)
 {
     QPalette pal;
-    if (ui->comboBoxRelative->currentText().contains(BROKEN_CHAR))
+    if (ui->comboBoxRelative->currentText().contains(WARNING_CHAR))
         pal.setColor(QPalette::Normal, QPalette::Button, QColor(255,0,0,127));
     ui->comboBoxRelative->setPalette(pal);
 }

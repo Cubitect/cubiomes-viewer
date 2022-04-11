@@ -17,11 +17,12 @@ ConfigDialog::ConfigDialog(QWidget *parent, Config *config) :
     mono.setStyleHint(QFont::TypeWriter);
     ui->buttonBiomeColor->setFont(mono);
 
-    ui->lineQueueSize->setValidator(new QIntValidator(1, 9999, ui->lineQueueSize));
     ui->lineMatching->setValidator(new QIntValidator(1, 99999999, ui->lineMatching));
-    for (int i = 0; i < 16; i++)
-        ui->cboxItemSize->addItem(QString::number(1 << i));
-    ui->lineGridSpacing->setValidator(new QIntValidator(0, 1048576, ui->lineQueueSize));
+
+    #if not WITH_UPDATER
+        delete ui->gridLayout->takeAt(4);
+        ui->groupBox_4->hide();
+    #endif
 
     #if not WITH_UPDATER
         delete ui->gridLayout->takeAt(4);
@@ -46,8 +47,6 @@ void ConfigDialog::initSettings(Config *config)
     if (config->autosaveCycle)
         ui->spinAutosave->setValue(config->autosaveCycle);
     ui->comboStyle->setCurrentIndex(config->uistyle);
-    ui->cboxItemSize->setCurrentText(QString::number(config->seedsPerItem));
-    ui->lineQueueSize->setText(QString::number(config->queueSize));
     ui->lineMatching->setText(QString::number(config->maxMatching));
     ui->lineGridSpacing->setText(config->gridSpacing ? QString::number(config->gridSpacing) : "");
     ui->spinCacheSize->setValue(config->mapCacheSize);
@@ -63,14 +62,10 @@ Config ConfigDialog::getSettings()
     conf.checkForUpdates = ui->checkUpdates->isChecked();
     conf.autosaveCycle = ui->checkAutosave->isChecked() ? ui->spinAutosave->value() : 0;
     conf.uistyle = ui->comboStyle->currentIndex();
-    conf.seedsPerItem = ui->cboxItemSize->currentText().toInt();
-    conf.queueSize = ui->lineQueueSize->text().toInt();
     conf.maxMatching = ui->lineMatching->text().toInt();
     conf.gridSpacing = ui->lineGridSpacing->text().toInt();
     conf.mapCacheSize = ui->spinCacheSize->value();
 
-    if (!conf.seedsPerItem) conf.seedsPerItem = 1024;
-    if (!conf.queueSize) conf.queueSize = QThread::idealThreadCount();
     if (!conf.maxMatching) conf.maxMatching = 65536;
 
     return conf;

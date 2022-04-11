@@ -38,12 +38,12 @@ SOURCES += \
         src/aboutdialog.cpp \
         src/collapsible.cpp \
         src/configdialog.cpp \
-        src/examplesdialog.cpp \
         src/extgendialog.cpp \
         src/formconditions.cpp \
         src/formgen48.cpp \
         src/formsearchcontrol.cpp \
         src/gotodialog.cpp \
+        src/presetdialog.cpp \
         src/protobasedialog.cpp \
         src/filterdialog.cpp \
         src/quadlistdialog.cpp \
@@ -52,7 +52,6 @@ SOURCES += \
         src/rangedialog.cpp \
         src/rangeslider.cpp \
         src/search.cpp \
-        src/searchitem.cpp \
         src/searchthread.cpp \
         src/mainwindow.cpp \
         src/main.cpp
@@ -65,12 +64,12 @@ HEADERS += \
         src/aboutdialog.h \
         src/collapsible.h \
         src/configdialog.h \
-        src/examplesdialog.h \
         src/extgendialog.h \
         src/formconditions.h \
         src/formgen48.h \
         src/formsearchcontrol.h \
         src/gotodialog.h \
+        src/presetdialog.h \
         src/protobasedialog.h \
         src/filterdialog.h \
         src/quadlistdialog.h \
@@ -80,7 +79,6 @@ HEADERS += \
         src/rangedialog.h \
         src/rangeslider.h \
         src/search.h \
-        src/searchitem.h \
         src/searchthread.h \
         src/seedtables.h \
         src/mainwindow.h \
@@ -89,12 +87,12 @@ HEADERS += \
 FORMS += \
         src/aboutdialog.ui \
         src/configdialog.ui \
-        src/examplesdialog.ui \
         src/extgendialog.ui \
         src/formconditions.ui \
         src/formgen48.ui \
         src/formsearchcontrol.ui \
         src/gotodialog.ui \
+        src/presetdialog.ui \
         src/protobasedialog.ui \
         src/filterdialog.ui \
         src/quadlistdialog.ui\
