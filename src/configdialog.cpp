@@ -24,11 +24,6 @@ ConfigDialog::ConfigDialog(QWidget *parent, Config *config) :
         ui->groupBox_4->hide();
     #endif
 
-    #if not WITH_UPDATER
-        delete ui->gridLayout->takeAt(4);
-        ui->groupBox_4->hide();
-    #endif
-
     initSettings(config);
 }
 
