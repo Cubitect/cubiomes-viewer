@@ -74,7 +74,7 @@ $ make
 #### Notes:
 
 With some Qt installs it is `qmake-qt5` instead.
-With a MinGW the make command is something like `minwgw32-make`.
+With MinGW the make command is something like `minwgw32-make` instead.
 If the commands are not found, make sure that the Qt `bin` directory is in the `PATH` variable.
 (The same applies to `C:/Qt/Qt15.12.12/Tools/mingw730_64/bin` or wherever your compiler is installed.)
 
