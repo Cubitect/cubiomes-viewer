@@ -3,13 +3,13 @@
 Cubiomes Viewer is a Qt5 application and requires at least Qt5.9 and a GNU C++ compiler (GCC or Clang).
 
 
-# Get a Compiler
+## Get a Compiler
 
-You should have either GCC or Clang.
+You should have either GCC or Clang installed.
 If you are on Windows you can use MinGW, which can be installed together with Qt, using the Qt Installer.
 
 
-# Get Qt5
+## Get Qt5
 
 Depending on your operating system you may have several options for installing Qt5,
 but [Using the Qt Installer] should be the most general method. Many Linux distros
@@ -51,7 +51,7 @@ $ brew link qt@5
 ```
 
 
-# Get the Sources
+## Get the Sources
 
 The cubiomes-viewer repository includes the cubiomes library as a submodule and requires a recursive clone:
 ```
