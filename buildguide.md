@@ -12,9 +12,9 @@ If you are on Windows you can use MinGW, which can be installed together with Qt
 ## Get Qt5
 
 Depending on your operating system you may have several options for installing Qt5,
-but [Using the Qt Installer] should be the most general method. Many Linux distros
+but [Using the Qt Installer](buildguide.md#using-the-qt-installer) should be the most general method. Many Linux distros
 already provide Qt in their repositories and you can refer to
-[Get Qt from Your Repository] instead if you wish.
+[Get Qt from Your Repository](buildguide.md#get-qt-from-your-repository) instead if you wish.
 
 Note: for a static build you will have to compile Qt yourself.
 
@@ -27,10 +27,10 @@ but you have to disconnect from the internet when you launch the installer, othe
 
 Choose an installation path without spaces.
 
-Only the Qt5 base install for your compiler is required.
+The only required component is the Qt5 base install for your compiler.
 (Make sure to select a compiler which supports GNU extensions, such as MinGW.)
 
-I would also recommend installing QtCreator and MinGw on Windows.
+I would also recommend installing QtCreator, as well as MinGW on Windows from the Developer Tools.
 
 
 ### Get Qt from Your Repository
@@ -74,7 +74,8 @@ $ make
 #### Notes:
 
 With some Qt installs it is `qmake-qt5` instead.
-With a MinGW it is minwg
-If the commands are not found, make sure that the Qt `/bin` directory is in the `PATH` variable.
+With a MinGW the make command is something like `minwgw32-make`.
+If the commands are not found, make sure that the Qt `bin` directory is in the `PATH` variable.
+(The same applies to `C:/Qt/Qt15.12.12/Tools/mingw730_64/bin` or wherever your compiler is installed.)
 
 
