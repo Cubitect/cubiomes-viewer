@@ -390,6 +390,9 @@ void MainWindow::saveSettings()
     if (config.restoreSession)
     {
         QString path = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+        QDir dir(path);
+        if (!dir.exists())
+            dir.mkpath(".");
         saveProgress(path + "/session.save", true);
     }
 }
@@ -462,7 +465,7 @@ void MainWindow::loadSettings()
     wi.mc = settings.value("map/mc", wi.mc).toInt();
     wi.large = settings.value("map/large", wi.large).toBool();
     wi.seed = (uint64_t) settings.value("map/seed", QVariant::fromValue((qlonglong)wi.seed)).toLongLong();
-    wi.y = settings.value("map/y", wi.mc).toInt();
+    wi.y = settings.value("map/y", 255).toInt();
     setSeed(wi);
 
     qreal x = ui->mapView->getX();
@@ -487,7 +490,11 @@ void MainWindow::loadSettings()
     if (config.restoreSession)
     {
         QString path = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
-        loadProgress(path + "/session.save", false);
+        path += "/session.save";
+        if (QFile::exists(path))
+        {
+            loadProgress(path, false);
+        }
     }
 
     if (config.autosaveCycle > 0)

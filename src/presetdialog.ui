@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
+    <width>860</width>
     <height>320</height>
    </rect>
   </property>
@@ -17,9 +17,9 @@
    <iconset resource="../rc/icons.qrc">
     <normaloff>:/icons/map.png</normaloff>:/icons/map.png</iconset>
   </property>
-  <layout class="QGridLayout" name="gridLayout_4">
+  <layout class="QGridLayout" name="gridLayout_5">
    <item row="0" column="0">
-    <widget class="QSplitter" name="splitter_2">
+    <widget class="QSplitter" name="splitterH">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
        <horstretch>0</horstretch>
@@ -29,73 +29,88 @@
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
-     <widget class="QTabWidget" name="tabWidget">
-      <property name="currentIndex">
-       <number>0</number>
-      </property>
-      <widget class="QWidget" name="tabFilters">
-       <attribute name="title">
-        <string>Saved Filters</string>
-       </attribute>
-       <layout class="QGridLayout" name="gridLayout">
-        <item row="1" column="0">
-         <widget class="QPushButton" name="buttonDelete">
-          <property name="text">
-           <string>Delete</string>
-          </property>
+     <widget class="QWidget" name="gridLayoutWidget">
+      <layout class="QGridLayout" name="gridLayout_4">
+       <item row="0" column="0">
+        <widget class="QTabWidget" name="tabWidget">
+         <property name="currentIndex">
+          <number>0</number>
+         </property>
+         <widget class="QWidget" name="tabFilters">
+          <attribute name="title">
+           <string>Saved Filters</string>
+          </attribute>
+          <layout class="QGridLayout" name="gridLayout">
+           <item row="1" column="0">
+            <widget class="QPushButton" name="buttonDelete">
+             <property name="text">
+              <string>Delete</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QPushButton" name="buttonSave">
+             <property name="text">
+              <string>Save Current Filter</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0" colspan="2">
+            <widget class="QListWidget" name="listFilters">
+             <property name="font">
+              <font>
+               <family>Monospace</family>
+               <pointsize>9</pointsize>
+              </font>
+             </property>
+             <property name="alternatingRowColors">
+              <bool>true</bool>
+             </property>
+             <property name="selectionMode">
+              <enum>QAbstractItemView::SingleSelection</enum>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QPushButton" name="buttonSave">
-          <property name="text">
-           <string>Save Current Filter</string>
-          </property>
+         <widget class="QWidget" name="tabExamples">
+          <attribute name="title">
+           <string>Examples Filters</string>
+          </attribute>
+          <layout class="QGridLayout" name="gridLayout_2">
+           <item row="0" column="0">
+            <widget class="QListWidget" name="listExamples">
+             <property name="font">
+              <font>
+               <family>Monospace</family>
+               <pointsize>9</pointsize>
+              </font>
+             </property>
+             <property name="alternatingRowColors">
+              <bool>true</bool>
+             </property>
+             <property name="selectionMode">
+              <enum>QAbstractItemView::SingleSelection</enum>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </widget>
-        </item>
-        <item row="0" column="0" colspan="2">
-         <widget class="QListWidget" name="listFilters">
-          <property name="font">
-           <font>
-            <family>Monospace</family>
-            <pointsize>9</pointsize>
-           </font>
-          </property>
-          <property name="alternatingRowColors">
-           <bool>true</bool>
-          </property>
-          <property name="selectionMode">
-           <enum>QAbstractItemView::SingleSelection</enum>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="tabExamples">
-       <attribute name="title">
-        <string>Examples Filters</string>
-       </attribute>
-       <layout class="QGridLayout" name="gridLayout_2">
-        <item row="0" column="0">
-         <widget class="QListWidget" name="listExamples">
-          <property name="font">
-           <font>
-            <family>Monospace</family>
-            <pointsize>9</pointsize>
-           </font>
-          </property>
-          <property name="alternatingRowColors">
-           <bool>true</bool>
-          </property>
-          <property name="selectionMode">
-           <enum>QAbstractItemView::SingleSelection</enum>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
+        </widget>
+       </item>
+      </layout>
      </widget>
      <widget class="QWidget" name="layoutWidget">
       <layout class="QGridLayout" name="gridLayout_3">
+       <item row="1" column="0">
+        <widget class="QSplitter" name="splitterV">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <widget class="FormConditions" name="formCond" native="true"/>
+         <widget class="QTextEdit" name="textDesc"/>
+        </widget>
+       </item>
        <item row="0" column="0">
         <widget class="QLabel" name="labelMC">
          <property name="text">
@@ -104,15 +119,6 @@
          <property name="alignment">
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QSplitter" name="splitter">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <widget class="FormConditions" name="formCond" native="true"/>
-         <widget class="QTextEdit" name="textDesc"/>
         </widget>
        </item>
       </layout>

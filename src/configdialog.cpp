@@ -13,16 +13,20 @@ ConfigDialog::ConfigDialog(QWidget *parent, Config *config) :
 {
     ui->setupUi(this);
 
+#if !WITH_UPDATER
+    int miscidx = ui->gridLayout->indexOf(ui->groupMisc);
+    if (miscidx >= 0)
+    {
+        delete ui->gridLayout->takeAt(miscidx);
+        ui->groupMisc->hide();
+    }
+#endif
+
     QFont mono = QFont("Monospace", 9);
     mono.setStyleHint(QFont::TypeWriter);
     ui->buttonBiomeColor->setFont(mono);
 
     ui->lineMatching->setValidator(new QIntValidator(1, 99999999, ui->lineMatching));
-
-    #if not WITH_UPDATER
-        delete ui->gridLayout->takeAt(4);
-        ui->groupBox_4->hide();
-    #endif
 
     initSettings(config);
 }

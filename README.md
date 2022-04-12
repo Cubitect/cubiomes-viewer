@@ -11,18 +11,15 @@ Precompiled binaries can be found for Linux and Windows under [Releases on githu
 
 For the linux build you will probably have to add the executable flags to the binary (github seems to remove them upon upload).
 
-For Arch linux users, the tool may be found in the [AUR](https://aur.archlinux.org/packages/cubiomes-viewer/) thanks to [JakobDev](https://github.com/JakobDev).
+For Arch linux users, the tool may be found in the [AUR](https://aur.archlinux.org/packages/cubiomes-viewer/) thanks to @JakobDev.
 
 Non-PC platforms, such as macOS, are not formally supported, but you can check [here](https://github.com/Cubitect/cubiomes-viewer/issues/107) for more information on this issue.
 
 
 ## Build from source
 
-Install Qt5 development files
-```
-$ sudo apt install build-essential qt5-default
-```
-get sources
+More detailed build instruction can be found [here](buildguide.md).
+If you have Qt5 installed, you can just get the sources:
 ```
 $ git clone --recursive https://github.com/Cubitect/cubiomes-viewer.git
 ```
@@ -37,4 +34,5 @@ build cubiomes-viewer
 $ qmake ..
 $ make
 ```
+
 

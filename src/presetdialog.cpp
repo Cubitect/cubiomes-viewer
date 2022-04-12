@@ -70,6 +70,7 @@ PresetDialog::PresetDialog(QWidget *parent, WorldInfo wi, bool showEamples)
     else
         ui->tabWidget->setCurrentWidget(ui->tabFilters);
 
+    ui->splitterH->setSizes(QList<int>({7500, 10000}));
 
     QString path = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
     QDirIterator it(path, QDirIterator::NoIteratorFlags);
