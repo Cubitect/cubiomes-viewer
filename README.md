@@ -18,7 +18,7 @@ Non-PC platforms, such as macOS, are not formally supported, but you can check [
 
 ## Build from source
 
-More detailed build instruction can be found [here](buildguide.md).
+More detailed build instructions can be found [here](buildguide.md).
 If you have Qt5 installed, you can just get the sources:
 ```
 $ git clone --recursive https://github.com/Cubitect/cubiomes-viewer.git
