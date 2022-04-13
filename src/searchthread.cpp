@@ -716,8 +716,6 @@ SearchWorker::SearchWorker(SearchMaster *master)
 
 void SearchWorker::run()
 {
-    QElapsedTimer timer;
-
     WorldGen gen;
     Pos origin = {0,0};
     gen.init(mc, large);
