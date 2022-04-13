@@ -1,27 +1,32 @@
 # Cubiomes Viewer Build Instructions
 
-Cubiomes Viewer is a Qt5 application and requires at least Qt5.9 and a GNU C++ compiler (GCC or Clang).
+Cubiomes Viewer is a Qt5 application and requires:
+* Qt5.9 or newer (Qt6 is not supported) and a
+* GNU C++ compiler (GCC or Clang).
+
+The cubiomes library is included as a submodule to this repository.
 
 
-## Get a Compiler
+## The Compiler
 
 You should have either GCC or Clang installed.
-If you are on Windows you can use MinGW, which can be installed together with Qt, using the Qt Installer.
+
+Windows users can use MinGW, which can be installed together with Qt, using the Qt Installer.
 
 
 ## Get Qt5
 
 Depending on your operating system you may have several options for installing Qt5,
-but [Using the Qt Installer](buildguide.md#using-the-qt-installer) should be the most general method. Many Linux distros
-already provide Qt in their repositories and you can refer to
-[Get Qt from Your Repository](buildguide.md#get-qt-from-your-repository) instead if you wish.
+but [Using the Qt Installer](buildguide.md#using-the-qt-installer) should be the most general method.
+Many Linux distros already provide Qt in their repositories and you can also
+[Get Qt With Your Package Manager](buildguide.md#get-qt-with-your-package-manager) instead if you wish.
 
 Note: for a static build you will have to compile Qt yourself.
 
 
 ### Using the Qt Installer
 
-If you have a Qt account or want to create one, you can use the [Qt Online Installer](https://www.qt.io/download-qt-installer).
+You can use the [Qt Online Installer](https://www.qt.io/download-qt-installer) if you have a Qt account or don't mind creating one.
 It is also possible to use the [Qt Offline Installer](https://www.qt.io/offline-installers) without an account,
 but you have to disconnect from the internet when you launch the installer, otherwise it will require a Qt account again, which is a little irritating.
 
@@ -33,7 +38,7 @@ The only required component is the Qt5 base install for your compiler.
 I would also recommend installing QtCreator, as well as MinGW on Windows from the Developer Tools.
 
 
-### Get Qt from Your Repository
+### Get Qt With Your Package Manager
 
 ##### Debian
 ```
@@ -57,7 +62,7 @@ The cubiomes-viewer repository includes the cubiomes library as a submodule and 
 ```
 $ git clone --recursive https://github.com/Cubitect/cubiomes-viewer.git
 ```
-If you have QtCreator you can now just open the cubiome-viewer.pro file and configure the project.
+If you have QtCreator you can now just open the `cubiome-viewer.pro` file and configure the project.
 
 Alternatively you can manually prepare a build directory:
 ```

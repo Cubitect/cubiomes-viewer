@@ -105,8 +105,8 @@ RESOURCES += \
         rc/examples.qrc
 
 
-# disable network features completely with: qmake CONFIG+=without_network
-!without_network: {
+# enable network features with: qmake CONFIG+=with_network
+with_network: {
     QT += network
     DEFINES += "WITH_UPDATER=1"
     SOURCES += src/updater.cpp
