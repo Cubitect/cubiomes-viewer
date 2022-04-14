@@ -110,7 +110,7 @@ FilterDialog::FilterDialog(FormConditions *parent, Config *config, int mcversion
     ui->lineSquare->setValidator(uintval);
     ui->lineRadius->setValidator(uintval);
 
-    ui->lineY->setValidator(new QIntValidator(-64, 320, this));
+    ui->comboY->lineEdit()->setValidator(new QIntValidator(-64, 320, this));
 
     memset(biomecboxes, 0, sizeof(biomecboxes));
 
@@ -358,7 +358,13 @@ FilterDialog::FilterDialog(FormConditions *parent, Config *config, int mcversion
 
         ui->checkApprox->setChecked(cond.flags & CFB_APPROX);
         ui->checkMatchAny->setChecked(cond.flags & CFB_MATCH_ANY);
-        ui->lineY->setText(QString::number(cond.y));
+        int i, n = ui->comboY->count();
+        for (i = 0; i < n; i++)
+            if (ui->comboY->itemText(i).section(' ', 0, 0).toInt() == cond.y)
+                break;
+        if (i >= n)
+            ui->comboY->addItem(QString::number(cond.y));
+        ui->comboY->setCurrentIndex(i);
 
         if (cond.x1 == cond.z1 && cond.x1 == -cond.x2 && cond.x1 == -cond.z2)
         {
@@ -508,7 +514,7 @@ void FilterDialog::updateMode()
     ui->spinBox->setEnabled(ft.count);
 
     ui->labelY->setEnabled(ft.hasy);
-    ui->lineY->setEnabled(ft.hasy);
+    ui->comboY->setEnabled(ft.hasy);
 
     if (filterindex == F_TEMPS)
     {
@@ -621,7 +627,7 @@ void FilterDialog::updateBiomeSelection()
     else if (ft.cat == CAT_BIOMES && mc <= MC_1_17)
     {
         ui->labelY->setEnabled(false);
-        ui->lineY->setEnabled(false);
+        ui->comboY->setEnabled(false);
 
         int layerId = ft.layer;
         if (layerId == 0)
@@ -777,6 +783,34 @@ void FilterDialog::on_buttonExclude_clicked()
     }
 }
 
+void FilterDialog::on_buttonAreaInfo_clicked()
+{
+    QMessageBox mb(this);
+    mb.setIcon(QMessageBox::Information);
+    mb.setWindowTitle(tr("Help: area entry"));
+    mb.setText(tr(
+        "<html><head/><body><p>"
+        "The area can be entered via <b>custom</b> rectangle, that is defined "
+        "by its two opposing corners, relative to a center point. These bounds "
+        "are inclusive."
+        "</p><p>"
+        "Alternatively, the area can be defined as a <b>centered square</b> "
+        "with a certain side length. In this case the area has the bounds: "
+        "[-X/2, -X/2] on both axes, rounding down and bounds included. For "
+        "example a centered square with side 3 will go from -2 to 1 for both "
+        "the X and Z axes."
+        "</p><p>"
+        "Important to note is that some filters have a scaling associtated with "
+        "them. This means that the area is not defined in blocks, but on a grid "
+        "with the given spacing (such as chunks instead of blocks). A scaling "
+        "of 1:16, for example, means that the aformentioned centered square of "
+        "side 3 will range from -32 to 31 in block coordinates. (Chunk 1 has "
+        "blocks 16 to 31.)"
+        "</p></body></html>"
+        ));
+    mb.exec();
+}
+
 void FilterDialog::on_checkRadius_toggled(bool)
 {
     updateMode();
@@ -867,7 +901,7 @@ void FilterDialog::on_buttonOk_clicked()
         }
     }
 
-    c.y = ui->lineY->text().toInt();
+    c.y = ui->comboY->currentText().section(' ', 0, 0).toInt();
 
     c.flags = 0;
     if (ui->checkApprox->isChecked())

@@ -166,30 +166,7 @@
           <string>Location</string>
          </property>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="1" column="3">
-           <widget class="QLineEdit" name="lineRadius">
-            <property name="text">
-             <string>0</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="3">
-           <widget class="SpinInstances" name="spinBox">
-            <property name="specialValueText">
-             <string>0 (exclude)</string>
-            </property>
-            <property name="minimum">
-             <number>0</number>
-            </property>
-            <property name="maximum">
-             <number>99</number>
-            </property>
-            <property name="value">
-             <number>1</number>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="3">
+          <item row="4" column="3" colspan="3">
            <widget class="QComboBox" name="comboBoxRelative">
             <property name="sizeAdjustPolicy">
              <enum>QComboBox::AdjustToContentsOnFirstShow</enum>
@@ -201,21 +178,14 @@
             </item>
            </widget>
           </item>
-          <item row="2" column="3">
-           <widget class="QLineEdit" name="lineSquare">
+          <item row="1" column="3" colspan="3">
+           <widget class="QLineEdit" name="lineRadius">
             <property name="text">
              <string>0</string>
             </property>
            </widget>
           </item>
-          <item row="3" column="0">
-           <widget class="QRadioButton" name="radioCustom">
-            <property name="text">
-             <string>Custom:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1" colspan="3">
+          <item row="3" column="1" colspan="5">
            <layout class="QHBoxLayout" name="horizontalLayout">
             <item>
              <widget class="QLabel" name="labelX1">
@@ -312,6 +282,36 @@
             </item>
            </layout>
           </item>
+          <item row="2" column="3">
+           <widget class="QLineEdit" name="lineSquare">
+            <property name="text">
+             <string>0</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3" colspan="3">
+           <widget class="SpinInstances" name="spinBox">
+            <property name="specialValueText">
+             <string>0 (exclude)</string>
+            </property>
+            <property name="minimum">
+             <number>0</number>
+            </property>
+            <property name="maximum">
+             <number>99</number>
+            </property>
+            <property name="value">
+             <number>1</number>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QRadioButton" name="radioCustom">
+            <property name="text">
+             <string>Custom:</string>
+            </property>
+           </widget>
+          </item>
           <item row="2" column="0" colspan="3">
            <widget class="QRadioButton" name="radioSquare">
             <property name="text">
@@ -343,6 +343,32 @@
             </property>
            </widget>
           </item>
+          <item row="2" column="4">
+           <widget class="QPushButton" name="buttonAreaInfo">
+            <property name="maximumSize">
+             <size>
+              <width>14</width>
+              <height>14</height>
+             </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">border: none;</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="../rc/icons.qrc">
+              <normaloff>:/icons/info.png</normaloff>:/icons/info.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>14</width>
+              <height>14</height>
+             </size>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -359,16 +385,6 @@
            <string>Biomes</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_4">
-           <item row="1" column="4">
-            <widget class="QLineEdit" name="lineY">
-             <property name="toolTip">
-              <string>Vertical position in blocks</string>
-             </property>
-             <property name="text">
-              <string>255</string>
-             </property>
-            </widget>
-           </item>
            <item row="1" column="0">
             <widget class="QCheckBox" name="checkApprox">
              <property name="toolTip">
@@ -386,7 +402,7 @@
              </property>
             </widget>
            </item>
-           <item row="3" column="0" colspan="5">
+           <item row="3" column="0" colspan="6">
             <widget class="QScrollArea" name="scrollArea">
              <property name="widgetResizable">
               <bool>true</bool>
@@ -411,7 +427,7 @@
              </widget>
             </widget>
            </item>
-           <item row="2" column="0" colspan="5">
+           <item row="2" column="0" colspan="6">
             <layout class="QHBoxLayout" name="horizontalLayout_3">
              <item>
               <widget class="QPushButton" name="buttonUncheck">
@@ -457,6 +473,71 @@
              <property name="text">
               <string>Match any</string>
              </property>
+            </widget>
+           </item>
+           <item row="1" column="4">
+            <widget class="QComboBox" name="comboY">
+             <property name="editable">
+              <bool>true</bool>
+             </property>
+             <property name="maxVisibleItems">
+              <number>12</number>
+             </property>
+             <item>
+              <property name="text">
+               <string>256 (Surface)</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>128 (Nether Roof)</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>62 (Sea Level)</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>48</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>32</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>16</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>0</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>-16</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>-32</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>-48</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>-64 (Bedrock)</string>
+              </property>
+             </item>
             </widget>
            </item>
           </layout>
@@ -615,8 +696,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>86</width>
-                <height>16</height>
+                <width>648</width>
+                <height>333</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -664,8 +745,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>86</width>
-                <height>16</height>
+                <width>648</width>
+                <height>413</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_3">

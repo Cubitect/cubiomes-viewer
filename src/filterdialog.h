@@ -142,10 +142,10 @@ private slots:
     void on_comboBoxRelative_activated(int);
 
     void on_buttonUncheck_clicked();
-
     void on_buttonInclude_clicked();
-
     void on_buttonExclude_clicked();
+
+    void on_buttonAreaInfo_clicked();
 
     void on_checkRadius_toggled(bool checked);
     void on_radioSquare_toggled(bool checked);

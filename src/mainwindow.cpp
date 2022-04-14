@@ -32,6 +32,7 @@
 #include <QDebug>
 #include <QFile>
 
+
 // Keep the extended generator settings in global scope, but we mainly need
 // them in this file. (Pass through via pointer elsewhere.)
 static ExtGenSettings g_extgen;
@@ -148,7 +149,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->lineEditZ2->setValidator(intval);
     on_checkArea_toggled(false);
 
-    ui->lineY->setValidator(new QIntValidator(-64, 320, this));
+    ui->comboY->lineEdit()->setValidator(new QIntValidator(-64, 320, this));
 
     formCond->updateSensitivity();
 
@@ -294,7 +295,8 @@ bool MainWindow::getSeed(WorldInfo *wi, bool applyrand)
     }
 
     wi->large = ui->checkLarge->isChecked();
-    wi->y = ui->lineY->text().toInt();
+
+    wi->y = ui->comboY->currentText().section(' ', 0, 0).toInt();
 
     return ok;
 }
@@ -312,14 +314,20 @@ bool MainWindow::setSeed(WorldInfo wi, int dim)
         dim = getDim();
 
     ui->checkLarge->setChecked(wi.large);
-    ui->lineY->setText(QString::number(wi.y));
+    int i, n = ui->comboY->count();
+    for (i = 0; i < n; i++)
+        if (ui->comboY->itemText(i).section(' ', 0, 0).toInt() == wi.y)
+            break;
+    if (i >= n)
+        ui->comboY->addItem(QString::number(wi.y));
+    ui->comboY->setCurrentIndex(i);
 
     ui->comboBoxMC->setCurrentText(mcstr);
     ui->seedEdit->setText(QString::asprintf("%" PRId64, (int64_t)wi.seed));
     ui->mapView->setSeed(wi, dim);
 
     ui->checkLarge->setEnabled(wi.mc >= MC_1_3);
-    ui->lineY->setEnabled(wi.mc >= MC_1_16);
+    ui->comboY->setEnabled(wi.mc >= MC_1_16);
     return true;
 }
 
@@ -465,7 +473,7 @@ void MainWindow::loadSettings()
     wi.mc = settings.value("map/mc", wi.mc).toInt();
     wi.large = settings.value("map/large", wi.large).toBool();
     wi.seed = (uint64_t) settings.value("map/seed", QVariant::fromValue((qlonglong)wi.seed)).toLongLong();
-    wi.y = settings.value("map/y", 255).toInt();
+    wi.y = settings.value("map/y", 256).toInt();
     setSeed(wi);
 
     qreal x = ui->mapView->getX();
@@ -749,7 +757,7 @@ void MainWindow::on_checkLarge_toggled()
     updateMapSeed();
     update();
 }
-void MainWindow::on_lineY_editingFinished()
+void MainWindow::on_comboY_currentIndexChanged(int)
 {
     updateMapSeed();
     update();

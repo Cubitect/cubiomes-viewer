@@ -31,17 +31,10 @@
         </property>
         <item>
          <layout class="QGridLayout" name="gridMCSeed">
-          <item row="0" column="3">
+          <item row="0" column="5">
            <widget class="QLineEdit" name="seedEdit">
             <property name="toolTip">
              <string>Press enter to accept</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="3">
-           <widget class="QLineEdit" name="lineY">
-            <property name="toolTip">
-             <string>Show map for this y-level</string>
             </property>
            </widget>
           </item>
@@ -81,7 +74,7 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="4">
+          <item row="0" column="6">
            <widget class="QLabel" name="labelSeedType">
             <property name="minimumSize">
              <size>
@@ -216,6 +209,71 @@
             <property name="text">
              <string>Large biomes</string>
             </property>
+           </widget>
+          </item>
+          <item row="1" column="5">
+           <widget class="QComboBox" name="comboY">
+            <property name="editable">
+             <bool>true</bool>
+            </property>
+            <property name="maxVisibleItems">
+             <number>12</number>
+            </property>
+            <item>
+             <property name="text">
+              <string>256 (Surface)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>128 (Nether Roof)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>62 (Sea Level)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>48</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>32</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>16</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>0</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>-16</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>-32</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>-48</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>-64 (Bedrock)</string>
+             </property>
+            </item>
            </widget>
           </item>
          </layout>
