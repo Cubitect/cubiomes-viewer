@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>FilterDialog</class>
- <widget class="QDialog" name="FilterDialog">
+ <class>ConditionDialog</class>
+ <widget class="QDialog" name="ConditionDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,11 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>New Filter</string>
+   <string>Condition Editor</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../rc/icons.qrc">
+    <normaloff>:/icons/map.png</normaloff>:/icons/map.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout_3">
    <item row="0" column="0">
@@ -74,7 +78,7 @@
        </item>
        <item>
         <property name="text">
-         <string>Biome filter</string>
+         <string>Biomes</string>
         </property>
         <property name="icon">
          <iconset resource="../rc/icons.qrc">
@@ -135,7 +139,7 @@
        </property>
        <item>
         <property name="text">
-         <string>Select filter</string>
+         <string>Select type</string>
         </property>
        </item>
       </widget>
@@ -143,7 +147,7 @@
      <item row="0" column="1">
       <widget class="QLabel" name="labelFilterType">
        <property name="text">
-        <string>Filter type:</string>
+        <string>Condition type:</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -412,8 +416,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>648</width>
-                <height>377</height>
+                <width>640</width>
+                <height>362</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -696,8 +700,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>648</width>
-                <height>333</height>
+                <width>640</width>
+                <height>316</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -745,8 +749,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>648</width>
-                <height>413</height>
+                <width>640</width>
+                <height>395</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -787,8 +791,7 @@
        </property>
        <property name="icon">
         <iconset theme="dialog-cancel">
-         <normaloff/>
-        </iconset>
+         <normaloff>.</normaloff>.</iconset>
        </property>
       </widget>
      </item>
@@ -799,8 +802,7 @@
        </property>
        <property name="icon">
         <iconset theme="dialog-ok">
-         <normaloff/>
-        </iconset>
+         <normaloff>.</normaloff>.</iconset>
        </property>
       </widget>
      </item>
@@ -818,7 +820,7 @@
   <customwidget>
    <class>SpinInstances</class>
    <extends>QSpinBox</extends>
-   <header>src/filterdialog.h</header>
+   <header>src/conditiondialog.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

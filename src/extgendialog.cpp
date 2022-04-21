@@ -24,6 +24,7 @@ ExtGenDialog::ExtGenDialog(QWidget *parent, ExtGenSettings *extgen)
         Monument,
         Mansion,
         Outpost,
+        Ancient_City,
         Ruined_Portal,
         Ruined_Portal_N,
         Treasure,

@@ -5,7 +5,7 @@
 #include "quadlistdialog.h"
 #include "presetdialog.h"
 #include "aboutdialog.h"
-#include "filterdialog.h"
+#include "conditiondialog.h"
 #include "extgendialog.h"
 
 #if WITH_UPDATER
@@ -123,6 +123,7 @@ MainWindow::MainWindow(QWidget *parent)
     addMapAction(D_SHIPWRECK, "shipwreck", tr("Show shipwrecks"));
     addMapAction(D_TREASURE, "treasure", tr("Show buried treasures"));
     addMapAction(D_OUTPOST, "outpost", tr("Show illager outposts"));
+    addMapAction(D_ANCIENTCITY, "ancient_city", tr("Show ancient cities"));
     addMapAction(D_PORTAL, "portal", tr("Show ruined portals"));
     ui->toolBar->addSeparator();
     addMapAction(D_FORTESS, "fortress", tr("Show nether fortresses"));

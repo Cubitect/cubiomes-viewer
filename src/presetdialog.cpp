@@ -198,6 +198,14 @@ void PresetDialog::updateSelection()
     }
 }
 
+void PresetDialog::on_tabWidget_currentChanged(int)
+{
+    if (ui->tabWidget->currentWidget() == ui->tabFilters)
+        ui->listExamples->clearSelection();
+    else
+        ui->listFilters->clearSelection();
+}
+
 void PresetDialog::on_listFilters_itemSelectionChanged()
 {
     updateSelection();

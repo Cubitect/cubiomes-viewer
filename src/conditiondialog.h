@@ -1,5 +1,5 @@
-#ifndef FILTERDIALOG_H
-#define FILTERDIALOG_H
+#ifndef CONDITIONDIALOG_H
+#define CONDITIONDIALOG_H
 
 #include <QDialog>
 #include <QCheckBox>
@@ -16,7 +16,7 @@
 class MainWindow;
 
 namespace Ui {
-class FilterDialog;
+class ConditionDialog;
 }
 
 class SpinExclude : public QSpinBox
@@ -113,14 +113,14 @@ public:
     }
 };
 
-class FilterDialog : public QDialog
+class ConditionDialog : public QDialog
 {
     Q_OBJECT
 
 public:
 
-    explicit FilterDialog(FormConditions *parent, Config *config, int mc, QListWidgetItem *item = 0, Condition *initcond = 0);
-    virtual ~FilterDialog();
+    explicit ConditionDialog(FormConditions *parent, Config *config, int mc, QListWidgetItem *item = 0, Condition *initcond = 0);
+    virtual ~ConditionDialog();
 
     void addVariant(QString name, int biome, int variant);
     void setActiveTab(QWidget *tab);
@@ -158,7 +158,7 @@ private slots:
 
     void on_buttonOk_clicked();
 
-    void on_FilterDialog_finished(int result);
+    void on_ConditionDialog_finished(int result);
 
     void on_comboBoxCat_currentIndexChanged(int index);
 
@@ -167,7 +167,7 @@ private slots:
     void onClimateLimitChanged();
 
 private:
-    Ui::FilterDialog *ui;
+    Ui::ConditionDialog *ui;
     QTextEdit *textDescription;
 
     QCheckBox *biomecboxes[256];
@@ -184,4 +184,4 @@ public:
     int mc;
 };
 
-#endif // FILTERDIALOG_H
+#endif // CONDITIONDIALOG_H

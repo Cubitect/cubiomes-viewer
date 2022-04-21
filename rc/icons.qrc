@@ -63,5 +63,7 @@
         <file>icons/mineshaft_d.png</file>
         <file>icons/helper.png</file>
         <file>icons/reference.png</file>
+        <file>icons/ancient_city_d.png</file>
+        <file>icons/ancient_city.png</file>
     </qresource>
 </RCC>

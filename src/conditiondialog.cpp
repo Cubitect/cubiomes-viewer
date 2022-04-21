@@ -1,5 +1,5 @@
-#include "filterdialog.h"
-#include "ui_filterdialog.h"
+#include "conditiondialog.h"
+#include "ui_conditiondialog.h"
 
 #include "mainwindow.h"
 #include "cutil.h"
@@ -32,7 +32,7 @@ static QString getTip(int mc, int layer, int id)
 {
     uint64_t mL = 0, mM = 0;
     genPotential(&mL, &mM, layer, mc, id);
-    QString tip = FilterDialog::tr("Generates any of:");
+    QString tip = ConditionDialog::tr("Generates any of:");
     for (int j = 0; j < 64; j++)
         if (mL & (1ULL << j))
             tip += QString("\n") + biome2str(mc, j);
@@ -42,7 +42,7 @@ static QString getTip(int mc, int layer, int id)
     return tip;
 }
 
-void FilterDialog::addVariant(QString name, int biome, int variant)
+void ConditionDialog::addVariant(QString name, int biome, int variant)
 {
     VariantCheckBox *cb = new VariantCheckBox(name, biome, variant);
     ui->gridLayoutVariants->addWidget(cb, variantboxes.size(), 0);
@@ -51,9 +51,9 @@ void FilterDialog::addVariant(QString name, int biome, int variant)
 
 #define WARNING_CHAR QChar(0x26A0)
 
-FilterDialog::FilterDialog(FormConditions *parent, Config *config, int mcversion, QListWidgetItem *item, Condition *initcond)
+ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcversion, QListWidgetItem *item, Condition *initcond)
     : QDialog(parent, Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint)
-    , ui(new Ui::FilterDialog)
+    , ui(new Ui::ConditionDialog)
     , config(config)
     , item(item)
     , mc(mcversion)
@@ -204,6 +204,9 @@ FilterDialog::FilterDialog(FormConditions *parent, Config *config, int mcversion
     SETUP_BIOME_CHECKBOX(jagged_peaks);
     SETUP_BIOME_CHECKBOX(frozen_peaks);
 
+    SETUP_BIOME_CHECKBOX(deep_dark);
+    SETUP_BIOME_CHECKBOX(mangrove_swamp);
+
     memset(tempsboxes, 0, sizeof(tempsboxes));
 
     SETUP_TEMPCAT_SPINBOX(Oceanic);
@@ -265,7 +268,7 @@ FilterDialog::FilterDialog(FormConditions *parent, Config *config, int mcversion
 
         QCheckBox *all = new QCheckBox(this);
         all->setFixedWidth(20);
-        all->setToolTip(tr("Require the complete range"));
+        all->setToolTip(tr("Require full range instead of intersection"));
         connect(all, SIGNAL(stateChanged(int)), this, SLOT(onClimateLimitChanged(void)));
         climatecomplete[climates[i].idx] = all;
 
@@ -438,14 +441,14 @@ FilterDialog::FilterDialog(FormConditions *parent, Config *config, int mcversion
     updateMode();
 }
 
-FilterDialog::~FilterDialog()
+ConditionDialog::~ConditionDialog()
 {
     if (item)
         delete item;
     delete ui;
 }
 
-void FilterDialog::setActiveTab(QWidget *tab)
+void ConditionDialog::setActiveTab(QWidget *tab)
 {
     ui->tabWidget->setEnabled(true);
     ui->tabWidget->setCurrentWidget(tab);
@@ -455,7 +458,7 @@ void FilterDialog::setActiveTab(QWidget *tab)
     ui->tabVariants->setEnabled(ui->tabVariants == tab);
 }
 
-void FilterDialog::updateMode()
+void ConditionDialog::updateMode()
 {
     int filterindex = ui->comboBoxType->currentData().toInt();
     const FilterInfo &ft = g_filterinfo.list[filterindex];
@@ -581,7 +584,7 @@ void FilterDialog::updateMode()
     textDescription->setText(ft.description);
 }
 
-void FilterDialog::enableSet(const int *ids, int n)
+void ConditionDialog::enableSet(const int *ids, int n)
 {
     for (int i = 0; i < 256; i++)
     {
@@ -595,7 +598,7 @@ void FilterDialog::enableSet(const int *ids, int n)
         biomecboxes[ids[i]]->setEnabled(true);
 }
 
-void FilterDialog::updateBiomeSelection()
+void ConditionDialog::updateBiomeSelection()
 {
     int filterindex = ui->comboBoxType->currentData().toInt();
     const FilterInfo &ft = g_filterinfo.list[filterindex];
@@ -692,7 +695,7 @@ void FilterDialog::updateBiomeSelection()
     }
 }
 
-int FilterDialog::warnIfBad(Condition cond)
+int ConditionDialog::warnIfBad(Condition cond)
 {
     const FilterInfo &ft = g_filterinfo.list[cond.type];
     if (ui->scrollVariants->isEnabled())
@@ -740,12 +743,12 @@ int FilterDialog::warnIfBad(Condition cond)
     return QMessageBox::Ok;
 }
 
-void FilterDialog::on_comboBoxType_activated(int)
+void ConditionDialog::on_comboBoxType_activated(int)
 {
     updateMode();
 }
 
-void FilterDialog::on_comboBoxRelative_activated(int)
+void ConditionDialog::on_comboBoxRelative_activated(int)
 {
     QPalette pal;
     if (ui->comboBoxRelative->currentText().contains(WARNING_CHAR))
@@ -753,7 +756,7 @@ void FilterDialog::on_comboBoxRelative_activated(int)
     ui->comboBoxRelative->setPalette(pal);
 }
 
-void FilterDialog::on_buttonUncheck_clicked()
+void ConditionDialog::on_buttonUncheck_clicked()
 {
     for (int i = 0; i < 256; i++)
     {
@@ -763,7 +766,7 @@ void FilterDialog::on_buttonUncheck_clicked()
     }
 }
 
-void FilterDialog::on_buttonInclude_clicked()
+void ConditionDialog::on_buttonInclude_clicked()
 {
     for (int i = 0; i < 256; i++)
     {
@@ -773,7 +776,7 @@ void FilterDialog::on_buttonInclude_clicked()
     }
 }
 
-void FilterDialog::on_buttonExclude_clicked()
+void ConditionDialog::on_buttonExclude_clicked()
 {
     for (int i = 0; i < 256; i++)
     {
@@ -783,7 +786,7 @@ void FilterDialog::on_buttonExclude_clicked()
     }
 }
 
-void FilterDialog::on_buttonAreaInfo_clicked()
+void ConditionDialog::on_buttonAreaInfo_clicked()
 {
     QMessageBox mb(this);
     mb.setIcon(QMessageBox::Information);
@@ -811,22 +814,22 @@ void FilterDialog::on_buttonAreaInfo_clicked()
     mb.exec();
 }
 
-void FilterDialog::on_checkRadius_toggled(bool)
+void ConditionDialog::on_checkRadius_toggled(bool)
 {
     updateMode();
 }
 
-void FilterDialog::on_radioSquare_toggled(bool)
+void ConditionDialog::on_radioSquare_toggled(bool)
 {
     updateMode();
 }
 
-void FilterDialog::on_radioCustom_toggled(bool)
+void ConditionDialog::on_radioCustom_toggled(bool)
 {
     updateMode();
 }
 
-void FilterDialog::on_lineSquare_editingFinished()
+void ConditionDialog::on_lineSquare_editingFinished()
 {
     int v = ui->lineSquare->text().toInt();
     int area = (v+1) * (v+1);
@@ -837,12 +840,12 @@ void FilterDialog::on_lineSquare_editingFinished()
     }
 }
 
-void FilterDialog::on_buttonCancel_clicked()
+void ConditionDialog::on_buttonCancel_clicked()
 {
     close();
 }
 
-void FilterDialog::on_buttonOk_clicked()
+void ConditionDialog::on_buttonOk_clicked()
 {
     Condition c = cond;
     c.type = ui->comboBoxType->currentData().toInt();
@@ -926,20 +929,20 @@ void FilterDialog::on_buttonOk_clicked()
     close();
 }
 
-void FilterDialog::on_FilterDialog_finished(int result)
+void ConditionDialog::on_ConditionDialog_finished(int result)
 {
     if (item)
         emit setCond(item, cond, result);
     item = 0;
 }
 
-void FilterDialog::on_comboBoxCat_currentIndexChanged(int idx)
+void ConditionDialog::on_comboBoxCat_currentIndexChanged(int idx)
 {
     ui->comboBoxType->setEnabled(idx != CAT_NONE);
     ui->comboBoxType->clear();
 
     int slot = 0;
-    ui->comboBoxType->insertItem(slot, tr("Select filter"), QVariant::fromValue((int)F_SELECT));
+    ui->comboBoxType->insertItem(slot, tr("Select type"), QVariant::fromValue((int)F_SELECT));
 
     const FilterInfo *ft_list[FILTER_MAX] = {};
     const FilterInfo *ft;
@@ -974,12 +977,12 @@ void FilterDialog::on_comboBoxCat_currentIndexChanged(int idx)
     updateMode();
 }
 
-void FilterDialog::on_checkStartPiece_stateChanged(int state)
+void ConditionDialog::on_checkStartPiece_stateChanged(int state)
 {
     ui->scrollVariants->setEnabled(state);
 }
 
-void FilterDialog::getClimateLimits(int limok[6][2], int limex[6][2])
+void ConditionDialog::getClimateLimits(int limok[6][2], int limex[6][2])
 {
     getClimateLimits(climaterange[0], limok);
     getClimateLimits(climaterange[1], limex);
@@ -1006,7 +1009,7 @@ void FilterDialog::getClimateLimits(int limok[6][2], int limex[6][2])
     }
 }
 
-void FilterDialog::getClimateLimits(LabeledRange *ranges[6], int limits[6][2])
+void ConditionDialog::getClimateLimits(LabeledRange *ranges[6], int limits[6][2])
 {
     for (int i = 0; i < 6; i++)
     {
@@ -1025,7 +1028,7 @@ void FilterDialog::getClimateLimits(LabeledRange *ranges[6], int limits[6][2])
     }
 }
 
-void FilterDialog::setClimateLimits(LabeledRange *ranges[6], int limits[6][2], bool complete)
+void ConditionDialog::setClimateLimits(LabeledRange *ranges[6], int limits[6][2], bool complete)
 {
     for (int i = 0; i < 6; i++)
     {
@@ -1050,7 +1053,7 @@ void FilterDialog::setClimateLimits(LabeledRange *ranges[6], int limits[6][2], b
     }
 }
 
-void FilterDialog::onClimateLimitChanged()
+void ConditionDialog::onClimateLimitChanged()
 {
     int limok[6][2], limex[6][2];
     char ok[256], ex[256];

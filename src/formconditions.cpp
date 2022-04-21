@@ -1,7 +1,7 @@
 #include "formconditions.h"
 #include "ui_formconditions.h"
 
-#include "filterdialog.h"
+#include "conditiondialog.h"
 #include "mainwindow.h"
 
 #include <QMessageBox>
@@ -165,7 +165,7 @@ void FormConditions::editCondition(QListWidgetItem *item)
         return;
     WorldInfo wi;
     parent->getSeed(&wi);
-    FilterDialog *dialog = new FilterDialog(this, &parent->config, wi.mc, item, (Condition*)item->data(Qt::UserRole).data());
+    ConditionDialog *dialog = new ConditionDialog(this, &parent->config, wi.mc, item, (Condition*)item->data(Qt::UserRole).data());
     QObject::connect(dialog, SIGNAL(setCond(QListWidgetItem*,Condition,int)), this, SLOT(addItemCondition(QListWidgetItem*,Condition,int)), Qt::QueuedConnection);
     dialog->show();
 }
@@ -224,7 +224,7 @@ void FormConditions::on_buttonAddFilter_clicked()
         return;
     WorldInfo wi;
     parent->getSeed(&wi);
-    FilterDialog *dialog = new FilterDialog(this, &parent->config, wi.mc);
+    ConditionDialog *dialog = new ConditionDialog(this, &parent->config, wi.mc);
     QObject::connect(dialog, SIGNAL(setCond(QListWidgetItem*,Condition,int)), this, SLOT(addItemCondition(QListWidgetItem*,Condition)), Qt::QueuedConnection);
     dialog->show();
 }

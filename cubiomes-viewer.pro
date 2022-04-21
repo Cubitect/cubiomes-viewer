@@ -37,6 +37,7 @@ CONFIG += static
 SOURCES += \
         src/aboutdialog.cpp \
         src/collapsible.cpp \
+        src/conditiondialog.cpp \
         src/configdialog.cpp \
         src/extgendialog.cpp \
         src/formconditions.cpp \
@@ -45,7 +46,6 @@ SOURCES += \
         src/gotodialog.cpp \
         src/presetdialog.cpp \
         src/protobasedialog.cpp \
-        src/filterdialog.cpp \
         src/quadlistdialog.cpp \
         src/mapview.cpp \
         src/quad.cpp \
@@ -63,6 +63,7 @@ HEADERS += \
         $$CUPATH/util.h \
         src/aboutdialog.h \
         src/collapsible.h \
+        src/conditiondialog.h \
         src/configdialog.h \
         src/extgendialog.h \
         src/formconditions.h \
@@ -71,7 +72,6 @@ HEADERS += \
         src/gotodialog.h \
         src/presetdialog.h \
         src/protobasedialog.h \
-        src/filterdialog.h \
         src/quadlistdialog.h \
         src/mapview.h \
         src/quad.h \
@@ -86,6 +86,7 @@ HEADERS += \
 
 FORMS += \
         src/aboutdialog.ui \
+        src/conditiondialog.ui \
         src/configdialog.ui \
         src/extgendialog.ui \
         src/formconditions.ui \
@@ -94,7 +95,6 @@ FORMS += \
         src/gotodialog.ui \
         src/presetdialog.ui \
         src/protobasedialog.ui \
-        src/filterdialog.ui \
         src/quadlistdialog.ui\
         src/mainwindow.ui \
         src/rangedialog.ui

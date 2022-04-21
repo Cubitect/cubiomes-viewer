@@ -38,6 +38,7 @@ public:
     void updateSelection();
 
 private slots:
+    void on_tabWidget_currentChanged(int idx);
     void on_listFilters_itemSelectionChanged();
     void on_listExamples_itemSelectionChanged();
 

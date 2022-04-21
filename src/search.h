@@ -102,6 +102,7 @@ enum
     F_REFERENCE_4,
     F_FIRST_STRONGHOLD,
     F_CLIMATE_NOISE,
+    F_ANCIENT_CITY,
     // new filters should be added here at the end to keep some downwards compatibility
     FILTER_MAX,
 };
@@ -250,7 +251,7 @@ static const struct FilterList
         list[F_BIOME] = FilterInfo{
             CAT_BIOMES, 1, 1, 1, 0, L_VORONOI_1, 0, 1, 0, MC_1_0, MC_1_17, 0, 1, disp++, // disable for 1.18
             ":icons/map.png",
-            _("Biome filter 1:1"),
+            _("Biomes 1:1"),
             _("Only seeds with the included (+) biomes in the specified area and "
             "discard those that have biomes that are explicitly excluded (-).")
         };
@@ -258,28 +259,28 @@ static const struct FilterList
         list[F_BIOME_4] = FilterInfo{
             CAT_BIOMES, 1, 1, 1, 0, 0, 0, 4, 0, MC_1_0, MC_NEWEST, 0, 1, disp++,
             ":icons/map.png",
-            _("Biome filter 1:4"),
+            _("Biomes 1:4"),
             _("Only seeds with the included (+) biomes in the specified area and "
             "discard those that have biomes that are explicitly excluded (-).")
         };
         list[F_BIOME_16] = FilterInfo{
             CAT_BIOMES, 1, 1, 1, 0, 0, 0, 16, 0, MC_1_0, MC_NEWEST, 0, 1, disp++,
             ":icons/map.png",
-            _("Biome filter 1:16"),
+            _("Biomes 1:16"),
             _("Only seeds with the included (+) biomes in the specified area and "
             "discard those that have biomes that are explicitly excluded (-).")
         };
         list[F_BIOME_64] = FilterInfo{
             CAT_BIOMES, 1, 1, 1, 0, 0, 0, 64, 0, MC_1_0, MC_NEWEST, 0, 1, disp++,
             ":icons/map.png",
-            _("Biome filter 1:64"),
+            _("Biomes 1:64"),
             _("Only seeds with the included (+) biomes in the specified area and "
             "discard those that have biomes that are explicitly excluded (-).")
         };
         list[F_BIOME_256] = FilterInfo{
             CAT_BIOMES, 1, 1, 1, 0, 0, 0, 256, 0, MC_1_0, MC_NEWEST, 0, 1, disp++,
             ":icons/map.png",
-            _("Biome filter 1:256"),
+            _("Biomes 1:256"),
             _("Only seeds with the included (+) biomes in the specified area and "
             "discard those that have biomes that are explicitly excluded (-).")
         };
@@ -287,7 +288,7 @@ static const struct FilterList
         list[F_BIOME_4_RIVER] = FilterInfo{
             CAT_BIOMES, 1, 1, 1, 0, L_RIVER_MIX_4, 0, 4, 0, MC_1_13, MC_1_17, 0, 0, disp++,
             ":icons/map.png",
-            _("Biome filter 1:4 RIVER"),
+            _("Biomes 1:4 RIVER"),
             _("Only seeds with the included (+) biomes in the specified area and "
             "discard those that have biomes that are explicitly excluded (-) "
             "at layer RIVER with scale 1:4. "
@@ -296,7 +297,7 @@ static const struct FilterList
         list[F_BIOME_256_OTEMP] = FilterInfo{
             CAT_BIOMES, 0, 1, 1, 0, L_OCEAN_TEMP_256, 0, 256, 0, MC_1_13, MC_1_17, 0, 0, disp++,
             ":icons/map.png",
-            _("Biome filter 1:256 O.TEMP"),
+            _("Biomes 1:256 O.TEMP"),
             _("Only seeds with the included (+) biomes in the specified area and "
             "discard those that have biomes that are explicitly excluded (-) "
             "at layer OCEAN TEMPERATURE with scale 1:256. "
@@ -319,56 +320,56 @@ static const struct FilterList
         list[F_BIOME_NETHER_1] = FilterInfo{
             CAT_NETHER, 1, 1, 1, 0, 0, 0, 1, 0, MC_1_16, 0, -1, 1, disp++, // disabled
             ":icons/nether.png",
-            _("Nether biome filter 1:1 (disabled)"),
+            _("Nether biomes 1:1 (disabled)"),
             _("Nether biomes after voronoi scaling to 1:1.")
         };
         list[F_BIOME_NETHER_4] = FilterInfo{
             CAT_NETHER, 0, 1, 1, 0, 0, 0, 4, 0, MC_1_16, MC_NEWEST, -1, 0, disp++,
             ":icons/nether.png",
-            _("Nether biome filter 1:4"),
+            _("Nether biomes 1:4"),
             _("Nether biomes with normal noise sampling at scale 1:4.")
         };
         list[F_BIOME_NETHER_16] = FilterInfo{
             CAT_NETHER, 0, 1, 1, 0, 0, 0, 16, 0, MC_1_16, MC_NEWEST, -1, 0, disp++,
             ":icons/nether.png",
-            _("Nether biome filter 1:16"),
+            _("Nether biomes 1:16"),
             _("Nether biomes, but only sampled at scale 1:16.")
         };
         list[F_BIOME_NETHER_64] = FilterInfo{
             CAT_NETHER, 0, 1, 1, 0, 0, 0, 64, 0, MC_1_16, MC_NEWEST, -1, 0, disp++,
             ":icons/nether.png",
-            _("Nether biome filter 1:64"),
+            _("Nether biomes 1:64"),
             _("Nether biomes, but only sampled at scale 1:64.")
         };
         list[F_BIOME_NETHER_256] = FilterInfo{
             CAT_NETHER, 0, 1, 1, 0, 0, 0, 256, 0, MC_1_16, MC_NEWEST, -1, 0, disp++,
             ":icons/nether.png",
-            _("Nether biome filter 1:256"),
+            _("Nether biomes 1:256"),
             _("Nether biomes, but only sampled at scale 1:256.")
         };
 
         list[F_BIOME_END_1] = FilterInfo{
             CAT_END, 1, 1, 1, 0, 0, 0, 1, 0, MC_1_9, 0, +1, 1, disp++, // disabled
             ":icons/the_end.png",
-            _("End biome filter 1:1 (disabled)"),
+            _("End biomes 1:1 (disabled)"),
             _("End biomes after voronoi scaling to 1:1.")
         };
         list[F_BIOME_END_4] = FilterInfo{
             CAT_END, 0, 1, 1, 0, 0, 0, 4, 0, MC_1_9, MC_NEWEST, +1, 0, disp++,
             ":icons/the_end.png",
-            _("End biome filter 1:4"),
+            _("End biomes 1:4"),
             _("End biomes sampled at scale 1:4. Note this is just a simple upscale of 1:16.")
         };
         list[F_BIOME_END_16] = FilterInfo{
             CAT_END, 0, 1, 1, 0, 0, 0, 16, 0, MC_1_9, MC_NEWEST, +1, 0, disp++,
             ":icons/the_end.png",
-            _("End biome filter 1:16"),
+            _("End biomes 1:16"),
             _("End biomes with normal sampling at scale 1:16. ")
         };
         list[F_BIOME_END_64] = FilterInfo{
             CAT_END, 0, 1, 1, 0, 0, 0, 64, 0, MC_1_9, MC_NEWEST, +1, 0, disp++,
             ":icons/the_end.png",
-            _("End biome filter 1:64"),
+            _("End biomes 1:64"),
             _("End biomes with lossy sampling at scale 1:64. ")
         };
 
@@ -487,6 +488,13 @@ static const struct FilterList
             CAT_STRUCT, 1, 1, 1, 1, 0, Outpost, 1, 1, MC_1_14, MC_NEWEST, 0, 0, disp++,
             ":icons/outpost.png",
             _("Pillager outpost"),
+            ""
+        };
+
+        list[F_ANCIENT_CITY] = FilterInfo{
+            CAT_STRUCT, 1, 1, 1, 1, 0, Ancient_City, 1, 1, MC_1_19, MC_NEWEST, 0, 0, disp++,
+            ":icons/ancient_city.png",
+            _("Ancient City"),
             ""
         };
 

@@ -81,6 +81,10 @@ void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
                 {
                     sv = getBastionType(wi.mc, wi.seed, p.x, p.z);
                 }
+                else if (sconf.structType == Ancient_City)
+                {
+                    sv = getAncientCityType(wi.mc, wi.seed, p.x, p.z);
+                }
                 else if (sconf.structType == Outpost && wi.mc >= MC_1_18)
                 {
                     sv.sx = sv.sz = 16;
@@ -346,6 +350,7 @@ QWorld::QWorld(WorldInfo wi, int dim)
     lvs[D_SHIPWRECK]    .init4struct(this, 0, 2048, D_SHIPWRECK, 1);
     lvs[D_TREASURE]     .init4struct(this, 0, 2048, D_TREASURE, 1);
     lvs[D_OUTPOST]      .init4struct(this, 0, 2048, D_OUTPOST, 2);
+    lvs[D_ANCIENTCITY]  .init4struct(this, 0, 2048, D_ANCIENTCITY, 2);
     lvs[D_PORTAL]       .init4struct(this, 0, 2048, D_PORTAL, 1);
     lvs[D_PORTALN]      .init4struct(this,-1, 2048, D_PORTALN, 1);
     lvs[D_FORTESS]      .init4struct(this,-1, 2048, D_FORTESS, 1);
@@ -368,6 +373,7 @@ QWorld::QWorld(WorldInfo wi, int dim)
     icons[D_TREASURE]   = QPixmap(":/icons/treasure.png");
     icons[D_MINESHAFT]  = QPixmap(":/icons/mineshaft.png");
     icons[D_OUTPOST]    = QPixmap(":/icons/outpost.png");
+    icons[D_ANCIENTCITY]= QPixmap(":/icons/ancient_city.png");
     icons[D_PORTAL]     = QPixmap(":/icons/portal.png");
     icons[D_PORTALN]    = QPixmap(":/icons/portal.png");
     icons[D_SPAWN]      = QPixmap(":/icons/spawn.png");
