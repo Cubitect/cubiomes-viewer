@@ -14,7 +14,7 @@
 Quad::Quad(const Level* l, int i, int j)
     : wi(l->wi),dim(l->dim),g(&l->g),scale(l->scale)
     , ti(i),tj(j),blocks(l->blocks),pixs(l->pixs),sopt(l->sopt)
-    , rgb(),img(),spos()
+    , biomes(),rgb(),img(),spos()
     , done(),isdel(l->isdel)
     , prio(),stopped()
 {
@@ -23,6 +23,7 @@ Quad::Quad(const Level* l, int i, int j)
 
 Quad::~Quad()
 {
+    if (biomes) free(biomes);
     delete img;
     delete spos;
     delete [] rgb;
@@ -104,6 +105,7 @@ void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
     }
 }
 
+QMutex g_mutex(QMutex::NonRecursive);
 
 void Quad::run()
 {
@@ -115,10 +117,10 @@ void Quad::run()
         int y = (scale > 1) ? wi.y >> 2 : wi.y;
         int x = ti*pixs, z = tj*pixs, w = pixs+SEAM_BUF, h = pixs+SEAM_BUF;
         Range r = {scale, x, z, w, h, y, 1};
-        int *b = allocCache(g, r);
-        if (!b) return;
+        biomes = allocCache(g, r);
+        if (!biomes) return;
 
-        int err = genBiomes(g, b, r);
+        int err = genBiomes(g, biomes, r);
         if (err)
         {
             fprintf(
@@ -128,11 +130,15 @@ void Quad::run()
                 mc2str(g->mc), g->seed, g->dim,
                 x, z, w, h, scale);
             for (int i = 0; i < w*h; i++)
-                b[i] = -1;
+                biomes[i] = -1;
         }
+
+        // sync biomeColors
+        g_mutex.lock();
+        g_mutex.unlock();
+
         rgb = new uchar[w*h * 3];
-        biomesToImage(rgb, biomeColors, b, w, h, 1, 1);
-        free(b);
+        biomesToImage(rgb, biomeColors, biomes, w, h, 1, 1);
         img = new QImage(rgb, w, h, 3*w, QImage::Format_RGB888);
     }
     else
@@ -468,6 +474,23 @@ int QWorld::getBiome(Pos p)
     int id = getBiomeAt(&g, 1, p.x, wi.y, p.z);
     return id;
 }
+
+void QWorld::refreshBiomeColors()
+{
+    g_mutex.lock();
+    for (Level& l : lvb)
+    {
+        for (Quad *q : l.cells)
+        {
+            QImage *img = q->img;
+            if (!img)
+                continue;
+            biomesToImage(q->rgb, biomeColors, q->biomes, img->width(), img->height(), 1, 1);
+        }
+    }
+    g_mutex.unlock();
+}
+
 
 void QWorld::cleancache(std::vector<Quad*>& cache, unsigned int maxsize)
 {
@@ -910,7 +933,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
     }
 
     int pixs = lvb[0].pixs + SEAM_BUF;
-    unsigned int cachesize = memlimit / pixs / pixs / 3;
+    unsigned int cachesize = memlimit / pixs / pixs / 7; // sizeof(RGB) + sizeof(biome_id)
 
     cleancache(cachedbiomes, cachesize);
     cleancache(cachedstruct, cachesize);

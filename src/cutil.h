@@ -35,6 +35,7 @@ inline const char* struct2str(int stype)
     case Bastion:           return "bastion";
     case End_City:          return "end_city";
     case End_Gateway:       return "end_gateway";
+    case Ancient_City:      return "ancient_city";
     }
     return "?";
 }

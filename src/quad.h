@@ -160,6 +160,7 @@ public:
     int pixs;
     int sopt;
 
+    int *biomes;
     uchar *rgb;
 
     // img and spos act as an atomic gate (with NULL or non-NULL indicating available results)
@@ -216,6 +217,8 @@ struct QWorld
     void draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz, qreal blocks2pix);
 
     int getBiome(Pos p);
+
+    void refreshBiomeColors();
 
     WorldInfo wi;
     int dim;

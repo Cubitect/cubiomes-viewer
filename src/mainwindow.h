@@ -50,6 +50,7 @@ public:
     bool setSeed(WorldInfo wi, int dim = INT_MAX);
     int getDim();
     MapView *getMapView();
+    void setBiomeColorRc(QString rc);
 
 protected:
 
@@ -77,6 +78,7 @@ private slots:
     void on_actionGo_to_triggered();
     void on_actionScan_seed_for_Quad_Huts_triggered();
     void on_actionOpen_shadow_seed_triggered();
+    void on_actionBiome_colors_triggered();
     void on_actionPresetLoad_triggered();
     void on_actionExamples_triggered();
     void on_actionAbout_triggered();

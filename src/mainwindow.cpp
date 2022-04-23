@@ -7,6 +7,7 @@
 #include "aboutdialog.h"
 #include "conditiondialog.h"
 #include "extgendialog.h"
+#include "biomecolordialog.h"
 
 #if WITH_UPDATER
 #include "updater.h"
@@ -342,6 +343,12 @@ int MainWindow::getDim()
     if (active == dimactions[2])
         return +1; // end
     return 0;
+}
+
+void MainWindow::setBiomeColorRc(QString rc)
+{
+    config.biomeColorPath = rc;
+    onBiomeColorChange();
 }
 
 void MainWindow::saveSettings()
@@ -837,7 +844,7 @@ void MainWindow::on_actionPreferences_triggered()
 void MainWindow::onBiomeColorChange()
 {
     QFile file(config.biomeColorPath);
-    if (file.open(QIODevice::ReadOnly))
+    if (!config.biomeColorPath.isEmpty() && file.open(QIODevice::ReadOnly))
     {
         char buf[32*1024];
         qint64 siz = file.read(buf, sizeof(buf)-1);
@@ -853,7 +860,7 @@ void MainWindow::onBiomeColorChange()
     {
         initBiomeColors(biomeColors);
     }
-    ui->mapView->refresh();
+    ui->mapView->refreshBiomeColors();
 }
 
 void MainWindow::on_actionGo_to_triggered()
@@ -876,6 +883,12 @@ void MainWindow::on_actionOpen_shadow_seed_triggered()
         wi.seed = getShadow(wi.seed);
         setSeed(wi);
     }
+}
+
+void MainWindow::on_actionBiome_colors_triggered()
+{
+    BiomeColorDialog *dialog = new BiomeColorDialog(this, config.biomeColorPath);
+    dialog->show();
 }
 
 void MainWindow::on_actionPresetLoad_triggered()

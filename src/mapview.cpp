@@ -135,6 +135,12 @@ void MapView::setConfig(const Config& c)
     update(2);
 }
 
+void MapView::refreshBiomeColors()
+{
+    if (world)
+        world->refreshBiomeColors();
+}
+
 void MapView::settingsToWorld()
 {
     if (!world)

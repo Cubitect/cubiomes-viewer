@@ -773,6 +773,7 @@ QToolButton:checked {
      <string>Map</string>
     </property>
     <addaction name="actionGo_to"/>
+    <addaction name="actionBiome_colors"/>
     <addaction name="actionScan_seed_for_Quad_Huts"/>
     <addaction name="actionOpen_shadow_seed"/>
    </widget>
@@ -901,6 +902,11 @@ QToolButton:checked {
   <action name="actionPresetLoad">
    <property name="text">
     <string>Load filter preset...</string>
+   </property>
+  </action>
+  <action name="actionBiome_colors">
+   <property name="text">
+    <string>Biome colors...</string>
    </property>
   </action>
  </widget>

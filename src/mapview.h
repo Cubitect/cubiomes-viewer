@@ -44,6 +44,7 @@ public:
     bool getShow(int stype) { return stype >= 0 && stype < STRUCT_NUM ? sshow[stype] : false; }
     void setShow(int stype, bool v);
     void setConfig(const Config& config);
+    void refreshBiomeColors();
 
     void timeout();
 

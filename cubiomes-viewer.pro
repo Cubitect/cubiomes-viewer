@@ -36,6 +36,7 @@ CONFIG += static
 
 SOURCES += \
         src/aboutdialog.cpp \
+        src/biomecolordialog.cpp \
         src/collapsible.cpp \
         src/conditiondialog.cpp \
         src/configdialog.cpp \
@@ -62,6 +63,7 @@ HEADERS += \
         $$CUPATH/layers.h \
         $$CUPATH/util.h \
         src/aboutdialog.h \
+        src/biomecolordialog.h \
         src/collapsible.h \
         src/conditiondialog.h \
         src/configdialog.h \
@@ -86,6 +88,7 @@ HEADERS += \
 
 FORMS += \
         src/aboutdialog.ui \
+        src/biomecolordialog.ui \
         src/conditiondialog.ui \
         src/configdialog.ui \
         src/extgendialog.ui \
