@@ -35,17 +35,19 @@ void MapOverlay::paintEvent(QPaintEvent *)
 }
 
 MapView::MapView(QWidget *parent)
-: QWidget(parent)
-, world()
-, decay(2.0)
-, blocks2pix(1.0/16)
-, focusx(),focusz()
-, prevx(),prevz()
-, velx(), velz()
-, holding()
-, mstart(),mprev()
-, updatecounter()
-, config()
+    : QWidget(parent)
+    , world()
+    , decay(2.0)
+    , blocks2pix(1.0/16)
+    , focusx(),focusz()
+    , prevx(),prevz()
+    , velx(), velz()
+    , mtime()
+    , holding()
+    , mstart(),mprev()
+    , updatecounter()
+    , layeropt(LOPT_DEFAULT_1)
+    , config()
 {
     memset(sshow, 0, sizeof(sshow));
 
@@ -87,23 +89,26 @@ void MapView::refresh()
         WorldInfo wi = world->wi;
         int dim = world->dim;
         delete world;
-        world = new QWorld(wi, dim);
+        world = new QWorld(wi, dim, layeropt);
     }
 }
 
-void MapView::setSeed(WorldInfo wi, int dim)
+void MapView::setSeed(WorldInfo wi, int dim, int lopt)
 {
     prevx = focusx = getX();
     prevz = focusz = getZ();
     velx = velz = 0;
+    if (lopt >= 0)
+        layeropt = lopt;
+
     if (world == NULL || !wi.equals(world->wi))
     {
         delete world;
-        world = new QWorld(wi, dim);
+        world = new QWorld(wi, dim, layeropt);
     }
-    else if (world->dim != dim)
+    else if (world->dim != dim || world->layeropt != layeropt)
     {
-        world->setDim(dim);
+        world->setDim(dim, layeropt);
     }
     settingsToWorld();
     update(2);
@@ -150,6 +155,7 @@ void MapView::settingsToWorld()
     world->showBB = config.showBBoxes;
     world->gridspacing = config.gridSpacing;
     world->memlimit = (uint64_t) config.mapCacheSize * 1024 * 1024;
+    world->layeropt = layeropt;
 }
 
 qreal MapView::getX()
@@ -257,6 +263,7 @@ void MapView::mousePressEvent(QMouseEvent *e)
         prevz = focusz = getZ();
         velx = 0;
         velz = 0;
+        mtime = 0;
         elapsed1.start();
         frameelapsed.start();
 

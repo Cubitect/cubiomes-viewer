@@ -540,6 +540,7 @@ void FormSearchControl::searchFinish(bool done)
     resultTimeout();
     if (done)
     {
+        ui->lineStart->setText(QString::asprintf("%" PRId64, sthread.smax));
         ui->progressBar->setValue(10000);
         ui->progressBar->setFormat(tr("Done", "Progressbar when finished"));
     }

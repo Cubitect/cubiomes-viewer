@@ -8,6 +8,7 @@
 #include "conditiondialog.h"
 #include "extgendialog.h"
 #include "biomecolordialog.h"
+#include "exportdialog.h"
 
 #if WITH_UPDATER
 #include "updater.h"
@@ -87,6 +88,15 @@ MainWindow::MainWindow(QWidget *parent)
     formCond = new FormConditions(this);
     formGen48 = new FormGen48(this);
     formControl = new FormSearchControl(this);
+
+    QList<QAction*> layeracts = ui->menuBiome_layer->actions();
+    for (int i = 0; i < layeracts.size(); i++)
+    {
+        connect(layeracts[i], &QAction::toggled,
+            [=](bool state) {
+                this->onActionBiomeLayerSelect(state, layeracts[i], i);
+            });
+    }
 
     QAction *toorigin = new QAction(QIcon(":/icons/origin.png"), "Goto origin", this);
     connect(toorigin, &QAction::triggered, [=](){ this->mapGoto(0,0,16); });
@@ -297,13 +307,12 @@ bool MainWindow::getSeed(WorldInfo *wi, bool applyrand)
     }
 
     wi->large = ui->checkLarge->isChecked();
-
     wi->y = ui->comboY->currentText().section(' ', 0, 0).toInt();
 
     return ok;
 }
 
-bool MainWindow::setSeed(WorldInfo wi, int dim)
+bool MainWindow::setSeed(WorldInfo wi, int dim, int layeropt)
 {
     const char *mcstr = mc2str(wi.mc);
     if (!mcstr)
@@ -326,7 +335,7 @@ bool MainWindow::setSeed(WorldInfo wi, int dim)
 
     ui->comboBoxMC->setCurrentText(mcstr);
     ui->seedEdit->setText(QString::asprintf("%" PRId64, (int64_t)wi.seed));
-    ui->mapView->setSeed(wi, dim);
+    ui->mapView->setSeed(wi, dim, layeropt);
 
     ui->checkLarge->setEnabled(wi.mc >= MC_1_3);
     ui->comboY->setEnabled(wi.mc >= MC_1_16);
@@ -951,6 +960,13 @@ void MainWindow::on_actionExtGen_triggered()
     }
 }
 
+void MainWindow::on_actionExportImg_triggered()
+{
+    ExportDialog *dialog = new ExportDialog(this);
+    dialog->show();
+}
+
+
 void MainWindow::on_mapView_customContextMenuRequested(const QPoint &pos)
 {
     QMenu menu(this);
@@ -1404,6 +1420,19 @@ void MainWindow::onActionMapToggled(int sopt, bool show)
     if (sopt == D_PORTAL) // overworld porals should also control nether
         ui->mapView->setShow(D_PORTALN, show);
     ui->mapView->setShow(sopt, show);
+}
+
+void MainWindow::onActionBiomeLayerSelect(bool state, QAction *src, int lopt)
+{
+    if (state == false)
+        return;
+    QList<QAction*> actions = ui->menuBiome_layer->actions();
+    for (QAction *act : actions)
+        if (act != src)
+            act->setChecked(false);
+    WorldInfo wi;
+    if (getSeed(&wi))
+        setSeed(wi, INT_MAX, lopt);
 }
 
 void MainWindow::onConditionsChanged()

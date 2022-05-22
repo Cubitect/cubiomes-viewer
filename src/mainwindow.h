@@ -47,7 +47,7 @@ public:
     QAction *addMapAction(int sopt, const char *iconpath, QString tip);
 
     bool getSeed(WorldInfo *wi, bool applyrand = true);
-    bool setSeed(WorldInfo wi, int dim = INT_MAX);
+    bool setSeed(WorldInfo wi, int dim = INT_MAX, int layeropt = -1);
     int getDim();
     MapView *getMapView();
     void setBiomeColorRc(QString rc);
@@ -86,6 +86,7 @@ private slots:
     void on_actionPaste_triggered();
     void on_actionAddShadow_triggered();
     void on_actionExtGen_triggered();
+    void on_actionExportImg_triggered();
 
     void on_mapView_customContextMenuRequested(const QPoint &pos);
 
@@ -102,6 +103,7 @@ private slots:
     // internal events
     void onAutosaveTimeout();
     void onActionMapToggled(int sopt, bool a);
+    void onActionBiomeLayerSelect(bool state, QAction *src, int lopt);
     void onConditionsChanged();
     void onGen48Changed();
     void onSelectedSeedChanged(uint64_t seed);

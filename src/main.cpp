@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include <QApplication>
+#include <QTranslator>
 
 #include "quad.h"
 
@@ -16,6 +17,10 @@ int main(int argc, char *argv[])
     initBiomeTypeColors(tempsColors);
 
     QApplication a(argc, argv);
+
+    QTranslator translator;
+    translator.load("en_US", ":/lang");
+    a.installTranslator(&translator);
 
     MainWindow mw;
     mw.show();

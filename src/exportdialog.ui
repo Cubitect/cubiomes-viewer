@@ -1,0 +1,439 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ExportDialog</class>
+ <widget class="QDialog" name="ExportDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>540</width>
+    <height>460</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Biome Export</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../rc/icons.qrc">
+    <normaloff>:/icons/map.png</normaloff>:/icons/map.png</iconset>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_3">
+   <item row="7" column="1" colspan="5">
+    <widget class="QGroupBox" name="groupTiled">
+     <property name="title">
+      <string>Split image into tiles</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_6">
+        <property name="text">
+         <string>Size of image tiles:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>Background color:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1" colspan="3">
+       <widget class="QComboBox" name="comboBackground">
+        <item>
+         <property name="text">
+          <string>Fill background by expanding area</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Transparent</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Black</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="0" column="1" colspan="3">
+       <widget class="QComboBox" name="comboTileSize">
+        <property name="currentIndex">
+         <number>5</number>
+        </property>
+        <item>
+         <property name="text">
+          <string>16x16</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>32x32</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>64x64</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>128x128</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>256x256</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>512x512</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>1024x1024</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>2048x2048</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>4096x4096</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="8" column="1" colspan="5">
+    <widget class="QGroupBox" name="groupSummary">
+     <property name="title">
+      <string>Resulting images</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_4">
+      <item row="2" column="1" colspan="3">
+       <widget class="QLabel" name="labelImgSize">
+        <property name="text">
+         <string>0x0</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1" colspan="3">
+       <widget class="QLabel" name="labelNumImg">
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_11">
+        <property name="text">
+         <string>Size of each image:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1" colspan="3">
+       <widget class="QLabel" name="labelNumSeeds">
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_8">
+        <property name="text">
+         <string>Number of images:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_1">
+        <property name="text">
+         <string>Number of seeds:</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="6" column="4" colspan="2">
+    <widget class="QPushButton" name="buttonFromVisible">
+     <property name="text">
+      <string>From visible</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="2" colspan="4">
+    <widget class="QLineEdit" name="linePattern">
+     <property name="text">
+      <string>%S_%x_%z.png</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="1" colspan="5">
+    <widget class="QLabel" name="label_9">
+     <property name="text">
+      <string>%S - seed; %x, %z - tile coordinates</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="3" colspan="3">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="2" colspan="4">
+    <widget class="QComboBox" name="comboSeed">
+     <item>
+      <property name="text">
+       <string>Current seed</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>From matching seeds list</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Export directory:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>Seed(s):</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="1" colspan="3">
+    <layout class="QHBoxLayout" name="layoutArea_2">
+     <item>
+      <widget class="QLabel" name="labelX1">
+       <property name="toolTip">
+        <string>Lower bound (inclusive)</string>
+       </property>
+       <property name="text">
+        <string>X&lt;sub&gt;1&lt;/sub&gt;=</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="lineEditX1">
+       <property name="toolTip">
+        <string>Lower bound (inclusive)</string>
+       </property>
+       <property name="text">
+        <string>0</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="labelZ1">
+       <property name="toolTip">
+        <string>Lower bound (inclusive)</string>
+       </property>
+       <property name="text">
+        <string>Z&lt;sub&gt;1&lt;/sub&gt;=</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="lineEditZ1">
+       <property name="toolTip">
+        <string>Lower bound (inclusive)</string>
+       </property>
+       <property name="text">
+        <string>0</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="labelX2">
+       <property name="toolTip">
+        <string>Upper bound (inclusive)</string>
+       </property>
+       <property name="text">
+        <string>X&lt;sub&gt;2&lt;/sub&gt;=</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="lineEditX2">
+       <property name="toolTip">
+        <string>Upper bound (inclusive)</string>
+       </property>
+       <property name="text">
+        <string>0</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="labelZ2">
+       <property name="toolTip">
+        <string>Upper bound (inclusive)</string>
+       </property>
+       <property name="text">
+        <string>Z&lt;sub&gt;2&lt;/sub&gt;=</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="lineEditZ2">
+       <property name="toolTip">
+        <string>Upper bound (inclusive)</string>
+       </property>
+       <property name="text">
+        <string>0</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="1" column="2" colspan="4">
+    <widget class="QComboBox" name="comboScale">
+     <item>
+      <property name="text">
+       <string>1:1</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>1:4</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>1:16</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>1:64</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>1:256</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QLabel" name="label_3">
+     <property name="text">
+      <string>Scale (pixel:blocks):</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="1">
+    <widget class="QLabel" name="label_4">
+     <property name="text">
+      <string>Area in blocks:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="2" colspan="3">
+    <widget class="QLineEdit" name="lineDir"/>
+   </item>
+   <item row="2" column="5">
+    <widget class="QPushButton" name="buttonDirSelect">
+     <property name="maximumSize">
+      <size>
+       <width>26</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>...</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QLabel" name="label_7">
+     <property name="text">
+      <string>File pattern:</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="../rc/icons.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>ExportDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>ExportDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

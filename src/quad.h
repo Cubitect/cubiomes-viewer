@@ -43,6 +43,21 @@ enum {
     STRUCT_NUM
 };
 
+enum {
+    LOPT_DEFAULT_1,
+    LOPT_DEFAULT_4,
+    LOPT_DEFAULT_16,
+    LOPT_DEFAULT_64,
+    LOPT_DEFAULT_256,
+    LOPT_RIVER_4,
+    LOPT_OCEAN_256,
+    LOPT_NOISE_C_4,
+    LOPT_NOISE_E_4,
+    LOPT_NOISE_W_4,
+    LOPT_NOISE_T_4,
+    LOPT_NOISE_H_4,
+};
+
 inline const char *mapopt2str(int opt)
 {
     switch (opt)
@@ -182,7 +197,7 @@ struct Level
     Level();
     ~Level();
 
-    void init4map(QWorld *w, int dim, int pix, int layerscale);
+    void init4map(QWorld *w, int pix, int layerscale);
     void init4struct(QWorld *w, int dim, int blocks, int sopt, int viewlv);
 
     void resizeLevel(std::vector<Quad*>& cache, int x, int z, int w, int h);
@@ -205,12 +220,12 @@ struct Level
 
 struct QWorld
 {
-    QWorld(WorldInfo wi, int dim = 0);
+    QWorld(WorldInfo wi, int dim = 0, int layeropt = LOPT_DEFAULT_1);
     ~QWorld();
 
     void clearPool();
 
-    void setDim(int dim);
+    void setDim(int dim, int layeropt);
 
     void cleancache(std::vector<Quad*>& cache, unsigned int maxsize);
 
@@ -222,13 +237,14 @@ struct QWorld
 
     WorldInfo wi;
     int dim;
+    int layeropt;
     Generator g;
 
     // the visible area is managed in Quads of different scales (for biomes and structures),
     // which are managed in rectangular sections as levels
     std::vector<Level> lvb;     // levels for biomes
     std::vector<Level> lvs;     // levels for structures
-    int activelv;               // currently visible level
+    int activelv;
 
     // processed Quads are cached until they are too far out of view
     std::vector<Quad*> cachedbiomes;

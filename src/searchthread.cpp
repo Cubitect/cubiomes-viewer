@@ -386,18 +386,19 @@ void SearchMaster::presearch()
             if (idx == scnt)
                 idx = 0;
             seed = slist[idx];
+            smax = slist.back();
             prog = idx;
         }
         else
         {   // slist should not be empty for a meaningful list search
-            scnt = ~(uint64_t)0;
+            scnt = smax = ~(uint64_t)0;
             prog = seed = sstart;
             idx = 0;
         }
     }
 
     if (searchtype == SEARCH_INC)
-    {
+    {   // smin & smax are given by user
         if (!slist.empty())
         {   // incremental search with a 48-bit list (incl. quad-searches)
             seed = sstart;
@@ -455,10 +456,11 @@ void SearchMaster::presearch()
                 seed = (sstart & ~MASK48) | slist[idx];
                 prog = 0x10000 * idx + (seed >> 48);
             }
+            smax = slist.back() | (0xffffULL << 48);
         }
         else
         {
-            scnt = ~(uint64_t)0;
+            scnt = smax = ~(uint64_t)0;
             seed = sstart;
             prog = (seed << 16) | (seed >> 48);
         }
@@ -507,7 +509,7 @@ void SearchMaster::stop()
     // clear event loop of currently running signals (such as results triggers)
     QApplication::processEvents();
 
-    for (long stop_ms = 5; ; stop_ms *= 6)
+    for (long stop_ms = 300; ; stop_ms *= 5)
     {
         QElapsedTimer timer;
         timer.start();
@@ -522,11 +524,16 @@ void SearchMaster::stop()
         if (!running)
             break;
         int button = 0;
+        Qt::ConnectionType connectiontype = Qt::BlockingQueuedConnection;
+        if (QThread::currentThread() == QApplication::instance()->thread())
+        {   // main thread would deadlock with a blocking connection
+            connectiontype = Qt::DirectConnection;
+        }
         QMetaObject::invokeMethod(
-                parent, "warning", Qt::BlockingQueuedConnection,
+                parent, "warning", connectiontype,
                 Q_RETURN_ARG(int, button),
                 Q_ARG(QString, tr("Failed to stop %n worker thread(s).\n"
-                "Keep waiting for threads to stop?.", "", running)),
+                "Keep waiting for threads to stop?", "", running)),
                 Q_ARG(QMessageBox::StandardButtons, QMessageBox::No|QMessageBox::Yes));
         if (button != QMessageBox::Yes)
             break;
@@ -620,7 +627,7 @@ bool SearchMaster::requestItem(SearchWorker *item)
         }
         else
         {
-            // seed += itemsizee; with overflow detection
+            // seed += itemsize; with overflow detection
             uint64_t s = seed + itemsize;
             if (s < seed)
                 isdone = true; // overflow

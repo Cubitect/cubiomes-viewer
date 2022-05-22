@@ -38,7 +38,7 @@ public:
 
     void deleteWorld();
     void refresh();
-    void setSeed(WorldInfo wi, int dim);
+    void setSeed(WorldInfo wi, int dim, int layeropt = -1);
     void setView(qreal x, qreal z, qreal scale = 0);
 
     bool getShow(int stype) { return stype >= 0 && stype < STRUCT_NUM ? sshow[stype] : false; }
@@ -89,6 +89,7 @@ private:
     int updatecounter;
 
     bool sshow[STRUCT_NUM];
+    int layeropt;
     Config config;
 };
 

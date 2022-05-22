@@ -6,7 +6,7 @@
 
 #define VERS_MAJOR 2
 #define VERS_MINOR 2
-#define VERS_PATCH -2   // negative patch number designates a development version
+#define VERS_PATCH -3   // negative patch number designates a development version
 
 // returns +1 if newer, -1 if older  and 0 if equal
 inline int cmpVers(int major, int minor, int patch)

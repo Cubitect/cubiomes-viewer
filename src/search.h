@@ -129,8 +129,9 @@ static const struct FilterList
             CAT_HELPER, 0, 0, 0, 0, 0, 0, 1, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
             ":icons/helper.png",
             _("OR logic gate"),
-            _("This helper is satisfied iff any of the conditions which use it "
-            "for a relative reference are met.")
+            _("Evaluates as true if any of the conditions that reference it "
+            "(by relative location) are met. If no referencing conditions are "
+            "defined, it also evaluates as true.")
         };
         list[F_SCALE_TO_NETHER] = FilterInfo{
             CAT_HELPER, 0, 0, 0, 0, 0, 0, 1, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,

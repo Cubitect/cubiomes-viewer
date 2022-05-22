@@ -41,6 +41,7 @@ SOURCES += \
         src/conditiondialog.cpp \
         src/configdialog.cpp \
         src/extgendialog.cpp \
+        src/exportdialog.cpp \
         src/formconditions.cpp \
         src/formgen48.cpp \
         src/formsearchcontrol.cpp \
@@ -68,6 +69,7 @@ HEADERS += \
         src/conditiondialog.h \
         src/configdialog.h \
         src/extgendialog.h \
+        src/exportdialog.h \
         src/formconditions.h \
         src/formgen48.h \
         src/formsearchcontrol.h \
@@ -92,6 +94,7 @@ FORMS += \
         src/conditiondialog.ui \
         src/configdialog.ui \
         src/extgendialog.ui \
+        src/exportdialog.ui \
         src/formconditions.ui \
         src/formgen48.ui \
         src/formsearchcontrol.ui \
@@ -102,10 +105,36 @@ FORMS += \
         src/mainwindow.ui \
         src/rangedialog.ui
 
+
+TRANSLATIONS += \
+        rc/lang/en_US.ts
+
 RESOURCES += \
         rc/icons.qrc \
         rc/style.qrc \
-        rc/examples.qrc
+        rc/examples.qrc \
+        rc/lang.qrc
+
+
+# ----- translations -----
+
+!without_translation: {
+    # automatically run lupdate for pluralization default translation
+    THIS_FILE = cubiomes-viewer.pro
+    lupdate.input       = THIS_FILE
+    lupdate.output      = output.dummy.1 # removed by clean
+    lupdate.commands    = $$[QT_INSTALL_BINS]/lupdate -pluralonly -noobsolete ${QMAKE_FILE_IN}
+    lupdate.CONFIG     += no_link target_predeps
+
+    lrelease.input      = TRANSLATIONS
+    lrelease.output     = output.dummy.2 # removed by clean
+    lrelease.commands   = $$[QT_INSTALL_BINS]/lrelease ${QMAKE_FILE_IN} \
+                            -qm ${QMAKE_FILE_PATH}/${QMAKE_FILE_IN_BASE}.qm
+    lrelease.CONFIG    += no_link target_predeps
+
+    QMAKE_EXTRA_COMPILERS += lupdate lrelease
+    #CONFIG += lrelease embed_translations # does this do anything?
+}
 
 
 # enable network features with: qmake CONFIG+=with_network

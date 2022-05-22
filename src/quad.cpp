@@ -8,9 +8,6 @@
 #include <algorithm>
 
 
-#define SEAM_BUF 8
-
-
 Quad::Quad(const Level* l, int i, int j)
     : wi(l->wi),dim(l->dim),g(&l->g),scale(l->scale)
     , ti(i),tj(j),blocks(l->blocks),pixs(l->pixs),sopt(l->sopt)
@@ -114,8 +111,9 @@ void Quad::run()
 
     if (pixs > 0)
     {
+        int seam_buf = pixs / 128;
         int y = (scale > 1) ? wi.y >> 2 : wi.y;
-        int x = ti*pixs, z = tj*pixs, w = pixs+SEAM_BUF, h = pixs+SEAM_BUF;
+        int x = ti*pixs, z = tj*pixs, w = pixs+seam_buf, h = pixs+seam_buf;
         Range r = {scale, x, z, w, h, y, 1};
         biomes = allocCache(g, r);
         if (!biomes) return;
@@ -141,7 +139,7 @@ void Quad::run()
         biomesToImage(rgb, biomeColors, biomes, w, h, 1, 1);
         img = new QImage(rgb, w, h, 3*w, QImage::Format_RGB888);
     }
-    else
+    else if (pixs < 0)
     {
         int structureType = mapopt2stype(sopt);
         if (structureType >= 0)
@@ -175,20 +173,53 @@ Level::~Level()
 }
 
 
-void Level::init4map(QWorld *w, int dim, int pix, int layerscale)
+void Level::init4map(QWorld *w, int pix, int layerscale)
 {
     this->wi = w->wi;
-    this->dim = dim;
+    this->dim = w->dim;
 
     tx = tz = tw = th = 0;
+
     scale = layerscale;
     pixs = pix;
     blocks = pix * layerscale;
-    sopt = D_NONE;
 
-    setupGenerator(&g, wi.mc, wi.large | FORCE_OCEAN_VARIANTS);
+    int optlscale = 1;
+    switch (w->layeropt)
+    {
+    case LOPT_RIVER_4:
+    case LOPT_DEFAULT_4:    optlscale = 4; break;
+    case LOPT_DEFAULT_16:   optlscale = 16; break;
+    case LOPT_DEFAULT_64:   optlscale = 64; break;
+    case LOPT_OCEAN_256:
+    case LOPT_DEFAULT_256:  optlscale = 256; break;
+    }
+    if (layerscale < optlscale) {
+        int f = optlscale / layerscale;
+        scale *= f;
+        pixs /= f;
+        if (pixs == 0)
+            pixs = 1;
+    }
+
+    if (w->layeropt == LOPT_RIVER_4 && wi.mc >= MC_1_13 && wi.mc <= MC_1_17)
+    {
+        setupGenerator(&g, wi.mc, wi.large);
+        g.ls.entry_4 = &g.ls.layers[L_RIVER_MIX_4];
+    }
+    else if (w->layeropt == LOPT_OCEAN_256 && wi.mc >= MC_1_13 && wi.mc <= MC_1_17)
+    {
+        setupGenerator(&g, wi.mc, wi.large);
+        g.ls.entry_256 = &g.ls.layers[L_OCEAN_TEMP_256];
+    }
+    else
+    {
+        setupGenerator(&g, wi.mc, wi.large | FORCE_OCEAN_VARIANTS);
+    }
+
     applySeed(&g, dim, wi.seed);
     this->isdel = &w->isdel;
+    sopt = D_NONE;
 }
 
 void Level::init4struct(QWorld *w, int dim, int blocks, int sopt, int lv)
@@ -310,9 +341,10 @@ void Level::update(std::vector<Quad*>& cache, qreal bx0, qreal bz0, qreal bx1, q
 }
 
 
-QWorld::QWorld(WorldInfo wi, int dim)
+QWorld::QWorld(WorldInfo wi, int dim, int layeropt)
     : wi(wi)
     , dim(dim)
+    , layeropt(layeropt)
     , lvb()
     , lvs()
     , activelv()
@@ -338,11 +370,9 @@ QWorld::QWorld(WorldInfo wi, int dim)
 {
     setupGenerator(&g, wi.mc,  wi.large);
 
-    activelv = 0;
-
     memlimit = 256ULL * 1024*1024;
 
-    setDim(dim);
+    setDim(dim, layeropt);
 
     lvs.resize(D_SPAWN);
     lvs[D_DESERT]       .init4struct(this, 0, 2048, D_DESERT, 2);
@@ -415,10 +445,18 @@ void QWorld::clearPool()
     isdel = false;
 }
 
-void QWorld::setDim(int dim)
+void QWorld::setDim(int dim, int layeropt)
 {
     clearPool();
+    if (this->layeropt != layeropt)
+    {
+        for (Level& l : lvb)
+            l.resizeLevel(cachedbiomes, 0, 0, 0, 0);
+        cleancache(cachedbiomes, 0);
+    }
+
     this->dim = dim;
+    this->layeropt = layeropt;
     applySeed(&g, dim, wi.seed);
 
     // cache existing quads
@@ -439,7 +477,7 @@ void QWorld::setDim(int dim)
     if (g.mc >= MC_1_18)
     {
         pixs = 128;
-        qual = 1.7;
+        qual = 2.0;
     }
     else
     {
@@ -447,31 +485,46 @@ void QWorld::setDim(int dim)
         qual = 1.0;
     }
 
+    activelv = -1;
     lvb.clear();
 
     if (dim == 0)
     {
         lvb.resize(5);
-        lvb[0].init4map(this, dim, pixs, 1);
-        lvb[1].init4map(this, dim, pixs, 4);
-        lvb[2].init4map(this, dim, pixs, 16);
-        lvb[3].init4map(this, dim, pixs, 64);
-        lvb[4].init4map(this, dim, pixs, 256);
+        lvb[0].init4map(this, pixs, 1);
+        lvb[1].init4map(this, pixs, 4);
+        lvb[2].init4map(this, pixs, 16);
+        lvb[3].init4map(this, pixs, 64);
+        lvb[4].init4map(this, pixs, 256);
     }
     else
     {
         lvb.resize(4);
-        lvb[0].init4map(this, dim, pixs, 1);
-        lvb[1].init4map(this, dim, pixs, 4);
-        lvb[2].init4map(this, dim, pixs, 16);
-        lvb[3].init4map(this, dim, pixs, 64);
+        lvb[0].init4map(this, pixs, 1);
+        lvb[1].init4map(this, pixs, 4);
+        lvb[2].init4map(this, pixs, 16);
+        lvb[3].init4map(this, pixs, 64);
     }
 }
 
 
 int QWorld::getBiome(Pos p)
 {
-    int id = getBiomeAt(&g, 1, p.x, wi.y, p.z);
+    Generator *g = &this->g;
+    int scale = 1;
+    int y = wi.y;
+
+    if (activelv >= 0 && activelv < (int)lvb.size())
+    {
+        g = &lvb[activelv].g;
+        scale = lvb[activelv].blocks / lvb[activelv].pixs;
+        p.x = p.x / scale - (p.x < 0);
+        p.z = p.z / scale - (p.z < 0);
+        if (scale != 1)
+            y /= 4;
+    }
+
+    int id = getBiomeAt(g, scale, p.x, y, p.z);
     return id;
 }
 
@@ -610,12 +663,13 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
     qreal bx1 = focusx + uiw/2;
     qreal bz1 = focusz + uih/2;
 
-    if      (blocks2pix >= qual)     activelv = -1;
-    else if (blocks2pix >= qual/4)   activelv = 0;
-    else if (blocks2pix >= qual/16)  activelv = 1;
-    else if (blocks2pix >= qual/64)  activelv = 2;
-    else if (blocks2pix >= qual/256) activelv = 3;
-    else activelv = lvb.size()-1;
+    // determine the active level, which represents a scale resolution of:
+    // [0] 1:1, [1] 1:4, [2] 1:16, [3] 1:64, [4] 1:256
+    qreal imgres = qual;
+    for (activelv = 0; activelv < (int)lvb.size(); activelv++, imgres /= 4)
+        if (blocks2pix > imgres)
+            break;
+    activelv--;
 
     for (int li = activelv+1; li >= activelv; --li)
     {
@@ -631,7 +685,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
             qreal px = vw/2.0 + (q->ti) * ps - focusx * blocks2pix;
             qreal pz = vh/2.0 + (q->tj) * ps - focusz * blocks2pix;
             // account for the seam buffer pixels
-            ps += ((SEAM_BUF)*q->blocks / (qreal)q->pixs) * blocks2pix;
+            ps += ((q->pixs / 128) * q->blocks / (qreal)q->pixs) * blocks2pix;
             QRect rec(px,pz,ps,ps);
             painter.drawImage(rec, *q->img);
 
@@ -932,11 +986,25 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
         painter.drawPixmap(iconrec.translated(pad,pad), *icon);
     }
 
-    int pixs = lvb[0].pixs + SEAM_BUF;
+    if (activelv < 0)
+        activelv = 0;
+    if (activelv >= (int)lvb.size()-1)
+        activelv = lvb.size() - 1;
+    int pixs = lvb[activelv].pixs + lvb[activelv].pixs / 128;
     unsigned int cachesize = memlimit / pixs / pixs / 7; // sizeof(RGB) + sizeof(biome_id)
 
     cleancache(cachedbiomes, cachesize);
     cleancache(cachedstruct, cachesize);
+
+    if (0)
+    {   // debug outline
+        qreal rx0 = vw/2.0 + (bx0 - focusx) * blocks2pix;
+        qreal rz0 = vh/2.0 + (bz0 - focusz) * blocks2pix;
+        qreal rx1 = vw/2.0 + (bx1 - focusx) * blocks2pix;
+        qreal rz1 = vh/2.0 + (bz1 - focusz) * blocks2pix;
+        painter.setPen(QPen(QColor(255, 0, 0, 255), 1));
+        painter.drawRect(QRect(rx0, rz0, rx1-rx0, rz1-rz0));
+    }
 }
 
 
