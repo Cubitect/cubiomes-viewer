@@ -105,7 +105,7 @@
 Keep waiting for threads to stop?</source>
         <translation>
             <numerusform>Failed to stop %n worker thread.
-Keep waiting for threads to stop?</numerusform>
+Keep waiting for thread to stop?</numerusform>
             <numerusform>Failed to stop %n worker threads.
 Keep waiting for threads to stop?</numerusform>
         </translation>
