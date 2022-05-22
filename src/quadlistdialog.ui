@@ -177,6 +177,11 @@
        </property>
        <item>
         <property name="text">
+         <string>1.19</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
          <string>1.18</string>
         </property>
        </item>
