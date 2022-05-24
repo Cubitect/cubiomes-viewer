@@ -666,6 +666,7 @@ L_qm_any:
     case F_TREASURE:
     case F_PORTAL:
     case F_PORTALN:
+    case F_ANCIENT_CITY:
 
     case F_FORTRESS:
     case F_BASTION:

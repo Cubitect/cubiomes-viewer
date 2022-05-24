@@ -38,9 +38,7 @@ struct ExportWorker : QRunnable
         Generator g;
         setupGenerator(&g, mt->wi.mc, mt->wi.large | FORCE_OCEAN_VARIANTS);
         applySeed(&g, mt->dim, seed);
-
-        int y = (mt->scale == 1 ? mt->y : mt->y >> 2);
-        Range r = {mt->scale, mt->x, mt->z, mt->w, mt->h, y, 1};
+        Range r = {mt->scale, mt->x, mt->z, mt->w, mt->h, mt->y, 1};
 
         if (mt->tilesize > 0)
         {
