@@ -7,8 +7,102 @@
 
 #include <QIntValidator>
 #include <QFileDialog>
-#include <QDir>
 #include <QSettings>
+#include <QRunnable>
+#include <QProgressDialog>
+
+
+struct ExportWorker : QRunnable
+{
+    ExportThread *mt;
+    uint64_t seed;
+    int tx, tz;
+    QString fnam;
+
+    ExportWorker(ExportThread *master) : mt(master) {}
+    bool init(uint64_t seed, int tx, int tz)
+    {
+        this->seed = seed;
+        this->tx = tx;
+        this->tz = tz;
+        fnam = mt->pattern;
+        fnam.replace("%S", QString::number(seed));
+        fnam.replace("%x", QString::number(tx));
+        fnam.replace("%z", QString::number(tz));
+        fnam = mt->dir.filePath(fnam);
+        return QFileInfo(fnam).exists();
+    }
+
+    void run()
+    {
+        Generator g;
+        setupGenerator(&g, mt->wi.mc, mt->wi.large | FORCE_OCEAN_VARIANTS);
+        applySeed(&g, mt->dim, seed);
+
+        int y = (mt->scale == 1 ? mt->y : mt->y >> 2);
+        Range r = {mt->scale, mt->x, mt->z, mt->w, mt->h, y, 1};
+
+        if (mt->tilesize > 0)
+        {
+            r.x = tx * mt->tilesize;
+            r.z = tz * mt->tilesize;
+            r.sx = r.sz = mt->tilesize;
+        }
+
+        int *ids = allocCache(&g, r);
+        genBiomes(&g, ids, r);
+
+        uchar *rgb = new uchar[r.sx * r.sz * 3];
+        enum { BG_NONE, BG_TRANSP, BG_BLACK };
+        biomesToImage(rgb, biomeColors, ids, r.sx, r.sz, 1, 1);
+
+        QImage img(rgb, r.sx, r.sz, 3*r.sx, QImage::Format_RGB888);
+
+        if (mt->tilesize > 0 && mt->bgmode != BG_NONE)
+        {   // TODO: only generate needed sections
+            QColor bg = QColor(Qt::black);
+            if (mt->bgmode == BG_TRANSP)
+            {
+                bg = QColor(Qt::transparent);
+                img = img.convertToFormat(QImage::Format_RGBA8888, Qt::AutoColor);
+            }
+            int zh = mt->z + mt->h;
+            int xw = mt->x + mt->w;
+            for (int j = 0; j < r.sz; j++)
+            {
+                for (int i = 0; i < r.sx; i++)
+                {
+                    if (r.z+j < mt->z || r.z+j >= zh || r.x+i < mt->x || r.x+i >= xw)
+                        img.setPixelColor(i, j, bg);
+                }
+            }
+        }
+
+        img.save(fnam);
+        free(ids);
+        delete [] rgb;
+    }
+};
+
+ExportThread::~ExportThread()
+{
+    for (ExportWorker* worker : workers)
+        delete worker;
+}
+
+void ExportThread::run()
+{
+    for (ExportWorker *& worker : workers)
+    {
+        //pool.start(worker);
+        worker->run();
+        emit workerDone();
+        if (stop)
+            break;
+    }
+    //pool.waitForDone();
+    deleteLater();
+}
 
 
 static void setCombo(QComboBox *cb, const char *setting)
@@ -32,10 +126,14 @@ ExportDialog::ExportDialog(MainWindow *parent)
     ui->lineEditX2->setValidator(intval);
     ui->lineEditZ2->setValidator(intval);
 
-    connect(ui->lineEditX1, &QLineEdit::editingFinished, this, &ExportDialog::update);
-    connect(ui->lineEditZ1, &QLineEdit::editingFinished, this, &ExportDialog::update);
-    connect(ui->lineEditX2, &QLineEdit::editingFinished, this, &ExportDialog::update);
-    connect(ui->lineEditZ2, &QLineEdit::editingFinished, this, &ExportDialog::update);
+    connect(ui->lineEditX1, SIGNAL(editingFinished()), this, SLOT(update()));
+    connect(ui->lineEditZ1, SIGNAL(editingFinished()), this, SLOT(update()));
+    connect(ui->lineEditX2, SIGNAL(editingFinished()), this, SLOT(update()));
+    connect(ui->lineEditZ2, SIGNAL(editingFinished()), this, SLOT(update()));
+    connect(ui->comboSeed, SIGNAL(activated(int)), this, SLOT(update()));
+    connect(ui->comboScale, SIGNAL(activated(int)), this, SLOT(update()));
+    connect(ui->comboTileSize, SIGNAL(activated(int)), this, SLOT(update()));
+    connect(ui->groupTiled, SIGNAL(toggled(bool)), this, SLOT(update()));
 
     QSettings settings("cubiomes-viewer", "cubiomes-viewer");
 
@@ -97,26 +195,6 @@ void ExportDialog::update()
     }
 }
 
-void ExportDialog::on_comboSeed_activated(int)
-{
-    update();
-}
-
-void ExportDialog::on_comboScale_activated(int)
-{
-    update();
-}
-
-void ExportDialog::on_comboTileSize_activated(int)
-{
-    update();
-}
-
-void ExportDialog::on_groupTiled_toggled(bool)
-{
-    update();
-}
-
 void ExportDialog::on_buttonFromVisible_clicked()
 {
     MapView *mapView = mainwindow->getMapView();
@@ -140,47 +218,14 @@ void ExportDialog::on_buttonFromVisible_clicked()
 void ExportDialog::on_buttonDirSelect_clicked()
 {
     QString dir = QFileDialog::getExistingDirectory(
-                this, tr("Select Export Directory"),
-                ui->lineDir->text(),
-                QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+            this, tr("Select Export Directory"),
+            ui->lineDir->text(),
+            QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
     if (dir.isEmpty())
         return;
     ui->lineDir->setText(dir);
 }
 
-int ExportDialog::saveimg(QString dir, QString pattern, uint64_t seed, int tx, int tz, QImage *img)
-{
-    QString fnam = pattern;
-    fnam.replace("%S", QString::number(seed));
-    fnam.replace("%x", QString::number(tx));
-    fnam.replace("%z", QString::number(tz));
-    fnam = QDir(dir).filePath(fnam);
-
-    QFileInfo finfo(fnam);
-    if (img)
-    {
-        if (!img->save(fnam))
-        {
-            QMessageBox::warning(this, tr("Warning"),
-                    tr("Error while saving image."));
-            return 2;
-        }
-    }
-    else
-    {
-        if (finfo.exists())
-        {
-            int button = QMessageBox::warning(this, tr("Warning"),
-                    tr("One or more of files already exist.\n"
-                       "Continue and overwrite?"),
-                    QMessageBox::Cancel | QMessageBox::Yes);
-            if (button == QMessageBox::Cancel)
-                return 2;
-            return 1;
-        }
-    }
-    return 0;
-}
 
 void ExportDialog::on_buttonBox_clicked(QAbstractButton *button)
 {
@@ -189,11 +234,9 @@ void ExportDialog::on_buttonBox_clicked(QAbstractButton *button)
     if (b == QDialogButtonBox::Ok)
     {
         int seedmode = ui->comboSeed->currentIndex();
-        QString dir = ui->lineDir->text();
         QString pattern = ui->linePattern->text();
         bool tiled = ui->groupTiled->isChecked();
 
-        int dim = mainwindow->getDim();
         WorldInfo wi;
         mainwindow->getSeed(&wi, true);
 
@@ -219,9 +262,6 @@ void ExportDialog::on_buttonBox_clicked(QAbstractButton *button)
             return;
         }
 
-        Generator g;
-        setupGenerator(&g, wi.mc, wi.large);// | FORCE_OCEAN_VARIANTS);
-
         int s = 2 * ui->comboScale->currentIndex();
         int x0 = ui->lineEditX1->text().toInt() >> s;
         int z0 = ui->lineEditZ1->text().toInt() >> s;
@@ -231,38 +271,38 @@ void ExportDialog::on_buttonBox_clicked(QAbstractButton *button)
 
         if (x1 <= x0 || z1 <= z0)
         {
-            QMessageBox::warning(this, tr("Warning"),
-                    tr("Invalid area."));
+            QMessageBox::warning(this, tr("Warning"), tr("Invalid area."));
             return;
         }
 
+        ExportThread *master = new ExportThread(mainwindow);
+        master->dir = QDir(ui->lineDir->text());
+        master->pattern = pattern;
+        master->wi = wi;
+        master->dim = mainwindow->getDim();
+        master->scale = 1 << s;
+        master->x = x0;
+        master->z = z0;
+        master->w = x1 - x0;
+        master->h = z1 - z0;
+        master->y = y;
+        master->tilesize = -1;
+        master->bgmode = 0;
+
+        QVector<ExportWorker*> workers;
+        bool existwarn = false;
+
         if (tiled)
         {
+            int bgmode = ui->comboBackground->currentIndex();
             int tilesize = ui->comboTileSize->currentText().section('x', 0, 0).toInt();
             int tx0 = (int) floor(x0 / (qreal)tilesize);
             int tz0 = (int) floor(z0 / (qreal)tilesize);
             int tx1 = (int) ceil(x1 / (qreal)tilesize);
             int tz1 = (int) ceil(z1 / (qreal)tilesize);
 
-            for (uint64_t seed : seeds)
-            {
-                for (int x = tx0; x < tx1; x++)
-                {
-                    for (int z = tz0; z < tz1; z++)
-                    {
-                        int st = saveimg(dir, pattern, seed, x, z, nullptr);
-                        if (st == 2)
-                            return;
-                        if (st == 1)
-                            goto L_tiles_contin;
-                    }
-                }
-            }
-
-        L_tiles_contin:
-            uchar *rgb = new uchar[tilesize * tilesize * 3];
-            enum { BG_NONE, BG_TRANSP, BG_BLACK };
-            int bgmode = ui->comboBackground->currentIndex();
+            master->tilesize = tilesize;
+            master->bgmode = bgmode;
 
             for (uint64_t seed : seeds)
             {
@@ -270,84 +310,57 @@ void ExportDialog::on_buttonBox_clicked(QAbstractButton *button)
                 {
                     for (int z = tz0; z < tz1; z++)
                     {
-                        Range r = {1 << s, x * tilesize, z * tilesize, tilesize, tilesize, y, 1};
-                        applySeed(&g, dim, seed);
-
-                        int *ids = allocCache(&g, r);
-                        genBiomes(&g, ids, r);
-                        biomesToImage(rgb, biomeColors, ids, tilesize, tilesize, 1, 1);
-
-                        QImage img(rgb, tilesize, tilesize, 3*tilesize, QImage::Format_RGB888);
-
-                        if (bgmode != BG_NONE)
-                        {
-                            QColor bg = QColor(Qt::black);
-                            if (bgmode == BG_TRANSP)
-                            {
-                                bg = QColor(Qt::transparent);
-                                img = img.convertToFormat(QImage::Format_RGBA8888, Qt::AutoColor);
-                            }
-                            for (int j = 0; j < r.sz; j++)
-                            {
-                                for (int i = 0; i < r.sx; i++)
-                                    if (r.z+j < z0 || r.z+j > z1 || r.x+i < x0 || r.x+i > x1)
-                                        img.setPixelColor(i, j, bg);
-                            }
-                        }
-
-                        int err = saveimg(dir, pattern, seed, x, z, &img);
-                        free(ids);
-                        if (err)
-                            goto L_tiles_cleanup;
+                        ExportWorker *worker = new ExportWorker(master);
+                        existwarn |= worker->init(seed, x, z);
+                        workers.push_back(worker);
                     }
                 }
             }
-
-        L_tiles_cleanup:
-            delete[] rgb;
         }
         else
         {
             int maxsiz = 0x8000;
-            int w = x1 - x0, h = z1 - z0;
-            if (w >= maxsiz || h >= maxsiz)
+            if (x1 - x0 >= maxsiz || z1 - z0 >= maxsiz)
             {
                 int button = QMessageBox::warning(this, tr("Warning"),
                         tr("Consider tiling very large images into smaller sections.\n"
                            "Continue?"),
                         QMessageBox::Cancel | QMessageBox::Yes);
                 if (button == QMessageBox::Cancel)
+                {
+                    delete master;
                     return;
+                }
             }
 
             for (uint64_t seed : seeds)
             {
-                if (saveimg(dir, pattern, seed, 0, 0, nullptr))
-                    return;
+                ExportWorker *worker = new ExportWorker(master);
+                existwarn |= worker->init(seed, 0, 0);
+                workers.push_back(worker);
             }
+        }
 
-            Range r = {1 << s, x0, z0, w, h, y, 1};
-            int *ids = allocCache(&g, r);
-            uchar *rgb = new uchar[r.sx * r.sz * 3];
-
-            for (uint64_t seed : seeds)
+        if (existwarn)
+        {
+            int button = QMessageBox::warning(this, tr("Warning"),
+                    tr("One or more of files already exist.\n"
+                       "Continue and overwrite?"),
+                    QMessageBox::Cancel | QMessageBox::Yes);
+            if (button == QMessageBox::Cancel)
             {
-                applySeed(&g, dim, seed);
-                genBiomes(&g, ids, r);
-                biomesToImage(rgb, biomeColors, ids, r.sx, r.sz, 1, 1);
-                QImage img(rgb, r.sx, r.sz, 3*r.sx, QImage::Format_RGB888);
-                if (saveimg(dir, pattern, seed, 0, 0, &img))
-                    break;
+                for (ExportWorker *worker : workers)
+                    delete worker;
+                workers.clear();
+                delete master;
+                return;
             }
-
-            delete[] rgb;
-            free(ids);
         }
 
         QSettings settings("cubiomes-viewer", "cubiomes-viewer");
         settings.setValue("export/seedIdx", ui->comboSeed->currentIndex());
-        settings.setValue("export/prevdir", dir);
-        settings.setValue("export/pattern", pattern);
+        settings.setValue("export/prevdir", ui->lineDir->text());
+        settings.setValue("export/pattern", ui->linePattern->text());
         settings.setValue("export/scaleIdx", ui->comboScale->currentIndex());
         settings.setValue("export/x0", ui->lineEditX1->text());
         settings.setValue("export/z0", ui->lineEditZ1->text());
@@ -356,5 +369,22 @@ void ExportDialog::on_buttonBox_clicked(QAbstractButton *button)
         settings.setValue("export/tiled", ui->groupTiled->isChecked());
         settings.setValue("export/tileSizeIdx", ui->comboTileSize->currentIndex());
         settings.setValue("export/bgIdx", ui->comboBackground->currentIndex());
+
+        QProgressDialog *progress = new QProgressDialog(
+            tr("Export biome images..."), tr("Abort"), 0, workers.size(), mainwindow);
+        progress->setValue(0);
+
+        connect(progress, &QProgressDialog::canceled, master, &ExportThread::cancel);
+        connect(master, &ExportThread::finished, progress, &QProgressDialog::close);
+        connect(master, &ExportThread::workerDone, progress,
+            [=]() { progress->setValue(progress->value() + 1); },
+            Qt::QueuedConnection);
+
+        progress->show();
+        master->workers = workers;
+        master->start();
     }
 }
+
+
+

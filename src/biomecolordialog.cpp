@@ -52,12 +52,15 @@ BiomeColorDialog::BiomeColorDialog(MainWindow *parent, QString initrc)
 
 
     QPushButton *button;
+    ui->gridLayout->setSpacing(2);
+    QPixmap alignicon(14, 14);
+    alignicon.fill(Qt::transparent);
 
-    button = new QPushButton(QIcon(), tr("All to default"), this);
+    button = new QPushButton(QIcon(alignicon), tr("All to default"), this);
     connect(button, &QPushButton::clicked, this, &BiomeColorDialog::onAllToDefault);
     ui->gridLayout->addWidget(button, 0, 1);
 
-    button = new QPushButton(QIcon(), tr("All to dimmed"), this);
+    button = new QPushButton(QIcon(alignicon), tr("All to dimmed"), this);
     connect(button, &QPushButton::clicked, this, &BiomeColorDialog::onAllToDimmed);
     ui->gridLayout->addWidget(button, 0, 2);
 

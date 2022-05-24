@@ -3,11 +3,51 @@
 
 #include <QDialog>
 #include <QAbstractButton>
+#include <QVector>
+#include <QThreadPool>
+#include <QThread>
+#include <QDir>
+
+#include "settings.h"
 
 namespace Ui {
 class ExportDialog;
 }
 class MainWindow;
+
+struct ExportWorker;
+struct ExportThread : public QThread
+{
+Q_OBJECT
+
+public:
+    ExportThread(QObject *parent) : QThread(parent), pool(this), stop() {}
+    virtual ~ExportThread();
+
+    void run() override;
+
+signals:
+    void workerDone();
+
+public slots:
+    void cancel() { stop = true; }
+
+public:
+    QThreadPool pool;
+    QDir dir;
+    QString pattern;
+    WorldInfo wi;
+    int dim;
+    int scale;
+    int x, z, w, h, y; // block area
+    int tilesize; // tile coordinates
+    int bgmode;
+    QVector<ExportWorker*> workers;
+
+private:
+    bool stop;
+};
+
 
 class ExportDialog : public QDialog
 {
@@ -17,20 +57,11 @@ public:
     explicit ExportDialog(MainWindow *parent);
     ~ExportDialog();
 
-private:
-    int saveimg(QString dir, QString pattern, uint64_t seed, int tx, int tz, QImage *img);
-
 private slots:
     void update();
 
-    void on_comboSeed_activated(int);
-    void on_comboScale_activated(int);
-    void on_comboTileSize_activated(int);
-
     void on_buttonFromVisible_clicked();
     void on_buttonDirSelect_clicked();
-
-    void on_groupTiled_toggled(bool on);
 
     void on_buttonBox_clicked(QAbstractButton *button);
 

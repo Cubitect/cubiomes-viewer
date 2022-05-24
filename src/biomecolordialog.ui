@@ -63,12 +63,12 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>562</width>
-        <height>521</height>
+        <width>566</width>
+        <height>524</height>
        </rect>
       </property>
       <property name="styleSheet">
-       <string notr="true">text-align:left;</string>
+       <string notr="true">text-align: left; padding: 2px;</string>
       </property>
       <layout class="QGridLayout" name="gridLayout_3">
        <item row="0" column="0">

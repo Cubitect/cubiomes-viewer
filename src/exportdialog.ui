@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Biome Export</string>
+   <string>Biome Image Export</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../rc/icons.qrc">

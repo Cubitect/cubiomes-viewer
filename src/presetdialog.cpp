@@ -109,19 +109,19 @@ PresetDialog::PresetDialog(QWidget *parent, WorldInfo wi, bool showEamples)
     */
 
     addPreset(":/examples/biome_diversity_1_18.txt",
-        tr("Biome Diverity (1.18)"),
+        tr("Biome Diverity (1.18+)"),
         tr("A wide range of climates near the origin.\n\n"
         "(Does not look for any particular biomes.)"),
         wi.mc >= MC_1_18);
 
     addPreset(":/examples/huge_jungle_1_18.txt",
-        tr("Large Jungle (1.18)"),
+        tr("Large Jungle (1.18+)"),
         tr("A large Jungle biome at the origin.\n\n"
         "Looks for a suitable climate that primarily supports Jungle variants."),
         wi.mc >= MC_1_18);
 
     addPreset(":/examples/large_birch_forest_1_18.txt",
-        tr("Large Birch Forest (1.18)"),
+        tr("Large Birch Forest (1.18+)"),
         tr("A large Birch Forest biome at the origin.\n\n"
         "Looks for a climate that supports Birch Forest variants. "
         "Swamps and Meadows can generate in the same climates and are "
@@ -129,7 +129,7 @@ PresetDialog::PresetDialog(QWidget *parent, WorldInfo wi, bool showEamples)
         wi.mc >= MC_1_18);
 
     addPreset(":/examples/old_growth_taiga_somewhere.txt",
-        tr("Large Old Growth Taiga somewhere (1.18)"),
+        tr("Large Old Growth Taiga somewhere (1.18+)"),
         tr("A large Old Growth Taiga biome somewhere within 2500 blocks.\n\n"
         "Searches an area of +/-2500 blocks for a large climate region that "
         "primarily supports Old Growth Taiga variants"),

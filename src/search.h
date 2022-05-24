@@ -129,9 +129,9 @@ static const struct FilterList
             CAT_HELPER, 0, 0, 0, 0, 0, 0, 1, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
             ":icons/helper.png",
             _("OR logic gate"),
-            _("Evaluates as true if any of the conditions that reference it "
-            "(by relative location) are met. If no referencing conditions are "
-            "defined, it also evaluates as true.")
+            _("Evaluates as true when any of the conditions that reference it "
+            "(by relative location) are met. When no referencing conditions are "
+            "defined, it also defaults to true.")
         };
         list[F_SCALE_TO_NETHER] = FilterInfo{
             CAT_HELPER, 0, 0, 0, 0, 0, 0, 1, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
@@ -421,7 +421,7 @@ static const struct FilterList
             CAT_STRUCT, 1, 1, 1, 1, 0, Desert_Pyramid, 1, 1, MC_1_3, MC_NEWEST, 0, 0, disp++,
             ":icons/desert.png",
             _("Desert pyramid"),
-            _("In version 1.18, desert pyramids depend on surface height and may fail to "
+            _("In version 1.18+, desert pyramids depend on surface height and may fail to "
             "generate near caves/aquifers, rivers and oceans.")
         };
 
@@ -429,7 +429,7 @@ static const struct FilterList
             CAT_STRUCT, 1, 1, 1, 1, 0, Jungle_Temple, 1, 1, MC_1_3, MC_NEWEST, 0, 0, disp++,
             ":icons/jungle.png",
             _("Jungle temple"),
-            _("In version 1.18, jungle temples depend on surface height and may fail to "
+            _("In version 1.18+, jungle temples depend on surface height and may fail to "
             "generate near caves/aquifers, rivers and oceans.")
         };
 
@@ -458,7 +458,7 @@ static const struct FilterList
             CAT_STRUCT, 1, 1, 1, 1, 0, Mansion, 1, 1, MC_1_11, MC_NEWEST, 0, 0, disp++,
             ":icons/mansion.png",
             _("Woodland mansion"),
-            _("In version 1.18, mansions depend on surface height and may fail to "
+            _("In version 1.18+, mansions depend on surface height and may fail to "
             "generate near caves/aquifers, rivers and oceans.")
         };
 
@@ -538,8 +538,8 @@ static const struct FilterList
             CAT_STRUCT, 0, 1, 1, 1, 0, End_Gateway, 1, 1, MC_1_13, MC_NEWEST, +1, 0, disp++,
             ":icons/gateway.png",
             _("End gateway"),
-            _("Scattered end gateway return portals, not including those "
-            "generated when defeating the dragon.")
+            _("Only scattered return gateways. Does not include those generated "
+            "when defeating the dragon.")
         };
 
 #undef _ // translation macro

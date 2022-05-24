@@ -63,7 +63,7 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
 
     textDescription = new QTextEdit(this);
     textDescription->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
-    ui->collapseDescription->init(tr("Description"), textDescription, true);
+    ui->collapseDescription->init(tr("Description/Notes"), textDescription, true);
 
     const char *p_mcs = mc2str(mc);
     QString mcs = tr("MC %1", "Minecraft version").arg(p_mcs ? p_mcs : "?");
