@@ -124,6 +124,7 @@ ExportDialog::ExportDialog(MainWindow *parent)
     ui->lineEditX2->setValidator(intval);
     ui->lineEditZ2->setValidator(intval);
 
+    connect(mainwindow, SIGNAL(mapUpdated()), this, SLOT(update()));
     connect(ui->lineEditX1, SIGNAL(editingFinished()), this, SLOT(update()));
     connect(ui->lineEditZ1, SIGNAL(editingFinished()), this, SLOT(update()));
     connect(ui->lineEditX2, SIGNAL(editingFinished()), this, SLOT(update()));
@@ -191,6 +192,24 @@ void ExportDialog::update()
         ui->labelImgSize->setText(tr("%1x%2").arg(w).arg(h));
         ui->labelNumImg->setText(QString::number(seedcnt));
     }
+
+    WorldInfo wi;
+    mainwindow->getSeed(&wi, true);
+    int dim = mainwindow->getDim();
+
+    const char *p_mcs = mc2str(wi.mc);
+    QString wgen = (p_mcs ? p_mcs : "");
+    wgen += ", ";
+    if (dim == 0) {
+        wgen += tr("Overworld");
+        if (wi.large) wgen += tr("/large");
+    } else if (dim == -1) {
+        wgen += tr("Nether");
+    } else if (dim == +1) {
+        wgen += tr("The End");
+    }
+    ui->labelWorldGen->setText(wgen);
+    ui->labelY->setText(QString::number(wi.y));
 }
 
 void ExportDialog::on_buttonFromVisible_clicked()

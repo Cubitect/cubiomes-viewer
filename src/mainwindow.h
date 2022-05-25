@@ -53,12 +53,14 @@ public:
     void setBiomeColorRc(QString rc);
 
 protected:
-
     void saveSettings();
     void loadSettings();
     bool saveProgress(QString fnam, bool quiet = false);
     bool loadProgress(QString fnam, bool quiet = false);
     void updateMapSeed();
+
+signals:
+    void mapUpdated();
 
 public slots:
     int warning(QString text, QMessageBox::StandardButtons buttons = QMessageBox::Ok);

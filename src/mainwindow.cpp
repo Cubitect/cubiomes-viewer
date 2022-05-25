@@ -746,6 +746,7 @@ void MainWindow::updateMapSeed()
     WorldInfo wi;
     if (getSeed(&wi))
         setSeed(wi);
+    emit mapUpdated();
 }
 
 
