@@ -541,6 +541,13 @@ void QWorld::refreshBiomeColors()
             biomesToImage(q->rgb, biomeColors, q->biomes, img->width(), img->height(), 1, 1);
         }
     }
+    for (Quad *q : cachedbiomes)
+    {
+        QImage *img = q->img;
+        if (!img)
+            continue;
+        biomesToImage(q->rgb, biomeColors, q->biomes, img->width(), img->height(), 1, 1);
+    }
     g_mutex.unlock();
 }
 
