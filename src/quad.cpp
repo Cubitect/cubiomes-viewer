@@ -45,7 +45,8 @@ void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
         for (int j = sj0; j <= sj1; j++)
         {
             Pos p;
-            if (!getStructurePos(sconf.structType, wi.mc, wi.seed, i, j, &p))
+            int ok = getStructurePos(sconf.structType, wi.mc, wi.seed, i, j, &p);
+            if (!ok)
                 continue;
 
             if (p.x >= x0 && p.x < x1 && p.z >= z0 && p.z < z1)
@@ -69,33 +70,7 @@ void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
                 }
 
                 VarPos vp = VarPos(p);
-                StructureVariant sv = {};
-                if (sconf.structType == Village)
-                {
-                    sv = getVillageType(wi.mc, wi.seed, p.x, p.z, id);
-                    vp.variant = sv.abandoned;
-                }
-                else if (sconf.structType == Bastion)
-                {
-                    sv = getBastionType(wi.mc, wi.seed, p.x, p.z);
-                }
-                else if (sconf.structType == Ancient_City)
-                {
-                    sv = getAncientCityType(wi.mc, wi.seed, p.x, p.z);
-                }
-                else if (sconf.structType == Outpost && wi.mc >= MC_1_18)
-                {
-                    sv.sx = sv.sz = 16;
-                }
-                if (sv.sx || sv.sz)
-                {
-                    switch (sv.rotation) {
-                        case 0: vp.sx = +sv.sx; vp.sz = +sv.sz; break;
-                        case 1: vp.sx = -sv.sz; vp.sz = +sv.sx; break;
-                        case 2: vp.sx = -sv.sx; vp.sz = -sv.sz; break;
-                        case 3: vp.sx = +sv.sz; vp.sz = -sv.sx; break;
-                    }
-                }
+                getVariant(&vp.v, sconf.structType, wi.mc, wi.seed, p.x, p.z, id);
                 out->push_back(vp);
             }
         }
@@ -807,38 +782,26 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
 
                 if (showBB && blocks2pix > 1.0)
                 {
-                    int sx = vp.sx, sz = vp.sz;
-                    if (sopt == D_DESERT)
-                    {
-                        sx = 21; sz = 21;
-                    }
-                    else if (sopt == D_JUNGLE)
-                    {
-                        sx = 12; sz = 15;
-                    }
-                    else if (sopt == D_HUT)
-                    {
-                        sx = 7; sz = 9;
-                    }
-                    else if (sopt == D_MONUMENT)
-                    {
-                        x -= 29 * blocks2pix;
-                        y -= 29 * blocks2pix;
-                        sx = 58; sz = 58;
-                    }
-
-                    if (sx && sz)
+                    if (vp.v.sx && vp.v.sz)
                     {   // draw bounding box and move icon to its center
-                        qreal dx = sx * blocks2pix;
-                        qreal dy = sz * blocks2pix;
+                        x += vp.v.x * blocks2pix;
+                        y += vp.v.z * blocks2pix;
+                        qreal dx = vp.v.sx * blocks2pix;
+                        qreal dy = vp.v.sz * blocks2pix;
                         painter.setPen(QPen(QColor(192, 0, 0, 160), 1));
                         painter.drawRect(QRect(x, y, dx, dy));
+                        // center icon on bb
                         x += dx / 2;
                         y += dy / 2;
                     }
                 }
 
                 QPointF d = QPointF(x, y);
+
+                Pos spos = {
+                    vp.p.x ,//+ (vp.v.x + vp.v.sx / 2),
+                    vp.p.z //+ (vp.v.z + vp.v.sz / 2)
+                };
 
                 if (seldo)
                 {   // check for structure selection
@@ -847,26 +810,24 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
                     if (r.contains(selx, selz))
                     {
                         seltype = sopt;
-                        selpos = vp.p;
-                        selvar = vp.variant;
+                        selpos = spos;
+                        selvar = vp.v.abandoned;
                     }
                 }
-                if (seltype != sopt || selpos.x != vp.p.x || selpos.z != vp.p.z)
-                {   // draw unselected structures
-                    QRectF r = icons[sopt].rect();
-                    if (sopt == D_VILLAGE)
-                    {
-                        if (vp.variant) {
-                            int ix = d.x()-r.width()/2, iy = d.y()-r.height()/2;
-                            painter.drawPixmap(ix, iy, iconzvil);
-                        } else {
-                            frags.push_back(QPainter::PixmapFragment::create(d, r));
-                        }
-                    }
-                    else
-                    {
-                        frags.push_back(QPainter::PixmapFragment::create(d, r));
-                    }
+                if (seltype == sopt && selpos.x == spos.x && selpos.z == spos.z)
+                {   // don't draw selected structure
+                    continue;
+                }
+                QRectF r = icons[sopt].rect();
+                if (sopt == D_VILLAGE && vp.v.abandoned)
+                {
+                    int ix = d.x()-r.width()/2;
+                    int iy = d.y()-r.height()/2;
+                    painter.drawPixmap(ix, iy, iconzvil);
+                }
+                else
+                {
+                    frags.push_back(QPainter::PixmapFragment::create(d, r));
                 }
             }
         }

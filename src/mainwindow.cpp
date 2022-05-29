@@ -1197,7 +1197,7 @@ void MainWindow::on_buttonAnalysis_clicked()
                 QTreeWidgetItem* item = new QTreeWidgetItem(item_cat);
                 item->setData(0, Qt::UserRole, QVariant::fromValue(vp.p));
                 item->setText(0, QString::asprintf("%d,\t%d", vp.p.x, vp.p.z));
-                if (vp.variant)
+                if (vp.v.abandoned)
                 {
                     if (stype == Village)
                         item->setText(1, tr("abandoned", "Village variant"));

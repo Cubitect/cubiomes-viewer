@@ -750,8 +750,8 @@ L_qm_any:
                         int i;
                         for (i = 0; i < vn; i++)
                         {
-                            StructureVariant vt = getVillageType(
-                                gen->mc, gen->seed, pc.x, pc.z, vv[i]);
+                            StructureVariant vt;
+                            getVariant(&vt, Village, gen->mc, gen->seed, pc.x, pc.z, vv[i]);
                             if (cond->villageOk(gen->mc, vt))
                                 break;
                         }
@@ -772,8 +772,8 @@ L_qm_any:
                     }
                     else if (st == Village && cond->variants)
                     {
-                        StructureVariant vt = getVillageType(
-                            gen->mc, gen->seed, pc.x, pc.z, id);
+                        StructureVariant vt;
+                        getVariant(&vt, Village, gen->mc, gen->seed, pc.x, pc.z, id);
                         if (!cond->villageOk(gen->mc, vt))
                             continue;
                     }

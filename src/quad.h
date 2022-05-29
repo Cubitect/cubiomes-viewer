@@ -149,10 +149,9 @@ struct Level;
 
 struct VarPos
 {
-    VarPos(Pos p) : p(p),sx(),sz(),variant() {}
+    VarPos(Pos p) : p(p),v() {}
     Pos p;
-    int sx, sz;
-    int variant;
+    StructureVariant v;
 };
 
 void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
