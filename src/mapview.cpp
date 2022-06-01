@@ -1,4 +1,5 @@
 #include "mapview.h"
+#include "gotodialog.h"
 #include "cutil.h"
 
 #include <QPainter>
@@ -9,6 +10,9 @@
 #include <QThreadPool>
 #include <QTime>
 #include <QSettings>
+#include <QMenu>
+#include <QAction>
+#include <QClipboard>
 
 #include <math.h>
 
@@ -68,6 +72,7 @@ MapView::MapView(QWidget *parent)
     overlay->setFont(mono);
 
     setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(this, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
 }
 
 MapView::~MapView()
@@ -206,6 +211,48 @@ Pos MapView::getActivePos()
     return p;
 }
 
+void MapView::showContextMenu(const QPoint &pos)
+{
+    QMenu menu(this);
+    // this is a contextual temporary menu so shortcuts are only indicated here,
+    // but will not function - see keyReleaseEvent() for shortcut implementation
+
+    menu.addAction(tr("Copy seed"), this, &MapView::copySeed, QKeySequence::Copy);
+    menu.addAction(tr("Copy coordinates"), this, &MapView::copyCoord);
+    menu.addAction(tr("Copy teleport command"), this, &MapView::copyTeleportCommand);
+    menu.addAction(tr("Go to coordinates..."), this, &MapView::onGoto);
+    menu.exec(mapToGlobal(pos));
+}
+
+void MapView::copySeed()
+{
+    if (world)
+    {
+        QClipboard *clipboard = QGuiApplication::clipboard();
+        clipboard->setText(QString::asprintf("%" PRId64, (int64_t)world->wi.seed));
+    }
+}
+
+void MapView::copyCoord()
+{
+    Pos p = getActivePos();
+    QClipboard *clipboard = QGuiApplication::clipboard();
+    clipboard->setText(QString::asprintf("%d, %d", p.x, p.z));
+}
+
+void MapView::copyTeleportCommand()
+{
+    Pos p = getActivePos();
+    QClipboard *clipboard = QGuiApplication::clipboard();
+    clipboard->setText(QString::asprintf("/tp @p %d ~ %d", p.x, p.z));
+}
+
+void MapView::onGoto()
+{
+    GotoDialog *dialog = new GotoDialog(this, getX(), getZ(), getScale());
+    dialog->show();
+}
+
 void MapView::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
@@ -314,7 +361,7 @@ void MapView::mouseReleaseEvent(QMouseEvent *e)
             update();
         }
         if (!config.smoothMotion)
-        {   // i.e. without interia
+        {   // i.e. without inertia
             velx = velz = 0;
         }
 
@@ -331,7 +378,10 @@ void MapView::mouseReleaseEvent(QMouseEvent *e)
     }
 }
 
-void MapView::keyPressEvent(QKeyEvent *)
+void MapView::keyReleaseEvent(QKeyEvent *event)
 {
+    if (event->matches(QKeySequence::Copy))
+        copySeed();
+    QWidget::keyReleaseEvent(event);
 }
 

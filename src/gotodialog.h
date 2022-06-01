@@ -7,14 +7,14 @@
 namespace Ui {
 class GotoDialog;
 }
-class MainWindow;
+class MapView;
 
 class GotoDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit GotoDialog(MainWindow *parent, qreal x, qreal z, qreal scale);
+    explicit GotoDialog(MapView *map, qreal x, qreal z, qreal scale);
     ~GotoDialog();
 
 private slots:
@@ -22,7 +22,7 @@ private slots:
 
 private:
     Ui::GotoDialog *ui;
-    MainWindow *mainwindow;
+    MapView *mapview;
     qreal scalemin, scalemax;
 };
 

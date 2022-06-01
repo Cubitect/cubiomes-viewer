@@ -1,14 +1,14 @@
 #include "gotodialog.h"
 #include "ui_gotodialog.h"
 
-#include "mainwindow.h"
+#include "mapview.h"
 
 #include <QDoubleValidator>
 
-GotoDialog::GotoDialog(MainWindow *parent, qreal x, qreal z, qreal scale)
-    : QDialog(parent)
+GotoDialog::GotoDialog(MapView *map, qreal x, qreal z, qreal scale)
+    : QDialog(map)
     , ui(new Ui::GotoDialog)
-    , mainwindow(parent)
+    , mapview(map)
 {
     ui->setupUi(this);
 
@@ -40,7 +40,7 @@ void GotoDialog::on_buttonBox_clicked(QAbstractButton *button)
         if (scale < scalemin) scale = scalemin;
         if (scale > scalemax) scale = scalemax;
         ui->lineScale->setText(QString::asprintf("%.4f", scale));
-        mainwindow->mapGoto(x, z, scale);
+        mapview->setView(x, z, scale);
     }
     else if (b == QDialogButtonBox::Reset)
     {

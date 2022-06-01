@@ -371,6 +371,9 @@
               <height>14</height>
              </size>
             </property>
+            <property name="autoDefault">
+             <bool>false</bool>
+            </property>
            </widget>
           </item>
          </layout>
@@ -416,8 +419,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>640</width>
-                <height>362</height>
+                <width>648</width>
+                <height>377</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -700,8 +703,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>640</width>
-                <height>316</height>
+                <width>648</width>
+                <height>333</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -749,8 +752,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>640</width>
-                <height>395</height>
+                <width>648</width>
+                <height>413</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -791,7 +794,8 @@
        </property>
        <property name="icon">
         <iconset theme="dialog-cancel">
-         <normaloff>.</normaloff>.</iconset>
+         <normaloff/>
+        </iconset>
        </property>
       </widget>
      </item>
@@ -802,7 +806,11 @@
        </property>
        <property name="icon">
         <iconset theme="dialog-ok">
-         <normaloff>.</normaloff>.</iconset>
+         <normaloff/>
+        </iconset>
+       </property>
+       <property name="default">
+        <bool>true</bool>
        </property>
       </widget>
      </item>

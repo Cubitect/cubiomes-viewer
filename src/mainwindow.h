@@ -53,6 +53,7 @@ public:
     void setBiomeColorRc(QString rc);
 
 protected:
+
     void saveSettings();
     void loadSettings();
     bool saveProgress(QString fnam, bool quiet = false);
@@ -90,8 +91,6 @@ private slots:
     void on_actionExtGen_triggered();
     void on_actionExportImg_triggered();
 
-    void on_mapView_customContextMenuRequested(const QPoint &pos);
-
     void on_checkArea_toggled(bool checked);
     void on_lineRadius_editingFinished();
     void on_buttonFromVisible_clicked();
@@ -112,8 +111,6 @@ private slots:
     void onSearchStatusChanged(bool running);
     void onStyleChanged(int style);
     void onBiomeColorChange();
-    void copyCoord();
-    void copyTeleportCommand();
 
 public:
     Ui::MainWindow *ui;

@@ -58,6 +58,12 @@ private:
 signals:
 
 public slots:
+    void showContextMenu(const QPoint &pos);
+    void copySeed();
+    void copyCoord();
+    void copyTeleportCommand();
+    void onGoto();
+
     void paintEvent(QPaintEvent *) Q_DECL_OVERRIDE;
     void resizeEvent(QResizeEvent *) Q_DECL_OVERRIDE;
 
@@ -66,7 +72,7 @@ public slots:
     void mouseMoveEvent(QMouseEvent *) Q_DECL_OVERRIDE;
     void mouseReleaseEvent(QMouseEvent *) Q_DECL_OVERRIDE;
 
-    void keyPressEvent(QKeyEvent *) Q_DECL_OVERRIDE;
+    void keyReleaseEvent(QKeyEvent *) Q_DECL_OVERRIDE;
 
 public:
     QWorld *world;

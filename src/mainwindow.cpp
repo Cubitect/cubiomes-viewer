@@ -1,7 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include "gotodialog.h"
 #include "quadlistdialog.h"
 #include "presetdialog.h"
 #include "aboutdialog.h"
@@ -875,8 +874,7 @@ void MainWindow::onBiomeColorChange()
 
 void MainWindow::on_actionGo_to_triggered()
 {
-    GotoDialog *dialog = new GotoDialog(this, ui->mapView->getX(), ui->mapView->getZ(), ui->mapView->getScale());
-    dialog->show();
+    ui->mapView->onGoto();
 }
 
 void MainWindow::on_actionScan_seed_for_Quad_Huts_triggered()
@@ -967,15 +965,6 @@ void MainWindow::on_actionExportImg_triggered()
     dialog->show();
 }
 
-
-void MainWindow::on_mapView_customContextMenuRequested(const QPoint &pos)
-{
-    QMenu menu(this);
-    menu.addAction(tr("Copy coordinates"), this, &MainWindow::copyCoord);
-    menu.addAction(tr("Copy teleport command"), this, &MainWindow::copyTeleportCommand);
-    menu.addAction(tr("Go to coordinates..."), this, &MainWindow::on_actionGo_to_triggered);
-    menu.exec(ui->mapView->mapToGlobal(pos));
-}
 
 void MainWindow::on_checkArea_toggled(bool checked)
 {
@@ -1473,20 +1462,5 @@ void MainWindow::onStyleChanged(int style)
         qApp->setStyleSheet("");
     }
 }
-
-void MainWindow::copyCoord()
-{
-    Pos p = ui->mapView->getActivePos();
-    QClipboard *clipboard = QGuiApplication::clipboard();
-    clipboard->setText(QString::asprintf("%d, %d", p.x, p.z));
-}
-
-void MainWindow::copyTeleportCommand()
-{
-    Pos p = ui->mapView->getActivePos();
-    QClipboard *clipboard = QGuiApplication::clipboard();
-    clipboard->setText(QString::asprintf("/tp @p %d ~ %d", p.x, p.z));
-}
-
 
 
