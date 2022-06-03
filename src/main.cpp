@@ -17,6 +17,7 @@ int main(int argc, char *argv[])
     initBiomeTypeColors(tempsColors);
 
     QApplication a(argc, argv);
+    QCoreApplication::setApplicationName("cubiomes-viewer");
 
     QTranslator translator;
     translator.load("en_US", ":/lang");

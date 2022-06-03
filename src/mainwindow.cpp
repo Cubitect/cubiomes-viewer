@@ -66,23 +66,7 @@ MainWindow::MainWindow(QWidget *parent)
     , dimactions{}
     , dimgroup()
 {
-    int fontid = QFontDatabase::addApplicationFont(":/fonts/DejaVuSans.ttf");
-    if (fontid >= 0)
-    {
-        QFontDatabase::addApplicationFont(":/fonts/DejaVuSans-Bold.ttf");
-        QFont fontdef = QFontDatabase::applicationFontFamilies(fontid).at(0);
-        fontdef.setPointSize(10);
-        QApplication::setFont(fontdef);
-    }
-    else
-    {
-        fprintf(stderr, "Failed to load recources.\n");
-        exit(1);
-    }
-
     ui->setupUi(this);
-
-    QCoreApplication::setApplicationName("cubiomes-viewer");
 
     formCond = new FormConditions(this);
     formGen48 = new FormGen48(this);
@@ -248,6 +232,22 @@ MainWindow::MainWindow(QWidget *parent)
     if (config.checkForUpdates)
         searchForUpdates(true);
 #endif
+
+    QCoreApplication::setAttribute(Qt::AA_UseStyleSheetPropagationInWidgetStyles, true);
+    int fontid = QFontDatabase::addApplicationFont(":/fonts/DejaVuSans.ttf");
+    if (fontid >= 0)
+    {
+        QFontDatabase::addApplicationFont(":/fonts/DejaVuSans-Bold.ttf");
+        QFont fontdef = QFontDatabase::applicationFontFamilies(fontid).at(0);
+        fontdef.setPointSize(10);
+        QApplication::setFont(fontdef);
+        //setStyleSheet("* { font: 10px '" + fontdef.family() + "'; }");
+    }
+    else
+    {
+        fprintf(stderr, "Failed to load recources.\n");
+        exit(1);
+    }
 }
 
 MainWindow::~MainWindow()
