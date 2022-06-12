@@ -46,7 +46,7 @@ $ sudo apt install build-essential qt5-default
 ```
 ##### Fedora
 ```
-$ sudo dnf install qt5-qtbase-devel
+$ sudo dnf install qt5-qtbase-devel qt5-linguist
 ```
 ##### macOS
 ```
