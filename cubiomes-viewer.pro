@@ -46,15 +46,16 @@ SOURCES += \
         src/formgen48.cpp \
         src/formsearchcontrol.cpp \
         src/gotodialog.cpp \
+        src/mapview.cpp \
         src/presetdialog.cpp \
         src/protobasedialog.cpp \
-        src/quadlistdialog.cpp \
-        src/mapview.cpp \
         src/quad.cpp \
+        src/quadlistdialog.cpp \
         src/rangedialog.cpp \
         src/rangeslider.cpp \
         src/search.cpp \
         src/searchthread.cpp \
+        src/structuredialog.cpp \
         src/mainwindow.cpp \
         src/main.cpp
 
@@ -68,25 +69,26 @@ HEADERS += \
         src/collapsible.h \
         src/conditiondialog.h \
         src/configdialog.h \
+        src/cutil.h \
         src/extgendialog.h \
         src/exportdialog.h \
         src/formconditions.h \
         src/formgen48.h \
         src/formsearchcontrol.h \
         src/gotodialog.h \
+        src/mapview.h \
         src/presetdialog.h \
         src/protobasedialog.h \
         src/quadlistdialog.h \
-        src/mapview.h \
         src/quad.h \
-        src/cutil.h \
         src/rangedialog.h \
         src/rangeslider.h \
         src/search.h \
         src/searchthread.h \
         src/seedtables.h \
-        src/mainwindow.h \
-        src/settings.h
+        src/settings.h \
+        src/structuredialog.h \
+        src/mainwindow.h
 
 FORMS += \
         src/aboutdialog.ui \
@@ -102,8 +104,9 @@ FORMS += \
         src/presetdialog.ui \
         src/protobasedialog.ui \
         src/quadlistdialog.ui\
-        src/mainwindow.ui \
-        src/rangedialog.ui
+        src/rangedialog.ui \
+        src/structuredialog.ui \
+        src/mainwindow.ui
 
 
 TRANSLATIONS += \
@@ -118,7 +121,7 @@ RESOURCES += \
 
 # ----- translations -----
 
-!without_translation: {
+translations: {
     # automatically run lupdate for pluralization default translation
     THIS_FILE = cubiomes-viewer.pro
     lupdate.input       = THIS_FILE

@@ -145,6 +145,10 @@ inline int mapopt2stype(int opt)
     }
 }
 
+void loadStructVis(std::map<int, double>& structvis);
+void saveStructVis(std::map<int, double>& structvis);
+const QPixmap& getMapIcon(int opt, int variation = 0);
+
 struct Level;
 
 struct VarPos
@@ -197,7 +201,7 @@ struct Level
     ~Level();
 
     void init4map(QWorld *w, int pix, int layerscale);
-    void init4struct(QWorld *w, int dim, int blocks, int sopt, int viewlv);
+    void init4struct(QWorld *w, int dim, int blocks, double vis, int sopt);
 
     void resizeLevel(std::vector<Quad*>& cache, int x, int z, int w, int h);
     void update(std::vector<Quad*>& cache, qreal bx0, qreal bz0, qreal bx1, qreal bz1);
@@ -212,10 +216,17 @@ struct Level
     int blocks;
     int pixs;
     int sopt;
-    int viewlv;
+    double vis;
     std::atomic_bool *isdel;
 };
 
+struct PosElement
+{
+    PosElement(Pos p_) : next(), p(p_) {}
+    ~PosElement() { delete next; next = nullptr; }
+    QAtomicPointer<PosElement> next;
+    Pos p;
+};
 
 struct QWorld
 {
@@ -257,7 +268,7 @@ struct QWorld
     // some features such as the world spawn and strongholds will be filled by
     // a designated worker thread once results are done
     QAtomicPointer<Pos> spawn;
-    QAtomicPointer<std::vector<Pos>> strongholds;
+    QAtomicPointer<PosElement> strongholds;
     QAtomicPointer<QVector<QuadInfo>> qsinfo;
     // isdel is a flag for the worker thread to stop
     std::atomic_bool isdel;
@@ -274,9 +285,6 @@ struct QWorld
     int selvar;
 
     qreal qual; // quality, i.e. maximum pixels per 'block' at the current layer
-
-    QPixmap icons[STRUCT_NUM];
-    QPixmap iconzvil;
 };
 
 

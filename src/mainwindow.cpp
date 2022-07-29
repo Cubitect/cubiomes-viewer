@@ -7,6 +7,7 @@
 #include "conditiondialog.h"
 #include "extgendialog.h"
 #include "biomecolordialog.h"
+#include "structuredialog.h"
 #include "exportdialog.h"
 
 #if WITH_UPDATER
@@ -22,7 +23,6 @@
 #include <QDataStream>
 #include <QMenu>
 #include <QClipboard>
-#include <QFontDatabase>
 #include <QFont>
 #include <QFileDialog>
 #include <QTextStream>
@@ -232,22 +232,6 @@ MainWindow::MainWindow(QWidget *parent)
     if (config.checkForUpdates)
         searchForUpdates(true);
 #endif
-
-    QCoreApplication::setAttribute(Qt::AA_UseStyleSheetPropagationInWidgetStyles, true);
-    int fontid = QFontDatabase::addApplicationFont(":/fonts/DejaVuSans.ttf");
-    if (fontid >= 0)
-    {
-        QFontDatabase::addApplicationFont(":/fonts/DejaVuSans-Bold.ttf");
-        QFont fontdef = QFontDatabase::applicationFontFamilies(fontid).at(0);
-        fontdef.setPointSize(10);
-        QApplication::setFont(fontdef);
-        //setStyleSheet("* { font: 10px '" + fontdef.family() + "'; }");
-    }
-    else
-    {
-        fprintf(stderr, "Failed to load recources.\n");
-        exit(1);
-    }
 }
 
 MainWindow::~MainWindow()
@@ -262,7 +246,6 @@ void MainWindow::closeEvent(QCloseEvent *event)
     saveSettings();
     QMainWindow::closeEvent(event);
 }
-
 
 QAction *MainWindow::addMapAction(int sopt, const char *iconpath, QString tip)
 {
@@ -351,12 +334,6 @@ int MainWindow::getDim()
     if (active == dimactions[2])
         return +1; // end
     return 0;
-}
-
-void MainWindow::setBiomeColorRc(QString rc)
-{
-    config.biomeColorPath = rc;
-    onBiomeColorChange();
 }
 
 void MainWindow::saveSettings()
@@ -759,6 +736,12 @@ void MainWindow::mapGoto(qreal x, qreal z, qreal scale)
     ui->mapView->setView(x, z, scale);
 }
 
+void MainWindow::setBiomeColorRc(QString rc)
+{
+    config.biomeColorPath = rc;
+    onBiomeColorChange();
+}
+
 void MainWindow::on_comboBoxMC_currentIndexChanged(int)
 {
     updateMapSeed();
@@ -784,12 +767,14 @@ void MainWindow::on_seedEdit_textChanged(const QString &a)
 {
     uint64_t s;
     int v = str2seed(a, &s);
+    QString typ = "";
     switch (v)
     {
-        case 0: ui->labelSeedType->setText(tr("(text)", "Seed input type")); break;
-        case 1: ui->labelSeedType->setText(tr("(numeric)", "Seed input type")); break;
-        case 2: ui->labelSeedType->setText(tr("(random)", "Seed input type")); break;
+    case S_TEXT:    typ = tr("text", "Seed input type"); break;
+    case S_NUMERIC: typ = ""; break;
+    case S_RANDOM:  typ = tr("random", "Seed input type"); break;
     }
+    ui->labelSeedType->setText(typ);
 }
 
 void MainWindow::on_actionSave_triggered()
@@ -848,6 +833,11 @@ void MainWindow::on_actionPreferences_triggered()
             onBiomeColorChange();
         }
     }
+    if (dialog->structVisModified)
+    {   // NOTE: structure visibility limits are not currently stored in config
+        // so the changes have to be applied regardless whether the dialog is accepted.
+        on_actionStructure_visibility_triggered();
+    }
 }
 
 void MainWindow::onBiomeColorChange()
@@ -893,9 +883,21 @@ void MainWindow::on_actionOpen_shadow_seed_triggered()
     }
 }
 
+void MainWindow::on_actionStructure_visibility_triggered()
+{
+    StructureDialog *dialog = new StructureDialog(this);
+    if (dialog->exec() != QDialog::Accepted || !dialog->modified)
+        return;
+    saveStructVis(dialog->structvis);
+    getMapView()->deleteWorld();
+    updateMapSeed();
+    update();
+}
+
 void MainWindow::on_actionBiome_colors_triggered()
 {
     BiomeColorDialog *dialog = new BiomeColorDialog(this, config.biomeColorPath);
+    connect(dialog, SIGNAL(yieldBiomeColorRc(QString)), this, SLOT(setBiomeColorRc(QString)));
     dialog->show();
 }
 
@@ -937,7 +939,7 @@ void MainWindow::on_actionPaste_triggered()
 
 void MainWindow::on_actionAddShadow_triggered()
 {
-    QVector<uint64_t> results = formControl->getResults();
+    const QVector<uint64_t> results = formControl->getResults();
     QVector<uint64_t> shadows;
     shadows.reserve(results.size());
     for (uint64_t s : results)
@@ -1001,6 +1003,30 @@ void MainWindow::on_buttonFromVisible_clicked()
     ui->lineEditZ2->setText( QString::number(bz1) );
 }
 
+static
+QTreeWidgetItem *setConditionTreeItems(ConditionTree& ctree, int node, Pos cpos[], QTreeWidgetItem* parent)
+{
+    Condition& c = ctree.condvec[node];
+    Pos p = cpos[c.save];
+    const std::vector<char>& branches = ctree.references[c.save];
+
+    QTreeWidgetItem* item = new QTreeWidgetItem(parent);
+    item->setText(0, c.summary());
+    item->setData(0, Qt::UserRole, QVariant::fromValue(p));
+
+    if (branches.empty())
+    {
+        item->setText(1, MainWindow::tr("incomplete"));
+    }
+    else
+    {
+        item->setText(1, QString::asprintf("%d,\t%d", p.x, p.z));
+        for (char b : branches)
+            setConditionTreeItems(ctree, b, cpos, item);
+    }
+    return item;
+}
+
 void MainWindow::on_buttonAnalysis_clicked()
 {
     int x1, z1, x2, z2;
@@ -1020,11 +1046,8 @@ void MainWindow::on_buttonAnalysis_clicked()
         x2 = ui->lineEditX2->text().toInt();
         z2 = ui->lineEditZ2->text().toInt();
     }
-    if (x2 < x1 || z2 < z1)
-    {
-        warning(tr("Invalid area for analysis"));
-        return;
-    }
+    if (x2 < x1) std::swap(x1, x2);
+    if (z2 < z1) std::swap(z1, z2);
 
     bool ck_struct = ui->checkStructs->isChecked();
     bool ck_biome = ui->checkBiomes->isChecked();
@@ -1248,7 +1271,7 @@ void MainWindow::on_buttonAnalysis_clicked()
         gen.setSeed(wi.seed);
 
         ConditionTree condtree;
-        condtree.set(conds);
+        condtree.set(conds, wi);
 
         //Condition& c0 = conds[0];
         int xr1 = 0; //(int)( cstepx * floor( (x1+c0.x1) / (double)cstepx ) );
@@ -1293,22 +1316,12 @@ void MainWindow::on_buttonAnalysis_clicked()
                 {
                     continue;
                 }
-                //Pos p = cpos[conds[0].save];
-                //if (p.x < x1 || p.x > x2 || p.z < z1 || p.z > z2)
-                //    continue;
 
-                QTreeWidgetItem* loc = new QTreeWidgetItem();
-                loc->setData(0, Qt::UserRole, QVariant::fromValue(origin));
-                loc->setText(0, tr("condition @[%1, %2]").arg(origin.x).arg(origin.z));
+                QTreeWidgetItem* loc = setConditionTreeItems(condtree, 0, cpos, nullptr);
+                //new QTreeWidgetItem();
+                //loc->setData(0, Qt::UserRole, QVariant::fromValue(origin));
+                //loc->setText(0, tr("condition @[%1, %2]").arg(origin.x).arg(origin.z));
 
-                for (int i = 0; i < conds.size(); i++)
-                {
-                    Pos p = cpos[conds[i].save];
-                    QTreeWidgetItem* item = new QTreeWidgetItem(loc);
-                    item->setText(0, conds[i].summary());
-                    item->setData(0, Qt::UserRole, QVariant::fromValue(p));
-                    item->setText(1, QString::asprintf("%d,\t%d", p.x, p.z));
-                }
 
                 items.push_back(loc);
 
@@ -1361,16 +1374,23 @@ void MainWindow::on_buttonExport_clicked()
     for (; *it; ++it)
     {
         QTreeWidgetItem *item = *it;
+        QStringList cols;
         if (item->type() >= QTreeWidgetItem::UserType)
-            stream << QString::number(item->type() - QTreeWidgetItem::UserType) << ", ";
-        stream << item->text(0).replace('\t', ' ');
-        if (!item->text(1).isEmpty())
-            stream << ", " << item->text(1);
-        stream << "\n";
+            cols << QString::number(item->type() - QTreeWidgetItem::UserType);
+        for (int i = 0; i <= 1; i++)
+        {
+            QString txt = item->text(i).replace('\t', ' ');
+            if (txt.isEmpty())
+                continue;
+            if (txt.contains("["))
+                txt = "\"" + txt + "\"";
+            cols << txt;
+        }
+        stream << cols.join(", ") << "\n";
     }
 }
 
-void MainWindow::on_treeAnalysis_itemDoubleClicked(QTreeWidgetItem *item)
+void MainWindow::on_treeAnalysis_itemClicked(QTreeWidgetItem *item)
 {
     QVariant dat = item->data(0, Qt::UserRole);
     if (dat.isValid())
@@ -1416,7 +1436,7 @@ void MainWindow::onActionBiomeLayerSelect(bool state, QAction *src, int lopt)
 {
     if (state == false)
         return;
-    QList<QAction*> actions = ui->menuBiome_layer->actions();
+    const QList<QAction*> actions = ui->menuBiome_layer->actions();
     for (QAction *act : actions)
         if (act != src)
             act->setChecked(false);
@@ -1450,6 +1470,7 @@ void MainWindow::onSearchStatusChanged(bool running)
 
 void MainWindow::onStyleChanged(int style)
 {
+    //QCoreApplication::setAttribute(Qt::AA_UseStyleSheetPropagationInWidgetStyles, false);
     if (style == STYLE_DARK)
     {
         QFile file(":dark.qss");
@@ -1460,6 +1481,7 @@ void MainWindow::onStyleChanged(int style)
     else
     {
         qApp->setStyleSheet("");
+        qApp->setStyle("");
     }
 }
 

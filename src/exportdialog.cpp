@@ -30,7 +30,7 @@ struct ExportWorker : QRunnable
         fnam.replace("%x", QString::number(tx));
         fnam.replace("%z", QString::number(tz));
         fnam = mt->dir.filePath(fnam);
-        return QFileInfo(fnam).exists();
+        return QFileInfo::exists(fnam);
     }
 
     void run()
@@ -84,7 +84,7 @@ struct ExportWorker : QRunnable
 
 ExportThread::~ExportThread()
 {
-    for (ExportWorker* worker : workers)
+    for (ExportWorker* worker : qAsConst(workers))
         delete worker;
 }
 
@@ -173,8 +173,12 @@ void ExportDialog::update()
     int s = 2 * ui->comboScale->currentIndex();
     int x0 = ui->lineEditX1->text().toInt() >> s;
     int z0 = ui->lineEditZ1->text().toInt() >> s;
-    int x1 = (ui->lineEditX2->text().toInt() >> s) + 1;
-    int z1 = (ui->lineEditZ2->text().toInt() >> s) + 1;
+    int x1 = ui->lineEditX2->text().toInt() >> s;
+    int z1 = ui->lineEditZ2->text().toInt() >> s;
+    if (x0 > x1) std::swap(x0, x1);
+    if (z0 > z1) std::swap(z0, z1);
+    x1 += 1;
+    z1 += 1;
 
     if (ui->groupTiled->isChecked())
     {
@@ -282,8 +286,12 @@ void ExportDialog::on_buttonBox_clicked(QAbstractButton *button)
         int s = 2 * ui->comboScale->currentIndex();
         int x0 = ui->lineEditX1->text().toInt() >> s;
         int z0 = ui->lineEditZ1->text().toInt() >> s;
-        int x1 = (ui->lineEditX2->text().toInt() >> s) + 1;
-        int z1 = (ui->lineEditZ2->text().toInt() >> s) + 1;
+        int x1 = ui->lineEditX2->text().toInt() >> s;
+        int z1 = ui->lineEditZ2->text().toInt() >> s;
+        if (x0 > x1) std::swap(x0, x1);
+        if (z0 > z1) std::swap(z0, z1);
+        x1 += 1;
+        z1 += 1;
         int y = (s == 0 ? wi.y : wi.y >> 2);
 
         if (x1 <= x0 || z1 <= z0)
@@ -321,7 +329,7 @@ void ExportDialog::on_buttonBox_clicked(QAbstractButton *button)
             master->tilesize = tilesize;
             master->bgmode = bgmode;
 
-            for (uint64_t seed : seeds)
+            for (uint64_t seed : qAsConst(seeds))
             {
                 for (int x = tx0; x < tx1; x++)
                 {
@@ -350,7 +358,7 @@ void ExportDialog::on_buttonBox_clicked(QAbstractButton *button)
                 }
             }
 
-            for (uint64_t seed : seeds)
+            for (uint64_t seed : qAsConst(seeds))
             {
                 ExportWorker *worker = new ExportWorker(master);
                 existwarn |= worker->init(seed, 0, 0);

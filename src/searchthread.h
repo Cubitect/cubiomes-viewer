@@ -41,30 +41,30 @@ signals:
     void searchFinish(bool done);
 
 public:
-    FormSearchControl     * parent;
-    QVector<SearchWorker*>  workers;
+    FormSearchControl         * parent;
+    std::vector<SearchWorker*>  workers;
 
-    QMutex                  mutex;
-    std::atomic_bool        abort;
+    QMutex                      mutex;
+    std::atomic_bool            abort;
 
-    QElapsedTimer           timer;
-    uint64_t                count;
+    QElapsedTimer               timer;
+    uint64_t                    count;
 
-    int                     searchtype;
-    int                     mc;
-    int                     large;
-    ConditionTree           condtree;
-    int                     itemsize;   // number of seeds per search item
-    int                     threadcnt;  // numbr of worker threads
-    Gen48Settings           gen48;      // 48-bit generator settings
-    std::vector<uint64_t>   slist;      // candidate list
-    uint64_t                idx;        // index within candidate list
-    uint64_t                scnt;       // search space size
-    uint64_t                prog;       // search space progress tracker
-    uint64_t                seed;       // current seed (next to be processed)
-    uint64_t                smin;
-    uint64_t                smax;
-    bool                    isdone;
+    int                         searchtype;
+    int                         mc;
+    int                         large;
+    ConditionTree               condtree;
+    int                         itemsize;   // number of seeds per search item
+    int                         threadcnt;  // numbr of worker threads
+    Gen48Settings               gen48;      // 48-bit generator settings
+    std::vector<uint64_t>       slist;      // candidate list
+    uint64_t                    idx;        // index within candidate list
+    uint64_t                    scnt;       // search space size
+    uint64_t                    prog;       // search space progress tracker
+    uint64_t                    seed;       // current seed (next to be processed)
+    uint64_t                    smin;
+    uint64_t                    smax;
+    bool                        isdone;
 };
 
 

@@ -1,5 +1,9 @@
 #include "configdialog.h"
 #include "ui_configdialog.h"
+
+#include "biomecolordialog.h"
+#include "structuredialog.h"
+
 #include "cutil.h"
 
 #include <QThread>
@@ -7,9 +11,11 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
-ConfigDialog::ConfigDialog(QWidget *parent, Config *config) :
-    QDialog(parent),
-    ui(new Ui::ConfigDialog)
+
+ConfigDialog::ConfigDialog(QWidget *parent, Config *config)
+    : QDialog(parent)
+    , ui(new Ui::ConfigDialog)
+    , structVisModified()
 {
     ui->setupUi(this);
 
@@ -124,6 +130,13 @@ void ConfigDialog::on_buttonBox_clicked(QAbstractButton *button)
     }
 }
 
+void ConfigDialog::on_buttonBiomeColorEditor_clicked()
+{
+    BiomeColorDialog *dialog = new BiomeColorDialog(this, conf.biomeColorPath);
+    if (dialog->exec() == QDialog::Accepted)
+        setBiomeColorPath(dialog->getRc());
+}
+
 void ConfigDialog::on_buttonBiomeColor_clicked()
 {
     QFileInfo finfo(conf.biomeColorPath);
@@ -134,6 +147,13 @@ void ConfigDialog::on_buttonBiomeColor_clicked()
         conf.biomeColorPath = fnam;
         setBiomeColorPath(fnam);
     }
+}
+
+void ConfigDialog::on_buttonStructVisEdit_clicked()
+{
+    StructureDialog *dialog = new StructureDialog(this);
+    if (dialog->exec() == QDialog::Accepted)
+        structVisModified |= dialog->modified;
 }
 
 void ConfigDialog::on_buttonClear_clicked()
@@ -161,4 +181,5 @@ void ConfigDialog::on_buttonColorHelp_clicked()
             );
     QMessageBox::information(this, tr("Help: custom biome colors"), msg, QMessageBox::Ok);
 }
+
 

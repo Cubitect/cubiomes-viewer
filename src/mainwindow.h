@@ -50,10 +50,8 @@ public:
     bool setSeed(WorldInfo wi, int dim = INT_MAX, int layeropt = -1);
     int getDim();
     MapView *getMapView();
-    void setBiomeColorRc(QString rc);
 
 protected:
-
     void saveSettings();
     void loadSettings();
     bool saveProgress(QString fnam, bool quiet = false);
@@ -66,6 +64,7 @@ signals:
 public slots:
     int warning(QString text, QMessageBox::StandardButtons buttons = QMessageBox::Ok);
     void mapGoto(qreal x, qreal z, qreal scale);
+    void setBiomeColorRc(QString rc);
 
 private slots:
     void on_comboBoxMC_currentIndexChanged(int a);
@@ -81,6 +80,7 @@ private slots:
     void on_actionGo_to_triggered();
     void on_actionScan_seed_for_Quad_Huts_triggered();
     void on_actionOpen_shadow_seed_triggered();
+    void on_actionStructure_visibility_triggered();
     void on_actionBiome_colors_triggered();
     void on_actionPresetLoad_triggered();
     void on_actionExamples_triggered();
@@ -95,7 +95,7 @@ private slots:
     void on_lineRadius_editingFinished();
     void on_buttonFromVisible_clicked();
     void on_buttonAnalysis_clicked();
-    void on_treeAnalysis_itemDoubleClicked(QTreeWidgetItem *item);
+    void on_treeAnalysis_itemClicked(QTreeWidgetItem *item);
     void on_buttonExport_clicked();
 
     void on_actionSearch_seed_list_triggered();

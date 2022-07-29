@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include <QApplication>
 #include <QTranslator>
+#include <QFontDatabase>
 
 #include "quad.h"
 
@@ -22,6 +23,16 @@ int main(int argc, char *argv[])
     QTranslator translator;
     translator.load("en_US", ":/lang");
     a.installTranslator(&translator);
+
+    //int fontid = QFontDatabase::addApplicationFont(":/fonts/test.ttf");
+    int fontid = QFontDatabase::addApplicationFont(":/fonts/DejaVuSans.ttf");
+    if (fontid >= 0)
+    {
+        QFontDatabase::addApplicationFont(":/fonts/DejaVuSans-Bold.ttf");
+        QFont fontdef = QFontDatabase::applicationFontFamilies(fontid).at(0);
+        fontdef.setPointSize(10);
+        a.setFont(fontdef);
+    }
 
     MainWindow mw;
     mw.show();

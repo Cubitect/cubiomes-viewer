@@ -79,6 +79,7 @@ public:
 
     QElapsedTimer elapsed1;
     QElapsedTimer frameelapsed;
+    QElapsedTimer actelapsed;
     qreal decay;
 
     MapOverlay *overlay;

@@ -106,7 +106,7 @@ bool SearchMaster::set(
             const char *mcs = mc2str(finfo.mcmin);
             QMessageBox::warning(parent, tr("Warning"),
                     tr("Condition %1 requires a minimum Minecraft version of %2.")
-                    .arg(cid).arg(mcs));
+                    .arg(cid, mcs));
             return false;
         }
         if (wi.mc > finfo.mcmax)
@@ -114,23 +114,21 @@ bool SearchMaster::set(
             const char *mcs = mc2str(finfo.mcmax);
             QMessageBox::warning(parent, tr("Warning"),
                     tr("Condition %1 not available for Minecraft versions above %2.")
-                    .arg(cid).arg(mcs));
+                    .arg(cid, mcs));
             return false;
         }
         if (finfo.cat == CAT_BIOMES && c.type != F_TEMPS && c.type != F_CLIMATE_NOISE)
         {
-            uint64_t b = c.bfilter.riverToFind;
-            uint64_t m = c.bfilter.riverToFindM;
-            b &= ~((1ULL << ocean) | (1ULL << deep_ocean));
-            b |= c.bfilter.oceanToFind;
-            if ((c.bfilter.biomeToExcl & b) || (c.bfilter.biomeToExclM & m))
+            uint64_t b = c.biomeToFind;
+            uint64_t m = c.biomeToFindM;
+            if ((c.biomeToExcl & b) || (c.biomeToExclM & m))
             {
                 QMessageBox::warning(parent, tr("Warning"),
                         tr("Biome condition with ID %1 has contradicting "
                         "flags for include and exclude.").arg(cid));
                 return false;
             }
-            if (b == 0 && m == 0 && c.bfilter.biomeToExcl == 0 && c.bfilter.biomeToExclM == 0)
+            if ((b | m | c.biomeToExcl | c.biomeToExclM) == 0)
             {
                 int button = QMessageBox::information(parent, tr("Info"),
                         tr("Biome condition with ID %1 specifies no biomes.")
@@ -157,7 +155,7 @@ bool SearchMaster::set(
                 int cnt = __builtin_popcountll(b) + __builtin_popcountll(m);
                 QString msg = tr("Biome condition with ID %1 includes %n "
                         "biome(s) that do not generate in MC %2.", "", cnt)
-                        .arg(cid).arg(mc2str(wi.mc));
+                        .arg(cid, mc2str(wi.mc));
                 QMessageBox::warning(parent, tr("Warning"), msg);
                 return false;
             }
@@ -185,12 +183,19 @@ bool SearchMaster::set(
                 return false;
             }
         }
+        if (c.skipref && c.x1 == 0 && c.x2 == 0 && c.z1 == 0 && c.z2 == 0)
+        {
+            QMessageBox::warning(parent, tr("Warning"),
+                    tr("Condition %1 ignores its only location of size 1.")
+                    .arg(cid));
+            return false;
+        }
     }
 
     this->searchtype = sc.searchtype;
     this->mc = wi.mc;
     this->large = wi.large;
-    this->condtree.set(cv);
+    this->condtree.set(cv, wi);
     this->itemsize = 1; //config.seedsPerItem;
     this->threadcnt = sc.threads;
     this->slist = slist;
@@ -557,8 +562,18 @@ void SearchMaster::stop()
 
 bool SearchMaster::getProgress(uint64_t *prog, uint64_t *end, uint64_t *seed)
 {
-    QMutexLocker locker(&mutex);
-
+    if (!mutex.tryLock(10))
+    {
+        if (searchtype == SEARCH_BLOCKS && slist.empty())
+        {   // a block search with no list looks for candidates in the search
+            // master and can therefore make progress outside of workers
+            *prog = this->prog;
+            *end  = this->scnt;
+            *seed = this->seed;
+            return true;
+        }
+        return false;
+    }
     *prog = this->prog;
     *end  = this->scnt;
     *seed = this->seed;
@@ -573,6 +588,7 @@ bool SearchMaster::getProgress(uint64_t *prog, uint64_t *end, uint64_t *seed)
             valid = true;
         }
     }
+    mutex.unlock();
     return valid;
 }
 
@@ -676,6 +692,9 @@ bool SearchMaster::requestItem(SearchWorker *item)
                     {
                         break;
                     }
+                    // update progress for skipped block
+                    seed = low;
+                    prog += 0x10000;
                 }
                 if (low > MASK48)
                     isdone = true;

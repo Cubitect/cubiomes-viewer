@@ -55,8 +55,10 @@ QVector<Condition> FormConditions::getConditions() const
     QVector<Condition> conds;
 
     for (int i = 0, ie = ui->listConditionsFull->count(); i < ie; i++)
-        conds.push_back(qvariant_cast<Condition>(ui->listConditionsFull->item(i)->data(Qt::UserRole)));
-
+    {
+        Condition c = qvariant_cast<Condition>(ui->listConditionsFull->item(i)->data(Qt::UserRole));
+        conds.push_back(c);
+    }
     return conds;
 }
 

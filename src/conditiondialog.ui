@@ -170,26 +170,14 @@
           <string>Location</string>
          </property>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="4" column="3" colspan="3">
-           <widget class="QComboBox" name="comboBoxRelative">
-            <property name="sizeAdjustPolicy">
-             <enum>QComboBox::AdjustToContentsOnFirstShow</enum>
-            </property>
-            <item>
-             <property name="text">
-              <string>World origin</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-          <item row="1" column="3" colspan="3">
-           <widget class="QLineEdit" name="lineRadius">
+          <item row="2" column="0" colspan="3">
+           <widget class="QCheckBox" name="checkRadius">
             <property name="text">
-             <string>0</string>
+             <string>Within radial distance: </string>
             </property>
            </widget>
           </item>
-          <item row="3" column="1" colspan="5">
+          <item row="4" column="1" colspan="5">
            <layout class="QHBoxLayout" name="horizontalLayout">
             <item>
              <widget class="QLabel" name="labelX1">
@@ -286,15 +274,64 @@
             </item>
            </layout>
           </item>
-          <item row="2" column="3">
-           <widget class="QLineEdit" name="lineSquare">
+          <item row="3" column="0" colspan="3">
+           <widget class="QRadioButton" name="radioSquare">
+            <property name="text">
+             <string>Within centred square of side:</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QRadioButton" name="radioCustom">
+            <property name="text">
+             <string>Custom:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0" colspan="3">
+           <widget class="QLabel" name="labelRelative">
+            <property name="text">
+             <string>Location is relative to:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="3" colspan="3">
+           <widget class="QComboBox" name="comboBoxRelative">
+            <property name="sizeAdjustPolicy">
+             <enum>QComboBox::AdjustToContentsOnFirstShow</enum>
+            </property>
+            <item>
+             <property name="text">
+              <string>World origin</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="2" column="3" colspan="3">
+           <widget class="QLineEdit" name="lineRadius">
             <property name="text">
              <string>0</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="3" colspan="3">
+          <item row="0" column="0" colspan="3">
+           <widget class="QLabel" name="labelSpinBox">
+            <property name="text">
+             <string>Instances within area:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
            <widget class="SpinInstances" name="spinBox">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="specialValueText">
              <string>0 (exclude)</string>
             </property>
@@ -309,45 +346,17 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="0">
-           <widget class="QRadioButton" name="radioCustom">
+          <item row="0" column="4" colspan="2">
+           <widget class="QCheckBox" name="checkSkipRef">
+            <property name="toolTip">
+             <string>Skip instances at exactly the relative reference location</string>
+            </property>
             <property name="text">
-             <string>Custom:</string>
+             <string>Ignore reference</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="0" colspan="3">
-           <widget class="QRadioButton" name="radioSquare">
-            <property name="text">
-             <string>Within centred square of side:</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0" colspan="3">
-           <widget class="QCheckBox" name="checkRadius">
-            <property name="text">
-             <string>Within radial distance: </string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0" colspan="3">
-           <widget class="QLabel" name="labelSpinBox">
-            <property name="text">
-             <string>Instances within area:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0" colspan="3">
-           <widget class="QLabel" name="labelRelative">
-            <property name="text">
-             <string>Location is relative to:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="4">
+          <item row="3" column="5">
            <widget class="QPushButton" name="buttonAreaInfo">
             <property name="maximumSize">
              <size>
@@ -373,6 +382,13 @@
             </property>
             <property name="autoDefault">
              <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="3" colspan="2">
+           <widget class="QLineEdit" name="lineSquare">
+            <property name="text">
+             <string>0</string>
             </property>
            </widget>
           </item>
@@ -419,8 +435,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>648</width>
-                <height>377</height>
+                <width>636</width>
+                <height>345</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -703,8 +719,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>648</width>
-                <height>333</height>
+                <width>636</width>
+                <height>298</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -752,8 +768,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>648</width>
-                <height>413</height>
+                <width>636</width>
+                <height>380</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -794,8 +810,7 @@
        </property>
        <property name="icon">
         <iconset theme="dialog-cancel">
-         <normaloff/>
-        </iconset>
+         <normaloff>.</normaloff>.</iconset>
        </property>
       </widget>
      </item>
@@ -806,8 +821,7 @@
        </property>
        <property name="icon">
         <iconset theme="dialog-ok">
-         <normaloff/>
-        </iconset>
+         <normaloff>.</normaloff>.</iconset>
        </property>
        <property name="default">
         <bool>true</bool>

@@ -26,31 +26,20 @@
       </property>
       <widget class="QFrame" name="controlFrame">
        <layout class="QVBoxLayout" name="verticalLayout_5">
-        <property name="margin">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
          <number>0</number>
         </property>
         <item>
          <layout class="QGridLayout" name="gridMCSeed">
-          <item row="0" column="5">
-           <widget class="QLineEdit" name="seedEdit">
-            <property name="toolTip">
-             <string>Press enter to accept</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <widget class="QLabel" name="labelY">
-            <property name="toolTip">
-             <string>Show map for this y-level</string>
-            </property>
-            <property name="text">
-             <string>Y:</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="2">
            <widget class="QLabel" name="labelSeed">
             <property name="toolTip">
@@ -71,22 +60,6 @@
             </property>
             <property name="text">
              <string>MC</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="6">
-           <widget class="QLabel" name="labelSeedType">
-            <property name="minimumSize">
-             <size>
-              <width>61</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="toolTip">
-             <string>Seed can be an integer or text. Leave empty for a random seed</string>
-            </property>
-            <property name="text">
-             <string>(random)</string>
             </property>
            </widget>
           </item>
@@ -209,6 +182,19 @@
             </item>
            </widget>
           </item>
+          <item row="1" column="2">
+           <widget class="QLabel" name="labelY">
+            <property name="toolTip">
+             <string>Show map for this y-level</string>
+            </property>
+            <property name="text">
+             <string>Y:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
           <item row="1" column="0" colspan="2">
            <widget class="QCheckBox" name="checkLarge">
             <property name="text">
@@ -216,8 +202,35 @@
             </property>
            </widget>
           </item>
+          <item row="0" column="5" colspan="2">
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <widget class="QLineEdit" name="seedEdit">
+              <property name="toolTip">
+               <string>Press enter to accept</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="labelSeedType">
+              <property name="toolTip">
+               <string>Seed can be an integer or text. Leave empty for a random seed</string>
+              </property>
+              <property name="text">
+               <string>random</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
           <item row="1" column="5">
            <widget class="QComboBox" name="comboY">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="editable">
              <bool>true</bool>
             </property>
@@ -299,7 +312,16 @@
             <string>Search</string>
            </attribute>
            <layout class="QGridLayout" name="gridLayout">
-            <property name="margin">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
              <number>0</number>
             </property>
             <item row="0" column="0">
@@ -345,8 +367,8 @@ QToolButton {
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>1233</width>
-                 <height>676</height>
+                 <width>1228</width>
+                 <height>663</height>
                 </rect>
                </property>
                <property name="sizePolicy">
@@ -671,7 +693,16 @@ QSplitter {
         <enum>QFrame::Raised</enum>
        </property>
        <layout class="QGridLayout" name="gridLayout_4">
-        <property name="margin">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
          <number>0</number>
         </property>
         <item row="0" column="0">
@@ -745,7 +776,7 @@ QToolButton:checked {
      <x>0</x>
      <y>0</y>
      <width>1280</width>
-     <height>23</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuMap">
@@ -765,8 +796,9 @@ QToolButton:checked {
      <addaction name="actionOceanTemp"/>
     </widget>
     <addaction name="actionGo_to"/>
-    <addaction name="actionScan_seed_for_Quad_Huts"/>
     <addaction name="actionOpen_shadow_seed"/>
+    <addaction name="actionScan_seed_for_Quad_Huts"/>
+    <addaction name="actionStructure_visibility"/>
     <addaction name="actionExportImg"/>
     <addaction name="actionBiome_colors"/>
     <addaction name="menuBiome_layer"/>
@@ -965,6 +997,11 @@ QToolButton:checked {
   <action name="actionExportImg">
    <property name="text">
     <string>Export biomes as image...</string>
+   </property>
+  </action>
+  <action name="actionStructure_visibility">
+   <property name="text">
+    <string>Structure zoom limits...</string>
    </property>
   </action>
  </widget>

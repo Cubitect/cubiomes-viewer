@@ -29,7 +29,10 @@ public:
 private slots:
     void on_buttonBox_clicked(QAbstractButton *button);
 
+    void on_buttonBiomeColorEditor_clicked();
     void on_buttonBiomeColor_clicked();
+
+    void on_buttonStructVisEdit_clicked();
 
     void on_buttonClear_clicked();
 
@@ -38,6 +41,8 @@ private slots:
 private:
     Ui::ConfigDialog *ui;
     Config conf;
+public:
+    bool structVisModified;
 };
 
 #endif // CONFIGDIALOG_H

@@ -19,3 +19,22 @@ Non-PC platforms, such as macOS, are not formally supported, but you can check [
 
 Build instructions can be found in the [buildguide](buildguide.md).
 
+
+## Primary Features Overview
+
+The tool features a map viewer that outlines the biomes of the Overworld,
+Nether and End dimensions, with a wide zoom range and with toggles for each
+supported structure type. It is simple to cycle through a list of seeds or to
+adjust the mincraft version on the fly.
+
+The integrated seed finder is highly customizable using a hierarchical
+condition system that allows the user to look for features that are relative to
+one another. Conditions can be derived from a large selection of criteria among
+structure placement, world spawn point and from the available biomes in an
+area. Filters can use logic gates in the form of helper conditions for even
+more control and Quad-Hut and Quad-Monument seed generators to quickly look for
+seeds that include extremely rare structure constellations.
+
+
+
+

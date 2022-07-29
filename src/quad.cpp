@@ -3,9 +3,73 @@
 #include "cutil.h"
 
 #include <QThreadPool>
+#include <QSettings>
 
 #include <cmath>
 #include <algorithm>
+
+
+void loadStructVis(std::map<int, double>& structvis)
+{
+    QSettings settings("cubiomes-viewer", "cubiomes-viewer");
+
+    for (int opt = D_DESERT; opt < D_SPAWN; opt++)
+    {
+        const char *name = mapopt2str(opt);
+        double scale = settings.value(QString("structscale/") + name, 32.0).toDouble();
+        structvis[opt] = scale;
+    }
+}
+
+void saveStructVis(std::map<int, double>& structvis)
+{
+    QSettings settings("cubiomes-viewer", "cubiomes-viewer");
+
+    for (auto it : structvis)
+    {
+        const char *name = mapopt2str(it.first);
+        settings.setValue(QString("structscale/") + name, it.second);
+    }
+}
+
+const QPixmap& getMapIcon(int opt, int variation)
+{
+    static QPixmap icons[STRUCT_NUM];
+    static QPixmap iconzvil;
+    static bool init = false;
+
+    if (!init)
+    {
+        init = true;
+        icons[D_DESERT]     = QPixmap(":/icons/desert.png");
+        icons[D_JUNGLE]     = QPixmap(":/icons/jungle.png");
+        icons[D_IGLOO]      = QPixmap(":/icons/igloo.png");
+        icons[D_HUT]        = QPixmap(":/icons/hut.png");
+        icons[D_VILLAGE]    = QPixmap(":/icons/village.png");
+        icons[D_MANSION]    = QPixmap(":/icons/mansion.png");
+        icons[D_MONUMENT]   = QPixmap(":/icons/monument.png");
+        icons[D_RUINS]      = QPixmap(":/icons/ruins.png");
+        icons[D_SHIPWRECK]  = QPixmap(":/icons/shipwreck.png");
+        icons[D_TREASURE]   = QPixmap(":/icons/treasure.png");
+        icons[D_MINESHAFT]  = QPixmap(":/icons/mineshaft.png");
+        icons[D_OUTPOST]    = QPixmap(":/icons/outpost.png");
+        icons[D_ANCIENTCITY]= QPixmap(":/icons/ancient_city.png");
+        icons[D_PORTAL]     = QPixmap(":/icons/portal.png");
+        icons[D_PORTALN]    = QPixmap(":/icons/portal.png");
+        icons[D_SPAWN]      = QPixmap(":/icons/spawn.png");
+        icons[D_STRONGHOLD] = QPixmap(":/icons/stronghold.png");
+        icons[D_FORTESS]    = QPixmap(":/icons/fortress.png");
+        icons[D_BASTION]    = QPixmap(":/icons/bastion.png");
+        icons[D_ENDCITY]    = QPixmap(":/icons/endcity.png");
+        icons[D_GATEWAY]    = QPixmap(":/icons/gateway.png");
+        iconzvil = QPixmap(":/icons/zombie.png");
+    }
+    if (variation)
+    {
+        if (opt == D_VILLAGE) return iconzvil;
+    }
+    return icons[opt];
+}
 
 
 Quad::Quad(const Level* l, int i, int j)
@@ -86,7 +150,7 @@ void Quad::run()
 
     if (pixs > 0)
     {
-        int seam_buf = pixs / 128;
+        int seam_buf = 0; //pixs / 128;
         int y = (scale > 1) ? wi.y >> 2 : wi.y;
         int x = ti*pixs, z = tj*pixs, w = pixs+seam_buf, h = pixs+seam_buf;
         Range r = {scale, x, z, w, h, y, 1};
@@ -197,7 +261,7 @@ void Level::init4map(QWorld *w, int pix, int layerscale)
     sopt = D_NONE;
 }
 
-void Level::init4struct(QWorld *w, int dim, int blocks, int sopt, int lv)
+void Level::init4struct(QWorld *w, int dim, int blocks, double vis, int sopt)
 {
     this->wi = w->wi;
     this->dim = dim;
@@ -205,7 +269,7 @@ void Level::init4struct(QWorld *w, int dim, int blocks, int sopt, int lv)
     this->pixs = -1;
     this->scale = -1;
     this->sopt = sopt;
-    this->viewlv = lv;
+    this->vis = vis;
     this->isdel = &w->isdel;
 }
 
@@ -349,52 +413,25 @@ QWorld::QWorld(WorldInfo wi, int dim, int layeropt)
 
     setDim(dim, layeropt);
 
+    std::map<int, double> svis;
+    loadStructVis(svis);
+
     lvs.resize(D_SPAWN);
-    lvs[D_DESERT]       .init4struct(this, 0, 2048, D_DESERT, 2);
-    lvs[D_JUNGLE]       .init4struct(this, 0, 2048, D_JUNGLE, 2);
-    lvs[D_IGLOO]        .init4struct(this, 0, 2048, D_IGLOO, 2);
-    lvs[D_HUT]          .init4struct(this, 0, 2048, D_HUT, 2);
-    lvs[D_VILLAGE]      .init4struct(this, 0, 2048, D_VILLAGE, 2);
-    lvs[D_MANSION]      .init4struct(this, 0, 2048, D_MANSION, 3);
-    lvs[D_MONUMENT]     .init4struct(this, 0, 2048, D_MONUMENT, 2);
-    lvs[D_RUINS]        .init4struct(this, 0, 2048, D_RUINS, 1);
-    lvs[D_SHIPWRECK]    .init4struct(this, 0, 2048, D_SHIPWRECK, 1);
-    lvs[D_TREASURE]     .init4struct(this, 0, 2048, D_TREASURE, 1);
-    lvs[D_OUTPOST]      .init4struct(this, 0, 2048, D_OUTPOST, 2);
-    lvs[D_ANCIENTCITY]  .init4struct(this, 0, 2048, D_ANCIENTCITY, 2);
-    lvs[D_PORTAL]       .init4struct(this, 0, 2048, D_PORTAL, 1);
-    lvs[D_PORTALN]      .init4struct(this,-1, 2048, D_PORTALN, 1);
-    lvs[D_FORTESS]      .init4struct(this,-1, 2048, D_FORTESS, 1);
-    lvs[D_BASTION]      .init4struct(this,-1, 2048, D_BASTION, 1);
-    lvs[D_ENDCITY]      .init4struct(this, 1, 2048, D_ENDCITY, 2);
-    lvs[D_GATEWAY]      .init4struct(this, 1, 2048, D_GATEWAY, 2);
-    lvs[D_MINESHAFT]    .init4struct(this, 0, 2048, D_MINESHAFT, 1);
-
+    for (int opt = D_DESERT; opt < D_SPAWN; opt++)
+    {
+        int sdim = 0, qsiz = 512*16;
+        switch (opt) {
+        case D_PORTALN: sdim = -1; break;
+        case D_FORTESS: sdim = -1; break;
+        case D_BASTION: sdim = -1; break;
+        case D_ENDCITY: sdim = +1; break;
+        case D_GATEWAY: sdim = +1; break;
+        case D_MANSION: qsiz = 1280*16; break;
+        }
+        double vis = 1.0 / svis[opt];
+        lvs[opt].init4struct(this, sdim, qsiz, vis, opt);
+    }
     memset(sshow, 0, sizeof(sshow));
-
-    icons[D_DESERT]     = QPixmap(":/icons/desert.png");
-    icons[D_JUNGLE]     = QPixmap(":/icons/jungle.png");
-    icons[D_IGLOO]      = QPixmap(":/icons/igloo.png");
-    icons[D_HUT]        = QPixmap(":/icons/hut.png");
-    icons[D_VILLAGE]    = QPixmap(":/icons/village.png");
-    icons[D_MANSION]    = QPixmap(":/icons/mansion.png");
-    icons[D_MONUMENT]   = QPixmap(":/icons/monument.png");
-    icons[D_RUINS]      = QPixmap(":/icons/ruins.png");
-    icons[D_SHIPWRECK]  = QPixmap(":/icons/shipwreck.png");
-    icons[D_TREASURE]   = QPixmap(":/icons/treasure.png");
-    icons[D_MINESHAFT]  = QPixmap(":/icons/mineshaft.png");
-    icons[D_OUTPOST]    = QPixmap(":/icons/outpost.png");
-    icons[D_ANCIENTCITY]= QPixmap(":/icons/ancient_city.png");
-    icons[D_PORTAL]     = QPixmap(":/icons/portal.png");
-    icons[D_PORTALN]    = QPixmap(":/icons/portal.png");
-    icons[D_SPAWN]      = QPixmap(":/icons/spawn.png");
-    icons[D_STRONGHOLD] = QPixmap(":/icons/stronghold.png");
-    icons[D_FORTESS]    = QPixmap(":/icons/fortress.png");
-    icons[D_BASTION]    = QPixmap(":/icons/bastion.png");
-    icons[D_ENDCITY]    = QPixmap(":/icons/endcity.png");
-    icons[D_GATEWAY]    = QPixmap(":/icons/gateway.png");
-
-    iconzvil = QPixmap(":/icons/zombie.png");
 }
 
 QWorld::~QWorld()
@@ -558,7 +595,6 @@ void QWorld::cleancache(std::vector<Quad*>& cache, unsigned int maxsize)
     cache.swap(newcache);
 }
 
-
 struct SpawnStronghold : public QRunnable
 {
     QWorld *world;
@@ -581,20 +617,17 @@ struct SpawnStronghold : public QRunnable
         StrongholdIter sh;
         initFirstStronghold(&sh, wi.mc, wi.seed);
 
-        std::vector<Pos> *shp = new std::vector<Pos>;
-        shp->reserve(wi.mc >= MC_1_9 ? 128 : 3);
+        // note: pointer to atomic pointer
+        QAtomicPointer<PosElement> *shpp = &world->strongholds;
 
         while (nextStronghold(&sh, &g) > 0)
         {
             if (world->isdel)
-            {
-                delete shp;
                 return;
-            }
-            shp->push_back(sh.pos);
+            PosElement *shp;
+            (*shpp) = shp = new PosElement(sh.pos);
+            shpp = &shp->next;
         }
-
-        world->strongholds = shp;
 
         QVector<QuadInfo> *qsinfo = new QVector<QuadInfo>;
 
@@ -667,8 +700,8 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
             qreal px = vw/2.0 + (q->ti) * ps - focusx * blocks2pix;
             qreal pz = vh/2.0 + (q->tj) * ps - focusz * blocks2pix;
             // account for the seam buffer pixels
-            ps += ((q->pixs / 128) * q->blocks / (qreal)q->pixs) * blocks2pix;
-            QRect rec(px,pz,ps,ps);
+            //ps += ((q->pixs / 128) * q->blocks / (qreal)q->pixs) * blocks2pix;
+            QRect rec(floor(px),floor(pz), ceil(ps),ceil(ps));
             painter.drawImage(rec, *q->img);
 
             if (sshow[D_GRID] && !gridspacing)
@@ -699,7 +732,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
         }
     }
 
-    if (sshow[D_SLIME] && dim == 0 && blocks2pix*16 > 2.0)
+    if (sshow[D_SLIME] && dim == 0 && blocks2pix*16 > 0.5)
     {
         long x = floor(bx0 / 16), w = floor(bx1 / 16) - x + 1;
         long z = floor(bz0 / 16), h = floor(bz1 / 16) - z + 1;
@@ -709,7 +742,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
             x+w >= slimex+slimeimg.width() || z+h >= slimez+slimeimg.height() ||
             w*h*4 >= slimeimg.width()*slimeimg.height())
         {
-            int pad = 64;
+            int pad = (int)(20 / blocks2pix); // 20*16 pixels movement before recalc
             x -= pad;
             z -= pad;
             w += 2*pad;
@@ -734,14 +767,14 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
         qreal px = vw/2.0 + slimex * ps - focusx * blocks2pix;
         qreal pz = vh/2.0 + slimez * ps - focusz * blocks2pix;
 
-        QRect rec(px, pz, ps*slimeimg.width(), ps*slimeimg.height());
+        QRect rec(round(px), round(pz), round(ps*slimeimg.width()), round(ps*slimeimg.height()));
         painter.drawImage(rec, slimeimg);
     }
 
 
     if (showBB && blocks2pix >= 1.0 && qsinfo && dim == 0)
     {
-        for (QuadInfo qi : *qsinfo)
+        for (QuadInfo qi : qAsConst(*qsinfo))
         {
             if (qi.typ == Swamp_Hut && !sshow[D_HUT])
                 continue;
@@ -762,7 +795,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
     for (int sopt = D_DESERT; sopt < D_SPAWN; sopt++)
     {
         Level& l = lvs[sopt];
-        if (!sshow[sopt] || dim != l.dim || activelv > l.viewlv)
+        if (!sshow[sopt] || dim != l.dim || l.vis > blocks2pix)
             continue;
 
         std::vector<QPainter::PixmapFragment> frags;
@@ -805,7 +838,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
 
                 if (seldo)
                 {   // check for structure selection
-                    QRectF r = icons[sopt].rect();
+                    QRectF r = getMapIcon(sopt).rect();
                     r.moveCenter(d);
                     if (r.contains(selx, selz))
                     {
@@ -818,12 +851,12 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
                 {   // don't draw selected structure
                     continue;
                 }
-                QRectF r = icons[sopt].rect();
+                QRectF r = getMapIcon(sopt).rect();
                 if (sopt == D_VILLAGE && vp.v.abandoned)
                 {
                     int ix = d.x()-r.width()/2;
                     int iy = d.y()-r.height()/2;
-                    painter.drawPixmap(ix, iy, iconzvil);
+                    painter.drawPixmap(ix, iy, getMapIcon(sopt, vp.v.abandoned));
                 }
                 else
                 {
@@ -832,7 +865,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
             }
         }
 
-        painter.drawPixmapFragments(frags.data(), frags.size(), icons[sopt]);
+        painter.drawPixmapFragments(frags.data(), frags.size(), getMapIcon(sopt));
     }
 
     Pos* sp = spawn; // atomic fetch
@@ -842,8 +875,8 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
         qreal y = vh/2.0 + (sp->z - focusz) * blocks2pix;
 
         QPointF d = QPointF(x, y);
-        QRectF r = icons[D_SPAWN].rect();
-        painter.drawPixmap(x-r.width()/2, y-r.height()/2, icons[D_SPAWN]);
+        QRectF r = getMapIcon(D_SPAWN).rect();
+        painter.drawPixmap(x-r.width()/2, y-r.height()/2, getMapIcon(D_SPAWN));
 
         if (seldo)
         {
@@ -857,17 +890,17 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
         }
     }
 
-    std::vector<Pos>* shs = strongholds; // atomic fetch
+    QAtomicPointer<PosElement> shs = strongholds;
     if (shs && sshow[D_STRONGHOLD] && dim == 0)
     {
         std::vector<QPainter::PixmapFragment> frags;
-        frags.reserve(shs->size());
-        for (Pos p : *shs)
+        do
         {
+            Pos p = (*shs).p;
             qreal x = vw/2.0 + (p.x - focusx) * blocks2pix;
             qreal y = vh/2.0 + (p.z - focusz) * blocks2pix;
             QPointF d = QPointF(x, y);
-            QRectF r = icons[D_STRONGHOLD].rect();
+            QRectF r = getMapIcon(D_STRONGHOLD).rect();
             frags.push_back(QPainter::PixmapFragment::create(d, r));
 
             if (seldo)
@@ -881,15 +914,16 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
                 }
             }
         }
-        painter.drawPixmapFragments(frags.data(), frags.size(), icons[D_STRONGHOLD]);
+        while ((shs = (*shs).next));
+        painter.drawPixmapFragments(frags.data(), frags.size(), getMapIcon(D_STRONGHOLD));
     }
 
     for (int sopt = D_DESERT; sopt < D_SPAWN; sopt++)
     {
         Level& l = lvs[sopt];
-        if (activelv <= l.viewlv && sshow[sopt] && dim == l.dim)
+        if (l.vis <= blocks2pix && sshow[sopt] && dim == l.dim)
             l.update(cachedstruct, bx0, bz0, bx1, bz1);
-        else if (activelv > l.viewlv+1)
+        else if (l.vis * 4 > blocks2pix)
             l.update(cachedstruct, 0, 0, 0, 0);
     }
     for (int li = lvb.size()-1; li >= 0; --li)
@@ -918,12 +952,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
 
     if (seltype != D_NONE)
     {
-        QPixmap *icon = &icons[seltype];
-        if (selvar)
-        {
-            if (seltype == D_VILLAGE)
-                icon = &iconzvil;
-        }
+        const QPixmap *icon = &getMapIcon(seltype, selvar);
         qreal x = vw/2.0 + (selpos.x - focusx) * blocks2pix;
         qreal y = vh/2.0 + (selpos.z - focusz) * blocks2pix;
         QRect iconrec = icon->rect();

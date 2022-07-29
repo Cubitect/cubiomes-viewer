@@ -66,6 +66,7 @@ MapView::MapView(QWidget *parent)
 
     elapsed1.start();
     frameelapsed.start();
+    actelapsed.start();
 
     overlay = new MapOverlay(this);
     overlay->setMouseTracking(true);
@@ -274,12 +275,34 @@ void MapView::paintEvent(QPaintEvent *)
         overlay->pos = p;
         overlay->bname = biome2str(world->wi.mc, world->getBiome(p));
 
-        if (QThreadPool::globalInstance()->activeThreadCount() > 0 || velx || velz)
+        bool active = QThreadPool::globalInstance()->activeThreadCount() > 0;
+        if (active || velx || velz)
             updatecounter = 2;
         if (updatecounter > 0)
         {
             updatecounter--;
             QWidget::update();
+
+            if (active)
+            {   // processing animation
+                qreal cyc = actelapsed.nsecsElapsed() * 1e-9;
+                qreal ang = 360 * (1.0 - (cyc - (int) cyc));
+                int r = 20;
+                QRect rec = QRect(r, height() - 2*r, r, r);
+
+                QConicalGradient gradient;
+                gradient.setCenter(rec.center());
+                gradient.setAngle(ang);
+                gradient.setColorAt(0, QColor(0, 0, 0, 192));
+                gradient.setColorAt(1, QColor(255, 255, 255, 192));
+                QPen pen(QBrush(gradient), 5, Qt::SolidLine, Qt::SquareCap);
+                painter.setPen(pen);
+                painter.drawRect(rec);
+            }
+        }
+        else
+        {
+            actelapsed.start();
         }
     }
 }

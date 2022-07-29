@@ -8,6 +8,7 @@
 
 #include <algorithm>
 
+#define MULTIPLY_CHAR QChar(0xD7)
 
 QString Condition::summary() const
 {
@@ -18,10 +19,20 @@ QString Condition::summary() const
     else
         s = QString("[%1]").arg(save, 2, 10, QLatin1Char('0'));
 
-    s += QString(" %2%3%4")
+    if (type == 0)
+    {
+        s += " " + QApplication::translate("Filter", "start condition");
+        return s;
+    }
+
+    QString cnts = "";
+    if (count)
+        cnts += MULTIPLY_CHAR + QString::number(count);
+    if (skipref)
+        cnts += "*";
+    s += QString(" %2%3")
         .arg(QApplication::translate("Filter", ft.name), -28, ' ')
-        .arg(QChar(0xD7))
-        .arg(count, -3, 10, QLatin1Char(' '));
+        .arg(cnts, -4, QLatin1Char(' '));
 
     if (relative)
         s += QString::asprintf("[%02d]+", relative);
@@ -42,24 +53,69 @@ QString Condition::summary() const
     return s;
 }
 
+bool Condition::versionUpgrade()
+{
+    if (version == 0)
+    {
+        uint64_t oceanToFind;
+        memcpy(&oceanToFind, pad2, sizeof(oceanToFind));
+        biomeToFind &= ~((1ULL << ocean) | (1ULL << deep_ocean));
+        biomeToFind |= oceanToFind;
+        skipref = 0;
+        memset(pad1, 0, sizeof(pad1));
+        memset(pad2, 0, sizeof(pad2));
+        version = 1;
+    }
+    return true;
+}
+
+bool Condition::apply(WorldInfo wi)
+{
+    int in[256] = {}, inlen = 0, ex[256] = {}, exlen = 0;
+    for (int i = 0; i < 64; i++)
+    {
+        if (biomeToFind & (1ULL << i))
+            in[inlen++] = i;
+        if (biomeToFindM & (1ULL << i))
+            in[inlen++] = i + 128;
+        if (biomeToExcl & (1ULL << i))
+            ex[exlen++] = i;
+        if (biomeToExclM & (1ULL << i))
+            ex[exlen++] = i + 128;
+    }
+    uint32_t bfflags = 0;
+    if (flags & APPROX)
+        bfflags |= CFB_APPROX;
+    if (flags & MATCH_ANY)
+        setupBiomeFilter(&bf, wi.mc, bfflags, 0, 0, ex, exlen, in, inlen);
+    else
+        setupBiomeFilter(&bf, wi.mc, bfflags, in, inlen, ex, exlen, 0, 0);
+    return true;
+}
+
 QString Condition::toHex() const
 {
-    return QByteArray((const char*) this, sizeof(Condition)).toHex();
+    size_t savsize = offsetof(Condition, generated_start);
+    return QByteArray((const char*) this, savsize).toHex();
 }
 
 bool Condition::readHex(const QString& hex)
 {
-    if (hex.length()/2 < (char*)&count - (char*)this)
+    if ((size_t)hex.length()/2 < offsetof(Condition, count))
         return false;
     QByteArray ba = QByteArray::fromHex(QByteArray(hex.toLatin1().data()));
     size_t minsize = (size_t)ba.size();
-    if (sizeof(Condition) < minsize)
-        minsize = sizeof(Condition);
+    size_t savsize = offsetof(Condition, generated_start);
+    if (savsize < minsize)
+        minsize = savsize;
     memset(this, 0, sizeof(Condition));
     memcpy(this, ba.data(), minsize);
-    return (size_t)ba.size() >= minsize &&
+    bool ok = (size_t)ba.size() >= minsize &&
             save >= 0 && save < 100 &&
             type >= 0 && type < FILTER_MAX;
+    if (ok)
+        ok = versionUpgrade();
+    return ok;
 }
 
 
@@ -100,7 +156,7 @@ bool Condition::villageOk(int mc, StructureVariant sv) const
     return mask & variants;
 }
 
-void ConditionTree::set(const QVector<Condition>& cv)
+void ConditionTree::set(const QVector<Condition>& cv, WorldInfo wi)
 {
     int cmax = 0;
     for (const Condition& c : cv)
@@ -115,6 +171,7 @@ void ConditionTree::set(const QVector<Condition>& cv)
         if (c.meta & Condition::DISABLED)
             continue;
         condvec[c.save] = c;
+        condvec[c.save].apply(wi);
         if (c.relative <= cmax)
             references[c.relative].push_back(c.save);
     }
@@ -132,7 +189,7 @@ int testTreeAt(
 )
 {
     Condition& c = tree->condvec[node];
-    QVector<char>& branches = tree->references[c.save];
+    const std::vector<char>& branches = tree->references[c.save];
     int st;
     int rx1, rz1, rx2, rz2;
     int sref;
@@ -186,7 +243,11 @@ int testTreeAt(
                 if (sta > st)
                     st = sta;
                 if (st == COND_OK)
+                {
+                    if (path)
+                        path[c.save] = pos;
                     return COND_OK;
+                }
             }
         }
         return st;
@@ -221,12 +282,18 @@ int testTreeAt(
             if (st == COND_FAILED)
                 break;
         }
+        if (path && st == COND_OK)
+            path[c.save] = pos;
         return st;
 
 
     case F_LOGIC_OR:
         if (branches.empty())
+        {
+            if (path)
+                path[c.save] = pos;
             return COND_OK; // empty ORs are ignored
+        }
         st = COND_FAILED;
         for (int b : branches)
         {
@@ -246,8 +313,33 @@ int testTreeAt(
             if (st == COND_OK)
                 break;
         }
+        if (path && st == COND_OK)
+            path[c.save] = pos;
         return st;
 
+
+    case F_LOGIC_NOT:
+        st = COND_OK;
+        for (int b : branches)
+        {
+            int sta = testTreeAt(
+                at,
+                tree,
+                b,
+                pass,
+                gen,
+                abort,
+                path
+            );
+            if (*abort)
+                return COND_FAILED;
+            if      (sta == COND_OK) { st = COND_FAILED; break; }
+            else if (sta == COND_FAILED) { st = COND_OK; break; }
+            else if (sta > st) st = sta;
+        }
+        if (path && st == COND_OK)
+            path[c.save] = pos;
+        return st;
 
     default:
 
@@ -261,9 +353,9 @@ int testTreeAt(
         }
         finfo = g_filterinfo.list + c.type;
         if (c.count == 1 && (finfo->count || finfo->cat == CAT_QUAD))
-        {   // condition has exactly one required instance => we can check
-            // each one individually, i.e. this is a branch that can have
-            // multiple independent branches (combined via OR)
+        {   // condition has exactly one required instance so we can check each
+            // of the found instances individually, i.e. this branch splits the
+            // instances into independent subbranches (combined via OR)
             // quad conditions are also processed here since we want to
             // examine all instances without support for averaging
             int icnt = MAX_INSTANCES;
@@ -272,11 +364,11 @@ int testTreeAt(
                 return st;
             int sta = COND_FAILED;
             int iok = 0;
-            for (int i = 0; i < icnt; i++)
+            for (int i = 0; i < icnt; i++) // OR instance subbranches
             {
                 int stb = COND_OK;
-                pos = inst[i]; // position of instance
-                for (int b : branches)
+                pos = inst[i];
+                for (int b : branches) // AND dependent conditions
                 {
                     int stc = testTreeAt(
                         pos,
@@ -326,7 +418,7 @@ int testTreeAt(
                     return st;
                 pos = inst[0]; // center point of instances
             }
-            for (int b : branches)
+            for (char b : branches)
             {
                 if (st == COND_FAILED)
                     break;
@@ -724,6 +816,8 @@ L_qm_any:
             {
                 if (!getStructurePos(st, gen->mc, gen->seed, rx+0, rz+0, &pc))
                     continue;
+                if (cond->skipref && pc.x == at.x && pc.z == at.z)
+                    continue;
                 if (rmax)
                 {
                     int dx = pc.x - at.x;
@@ -871,6 +965,8 @@ L_qm_any:
         if (cond->count == 0)
         {   // exclusion
             icnt = getMineshafts(gen->mc, gen->seed, rx1, rz1, rx2, rz2, cent, 1);
+            if (icnt == 1 && cond->skipref && cent->x == at.x && cent->z == at.z)
+                icnt = 0;
             cent->x = (x1 + x2) >> 1;
             cent->z = (z1 + z2) >> 1;
             if (icnt == 0)
@@ -896,6 +992,18 @@ L_qm_any:
                 }
                 *imax = icnt = j;
             }
+            if (cond->skipref && icnt > 0)
+            {   // remove origin instance
+                for (int i = 0; i < icnt; i++)
+                {
+                    if (cent[i].x == at.x && cent[i].z == at.z)
+                    {
+                        cent[i] = cent[icnt-1];
+                        *imax = --icnt;
+                        break;
+                    }
+                }
+            }
             if (icnt >= cond->count)
                 return COND_OK;
         }
@@ -916,6 +1024,8 @@ L_qm_any:
                     if (rsq >= rmax)
                         continue;
                 }
+                if (cond->skipref && p[i].x == at.x && p[i].z == at.z)
+                    continue;
                 xt += p[i].x;
                 zt += p[i].z;
                 j++;
@@ -967,6 +1077,9 @@ L_qm_any:
         {
             return COND_FAILED;
         }
+
+        if (cond->skipref && pc.x == at.x && pc.z == at.z)
+            return COND_FAILED;
         *cent = pc;
         return COND_OK;
 
@@ -982,8 +1095,8 @@ L_qm_any:
             int dx = pc.x - at.x;
             int dz = pc.z - at.z;
             uint64_t rsq = dx*(int64_t)dx + dz*(int64_t)dz;
-            if (rsq <= rsqmax)
-                return COND_OK;
+            if (rsq > rsqmax)
+                return COND_FAILED;
         }
         else
         {
@@ -991,10 +1104,12 @@ L_qm_any:
             z1 = cond->z1 + at.z;
             x2 = cond->x2 + at.x;
             z2 = cond->z2 + at.z;
-            if (pc.x >= x1 && pc.x <= x2 && pc.z >= z1 && pc.z <= z2)
-                return COND_OK;
+            if (pc.x < x1 || pc.x > x2 || pc.z < z1 || pc.z > z2)
+                return COND_FAILED;
         }
-        return COND_FAILED;
+        if (cond->skipref && pc.x == at.x && pc.z == at.z)
+            return COND_FAILED;
+        return COND_OK;
 
 
     case F_STRONGHOLD:
@@ -1104,10 +1219,12 @@ L_qm_any:
                     inside = (sh.pos.x >= x1 && sh.pos.x <= x2 &&
                               sh.pos.z >= z1 && sh.pos.z <= z2);
                 }
+                if (cond->skipref && sh.pos.x == at.x && sh.pos.z == at.z)
+                    inside = false;
                 if (inside)
                 {
                     if (cond->count == 0)
-                    {
+                    {   // exclude
                         return COND_FAILED;
                     }
                     else if (imax)
@@ -1137,7 +1254,7 @@ L_qm_any:
             {
                 *imax = icnt;
             }
-            else
+            else if (icnt)
             {
                 cent->x = xt / icnt;
                 cent->z = zt / icnt;
@@ -1161,6 +1278,8 @@ L_qm_any:
         {
             for (int rx = rx1; rx <= rx2; rx++)
             {
+                if (cond->skipref && rx == at.x >> 4 && rz == at.z >> 4)
+                    continue;
                 if (isSlimeChunk(gen->seed, rx, rz))
                 {
                     if (cond->count == 0)
@@ -1195,7 +1314,7 @@ L_qm_any:
         {
             *imax = icnt;
         }
-        else
+        else if (icnt)
         {
             cent->x = (xt << 4) / icnt;
             cent->z = (zt << 4) / icnt;
@@ -1206,15 +1325,15 @@ L_qm_any:
 
     // biome filters reference specific layers
     // MAYBE: options for layers in different versions?
-    case F_BIOME:           s = 0;
-        if (gen->mc >= MC_1_18)    goto L_noise_biome;
-        else                       goto L_biome_filter_layered;
-    case F_BIOME_4_RIVER:   s = 2; goto L_biome_filter_layered;
-    case F_BIOME_256_OTEMP: s = 8; goto L_biome_filter_layered;
+    case F_BIOME:
+        if (gen->mc >= MC_1_18) goto L_noise_biome;
+        // fallthrough
+    case F_BIOME_4_RIVER:
+    case F_BIOME_256_OTEMP:
 
-L_biome_filter_layered:
         if (gen->mc >= MC_1_18)
             return COND_FAILED;
+        s = finfo.pow2;
         rx1 = ((cond->x1 << s) + at.x) >> s;
         rz1 = ((cond->z1 << s) + at.z) >> s;
         rx2 = ((cond->x2 << s) + at.x) >> s;
@@ -1235,7 +1354,7 @@ L_biome_filter_layered:
             int h = rz2-rz1+1;
             //gen->init4Dim(0); // seed gets applied by checkForBiomesAtLayer
             if (checkForBiomesAtLayer(&gen->g.ls, &gen->g.ls.layers[finfo.layer],
-                NULL, gen->seed, rx1, rz1, w, h, cond->bfilter, cond->flags) > 0)
+                NULL, gen->seed, rx1, rz1, w, h, &cond->bf) > 0)
             {
                 valid = COND_OK;
             }
@@ -1260,20 +1379,21 @@ L_biome_filter_layered:
         return COND_FAILED;
 
 
-    case F_BIOME_4:         s = 2;  goto L_noise_biome;
-    case F_BIOME_16:        s = 4;  goto L_noise_biome;
-    case F_BIOME_64:        s = 6;  goto L_noise_biome;
-    case F_BIOME_256:       s = 8;  goto L_noise_biome;
-    case F_BIOME_NETHER_1:  s = 0;  goto L_noise_biome;
-    case F_BIOME_NETHER_4:  s = 2;  goto L_noise_biome;
-    case F_BIOME_NETHER_16: s = 4;  goto L_noise_biome;
-    case F_BIOME_NETHER_64: s = 6;  goto L_noise_biome;
-    case F_BIOME_END_1:     s = 0;  goto L_noise_biome;
-    case F_BIOME_END_4:     s = 2;  goto L_noise_biome;
-    case F_BIOME_END_16:    s = 4;  goto L_noise_biome;
-    case F_BIOME_END_64:    s = 6;  goto L_noise_biome;
+    case F_BIOME_4:
+    case F_BIOME_16:
+    case F_BIOME_64:
+    case F_BIOME_256:
+    case F_BIOME_NETHER_1:
+    case F_BIOME_NETHER_4:
+    case F_BIOME_NETHER_16:
+    case F_BIOME_NETHER_64:
+    case F_BIOME_END_1:
+    case F_BIOME_END_4:
+    case F_BIOME_END_16:
+    case F_BIOME_END_64:
 
 L_noise_biome:
+        s = finfo.pow2;
         rx1 = ((cond->x1 << s) + at.x) >> s;
         rz1 = ((cond->z1 << s) + at.z) >> s;
         rx2 = ((cond->x2 << s) + at.x) >> s;
@@ -1292,7 +1412,7 @@ L_noise_biome:
             int y = (s == 0 ? cond->y : cond->y >> 2);
             Range r = {1<<s, rx1, rz1, w, h, y, 1};
             valid = checkForBiomes(&gen->g, NULL, r, finfo.dim, gen->seed,
-                cond->bfilter, cond->flags, (volatile char*)abort) > 0;
+                &cond->bf, (volatile char*)abort) > 0;
         }
         return valid ? COND_OK : COND_FAILED;
 

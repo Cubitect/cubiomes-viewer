@@ -1,6 +1,6 @@
 #include "biomecolordialog.h"
 #include "ui_biomecolordialog.h"
-#include "mainwindow.h"
+
 #include "cutil.h"
 
 #include <QPixmap>
@@ -35,10 +35,9 @@ static QIcon getColorIcon(const QColor& col)
     return QIcon(pixmap);
 }
 
-BiomeColorDialog::BiomeColorDialog(MainWindow *parent, QString initrc)
+BiomeColorDialog::BiomeColorDialog(QWidget *parent, QString initrc)
     : QDialog(parent)
     , ui(new Ui::BiomeColorDialog)
-    , parent(parent)
     , modified()
 {
     ui->setupUi(this);
@@ -170,6 +169,11 @@ int BiomeColorDialog::saveColormap(QString rc, QString desc)
     return index;
 }
 
+QString BiomeColorDialog::getRc()
+{
+    return activerc;
+}
+
 void BiomeColorDialog::setBiomeColor(int id, const QColor &col)
 {
     buttons[id]->setIcon(getColorIcon(col));
@@ -269,7 +273,7 @@ void BiomeColorDialog::on_buttonRemove_clicked()
 void BiomeColorDialog::on_buttonOk_clicked()
 {
     on_comboColormaps_currentIndexChanged(ui->comboColormaps->currentIndex());
-    parent->setBiomeColorRc(activerc);
+    emit yieldBiomeColorRc(activerc);
     accept();
 }
 
