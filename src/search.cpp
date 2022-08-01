@@ -21,18 +21,27 @@ QString Condition::summary() const
 
     if (type == 0)
     {
-        s += " " + QApplication::translate("Filter", "start condition");
+        s += " " + QApplication::translate("Filter", "Start");
         return s;
     }
 
     QString cnts = "";
-    if (count)
+    if (ft.count)
         cnts += MULTIPLY_CHAR + QString::number(count);
     if (skipref)
         cnts += "*";
-    s += QString(" %2%3")
-        .arg(QApplication::translate("Filter", ft.name), -28, ' ')
-        .arg(cnts, -4, QLatin1Char(' '));
+    QString txts = "";
+    if (text[0])
+    {
+        QByteArray txta = QByteArray(text, sizeof(text));
+        txts = QString::fromLatin1(txta);
+    }
+    else
+    {
+        txts = QApplication::translate("Filter", ft.name);
+    }
+
+    s += QString(" %2%3").arg(txts, -28, ' ').arg(cnts, -4, QLatin1Char(' '));
 
     if (relative)
         s += QString::asprintf("[%02d]+", relative);
@@ -62,6 +71,8 @@ bool Condition::versionUpgrade()
         biomeToFind &= ~((1ULL << ocean) | (1ULL << deep_ocean));
         biomeToFind |= oceanToFind;
         skipref = 0;
+        memset(pad0, 0, sizeof(pad0));
+        memset(text, 0, sizeof(text));
         memset(pad1, 0, sizeof(pad1));
         memset(pad2, 0, sizeof(pad2));
         version = 1;

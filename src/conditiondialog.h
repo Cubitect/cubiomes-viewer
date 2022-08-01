@@ -113,6 +113,7 @@ public:
     }
 };
 
+
 class ConditionDialog : public QDialog
 {
     Q_OBJECT

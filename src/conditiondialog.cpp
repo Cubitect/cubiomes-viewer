@@ -62,6 +62,11 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
     QString mcs = tr("MC %1", "Minecraft version").arg(p_mcs ? p_mcs : "?");
     ui->labelMC->setText(mcs);
 
+    QFont mono = QFont("Monospace", 10);
+    mono.setStyleHint(QFont::TypeWriter);
+    ui->lineSummary->setFont(mono);
+
+    // prevent bold font of group box title getting inherited
     QFont dfont = font();
     dfont.setBold(false);
     const QList<QWidget*> children = ui->groupBoxPosition->findChildren<QWidget*>(QString(), Qt::FindDirectChildrenOnly);
@@ -244,6 +249,7 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
     }
 
     // defaults
+    ui->checkEnabled->setChecked(true);
     ui->spinBox->setValue(1);
     ui->checkSkipRef->setChecked(false);
     ui->radioSquare->setChecked(true);
@@ -253,6 +259,11 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
     {
         cond = *initcond;
         const FilterInfo &ft = g_filterinfo.list[cond.type];
+
+        ui->checkEnabled->setChecked(!(cond.meta & Condition::DISABLED));
+        ui->lineSummary->setPlaceholderText(QApplication::translate("Filter", ft.name));
+        QByteArray txta = QByteArray(cond.text, sizeof(cond.text));
+        ui->lineSummary->setText(QString::fromLatin1(txta));
 
         ui->comboBoxCat->setCurrentIndex(ft.cat);
         for (int i = 0; i < ui->comboBoxType->count(); i++)
@@ -380,6 +391,8 @@ void ConditionDialog::updateMode()
 {
     int filterindex = ui->comboBoxType->currentData().toInt();
     const FilterInfo &ft = g_filterinfo.list[filterindex];
+
+    ui->lineSummary->setPlaceholderText(QApplication::translate("Filter", ft.name));
 
     QPalette pal;
     if (mc < ft.mcmin || mc > ft.mcmax)
@@ -771,6 +784,14 @@ void ConditionDialog::on_buttonOk_clicked()
     c.relative = ui->comboBoxRelative->currentData().toInt();
     c.count = ui->spinBox->value();
     c.skipref = ui->checkSkipRef->isChecked();
+
+    if (ui->checkEnabled->isChecked())
+        c.meta &= ~Condition::DISABLED;
+    else
+        c.meta |= Condition::DISABLED;
+
+    QByteArray text = ui->lineSummary->text().toLatin1().leftJustified(sizeof(c.text), '\0');
+    memcpy(c.text, text.data(), sizeof(c.text));
 
     if (ui->radioSquare->isChecked())
     {

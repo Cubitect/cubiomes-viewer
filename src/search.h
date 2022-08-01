@@ -577,7 +577,9 @@ struct /*__attribute__((packed))*/ Condition
     int32_t     save;
     int32_t     relative;
     uint8_t     skipref;
-    uint8_t     pad1[67]; // legacy
+    uint8_t     pad0[3]; // legacy
+    char        text[28];
+    uint8_t     pad1[36]; // legacy
     uint64_t    biomeToFind, biomeToFindM; // inclusion biomes
     uint8_t     pad2[12]; // legacy oceanToFind(8), specialCnt(4)
     uint8_t     pad3[2]; // legacy zero initialized
