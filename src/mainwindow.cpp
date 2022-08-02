@@ -494,7 +494,7 @@ void MainWindow::loadSettings()
         path += "/session.save";
         if (QFile::exists(path))
         {
-            loadProgress(path, false);
+            loadProgress(path, false, false);
         }
     }
 
@@ -573,7 +573,7 @@ bool MainWindow::saveProgress(QString fnam, bool quiet)
     return true;
 }
 
-bool MainWindow::loadProgress(QString fnam, bool quiet)
+bool MainWindow::loadProgress(QString fnam, bool keepresults, bool quiet)
 {
     QFile file(fnam);
 
@@ -708,7 +708,9 @@ bool MainWindow::loadProgress(QString fnam, bool quiet)
 
     formGen48->setSettings(gen48, quiet);
     formGen48->updateCount();
-    formControl->on_buttonClear_clicked();
+
+    if (!keepresults)
+        formControl->on_buttonClear_clicked();
     formControl->setSearchConfig(searchconf, quiet);
     formControl->searchResultsAdd(seeds, false);
     formControl->searchProgressReset();
@@ -797,7 +799,7 @@ void MainWindow::on_actionLoad_triggered()
     {
         QFileInfo finfo(fnam);
         prevdir = finfo.absolutePath();
-        loadProgress(fnam, false);
+        loadProgress(fnam, false, false);
     }
 }
 
@@ -908,7 +910,7 @@ void MainWindow::on_actionPresetLoad_triggered()
     PresetDialog *dialog = new PresetDialog(this, wi, false);
     dialog->setActiveFilter(formCond->getConditions());
     if (dialog->exec() && !dialog->rc.isEmpty())
-        loadProgress(dialog->rc);
+        loadProgress(dialog->rc, true, false);
 }
 
 void MainWindow::on_actionExamples_triggered()
@@ -918,7 +920,7 @@ void MainWindow::on_actionExamples_triggered()
     PresetDialog *dialog = new PresetDialog(this, wi, true);
     dialog->setActiveFilter(formCond->getConditions());
     if (dialog->exec() && !dialog->rc.isEmpty())
-        loadProgress(dialog->rc);
+        loadProgress(dialog->rc, true, false);
 }
 
 void MainWindow::on_actionAbout_triggered()

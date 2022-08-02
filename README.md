@@ -30,7 +30,7 @@ information on this issue.
 Build instructions can be found in the [buildguide](buildguide.md).
 
 
-## Primary Features Overview
+## Basic Feature Overview
 
 The tool features a map viewer that outlines the biomes of the Overworld,
 Nether and End dimensions, with a wide zoom range and with toggles for each
@@ -42,8 +42,8 @@ condition system that allows the user to look for features that are relative to
 one another. Conditions can be derived from a large selection of criteria among
 structure placement, world spawn point and from the available biomes in an
 area. Filters can use logic gates in the form of helper conditions for even
-more control and Quad-Hut and Quad-Monument seed generators to quickly look for
-seeds that include extremely rare structure constellations.
+more control, as well as Quad-Hut and Quad-Monument seed generators to quickly
+look for seeds that include extremely rare structure constellations.
 
 ![maingui](etc/screenshot_maingui.png)
 

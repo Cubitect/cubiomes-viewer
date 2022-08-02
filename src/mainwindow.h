@@ -55,7 +55,7 @@ protected:
     void saveSettings();
     void loadSettings();
     bool saveProgress(QString fnam, bool quiet = false);
-    bool loadProgress(QString fnam, bool quiet = false);
+    bool loadProgress(QString fnam, bool keepresults, bool quiet);
     void updateMapSeed();
 
 signals:
