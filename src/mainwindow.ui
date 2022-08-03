@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="../rc/icons.qrc">
-    <normaloff>:/icons/map.png</normaloff>:/icons/map.png</iconset>
+    <normaloff>:/icons/logo.png</normaloff>:/icons/logo.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout_6">
@@ -367,8 +367,8 @@ QToolButton {
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>1228</width>
-                 <height>663</height>
+                 <width>1232</width>
+                 <height>667</height>
                 </rect>
                </property>
                <property name="sizePolicy">
@@ -794,6 +794,11 @@ QToolButton:checked {
      <addaction name="actionDefault_256"/>
      <addaction name="actionRiver"/>
      <addaction name="actionOceanTemp"/>
+     <addaction name="actionParaTemperature"/>
+     <addaction name="actionParaHumidity"/>
+     <addaction name="actionParaContinentalness"/>
+     <addaction name="actionParaErosion"/>
+     <addaction name="actionParaWeirdness"/>
     </widget>
     <addaction name="actionGo_to"/>
     <addaction name="actionOpen_shadow_seed"/>
@@ -1002,6 +1007,46 @@ QToolButton:checked {
   <action name="actionStructure_visibility">
    <property name="text">
     <string>Structure zoom limits...</string>
+   </property>
+  </action>
+  <action name="actionParaTemperature">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Temperature (1.18+)</string>
+   </property>
+  </action>
+  <action name="actionParaHumidity">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Humidity (1.18+)</string>
+   </property>
+  </action>
+  <action name="actionParaContinentalness">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Continentalness (1.18+)</string>
+   </property>
+  </action>
+  <action name="actionParaErosion">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Erosion (1.18+)</string>
+   </property>
+  </action>
+  <action name="actionParaWeirdness">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Weirdness (1.18+)</string>
    </property>
   </action>
  </widget>

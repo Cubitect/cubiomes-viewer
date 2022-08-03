@@ -74,7 +74,7 @@ const QPixmap& getMapIcon(int opt, int variation)
 
 Quad::Quad(const Level* l, int i, int j)
     : wi(l->wi),dim(l->dim),g(&l->g),scale(l->scale)
-    , ti(i),tj(j),blocks(l->blocks),pixs(l->pixs),sopt(l->sopt)
+    , ti(i),tj(j),blocks(l->blocks),pixs(l->pixs),sopt(l->sopt),lopt(l->lopt)
     , biomes(),rgb(),img(),spos()
     , done(),isdel(l->isdel)
     , prio(),stopped()
@@ -175,7 +175,22 @@ void Quad::run()
         g_mutex.unlock();
 
         rgb = new uchar[w*h * 3];
-        biomesToImage(rgb, biomeColors, biomes, w, h, 1, 1);
+        if (lopt <= LOPT_OCEAN_256 || g->mc < MC_1_18 || dim != 0 || g->bn.nptype < 0)
+        {
+            biomesToImage(rgb, biomeColors, biomes, w, h, 1, 1);
+        }
+        else // climate parameter
+        {
+            const int *extremes = getBiomeParaExtremes(g->mc);
+            int cmin = extremes[g->bn.nptype*2 + 0];
+            int cmax = extremes[g->bn.nptype*2 + 1];
+            for (int i = 0; i < w*h; i++)
+            {
+                double p = (biomes[i] - cmin) / (double) (cmax - cmin);
+                uchar col = (p <= 0) ? 0 : (p >= 1.0) ? 0xff : (uchar)(0xff * p);
+                rgb[3*i+0] = rgb[3*i+1] = rgb[3*i+2] = col;
+            }
+        }
         img = new QImage(rgb, w, h, 3*w, QImage::Format_RGB888);
     }
     else if (pixs < 0)
@@ -200,7 +215,7 @@ Level::Level()
     : cells(),g(),entry(),wi(),dim()
     , tx(),tz(),tw(),th()
     , scale(),blocks(),pixs()
-    , sopt()
+    , sopt(),lopt()
 {
 }
 
@@ -259,6 +274,19 @@ void Level::init4map(QWorld *w, int pix, int layerscale)
     applySeed(&g, dim, wi.seed);
     this->isdel = &w->isdel;
     sopt = D_NONE;
+    lopt = 0;
+    if (dim == 0 && wi.mc >= MC_1_18)
+    {
+        lopt = w->layeropt;
+        switch (w->layeropt)
+        {
+        case LOPT_NOISE_T_4: g.bn.nptype = NP_TEMPERATURE; break;
+        case LOPT_NOISE_H_4: g.bn.nptype = NP_HUMIDITY; break;
+        case LOPT_NOISE_C_4: g.bn.nptype = NP_CONTINENTALNESS; break;
+        case LOPT_NOISE_E_4: g.bn.nptype = NP_EROSION; break;
+        case LOPT_NOISE_W_4: g.bn.nptype = NP_WEIRDNESS; break;
+        }
+    }
 }
 
 void Level::init4struct(QWorld *w, int dim, int blocks, double vis, int sopt)
@@ -269,6 +297,7 @@ void Level::init4struct(QWorld *w, int dim, int blocks, double vis, int sopt)
     this->pixs = -1;
     this->scale = -1;
     this->sopt = sopt;
+    this->lopt = 0;
     this->vis = vis;
     this->isdel = &w->isdel;
 }
@@ -538,6 +567,26 @@ int QWorld::getBiome(Pos p)
 
     int id = getBiomeAt(g, scale, p.x, y, p.z);
     return id;
+}
+
+QString QWorld::getBiomeName(Pos p)
+{
+    int id = getBiome(p);
+    if (wi.mc >= MC_1_18 && dim == 0 && layeropt >= LOPT_NOISE_T_4 && layeropt <= LOPT_NOISE_W_4)
+    {
+        QString c;
+        switch (layeropt)
+        {
+            case LOPT_NOISE_T_4: c = "T="; break;
+            case LOPT_NOISE_H_4: c = "H="; break;
+            case LOPT_NOISE_C_4: c = "C="; break;
+            case LOPT_NOISE_E_4: c = "E="; break;
+            case LOPT_NOISE_W_4: c = "W="; break;
+        }
+        return c + QString::number(id);
+    }
+    const char *s = biome2str(wi.mc, id);
+    return s ? s : "";
 }
 
 void QWorld::refreshBiomeColors()

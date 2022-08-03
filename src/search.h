@@ -592,8 +592,8 @@ struct /*__attribute__((packed))*/ Condition
     int32_t     rmax; // (<=0):disabled; (>0):strict upper radius
     uint8_t     pad4[4]; // unused
     uint64_t    variants;
-    int32_t     limok[6][2];
-    int32_t     limex[6][2];
+    int32_t     limok[NP_MAX][2];
+    int32_t     limex[NP_MAX][2];
 
     // generated members - initialized when the search is started
     uint8_t     generated_start[0]; // address dummy

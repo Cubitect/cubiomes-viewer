@@ -26,16 +26,13 @@ bool MapOverlay::event(QEvent *e)
 void MapOverlay::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
-    if (bname)
-    {
-        QString s = QString::asprintf("%s [%d,%d]", bname, pos.x, pos.z);
-        QRect r = painter.fontMetrics()
-                .boundingRect(0, 0, width(), height(), Qt::AlignRight | Qt::AlignTop, s);
+    QString s = bname + QString::asprintf(" [%d,%d]", pos.x, pos.z);
+    QRect r = painter.fontMetrics()
+            .boundingRect(0, 0, width(), height(), Qt::AlignRight | Qt::AlignTop, s);
 
-        painter.fillRect(r, QBrush(QColor(0, 0, 0, 128), Qt::SolidPattern));
-        painter.setPen(Qt::white);
-        painter.drawText(r, s);
-    }
+    painter.fillRect(r, QBrush(QColor(0, 0, 0, 128), Qt::SolidPattern));
+    painter.setPen(Qt::white);
+    painter.drawText(r, s);
 }
 
 MapView::MapView(QWidget *parent)
@@ -273,7 +270,7 @@ void MapView::paintEvent(QPaintEvent *)
         qreal bz = (cur.y() - height()/2.0) / blocks2pix + fz;
         Pos p = {(int)bx, (int)bz};
         overlay->pos = p;
-        overlay->bname = biome2str(world->wi.mc, world->getBiome(p));
+        overlay->bname = world->getBiomeName(p);
 
         bool active = QThreadPool::globalInstance()->activeThreadCount() > 0;
         if (active || velx || velz)

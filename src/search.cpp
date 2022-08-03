@@ -1444,23 +1444,17 @@ L_noise_biome:
             int h = rz2 - rz1 + 1;
             //int y = cond->y >> 2;
             gen->init4Dim(0);
-
-            const DoublePerlinNoise *cn[6] =
-            {
-                &gen->g.bn.temperature,
-                &gen->g.bn.humidity,
-                &gen->g.bn.continentalness,
-                &gen->g.bn.erosion,
-                NULL,
-                &gen->g.bn.weirdness,
+            int order[] = { // use this order for performance
+                NP_TEMPERATURE,
+                NP_HUMIDITY,
+                NP_WEIRDNESS,
+                NP_EROSION,
+                NP_CONTINENTALNESS,
             };
-            int order[] = { 0, 1, 5, 3, 2 }; // use this order for performance
             valid = 1;
             for (uint j = 0; j < sizeof(order)/sizeof(int); j++)
             {
                 int i = order[j];
-                if (cn[i] == NULL)
-                    continue;
                 if (cond->limok[i][0] == INT_MIN && cond->limok[i][1] == INT_MAX &&
                     cond->limex[i][0] == INT_MIN && cond->limex[i][1] == INT_MAX)
                 {
@@ -1471,7 +1465,7 @@ L_noise_biome:
                     (double)cond->limex[i][0],
                     (double)cond->limex[i][1],
                 };
-                int err = getParaRange(cn[i], &pmin, &pmax, rx1, rz1, w, h, (void*)bounds, f_confine);
+                int err = getParaRange(&gen->g.bn.climate[i], &pmin, &pmax, rx1, rz1, w, h, (void*)bounds, f_confine);
                 if (err)
                 {
                     valid = 0;

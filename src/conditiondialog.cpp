@@ -165,20 +165,23 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
 
     memset(climaterange, 0, sizeof(climaterange));
     memset(climatecomplete, 0, sizeof(climatecomplete));
-    struct { QString name; int idx; int min, max; } climates[] =
+    const int *extremes = getBiomeParaExtremes(mc);
+    struct { QString name; int idx; } climates[] =
     {
-        {tr("Temperature:"), 0, -4501, 5500},
-        {tr("Humidity:"), 1, -3500, 6999},
-        {tr("Continentalness:"), 2, -10500, 300},
-        {tr("Erosion:"), 3, -7799, 5500},
+        {tr("Temperature:"),        NP_TEMPERATURE      },
+        {tr("Humidity:"),           NP_HUMIDITY         },
+        {tr("Continentalness:"),    NP_CONTINENTALNESS  },
+        {tr("Erosion:"),            NP_EROSION          },
         // depth has more dependencies and is not supported
-        {tr("Weirdness:"), 5, -9333, 9333},
+        {tr("Weirdness:"),          NP_WEIRDNESS        },
     };
     for (int i = 0; i < 5; i++)
     {
         QLabel *label = new QLabel(climates[i].name, this);
-        LabeledRange *ok = new LabeledRange(this, climates[i].min-1, climates[i].max+1);
-        LabeledRange *ex = new LabeledRange(this, climates[i].min-1, climates[i].max+1);
+        int cmin = extremes[2*climates[i].idx + 0];
+        int cmax = extremes[2*climates[i].idx + 1];
+        LabeledRange *ok = new LabeledRange(this, cmin-1, cmax+1);
+        LabeledRange *ex = new LabeledRange(this, cmin-1, cmax+1);
         ok->setLimitText(tr("-Inf"), tr("+Inf"));
         ex->setLimitText(tr("-Inf"), tr("+Inf"));
         ex->setHighlight(QColor(0,0,0,0), QColor(Qt::red));

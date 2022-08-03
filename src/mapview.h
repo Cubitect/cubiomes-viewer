@@ -12,7 +12,7 @@ class MapOverlay : public QWidget
 
 public:
     explicit MapOverlay(QWidget *parent = nullptr)
-        : QWidget(parent),pos{},bname(nullptr) {}
+        : QWidget(parent),pos{},bname() {}
     ~MapOverlay() {}
 
 public slots:
@@ -21,7 +21,7 @@ public slots:
 
 public:
     Pos pos;
-    const char *bname;
+    QString bname;
 };
 
 class MapView : public QWidget

@@ -51,11 +51,11 @@ enum {
     LOPT_DEFAULT_256,
     LOPT_RIVER_4,
     LOPT_OCEAN_256,
+    LOPT_NOISE_T_4,
+    LOPT_NOISE_H_4,
     LOPT_NOISE_C_4,
     LOPT_NOISE_E_4,
     LOPT_NOISE_W_4,
-    LOPT_NOISE_T_4,
-    LOPT_NOISE_H_4,
 };
 
 inline const char *mapopt2str(int opt)
@@ -177,6 +177,7 @@ public:
     int blocks;
     int pixs;
     int sopt;
+    int lopt;
 
     int *biomes;
     uchar *rgb;
@@ -216,6 +217,7 @@ struct Level
     int blocks;
     int pixs;
     int sopt;
+    int lopt;
     double vis;
     std::atomic_bool *isdel;
 };
@@ -242,6 +244,7 @@ struct QWorld
     void draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz, qreal blocks2pix);
 
     int getBiome(Pos p);
+    QString getBiomeName(Pos p);
 
     void refreshBiomeColors();
 
