@@ -165,7 +165,7 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
 
     memset(climaterange, 0, sizeof(climaterange));
     memset(climatecomplete, 0, sizeof(climatecomplete));
-    const int *extremes = getBiomeParaExtremes(mc);
+    const int *extremes = getBiomeParaExtremes(MC_NEWEST);
     struct { QString name; int idx; } climates[] =
     {
         {tr("Temperature:"),        NP_TEMPERATURE      },
