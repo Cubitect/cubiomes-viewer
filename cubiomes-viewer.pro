@@ -17,9 +17,9 @@ QMAKE_CXXFLAGS  = $$QMAKE_CFLAGS -std=gnu++11
 QMAKE_CXXFLAGS_RELEASE *= -O3
 
 win32: {
-    CONFIG += static
+    CONFIG += static_gnu
 }
-static: {
+static_gnu: {
     LIBS += -static -static-libgcc -static-libstdc++
 }
 
