@@ -65,6 +65,6 @@
         <file>icons/reference.png</file>
         <file>icons/ancient_city_d.png</file>
         <file>icons/ancient_city.png</file>
-        <file>icons/logo.svg</file>
+        <file>icons/logo.png</file>
     </qresource>
 </RCC>

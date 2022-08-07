@@ -2,12 +2,20 @@
 <ui version="4.0">
  <class>AboutDialog</class>
  <widget class="QDialog" name="AboutDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>614</width>
+    <height>422</height>
+   </rect>
+  </property>
   <property name="windowTitle">
    <string>About</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../rc/icons.qrc">
-    <normaloff>:/icons/logo.svg</normaloff>:/icons/logo.svg</iconset>
+    <normaloff>:/icons/logo.png</normaloff>:/icons/logo.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <property name="horizontalSpacing">
@@ -45,7 +53,7 @@
       <string/>
      </property>
      <property name="pixmap">
-      <pixmap resource="../rc/icons.qrc">:/icons/logo.svg</pixmap>
+      <pixmap resource="../rc/icons.qrc">:/icons/logo.png</pixmap>
      </property>
      <property name="scaledContents">
       <bool>true</bool>

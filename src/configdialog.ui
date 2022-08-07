@@ -2,20 +2,12 @@
 <ui version="4.0">
  <class>ConfigDialog</class>
  <widget class="QDialog" name="ConfigDialog">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>433</width>
-    <height>555</height>
-   </rect>
-  </property>
   <property name="windowTitle">
    <string>Preferences</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../rc/icons.qrc">
-    <normaloff>:/icons/logo.svg</normaloff>:/icons/logo.svg</iconset>
+    <normaloff>:/icons/logo.png</normaloff>:/icons/logo.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="4" column="0" colspan="2">
