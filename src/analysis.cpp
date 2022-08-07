@@ -19,7 +19,7 @@ void Analysis::requestAbort()
 }
 
 static
-QTreeWidgetItem *setConditionTreeItems(ConditionTree& ctree, int node, Pos cpos[], QTreeWidgetItem* parent)
+QTreeWidgetItem *setConditionTreeItems(ConditionTree& ctree, int node, int64_t seed, Pos cpos[], QTreeWidgetItem* parent)
 {
     Condition& c = ctree.condvec[node];
     Pos p = cpos[c.save];
@@ -27,7 +27,8 @@ QTreeWidgetItem *setConditionTreeItems(ConditionTree& ctree, int node, Pos cpos[
 
     QTreeWidgetItem* item = new QTreeWidgetItem(parent);
     item->setText(0, c.summary());
-    item->setData(0, Qt::UserRole, QVariant::fromValue(p));
+    item->setData(0, Qt::UserRole, QVariant::fromValue(seed));
+    item->setData(0, Qt::UserRole+1, QVariant::fromValue(p));
 
     if (branches.empty())
     {
@@ -37,7 +38,7 @@ QTreeWidgetItem *setConditionTreeItems(ConditionTree& ctree, int node, Pos cpos[
     {
         item->setText(1, QString::asprintf("%d,\t%d", p.x, p.z));
         for (char b : branches)
-            setConditionTreeItems(ctree, b, cpos, item);
+            setConditionTreeItems(ctree, b, seed, cpos, item);
     }
     return item;
 }
@@ -225,7 +226,7 @@ void Analysis::run()
             if (testTreeAt(origin, &condtree, PASS_FULL_64, &gen, &stop, cpos)
                 == COND_OK)
             {
-                setConditionTreeItems(condtree, 0, cpos, seeditem);
+                setConditionTreeItems(condtree, 0, seed, cpos, seeditem);
             }
         }
 
