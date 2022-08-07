@@ -136,4 +136,10 @@ struct SearchConfig
 };
 
 
+Q_DECLARE_METATYPE(int64_t)
+Q_DECLARE_METATYPE(uint64_t)
+Q_DECLARE_METATYPE(Pos)
+Q_DECLARE_METATYPE(Config)
+
+
 #endif // SETTINGS_H

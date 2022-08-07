@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="../rc/icons.qrc">
-    <normaloff>:/icons/map.png</normaloff>:/icons/map.png</iconset>
+    <normaloff>:/icons/logo.svg</normaloff>:/icons/logo.svg</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout_3">
    <item row="0" column="0">
@@ -515,7 +515,7 @@
                 <x>0</x>
                 <y>0</y>
                 <width>635</width>
-                <height>301</height>
+                <height>304</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -798,8 +798,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>635</width>
-                <height>255</height>
+                <width>98</width>
+                <height>28</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -847,8 +847,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>635</width>
-                <height>334</height>
+                <width>98</width>
+                <height>28</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_3">

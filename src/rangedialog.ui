@@ -2,20 +2,12 @@
 <ui version="4.0">
  <class>RangeDialog</class>
  <widget class="QDialog" name="RangeDialog">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>321</width>
-    <height>179</height>
-   </rect>
-  </property>
   <property name="windowTitle">
    <string>Search range</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../rc/icons.qrc">
-    <normaloff>:/icons/map.png</normaloff>:/icons/map.png</iconset>
+    <normaloff>:/icons/logo.svg</normaloff>:/icons/logo.svg</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="4" column="2">

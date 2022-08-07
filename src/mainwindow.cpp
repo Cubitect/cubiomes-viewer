@@ -57,6 +57,9 @@ int getStructureConfig_override(int stype, int mc, StructureConfig *sconf)
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
+    , dock(new QDockWidget(tr("Map"), this))
+    , mapView(new MapView(this))
+    , analysis(this)
     , formCond()
     , formGen48()
     , formControl()
@@ -68,17 +71,28 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    dock->setWidget(mapView);
+    dock->setFeatures(QDockWidget::DockWidgetFloatable);
+    QMainWindow *submain = new QMainWindow(this);
+    ui->frameMap->layout()->addWidget(submain);
+    submain->addDockWidget(Qt::LeftDockWidgetArea, dock);
+    on_actionDockable_toggled(false);
+
     formCond = new FormConditions(this);
     formGen48 = new FormGen48(this);
     formControl = new FormSearchControl(this);
 
     QList<QAction*> layeracts = ui->menuBiome_layer->actions();
+    int lopt = LOPT_DEFAULT_1;
     for (int i = 0; i < layeracts.size(); i++)
     {
+        if (layeracts[i]->isSeparator())
+            continue;
         connect(layeracts[i], &QAction::toggled,
             [=](bool state) {
-                this->onActionBiomeLayerSelect(state, layeracts[i], i);
+                this->onActionBiomeLayerSelect(state, layeracts[i], lopt);
             });
+        lopt++;
     }
 
     QAction *toorigin = new QAction(QIcon(":/icons/origin.png"), "Goto origin", this);
@@ -151,6 +165,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(&autosaveTimer, &QTimer::timeout, this, &MainWindow::onAutosaveTimeout);
 
     ui->treeAnalysis->sortByColumn(0, Qt::AscendingOrder);
+    connect(&analysis, &Analysis::itemDone, this, &MainWindow::onAnalysisItemDone);
+    connect(&analysis, &Analysis::finished, this, &MainWindow::onAnalysisFinished);
 
     loadSettings();
 
@@ -267,7 +283,7 @@ QAction *MainWindow::addMapAction(int sopt, const char *iconpath, QString tip)
 
 MapView* MainWindow::getMapView()
 {
-    return ui->mapView;
+    return mapView;
 }
 
 bool MainWindow::getSeed(WorldInfo *wi, bool applyrand)
@@ -317,7 +333,7 @@ bool MainWindow::setSeed(WorldInfo wi, int dim, int layeropt)
 
     ui->comboBoxMC->setCurrentText(mcstr);
     ui->seedEdit->setText(QString::asprintf("%" PRId64, (int64_t)wi.seed));
-    ui->mapView->setSeed(wi, dim, layeropt);
+    getMapView()->setSeed(wi, dim, layeropt);
 
     ui->checkLarge->setEnabled(wi.mc >= MC_1_3);
     ui->comboY->setEnabled(wi.mc >= MC_1_16);
@@ -353,6 +369,7 @@ void MainWindow::saveSettings()
     settings.setValue("analysis/z1", ui->lineEditZ1->text().toInt());
     settings.setValue("analysis/x2", ui->lineEditX2->text().toInt());
     settings.setValue("analysis/z2", ui->lineEditZ2->text().toInt());
+    settings.setValue("analysis/seedsrc", ui->comboSeedSource->currentIndex());
 
     settings.setValue("config/smoothMotion", config.smoothMotion);
     settings.setValue("config/showBBoxes", config.showBBoxes);
@@ -379,15 +396,17 @@ void MainWindow::saveSettings()
     settings.setValue("map/large", wi.large);
     settings.setValue("map/seed", (qlonglong)wi.seed);
     settings.setValue("map/dim", getDim());
-    settings.setValue("map/x", ui->mapView->getX());
+    settings.setValue("map/x", getMapView()->getX());
     settings.setValue("map/y", wi.y);
-    settings.setValue("map/z", ui->mapView->getZ());
-    settings.setValue("map/scale", ui->mapView->getScale());
+    settings.setValue("map/z", getMapView()->getZ());
+    settings.setValue("map/scale", getMapView()->getScale());
     for (int stype = 0; stype < STRUCT_NUM; stype++)
     {
         QString s = QString("map/show_") + mapopt2str(stype);
-        settings.setValue(s, ui->mapView->getShow(stype));
+        settings.setValue(s, getMapView()->getShow(stype));
     }
+    settings.setValue("map/dockable", ui->actionDockable->isChecked());
+
     if (config.restoreSession)
     {
         QString path = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
@@ -428,6 +447,7 @@ void MainWindow::loadSettings()
     loadLine(&settings, ui->lineEditZ1, "analysis/z1");
     loadLine(&settings, ui->lineEditX2, "analysis/x2");
     loadLine(&settings, ui->lineEditZ2, "analysis/z2");
+    ui->comboSeedSource->setCurrentIndex(settings.value("analysis/seedsrc", ui->comboSeedSource->currentIndex()).toInt());
 
     config.smoothMotion = settings.value("config/smoothMotion", config.smoothMotion).toBool();
     config.showBBoxes = settings.value("config/showBBoxes", config.showBBoxes).toBool();
@@ -443,7 +463,7 @@ void MainWindow::loadSettings()
     if (!config.biomeColorPath.isEmpty())
         onBiomeColorChange();
 
-    ui->mapView->setConfig(config);
+    getMapView()->setConfig(config);
     onStyleChanged(config.uistyle);
 
     g_extgen.saltOverride = settings.value("world/saltOverride", g_extgen.saltOverride).toBool();
@@ -469,9 +489,9 @@ void MainWindow::loadSettings()
     wi.y = settings.value("map/y", 256).toInt();
     setSeed(wi);
 
-    qreal x = ui->mapView->getX();
-    qreal z = ui->mapView->getZ();
-    qreal scale = ui->mapView->getScale();
+    qreal x = getMapView()->getX();
+    qreal z = getMapView()->getZ();
+    qreal scale = getMapView()->getScale();
 
     x = settings.value("map/x", x).toDouble();
     z = settings.value("map/z", z).toDouble();
@@ -479,14 +499,17 @@ void MainWindow::loadSettings()
 
     for (int sopt = 0; sopt < STRUCT_NUM; sopt++)
     {
-        bool show = ui->mapView->getShow(sopt);
+        bool show = getMapView()->getShow(sopt);
         QString soptstr = QString("map/show_") + mapopt2str(sopt);
         show = settings.value(soptstr, show).toBool();
         if (saction[sopt])
             saction[sopt]->setChecked(show);
-        ui->mapView->setShow(sopt, show);
+        getMapView()->setShow(sopt, show);
     }
     mapGoto(x, z, scale);
+
+    bool dockable = settings.value("map/dockable", ui->actionDockable->isChecked()).toBool();
+    ui->actionDockable->setChecked(dockable);
 
     if (config.restoreSession)
     {
@@ -567,7 +590,7 @@ bool MainWindow::saveProgress(QString fnam, bool quiet)
     for (Condition &c : condvec)
         stream << "#Cond: " << c.toHex() << "\n";
 
-    for (uint64_t s : results)
+    for (uint64_t s : qAsConst(results))
         stream << QString::asprintf("%" PRId64 "\n", (int64_t)s);
 
     return true;
@@ -724,6 +747,19 @@ void MainWindow::updateMapSeed()
     WorldInfo wi;
     if (getSeed(&wi))
         setSeed(wi);
+
+    bool state;
+    state = (wi.mc >= MC_1_13 && wi.mc <= MC_1_17);
+    ui->actionRiver->setEnabled(state);
+    ui->actionOceanTemp->setEnabled(state);
+    state = (wi.mc >= MC_1_18);
+    ui->actionParaTemperature->setEnabled(state);
+    ui->actionParaHumidity->setEnabled(state);
+    ui->actionParaContinentalness->setEnabled(state);
+    ui->actionParaErosion->setEnabled(state);
+    ui->actionParaDepth->setEnabled(state);
+    ui->actionParaWeirdness->setEnabled(state);
+
     emit mapUpdated();
 }
 
@@ -735,7 +771,7 @@ int MainWindow::warning(QString text, QMessageBox::StandardButtons buttons)
 
 void MainWindow::mapGoto(qreal x, qreal z, qreal scale)
 {
-    ui->mapView->setView(x, z, scale);
+    getMapView()->setView(x, z, scale);
 }
 
 void MainWindow::setBiomeColorRc(QString rc)
@@ -816,7 +852,7 @@ void MainWindow::on_actionPreferences_triggered()
     {
         Config oldConfig = config;
         config = dialog->getSettings();
-        ui->mapView->setConfig(config);
+        getMapView()->setConfig(config);
         if (oldConfig.uistyle != config.uistyle)
             onStyleChanged(config.uistyle);
 
@@ -861,12 +897,24 @@ void MainWindow::onBiomeColorChange()
     {
         initBiomeColors(biomeColors);
     }
-    ui->mapView->refreshBiomeColors();
+    getMapView()->refreshBiomeColors();
+}
+
+void MainWindow::onAnalysisItemDone(QTreeWidgetItem *item)
+{
+    ui->treeAnalysis->addTopLevelItem(item);
+}
+
+void MainWindow::onAnalysisFinished()
+{
+    ui->buttonExport->setEnabled(true);
+    ui->buttonAnalysis->setChecked(false);
+    ui->buttonAnalysis->setText(tr("Analyze"));
 }
 
 void MainWindow::on_actionGo_to_triggered()
 {
-    ui->mapView->onGoto();
+    getMapView()->onGoto();
 }
 
 void MainWindow::on_actionScan_seed_for_Quad_Huts_triggered()
@@ -991,12 +1039,12 @@ void MainWindow::on_lineRadius_editingFinished()
 
 void MainWindow::on_buttonFromVisible_clicked()
 {
-    qreal uiw = ui->mapView->width() * ui->mapView->getScale();
-    qreal uih = ui->mapView->height() * ui->mapView->getScale();
-    int bx0 = (int) floor(ui->mapView->getX() - uiw/2);
-    int bz0 = (int) floor(ui->mapView->getZ() - uih/2);
-    int bx1 = (int) ceil(ui->mapView->getX() + uiw/2);
-    int bz1 = (int) ceil(ui->mapView->getZ() + uih/2);
+    qreal uiw = getMapView()->width() * getMapView()->getScale();
+    qreal uih = getMapView()->height() * getMapView()->getScale();
+    int bx0 = (int) floor(getMapView()->getX() - uiw/2);
+    int bz0 = (int) floor(getMapView()->getZ() - uih/2);
+    int bx1 = (int) ceil(getMapView()->getX() + uiw/2);
+    int bz1 = (int) ceil(getMapView()->getZ() + uih/2);
 
     ui->checkArea->setChecked(true);
     ui->lineEditX1->setText( QString::number(bx0) );
@@ -1005,32 +1053,14 @@ void MainWindow::on_buttonFromVisible_clicked()
     ui->lineEditZ2->setText( QString::number(bz1) );
 }
 
-static
-QTreeWidgetItem *setConditionTreeItems(ConditionTree& ctree, int node, Pos cpos[], QTreeWidgetItem* parent)
-{
-    Condition& c = ctree.condvec[node];
-    Pos p = cpos[c.save];
-    const std::vector<char>& branches = ctree.references[c.save];
-
-    QTreeWidgetItem* item = new QTreeWidgetItem(parent);
-    item->setText(0, c.summary());
-    item->setData(0, Qt::UserRole, QVariant::fromValue(p));
-
-    if (branches.empty())
-    {
-        item->setText(1, MainWindow::tr("incomplete"));
-    }
-    else
-    {
-        item->setText(1, QString::asprintf("%d,\t%d", p.x, p.z));
-        for (char b : branches)
-            setConditionTreeItems(ctree, b, cpos, item);
-    }
-    return item;
-}
-
 void MainWindow::on_buttonAnalysis_clicked()
 {
+    if (analysis.isRunning())
+    {
+        analysis.requestAbort();
+        return;
+    }
+
     int x1, z1, x2, z2;
 
     if (ui->lineRadius->isEnabled())
@@ -1051,60 +1081,45 @@ void MainWindow::on_buttonAnalysis_clicked()
     if (x2 < x1) std::swap(x1, x2);
     if (z2 < z1) std::swap(z1, z2);
 
-    bool ck_struct = ui->checkStructs->isChecked();
-    bool ck_biome = ui->checkBiomes->isChecked();
-    bool ck_conds = ui->checkConditions->isChecked();
-    bool map_only = ui->checkMapOnly->isChecked();
+    analysis.x1 = x1;
+    analysis.z1 = z1;
+    analysis.x2 = x2;
+    analysis.z2 = z2;
+    analysis.ck_struct = ui->checkStructs->isChecked();
+    analysis.ck_biome = ui->checkBiomes->isChecked();
+    analysis.ck_conds = ui->checkConditions->isChecked();
+    analysis.map_only = ui->checkMapOnly->isChecked();
 
-    QTreeWidget *tree = ui->treeAnalysis;
-    while (tree->topLevelItemCount() > 0)
-        delete tree->takeTopLevelItem(0);
-
-
-    WorldInfo wi;
-    if (!getSeed(&wi))
+    analysis.dim = getDim();
+    if (!getSeed(&analysis.wi))
         return;
 
-    QVector<Condition> conds;
-    if (ck_conds)
-        conds = formCond->getConditions();
+    analysis.conds = formCond->getConditions();
+    analysis.seeds.clear();
+    if (ui->comboSeedSource->currentIndex() == 0)
+        analysis.seeds.append(analysis.wi.seed);
+    else
+        analysis.seeds = formControl->getResults();
 
-    uint64_t areasiz = (uint64_t)(x2 - x1) * (uint64_t)(z2 - z1);
-    int64_t cstepx = 1, cstepz = 1;
+    for (int sopt = 0; sopt < STRUCT_NUM; sopt++)
+        analysis.mapshow[sopt] = getMapView()->getShow(sopt);
 
-    bool areawarn = false;
-    if (ck_struct && areasiz > 1e10)
-        areawarn = true;
-    if (ck_biome && areasiz > 1e8)
-        areawarn = true;
-    if (ck_conds && !conds.empty())
-    {
-        Condition *c = &conds[0];
-        const FilterInfo& finfo = g_filterinfo.list[c->type];
-        cstepx = (c->x2 - c->x1);
-        cstepz = (c->z2 - c->z1);
+    double warnlim = 1e10;
+    double areasiz = (double)(x2 - x1) * (double)(z2 - z1);
+    double expense = 0;
+    if (analysis.ck_struct)
+        expense += areasiz * 1;
+    if (analysis.ck_biome)
+        expense += areasiz * (analysis.wi.mc < MC_1_18 ? 10 : 1000);
 
-        if (cstepx < 1) cstepx = 1;
-        if (cstepz < 1) cstepz = 1;
+    //expense *= analysis.seeds.size();
 
-        if (finfo.step > 1)
-        {
-            cstepx *= finfo.step;
-            cstepz *= finfo.step;
-        }
-        else if (finfo.stype > 0)
-        {
-            if (cstepx < 16) cstepx = 16;
-            if (cstepz < 16) cstepz = 16;
-        }
-    }
-
-    if (areawarn)
+    if (expense >= warnlim)
     {
         QString msg = tr(
-                "Area for analysis is very large (%1, %2).\n"
-                "The analysis might take a while. Do you want to continue?")
-                .arg(x2-x1+1).arg(z2-z1+1);
+            "Analysis for area of size (%1, %2) might take a while.\n"
+            "Do you want to continue?")
+            .arg(x2-x1+1).arg(z2-z1+1);
         int button = QMessageBox::warning(
             this, tr("Warning"), msg, QMessageBox::Cancel|QMessageBox::Yes);
         if (button != QMessageBox::Yes)
@@ -1115,242 +1130,14 @@ void MainWindow::on_buttonAnalysis_clicked()
         QApplication::processEvents();
     }
 
-    ui->buttonAnalysis->setEnabled(false);
+    QTreeWidget *tree = ui->treeAnalysis;
+    while (tree->topLevelItemCount() > 0)
+        delete tree->takeTopLevelItem(0);
 
-
-    int dim = getDim();
-    Generator g;
-    setupGenerator(&g, wi.mc, wi.large);
-
-    if (ck_biome)
-    {
-        const int step = 512;
-        long idcnt[256] = {0};
-
-        for (int x = x1; x <= x2; x += step)
-        {
-            for (int z = z1; z <= z2; z += step)
-            {
-                int w = x2-x+1 < step ? x2-x+1 : step;
-                int h = z2-z+1 < step ? z2-z+1 : step;
-                Range r = {1, x, z, w, h, wi.y, 1};
-                int *ids = allocCache(&g, r);
-
-                int dims[] = {0, -1, +1};
-                for (int d = 0; d < 3; d++)
-                {
-                    if (dims[d] == dim || !map_only)
-                    {
-                        applySeed(&g, dims[d], wi.seed);
-                        genBiomes(&g, ids, r);
-                        for (int i = 0; i < w*h; i++)
-                            idcnt[ ids[i] & 0xff ]++;
-                    }
-                }
-                free(ids);
-            }
-        }
-
-        int bcnt = 0;
-        for (int i = 0; i < 256; i++)
-            bcnt += !!idcnt[i];
-
-        QTreeWidgetItem* item_cat = new QTreeWidgetItem(tree);
-        item_cat->setText(0, tr("biomes", "Analysis ID"));
-        item_cat->setData(1, Qt::DisplayRole, QVariant::fromValue(bcnt));
-
-        for (int id = 0; id < 256; id++)
-        {
-            long cnt = idcnt[id];
-            if (cnt <= 0)
-                continue;
-            const char *s;
-            if (!(s = biome2str(wi.mc, id)))
-                continue;
-            QTreeWidgetItem* item =
-                new QTreeWidgetItem(item_cat, QTreeWidgetItem::UserType + id);
-            item->setText(0, s);
-            item->setData(1, Qt::DisplayRole, QVariant::fromValue(cnt));
-        }
-    }
-
-    if (ck_struct)
-    {
-        std::vector<VarPos> st;
-        for (int sopt = D_DESERT; sopt < D_SPAWN; sopt++)
-        {
-            int sdim = 0;
-            if (sopt == D_FORTESS || sopt == D_BASTION || sopt == D_PORTALN)
-                sdim = -1;
-            if (sopt == D_ENDCITY || sopt == D_GATEWAY)
-                sdim = 1;
-            if (map_only)
-            {
-                if (!getMapView()->getShow(sopt))
-                    continue;
-                if (sdim != dim)
-                    continue;
-            }
-            int stype = mapopt2stype(sopt);
-            st.clear();
-            StructureConfig sconf;
-            if (!getStructureConfig_override(stype, wi.mc, &sconf))
-                continue;
-            getStructs(&st, sconf, wi, sdim, x1, z1, x2, z2);
-            if (st.empty())
-                continue;
-
-            QTreeWidgetItem* item_cat = new QTreeWidgetItem(tree);
-            const char *s = struct2str(stype);
-            item_cat->setText(0, s);
-            item_cat->setData(1, Qt::DisplayRole, QVariant::fromValue(st.size()));
-
-            for (size_t i = 0; i < st.size(); i++)
-            {
-                VarPos vp = st[i];
-                QTreeWidgetItem* item = new QTreeWidgetItem(item_cat);
-                item->setData(0, Qt::UserRole, QVariant::fromValue(vp.p));
-                item->setText(0, QString::asprintf("%d,\t%d", vp.p.x, vp.p.z));
-                if (vp.v.abandoned)
-                {
-                    if (stype == Village)
-                        item->setText(1, tr("abandoned", "Village variant"));
-                }
-            }
-        }
-
-        if ((dim == 0 && getMapView()->getShow(D_SPAWN)) || !map_only)
-        {
-            applySeed(&g, 0, wi.seed);
-            Pos pos = getSpawn(&g);
-            if (pos.x >= x1 && pos.x <= x2 && pos.z >= z1 && pos.z <= z2)
-            {
-                QTreeWidgetItem* item_cat = new QTreeWidgetItem(tree);
-                item_cat->setText(0, tr("spawn", "Analysis ID"));
-                item_cat->setData(1, Qt::DisplayRole, QVariant::fromValue(1));
-                QTreeWidgetItem* item = new QTreeWidgetItem(item_cat);
-                item->setData(0, Qt::UserRole, QVariant::fromValue(pos));
-                item->setText(0, QString::asprintf("%d,\t%d", pos.x, pos.z));
-            }
-        }
-
-        if ((dim == 0 && getMapView()->getShow(D_STRONGHOLD)) || !map_only)
-        {
-            StrongholdIter sh;
-            initFirstStronghold(&sh, wi.mc, wi.seed);
-            std::vector<Pos> shp;
-            applySeed(&g, dim, wi.seed);
-            while (nextStronghold(&sh, &g) > 0)
-            {
-                Pos pos = sh.pos;
-                if (pos.x >= x1 && pos.x <= x2 && pos.z >= z1 && pos.z <= z2)
-                    shp.push_back(pos);
-            }
-
-            if (!shp.empty())
-            {
-                QTreeWidgetItem* item_cat = new QTreeWidgetItem(tree);
-                item_cat->setText(0, tr("stronghold", "Analysis ID"));
-                item_cat->setData(1, Qt::DisplayRole, QVariant::fromValue(shp.size()));
-                for (Pos pos : shp)
-                {
-                    QTreeWidgetItem* item = new QTreeWidgetItem(item_cat);
-                    item->setData(0, Qt::UserRole, QVariant::fromValue(pos));
-                    item->setText(0, QString::asprintf("%d,\t%d", pos.x, pos.z));
-                }
-            }
-        }
-    }
-
-    QElapsedTimer timer;
-    timer.start();
-    int64_t warn_ms = 1000;
-
-    if (ck_conds && !conds.empty())
-    {
-        WorldGen gen;
-        gen.init(wi.mc, wi.large);
-        gen.setSeed(wi.seed);
-
-        ConditionTree condtree;
-        condtree.set(conds, wi);
-
-        //Condition& c0 = conds[0];
-        int xr1 = 0; //(int)( cstepx * floor( (x1+c0.x1) / (double)cstepx ) );
-        int zr1 = 0; //(int)( cstepz * floor( (z1+c0.z1) / (double)cstepz ) );
-        int xr2 = 0; //(int)( cstepx * ceil( (x2+c0.x2) / (double)cstepx ) );
-        int zr2 = 0; //(int)( cstepz * ceil( (z2+c0.z2) / (double)cstepz ) );
-
-        QList<QTreeWidgetItem*> items;
-
-        for (int x = xr1; x <= xr2; x += cstepx)
-        {
-            //if (x + c0.x1 > x2 || x + c0.x2 < x1)
-            //    continue;
-            for (int z = zr1; z <= zr2; z += cstepz)
-            {
-                //if (z + c0.z1 > z2 || z + c0.z2 < z1)
-                //    continue;
-
-                if (timer.elapsed() > warn_ms)
-                {
-                    QString msg = tr(
-                            "The search is taking some time.\n"
-                            "Locations found so far: %1\n"
-                            "Continue search?")
-                            .arg(items.size());
-                    int button = QMessageBox::warning(
-                        this, tr("Warning"), msg, QMessageBox::Abort|QMessageBox::Yes);
-                    if (button != QMessageBox::Yes)
-                        goto L_scan_end;
-                    update();
-                    QApplication::processEvents();
-                    warn_ms *= 4;
-                    timer.start();
-                }
-
-                Pos origin = {x, z};
-                Pos cpos[MAX_INSTANCES] = {};
-                std::atomic_bool ab;
-                ab = false;
-                if (testTreeAt(origin, &condtree, PASS_FULL_64, &gen, &ab, cpos)
-                    != COND_OK)
-                {
-                    continue;
-                }
-
-                QTreeWidgetItem* loc = setConditionTreeItems(condtree, 0, cpos, nullptr);
-                //new QTreeWidgetItem();
-                //loc->setData(0, Qt::UserRole, QVariant::fromValue(origin));
-                //loc->setText(0, tr("condition @[%1, %2]").arg(origin.x).arg(origin.z));
-
-
-                items.push_back(loc);
-
-                if (items.size() >= 65536)
-                {
-                    warning(tr("Reached maximum number of results (%1).\n"
-                        "Stopping search.").arg(items.size()));
-                    goto L_scan_end;
-                }
-            }
-        }
-L_scan_end:
-
-        if (!items.empty())
-        {
-            /*
-            QTreeWidgetItem* item_cat = new QTreeWidgetItem(tree);
-            item_cat->setText(0, "conditions");
-            item_cat->setData(1, Qt::DisplayRole, QVariant::fromValue(items.size()));
-            item_cat->addChildren(items);
-            */
-            tree->addTopLevelItems(items);
-        }
-    }
-
-    ui->buttonExport->setEnabled(true);
-    ui->buttonAnalysis->setEnabled(true);
+    ui->buttonExport->setEnabled(false);
+    ui->buttonAnalysis->setChecked(true);
+    ui->buttonAnalysis->setText(tr("Stop"));
+    analysis.start();
 }
 
 void MainWindow::on_buttonExport_clicked()
@@ -1394,11 +1181,22 @@ void MainWindow::on_buttonExport_clicked()
 
 void MainWindow::on_treeAnalysis_itemClicked(QTreeWidgetItem *item)
 {
-    QVariant dat = item->data(0, Qt::UserRole);
+    QVariant dat;
+    dat = item->data(0, Qt::UserRole);
+    if (dat.isValid())
+    {
+        uint64_t seed = qvariant_cast<uint64_t>(dat);
+        WorldInfo wi;
+        getSeed(&wi);
+        wi.seed = seed;
+        setSeed(wi);
+    }
+
+    dat = item->data(0, Qt::UserRole+1);
     if (dat.isValid())
     {
         Pos p = qvariant_cast<Pos>(dat);
-        ui->mapView->setView(p.x+0.5, p.z+0.5);
+        getMapView()->setView(p.x+0.5, p.z+0.5);
     }
 }
 
@@ -1412,6 +1210,25 @@ void MainWindow::on_actionSearch_full_seed_space_triggered()
     formControl->setSearchMode(SEARCH_BLOCKS);
 }
 
+void MainWindow::on_actionDockable_toggled(bool dockable)
+{
+    if (dockable)
+    {   // reset to default
+        QWidget *title = dock->titleBarWidget();
+        dock->setTitleBarWidget(nullptr);
+        delete title;
+    }
+    else
+    {   // add a dummy widget with a layout to hide the title bar
+        // and avoid a warning about negative size widget
+        QWidget *title = new QWidget(this);
+        QHBoxLayout *l = new QHBoxLayout(title);
+        l->setMargin(0);
+        title->setLayout(l);
+        dock->setTitleBarWidget(title);
+        dock->setFloating(false);
+    }
+}
 
 void MainWindow::onAutosaveTimeout()
 {
@@ -1430,8 +1247,8 @@ void MainWindow::onAutosaveTimeout()
 void MainWindow::onActionMapToggled(int sopt, bool show)
 {
     if (sopt == D_PORTAL) // overworld porals should also control nether
-        ui->mapView->setShow(D_PORTALN, show);
-    ui->mapView->setShow(sopt, show);
+        getMapView()->setShow(D_PORTALN, show);
+    getMapView()->setShow(sopt, show);
 }
 
 void MainWindow::onActionBiomeLayerSelect(bool state, QAction *src, int lopt)
@@ -1486,5 +1303,4 @@ void MainWindow::onStyleChanged(int style)
         qApp->setStyle("");
     }
 }
-
 

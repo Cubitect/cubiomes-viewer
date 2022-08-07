@@ -21,7 +21,7 @@ QString Condition::summary() const
 
     if (type == 0)
     {
-        s += " " + QApplication::translate("Filter", "Start");
+        s += " " + QApplication::translate("Filter", "Conditions");
         return s;
     }
 

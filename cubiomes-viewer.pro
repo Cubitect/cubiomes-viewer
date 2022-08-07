@@ -17,6 +17,9 @@ QMAKE_CXXFLAGS  = $$QMAKE_CFLAGS -std=gnu++11
 QMAKE_CXXFLAGS_RELEASE *= -O3
 
 win32: {
+    CONFIG += static
+}
+static: {
     LIBS += -static -static-libgcc -static-libstdc++
 }
 
@@ -31,11 +34,10 @@ QMAKE_CLEAN += $$CUPATH/*.o $$CUPATH/libcubiomes.a
 
 TARGET = cubiomes-viewer
 
-CONFIG += static
-
 
 SOURCES += \
         src/aboutdialog.cpp \
+        src/analysis.cpp \
         src/biomecolordialog.cpp \
         src/collapsible.cpp \
         src/conditiondialog.cpp \
@@ -46,18 +48,18 @@ SOURCES += \
         src/formgen48.cpp \
         src/formsearchcontrol.cpp \
         src/gotodialog.cpp \
-        src/mapview.cpp \
         src/presetdialog.cpp \
         src/protobasedialog.cpp \
-        src/quad.cpp \
         src/quadlistdialog.cpp \
+        src/mapview.cpp \
+        src/quad.cpp \
         src/rangedialog.cpp \
         src/rangeslider.cpp \
         src/search.cpp \
         src/searchthread.cpp \
-        src/structuredialog.cpp \
         src/mainwindow.cpp \
-        src/main.cpp
+        src/main.cpp \
+        src/structuredialog.cpp
 
 HEADERS += \
         $$CUPATH/finders.h \
@@ -65,30 +67,31 @@ HEADERS += \
         $$CUPATH/layers.h \
         $$CUPATH/util.h \
         src/aboutdialog.h \
+        src/analysis.h \
         src/biomecolordialog.h \
         src/collapsible.h \
         src/conditiondialog.h \
         src/configdialog.h \
-        src/cutil.h \
         src/extgendialog.h \
         src/exportdialog.h \
         src/formconditions.h \
         src/formgen48.h \
         src/formsearchcontrol.h \
         src/gotodialog.h \
-        src/mapview.h \
         src/presetdialog.h \
         src/protobasedialog.h \
         src/quadlistdialog.h \
+        src/mapview.h \
         src/quad.h \
+        src/cutil.h \
         src/rangedialog.h \
         src/rangeslider.h \
         src/search.h \
         src/searchthread.h \
         src/seedtables.h \
+        src/mainwindow.h \
         src/settings.h \
-        src/structuredialog.h \
-        src/mainwindow.h
+        src/structuredialog.h
 
 FORMS += \
         src/aboutdialog.ui \
@@ -104,9 +107,9 @@ FORMS += \
         src/presetdialog.ui \
         src/protobasedialog.ui \
         src/quadlistdialog.ui\
+        src/mainwindow.ui \
         src/rangedialog.ui \
-        src/structuredialog.ui \
-        src/mainwindow.ui
+        src/structuredialog.ui
 
 
 TRANSLATIONS += \

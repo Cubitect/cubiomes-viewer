@@ -2,20 +2,12 @@
 <ui version="4.0">
  <class>ExtGenDialog</class>
  <widget class="QDialog" name="ExtGenDialog">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>321</width>
-    <height>110</height>
-   </rect>
-  </property>
   <property name="windowTitle">
    <string>World Settings (experimental)</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../rc/icons.qrc">
-    <normaloff>:/icons/map.png</normaloff>:/icons/map.png</iconset>
+    <normaloff>:/icons/logo.svg</normaloff>:/icons/logo.svg</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="1" column="0" colspan="2">

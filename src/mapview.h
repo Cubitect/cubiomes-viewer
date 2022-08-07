@@ -3,7 +3,7 @@
 
 #include "quad.h"
 
-#include <QWidget>
+#include <QDockWidget>
 #include <QElapsedTimer>
 
 class MapOverlay : public QWidget

@@ -55,7 +55,9 @@ enum {
     LOPT_NOISE_H_4,
     LOPT_NOISE_C_4,
     LOPT_NOISE_E_4,
+    LOPT_NOISE_D_4,
     LOPT_NOISE_W_4,
+    LOPT_MAX,
 };
 
 inline const char *mapopt2str(int opt)

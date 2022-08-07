@@ -1027,4 +1027,3 @@ void ConditionDialog::onClimateLimitChanged()
     }
 }
 
-

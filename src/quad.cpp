@@ -284,6 +284,7 @@ void Level::init4map(QWorld *w, int pix, int layerscale)
         case LOPT_NOISE_H_4: g.bn.nptype = NP_HUMIDITY; break;
         case LOPT_NOISE_C_4: g.bn.nptype = NP_CONTINENTALNESS; break;
         case LOPT_NOISE_E_4: g.bn.nptype = NP_EROSION; break;
+        case LOPT_NOISE_D_4: g.bn.nptype = NP_DEPTH; break;
         case LOPT_NOISE_W_4: g.bn.nptype = NP_WEIRDNESS; break;
         }
     }
@@ -581,6 +582,7 @@ QString QWorld::getBiomeName(Pos p)
             case LOPT_NOISE_H_4: c = "H="; break;
             case LOPT_NOISE_C_4: c = "C="; break;
             case LOPT_NOISE_E_4: c = "E="; break;
+            case LOPT_NOISE_D_4: c = "D="; break;
             case LOPT_NOISE_W_4: c = "W="; break;
         }
         return c + QString::number(id);

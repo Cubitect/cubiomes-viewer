@@ -18,6 +18,8 @@
 
 #include <atomic>
 
+#include "analysis.h"
+#include "mapview.h"
 #include "searchthread.h"
 #include "configdialog.h"
 #include "formconditions.h"
@@ -28,10 +30,6 @@ namespace Ui {
 class MainWindow;
 }
 
-Q_DECLARE_METATYPE(int64_t)
-Q_DECLARE_METATYPE(uint64_t)
-Q_DECLARE_METATYPE(Pos)
-Q_DECLARE_METATYPE(Config)
 
 class MapView;
 
@@ -101,6 +99,8 @@ private slots:
     void on_actionSearch_seed_list_triggered();
     void on_actionSearch_full_seed_space_triggered();
 
+    void on_actionDockable_toggled(bool dockable);
+
     // internal events
     void onAutosaveTimeout();
     void onActionMapToggled(int sopt, bool a);
@@ -111,9 +111,15 @@ private slots:
     void onSearchStatusChanged(bool running);
     void onStyleChanged(int style);
     void onBiomeColorChange();
+    void onAnalysisItemDone(QTreeWidgetItem *item);
+    void onAnalysisFinished();
 
 public:
     Ui::MainWindow *ui;
+    QDockWidget *dock;
+    MapView *mapView;
+    Analysis analysis;
+
     FormConditions *formCond;
     FormGen48 *formGen48;
     FormSearchControl *formControl;

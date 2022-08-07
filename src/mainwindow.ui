@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="../rc/icons.qrc">
-    <normaloff>:/icons/logo.png</normaloff>:/icons/logo.png</iconset>
+    <normaloff>:/icons/logo.svg</normaloff>:/icons/logo.svg</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout_6">
@@ -367,7 +367,7 @@ QToolButton {
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>1232</width>
+                 <width>1246</width>
                  <height>667</height>
                 </rect>
                </property>
@@ -441,67 +441,21 @@ QSplitter {
             <string>Analysis</string>
            </attribute>
            <layout class="QGridLayout" name="gridLayout_7">
-            <item row="0" column="1" colspan="2">
-             <widget class="QLineEdit" name="lineRadius">
-              <property name="text">
-               <string>0</string>
-              </property>
-             </widget>
-            </item>
-            <item row="7" column="0">
-             <widget class="QPushButton" name="buttonExport">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="text">
-               <string>Export</string>
-              </property>
-             </widget>
-            </item>
-            <item row="6" column="0" colspan="5">
-             <widget class="QTreeWidget" name="treeAnalysis">
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>20</height>
-               </size>
-              </property>
-              <property name="font">
-               <font>
-                <family>Monospace</family>
-               </font>
-              </property>
-              <property name="editTriggers">
-               <set>QAbstractItemView::NoEditTriggers</set>
-              </property>
-              <property name="dragDropMode">
-               <enum>QAbstractItemView::NoDragDrop</enum>
-              </property>
-              <property name="selectionMode">
-               <enum>QAbstractItemView::ExtendedSelection</enum>
-              </property>
-              <property name="sortingEnabled">
-               <bool>true</bool>
-              </property>
-              <property name="columnCount">
-               <number>2</number>
-              </property>
-              <attribute name="headerDefaultSectionSize">
-               <number>280</number>
-              </attribute>
-              <column>
+            <item row="0" column="1" colspan="4">
+             <widget class="QComboBox" name="comboSeedSource">
+              <item>
                <property name="text">
-                <string>object</string>
+                <string>Current seed</string>
                </property>
-              </column>
-              <column>
+              </item>
+              <item>
                <property name="text">
-                <string>count</string>
+                <string>From matching seeds list</string>
                </property>
-              </column>
+              </item>
              </widget>
             </item>
-            <item row="2" column="0" colspan="3">
+            <item row="3" column="0" colspan="4">
              <layout class="QHBoxLayout" name="layoutArea">
               <item>
                <widget class="QLabel" name="labelX1">
@@ -598,36 +552,16 @@ QSplitter {
               </item>
              </layout>
             </item>
-            <item row="2" column="3" colspan="2">
-             <widget class="QPushButton" name="buttonFromVisible">
-              <property name="text">
-               <string>From visible</string>
-              </property>
-             </widget>
-            </item>
             <item row="0" column="0">
-             <widget class="QLabel" name="labelSquareArea">
+             <widget class="QLabel" name="label">
               <property name="text">
-               <string>Within centred square of side =</string>
+               <string>Seed(s):</string>
               </property>
              </widget>
             </item>
-            <item row="0" column="3" colspan="2">
-             <widget class="QCheckBox" name="checkArea">
-              <property name="toolTip">
-               <string>Specify manual rectangle rather than square</string>
-              </property>
-              <property name="text">
-               <string>Custom area</string>
-              </property>
-              <property name="checkable">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0" colspan="5">
-             <layout class="QGridLayout" name="gridLayout_3">
-              <item row="0" column="2">
+            <item row="4" column="0" colspan="5">
+             <layout class="QHBoxLayout" name="horizontalLayout_3">
+              <item>
                <widget class="QCheckBox" name="checkConditions">
                 <property name="toolTip">
                  <string>Features that trigger the search conditions, provided the seed matches</string>
@@ -637,14 +571,27 @@ QSplitter {
                 </property>
                </widget>
               </item>
-              <item row="1" column="0" colspan="2">
-               <widget class="QPushButton" name="buttonAnalysis">
+              <item>
+               <widget class="QCheckBox" name="checkStructs">
+                <property name="toolTip">
+                 <string>structure positions in area</string>
+                </property>
                 <property name="text">
-                 <string>Analyze</string>
+                 <string>Structures</string>
                 </property>
                </widget>
               </item>
-              <item row="1" column="2">
+              <item>
+               <widget class="QCheckBox" name="checkBiomes">
+                <property name="toolTip">
+                 <string>statistic of biome occurances in area</string>
+                </property>
+                <property name="text">
+                 <string>Biomes</string>
+                </property>
+               </widget>
+              </item>
+              <item>
                <widget class="QCheckBox" name="checkMapOnly">
                 <property name="toolTip">
                  <string>limits analysis to the selected structures and dimension in the map view</string>
@@ -657,23 +604,108 @@ QSplitter {
                 </property>
                </widget>
               </item>
-              <item row="0" column="1">
-               <widget class="QCheckBox" name="checkBiomes">
-                <property name="toolTip">
-                 <string>statistic of biome occurances in area</string>
+             </layout>
+            </item>
+            <item row="7" column="0" colspan="5">
+             <widget class="QTreeWidget" name="treeAnalysis">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <family>Monospace</family>
+               </font>
+              </property>
+              <property name="editTriggers">
+               <set>QAbstractItemView::NoEditTriggers</set>
+              </property>
+              <property name="dragDropMode">
+               <enum>QAbstractItemView::NoDragDrop</enum>
+              </property>
+              <property name="selectionMode">
+               <enum>QAbstractItemView::ExtendedSelection</enum>
+              </property>
+              <property name="sortingEnabled">
+               <bool>true</bool>
+              </property>
+              <property name="columnCount">
+               <number>2</number>
+              </property>
+              <attribute name="headerDefaultSectionSize">
+               <number>280</number>
+              </attribute>
+              <column>
+               <property name="text">
+                <string>object</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>data/count</string>
+               </property>
+              </column>
+             </widget>
+            </item>
+            <item row="9" column="0" colspan="5">
+             <layout class="QHBoxLayout" name="horizontalLayout">
+              <item>
+               <widget class="QPushButton" name="buttonExport">
+                <property name="enabled">
+                 <bool>false</bool>
                 </property>
                 <property name="text">
-                 <string>Biomes</string>
+                 <string>Export</string>
                 </property>
                </widget>
               </item>
-              <item row="0" column="0">
-               <widget class="QCheckBox" name="checkStructs">
-                <property name="toolTip">
-                 <string>structure positions in area</string>
-                </property>
+              <item>
+               <widget class="QPushButton" name="buttonAnalysis">
                 <property name="text">
-                 <string>Structures</string>
+                 <string>Analyze</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="1" column="4">
+             <widget class="QCheckBox" name="checkArea">
+              <property name="toolTip">
+               <string>Specify manual rectangle rather than square</string>
+              </property>
+              <property name="text">
+               <string>Custom area</string>
+              </property>
+              <property name="checkable">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="4">
+             <widget class="QPushButton" name="buttonFromVisible">
+              <property name="text">
+               <string>From visible</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0" colspan="4">
+             <layout class="QHBoxLayout" name="horizontalLayout_5">
+              <item>
+               <widget class="QLabel" name="labelSquareArea">
+                <property name="text">
+                 <string>Within centred square of side =</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="lineRadius">
+                <property name="text">
+                 <string>0</string>
                 </property>
                </widget>
               </item>
@@ -705,16 +737,6 @@ QSplitter {
         <property name="bottomMargin">
          <number>0</number>
         </property>
-        <item row="0" column="0">
-         <widget class="MapView" name="mapView" native="true">
-          <property name="focusPolicy">
-           <enum>Qt::ClickFocus</enum>
-          </property>
-          <property name="contextMenuPolicy">
-           <enum>Qt::CustomContextMenu</enum>
-          </property>
-         </widget>
-        </item>
        </layout>
       </widget>
      </widget>
@@ -792,14 +814,18 @@ QToolButton:checked {
      <addaction name="actionDefault_16"/>
      <addaction name="actionDefault_64"/>
      <addaction name="actionDefault_256"/>
+     <addaction name="separator"/>
      <addaction name="actionRiver"/>
      <addaction name="actionOceanTemp"/>
+     <addaction name="separator"/>
      <addaction name="actionParaTemperature"/>
      <addaction name="actionParaHumidity"/>
      <addaction name="actionParaContinentalness"/>
      <addaction name="actionParaErosion"/>
+     <addaction name="actionParaDepth"/>
      <addaction name="actionParaWeirdness"/>
     </widget>
+    <addaction name="actionDockable"/>
     <addaction name="actionGo_to"/>
     <addaction name="actionOpen_shadow_seed"/>
     <addaction name="actionScan_seed_for_Quad_Huts"/>
@@ -866,10 +892,16 @@ QToolButton:checked {
    <property name="text">
     <string>Save session...</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
   </action>
   <action name="actionLoad">
    <property name="text">
     <string>Load session...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
    </property>
   </action>
   <action name="actionSearch_seed_list">
@@ -945,6 +977,9 @@ QToolButton:checked {
    <property name="text">
     <string>Default 1:1</string>
    </property>
+   <property name="shortcut">
+    <string>Alt+1</string>
+   </property>
   </action>
   <action name="actionDefault_4">
    <property name="checkable">
@@ -952,6 +987,9 @@ QToolButton:checked {
    </property>
    <property name="text">
     <string>Default 1:4</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+2</string>
    </property>
   </action>
   <action name="actionDefault_16">
@@ -961,6 +999,9 @@ QToolButton:checked {
    <property name="text">
     <string>Default 1:16</string>
    </property>
+   <property name="shortcut">
+    <string>Alt+3</string>
+   </property>
   </action>
   <action name="actionDefault_64">
    <property name="checkable">
@@ -969,6 +1010,9 @@ QToolButton:checked {
    <property name="text">
     <string>Default 1:64</string>
    </property>
+   <property name="shortcut">
+    <string>Alt+4</string>
+   </property>
   </action>
   <action name="actionDefault_256">
    <property name="checkable">
@@ -976,6 +1020,9 @@ QToolButton:checked {
    </property>
    <property name="text">
     <string>Default 1:256</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+5</string>
    </property>
   </action>
   <action name="actionGo_to">
@@ -988,7 +1035,10 @@ QToolButton:checked {
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>O. Temp. 1:256 (1.13 - 1.17)</string>
+    <string>(1.13 - 1.17) O. Temp. 1:25</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+7</string>
    </property>
   </action>
   <action name="actionRiver">
@@ -996,7 +1046,10 @@ QToolButton:checked {
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>River Mix 1:4 (1.13 - 1.17)</string>
+    <string>(1.13 - 1.17) River Mix 1:4</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+6</string>
    </property>
   </action>
   <action name="actionExportImg">
@@ -1014,7 +1067,10 @@ QToolButton:checked {
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Temperature (1.18+)</string>
+    <string>(1.18+) Temperature</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+T</string>
    </property>
   </action>
   <action name="actionParaHumidity">
@@ -1022,7 +1078,10 @@ QToolButton:checked {
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Humidity (1.18+)</string>
+    <string>(1.18+) Humidity</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+H</string>
    </property>
   </action>
   <action name="actionParaContinentalness">
@@ -1030,7 +1089,10 @@ QToolButton:checked {
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Continentalness (1.18+)</string>
+    <string>(1.18+) Continentalness</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+C</string>
    </property>
   </action>
   <action name="actionParaErosion">
@@ -1038,7 +1100,10 @@ QToolButton:checked {
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Erosion (1.18+)</string>
+    <string>(1.18+) Erosion</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+E</string>
    </property>
   </action>
   <action name="actionParaWeirdness">
@@ -1046,7 +1111,29 @@ QToolButton:checked {
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Weirdness (1.18+)</string>
+    <string>(1.18+) Weirdness</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+W</string>
+   </property>
+  </action>
+  <action name="actionParaDepth">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>(1.18+) Depth</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+D</string>
+   </property>
+  </action>
+  <action name="actionDockable">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Dockable</string>
    </property>
   </action>
  </widget>
@@ -1056,12 +1143,6 @@ QToolButton:checked {
    <class>Collapsible</class>
    <extends>QWidget</extends>
    <header>src/collapsible.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>MapView</class>
-   <extends>QWidget</extends>
-   <header>src/mapview.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

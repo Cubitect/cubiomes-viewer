@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="../rc/icons.qrc">
-    <normaloff>:/icons/map.png</normaloff>:/icons/map.png</iconset>
+    <normaloff>:/icons/logo.svg</normaloff>:/icons/logo.svg</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="0" column="1" colspan="2">
@@ -63,8 +63,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>566</width>
-        <height>524</height>
+        <width>562</width>
+        <height>521</height>
        </rect>
       </property>
       <property name="styleSheet">
