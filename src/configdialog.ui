@@ -100,23 +100,6 @@
       <string>Interface</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="6" column="0" colspan="4">
-       <widget class="QCheckBox" name="checkSmooth">
-        <property name="toolTip">
-         <string>Simulate innertia for the map view</string>
-        </property>
-        <property name="text">
-         <string>Smooth map motion</string>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="0" colspan="4">
-       <widget class="QCheckBox" name="checkBBoxes">
-        <property name="text">
-         <string>Outline known bounding boxes</string>
-        </property>
-       </widget>
-      </item>
       <item row="5" column="2" colspan="3">
        <widget class="QSpinBox" name="spinCacheSize">
         <property name="suffix">
@@ -136,39 +119,12 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="2" colspan="3">
-       <widget class="QComboBox" name="comboStyle">
-        <property name="iconSize">
-         <size>
-          <width>0</width>
-          <height>16</height>
-         </size>
-        </property>
-        <item>
-         <property name="text">
-          <string>System</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Dark</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="4" column="0" colspan="2">
-       <widget class="QLabel" name="label_6">
-        <property name="toolTip">
-         <string>Use a fixed grid in blocks instead of outlining the generated map tiles
-Leave blank for the default behaviour</string>
-        </property>
+      <item row="8" column="0" colspan="4">
+       <widget class="QCheckBox" name="checkBBoxes">
         <property name="text">
-         <string>Custom grid spacing:</string>
+         <string>Outline known bounding boxes</string>
         </property>
        </widget>
-      </item>
-      <item row="4" column="2" colspan="3">
-       <widget class="QLineEdit" name="lineGridSpacing"/>
       </item>
       <item row="2" column="2" colspan="2">
        <widget class="QPushButton" name="buttonBiomeColor">
@@ -191,10 +147,10 @@ Leave blank for the default behaviour</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="2" colspan="3">
-       <widget class="QPushButton" name="buttonBiomeColorEditor">
+      <item row="3" column="0" colspan="2">
+       <widget class="QLabel" name="label">
         <property name="text">
-         <string>Edit biome colors...</string>
+         <string>Maximum structure zoom:</string>
         </property>
        </widget>
       </item>
@@ -231,10 +187,31 @@ Leave blank for the default behaviour</string>
         </property>
        </widget>
       </item>
+      <item row="7" column="0" colspan="4">
+       <widget class="QCheckBox" name="checkSmooth">
+        <property name="toolTip">
+         <string>Simulate innertia for the map view</string>
+        </property>
+        <property name="text">
+         <string>Smooth map motion</string>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="0" colspan="2">
        <widget class="QLabel" name="label_4">
         <property name="text">
          <string>GUI style:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0" colspan="2">
+       <widget class="QLabel" name="label_6">
+        <property name="toolTip">
+         <string>Use a fixed grid in blocks instead of outlining the generated map tiles
+Leave blank for the default behaviour</string>
+        </property>
+        <property name="text">
+         <string>Custom grid spacing:</string>
         </property>
        </widget>
       </item>
@@ -252,10 +229,40 @@ Leave blank for the default behaviour</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="0" colspan="2">
-       <widget class="QLabel" name="label">
+      <item row="1" column="2" colspan="3">
+       <widget class="QPushButton" name="buttonBiomeColorEditor">
         <property name="text">
-         <string>Maximum structure zoom:</string>
+         <string>Edit biome colors...</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2" colspan="3">
+       <widget class="QComboBox" name="comboStyle">
+        <property name="iconSize">
+         <size>
+          <width>0</width>
+          <height>16</height>
+         </size>
+        </property>
+        <item>
+         <property name="text">
+          <string>System</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Dark</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="4" column="2" colspan="3">
+       <widget class="QLineEdit" name="lineGridSpacing"/>
+      </item>
+      <item row="6" column="0" colspan="4">
+       <widget class="QCheckBox" name="checkDockable">
+        <property name="text">
+         <string>Undockable map</string>
         </property>
        </widget>
       </item>

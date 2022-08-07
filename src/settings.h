@@ -51,6 +51,7 @@ enum { STYLE_SYSTEM, STYLE_DARK };
 
 struct Config
 {
+    bool dockable;
     bool smoothMotion;
     bool showBBoxes;
     bool restoreSession;
@@ -66,6 +67,7 @@ struct Config
 
     void reset()
     {
+        dockable = true;
         smoothMotion = true;
         showBBoxes = true;
         restoreSession = true;

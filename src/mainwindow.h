@@ -55,6 +55,8 @@ protected:
     bool saveProgress(QString fnam, bool quiet = false);
     bool loadProgress(QString fnam, bool keepresults, bool quiet);
     void updateMapSeed();
+    void setDockable(bool dockable);
+    void applyConfigChanges(const Config old, const Config conf);
 
 signals:
     void mapUpdated();
@@ -98,8 +100,6 @@ private slots:
 
     void on_actionSearch_seed_list_triggered();
     void on_actionSearch_full_seed_space_triggered();
-
-    void on_actionDockable_toggled(bool dockable);
 
     // internal events
     void onAutosaveTimeout();

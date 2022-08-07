@@ -76,7 +76,6 @@ MainWindow::MainWindow(QWidget *parent)
     QMainWindow *submain = new QMainWindow(this);
     ui->frameMap->layout()->addWidget(submain);
     submain->addDockWidget(Qt::LeftDockWidgetArea, dock);
-    on_actionDockable_toggled(false);
 
     formCond = new FormConditions(this);
     formGen48 = new FormGen48(this);
@@ -371,6 +370,7 @@ void MainWindow::saveSettings()
     settings.setValue("analysis/z2", ui->lineEditZ2->text().toInt());
     settings.setValue("analysis/seedsrc", ui->comboSeedSource->currentIndex());
 
+    settings.setValue("config/dockable", config.dockable);
     settings.setValue("config/smoothMotion", config.smoothMotion);
     settings.setValue("config/showBBoxes", config.showBBoxes);
     settings.setValue("config/restoreSession", config.restoreSession);
@@ -405,7 +405,6 @@ void MainWindow::saveSettings()
         QString s = QString("map/show_") + mapopt2str(stype);
         settings.setValue(s, getMapView()->getShow(stype));
     }
-    settings.setValue("map/dockable", ui->actionDockable->isChecked());
 
     if (config.restoreSession)
     {
@@ -449,6 +448,7 @@ void MainWindow::loadSettings()
     loadLine(&settings, ui->lineEditZ2, "analysis/z2");
     ui->comboSeedSource->setCurrentIndex(settings.value("analysis/seedsrc", ui->comboSeedSource->currentIndex()).toInt());
 
+    config.dockable = settings.value("config/dockable", config.dockable).toBool();
     config.smoothMotion = settings.value("config/smoothMotion", config.smoothMotion).toBool();
     config.showBBoxes = settings.value("config/showBBoxes", config.showBBoxes).toBool();
     config.restoreSession = settings.value("config/restoreSession", config.restoreSession).toBool();
@@ -465,6 +465,7 @@ void MainWindow::loadSettings()
 
     getMapView()->setConfig(config);
     onStyleChanged(config.uistyle);
+    setDockable(config.dockable);
 
     g_extgen.saltOverride = settings.value("world/saltOverride", g_extgen.saltOverride).toBool();
     for (int st = 0; st < FEATURE_NUM; st++)
@@ -507,9 +508,6 @@ void MainWindow::loadSettings()
         getMapView()->setShow(sopt, show);
     }
     mapGoto(x, z, scale);
-
-    bool dockable = settings.value("map/dockable", ui->actionDockable->isChecked()).toBool();
-    ui->actionDockable->setChecked(dockable);
 
     if (config.restoreSession)
     {
@@ -741,7 +739,6 @@ bool MainWindow::loadProgress(QString fnam, bool keepresults, bool quiet)
     return true;
 }
 
-
 void MainWindow::updateMapSeed()
 {
     WorldInfo wi;
@@ -763,6 +760,49 @@ void MainWindow::updateMapSeed()
     emit mapUpdated();
 }
 
+void MainWindow::setDockable(bool dockable)
+{
+    if (dockable)
+    {   // reset to default
+        QWidget *title = dock->titleBarWidget();
+        dock->setTitleBarWidget(nullptr);
+        delete title;
+    }
+    else
+    {   // add a dummy widget with a layout to hide the title bar
+        // and avoid a warning about negative size widget
+        QWidget *title = new QWidget(this);
+        QHBoxLayout *l = new QHBoxLayout(title);
+        l->setMargin(0);
+        title->setLayout(l);
+        dock->setTitleBarWidget(title);
+        dock->setFloating(false);
+    }
+}
+
+void MainWindow::applyConfigChanges(const Config old, const Config conf)
+{
+    this->config = conf;
+    getMapView()->setConfig(conf);
+    if (old.uistyle != conf.uistyle)
+        onStyleChanged(conf.uistyle);
+
+    if (conf.autosaveCycle)
+    {
+        autosaveTimer.setInterval(conf.autosaveCycle * 60000);
+        autosaveTimer.start();
+    }
+    else
+    {
+        autosaveTimer.stop();
+    }
+
+    if (!conf.biomeColorPath.isEmpty() || !old.biomeColorPath.isEmpty())
+        onBiomeColorChange();
+
+    if (conf.dockable != old.dockable)
+        setDockable(conf.dockable);
+}
 
 int MainWindow::warning(QString text, QMessageBox::StandardButtons buttons)
 {
@@ -850,26 +890,7 @@ void MainWindow::on_actionPreferences_triggered()
     int status = dialog->exec();
     if (status == QDialog::Accepted)
     {
-        Config oldConfig = config;
-        config = dialog->getSettings();
-        getMapView()->setConfig(config);
-        if (oldConfig.uistyle != config.uistyle)
-            onStyleChanged(config.uistyle);
-
-        if (config.autosaveCycle)
-        {
-            autosaveTimer.setInterval(config.autosaveCycle * 60000);
-            autosaveTimer.start();
-        }
-        else
-        {
-            autosaveTimer.stop();
-        }
-
-        if (!config.biomeColorPath.isEmpty() || !oldConfig.biomeColorPath.isEmpty())
-        {
-            onBiomeColorChange();
-        }
+        applyConfigChanges(config, dialog->getSettings());
     }
     if (dialog->structVisModified)
     {   // NOTE: structure visibility limits are not currently stored in config
@@ -1208,26 +1229,6 @@ void MainWindow::on_actionSearch_seed_list_triggered()
 void MainWindow::on_actionSearch_full_seed_space_triggered()
 {
     formControl->setSearchMode(SEARCH_BLOCKS);
-}
-
-void MainWindow::on_actionDockable_toggled(bool dockable)
-{
-    if (dockable)
-    {   // reset to default
-        QWidget *title = dock->titleBarWidget();
-        dock->setTitleBarWidget(nullptr);
-        delete title;
-    }
-    else
-    {   // add a dummy widget with a layout to hide the title bar
-        // and avoid a warning about negative size widget
-        QWidget *title = new QWidget(this);
-        QHBoxLayout *l = new QHBoxLayout(title);
-        l->setMargin(0);
-        title->setLayout(l);
-        dock->setTitleBarWidget(title);
-        dock->setFloating(false);
-    }
 }
 
 void MainWindow::onAutosaveTimeout()

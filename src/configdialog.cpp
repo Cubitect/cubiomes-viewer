@@ -44,6 +44,7 @@ ConfigDialog::~ConfigDialog()
 
 void ConfigDialog::initSettings(Config *config)
 {
+    ui->checkDockable->setChecked(config->dockable);
     ui->checkSmooth->setChecked(config->smoothMotion);
     ui->checkBBoxes->setChecked(config->showBBoxes);
     ui->checkRestore->setChecked(config->restoreSession);
@@ -61,6 +62,7 @@ void ConfigDialog::initSettings(Config *config)
 
 Config ConfigDialog::getSettings()
 {
+    conf.dockable = ui->checkDockable->isChecked();
     conf.smoothMotion = ui->checkSmooth->isChecked();
     conf.showBBoxes = ui->checkBBoxes->isChecked();
     conf.restoreSession = ui->checkRestore->isChecked();

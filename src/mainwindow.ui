@@ -825,7 +825,6 @@ QToolButton:checked {
      <addaction name="actionParaDepth"/>
      <addaction name="actionParaWeirdness"/>
     </widget>
-    <addaction name="actionDockable"/>
     <addaction name="actionGo_to"/>
     <addaction name="actionOpen_shadow_seed"/>
     <addaction name="actionScan_seed_for_Quad_Huts"/>
