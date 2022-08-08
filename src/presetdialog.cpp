@@ -95,10 +95,21 @@ PresetDialog::PresetDialog(QWidget *parent, WorldInfo wi, bool showEamples)
         wi.mc >= MC_1_7);
     */
 
+    addPreset(":/examples/two_zombie_villages.txt",
+        tr("Abandoned Villages in separate biomes (1.10+)"),
+        tr("Two abandoned Villages close together, one in a Plains, the other in a Desert.\n\n"
+        "Works best with the 48-bit family search."),
+        wi.mc >= MC_1_9);
+
+    addPreset(":/examples/portal_village_or_treasure.txt",
+        tr("Village or Treasure with Portal (1.16+)"),
+        tr("Spawn at a Ruined Portal right beside a Village <b>OR</b> Buried Treasure."),
+        wi.mc >= MC_1_16);
+
     addPreset(":/examples/village_portal_stronghold.txt",
         tr("Speedrunner Village (1.16+)"),
         tr("Spawn in a Village with a Ruined Portal leading to a Stronghold.\n\n"
-        "Works best with a large search item size and with the 48-bit family search."),
+        "Works best with the 48-bit family search."),
         wi.mc >= MC_1_16);
 
     /*

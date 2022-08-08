@@ -564,6 +564,11 @@ struct /*__attribute__((packed))*/ Condition
     // should be POD or at least Standard Layout
     // layout needs to remain consistent across versions
 
+    enum { // condition version upgrades
+        VER_LEGACY  = 0,
+        VER_2_3_0   = 1,
+        VER_CURRENT = VER_2_3_0,
+    };
     enum { // meta flags
         DISABLED = 0x0001,
     };

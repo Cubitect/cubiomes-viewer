@@ -7,5 +7,7 @@
         <file>examples/old_growth_taiga_somewhere.txt</file>
         <file>examples/large_birch_forest_1_18.txt</file>
         <file>examples/huge_jungle_1_18.txt</file>
+        <file>examples/portal_village_or_treasure.txt</file>
+        <file>examples/two_zombie_villages.txt</file>
     </qresource>
 </RCC>

@@ -64,7 +64,7 @@ QString Condition::summary() const
 
 bool Condition::versionUpgrade()
 {
-    if (version == 0)
+    if (version == VER_LEGACY)
     {
         uint64_t oceanToFind;
         memcpy(&oceanToFind, pad2, sizeof(oceanToFind));
@@ -75,7 +75,7 @@ bool Condition::versionUpgrade()
         memset(text, 0, sizeof(text));
         memset(pad1, 0, sizeof(pad1));
         memset(pad2, 0, sizeof(pad2));
-        version = 1;
+        version = VER_CURRENT;
     }
     return true;
 }

@@ -471,6 +471,8 @@ void ConditionDialog::updateMode()
     else if (filterindex == F_VILLAGE)
     {
         setActiveTab(ui->tabVariants);
+        ui->checkStartPiece->setEnabled(mc >= MC_1_14);
+        ui->checkAbandoned->setEnabled(mc >= MC_1_10);
     }
     else
     {
@@ -480,8 +482,7 @@ void ConditionDialog::updateMode()
         ui->tabVariants->setEnabled(false);
     }
 
-    ui->checkStartPiece->setEnabled(mc >= MC_1_14);
-    ui->scrollVariants->setEnabled(mc >= MC_1_14 && (cond.variants & Condition::START_PIECE_MASK));
+    ui->scrollVariants->setEnabled((cond.variants & Condition::START_PIECE_MASK));
 
     updateBiomeSelection();
 
@@ -783,6 +784,7 @@ void ConditionDialog::on_buttonCancel_clicked()
 void ConditionDialog::on_buttonOk_clicked()
 {
     Condition c = cond;
+    c.version = Condition::VER_CURRENT;
     c.type = ui->comboBoxType->currentData().toInt();
     c.relative = ui->comboBoxRelative->currentData().toInt();
     c.count = ui->spinBox->value();

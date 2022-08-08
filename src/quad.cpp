@@ -141,7 +141,7 @@ void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
     }
 }
 
-QMutex g_mutex(QMutex::NonRecursive);
+static QMutex g_mutex;
 
 void Quad::run()
 {
@@ -241,14 +241,29 @@ void Level::init4map(QWorld *w, int pix, int layerscale)
     int optlscale = 1;
     switch (w->layeropt)
     {
+    case LOPT_NOISE_T_4:
+    case LOPT_NOISE_H_4:
+    case LOPT_NOISE_C_4:
+    case LOPT_NOISE_E_4:
+    case LOPT_NOISE_D_4:
+    case LOPT_NOISE_W_4:
     case LOPT_RIVER_4:
-    case LOPT_DEFAULT_4:    optlscale = 4; break;
-    case LOPT_DEFAULT_16:   optlscale = 16; break;
-    case LOPT_DEFAULT_64:   optlscale = 64; break;
+    case LOPT_DEFAULT_4:
+        optlscale = 4;
+        break;
+    case LOPT_DEFAULT_16:
+        optlscale = 16;
+        break;
+    case LOPT_DEFAULT_64:
+        optlscale = 64;
+        break;
     case LOPT_OCEAN_256:
-    case LOPT_DEFAULT_256:  optlscale = 256; break;
+    case LOPT_DEFAULT_256:
+        optlscale = 256;
+        break;
     }
-    if (layerscale < optlscale) {
+    if (layerscale < optlscale)
+    {
         int f = optlscale / layerscale;
         scale *= f;
         pixs /= f;
