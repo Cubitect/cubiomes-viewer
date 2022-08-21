@@ -127,6 +127,10 @@ void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
                     if (!id)
                         continue;
                 }
+                else if (sconf.structType == Ruined_Portal)
+                {
+                    id = getBiomeAt(&g, 4, p.x >> 2, 0, p.z >> 2);
+                }
                 else if (g.mc >= MC_1_18)
                 {
                     if (!isViableStructureTerrain(sconf.structType, &g, p.x, p.z))

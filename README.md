@@ -14,7 +14,10 @@ Precompiled binaries can be found for Linux and Windows under
 [Releases on github](https://github.com/Cubitect/cubiomes-viewer/releases).
 The builds are statically linked against [Qt](https://www.qt.io) and should run
 as-is on most newer distributions. For the Linux build you will probably have to
-add the executable flags to the binary (github seems to remove them upon upload).
+add the executable flags to the binary.
+
+A Flatpak for the tool is available on the
+[flathub](https://flathub.org/apps/details/com.github.cubitect.cubiomes-viewer).
 
 For Arch Linux users, the tool may be found in the
 [AUR](https://aur.archlinux.org/packages/cubiomes-viewer) thanks to

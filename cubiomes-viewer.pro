@@ -12,10 +12,6 @@ LIBS    += -lm $$CUPATH/libcubiomes.a
 #QMAKE_CC = clang
 #QMAKE_CXX = clang++
 
-QMAKE_CFLAGS    = -fwrapv -DSTRUCT_CONFIG_OVERRIDE=1
-QMAKE_CXXFLAGS  = $$QMAKE_CFLAGS -std=gnu++11
-QMAKE_CXXFLAGS_RELEASE *= -O3
-
 win32: {
     CONFIG += static_gnu
 }
@@ -23,13 +19,18 @@ static_gnu: {
     LIBS += -static -static-libgcc -static-libstdc++
 }
 
+CHARSET         = -finput-charset=UTF-8 -fexec-charset=UTF-8
+QMAKE_CFLAGS    = $$CHARSET -fwrapv -DSTRUCT_CONFIG_OVERRIDE=1
+QMAKE_CXXFLAGS  = $$QMAKE_CFLAGS -std=gnu++11
+QMAKE_CXXFLAGS_RELEASE *= -O3
+
 # compile cubiomes
 release: {
     CUTARGET = release
 } else: { # may need the release target to be disabled: qmake CONFIG-=release
     CUTARGET = debug
 }
-QMAKE_PRE_LINK += $(MAKE) -C $$CUPATH -f $$CUPATH/makefile CFLAGS="-DSTRUCT_CONFIG_OVERRIDE=1" $$CUTARGET
+QMAKE_PRE_LINK += $(MAKE) -C $$CUPATH -f $$CUPATH/makefile CFLAGS=\"$$QMAKE_CFLAGS\" $$CUTARGET
 QMAKE_CLEAN += $$CUPATH/*.o $$CUPATH/libcubiomes.a
 
 TARGET = cubiomes-viewer
@@ -65,6 +66,7 @@ HEADERS += \
         $$CUPATH/finders.h \
         $$CUPATH/generator.h \
         $$CUPATH/layers.h \
+        $$CUPATH/quadbase.h \
         $$CUPATH/util.h \
         src/aboutdialog.h \
         src/analysis.h \

@@ -5,6 +5,8 @@
 #include "search.h"
 #include "rangedialog.h"
 
+#include "cubiomes/util.h"
+
 #include <QMenu>
 #include <QAction>
 #include <QClipboard>

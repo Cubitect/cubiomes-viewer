@@ -367,8 +367,8 @@ QToolButton {
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>1242</width>
-                 <height>663</height>
+                 <width>1246</width>
+                 <height>667</height>
                 </rect>
                </property>
                <property name="sizePolicy">

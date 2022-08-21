@@ -134,7 +134,7 @@ void ConfigDialog::on_buttonBox_clicked(QAbstractButton *button)
 
 void ConfigDialog::on_buttonBiomeColorEditor_clicked()
 {
-    BiomeColorDialog *dialog = new BiomeColorDialog(this, conf.biomeColorPath);
+    BiomeColorDialog *dialog = new BiomeColorDialog(this, conf.biomeColorPath, -1, INT_MAX);
     if (dialog->exec() == QDialog::Accepted)
         setBiomeColorPath(dialog->getRc());
 }

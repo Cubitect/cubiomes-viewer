@@ -2,6 +2,7 @@
 #define BIOMECOLORDIALOG_H
 
 #include <QDialog>
+#include <QLabel>
 
 namespace Ui {
 class BiomeColorDialog;
@@ -12,11 +13,17 @@ class BiomeColorDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit BiomeColorDialog(QWidget *parent, QString initrc);
+    explicit BiomeColorDialog(QWidget *parent, QString initrc, int mc, int dim);
     ~BiomeColorDialog();
 
     int saveColormap(QString rc, QString desc);
     QString getRc();
+
+    enum {
+        SORT_ID,
+        SORT_LEX,
+    };
+    void arrange(int sort);
 
 signals:
     void yieldBiomeColorRc(QString path);
@@ -36,7 +43,9 @@ private slots:
 
 private:
     Ui::BiomeColorDialog *ui;
-    QPushButton *buttons[256];
+    int mc, dim;
+    QLabel *separator;
+    QPushButton *buttons[256][3];
     unsigned char colors[256][3];
     QString activerc;
     bool modified;

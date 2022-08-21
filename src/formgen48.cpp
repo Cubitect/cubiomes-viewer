@@ -5,6 +5,8 @@
 #include "search.h"
 #include "seedtables.h"
 
+#include "cubiomes/util.h"
+
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QMessageBox>

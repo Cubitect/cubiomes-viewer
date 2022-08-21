@@ -35,25 +35,28 @@ static QIcon getColorIcon(const QColor& col)
     return QIcon(pixmap);
 }
 
-BiomeColorDialog::BiomeColorDialog(QWidget *parent, QString initrc)
+BiomeColorDialog::BiomeColorDialog(QWidget *parent, QString initrc, int mc, int dim)
     : QDialog(parent)
     , ui(new Ui::BiomeColorDialog)
+    , mc(mc), dim(dim)
     , modified()
 {
     ui->setupUi(this);
     ui->buttonOk->setIcon(style()->standardIcon(QStyle::SP_DialogOkButton));
 
-    memset(buttons, 0, sizeof(buttons));
     memcpy(colors, biomeColors, sizeof(colors));
+    memset(buttons, 0, sizeof(buttons));
 
     unsigned char coldefault[256][3];
     initBiomeColors(coldefault);
-
 
     QPushButton *button;
     ui->gridLayout->setSpacing(2);
     QPixmap alignicon(14, 14);
     alignicon.fill(Qt::transparent);
+
+    separator = new QLabel(tr("Currently inactive biomes:"), this);
+    separator->setVisible(false);
 
     button = new QPushButton(QIcon(alignicon), tr("All to default"), this);
     connect(button, &QPushButton::clicked, this, &BiomeColorDialog::onAllToDefault);
@@ -65,26 +68,27 @@ BiomeColorDialog::BiomeColorDialog(QWidget *parent, QString initrc)
 
     for (int i = 0; i < 256; i++)
     {
-        const char *bname = biome2str(MC_NEWEST, i);
+        const char *bname = biome2str(mc, i);
         if (!bname)
             continue;
 
         QColor col;
         col = QColor(colors[i][0], colors[i][1], colors[i][2]);
-        buttons[i] = button = new QPushButton(getColorIcon(col), bname, this);
+        buttons[i][0] = button = new QPushButton(getColorIcon(col), bname, this);
         connect(button, &QPushButton::clicked, [=]() { this->editBiomeColor(i); });
         ui->gridLayout->addWidget(button, i+1, 0);
 
         col = QColor(coldefault[i][0], coldefault[i][1], coldefault[i][2]);
-        button = new QPushButton(getColorIcon(col), tr("Default reset"), this);
+        buttons[i][1] = button = new QPushButton(getColorIcon(col), tr("Default reset"), this);
         connect(button, &QPushButton::clicked, [=]() { this->setBiomeColor(i, col); });
         ui->gridLayout->addWidget(button, i+1, 1);
 
         col = QColor(coldefault[i][0] / DIM_DIVIDER, coldefault[i][1] / DIM_DIVIDER, coldefault[i][2] / DIM_DIVIDER);
-        button = new QPushButton(getColorIcon(col), tr("Dimmed reset"), this);
+        buttons[i][2] = button = new QPushButton(getColorIcon(col), tr("Dimmed reset"), this);
         connect(button, &QPushButton::clicked, [=]() { this->setBiomeColor(i, col); });
         ui->gridLayout->addWidget(button, i+1, 2);
     }
+    ui->gridLayout->addWidget(separator, 256, 0, 1, 3);
 
     QString dir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
     QDirIterator it(dir, QDirIterator::NoIteratorFlags);
@@ -115,11 +119,105 @@ BiomeColorDialog::BiomeColorDialog(QWidget *parent, QString initrc)
         }
     }
     ui->comboColormaps->setCurrentIndex(index);
+
+    arrange(SORT_LEX);
 }
 
 BiomeColorDialog::~BiomeColorDialog()
 {
     delete ui;
+}
+
+
+struct IdCmp
+{
+    int mode;
+    int mc;
+    int dim;
+    bool operator() (int id1, int id2)
+    {
+        if (mode == BiomeColorDialog::SORT_ID)
+            return id1 < id2;
+        int v1 = 1, v2 = 1;
+        if (mc >= 0)
+        {   // biomes not in this version go to the back
+            v1 &= biomeExists(mc, id1);
+            v2 &= biomeExists(mc, id2);
+        }
+        if (dim != INT_MAX)
+        {   // biomes in other dimensions go to the back
+            v1 &= getDimension(id1) == dim;
+            v2 &= getDimension(id2) == dim;
+        }
+        if (v1 ^ v2)
+            return v1;
+        const char *s1 = biome2str(mc, id1);
+        const char *s2 = biome2str(mc, id2);
+        if (!s1 && !s2) return id1 < id2;
+        if (!s1) return false; // move non-biomes to back
+        if (!s2) return true;
+        return strcmp(s1, s2) < 0;
+    }
+
+    bool isPrimary(int id)
+    {
+        if (mode == BiomeColorDialog::SORT_ID)
+            return true;
+        if (mc >= 0 && !biomeExists(mc, id))
+            return false;
+        if (dim != INT_MAX && getDimension(id) != dim)
+            return false;
+        return true;
+    }
+};
+
+void BiomeColorDialog::arrange(int sort)
+{
+    QLayoutItem *sep = ui->gridLayout->takeAt(ui->gridLayout->indexOf(separator));
+    QLayoutItem *items[256][3] = {};
+    for (int i = 0; i < 256; i++)
+    {
+        if (!buttons[i][0])
+            continue;
+        for (int j = 0; j < 3; j++)
+        {
+            int idx = ui->gridLayout->indexOf(buttons[i][j]);
+            items[i][j] = ui->gridLayout->takeAt(idx);
+        }
+    }
+    IdCmp cmp = {sort, mc, dim};
+    int ids[256];
+    for (int i = 0; i < 256; i++)
+        ids[i] = i;
+    std::sort(ids, ids+256, cmp);
+
+    bool isprim = true;
+    int row = 1;
+    for (int i = 0; i < 256; i++)
+    {
+        int id = ids[i];
+        if (!items[id][0])
+            continue;
+        if (isprim && !cmp.isPrimary(id))
+        {
+            isprim = false;
+            ui->gridLayout->addItem(sep, row, 0, 1, 3);
+            sep = 0;
+            row++;
+        }
+        for (int j = 0; j < 3; j++)
+            ui->gridLayout->addItem(items[id][j], row, j);
+        row++;
+    }
+    if (sep)
+    {
+        ui->gridLayout->addItem(sep, row, 0, 1, 3);
+        separator->setVisible(false);
+    }
+    else
+    {
+        separator->setVisible(true);
+    }
 }
 
 /// Saves the current colormap as the given rc.
@@ -176,7 +274,7 @@ QString BiomeColorDialog::getRc()
 
 void BiomeColorDialog::setBiomeColor(int id, const QColor &col)
 {
-    buttons[id]->setIcon(getColorIcon(col));
+    buttons[id][0]->setIcon(getColorIcon(col));
     colors[id][0] = col.red();
     colors[id][1] = col.green();
     colors[id][2] = col.blue();
@@ -226,10 +324,10 @@ void BiomeColorDialog::on_comboColormaps_currentIndexChanged(int index)
 
     for (int i = 0; i < 256; i++)
     {
-        if (buttons[i])
+        if (buttons[i][0])
         {
             QColor col(colors[i][0], colors[i][1], colors[i][2]);
-            buttons[i]->setIcon(getColorIcon(col));
+            buttons[i][0]->setIcon(getColorIcon(col));
         }
     }
 }
@@ -283,10 +381,10 @@ void BiomeColorDialog::onAllToDefault()
     initBiomeColors(colors);
     for (int i = 0; i < 256; i++)
     {
-        if (buttons[i])
+        if (buttons[i][0])
         {
             QColor col(colors[i][0], colors[i][1], colors[i][2]);
-            buttons[i]->setIcon(getColorIcon(col));
+            buttons[i][0]->setIcon(getColorIcon(col));
         }
     }
     modified = true;
@@ -300,10 +398,10 @@ void BiomeColorDialog::onAllToDimmed()
         colors[i][0] /= DIM_DIVIDER;
         colors[i][1] /= DIM_DIVIDER;
         colors[i][2] /= DIM_DIVIDER;
-        if (buttons[i])
+        if (buttons[i][0])
         {
             QColor col(colors[i][0], colors[i][1], colors[i][2]);
-            buttons[i]->setIcon(getColorIcon(col));
+            buttons[i][0]->setIcon(getColorIcon(col));
         }
     }
     modified = true;

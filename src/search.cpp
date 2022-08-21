@@ -2,6 +2,9 @@
 #include "seedtables.h"
 #include "mainwindow.h"
 
+#include "cubiomes/quadbase.h"
+#include "cubiomes/finders.h"
+
 #include <QThread>
 #include <QByteArray>
 #include <QApplication>

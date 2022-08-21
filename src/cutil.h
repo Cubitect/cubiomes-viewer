@@ -6,7 +6,7 @@
 
 #include <random>
 
-#include "cubiomes/finders.h"
+#include "cubiomes/quadbase.h"
 #include "cubiomes/util.h"
 
 extern unsigned char biomeColors[256][3];

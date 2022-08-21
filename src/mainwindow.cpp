@@ -41,7 +41,7 @@ static ExtGenSettings g_extgen;
 extern "C"
 int getStructureConfig_override(int stype, int mc, StructureConfig *sconf)
 {
-    if U(mc == INT_MAX) // to check if override is enabled in cubiomes
+    if unlikely(mc == INT_MAX) // to check if override is enabled in cubiomes
         mc = 0;
     int ok = getStructureConfig(stype, mc, sconf);
     if (ok && g_extgen.saltOverride)
@@ -76,6 +76,7 @@ MainWindow::MainWindow(QWidget *parent)
     QMainWindow *submain = new QMainWindow(this);
     ui->frameMap->layout()->addWidget(submain);
     submain->addDockWidget(Qt::LeftDockWidgetArea, dock);
+    mapView->setFocusPolicy(Qt::StrongFocus);
 
     formCond = new FormConditions(this);
     formGen48 = new FormGen48(this);
@@ -621,7 +622,7 @@ bool MainWindow::loadProgress(QString fnam, bool keepresults, bool quiet)
     line = stream.readLine();
     int lno = 1;
 
-    if (sscanf(line.toLatin1().data(), "#Version: %d.%d.%d", &major, &minor, &patch) != 3)
+    if (sscanf(line.toLocal8Bit().data(), "#Version: %d.%d.%d", &major, &minor, &patch) != 3)
     {
         if (quiet)
             return false;
@@ -650,7 +651,7 @@ bool MainWindow::loadProgress(QString fnam, bool keepresults, bool quiet)
     {
         lno++;
         line = stream.readLine();
-        QByteArray ba = line.toLatin1();
+        QByteArray ba = line.toLocal8Bit();
         const char *p = ba.data();
 
         if (line.isEmpty()) continue;
@@ -700,7 +701,7 @@ bool MainWindow::loadProgress(QString fnam, bool keepresults, bool quiet)
         else
         {   // Seeds
             uint64_t s;
-            if (sscanf(line.toLatin1().data(), "%" PRId64, (int64_t*)&s) == 1)
+            if (sscanf(line.toLocal8Bit().data(), "%" PRId64, (int64_t*)&s) == 1)
             {
                 seeds.push_back(s);
             }
@@ -967,7 +968,9 @@ void MainWindow::on_actionStructure_visibility_triggered()
 
 void MainWindow::on_actionBiome_colors_triggered()
 {
-    BiomeColorDialog *dialog = new BiomeColorDialog(this, config.biomeColorPath);
+    WorldInfo wi;
+    getSeed(&wi);
+    BiomeColorDialog *dialog = new BiomeColorDialog(this, config.biomeColorPath, wi.mc, getDim());
     connect(dialog, SIGNAL(yieldBiomeColorRc(QString)), this, SLOT(setBiomeColorRc(QString)));
     dialog->show();
 }

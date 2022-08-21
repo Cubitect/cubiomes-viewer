@@ -9,7 +9,7 @@
 #include <QPainter>
 #include <QAtomicPointer>
 
-#include "cubiomes/finders.h"
+#include "cubiomes/quadbase.h"
 
 
 enum {
