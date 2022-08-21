@@ -38,13 +38,9 @@ release: {
     CUTARGET = debug
 }
 CUPATH              = $$PWD/cubiomes
-cubiomes.target     = cubiomes
-cubiomes.output     = $$CUPATH/*.o $$CUPATH/libcubiomes.a
-cubiomes.commands   = $(MAKE) -C $$CUPATH -f $$CUPATH/makefile CFLAGS=\"$$QMAKE_CFLAGS\" $$CUTARGET
-QMAKE_EXTRA_TARGETS += cubiomes
-PRE_TARGETDEPS      += cubiomes
-LIBS                += -lm $$CUPATH/libcubiomes.a
+QMAKE_PRE_LINK      += $(MAKE) -C $$CUPATH -f $$CUPATH/makefile CFLAGS=\"$$QMAKE_CFLAGS\" $$CUTARGET
 QMAKE_CLEAN         += $$CUPATH/*.o $$CUPATH/libcubiomes.a
+LIBS                += -lm $$CUPATH/libcubiomes.a
 
 
 TARGET = cubiomes-viewer
