@@ -127,7 +127,7 @@ bool FormSearchControl::setList64(QString path, bool quiet)
         slist64path = path;
         uint64_t *l = NULL;
         uint64_t len;
-        QByteArray ba = path.toLatin1();
+        QByteArray ba = path.toLocal8Bit();
         l = loadSavedSeeds(ba.data(), &len);
         if (l != NULL)
         {

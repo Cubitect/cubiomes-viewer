@@ -256,7 +256,7 @@ static void genQHBases(QObject *qtobj, int qual, uint64_t salt, std::vector<uint
     }
 
     path += QString("/quad_") + lbstr + ".txt";
-    QByteArray fnam = path.toLatin1();
+    QByteArray fnam = path.toLocal8Bit();
     uint64_t *qb = NULL;
     uint64_t qn = 0;
 

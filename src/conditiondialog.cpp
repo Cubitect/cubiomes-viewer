@@ -93,7 +93,7 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
         {
             initindex = ui->comboBoxRelative->count();
             QString condstr = QString("[%1] %2 broken reference")
-                .arg(initcond->relative, 2, 10, QLatin1Char('0'))
+                .arg(initcond->relative, 2, 10, QChar('0'))
                 .arg(WARNING_CHAR);
             ui->comboBoxRelative->addItem(condstr, initcond->relative);
         }
@@ -266,7 +266,7 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
         ui->checkEnabled->setChecked(!(cond.meta & Condition::DISABLED));
         ui->lineSummary->setPlaceholderText(QApplication::translate("Filter", ft.name));
         QByteArray txta = QByteArray(cond.text, sizeof(cond.text));
-        ui->lineSummary->setText(QString::fromLatin1(txta));
+        ui->lineSummary->setText(QString::fromLocal8Bit(txta));
 
         ui->comboBoxCat->setCurrentIndex(ft.cat);
         for (int i = 0; i < ui->comboBoxType->count(); i++)
@@ -795,7 +795,7 @@ void ConditionDialog::on_buttonOk_clicked()
     else
         c.meta |= Condition::DISABLED;
 
-    QByteArray text = ui->lineSummary->text().toLatin1().leftJustified(sizeof(c.text), '\0');
+    QByteArray text = ui->lineSummary->text().toLocal8Bit().leftJustified(sizeof(c.text), '\0');
     memcpy(c.text, text.data(), sizeof(c.text));
 
     if (ui->radioSquare->isChecked())

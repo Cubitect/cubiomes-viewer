@@ -1,0 +1,2 @@
+#include <winuser.h>
+CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "utf8.xml"

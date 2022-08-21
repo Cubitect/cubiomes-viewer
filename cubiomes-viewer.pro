@@ -4,25 +4,32 @@
 #
 #-------------------------------------------------
 
-CUPATH   = $$PWD/cubiomes
-QT      += core widgets
-LIBS    += -lm $$CUPATH/libcubiomes.a
+QT += core widgets
 
 # uncomment to override the profile compiler
 #QMAKE_CC = clang
 #QMAKE_CXX = clang++
 
+CHARSET                 = -finput-charset=UTF-8 -fexec-charset=UTF-8
+QMAKE_CFLAGS            = $$CHARSET -fwrapv -DSTRUCT_CONFIG_OVERRIDE=1
+QMAKE_CXXFLAGS          = $$QMAKE_CFLAGS -std=gnu++11
+QMAKE_CXXFLAGS_RELEASE  *= -O3
+
 win32: {
     CONFIG += static_gnu
+
+    # thanks to nullprogram for dealing with the Windows UTF-16 nonsense
+    LIBWINSANE          = $$PWD/src/libwinsane
+    libwinsane.target   = libwinsane
+    libwinsane.output   = $$LIBWINSANE/libwinsane.o
+    libwinsane.commands = $(MAKE) -C $$LIBWINSANE -f $$LIBWINSANE/Makefile
+    QMAKE_EXTRA_TARGETS += libwinsane
+    PRE_TARGETDEPS      += libwinsane
+    LIBS                += $$LIBWINSANE/libwinsane.o
 }
 static_gnu: {
     LIBS += -static -static-libgcc -static-libstdc++
 }
-
-CHARSET         = -finput-charset=UTF-8 -fexec-charset=UTF-8
-QMAKE_CFLAGS    = $$CHARSET -fwrapv -DSTRUCT_CONFIG_OVERRIDE=1
-QMAKE_CXXFLAGS  = $$QMAKE_CFLAGS -std=gnu++11
-QMAKE_CXXFLAGS_RELEASE *= -O3
 
 # compile cubiomes
 release: {
@@ -30,8 +37,15 @@ release: {
 } else: { # may need the release target to be disabled: qmake CONFIG-=release
     CUTARGET = debug
 }
-QMAKE_PRE_LINK += $(MAKE) -C $$CUPATH -f $$CUPATH/makefile CFLAGS=\"$$QMAKE_CFLAGS\" $$CUTARGET
-QMAKE_CLEAN += $$CUPATH/*.o $$CUPATH/libcubiomes.a
+CUPATH              = $$PWD/cubiomes
+cubiomes.target     = cubiomes
+cubiomes.output     = $$CUPATH/*.o $$CUPATH/libcubiomes.a
+cubiomes.commands   = $(MAKE) -C $$CUPATH -f $$CUPATH/makefile CFLAGS=\"$$QMAKE_CFLAGS\" $$CUTARGET
+QMAKE_EXTRA_TARGETS += cubiomes
+PRE_TARGETDEPS      += cubiomes
+LIBS                += -lm $$CUPATH/libcubiomes.a
+QMAKE_CLEAN         += $$CUPATH/*.o $$CUPATH/libcubiomes.a
+
 
 TARGET = cubiomes-viewer
 
@@ -128,7 +142,7 @@ RESOURCES += \
 
 translations: {
     # automatically run lupdate for pluralization default translation
-    THIS_FILE = cubiomes-viewer.pro
+    THIS_FILE           = cubiomes-viewer.pro
     lupdate.input       = THIS_FILE
     lupdate.output      = output.dummy.1 # removed by clean
     lupdate.commands    = $$[QT_INSTALL_BINS]/lupdate -pluralonly -noobsolete ${QMAKE_FILE_IN}

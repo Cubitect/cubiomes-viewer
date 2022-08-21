@@ -18,9 +18,9 @@ QString Condition::summary() const
     const FilterInfo& ft = g_filterinfo.list[type];
     QString s;
     if (meta & Condition::DISABLED)
-        s = QString("#%1#").arg(save, 2, 10, QLatin1Char('0'));
+        s = QString("#%1#").arg(save, 2, 10, QChar('0'));
     else
-        s = QString("[%1]").arg(save, 2, 10, QLatin1Char('0'));
+        s = QString("[%1]").arg(save, 2, 10, QChar('0'));
 
     if (type == 0)
     {
@@ -37,14 +37,14 @@ QString Condition::summary() const
     if (text[0])
     {
         QByteArray txta = QByteArray(text, sizeof(text));
-        txts = QString::fromLatin1(txta);
+        txts = QString::fromLocal8Bit(txta);
     }
     else
     {
         txts = QApplication::translate("Filter", ft.name);
     }
 
-    s += QString(" %2%3").arg(txts, -28, ' ').arg(cnts, -4, QLatin1Char(' '));
+    s += QString(" %2%3").arg(txts, -28, ' ').arg(cnts, -4, QChar(' '));
 
     if (relative)
         s += QString::asprintf("[%02d]+", relative);
@@ -117,7 +117,7 @@ bool Condition::readHex(const QString& hex)
 {
     if ((size_t)hex.length()/2 < offsetof(Condition, count))
         return false;
-    QByteArray ba = QByteArray::fromHex(QByteArray(hex.toLatin1().data()));
+    QByteArray ba = QByteArray::fromHex(QByteArray(hex.toLocal8Bit().data()));
     size_t minsize = (size_t)ba.size();
     size_t savsize = offsetof(Condition, generated_start);
     if (savsize < minsize)
