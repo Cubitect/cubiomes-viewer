@@ -130,7 +130,7 @@ MainWindow::MainWindow(QWidget *parent)
     addMapAction(D_RUINS, "ruins", tr("Show ocean ruins"));
     addMapAction(D_SHIPWRECK, "shipwreck", tr("Show shipwrecks"));
     addMapAction(D_TREASURE, "treasure", tr("Show buried treasures"));
-    addMapAction(D_OUTPOST, "outpost", tr("Show illager outposts"));
+    addMapAction(D_OUTPOST, "outpost", tr("Show pillager outposts"));
     addMapAction(D_ANCIENTCITY, "ancient_city", tr("Show ancient cities"));
     addMapAction(D_PORTAL, "portal", tr("Show ruined portals"));
     ui->toolBar->addSeparator();
