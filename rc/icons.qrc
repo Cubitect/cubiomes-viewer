@@ -66,5 +66,8 @@
         <file>icons/ancient_city_d.png</file>
         <file>icons/ancient_city.png</file>
         <file>icons/logo.png</file>
+        <file>icons/portal_lit.png</file>
+        <file>icons/portal_giant.png</file>
+        <file>icons/end_ship.png</file>
     </qresource>
 </RCC>

@@ -14,7 +14,7 @@
 #include "updater.h"
 #endif
 
-#include "quad.h"
+#include "world.h"
 #include "cutil.h"
 
 #include <QIntValidator>
@@ -319,7 +319,7 @@ bool MainWindow::setSeed(WorldInfo wi, int dim, int layeropt)
         return false;
     }
 
-    if (dim == INT_MAX)
+    if (dim == DIM_UNDEF)
         dim = getDim();
 
     ui->checkLarge->setChecked(wi.large);
@@ -1265,7 +1265,7 @@ void MainWindow::onActionBiomeLayerSelect(bool state, QAction *src, int lopt)
             act->setChecked(false);
     WorldInfo wi;
     if (getSeed(&wi))
-        setSeed(wi, INT_MAX, lopt);
+        setSeed(wi, DIM_UNDEF, lopt);
 }
 
 void MainWindow::onConditionsChanged()

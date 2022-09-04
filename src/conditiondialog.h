@@ -8,10 +8,12 @@
 #include <QListWidgetItem>
 #include <QTextEdit>
 #include <QMouseEvent>
+#include <QVBoxLayout>
 
 #include "search.h"
 #include "formconditions.h"
 #include "rangeslider.h"
+#include "cutil.h"
 
 class MainWindow;
 
@@ -103,14 +105,9 @@ class VariantCheckBox : public QCheckBox
 {
     Q_OBJECT
 public:
-    VariantCheckBox(QString name, int b, int v) : QCheckBox(name),biome(b),variant(v) {}
+    VariantCheckBox(const StartPiece *sp) : QCheckBox(sp->name),sp(sp) {}
     virtual ~VariantCheckBox() {}
-    int biome;
-    int variant;
-    uint64_t getMask()
-    {
-        return 1ULL << Condition::toVariantBit(biome, variant);
-    }
+    const StartPiece *sp;
 };
 
 
@@ -124,10 +121,8 @@ public:
     virtual ~ConditionDialog();
 
     void addVariant(QString name, int biome, int variant);
-    void setActiveTab(QWidget *tab);
     void updateMode();
     void updateBiomeSelection();
-    void enableSet(const int *ids, int n);
     int warnIfBad(Condition cond);
 
     void getClimateLimits(int limok[6][2], int limex[6][2]);
@@ -163,20 +158,21 @@ private slots:
 
     void on_comboBoxCat_currentIndexChanged(int index);
 
-    void on_checkStartPiece_stateChanged(int state);
-
+    void onCheckStartChanged(int state);
     void onClimateLimitChanged();
 
 private:
     Ui::ConditionDialog *ui;
     QTextEdit *textDescription;
 
-    QCheckBox *biomecboxes[256];
+    QFrame *separator;
+    std::map<int, QCheckBox*> biomecboxes;
     SpinExclude *tempsboxes[9];
-    QVector<VariantCheckBox*> variantboxes;
     LabeledRange *climaterange[2][6];
     QCheckBox *climatecomplete[6];
     std::map<int, NoiseBiomeIndicator*> noisebiomes;
+
+    QVector<VariantCheckBox*> variantboxes;
 
 public:
     Config *config;

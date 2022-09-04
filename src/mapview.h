@@ -1,7 +1,7 @@
 #ifndef MAPVIEW_H
 #define MAPVIEW_H
 
-#include "quad.h"
+#include "world.h"
 
 #include <QDockWidget>
 #include <QElapsedTimer>

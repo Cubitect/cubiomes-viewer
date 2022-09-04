@@ -745,7 +745,7 @@ QSizeGrip {
 
 --------------------------------------------------------------------------- */
 QStackedWidget {
-  padding: 2px;
+  padding: 0px;
   border: 1px solid #455364;
   border: 1px solid #19232D;
 }

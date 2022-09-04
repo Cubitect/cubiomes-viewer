@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="en">
+<TS version="2.0" language="en">
 <context>
     <name>ConfigDialog</name>
     <message numerus="yes">
@@ -95,7 +95,7 @@
         <location filename="../../src/searchthread.cpp" line="156"/>
         <source>Biome condition with ID %1 includes %n biome(s) that do not generate in MC %2.</source>
         <translation>
-            <numerusform>Biome condition with ID %1 includes %n biome that do not generate in MC %2.</numerusform>
+            <numerusform>Biome condition with ID %1 includes %n biome that does not generate in MC %2.</numerusform>
             <numerusform>Biome condition with ID %1 includes %n biomes that do not generate in MC %2.</numerusform>
         </translation>
     </message>

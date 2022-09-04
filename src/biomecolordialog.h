@@ -19,10 +19,6 @@ public:
     int saveColormap(QString rc, QString desc);
     QString getRc();
 
-    enum {
-        SORT_ID,
-        SORT_LEX,
-    };
     void arrange(int sort);
 
 signals:

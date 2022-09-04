@@ -2,7 +2,7 @@
 #define ANALYSIS_H
 
 #include "search.h"
-#include "quad.h"
+#include "world.h"
 
 #include <QThread>
 #include <QTreeWidgetItem>

@@ -1,4 +1,5 @@
-#include "quad.h"
+#include "world.h"
+#include "mapview.h" // for translations
 
 #include "cutil.h"
 
@@ -32,10 +33,12 @@ void saveStructVis(std::map<int, double>& structvis)
     }
 }
 
-const QPixmap& getMapIcon(int opt, int variation)
+const QPixmap& getMapIcon(int opt, StructureVariant *variation)
 {
     static QPixmap icons[STRUCT_NUM];
     static QPixmap iconzvil;
+    static QPixmap icongiant;
+    static QPixmap iconship;
     static bool init = false;
 
     if (!init)
@@ -62,12 +65,18 @@ const QPixmap& getMapIcon(int opt, int variation)
         icons[D_BASTION]    = QPixmap(":/icons/bastion.png");
         icons[D_ENDCITY]    = QPixmap(":/icons/endcity.png");
         icons[D_GATEWAY]    = QPixmap(":/icons/gateway.png");
-        iconzvil = QPixmap(":/icons/zombie.png");
+        iconzvil            = QPixmap(":/icons/zombie.png");
+        icongiant           = QPixmap(":/icons/portal_giant.png");
+        iconship            = QPixmap(":/icons/end_ship.png");
     }
-    if (variation)
-    {
-        if (opt == D_VILLAGE) return iconzvil;
-    }
+    if (!variation)
+        return icons[opt];
+    if (opt == D_VILLAGE && variation->abandoned)
+        return iconzvil;
+    if ((opt == D_PORTAL || opt == D_PORTALN) && variation->giant)
+        return icongiant;
+    if (opt == D_ENDCITY && variation->ship)
+        return iconship;
     return icons[opt];
 }
 
@@ -118,6 +127,7 @@ void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
                 int id = isViableStructurePos(sconf.structType, &g, p.x, p.z, 0);
                 if (!id)
                     continue;
+                VarPos vp = VarPos(p);
 
                 if (sconf.structType == End_City)
                 {
@@ -126,8 +136,11 @@ void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
                     id = isViableEndCityTerrain(&g.en, &sn, p.x, p.z);
                     if (!id)
                         continue;
+                    Piece pieces[END_CITY_PIECES_MAX];
+                    int n = getEndCityPieces(pieces, wi.seed, p.x >> 4, p.z >> 4);
+                    vp.pieces.assign(pieces, pieces+n);
                 }
-                else if (sconf.structType == Ruined_Portal)
+                else if (sconf.structType == Ruined_Portal || sconf.structType == Ruined_Portal_N)
                 {
                     id = getBiomeAt(&g, 4, p.x >> 2, 0, p.z >> 2);
                 }
@@ -137,7 +150,6 @@ void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
                         continue;
                 }
 
-                VarPos vp = VarPos(p);
                 getVariant(&vp.v, sconf.structType, wi.mc, wi.seed, p.x, p.z, id);
                 out->push_back(vp);
             }
@@ -452,8 +464,7 @@ QWorld::QWorld(WorldInfo wi, int dim, int layeropt)
     , selx()
     , selz()
     , seltype(-1)
-    , selpos()
-    , selvar()
+    , selvp(Pos{})
     , qual()
 {
     setupGenerator(&g, wi.mc,  wi.large);
@@ -868,7 +879,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
         if (!sshow[sopt] || dim != l.dim || l.vis > blocks2pix)
             continue;
 
-        std::vector<QPainter::PixmapFragment> frags;
+        std::map<const QPixmap*, std::vector<QPainter::PixmapFragment>> frags;
 
         for (Quad *q : l.cells)
         {
@@ -897,6 +908,15 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
                         x += dx / 2;
                         y += dy / 2;
                     }
+                    painter.setPen(QPen(QColor(192, 0, 0, 128), 0));
+                    for (Piece& p : vp.pieces)
+                    {
+                        qreal px = vw/2.0 + (p.bb0.x - focusx) * blocks2pix;
+                        qreal py = vh/2.0 + (p.bb0.z - focusz) * blocks2pix;
+                        qreal dx = (p.bb1.x - p.bb0.x + 1) * blocks2pix;
+                        qreal dy = (p.bb1.z - p.bb0.z + 1) * blocks2pix;
+                        painter.drawRect(QRect(px, py, dx, dy));
+                    }
                 }
 
                 QPointF d = QPointF(x, y);
@@ -906,36 +926,29 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
                     vp.p.z //+ (vp.v.z + vp.v.sz / 2)
                 };
 
+                const QPixmap& icon = getMapIcon(sopt, &vp.v);
+                QRectF rec = icon.rect();
                 if (seldo)
                 {   // check for structure selection
-                    QRectF r = getMapIcon(sopt).rect();
+                    QRectF r = rec;
                     r.moveCenter(d);
                     if (r.contains(selx, selz))
                     {
                         seltype = sopt;
-                        selpos = spos;
-                        selvar = vp.v.abandoned;
+                        selvp = vp;
                     }
                 }
-                if (seltype == sopt && selpos.x == spos.x && selpos.z == spos.z)
+                if (seltype == sopt && selvp.p.x == spos.x && selvp.p.z == spos.z)
                 {   // don't draw selected structure
                     continue;
                 }
-                QRectF r = getMapIcon(sopt).rect();
-                if (sopt == D_VILLAGE && vp.v.abandoned)
-                {
-                    int ix = d.x()-r.width()/2;
-                    int iy = d.y()-r.height()/2;
-                    painter.drawPixmap(ix, iy, getMapIcon(sopt, vp.v.abandoned));
-                }
-                else
-                {
-                    frags.push_back(QPainter::PixmapFragment::create(d, r));
-                }
+
+                frags[&icon].push_back(QPainter::PixmapFragment::create(d, rec));
             }
         }
 
-        painter.drawPixmapFragments(frags.data(), frags.size(), getMapIcon(sopt));
+        for (auto& it : frags)
+            painter.drawPixmapFragments(it.second.data(), it.second.size(), *it.first);
     }
 
     Pos* sp = spawn; // atomic fetch
@@ -954,8 +967,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
             if (r.contains(selx, selz))
             {
                 seltype = D_SPAWN;
-                selpos = *sp;
-                selvar = 0;
+                selvp.p = *sp;
             }
         }
     }
@@ -979,8 +991,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
                 if (r.contains(selx, selz))
                 {
                     seltype = D_STRONGHOLD;
-                    selpos = p;
-                    selvar = 0;
+                    selvp.p = p;
                 }
             }
         }
@@ -1005,9 +1016,8 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
             l.update(cachedbiomes, 0, 0, 0, 0);
     }
 
-    // start the spawn and stronghold worker thread if this is the first run
     if (spawn == NULL)
-    {
+    {   // start the spawn and stronghold worker thread if this is the first run
         if (sshow[D_SPAWN] || sshow[D_STRONGHOLD] || (showBB && blocks2pix >= 1.0))
         {
             spawn = (Pos*) -1;
@@ -1021,20 +1031,20 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
     }
 
     if (seltype != D_NONE)
-    {
-        const QPixmap *icon = &getMapIcon(seltype, selvar);
-        qreal x = vw/2.0 + (selpos.x - focusx) * blocks2pix;
-        qreal y = vh/2.0 + (selpos.z - focusz) * blocks2pix;
-        QRect iconrec = icon->rect();
+    {   // draw selection overlay
+        const QPixmap& icon = getMapIcon(seltype, &selvp.v);
+        qreal x = vw/2.0 + (selvp.p.x - focusx) * blocks2pix;
+        qreal y = vh/2.0 + (selvp.p.z - focusz) * blocks2pix;
+        QRect iconrec = icon.rect();
         qreal w = iconrec.width() * 1.5;
         qreal h = iconrec.height() * 1.5;
-        painter.drawPixmap(x-w/2, y-h/2, w, h, *icon);
+        painter.drawPixmap(x-w/2, y-h/2, w, h, icon);
 
         QFont f = QFont();
         f.setBold(true);
         painter.setFont(f);
 
-        QString s = QString::asprintf(" %d,%d", selpos.x, selpos.z);
+        QString s = QString::asprintf(" %d,%d", selvp.p.x, selvp.p.z);
         int pad = 5;
         QRect textrec = painter.fontMetrics()
                 .boundingRect(0, 0, vw, vh, Qt::AlignLeft | Qt::AlignTop, s);
@@ -1050,15 +1060,71 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
         painter.setPen(QPen(QColor(255, 255, 255), 2));
         painter.drawText(textrec, s, QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
 
-        painter.drawPixmap(iconrec.translated(pad,pad), *icon);
+        iconrec = iconrec.translated(pad,pad);
+        painter.drawPixmap(iconrec, icon);
+
+        QStringList sinfo;
+        if (seltype == D_VILLAGE)
+        {
+            if (selvp.v.abandoned)
+                sinfo.append("abandoned");
+            s = getStartPieceName(Village, &selvp.v);
+            if (!s.isEmpty())
+                sinfo.append(s);
+        }
+        else if (seltype == D_BASTION)
+        {
+            s = getStartPieceName(Bastion, &selvp.v);
+            if (!s.isEmpty())
+                sinfo.append(s);
+        }
+        else if (seltype == D_PORTAL || seltype == D_PORTALN)
+        {
+            switch (selvp.v.biome)
+            {
+            case plains:    sinfo.append("standard"); break;
+            case desert:    sinfo.append("desert"); break;
+            case jungle:    sinfo.append("jungle"); break;
+            case swamp:     sinfo.append("swamp"); break;
+            case mountains: sinfo.append("mountain"); break;
+            case ocean:     sinfo.append("ocean"); break;
+            default:        sinfo.append("nether"); break;
+            }
+            s = getStartPieceName(Ruined_Portal, &selvp.v);
+            if (!s.isEmpty())
+                sinfo.append(s);
+            if (selvp.v.underground)
+                sinfo.append("underground");
+            if (selvp.v.airpocket)
+                sinfo.append("airpocket");
+        }
+        else if (seltype == D_ENDCITY)
+        {
+            sinfo.append(QString::asprintf("size=%zu", selvp.pieces.size()));
+            if (selvp.v.ship)
+                sinfo.append("ship");
+        }
+        if (!sinfo.empty())
+        {
+            f = QFont();
+            f.setPointSize(8);
+            painter.setFont(f);
+
+            s = sinfo.join(":");
+            int xpos = textrec.right() + 3;
+            textrec = painter.fontMetrics().boundingRect(0, 0, vw, vh, Qt::AlignLeft | Qt::AlignTop, s);
+            textrec = textrec.translated(xpos+pad, 0);
+            painter.fillRect(textrec.marginsAdded(QMargins(2,0,2,0)), QBrush(QColor(0,0,0,128), Qt::SolidPattern));
+            painter.drawText(textrec, s, QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
+        }
     }
 
     if (activelv < 0)
         activelv = 0;
     if (activelv >= (int)lvb.size()-1)
         activelv = lvb.size() - 1;
-    int pixs = lvb[activelv].pixs + lvb[activelv].pixs / 128;
-    unsigned int cachesize = memlimit / pixs / pixs / 7; // sizeof(RGB) + sizeof(biome_id)
+    int pixs = lvb[activelv].pixs;
+    unsigned int cachesize = memlimit / pixs / pixs / (3+4); // sizeof(RGB) + sizeof(biome_id)
 
     cleancache(cachedbiomes, cachesize);
     cleancache(cachedstruct, cachesize);

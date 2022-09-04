@@ -120,56 +120,13 @@ BiomeColorDialog::BiomeColorDialog(QWidget *parent, QString initrc, int mc, int 
     }
     ui->comboColormaps->setCurrentIndex(index);
 
-    arrange(SORT_LEX);
+    arrange(IdCmp::SORT_LEX);
 }
 
 BiomeColorDialog::~BiomeColorDialog()
 {
     delete ui;
 }
-
-
-struct IdCmp
-{
-    int mode;
-    int mc;
-    int dim;
-    bool operator() (int id1, int id2)
-    {
-        if (mode == BiomeColorDialog::SORT_ID)
-            return id1 < id2;
-        int v1 = 1, v2 = 1;
-        if (mc >= 0)
-        {   // biomes not in this version go to the back
-            v1 &= biomeExists(mc, id1);
-            v2 &= biomeExists(mc, id2);
-        }
-        if (dim != INT_MAX)
-        {   // biomes in other dimensions go to the back
-            v1 &= getDimension(id1) == dim;
-            v2 &= getDimension(id2) == dim;
-        }
-        if (v1 ^ v2)
-            return v1;
-        const char *s1 = biome2str(mc, id1);
-        const char *s2 = biome2str(mc, id2);
-        if (!s1 && !s2) return id1 < id2;
-        if (!s1) return false; // move non-biomes to back
-        if (!s2) return true;
-        return strcmp(s1, s2) < 0;
-    }
-
-    bool isPrimary(int id)
-    {
-        if (mode == BiomeColorDialog::SORT_ID)
-            return true;
-        if (mc >= 0 && !biomeExists(mc, id))
-            return false;
-        if (dim != INT_MAX && getDimension(id) != dim)
-            return false;
-        return true;
-    }
-};
 
 void BiomeColorDialog::arrange(int sort)
 {

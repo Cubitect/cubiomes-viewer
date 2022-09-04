@@ -1,7 +1,7 @@
 #include "analysis.h"
 #include "cutil.h"
 #include "settings.h"
-#include "quad.h"
+#include "world.h"
 
 #include <QElapsedTimer>
 

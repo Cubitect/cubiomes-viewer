@@ -45,7 +45,7 @@ public:
     QAction *addMapAction(int sopt, const char *iconpath, QString tip);
 
     bool getSeed(WorldInfo *wi, bool applyrand = true);
-    bool setSeed(WorldInfo wi, int dim = INT_MAX, int layeropt = -1);
+    bool setSeed(WorldInfo wi, int dim = DIM_UNDEF, int layeropt = -1);
     int getDim();
     MapView *getMapView();
 

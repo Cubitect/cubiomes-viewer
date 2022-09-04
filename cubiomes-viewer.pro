@@ -63,14 +63,14 @@ SOURCES += \
         src/protobasedialog.cpp \
         src/quadlistdialog.cpp \
         src/mapview.cpp \
-        src/quad.cpp \
         src/rangedialog.cpp \
         src/rangeslider.cpp \
         src/search.cpp \
         src/searchthread.cpp \
         src/mainwindow.cpp \
         src/main.cpp \
-        src/structuredialog.cpp
+        src/structuredialog.cpp \
+        src/world.cpp
 
 HEADERS += \
         $$CUPATH/finders.h \
@@ -94,7 +94,6 @@ HEADERS += \
         src/protobasedialog.h \
         src/quadlistdialog.h \
         src/mapview.h \
-        src/quad.h \
         src/cutil.h \
         src/rangedialog.h \
         src/rangeslider.h \
@@ -103,7 +102,8 @@ HEADERS += \
         src/seedtables.h \
         src/mainwindow.h \
         src/settings.h \
-        src/structuredialog.h
+        src/structuredialog.h \
+        src/world.h
 
 FORMS += \
         src/aboutdialog.ui \

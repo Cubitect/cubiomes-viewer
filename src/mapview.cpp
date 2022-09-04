@@ -205,7 +205,7 @@ Pos MapView::getActivePos()
 {
     Pos p = overlay->pos;
     if (world && world->seltype != D_NONE)
-        p = world->selpos;
+        p = world->selvp.p;
     return p;
 }
 

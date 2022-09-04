@@ -147,7 +147,8 @@ bool SearchMaster::set(
                     layerId = l - tmp.ls.layers;
             }
             uint64_t ab, am;
-            getAvailableBiomes(&ab, &am, layerId, wi.mc);
+            uint32_t flags = 0;
+            getAvailableBiomes(&ab, &am, layerId, wi.mc, flags);
             b ^= (ab & b);
             m ^= (am & m);
             if (b || m)

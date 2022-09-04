@@ -3,7 +3,7 @@
 #include <QTranslator>
 #include <QFontDatabase>
 
-#include "quad.h"
+#include "world.h"
 
 #include "cubiomes/generator.h"
 #include "cubiomes/util.h"

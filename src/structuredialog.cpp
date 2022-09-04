@@ -6,7 +6,7 @@
 #include <QDoubleValidator>
 #include <QPushButton>
 
-#include "quad.h"
+#include "world.h"
 #include "cutil.h"
 
 StructureDialog::StructureDialog(QWidget *parent)

@@ -145,13 +145,13 @@ static const struct FilterList
         };
         list[F_SCALE_TO_NETHER] = FilterInfo{
             CAT_HELPER, 0, 0, 0, 0, 0, 0, 1, 0, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
-            ":icons/portal.png",
+            ":icons/portal_lit.png",
             _("Coordinate factor x/8"),
             _("Divides relative location by 8, from Overworld to Nether.")
         };
         list[F_SCALE_TO_OVERWORLD] = FilterInfo{
             CAT_HELPER, 0, 0, 0, 0, 0, 0, 1, 0, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
-            ":icons/portal.png",
+            ":icons/portal_lit.png",
             _("Coordinate factor x*8"),
             _("Multiplies relative location by 8, from Nether to Overworld.")
         };
@@ -505,7 +505,7 @@ static const struct FilterList
         list[F_ANCIENT_CITY] = FilterInfo{
             CAT_STRUCT, 1, 1, 1, 1, 0, Ancient_City, 1, 0, 1, MC_1_19, MC_NEWEST, 0, 0, disp++,
             ":icons/ancient_city.png",
-            _("Ancient City"),
+            _("Ancient city"),
             ""
         };
 
@@ -567,14 +567,16 @@ struct /*__attribute__((packed))*/ Condition
     enum { // condition version upgrades
         VER_LEGACY  = 0,
         VER_2_3_0   = 1,
-        VER_CURRENT = VER_2_3_0,
+        VER_2_4_0   = 2,
+        VER_CURRENT = VER_2_4_0,
     };
     enum { // meta flags
         DISABLED = 0x0001,
     };
     enum { // variant flags
-        START_PIECE_MASK = (1ULL << 63),
-        ABANDONED_MASK   = (1ULL << 62),
+        VAR_WITH_START  = 0x01, // restrict start piece index and biome
+        VAR_ABANODONED  = 0x02, // zombie village
+        VAR_ENDSHIP     = 0x04, // end city ship
     };
     int16_t     type;
     uint16_t    meta;
@@ -595,8 +597,9 @@ struct /*__attribute__((packed))*/ Condition
     int32_t     y;
     uint32_t    flags;
     int32_t     rmax; // (<=0):disabled; (>0):strict upper radius
-    uint8_t     pad4[4]; // unused
-    uint64_t    variants;
+    uint16_t    varflags;
+    int16_t     varbiome; // unused
+    uint64_t    varstart;
     int32_t     limok[NP_MAX][2];
     int32_t     limex[NP_MAX][2];
 
@@ -613,9 +616,7 @@ struct /*__attribute__((packed))*/ Condition
 
     QString summary() const;
 
-    static int toVariantBit(int biome, int variant);
-    static void fromVariantBit(int bit, int *biome, int *variant);
-    bool villageOk(int mc, StructureVariant sv) const;
+    bool isVariantOk(int mc, int stype, StructureVariant sv) const;
 };
 
 struct ConditionTree
@@ -648,7 +649,10 @@ struct WorldGen
         this->large = large;
         this->seed = 0;
         this->initsurf = false;
-        setupGenerator(&g, mc, large);
+        uint32_t flags = 0;
+        if (large)
+            flags |= LARGE_BIOMES;
+        setupGenerator(&g, mc, flags);
     }
 
     void setSeed(uint64_t seed)

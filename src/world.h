@@ -1,5 +1,5 @@
-#ifndef QUAD_H
-#define QUAD_H
+#ifndef WORLD_H
+#define WORLD_H
 
 #include "settings.h"
 #include "search.h"
@@ -149,15 +149,16 @@ inline int mapopt2stype(int opt)
 
 void loadStructVis(std::map<int, double>& structvis);
 void saveStructVis(std::map<int, double>& structvis);
-const QPixmap& getMapIcon(int opt, int variation = 0);
+const QPixmap& getMapIcon(int opt, StructureVariant *variation = 0);
 
 struct Level;
 
 struct VarPos
 {
-    VarPos(Pos p) : p(p),v() {}
+    VarPos(Pos p) : p(p),v(),pieces() {}
     Pos p;
     StructureVariant v;
+    std::vector<Piece> pieces;
 };
 
 void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
@@ -286,12 +287,11 @@ struct QWorld
     bool seldo;
     qreal selx, selz;
     int seltype;
-    Pos selpos;
-    int selvar;
+    VarPos selvp;
 
     qreal qual; // quality, i.e. maximum pixels per 'block' at the current layer
 };
 
 
 
-#endif // QUAD_H
+#endif // WORLD_H

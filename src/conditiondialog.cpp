@@ -2,7 +2,6 @@
 #include "ui_conditiondialog.h"
 
 #include "mainwindow.h"
-#include "cutil.h"
 
 #include <QCheckBox>
 #include <QIntValidator>
@@ -12,19 +11,20 @@
 #include <QPainterPath>
 #include <QMessageBox>
 #include <QScrollBar>
+#include <QSpacerItem>
 
 #define SETUP_TEMPCAT_SPINBOX(B) do {\
         tempsboxes[B] = new SpinExclude();\
         QLabel *l = new QLabel(#B);\
         ui->gridLayoutTemps->addWidget(tempsboxes[B], (B) % Special, (B) / Special * 2 + 0);\
         ui->gridLayoutTemps->addWidget(l, (B) % Special, (B) / Special * 2 + 1);\
-        l->setToolTip(getTip( MC_1_16, L_SPECIAL_1024, (B) % Special + ((B)>=Special?256:0) ));\
+        l->setToolTip(getTip( MC_1_16, L_SPECIAL_1024, 0, (B) % Special + ((B)>=Special?256:0) ));\
     } while (0)
 
-static QString getTip(int mc, int layer, int id)
+static QString getTip(int mc, int layer, uint32_t flags, int id)
 {
     uint64_t mL = 0, mM = 0;
-    genPotential(&mL, &mM, layer, mc, id);
+    genPotential(&mL, &mM, layer, mc, flags, id);
     QString tip = ConditionDialog::tr("Generates any of:");
     for (int j = 0; j < 64; j++)
         if (mL & (1ULL << j))
@@ -33,13 +33,6 @@ static QString getTip(int mc, int layer, int id)
         if (mM & (1ULL << j))
             tip += QString("\n") + biome2str(mc, 128+j);
     return tip;
-}
-
-void ConditionDialog::addVariant(QString name, int biome, int variant)
-{
-    VariantCheckBox *cb = new VariantCheckBox(name, biome, variant);
-    ui->gridLayoutVariants->addWidget(cb, variantboxes.size(), 0);
-    variantboxes.push_back(cb);
 }
 
 #define WARNING_CHAR QChar(0x26A0)
@@ -109,13 +102,11 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
     ui->lineEditX2->setValidator(intval);
     ui->lineEditZ2->setValidator(intval);
 
-    QIntValidator *uintval = new QIntValidator(0, INT_MAX, this);
+    QIntValidator *uintval = new QIntValidator(0, 30e6, this);
     ui->lineSquare->setValidator(uintval);
     ui->lineRadius->setValidator(uintval);
 
     ui->comboY->lineEdit()->setValidator(new QIntValidator(-64, 320, this));
-
-    memset(biomecboxes, 0, sizeof(biomecboxes));
 
     for (int i = 0; i < 256; i++)
     {
@@ -127,6 +118,9 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
         cb->setTristate(true);
         biomecboxes[i] = cb;
     }
+    separator = new QFrame(this);
+    separator->setFrameShape(QFrame::HLine);
+    ui->gridLayoutBiomes->addWidget(separator, 128, 0, 1, 2);
 
     memset(tempsboxes, 0, sizeof(tempsboxes));
 
@@ -139,29 +133,34 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
     SETUP_TEMPCAT_SPINBOX(Special+Lush);
     SETUP_TEMPCAT_SPINBOX(Special+Cold);
 
-    addVariant("plains_fountain_01", plains, 0);
-    addVariant("plains_meeting_point_1", plains, 1);
-    addVariant("plains_meeting_point_2", plains, 2);
-    addVariant("plains_meeting_point_3", plains, 3);
-    addVariant("desert_meeting_point_1", desert, 1);
-    addVariant("desert_meeting_point_2", desert, 2);
-    addVariant("desert_meeting_point_3", desert, 3);
-    addVariant("savanna_meeting_point_1", savanna, 1);
-    addVariant("savanna_meeting_point_2", savanna, 2);
-    addVariant("savanna_meeting_point_3", savanna, 3);
-    addVariant("savanna_meeting_point_4", savanna, 4);
-    addVariant("taiga_meeting_point_1", taiga, 1);
-    addVariant("taiga_meeting_point_2", taiga, 2);
-    addVariant("snowy_meeting_point_1", snowy_tundra, 1);
-    addVariant("snowy_meeting_point_2", snowy_tundra, 2);
-    addVariant("snowy_meeting_point_3", snowy_tundra, 3);
+    for (const StartPiece *sp = g_start_pieces; sp->stype >= 0; sp++)
+    {
+        VariantCheckBox *cb = new VariantCheckBox(sp);
+        variantboxes.push_back(cb);
+        if (sp->stype == Village)
+            ui->gridVillagePieces->addWidget(cb, sp->row, sp->col);
+        else if (sp->stype == Bastion)
+            ui->gridBastionPieces->addWidget(cb, sp->row, sp->col);
+        else if (sp->stype == Ruined_Portal)
+            ui->gridPortalPieces->addWidget(cb, sp->row, sp->col);
+    }
+    connect(ui->checkStartPieces, SIGNAL(stateChanged(int)), this, SLOT(onCheckStartChanged(int)));
+    connect(ui->checkStartBastion, SIGNAL(stateChanged(int)), this, SLOT(onCheckStartChanged(int)));
+    connect(ui->checkStartPortal, SIGNAL(stateChanged(int)), this, SLOT(onCheckStartChanged(int)));
+
+    QGridLayout *grids[] = { ui->gridVillagePieces, ui->gridBastionPieces, ui->gridPortalPieces };
+    for (int i = 0; i < 3; i++)
+    {
+        QSpacerItem *spacer = new QSpacerItem(0, 0, QSizePolicy::Maximum, QSizePolicy::Expanding);
+        grids[i]->addItem(spacer, grids[i]->rowCount(), 0);
+    }
 
     QString tristyle =
         "QCheckBox::indicator:unchecked     { image: url(:/icons/check0.png); }\n"
         "QCheckBox::indicator:indeterminate { image: url(:/icons/check1.png); }\n"
         "QCheckBox::indicator:checked       { image: url(:/icons/check2.png); }\n";
     ui->scrollBiomes->setStyleSheet(tristyle);
-    ui->scrollNoiseBiomes->setStyleSheet(tristyle);
+    ui->scrollNoise->setStyleSheet(tristyle);
 
     memset(climaterange, 0, sizeof(climaterange));
     memset(climatecomplete, 0, sizeof(climatecomplete));
@@ -238,17 +237,16 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
     path.addRoundedRect(QRectF(1, 1, 12, 12), 3, 3);
     QPen pen(Qt::black, 1);
     p.setPen(pen);
-    for (int i = 0; i < 256; i++)
+    for (const auto& it : biomecboxes)
     {
-        QCheckBox *cb = biomecboxes[i];
-        if (!cb)
-            continue;
-        QColor col(biomeColors[i][0], biomeColors[i][1], biomeColors[i][2]);
+        int id = it.first;
+        QCheckBox *cb = it.second;
+        QColor col(biomeColors[id][0], biomeColors[id][1], biomeColors[id][2]);
         p.fillPath(path, col);
         p.drawPath(path);
-        biomecboxes[i]->setIcon(QIcon(pixmap));
-        if (noisebiomes.find(i) != noisebiomes.end())
-            noisebiomes[i]->setIcon(QIcon(pixmap));
+        cb->setIcon(QIcon(pixmap));
+        if (noisebiomes.count(id))
+            noisebiomes[id]->setIcon(QIcon(pixmap));
     }
 
     // defaults
@@ -257,6 +255,7 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
     ui->checkSkipRef->setChecked(false);
     ui->radioSquare->setChecked(true);
     ui->checkRadius->setChecked(false);
+    onCheckStartChanged(false);
 
     if (initcond)
     {
@@ -322,21 +321,20 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
             ui->checkRadius->setChecked(true);
         }
 
-        // remember bamboo_jungle=168 has a bit at (bamboo_jungle & 0x3f) in cond.bfilter.edgesToFind
-        for (int i = 0; i < 64; i++)
+        for (const auto& it : biomecboxes)
         {
-            if (biomecboxes[i])
+            int id = it.first;
+            if (id < 128)
             {
-                bool c1 = cond.biomeToFind & (1ULL << i);
-                bool c2 = cond.biomeToExcl & (1ULL << i);
-                biomecboxes[i]->setCheckState(c2 ? Qt::Checked : c1 ? Qt::PartiallyChecked : Qt::Unchecked);
+                bool c1 = cond.biomeToFind & (1ULL << id);
+                bool c2 = cond.biomeToExcl & (1ULL << id);
+                it.second->setCheckState(c2 ? Qt::Checked : c1 ? Qt::PartiallyChecked : Qt::Unchecked);
             }
-
-            if (biomecboxes[i+128])
+            else
             {
-                bool c1 = cond.biomeToFindM & (1ULL << i);
-                bool c2 = cond.biomeToExclM & (1ULL << i);
-                biomecboxes[i+128]->setCheckState(c2 ? Qt::Checked : c1 ? Qt::PartiallyChecked : Qt::Unchecked);
+                bool c1 = cond.biomeToFindM & (1ULL << (id-128));
+                bool c2 = cond.biomeToExclM & (1ULL << (id-128));
+                it.second->setCheckState(c2 ? Qt::Checked : c1 ? Qt::PartiallyChecked : Qt::Unchecked);
             }
         }
         for (int i = 0; i < 9; i++)
@@ -347,11 +345,13 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
             }
         }
 
-        ui->checkStartPiece->setChecked(cond.variants & Condition::START_PIECE_MASK);
-        ui->checkAbandoned->setChecked(cond.variants & Condition::ABANDONED_MASK);
+        ui->checkStartPieces->setChecked(cond.varflags & Condition::VAR_WITH_START);
+        ui->checkAbandoned->setChecked(cond.varflags & Condition::VAR_ABANODONED);
+        ui->checkEndShip->setChecked(cond.varflags & Condition::VAR_ENDSHIP);
         for (VariantCheckBox *cb : qAsConst(variantboxes))
         {
-            cb->setChecked(cond.variants & cb->getMask());
+            int idx = cb->sp - g_start_pieces;
+            cb->setChecked(cond.varstart & (1ULL << idx));
         }
 
         int *lim = (int*) &cond.limok[0][0];
@@ -380,16 +380,6 @@ ConditionDialog::~ConditionDialog()
     delete ui;
 }
 
-void ConditionDialog::setActiveTab(QWidget *tab)
-{
-    ui->tabWidget->setEnabled(true);
-    ui->tabWidget->setCurrentWidget(tab);
-    ui->tabBiomes->setEnabled(ui->tabBiomes == tab);
-    ui->tabTemps->setEnabled(ui->tabTemps == tab);
-    ui->tabNoise->setEnabled(ui->tabNoise == tab);
-    ui->tabVariants->setEnabled(ui->tabVariants == tab);
-}
-
 void ConditionDialog::updateMode()
 {
     int filterindex = ui->comboBoxType->currentData().toInt();
@@ -402,9 +392,8 @@ void ConditionDialog::updateMode()
         pal.setColor(QPalette::Normal, QPalette::Button, QColor(255,0,0,127));
     ui->comboBoxType->setPalette(pal);
 
-
+    ui->groupBoxGeneral->setEnabled(filterindex != F_SELECT);
     ui->groupBoxPosition->setEnabled(filterindex != F_SELECT);
-
 
     ui->checkRadius->setEnabled(ft.rmax);
 
@@ -456,33 +445,43 @@ void ConditionDialog::updateMode()
 
     if (filterindex == F_TEMPS)
     {
-        setActiveTab(ui->tabTemps);
+        ui->stackedWidget->setCurrentWidget(ui->pageTemps);
     }
     else if (filterindex == F_CLIMATE_NOISE)
     {
-        setActiveTab(ui->tabNoise);
+        ui->stackedWidget->setCurrentWidget(ui->pageClimates);
     }
     else if (ft.cat == CAT_BIOMES || ft.cat == CAT_NETHER || ft.cat == CAT_END)
     {
-        setActiveTab(ui->tabBiomes);
+        ui->stackedWidget->setCurrentWidget(ui->pageBiomes);
         ui->checkApprox->setEnabled(mc <= MC_1_17 || ft.step == 4);
         ui->checkMatchAny->setEnabled(true);
     }
     else if (filterindex == F_VILLAGE)
     {
-        setActiveTab(ui->tabVariants);
-        ui->checkStartPiece->setEnabled(mc >= MC_1_14);
-        ui->checkAbandoned->setEnabled(mc >= MC_1_10);
+        ui->stackedWidget->setCurrentWidget(ui->pageVillage);
+        ui->checkStartPieces->setEnabled(mc >= MC_1_14);
+        ui->checkAbandoned->setEnabled(filterindex == F_VILLAGE && mc >= MC_1_10);
+    }
+    else if (filterindex == F_BASTION)
+    {
+        ui->stackedWidget->setCurrentWidget(ui->pageBastion);
+        ui->checkStartBastion->setEnabled(mc >= MC_1_16);
+    }
+    else if (filterindex == F_PORTAL || filterindex == F_PORTALN)
+    {
+        ui->stackedWidget->setCurrentWidget(ui->pagePortal);
+        ui->checkStartPortal->setEnabled(mc >= MC_1_16);
+    }
+    else if (filterindex == F_ENDCITY)
+    {
+        ui->stackedWidget->setCurrentWidget(ui->pageEndCity);
+        ui->checkEndShip->setEnabled(mc >= MC_1_9);
     }
     else
     {
-        ui->tabWidget->setEnabled(false);
-        ui->tabTemps->setEnabled(false);
-        ui->tabBiomes->setEnabled(false);
-        ui->tabVariants->setEnabled(false);
+        ui->stackedWidget->setCurrentWidget(ui->pageNone);
     }
-
-    ui->scrollVariants->setEnabled((cond.variants & Condition::START_PIECE_MASK));
 
     updateBiomeSelection();
 
@@ -520,54 +519,33 @@ void ConditionDialog::updateMode()
     textDescription->setText(ft.description);
 }
 
-void ConditionDialog::enableSet(const int *ids, int n)
-{
-    for (int i = 0; i < 256; i++)
-    {
-        if (biomecboxes[i])
-        {
-            biomecboxes[i]->setEnabled(false);
-            biomecboxes[i]->setToolTip("");
-        }
-    }
-    for (int i = 0; i < n; i++)
-        biomecboxes[ids[i]]->setEnabled(true);
-}
-
 void ConditionDialog::updateBiomeSelection()
 {
     int filterindex = ui->comboBoxType->currentData().toInt();
     const FilterInfo &ft = g_filterinfo.list[filterindex];
 
-    if (ft.cat == CAT_NETHER)
+    // clear tool tips
+    for (const auto& it : biomecboxes)
+        it.second->setToolTip("");
+
+    std::vector<int> available;
+
+    if (ft.cat == CAT_NETHER || ft.cat == CAT_END)
     {
-        const int ids[] = {
-            nether_wastes, soul_sand_valley, crimson_forest,
-            warped_forest, basalt_deltas
-        };
-        enableSet(ids, sizeof(ids) / sizeof(int));
-    }
-    else if (ft.cat == CAT_END)
-    {
-        const int ids[] = {
-            the_end, small_end_islands, end_midlands,
-            end_highlands, end_barrens
-        };
-        enableSet(ids, sizeof(ids) / sizeof(int));
+        for (int i = 0; i < 256; i++)
+            if (getDimension(i) == ft.dim)
+                available.push_back(i);
     }
     if (filterindex == F_BIOME_256_OTEMP)
     {
-        const int ids[] = {
-            warm_ocean, lukewarm_ocean, ocean,
-            cold_ocean, frozen_ocean
-        };
-        enableSet(ids, sizeof(ids) / sizeof(int));
+        available.push_back(warm_ocean);
+        available.push_back(lukewarm_ocean);
+        available.push_back(ocean);
+        available.push_back(cold_ocean);
+        available.push_back(frozen_ocean);
     }
     else if (ft.cat == CAT_BIOMES && mc <= MC_1_17)
     {
-        ui->labelY->setEnabled(false);
-        ui->comboY->setEnabled(false);
-
         int layerId = ft.layer;
         if (layerId == 0)
         {
@@ -580,17 +558,16 @@ void ConditionDialog::updateBiomeSelection()
         if (layerId <= 0 || layerId >= L_NUM)
             return; // error
 
-        for (int i = 0; i < 256; i++)
+        for (const auto& it : biomecboxes)
         {
-            QCheckBox *cb = biomecboxes[i];
-            if (!cb)
-                continue;
-
+            QCheckBox *cb = it.second;
             uint64_t mL = 0, mM = 0;
-            genPotential(&mL, &mM, layerId, mc, i);
+            uint32_t flags = 0;
+            genPotential(&mL, &mM, layerId, mc, flags, it.first);
+
             if (mL || mM)
             {
-                cb->setEnabled(true);
+                available.push_back(it.first);
                 if (ft.layer != L_VORONOI_1)
                 {
                     QString tip = tr("Generates any of:");
@@ -611,32 +588,61 @@ void ConditionDialog::updateBiomeSelection()
                     cb->setToolTip(cb->text());
                 }
             }
-            else
-            {
-                cb->setEnabled(false);
-                cb->setToolTip("");
-            }
         }
     }
-    else if (ft.cat == CAT_BIOMES && ft.dim == 0)
+    else if (ft.cat == CAT_BIOMES && ft.dim == DIM_OVERWORLD)
     {
-        for (int i = 0; i < 256; i++)
+        for (const auto& it : biomecboxes)
         {
-            QCheckBox *cb = biomecboxes[i];
-            if (!cb)
-                continue;
-            cb->setEnabled(isOverworld(mc, i));
-            cb->setToolTip("");
+            if (isOverworld(mc, it.first))
+                available.push_back(it.first);
         }
+    }
+
+    // separate available biomes
+    QLayoutItem *sep = ui->gridLayoutBiomes->takeAt(ui->gridLayoutBiomes->indexOf(separator));
+    std::vector<int> unavailable;
+    std::map<int, QLayoutItem*> items;
+    for (const auto& it : biomecboxes)
+    {
+        int id = it.first;
+        QCheckBox *cb = it.second;
+        int idx = ui->gridLayoutBiomes->indexOf(cb);
+        items[id] = ui->gridLayoutBiomes->takeAt(idx);
+        if (std::find(available.begin(), available.end(), id) == available.end())
+            unavailable.push_back(id);
+    }
+
+    IdCmp cmp = {IdCmp::SORT_LEX, mc, DIM_UNDEF};
+    std::sort(available.begin(), available.end(), cmp);
+    std::sort(unavailable.begin(), unavailable.end(), cmp);
+
+    int row = 0;
+    for (int i = 0, len = available.size(), mod = (len+1)/2; i < len; i++)
+    {
+        int id = available[i];
+        biomecboxes[id]->setEnabled(true);
+        QLayoutItem *item = items[id];
+        ui->gridLayoutBiomes->addItem(item, row+i%mod, i/mod);
+    }
+    row = (available.size() + 1) / 2;
+    ui->gridLayoutBiomes->addItem(sep, row, 0, 1, 2);
+    row++;
+    for (int i = 0, len = unavailable.size(), mod = (len+1)/2; i < len; i++)
+    {
+        int id = unavailable[i];
+        biomecboxes[id]->setEnabled(false);
+        QLayoutItem *item = items[id];
+        ui->gridLayoutBiomes->addItem(item, row+i%mod, i/mod);
     }
 }
 
 int ConditionDialog::warnIfBad(Condition cond)
 {
     const FilterInfo &ft = g_filterinfo.list[cond.type];
-    if (ui->scrollVariants->isEnabled())
+    if ((cond.varflags & Condition::VAR_WITH_START) && (cond.varstart == 0))
     {
-        if ((cond.variants & ((1ULL << 60) - 1)) == 0)
+        if (ui->checkStartPieces->isEnabled())
         {
             QString text = tr("No allowed start pieces specified. Condition can never be true.");
             QMessageBox::warning(this, tr("Missing Start Piece"), text, QMessageBox::Ok);
@@ -694,32 +700,20 @@ void ConditionDialog::on_comboBoxRelative_activated(int)
 
 void ConditionDialog::on_buttonUncheck_clicked()
 {
-    for (int i = 0; i < 256; i++)
-    {
-        QCheckBox *cb = biomecboxes[i];
-        if (cb)
-            cb->setCheckState(Qt::Unchecked);
-    }
+    for (const auto& it : biomecboxes)
+        it.second->setCheckState(Qt::Unchecked);
 }
 
 void ConditionDialog::on_buttonInclude_clicked()
 {
-    for (int i = 0; i < 256; i++)
-    {
-        QCheckBox *cb = biomecboxes[i];
-        if (cb)
-            cb->setCheckState(cb->isEnabled() ? Qt::PartiallyChecked : Qt::Unchecked);
-    }
+    for (const auto& it : biomecboxes)
+        it.second->setCheckState(it.second->isEnabled() ? Qt::PartiallyChecked : Qt::Unchecked);
 }
 
 void ConditionDialog::on_buttonExclude_clicked()
 {
-    for (int i = 0; i < 256; i++)
-    {
-        QCheckBox *cb = biomecboxes[i];
-        if (cb)
-            cb->setCheckState(cb->isEnabled() ? Qt::Checked : Qt::Unchecked);
-    }
+    for (const auto& it : biomecboxes)
+        it.second->setCheckState(it.second->isEnabled() ? Qt::Checked : Qt::Unchecked);
 }
 
 void ConditionDialog::on_buttonAreaInfo_clicked()
@@ -821,30 +815,32 @@ void ConditionDialog::on_buttonOk_clicked()
     else
         c.rmax = 0;
 
-    if (ui->tabBiomes->isEnabled())
+    if (ui->stackedWidget->currentWidget() == ui->pageBiomes)
     {
         c.biomeToFind = c.biomeToFindM = 0;
         c.biomeToExcl = c.biomeToExclM = 0;
-        for (int i = 0; i < 256; i++)
+
+        for (const auto& it : biomecboxes)
         {
-            QCheckBox *cb = biomecboxes[i];
+            int id = it.first;
+            QCheckBox *cb = it.second;
             if (cb && cb->isEnabled())
             {
                 if (cb->checkState() == Qt::PartiallyChecked)
                 {
-                    if (i < 128) c.biomeToFind |= (1ULL << i);
-                    else c.biomeToFindM |= (1ULL << (i-128));
+                    if (id < 128) c.biomeToFind |= (1ULL << id);
+                    else c.biomeToFindM |= (1ULL << (id-128));
                 }
                 if (cb->checkState() == Qt::Checked)
                 {
-                    if (i < 128) c.biomeToExcl |= (1ULL << i);
-                    else c.biomeToExclM |= (1ULL << (i-128));
+                    if (id < 128) c.biomeToExcl |= (1ULL << id);
+                    else c.biomeToExclM |= (1ULL << (id-128));
                 }
             }
         }
         c.count = 0;
     }
-    if (ui->tabTemps->isEnabled())
+    if (ui->stackedWidget->currentWidget() == ui->pageTemps)
     {
         c.count = 0;
         for (int i = 0; i < 9; i++)
@@ -866,12 +862,16 @@ void ConditionDialog::on_buttonOk_clicked()
     if (ui->checkMatchAny->isChecked())
         c.flags |= MATCH_ANY;
 
-    c.variants = 0;
-    c.variants |= ui->checkStartPiece->isChecked() * Condition::START_PIECE_MASK;
-    c.variants |= ui->checkAbandoned->isChecked() * Condition::ABANDONED_MASK;
+    c.varflags = c.varstart = 0;
+    c.varflags |= ui->checkStartPieces->isChecked() * Condition::VAR_WITH_START;
+    c.varflags |= ui->checkAbandoned->isChecked() * Condition::VAR_ABANODONED;
+    c.varflags |= ui->checkEndShip->isChecked() * Condition::VAR_ENDSHIP;
     for (VariantCheckBox *cb : qAsConst(variantboxes))
-        if (cb->isChecked())
-            c.variants |= cb->getMask();
+    {
+        if (!cb->isChecked())
+            continue;
+        c.varstart |= 1ULL << (cb->sp - g_start_pieces);
+    }
 
     getClimateLimits(c.limok, c.limex);
 
@@ -931,9 +931,14 @@ void ConditionDialog::on_comboBoxCat_currentIndexChanged(int idx)
     updateMode();
 }
 
-void ConditionDialog::on_checkStartPiece_stateChanged(int state)
-{
-    ui->scrollVariants->setEnabled(state);
+void ConditionDialog::onCheckStartChanged(int checked)
+{   // synchronize stat piece checkboxes
+    ui->checkStartPieces->setChecked(checked);
+    ui->checkStartBastion->setChecked(checked);
+    ui->checkStartPortal->setChecked(checked);
+    ui->scrollVillagePieces->setEnabled(checked);
+    ui->scrollBastionPieces->setEnabled(checked);
+    ui->scrollPortalPieces->setEnabled(checked);
 }
 
 void ConditionDialog::getClimateLimits(int limok[6][2], int limex[6][2])

@@ -1,6 +1,7 @@
 #include "search.h"
 #include "seedtables.h"
 #include "mainwindow.h"
+#include "cutil.h"
 
 #include "cubiomes/quadbase.h"
 #include "cubiomes/finders.h"
@@ -78,8 +79,14 @@ bool Condition::versionUpgrade()
         memset(text, 0, sizeof(text));
         memset(pad1, 0, sizeof(pad1));
         memset(pad2, 0, sizeof(pad2));
-        version = VER_CURRENT;
+        memset(pad3, 0, sizeof(pad3));
+        varflags = varbiome = varstart = 0;
     }
+    else if (version == VER_2_3_0)
+    {
+        varflags = varbiome = varstart = 0;
+    }
+    version = VER_CURRENT;
     return true;
 }
 
@@ -97,7 +104,7 @@ bool Condition::apply(WorldInfo wi)
         if (biomeToExclM & (1ULL << i))
             ex[exlen++] = i + 128;
     }
-    uint32_t bfflags = 0;
+    uint32_t bfflags = CFB_FORCED_OCEAN;
     if (flags & APPROX)
         bfflags |= CFB_APPROX;
     if (flags & MATCH_ANY)
@@ -132,42 +139,52 @@ bool Condition::readHex(const QString& hex)
     return ok;
 }
 
-
-int Condition::toVariantBit(int biome, int variant)
+bool Condition::isVariantOk(int mc, int stype, StructureVariant sv) const
 {
-    int bit = 0;
-    switch (biome)
+    if (stype == Village)
     {
-    case meadow:
-    case plains:        bit = 1; break;
-    case desert:        bit = 2; break;
-    case savanna:       bit = 3; break;
-    case taiga:         bit = 4; break;
-    case snowy_tundra:  bit = 5; break;
+        if (mc < MC_1_10) return true;
+        if ((varflags & VAR_ABANODONED) && !sv.abandoned) return false;
+        if (!(varflags & VAR_WITH_START) || mc < MC_1_14) return true;
     }
-    return (bit << 3) + variant;
-}
-
-void Condition::fromVariantBit(int bit, int *biome, int *variant)
-{
-    *variant = bit & 0x7;
-    switch (bit >> 3)
+    else if (stype == Bastion)
     {
-    case 1: *biome = plains;        break;
-    case 2: *biome = desert;        break;
-    case 3: *biome = savanna;       break;
-    case 4: *biome = taiga;         break;
-    case 5: *biome = snowy_tundra;  break;
+        if (mc < MC_1_16 || !(varflags & VAR_WITH_START)) return true;
     }
-}
+    else if (stype == Ruined_Portal || stype == Ruined_Portal_N)
+    {
+        if (mc < MC_1_16 || !(varflags & VAR_WITH_START)) return true;
+    }
+    else if (stype == End_City)
+    {
+        if ((varflags & VAR_ENDSHIP) && !sv.ship) return false;
+        return true;
+    }
+    else
+    {
+        return true;
+    }
 
-bool Condition::villageOk(int mc, StructureVariant sv) const
-{
-    if ((variants & ABANDONED_MASK) && !sv.abandoned) return false;
-    if (mc < MC_1_14) return true;
-    if (!(variants & START_PIECE_MASK)) return true;
-    uint64_t mask = 1ULL << toVariantBit(sv.biome, sv.variant);
-    return mask & variants;
+    // check start piece
+    uint64_t idxbits = varstart;
+    while (idxbits)
+    {
+        int idx = __builtin_ctzll(idxbits);
+        idxbits &= idxbits - 1;
+        if ((size_t)idx < sizeof(g_start_pieces) / sizeof(g_start_pieces[0]))
+        {
+            const StartPiece *sp = g_start_pieces + idx;
+            if (sp->stype == stype && sp->start == sv.start)
+            {
+                if (sp->biome != -1 && sp->biome != sv.biome)
+                    continue;
+                if (sp->giant != -1 && sp->giant != sv.giant)
+                    continue;
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 void ConditionTree::set(const QVector<Condition>& cv, WorldInfo wi)
@@ -848,19 +865,20 @@ L_qm_any:
                 {
                     if (*abort) return COND_FAILED;
 
-                    if (st == Village && cond->variants)
-                    {
+                    if (st == Village && cond->varflags)
+                    {   // we can test for abandoned villages before the
+                        // biome checks by trying each suitable biome
                         int vv[] = {
                             plains, desert, savanna, taiga, snowy_tundra,
                             // plains village variant covers meadows
                         };
-                        int vn = sizeof(vv) / sizeof(int);
+                        int vn = gen->mc <= MC_1_13 ? 1 : sizeof(vv) / sizeof(int);
                         int i;
                         for (i = 0; i < vn; i++)
                         {
                             StructureVariant vt;
-                            getVariant(&vt, Village, gen->mc, gen->seed, pc.x, pc.z, vv[i]);
-                            if (cond->villageOk(gen->mc, vt))
+                            getVariant(&vt, st, gen->mc, gen->seed, pc.x, pc.z, vv[i]);
+                            if (cond->isVariantOk(gen->mc, st, vt))
                                 break;
                         }
                         if (i >= vn) // no suitable village variants here
@@ -878,11 +896,13 @@ L_qm_any:
                             &gen->g.en, &gen->sn, pc.x, pc.z))
                             continue;
                     }
-                    else if (st == Village && cond->variants)
+                    if (cond->varflags)
                     {
                         StructureVariant vt;
-                        getVariant(&vt, Village, gen->mc, gen->seed, pc.x, pc.z, id);
-                        if (!cond->villageOk(gen->mc, vt))
+                        if (st == Ruined_Portal || st == Ruined_Portal_N)
+                            id = getBiomeAt(&gen->g, 4, pc.x >> 2, 0, pc.z >> 2);
+                        getVariant(&vt, st, gen->mc, gen->seed, pc.x, pc.z, id);
+                        if (!cond->isVariantOk(gen->mc, st, vt))
                             continue;
                     }
                     if (gen->mc >= MC_1_18)
