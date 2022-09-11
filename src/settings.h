@@ -8,9 +8,12 @@
 
 #include <vector>
 
+extern unsigned char g_biomeColors[256][3];
+extern unsigned char g_tempsColors[256][3];
 
 struct ExtGenSettings
 {
+    bool estimateTerrain;
     bool saltOverride;
     uint64_t salts[FEATURE_NUM];
 
@@ -18,11 +21,15 @@ struct ExtGenSettings
 
     void reset()
     {
+        estimateTerrain = true;
         saltOverride = false;
         for (int i = 0; i < FEATURE_NUM; i++)
             salts[i] = ~(uint64_t)0;
     }
 };
+
+// Keep the extended generator settings in global scope.
+extern ExtGenSettings g_extgen;
 
 struct WorldInfo
 {

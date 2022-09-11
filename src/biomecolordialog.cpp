@@ -2,6 +2,7 @@
 #include "ui_biomecolordialog.h"
 
 #include "cutil.h"
+#include "settings.h"
 
 #include <QPixmap>
 #include <QPainter>
@@ -44,7 +45,7 @@ BiomeColorDialog::BiomeColorDialog(QWidget *parent, QString initrc, int mc, int 
     ui->setupUi(this);
     ui->buttonOk->setIcon(style()->standardIcon(QStyle::SP_DialogOkButton));
 
-    memcpy(colors, biomeColors, sizeof(colors));
+    memcpy(colors, g_biomeColors, sizeof(colors));
     memset(buttons, 0, sizeof(buttons));
 
     unsigned char coldefault[256][3];

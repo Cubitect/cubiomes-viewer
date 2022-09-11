@@ -69,6 +69,7 @@ SOURCES += \
         src/searchthread.cpp \
         src/mainwindow.cpp \
         src/main.cpp \
+        src/statsdialog.cpp \
         src/structuredialog.cpp \
         src/world.cpp
 
@@ -102,6 +103,7 @@ HEADERS += \
         src/seedtables.h \
         src/mainwindow.h \
         src/settings.h \
+        src/statsdialog.h \
         src/structuredialog.h \
         src/world.h
 
@@ -121,6 +123,7 @@ FORMS += \
         src/quadlistdialog.ui\
         src/mainwindow.ui \
         src/rangedialog.ui \
+        src/statsdialog.ui \
         src/structuredialog.ui
 
 

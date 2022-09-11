@@ -9,9 +9,6 @@
 #include "cubiomes/quadbase.h"
 #include "cubiomes/util.h"
 
-extern unsigned char biomeColors[256][3];
-extern unsigned char tempsColors[256][3];
-
 
 inline const char* struct2str(int stype)
 {

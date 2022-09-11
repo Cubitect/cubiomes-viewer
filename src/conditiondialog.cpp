@@ -241,7 +241,7 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
     {
         int id = it.first;
         QCheckBox *cb = it.second;
-        QColor col(biomeColors[id][0], biomeColors[id][1], biomeColors[id][2]);
+        QColor col(g_biomeColors[id][0], g_biomeColors[id][1], g_biomeColors[id][2]);
         p.fillPath(path, col);
         p.drawPath(path);
         cb->setIcon(QIcon(pixmap));

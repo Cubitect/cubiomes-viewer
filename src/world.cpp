@@ -16,8 +16,9 @@ void loadStructVis(std::map<int, double>& structvis)
 
     for (int opt = D_DESERT; opt < D_SPAWN; opt++)
     {
+        double defval = 32;
         const char *name = mapopt2str(opt);
-        double scale = settings.value(QString("structscale/") + name, 32.0).toDouble();
+        double scale = settings.value(QString("structscale/") + name, defval).toDouble();
         structvis[opt] = scale;
     }
 }
@@ -128,6 +129,7 @@ void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
                 if (!id)
                     continue;
                 VarPos vp = VarPos(p);
+                Piece pieces[1024];
 
                 if (sconf.structType == End_City)
                 {
@@ -136,7 +138,6 @@ void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
                     id = isViableEndCityTerrain(&g.en, &sn, p.x, p.z);
                     if (!id)
                         continue;
-                    Piece pieces[END_CITY_PIECES_MAX];
                     int n = getEndCityPieces(pieces, wi.seed, p.x >> 4, p.z >> 4);
                     vp.pieces.assign(pieces, pieces+n);
                 }
@@ -144,10 +145,19 @@ void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
                 {
                     id = getBiomeAt(&g, 4, p.x >> 2, 0, p.z >> 2);
                 }
+                else if (sconf.structType == Fortress)
+                {
+                    int n = getFortressPieces(pieces, sizeof(pieces)/sizeof(pieces[0]),
+                        wi.mc, wi.seed, p.x >> 4, p.z >> 4);
+                    vp.pieces.assign(pieces, pieces+n);
+                }
                 else if (g.mc >= MC_1_18)
                 {
-                    if (!isViableStructureTerrain(sconf.structType, &g, p.x, p.z))
+                    if (g_extgen.estimateTerrain &&
+                        !isViableStructureTerrain(sconf.structType, &g, p.x, p.z))
+                    {
                         continue;
+                    }
                 }
 
                 getVariant(&vp.v, sconf.structType, wi.mc, wi.seed, p.x, p.z, id);
@@ -186,14 +196,13 @@ void Quad::run()
                 biomes[i] = -1;
         }
 
-        // sync biomeColors
-        g_mutex.lock();
-        g_mutex.unlock();
-
         rgb = new uchar[w*h * 3];
         if (lopt <= LOPT_OCEAN_256 || g->mc < MC_1_18 || dim != 0 || g->bn.nptype < 0)
         {
-            biomesToImage(rgb, biomeColors, biomes, w, h, 1, 1);
+            // sync biomeColors
+            g_mutex.lock();
+            g_mutex.unlock();
+            biomesToImage(rgb, g_biomeColors, biomes, w, h, 1, 1);
         }
         else // climate parameter
         {
@@ -621,26 +630,25 @@ QString QWorld::getBiomeName(Pos p)
     return s ? s : "";
 }
 
+static void refreshQuadColor(Quad *q)
+{
+    QImage *img = q->img;
+    if (!img)
+        return;
+    if (q->lopt <= LOPT_OCEAN_256 || q->g->mc < MC_1_18 || q->dim != 0 || q->g->bn.nptype < 0)
+        biomesToImage(q->rgb, g_biomeColors, q->biomes, img->width(), img->height(), 1, 1);
+}
+
 void QWorld::refreshBiomeColors()
 {
     g_mutex.lock();
     for (Level& l : lvb)
     {
         for (Quad *q : l.cells)
-        {
-            QImage *img = q->img;
-            if (!img)
-                continue;
-            biomesToImage(q->rgb, biomeColors, q->biomes, img->width(), img->height(), 1, 1);
-        }
+            refreshQuadColor(q);
     }
     for (Quad *q : cachedbiomes)
-    {
-        QImage *img = q->img;
-        if (!img)
-            continue;
-        biomesToImage(q->rgb, biomeColors, q->biomes, img->width(), img->height(), 1, 1);
-    }
+        refreshQuadColor(q);
     g_mutex.unlock();
 }
 
@@ -1103,6 +1111,20 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
             sinfo.append(QString::asprintf("size=%zu", selvp.pieces.size()));
             if (selvp.v.ship)
                 sinfo.append("ship");
+        }
+        else if (seltype == D_FORTESS)
+        {
+            sinfo.append(QString::asprintf("size=%zu", selvp.pieces.size()));
+            int spawner = 0, wart = 0;
+            for (Piece& p : selvp.pieces)
+            {
+                spawner += p.type == BRIDGE_SPAWNER;
+                wart += p.type == CORRIDOR_NETHER_WART;
+            }
+            if (spawner)
+                sinfo.append(QString::asprintf("spawners=%d", spawner));
+            if (wart)
+                sinfo.append(QString::asprintf("nether_wart=%d", wart));
         }
         if (!sinfo.empty())
         {

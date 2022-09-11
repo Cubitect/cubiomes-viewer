@@ -907,8 +907,11 @@ L_qm_any:
                     }
                     if (gen->mc >= MC_1_18)
                     {
-                        if (!isViableStructureTerrain(st, &gen->g, pc.x, pc.z))
+                        if (g_extgen.estimateTerrain &&
+                            !isViableStructureTerrain(st, &gen->g, pc.x, pc.z))
+                        {
                             continue;
+                        }
                     }
                 }
 

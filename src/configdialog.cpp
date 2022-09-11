@@ -3,7 +3,7 @@
 
 #include "biomecolordialog.h"
 #include "structuredialog.h"
-
+#include "world.h"
 #include "cutil.h"
 
 #include <QThread>
@@ -155,7 +155,10 @@ void ConfigDialog::on_buttonStructVisEdit_clicked()
 {
     StructureDialog *dialog = new StructureDialog(this);
     if (dialog->exec() == QDialog::Accepted)
-        structVisModified |= dialog->modified;
+    {
+        if ((structVisModified |= dialog->modified))
+            saveStructVis(dialog->structvis);
+    }
 }
 
 void ConfigDialog::on_buttonClear_clicked()

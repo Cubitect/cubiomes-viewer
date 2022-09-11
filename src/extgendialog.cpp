@@ -61,6 +61,8 @@ ExtGenDialog::~ExtGenDialog()
 
 void ExtGenDialog::initSettings(ExtGenSettings *extgen)
 {
+    ui->checkEstimate->setChecked(extgen->estimateTerrain);
+
     // start checked, otherwise Qt doesn't respond to initial uncheck
     ui->groupSalts->setChecked(true);
 
@@ -87,6 +89,7 @@ void ExtGenDialog::initSettings(ExtGenSettings *extgen)
 
 ExtGenSettings ExtGenDialog::getSettings()
 {
+    extgen.estimateTerrain = ui->checkEstimate->isChecked();
     extgen.saltOverride = ui->groupSalts->isChecked();
 
     for (int i = 0; i < FEATURE_NUM; i++)

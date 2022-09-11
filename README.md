@@ -16,8 +16,8 @@ The builds are statically linked against [Qt](https://www.qt.io) and should run
 as-is on most newer distributions. For the Linux build you will probably have to
 add the executable flags to the binary.
 
-A Flatpak for the tool is available on the
-[flathub](https://flathub.org/apps/details/com.github.cubitect.cubiomes-viewer).
+A Flatpak for the tool is available on
+[Flathub](https://flathub.org/apps/details/com.github.cubitect.cubiomes-viewer).
 
 For Arch Linux users, the tool may be found in the
 [AUR](https://aur.archlinux.org/packages/cubiomes-viewer) thanks to
@@ -33,7 +33,7 @@ information on this issue.
 Build instructions can be found in the [buildguide](buildguide.md).
 
 
-## Basic Feature Overview
+## Basic feature overview
 
 The tool features a map viewer that outlines the biomes of the Overworld,
 Nether and End dimensions, with a wide zoom range and with toggles for each
@@ -49,4 +49,16 @@ more control, as well as Quad-Hut and Quad-Monument seed generators to quickly
 look for seeds that include extremely rare structure constellations.
 
 ![maingui](etc/screenshot_maingui.png)
+
+
+### Known issues
+
+Desert Pyramids, Jungle Temples and, to a lesser extent, Woodland Mansions can
+fail to generate in 1.18+ due to unsuitable terrain. Cubiomes will make an
+attempt to estimate the terrain based on the biomes and cimate noise. However,
+expect some inaccurate results.
+
+The World Spawn point for pre-1.18 versions can sometimes be off, since it
+depends on the presence of a grass block that cubiomes cannot test for.
+
 

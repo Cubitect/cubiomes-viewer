@@ -34,26 +34,6 @@
 #include <QFile>
 
 
-// Keep the extended generator settings in global scope, but we mainly need
-// them in this file. (Pass through via pointer elsewhere.)
-static ExtGenSettings g_extgen;
-
-extern "C"
-int getStructureConfig_override(int stype, int mc, StructureConfig *sconf)
-{
-    if unlikely(mc == INT_MAX) // to check if override is enabled in cubiomes
-        mc = 0;
-    int ok = getStructureConfig(stype, mc, sconf);
-    if (ok && g_extgen.saltOverride)
-    {
-        uint64_t salt = g_extgen.salts[stype];
-        if (salt <= MASK48)
-            sconf->salt = salt;
-    }
-    return ok;
-}
-
-
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -383,6 +363,7 @@ void MainWindow::saveSettings()
     settings.setValue("config/mapCacheSize", config.mapCacheSize);
     settings.setValue("config/biomeColorPath", config.biomeColorPath);
 
+    settings.setValue("world/estimateTerrain", g_extgen.estimateTerrain);
     settings.setValue("world/saltOverride", g_extgen.saltOverride);
     for (int st = 0; st < FEATURE_NUM; st++)
     {
@@ -468,6 +449,7 @@ void MainWindow::loadSettings()
     onStyleChanged(config.uistyle);
     setDockable(config.dockable);
 
+    g_extgen.estimateTerrain = settings.value("world/estimateTerrain", g_extgen.estimateTerrain).toBool();
     g_extgen.saltOverride = settings.value("world/saltOverride", g_extgen.saltOverride).toBool();
     for (int st = 0; st < FEATURE_NUM; st++)
     {
@@ -894,9 +876,10 @@ void MainWindow::on_actionPreferences_triggered()
         applyConfigChanges(config, dialog->getSettings());
     }
     if (dialog->structVisModified)
-    {   // NOTE: structure visibility limits are not currently stored in config
-        // so the changes have to be applied regardless whether the dialog is accepted.
-        on_actionStructure_visibility_triggered();
+    {
+        getMapView()->deleteWorld();
+        updateMapSeed();
+        update();
     }
 }
 
@@ -911,13 +894,13 @@ void MainWindow::onBiomeColorChange()
         if (siz >= 0)
         {
             buf[siz] = 0;
-            initBiomeColors(biomeColors);
-            parseBiomeColors(biomeColors, buf);
+            initBiomeColors(g_biomeColors);
+            parseBiomeColors(g_biomeColors, buf);
         }
     }
     else
     {
-        initBiomeColors(biomeColors);
+        initBiomeColors(g_biomeColors);
     }
     getMapView()->refreshBiomeColors();
 }

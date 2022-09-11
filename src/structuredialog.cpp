@@ -69,8 +69,8 @@ void StructureDialog::onAccept()
 
 void StructureDialog::onReset()
 {
-    double scale = 32;
+    QString scalestr = "32";
     for (auto it : entries)
-        it.second->setText(QString::number(scale));
+        it.second->setText(scalestr);
     modified = true;
 }

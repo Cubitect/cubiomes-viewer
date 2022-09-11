@@ -52,7 +52,7 @@ struct ExportWorker : QRunnable
 
         uchar *rgb = new uchar[r.sx * r.sz * 3];
         enum { BG_NONE, BG_TRANSP, BG_BLACK };
-        biomesToImage(rgb, biomeColors, ids, r.sx, r.sz, 1, 1);
+        biomesToImage(rgb, g_biomeColors, ids, r.sx, r.sz, 1, 1);
 
         QImage img(rgb, r.sx, r.sz, 3*r.sx, QImage::Format_RGB888);
 

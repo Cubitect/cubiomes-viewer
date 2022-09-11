@@ -8,14 +8,33 @@
 #include "cubiomes/generator.h"
 #include "cubiomes/util.h"
 
-unsigned char biomeColors[256][3];
-unsigned char tempsColors[256][3];
+/// globals
+
+unsigned char g_biomeColors[256][3];
+unsigned char g_tempsColors[256][3];
+
+ExtGenSettings g_extgen;
+
+extern "C"
+int getStructureConfig_override(int stype, int mc, StructureConfig *sconf)
+{
+    if unlikely(mc == INT_MAX) // to check if override is enabled in cubiomes
+        mc = 0;
+    int ok = getStructureConfig(stype, mc, sconf);
+    if (ok && g_extgen.saltOverride)
+    {
+        uint64_t salt = g_extgen.salts[stype];
+        if (salt <= MASK48)
+            sconf->salt = salt;
+    }
+    return ok;
+}
 
 int main(int argc, char *argv[])
 {
     initBiomes();
-    initBiomeColors(biomeColors);
-    initBiomeTypeColors(tempsColors);
+    initBiomeColors(g_biomeColors);
+    initBiomeTypeColors(g_tempsColors);
 
     QApplication a(argc, argv);
     QCoreApplication::setApplicationName("cubiomes-viewer");
