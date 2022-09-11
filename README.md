@@ -51,14 +51,14 @@ look for seeds that include extremely rare structure constellations.
 ![maingui](etc/screenshot_maingui.png)
 
 
-### Known issues
+#### Known issues
 
 Desert Pyramids, Jungle Temples and, to a lesser extent, Woodland Mansions can
 fail to generate in 1.18+ due to unsuitable terrain. Cubiomes will make an
 attempt to estimate the terrain based on the biomes and cimate noise. However,
 expect some inaccurate results.
 
-The World Spawn point for pre-1.18 versions can sometimes be off, since it
-depends on the presence of a grass block that cubiomes cannot test for.
+The World Spawn point for pre-1.18 versions can sometimes be off becuase it
+depends on the presence of a grass block, that cubiomes cannot test for.
 
 
