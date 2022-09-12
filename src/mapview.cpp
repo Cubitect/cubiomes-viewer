@@ -314,7 +314,7 @@ void MapView::wheelEvent(QWheelEvent *e)
 {
     const qreal ang = e->angleDelta().y() / 8; // e->delta() / 8;
     blocks2pix *= pow(2, ang/100);
-    qreal scalemin = 128.0, scalemax = 1.0 / 1024.0;
+    qreal scalemin = 128.0, scalemax = 1.0 / 4096.0;
     if (blocks2pix > scalemin) blocks2pix = scalemin;
     if (blocks2pix < scalemax) blocks2pix = scalemax;
     update();//repaint();

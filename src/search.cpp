@@ -900,7 +900,7 @@ L_qm_any:
                     {
                         StructureVariant vt;
                         if (st == Ruined_Portal || st == Ruined_Portal_N)
-                            id = getBiomeAt(&gen->g, 4, pc.x >> 2, 0, pc.z >> 2);
+                            id = getBiomeAt(&gen->g, 4, (pc.x >> 2) + 2, 0, (pc.z >> 2) + 2);
                         getVariant(&vt, st, gen->mc, gen->seed, pc.x, pc.z, id);
                         if (!cond->isVariantOk(gen->mc, st, vt))
                             continue;

@@ -143,7 +143,7 @@ void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
                 }
                 else if (sconf.structType == Ruined_Portal || sconf.structType == Ruined_Portal_N)
                 {
-                    id = getBiomeAt(&g, 4, p.x >> 2, 0, p.z >> 2);
+                    id = getBiomeAt(&g, 4, (p.x >> 2) + 2, 0, (p.z >> 2) + 2);
                 }
                 else if (sconf.structType == Fortress)
                 {
@@ -554,38 +554,25 @@ void QWorld::setDim(int dim, int layeropt)
         l.cells.swap(todel);
     }
 
-    int pixs;
-    if (g.mc >= MC_1_18)
+    int pixs, lcnt;
+    if (g.mc >= MC_1_18 || dim != DIM_OVERWORLD)
     {
         pixs = 128;
+        lcnt = 6;
         qual = 2.0;
     }
     else
     {
         pixs = 512;
+        lcnt = 5;
         qual = 1.0;
     }
 
     activelv = -1;
     lvb.clear();
-
-    if (dim == 0)
-    {
-        lvb.resize(5);
-        lvb[0].init4map(this, pixs, 1);
-        lvb[1].init4map(this, pixs, 4);
-        lvb[2].init4map(this, pixs, 16);
-        lvb[3].init4map(this, pixs, 64);
-        lvb[4].init4map(this, pixs, 256);
-    }
-    else
-    {
-        lvb.resize(4);
-        lvb[0].init4map(this, pixs, 1);
-        lvb[1].init4map(this, pixs, 4);
-        lvb[2].init4map(this, pixs, 16);
-        lvb[3].init4map(this, pixs, 64);
-    }
+    lvb.resize(lcnt);
+    for (int i = 0, scale = 1; i < lcnt; i++, scale *= 4)
+        lvb[i].init4map(this, pixs, scale);
 }
 
 

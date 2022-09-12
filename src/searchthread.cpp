@@ -184,7 +184,7 @@ bool SearchMaster::set(
                 return false;
             }
         }
-        if (c.skipref && c.x1 == 0 && c.x2 == 0 && c.z1 == 0 && c.z2 == 0)
+        if (c.skipref && c.rmax == 0 && c.x1 == 0 && c.x2 == 0 && c.z1 == 0 && c.z2 == 0)
         {
             QMessageBox::warning(parent, tr("Warning"),
                     tr("Condition %1 ignores its only location of size 1.")
