@@ -48,7 +48,6 @@ TARGET = cubiomes-viewer
 
 SOURCES += \
         src/aboutdialog.cpp \
-        src/analysis.cpp \
         src/biomecolordialog.cpp \
         src/collapsible.cpp \
         src/conditiondialog.cpp \
@@ -67,10 +66,12 @@ SOURCES += \
         src/rangeslider.cpp \
         src/search.cpp \
         src/searchthread.cpp \
+        src/tabbiomes.cpp \
+        src/tabstructures.cpp \
         src/mainwindow.cpp \
         src/main.cpp \
-        src/statsdialog.cpp \
         src/structuredialog.cpp \
+        src/tabtriggers.cpp \
         src/world.cpp
 
 HEADERS += \
@@ -80,7 +81,6 @@ HEADERS += \
         $$CUPATH/quadbase.h \
         $$CUPATH/util.h \
         src/aboutdialog.h \
-        src/analysis.h \
         src/biomecolordialog.h \
         src/collapsible.h \
         src/conditiondialog.h \
@@ -101,10 +101,12 @@ HEADERS += \
         src/search.h \
         src/searchthread.h \
         src/seedtables.h \
+        src/tabbiomes.h \
+        src/tabstructures.h \
         src/mainwindow.h \
         src/settings.h \
-        src/statsdialog.h \
         src/structuredialog.h \
+        src/tabtriggers.h \
         src/world.h
 
 FORMS += \
@@ -123,8 +125,10 @@ FORMS += \
         src/quadlistdialog.ui\
         src/mainwindow.ui \
         src/rangedialog.ui \
-        src/statsdialog.ui \
-        src/structuredialog.ui
+        src/tabbiomes.ui \
+        src/tabstructures.ui \
+        src/structuredialog.ui \
+        src/tabtriggers.ui
 
 
 TRANSLATIONS += \

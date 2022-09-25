@@ -128,7 +128,7 @@ static const struct FilterList
 #define _(S) QT_TRANSLATE_NOOP("Filter", S)
 
         list[F_LOGIC_OR] = FilterInfo{
-            CAT_HELPER, 0, 0, 0, 0, 0, 0, 1, 0, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
+            CAT_HELPER, 0, 0, 0, 0, 0, 0, 1, 0, 0, MC_1_0, MC_NEWEST, DIM_UNDEF, 0, disp++,
             ":icons/helper.png",
             _("OR logic gate"),
             _("Evaluates as true when any of the conditions that reference it "
@@ -136,7 +136,7 @@ static const struct FilterList
             "defined, it defaults to true.")
         };
         list[F_LOGIC_NOT] = FilterInfo{
-            CAT_HELPER, 0, 0, 0, 0, 0, 0, 1, 0, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
+            CAT_HELPER, 0, 0, 0, 0, 0, 0, 1, 0, 0, MC_1_0, MC_NEWEST, DIM_UNDEF, 0, disp++,
             ":icons/helper.png",
             _("NOT logic gate"),
             _("Evaluates as true when none of the conditions that reference it "
@@ -144,13 +144,13 @@ static const struct FilterList
             "defined, it defaults to true.")
         };
         list[F_SCALE_TO_NETHER] = FilterInfo{
-            CAT_HELPER, 0, 0, 0, 0, 0, 0, 1, 0, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
+            CAT_HELPER, 0, 0, 0, 0, 0, 0, 1, 0, 0, MC_1_0, MC_NEWEST, DIM_UNDEF, 0, disp++,
             ":icons/portal_lit.png",
             _("Coordinate factor x/8"),
             _("Divides relative location by 8, from Overworld to Nether.")
         };
         list[F_SCALE_TO_OVERWORLD] = FilterInfo{
-            CAT_HELPER, 0, 0, 0, 0, 0, 0, 1, 0, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
+            CAT_HELPER, 0, 0, 0, 0, 0, 0, 1, 0, 0, MC_1_0, MC_NEWEST, DIM_UNDEF, 0, disp++,
             ":icons/portal_lit.png",
             _("Coordinate factor x*8"),
             _("Multiplies relative location by 8, from Nether to Overworld.")
@@ -162,43 +162,43 @@ static const struct FilterList
             "</body></html>"
         );
         list[F_REFERENCE_1] = FilterInfo{
-            CAT_HELPER, 0, 1, 1, 0, 0, 0, 1, 0, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
+            CAT_HELPER, 0, 1, 1, 0, 0, 0, 1, 0, 0, MC_1_0, MC_NEWEST, DIM_UNDEF, 0, disp++,
             ":icons/reference.png",
             _("Reference point 1:1"),
             ref_desc
         };
         list[F_REFERENCE_4] = FilterInfo{
-            CAT_HELPER, 0, 1, 1, 0, 0, 0, 4, 2, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
+            CAT_HELPER, 0, 1, 1, 0, 0, 0, 4, 2, 0, MC_1_0, MC_NEWEST, DIM_UNDEF, 0, disp++,
             ":icons/reference.png",
             _("Reference point 1:4"),
             ref_desc
         };
         list[F_REFERENCE_16] = FilterInfo{
-            CAT_HELPER, 0, 1, 1, 0, 0, 0, 16, 4, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
+            CAT_HELPER, 0, 1, 1, 0, 0, 0, 16, 4, 0, MC_1_0, MC_NEWEST, DIM_UNDEF, 0, disp++,
             ":icons/reference.png",
             _("Reference point 1:16"),
             ref_desc
         };
         list[F_REFERENCE_64] = FilterInfo{
-            CAT_HELPER, 0, 1, 1, 0, 0, 0, 64, 6, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
+            CAT_HELPER, 0, 1, 1, 0, 0, 0, 64, 6, 0, MC_1_0, MC_NEWEST, DIM_UNDEF, 0, disp++,
             ":icons/reference.png",
             _("Reference point 1:64"),
             ref_desc
         };
         list[F_REFERENCE_256] = FilterInfo{
-            CAT_HELPER, 0, 1, 1, 0, 0, 0, 256, 8, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
+            CAT_HELPER, 0, 1, 1, 0, 0, 0, 256, 8, 0, MC_1_0, MC_NEWEST, DIM_UNDEF, 0, disp++,
             ":icons/reference.png",
             _("Reference point 1:256"),
             ref_desc
         };
         list[F_REFERENCE_512] = FilterInfo{
-            CAT_HELPER, 0, 1, 1, 0, 0, 0, 512, 9, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
+            CAT_HELPER, 0, 1, 1, 0, 0, 0, 512, 9, 0, MC_1_0, MC_NEWEST, DIM_UNDEF, 0, disp++,
             ":icons/reference.png",
             _("Reference point 1:512"),
             ref_desc
         };
         list[F_REFERENCE_1024] = FilterInfo{
-            CAT_HELPER, 0, 1, 1, 0, 0, 0, 1024, 10, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
+            CAT_HELPER, 0, 1, 1, 0, 0, 0, 1024, 10, 0, MC_1_0, MC_NEWEST, DIM_UNDEF, 0, disp++,
             ":icons/reference.png",
             _("Reference point 1:1024"),
             ref_desc
@@ -577,6 +577,7 @@ struct /*__attribute__((packed))*/ Condition
         VAR_WITH_START  = 0x01, // restrict start piece index and biome
         VAR_ABANODONED  = 0x02, // zombie village
         VAR_ENDSHIP     = 0x04, // end city ship
+        VAR_DENSE_BB    = 0x08, // fortress with a 2x2 arrangement of start/crossings
     };
     int16_t     type;
     uint16_t    meta;
@@ -615,8 +616,6 @@ struct /*__attribute__((packed))*/ Condition
     bool readHex(const QString& hex);
 
     QString summary() const;
-
-    bool isVariantOk(int mc, int stype, StructureVariant sv) const;
 };
 
 struct ConditionTree
@@ -626,13 +625,6 @@ struct ConditionTree
 
     void set(const QVector<Condition>& cv, WorldInfo wi);
 };
-
-struct StructPos
-{
-    StructureConfig sconf;
-    int cx, cz; // effective center position
-};
-
 
 struct WorldGen
 {

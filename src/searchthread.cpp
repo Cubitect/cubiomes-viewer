@@ -77,6 +77,8 @@ bool SearchMaster::set(
                     .arg(c.type).arg(cid));
             return false;
         }
+        if (disabled[c.save])
+            continue;
 
         const FilterInfo& finfo = g_filterinfo.list[c.type];
 

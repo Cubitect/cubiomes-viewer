@@ -348,6 +348,7 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
         ui->checkStartPieces->setChecked(cond.varflags & Condition::VAR_WITH_START);
         ui->checkAbandoned->setChecked(cond.varflags & Condition::VAR_ABANODONED);
         ui->checkEndShip->setChecked(cond.varflags & Condition::VAR_ENDSHIP);
+        ui->checkDenseBB->setChecked(cond.varflags & Condition::VAR_DENSE_BB);
         for (VariantCheckBox *cb : qAsConst(variantboxes))
         {
             int idx = cb->sp - g_start_pieces;
@@ -462,6 +463,11 @@ void ConditionDialog::updateMode()
         ui->stackedWidget->setCurrentWidget(ui->pageVillage);
         ui->checkStartPieces->setEnabled(mc >= MC_1_14);
         ui->checkAbandoned->setEnabled(filterindex == F_VILLAGE && mc >= MC_1_10);
+    }
+    else if (filterindex == F_FORTRESS)
+    {
+        ui->stackedWidget->setCurrentWidget(ui->pageFortress);
+        ui->checkDenseBB->setEnabled(true);
     }
     else if (filterindex == F_BASTION)
     {
@@ -866,6 +872,7 @@ void ConditionDialog::on_buttonOk_clicked()
     c.varflags |= ui->checkStartPieces->isChecked() * Condition::VAR_WITH_START;
     c.varflags |= ui->checkAbandoned->isChecked() * Condition::VAR_ABANODONED;
     c.varflags |= ui->checkEndShip->isChecked() * Condition::VAR_ENDSHIP;
+    c.varflags |= ui->checkDenseBB->isChecked() * Condition::VAR_DENSE_BB;
     for (VariantCheckBox *cb : qAsConst(variantboxes))
     {
         if (!cb->isChecked())

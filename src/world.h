@@ -149,17 +149,21 @@ inline int mapopt2stype(int opt)
 
 void loadStructVis(std::map<int, double>& structvis);
 void saveStructVis(std::map<int, double>& structvis);
-const QPixmap& getMapIcon(int opt, StructureVariant *variation = 0);
 
 struct Level;
 
 struct VarPos
 {
-    VarPos(Pos p) : p(p),v(),pieces() {}
+    VarPos(Pos p, int type) : p(p),type(type),v(),pieces() {}
     Pos p;
+    int type;
     StructureVariant v;
     std::vector<Piece> pieces;
+
+    QStringList detail() const;
 };
+
+const QPixmap& getMapIcon(int opt, VarPos *variation = 0);
 
 void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
         WorldInfo wi, int dim, int x0, int z0, int x1, int z1);
@@ -286,7 +290,7 @@ struct QWorld
     // structure selection from mouse position
     bool seldo;
     qreal selx, selz;
-    int seltype;
+    int selopt;
     VarPos selvp;
 
     qreal qual; // quality, i.e. maximum pixels per 'block' at the current layer

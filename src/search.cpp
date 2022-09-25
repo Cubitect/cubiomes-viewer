@@ -104,9 +104,9 @@ bool Condition::apply(WorldInfo wi)
         if (biomeToExclM & (1ULL << i))
             ex[exlen++] = i + 128;
     }
-    uint32_t bfflags = CFB_FORCED_OCEAN;
+    uint32_t bfflags = BF_FORCED_OCEAN;
     if (flags & APPROX)
-        bfflags |= CFB_APPROX;
+        bfflags |= BF_APPROX;
     if (flags & MATCH_ANY)
         setupBiomeFilter(&bf, wi.mc, bfflags, 0, 0, ex, exlen, in, inlen);
     else
@@ -137,54 +137,6 @@ bool Condition::readHex(const QString& hex)
     if (ok)
         ok = versionUpgrade();
     return ok;
-}
-
-bool Condition::isVariantOk(int mc, int stype, StructureVariant sv) const
-{
-    if (stype == Village)
-    {
-        if (mc < MC_1_10) return true;
-        if ((varflags & VAR_ABANODONED) && !sv.abandoned) return false;
-        if (!(varflags & VAR_WITH_START) || mc < MC_1_14) return true;
-    }
-    else if (stype == Bastion)
-    {
-        if (mc < MC_1_16 || !(varflags & VAR_WITH_START)) return true;
-    }
-    else if (stype == Ruined_Portal || stype == Ruined_Portal_N)
-    {
-        if (mc < MC_1_16 || !(varflags & VAR_WITH_START)) return true;
-    }
-    else if (stype == End_City)
-    {
-        if ((varflags & VAR_ENDSHIP) && !sv.ship) return false;
-        return true;
-    }
-    else
-    {
-        return true;
-    }
-
-    // check start piece
-    uint64_t idxbits = varstart;
-    while (idxbits)
-    {
-        int idx = __builtin_ctzll(idxbits);
-        idxbits &= idxbits - 1;
-        if ((size_t)idx < sizeof(g_start_pieces) / sizeof(g_start_pieces[0]))
-        {
-            const StartPiece *sp = g_start_pieces + idx;
-            if (sp->stype == stype && sp->start == sv.start)
-            {
-                if (sp->biome != -1 && sp->biome != sv.biome)
-                    continue;
-                if (sp->giant != -1 && sp->giant != sv.giant)
-                    continue;
-                return true;
-            }
-        }
-    }
-    return false;
 }
 
 void ConditionTree::set(const QVector<Condition>& cv, WorldInfo wi)
@@ -322,30 +274,45 @@ int testTreeAt(
         if (branches.empty())
         {
             if (path)
-                path[c.save] = pos;
+                path[c.save] = at;
             return COND_OK; // empty ORs are ignored
         }
-        st = COND_FAILED;
-        for (int b : branches)
+        else
         {
-            int sta = testTreeAt(
-                at,
-                tree,
-                b,
-                pass,
-                gen,
-                abort,
-                path
-            );
-            if (*abort)
-                return COND_FAILED;
-            if (sta > st)
-                st = sta;
-            if (st == COND_OK)
-                break;
+            int bok = 0;
+            st = COND_FAILED;
+            for (int b : branches)
+            {
+                int sta = testTreeAt(
+                    at,
+                    tree,
+                    b,
+                    pass,
+                    gen,
+                    abort,
+                    path
+                );
+                if (*abort)
+                    return COND_FAILED;
+                if (sta > st)
+                    st = sta;
+                if (st == COND_OK) {
+                    bok = b;
+                    break;
+                }
+            }
+            if (path && st == COND_OK)
+            {
+                path[c.save] = at;
+                for (int b : branches)
+                {   // invalidate the other branches
+                    if (b == bok)
+                        continue;
+                    Pos *p = path + tree->condvec[b].save;
+                    p->x = p->z = -1;
+                }
+            }
         }
-        if (path && st == COND_OK)
-            path[c.save] = pos;
         return st;
 
 
@@ -368,8 +335,6 @@ int testTreeAt(
             else if (sta == COND_FAILED) { st = COND_OK; break; }
             else if (sta > st) st = sta;
         }
-        if (path && st == COND_OK)
-            path[c.save] = pos;
         return st;
 
     default:
@@ -379,7 +344,12 @@ int testTreeAt(
             int icnt = c.count;
             st = testCondAt(at, inst, &icnt, &c, pass, gen, abort);
             if (path && st == COND_OK)
-                path[c.save] = at;
+            {
+                if (icnt == 1)
+                    path[c.save] = *inst;
+                else
+                    path[c.save].x = path[c.save].z = -1;
+            }
             return st;
         }
         finfo = g_filterinfo.list + c.type;
@@ -501,7 +471,8 @@ void _init(void) __attribute__((constructor));
 void _init(void)
 {
     int st = Swamp_Hut;
-    StructureConfig sc = SWAMP_HUT_CONFIG;
+    StructureConfig sc;
+    getStructureConfig(st, MC_NEWEST, &sc);
     sc.salt = 0; // ignore version dependent salt offsets
 
     for (int i = 0; i < g_qh_c_n; i++)
@@ -553,6 +524,97 @@ void _init(void)
     }
 }
 
+static bool isVariantOk(const Condition *c, WorldGen *g, int stype, int varbiome, Pos *pos)
+{
+    StructureVariant sv;
+
+    if (stype == Village)
+    {
+        if (g->mc < MC_1_10) return true;
+        getVariant(&sv, stype, g->mc, g->seed, pos->x, pos->z, varbiome);
+        if ((c->varflags & Condition::VAR_ABANODONED) && !sv.abandoned) return false;
+        if (!(c->varflags & Condition::VAR_WITH_START) || g->mc < MC_1_14) return true;
+    }
+    else if (stype == Bastion)
+    {
+        if (g->mc < MC_1_16) return true;
+        getVariant(&sv, stype, g->mc, g->seed, pos->x, pos->z, -1);
+        if (!(c->varflags & Condition::VAR_WITH_START)) return true;
+    }
+    else if (stype == Ruined_Portal || stype == Ruined_Portal_N)
+    {
+        if (g->mc < MC_1_16) return true;
+        g->init4Dim(stype == Ruined_Portal ? DIM_OVERWORLD : DIM_NETHER);
+        varbiome = getBiomeAt(&g->g, 4, (pos->x >> 2) + 2, 0, (pos->z >> 2) + 2);
+        getVariant(&sv, stype, g->mc, g->seed, pos->x, pos->z, varbiome);
+        if (!(c->varflags & Condition::VAR_WITH_START)) return true;
+    }
+    else if (stype == End_City)
+    {
+        if (!(c->varflags & Condition::VAR_ENDSHIP)) return true;
+        Piece pieces[END_CITY_PIECES_MAX];
+        int i, n = getEndCityPieces(pieces, g->seed, pos->x >> 4, pos->z >> 4);
+        for (i = 0; i < n; i++)
+            if (pieces[i].type == END_SHIP)
+                return true;
+        return false;
+    }
+    else if (stype == Fortress)
+    {
+        if (!(c->varflags & Condition::VAR_DENSE_BB)) return true;
+        enum { FP_MAX = 400 };
+        Piece p[FP_MAX];
+        int i, n, b;
+        n = getFortressPieces(p, FP_MAX, g->mc, g->seed, pos->x >> 4, pos->z >> 4);
+        for (b = i = 0; i < n; i++)
+            if (p[i].type == FORTRESS_START || p[i].type == BRIDGE_CROSSING)
+                p[b++] = p[i];
+        if (b < 4) return false;
+        for (i = 0; i < b; i++)
+        {
+            int j, adj = 0;
+            for (j = 0; j < b; j++)
+            {
+                if (p[i].bb0.y != p[j].bb0.y) continue;
+                if (p[i].bb1.x != p[j].bb1.x && p[i].bb1.x+1 != p[j].bb0.x) continue;
+                if (p[i].bb1.z != p[j].bb1.z && p[i].bb1.z+1 != p[j].bb0.z) continue;
+                adj++;
+            }
+            if (adj >= 4)
+            {
+                pos->x = p[i].bb1.x;
+                pos->z = p[i].bb1.z;
+                return true;
+            }
+        }
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+
+    // check start piece
+    uint64_t idxbits = c->varstart;
+    while (idxbits)
+    {
+        int idx = __builtin_ctzll(idxbits);
+        idxbits &= idxbits - 1;
+        if ((size_t)idx < sizeof(g_start_pieces) / sizeof(g_start_pieces[0]))
+        {
+            const StartPiece *sp = g_start_pieces + idx;
+            if (sp->stype == stype && sp->start == sv.start)
+            {
+                if (sp->biome != -1 && sp->biome != sv.biome)
+                    continue;
+                if (sp->giant != -1 && sp->giant != sv.giant)
+                    continue;
+                return true;
+            }
+        }
+    }
+    return false;
+}
 
 static bool intersectLineLine(double ax1, double az1, double ax2, double az2, double bx1, double bz1, double bx2, double bz2)
 {
@@ -875,12 +937,8 @@ L_qm_any:
                         int vn = gen->mc <= MC_1_13 ? 1 : sizeof(vv) / sizeof(int);
                         int i;
                         for (i = 0; i < vn; i++)
-                        {
-                            StructureVariant vt;
-                            getVariant(&vt, st, gen->mc, gen->seed, pc.x, pc.z, vv[i]);
-                            if (cond->isVariantOk(gen->mc, st, vt))
+                            if (isVariantOk(cond, gen, st, vv[i], &pc))
                                 break;
-                        }
                         if (i >= vn) // no suitable village variants here
                             continue;
                     }
@@ -898,11 +956,7 @@ L_qm_any:
                     }
                     if (cond->varflags)
                     {
-                        StructureVariant vt;
-                        if (st == Ruined_Portal || st == Ruined_Portal_N)
-                            id = getBiomeAt(&gen->g, 4, (pc.x >> 2) + 2, 0, (pc.z >> 2) + 2);
-                        getVariant(&vt, st, gen->mc, gen->seed, pc.x, pc.z, id);
-                        if (!cond->isVariantOk(gen->mc, st, vt))
+                        if (!isVariantOk(cond, gen, st, id, &pc))
                             continue;
                     }
                     if (gen->mc >= MC_1_18)

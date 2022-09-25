@@ -60,8 +60,7 @@ signals:
 public slots:
     void showContextMenu(const QPoint &pos);
     void copySeed();
-    void copyCoord();
-    void copyTeleportCommand();
+    void copyText(QString txt);
     void onGoto();
 
     void paintEvent(QPaintEvent *) Q_DECL_OVERRIDE;

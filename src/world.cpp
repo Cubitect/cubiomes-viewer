@@ -34,7 +34,7 @@ void saveStructVis(std::map<int, double>& structvis)
     }
 }
 
-const QPixmap& getMapIcon(int opt, StructureVariant *variation)
+const QPixmap& getMapIcon(int opt, VarPos *vp)
 {
     static QPixmap icons[STRUCT_NUM];
     static QPixmap iconzvil;
@@ -70,15 +70,86 @@ const QPixmap& getMapIcon(int opt, StructureVariant *variation)
         icongiant           = QPixmap(":/icons/portal_giant.png");
         iconship            = QPixmap(":/icons/end_ship.png");
     }
-    if (!variation)
+    if (!vp)
         return icons[opt];
-    if (opt == D_VILLAGE && variation->abandoned)
+    if (opt == D_VILLAGE && vp->v.abandoned)
         return iconzvil;
-    if ((opt == D_PORTAL || opt == D_PORTALN) && variation->giant)
+    if ((opt == D_PORTAL || opt == D_PORTALN) && vp->v.giant)
         return icongiant;
-    if (opt == D_ENDCITY && variation->ship)
-        return iconship;
+    if (opt == D_ENDCITY)
+    {
+        for (Piece& p : vp->pieces)
+            if (p.type == END_SHIP)
+                return iconship;
+    }
     return icons[opt];
+}
+
+QStringList VarPos::detail() const
+{
+    QStringList sinfo;
+    QString s;
+    if (type == Village)
+    {
+        if (v.abandoned)
+            sinfo.append("abandoned");
+        s = getStartPieceName(Village, &v);
+        if (!s.isEmpty())
+            sinfo.append(s);
+    }
+    else if (type == Bastion)
+    {
+        s = getStartPieceName(Bastion, &v);
+        if (!s.isEmpty())
+            sinfo.append(s);
+    }
+    else if (type == Ruined_Portal || type == Ruined_Portal_N)
+    {
+        switch (v.biome)
+        {
+        case plains:    sinfo.append("standard"); break;
+        case desert:    sinfo.append("desert"); break;
+        case jungle:    sinfo.append("jungle"); break;
+        case swamp:     sinfo.append("swamp"); break;
+        case mountains: sinfo.append("mountain"); break;
+        case ocean:     sinfo.append("ocean"); break;
+        default:        sinfo.append("nether"); break;
+        }
+        s = getStartPieceName(Ruined_Portal, &v);
+        if (!s.isEmpty())
+            sinfo.append(s);
+        if (v.underground)
+            sinfo.append("underground");
+        if (v.airpocket)
+            sinfo.append("airpocket");
+    }
+    else if (type == End_City)
+    {
+        sinfo.append(QString::asprintf("size=%zu", pieces.size()));
+        for (const Piece& p : pieces)
+        {
+            if (p.type == END_SHIP)
+            {
+                sinfo.append("ship");
+                break;
+            }
+        }
+    }
+    else if (type == Fortress)
+    {
+        sinfo.append(QString::asprintf("size=%zu", pieces.size()));
+        int spawner = 0, wart = 0;
+        for (const Piece& p : pieces)
+        {
+            spawner += p.type == BRIDGE_SPAWNER;
+            wart += p.type == CORRIDOR_NETHER_WART;
+        }
+        if (spawner)
+            sinfo.append(QString::asprintf("spawners=%d", spawner));
+        if (wart)
+            sinfo.append(QString::asprintf("nether_wart=%d", wart));
+    }
+    return sinfo;
 }
 
 
@@ -128,7 +199,7 @@ void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
                 int id = isViableStructurePos(sconf.structType, &g, p.x, p.z, 0);
                 if (!id)
                     continue;
-                VarPos vp = VarPos(p);
+                VarPos vp = VarPos(p, sconf.structType);
                 Piece pieces[1024];
 
                 if (sconf.structType == End_City)
@@ -472,8 +543,8 @@ QWorld::QWorld(WorldInfo wi, int dim, int layeropt)
     , seldo()
     , selx()
     , selz()
-    , seltype(-1)
-    , selvp(Pos{})
+    , selopt(-1)
+    , selvp(Pos{}, -1)
     , qual()
 {
     setupGenerator(&g, wi.mc,  wi.large);
@@ -921,7 +992,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
                     vp.p.z //+ (vp.v.z + vp.v.sz / 2)
                 };
 
-                const QPixmap& icon = getMapIcon(sopt, &vp.v);
+                const QPixmap& icon = getMapIcon(sopt, &vp);
                 QRectF rec = icon.rect();
                 if (seldo)
                 {   // check for structure selection
@@ -929,11 +1000,11 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
                     r.moveCenter(d);
                     if (r.contains(selx, selz))
                     {
-                        seltype = sopt;
+                        selopt = sopt;
                         selvp = vp;
                     }
                 }
-                if (seltype == sopt && selvp.p.x == spos.x && selvp.p.z == spos.z)
+                if (selopt == sopt && selvp.p.x == spos.x && selvp.p.z == spos.z)
                 {   // don't draw selected structure
                     continue;
                 }
@@ -961,8 +1032,8 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
             r.moveCenter(d);
             if (r.contains(selx, selz))
             {
-                seltype = D_SPAWN;
-                selvp.p = *sp;
+                selopt = D_SPAWN;
+                selvp = VarPos(*sp, -1);
             }
         }
     }
@@ -985,8 +1056,8 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
                 r.moveCenter(d);
                 if (r.contains(selx, selz))
                 {
-                    seltype = D_STRONGHOLD;
-                    selvp.p = p;
+                    selopt = D_STRONGHOLD;
+                    selvp = VarPos(p, -1);
                 }
             }
         }
@@ -1025,9 +1096,9 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
         seldo = false;
     }
 
-    if (seltype != D_NONE)
+    if (selopt != D_NONE)
     {   // draw selection overlay
-        const QPixmap& icon = getMapIcon(seltype, &selvp.v);
+        const QPixmap& icon = getMapIcon(selopt, &selvp);
         qreal x = vw/2.0 + (selvp.p.x - focusx) * blocks2pix;
         qreal y = vh/2.0 + (selvp.p.z - focusz) * blocks2pix;
         QRect iconrec = icon.rect();
@@ -1058,61 +1129,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
         iconrec = iconrec.translated(pad,pad);
         painter.drawPixmap(iconrec, icon);
 
-        QStringList sinfo;
-        if (seltype == D_VILLAGE)
-        {
-            if (selvp.v.abandoned)
-                sinfo.append("abandoned");
-            s = getStartPieceName(Village, &selvp.v);
-            if (!s.isEmpty())
-                sinfo.append(s);
-        }
-        else if (seltype == D_BASTION)
-        {
-            s = getStartPieceName(Bastion, &selvp.v);
-            if (!s.isEmpty())
-                sinfo.append(s);
-        }
-        else if (seltype == D_PORTAL || seltype == D_PORTALN)
-        {
-            switch (selvp.v.biome)
-            {
-            case plains:    sinfo.append("standard"); break;
-            case desert:    sinfo.append("desert"); break;
-            case jungle:    sinfo.append("jungle"); break;
-            case swamp:     sinfo.append("swamp"); break;
-            case mountains: sinfo.append("mountain"); break;
-            case ocean:     sinfo.append("ocean"); break;
-            default:        sinfo.append("nether"); break;
-            }
-            s = getStartPieceName(Ruined_Portal, &selvp.v);
-            if (!s.isEmpty())
-                sinfo.append(s);
-            if (selvp.v.underground)
-                sinfo.append("underground");
-            if (selvp.v.airpocket)
-                sinfo.append("airpocket");
-        }
-        else if (seltype == D_ENDCITY)
-        {
-            sinfo.append(QString::asprintf("size=%zu", selvp.pieces.size()));
-            if (selvp.v.ship)
-                sinfo.append("ship");
-        }
-        else if (seltype == D_FORTESS)
-        {
-            sinfo.append(QString::asprintf("size=%zu", selvp.pieces.size()));
-            int spawner = 0, wart = 0;
-            for (Piece& p : selvp.pieces)
-            {
-                spawner += p.type == BRIDGE_SPAWNER;
-                wart += p.type == CORRIDOR_NETHER_WART;
-            }
-            if (spawner)
-                sinfo.append(QString::asprintf("spawners=%d", spawner));
-            if (wart)
-                sinfo.append(QString::asprintf("nether_wart=%d", wart));
-        }
+        QStringList sinfo = selvp.detail();
         if (!sinfo.empty())
         {
             f = QFont();

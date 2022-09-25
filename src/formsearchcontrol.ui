@@ -20,7 +20,16 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
-   <property name="margin">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
     <number>0</number>
    </property>
    <item row="0" column="0">
@@ -65,14 +74,14 @@
       <bool>true</bool>
      </attribute>
      <attribute name="verticalHeaderDefaultSectionSize">
-      <number>20</number>
+      <number>21</number>
      </attribute>
      <column>
       <property name="text">
        <string>Hex  low-48 | top-16</string>
       </property>
       <property name="textAlignment">
-       <set>AlignLeft|AlignVCenter</set>
+       <set>AlignLeading|AlignVCenter</set>
       </property>
      </column>
      <column>
@@ -80,7 +89,7 @@
        <string>Seed</string>
       </property>
       <property name="textAlignment">
-       <set>AlignLeft|AlignVCenter</set>
+       <set>AlignLeading|AlignVCenter</set>
       </property>
      </column>
     </widget>

@@ -15,10 +15,10 @@
 #include <QRunnable>
 #include <QMutex>
 #include <QVector>
+#include <QSettings>
 
 #include <atomic>
 
-#include "analysis.h"
 #include "mapview.h"
 #include "searchthread.h"
 #include "configdialog.h"
@@ -30,6 +30,12 @@ namespace Ui {
 class MainWindow;
 }
 
+
+struct ISaveTab
+{
+    virtual void save(QSettings& settings) = 0;
+    virtual void load(QSettings& settings) = 0;
+};
 
 class MapView;
 
@@ -91,12 +97,7 @@ private slots:
     void on_actionExtGen_triggered();
     void on_actionExportImg_triggered();
 
-    void on_checkArea_toggled(bool checked);
-    void on_lineRadius_editingFinished();
-    void on_buttonFromVisible_clicked();
-    void on_buttonAnalysis_clicked();
-    void on_treeAnalysis_itemClicked(QTreeWidgetItem *item);
-    void on_buttonExport_clicked();
+    void on_tabContainer_currentChanged(int index);
 
     void on_actionSearch_seed_list_triggered();
     void on_actionSearch_full_seed_space_triggered();
@@ -111,14 +112,11 @@ private slots:
     void onSearchStatusChanged(bool running);
     void onStyleChanged(int style);
     void onBiomeColorChange();
-    void onAnalysisItemDone(QTreeWidgetItem *item);
-    void onAnalysisFinished();
 
 public:
     Ui::MainWindow *ui;
     QDockWidget *dock;
     MapView *mapView;
-    Analysis analysis;
 
     FormConditions *formCond;
     FormGen48 *formGen48;
@@ -126,6 +124,7 @@ public:
     Config config;
     QString prevdir;
     QTimer autosaveTimer;
+    int prevtab;
 
     QVector<QAction*> saction;
     QAction *dimactions[3];

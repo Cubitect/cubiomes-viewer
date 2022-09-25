@@ -9,6 +9,9 @@
 #include "biomecolordialog.h"
 #include "structuredialog.h"
 #include "exportdialog.h"
+#include "tabtriggers.h"
+#include "tabbiomes.h"
+#include "tabstructures.h"
 
 #if WITH_UPDATER
 #include "updater.h"
@@ -39,13 +42,13 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
     , dock(new QDockWidget(tr("Map"), this))
     , mapView(new MapView(this))
-    , analysis(this)
     , formCond()
     , formGen48()
     , formControl()
     , config()
     , prevdir(".")
     , autosaveTimer()
+    , prevtab(-1)
     , dimactions{}
     , dimgroup()
 {
@@ -61,6 +64,10 @@ MainWindow::MainWindow(QWidget *parent)
     formCond = new FormConditions(this);
     formGen48 = new FormGen48(this);
     formControl = new FormSearchControl(this);
+
+    ui->tabContainer->addTab(new TabTriggers(this), tr("Triggers"));
+    ui->tabContainer->addTab(new TabBiomes(this), tr("Biomes"));
+    ui->tabContainer->addTab(new TabStructures(this), tr("Structures"));
 
     QList<QAction*> layeracts = ui->menuBiome_layer->actions();
     int lopt = LOPT_DEFAULT_1;
@@ -130,23 +137,11 @@ MainWindow::MainWindow(QWidget *parent)
     qRegisterMetaType< QVector<uint64_t> >("QVector<uint64_t>");
     qRegisterMetaType< Config >("Config");
 
-    QIntValidator *intval = new QIntValidator(this);
-    ui->lineRadius->setValidator(intval);
-    ui->lineEditX1->setValidator(intval);
-    ui->lineEditZ1->setValidator(intval);
-    ui->lineEditX2->setValidator(intval);
-    ui->lineEditZ2->setValidator(intval);
-    on_checkArea_toggled(false);
-
     ui->comboY->lineEdit()->setValidator(new QIntValidator(-64, 320, this));
 
     formCond->updateSensitivity();
 
     connect(&autosaveTimer, &QTimer::timeout, this, &MainWindow::onAutosaveTimeout);
-
-    ui->treeAnalysis->sortByColumn(0, Qt::AscendingOrder);
-    connect(&analysis, &Analysis::itemDone, this, &MainWindow::onAnalysisItemDone);
-    connect(&analysis, &Analysis::finished, this, &MainWindow::onAnalysisFinished);
 
     loadSettings();
 
@@ -299,7 +294,13 @@ bool MainWindow::setSeed(WorldInfo wi, int dim, int layeropt)
         return false;
     }
 
-    if (dim == DIM_UNDEF)
+    if (dim == DIM_OVERWORLD)
+        dimactions[0]->setChecked(true);
+    if (dim == DIM_NETHER)
+        dimactions[1]->setChecked(true);
+    else if (dim == DIM_END)
+        dimactions[2]->setChecked(true);
+    else
         dim = getDim();
 
     ui->checkLarge->setChecked(wi.large);
@@ -340,17 +341,6 @@ void MainWindow::saveSettings()
     settings.setValue("mainwindow/pos", pos());
     settings.setValue("mainwindow/prevdir", prevdir);
 
-    settings.setValue("analysis/structs", ui->checkStructs->isChecked());
-    settings.setValue("analysis/biomes", ui->checkBiomes->isChecked());
-    settings.setValue("analysis/conditions", ui->checkConditions->isChecked());
-    settings.setValue("analysis/maponly", ui->checkMapOnly->isChecked());
-    settings.setValue("analysis/customarea", ui->checkArea->isChecked());
-    settings.setValue("analysis/x1", ui->lineEditX1->text().toInt());
-    settings.setValue("analysis/z1", ui->lineEditZ1->text().toInt());
-    settings.setValue("analysis/x2", ui->lineEditX2->text().toInt());
-    settings.setValue("analysis/z2", ui->lineEditZ2->text().toInt());
-    settings.setValue("analysis/seedsrc", ui->comboSeedSource->currentIndex());
-
     settings.setValue("config/dockable", config.dockable);
     settings.setValue("config/smoothMotion", config.smoothMotion);
     settings.setValue("config/showBBoxes", config.showBBoxes);
@@ -371,6 +361,8 @@ void MainWindow::saveSettings()
         if (salt <= MASK48)
             settings.setValue(QString("world/salt_") + struct2str(st), (qulonglong)salt);
     }
+
+    on_tabContainer_currentChanged(-1);
 
     WorldInfo wi;
     getSeed(&wi, false);
@@ -399,18 +391,6 @@ void MainWindow::saveSettings()
 }
 
 
-static void loadCheck(QSettings *s, QCheckBox *cb, const char *key)
-{
-    cb->setChecked( s->value(key, cb->isChecked()).toBool() );
-}
-
-static void loadLine(QSettings *s, QLineEdit *line, const char *key)
-{
-    // only load as integer
-    qlonglong x = line->text().toLongLong();
-    line->setText( QString::number(s->value(key, x).toLongLong()) );
-}
-
 void MainWindow::loadSettings()
 {
     QSettings settings("cubiomes-viewer", "cubiomes-viewer");
@@ -418,17 +398,6 @@ void MainWindow::loadSettings()
     resize(settings.value("mainwindow/size", size()).toSize());
     move(settings.value("mainwindow/pos", pos()).toPoint());
     prevdir = settings.value("mainwindow/prevdir", pos()).toString();
-
-    loadCheck(&settings, ui->checkStructs, "analysis/structs");
-    loadCheck(&settings, ui->checkBiomes, "analysis/biomes");
-    loadCheck(&settings, ui->checkConditions, "analysis/conditions");
-    loadCheck(&settings, ui->checkMapOnly, "analysis/maponly");
-    loadCheck(&settings, ui->checkArea, "analysis/customarea");
-    loadLine(&settings, ui->lineEditX1, "analysis/x1");
-    loadLine(&settings, ui->lineEditZ1, "analysis/z1");
-    loadLine(&settings, ui->lineEditX2, "analysis/x2");
-    loadLine(&settings, ui->lineEditZ2, "analysis/z2");
-    ui->comboSeedSource->setCurrentIndex(settings.value("analysis/seedsrc", ui->comboSeedSource->currentIndex()).toInt());
 
     config.dockable = settings.value("config/dockable", config.dockable).toBool();
     config.smoothMotion = settings.value("config/smoothMotion", config.smoothMotion).toBool();
@@ -457,21 +426,14 @@ void MainWindow::loadSettings()
         g_extgen.salts[st] = settings.value(QString("world/salt_") + struct2str(st), v).toULongLong();
     }
 
-    int dim = settings.value("map/dim", getDim()).toInt();
-    if (dim == -1)
-        dimactions[1]->setChecked(true);
-    else if (dim == +1)
-        dimactions[2]->setChecked(true);
-    else
-        dimactions[0]->setChecked(true);
-
     WorldInfo wi;
     getSeed(&wi, true);
     wi.mc = settings.value("map/mc", wi.mc).toInt();
     wi.large = settings.value("map/large", wi.large).toBool();
     wi.seed = (uint64_t) settings.value("map/seed", QVariant::fromValue((qlonglong)wi.seed)).toLongLong();
     wi.y = settings.value("map/y", 256).toInt();
-    setSeed(wi);
+    int dim = settings.value("map/dim", getDim()).toInt();
+    setSeed(wi, dim);
 
     qreal x = getMapView()->getX();
     qreal z = getMapView()->getZ();
@@ -905,18 +867,6 @@ void MainWindow::onBiomeColorChange()
     getMapView()->refreshBiomeColors();
 }
 
-void MainWindow::onAnalysisItemDone(QTreeWidgetItem *item)
-{
-    ui->treeAnalysis->addTopLevelItem(item);
-}
-
-void MainWindow::onAnalysisFinished()
-{
-    ui->buttonExport->setEnabled(true);
-    ui->buttonAnalysis->setChecked(false);
-    ui->buttonAnalysis->setText(tr("Analyze"));
-}
-
 void MainWindow::on_actionGo_to_triggered()
 {
     getMapView()->onGoto();
@@ -1024,187 +974,14 @@ void MainWindow::on_actionExportImg_triggered()
     dialog->show();
 }
 
-
-void MainWindow::on_checkArea_toggled(bool checked)
+void MainWindow::on_tabContainer_currentChanged(int index)
 {
-    ui->labelSquareArea->setEnabled(!checked);
-    ui->lineRadius->setEnabled(!checked);
-    ui->labelX1->setEnabled(checked);
-    ui->labelZ1->setEnabled(checked);
-    ui->labelX2->setEnabled(checked);
-    ui->labelZ2->setEnabled(checked);
-    ui->lineEditX1->setEnabled(checked);
-    ui->lineEditZ1->setEnabled(checked);
-    ui->lineEditX2->setEnabled(checked);
-    ui->lineEditZ2->setEnabled(checked);
-}
-
-void MainWindow::on_lineRadius_editingFinished()
-{
-    on_buttonAnalysis_clicked();
-}
-
-void MainWindow::on_buttonFromVisible_clicked()
-{
-    qreal uiw = getMapView()->width() * getMapView()->getScale();
-    qreal uih = getMapView()->height() * getMapView()->getScale();
-    int bx0 = (int) floor(getMapView()->getX() - uiw/2);
-    int bz0 = (int) floor(getMapView()->getZ() - uih/2);
-    int bx1 = (int) ceil(getMapView()->getX() + uiw/2);
-    int bz1 = (int) ceil(getMapView()->getZ() + uih/2);
-
-    ui->checkArea->setChecked(true);
-    ui->lineEditX1->setText( QString::number(bx0) );
-    ui->lineEditZ1->setText( QString::number(bz0) );
-    ui->lineEditX2->setText( QString::number(bx1) );
-    ui->lineEditZ2->setText( QString::number(bz1) );
-}
-
-void MainWindow::on_buttonAnalysis_clicked()
-{
-    if (analysis.isRunning())
-    {
-        analysis.requestAbort();
-        return;
-    }
-
-    int x1, z1, x2, z2;
-
-    if (ui->lineRadius->isEnabled())
-    {
-        int d = ui->lineRadius->text().toInt();
-        x1 = (-d) >> 1;
-        z1 = (-d) >> 1;
-        x2 = (d) >> 1;
-        z2 = (d) >> 1;
-    }
-    else
-    {
-        x1 = ui->lineEditX1->text().toInt();
-        z1 = ui->lineEditZ1->text().toInt();
-        x2 = ui->lineEditX2->text().toInt();
-        z2 = ui->lineEditZ2->text().toInt();
-    }
-    if (x2 < x1) std::swap(x1, x2);
-    if (z2 < z1) std::swap(z1, z2);
-
-    analysis.x1 = x1;
-    analysis.z1 = z1;
-    analysis.x2 = x2;
-    analysis.z2 = z2;
-    analysis.ck_struct = ui->checkStructs->isChecked();
-    analysis.ck_biome = ui->checkBiomes->isChecked();
-    analysis.ck_conds = ui->checkConditions->isChecked();
-    analysis.map_only = ui->checkMapOnly->isChecked();
-
-    analysis.dim = getDim();
-    if (!getSeed(&analysis.wi))
-        return;
-
-    analysis.conds = formCond->getConditions();
-    analysis.seeds.clear();
-    if (ui->comboSeedSource->currentIndex() == 0)
-        analysis.seeds.append(analysis.wi.seed);
-    else
-        analysis.seeds = formControl->getResults();
-
-    for (int sopt = 0; sopt < STRUCT_NUM; sopt++)
-        analysis.mapshow[sopt] = getMapView()->getShow(sopt);
-
-    double warnlim = 1e10;
-    double areasiz = (double)(x2 - x1) * (double)(z2 - z1);
-    double expense = 0;
-    if (analysis.ck_struct)
-        expense += areasiz * 1;
-    if (analysis.ck_biome)
-        expense += areasiz * (analysis.wi.mc < MC_1_18 ? 10 : 1000);
-
-    //expense *= analysis.seeds.size();
-
-    if (expense >= warnlim)
-    {
-        QString msg = tr(
-            "Analysis for area of size (%1, %2) might take a while.\n"
-            "Do you want to continue?")
-            .arg(x2-x1+1).arg(z2-z1+1);
-        int button = QMessageBox::warning(
-            this, tr("Warning"), msg, QMessageBox::Cancel|QMessageBox::Yes);
-        if (button != QMessageBox::Yes)
-            return;
-
-        // update to close message box
-        update();
-        QApplication::processEvents();
-    }
-
-    QTreeWidget *tree = ui->treeAnalysis;
-    while (tree->topLevelItemCount() > 0)
-        delete tree->takeTopLevelItem(0);
-
-    ui->buttonExport->setEnabled(false);
-    ui->buttonAnalysis->setChecked(true);
-    ui->buttonAnalysis->setText(tr("Stop"));
-    analysis.start();
-}
-
-void MainWindow::on_buttonExport_clicked()
-{
-    QString fnam = QFileDialog::getSaveFileName(
-        this, tr("Export analysis"), prevdir, tr("Text files (*.txt *csv);;Any files (*)"));
-    if (fnam.isEmpty())
-        return;
-
-    QFileInfo finfo(fnam);
-    QFile file(fnam);
-    prevdir = finfo.absolutePath();
-
-    if (!file.open(QIODevice::WriteOnly))
-    {
-        warning(tr("Failed to open file for export:\n\"%1\"").arg(fnam));
-        return;
-    }
-
-    QTextStream stream(&file);
-
-    QTreeWidgetItemIterator it(ui->treeAnalysis);
-    for (; *it; ++it)
-    {
-        QTreeWidgetItem *item = *it;
-        QStringList cols;
-        if (item->type() >= QTreeWidgetItem::UserType)
-            cols << QString::number(item->type() - QTreeWidgetItem::UserType);
-        for (int i = 0; i <= 1; i++)
-        {
-            QString txt = item->text(i).replace('\t', ' ');
-            if (txt.isEmpty())
-                continue;
-            if (txt.contains("["))
-                txt = "\"" + txt + "\"";
-            cols << txt;
-        }
-        stream << cols.join(", ") << "\n";
-    }
-}
-
-void MainWindow::on_treeAnalysis_itemClicked(QTreeWidgetItem *item)
-{
-    QVariant dat;
-    dat = item->data(0, Qt::UserRole);
-    if (dat.isValid())
-    {
-        uint64_t seed = qvariant_cast<uint64_t>(dat);
-        WorldInfo wi;
-        getSeed(&wi);
-        wi.seed = seed;
-        setSeed(wi);
-    }
-
-    dat = item->data(0, Qt::UserRole+1);
-    if (dat.isValid())
-    {
-        Pos p = qvariant_cast<Pos>(dat);
-        getMapView()->setView(p.x+0.5, p.z+0.5);
-    }
+    QSettings settings("cubiomes-viewer", "cubiomes-viewer");
+    ISaveTab *tabold = dynamic_cast<ISaveTab*>(ui->tabContainer->widget(prevtab));
+    ISaveTab *tabnew = dynamic_cast<ISaveTab*>(ui->tabContainer->widget(index));
+    if (tabold) tabold->save(settings);
+    if (tabnew) tabnew->load(settings);
+    prevtab = index;
 }
 
 void MainWindow::on_actionSearch_seed_list_triggered()

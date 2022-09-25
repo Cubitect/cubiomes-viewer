@@ -204,7 +204,7 @@ void MapView::update(int cnt)
 Pos MapView::getActivePos()
 {
     Pos p = overlay->pos;
-    if (world && world->seltype != D_NONE)
+    if (world && world->selopt != D_NONE)
         p = world->selvp.p;
     return p;
 }
@@ -212,12 +212,20 @@ Pos MapView::getActivePos()
 void MapView::showContextMenu(const QPoint &pos)
 {
     QMenu menu(this);
+    menu.setFont(font());
     // this is a contextual temporary menu so shortcuts are only indicated here,
     // but will not function - see keyReleaseEvent() for shortcut implementation
 
-    menu.addAction(tr("Copy seed"), this, &MapView::copySeed, QKeySequence::Copy);
-    menu.addAction(tr("Copy coordinates"), this, &MapView::copyCoord);
-    menu.addAction(tr("Copy teleport command"), this, &MapView::copyTeleportCommand);
+    Pos p = getActivePos();
+    QString seed   = world ? QString::asprintf("%" PRId64, (int64_t)world->wi.seed) : "";
+    QString tp     = QString::asprintf("/tp @p %d ~ %d", p.x, p.z);
+    QString coords = QString::asprintf("%d %d", p.x, p.z);
+    QString chunk  = QString::asprintf("%d %d", p.x >> 4, p.z >> 4);
+
+    menu.addAction(tr("Copy seed:     ")+seed, this, &MapView::copySeed, QKeySequence::Copy);
+    menu.addAction(tr("Copy teleport: ")+tp, [=](){ this->copyText(tp); });
+    menu.addAction(tr("Copy location: ")+coords, [=](){ this->copyText(coords); });
+    menu.addAction(tr("Copy chunk:    ")+chunk, [=](){ this->copyText(chunk); });
     menu.addAction(tr("Go to coordinates..."), this, &MapView::onGoto);
     menu.exec(mapToGlobal(pos));
 }
@@ -231,18 +239,10 @@ void MapView::copySeed()
     }
 }
 
-void MapView::copyCoord()
+void MapView::copyText(QString txt)
 {
-    Pos p = getActivePos();
     QClipboard *clipboard = QGuiApplication::clipboard();
-    clipboard->setText(QString::asprintf("%d, %d", p.x, p.z));
-}
-
-void MapView::copyTeleportCommand()
-{
-    Pos p = getActivePos();
-    QClipboard *clipboard = QGuiApplication::clipboard();
-    clipboard->setText(QString::asprintf("/tp @p %d ~ %d", p.x, p.z));
+    clipboard->setText(txt);
 }
 
 void MapView::onGoto()
@@ -393,7 +393,7 @@ void MapView::mouseReleaseEvent(QMouseEvent *e)
             world->selx = mstart.x();
             world->selz = mstart.y();
             world->seldo = true;
-            world->seltype = D_NONE;
+            world->selopt = D_NONE;
         }
     }
 }
