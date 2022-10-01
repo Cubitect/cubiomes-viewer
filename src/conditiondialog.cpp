@@ -106,6 +106,9 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
     ui->lineSquare->setValidator(uintval);
     ui->lineRadius->setValidator(uintval);
 
+    ui->lineBiomeSize->setValidator(new QIntValidator(1, INT_MAX, this));
+    ui->lineTollerance->setValidator(new QIntValidator(0, 255, this));
+
     ui->comboY->lineEdit()->setValidator(new QIntValidator(-64, 320, this));
 
     for (int i = 0; i < 256; i++)
@@ -202,12 +205,25 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
         ui->gridNoiseAllowed->addWidget(ex, row, 0, 1, 2);
     }
 
-    for (int i = 0; i < 256; i++)
+    std::vector<int> ids;
+    for (int id = 0; id < 256; id++)
+        ids.push_back(id);
+    IdCmp cmp = {IdCmp::SORT_LEX, mc, DIM_UNDEF};
+    std::sort(ids.begin(), ids.end(), cmp);
+    QStringList allowed_matches;
+    for (int id : ids)
     {
-        const int *lim = getBiomeParaLimits(mc, i);
-        if (lim == NULL)
+        if (isOverworld(mc, id))
+        {
+            QString s = biome2str(mc, id);
+            ui->comboMatchBiome->addItem(getBiomeIcon(id), s, QVariant::fromValue(id));
+            allowed_matches.append(s);
+        }
+
+        const int *lim = getBiomeParaLimits(mc, id);
+        if (!lim)
             continue;
-        NoiseBiomeIndicator *cb = new NoiseBiomeIndicator(biome2str(mc, i), this);
+        NoiseBiomeIndicator *cb = new NoiseBiomeIndicator(biome2str(mc, id), this);
         QString tip = "<pre>";
         for (int j = 0; j < 5; j++)
         {
@@ -226,27 +242,17 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
         int cols = 3;
         int n = noisebiomes.size();
         ui->gridNoiseBiomes->addWidget(cb, n/cols, n%cols);
-        noisebiomes[i] = cb;
+        noisebiomes[id] = cb;
     }
 
-    QPixmap pixmap(14,14);
-    pixmap.fill(QColor(0,0,0,0));
-    QPainter p(&pixmap);
-    p.setRenderHint(QPainter::Antialiasing);
-    QPainterPath path;
-    path.addRoundedRect(QRectF(1, 1, 12, 12), 3, 3);
-    QPen pen(Qt::black, 1);
-    p.setPen(pen);
     for (const auto& it : biomecboxes)
     {
         int id = it.first;
         QCheckBox *cb = it.second;
-        QColor col(g_biomeColors[id][0], g_biomeColors[id][1], g_biomeColors[id][2]);
-        p.fillPath(path, col);
-        p.drawPath(path);
-        cb->setIcon(QIcon(pixmap));
+        QIcon icon = getBiomeIcon(id);
+        cb->setIcon(icon);
         if (noisebiomes.count(id))
-            noisebiomes[id]->setIcon(QIcon(pixmap));
+            noisebiomes[id]->setIcon(icon);
     }
 
     // defaults
@@ -255,6 +261,7 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
     ui->checkSkipRef->setChecked(false);
     ui->radioSquare->setChecked(true);
     ui->checkRadius->setChecked(false);
+    ui->lineBiomeSize->setText("");
     onCheckStartChanged(false);
 
     if (initcond)
@@ -345,6 +352,21 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
             }
         }
 
+        int idx = ui->comboMatchBiome->findData(QVariant::fromValue(cond.biomeId));
+        if (idx >= 0)
+        {
+            ui->comboMatchBiome->setCurrentIndex(idx);
+        }
+        else
+        {
+            QString bstr = biome2str(mc, cond.biomeId);
+            ui->comboMatchBiome->insertItem(0, QIcon(":/icons/check2.png"), bstr, QVariant::fromValue(cond.biomeId));
+            ui->comboMatchBiome->setCurrentIndex(0);
+            allowed_matches.append(bstr);
+        }
+        ui->lineBiomeSize->setText(QString::number(cond.biomeSize));
+        ui->lineTollerance->setText(QString::number(cond.tol));
+
         ui->checkStartPieces->setChecked(cond.varflags & Condition::VAR_WITH_START);
         ui->checkAbandoned->setChecked(cond.varflags & Condition::VAR_ABANODONED);
         ui->checkEndShip->setChecked(cond.varflags & Condition::VAR_ENDSHIP);
@@ -367,6 +389,12 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
         setClimateLimits(climaterange[0], cond.limok, true);
         setClimateLimits(climaterange[1], cond.limex, false);
     }
+
+
+    QRegularExpressionValidator *reval = new QRegularExpressionValidator(
+        QRegularExpression("(" + allowed_matches.join("|") + ")"), this
+    );
+    ui->comboMatchBiome->lineEdit()->setValidator(reval);
 
     on_lineSquare_editingFinished();
 
@@ -451,6 +479,10 @@ void ConditionDialog::updateMode()
     else if (filterindex == F_CLIMATE_NOISE)
     {
         ui->stackedWidget->setCurrentWidget(ui->pageClimates);
+    }
+    else if (filterindex == F_BIOME_CENTER)
+    {
+        ui->stackedWidget->setCurrentWidget(ui->pageBiomeCenter);
     }
     else if (ft.cat == CAT_BIOMES || ft.cat == CAT_NETHER || ft.cat == CAT_END)
     {
@@ -671,6 +703,17 @@ int ConditionDialog::warnIfBad(Condition cond)
             }
         }
     }
+    else if (cond.type == F_BIOME_CENTER)
+    {
+        int w = cond.x2 - cond.x1 + 1;
+        int h = cond.z2 - cond.z1 + 1;
+        if ((unsigned int)(w * h) < cond.count * cond.biomeSize)
+        {
+            QString text = tr("Area is too small for the required biome size.");
+            QMessageBox::warning(this, tr("Area Insufficient"), text, QMessageBox::Ok);
+            return QMessageBox::Cancel;
+        }
+    }
     else if (ft.cat == CAT_BIOMES)
     {
         if (mc >= MC_1_18)
@@ -845,6 +888,12 @@ void ConditionDialog::on_buttonOk_clicked()
             }
         }
         c.count = 0;
+    }
+    if (ui->stackedWidget->currentWidget() == ui->pageBiomeCenter)
+    {
+        c.biomeId = ui->comboMatchBiome->currentData().toInt();
+        c.biomeSize = ui->lineBiomeSize->text().toInt();
+        c.tol = ui->lineTollerance->text().toInt();
     }
     if (ui->stackedWidget->currentWidget() == ui->pageTemps)
     {
@@ -1039,5 +1088,11 @@ void ConditionDialog::onClimateLimitChanged()
         if (!ex[id]) state = Qt::Checked;
         cb->setCheckState(state);
     }
+}
+
+void ConditionDialog::on_lineBiomeSize_textChanged(const QString &text)
+{
+    double area = text.toInt();
+    ui->labelBiomeSize->setText(QString::asprintf("(%g sq. chunks)", area / 16));
 }
 

@@ -35,6 +35,7 @@ struct ISaveTab
 {
     virtual void save(QSettings& settings) = 0;
     virtual void load(QSettings& settings) = 0;
+    virtual void refresh() {}
 };
 
 class MapView;
@@ -84,7 +85,6 @@ private slots:
     void on_actionQuit_triggered();
     void on_actionPreferences_triggered();
     void on_actionGo_to_triggered();
-    void on_actionScan_seed_for_Quad_Huts_triggered();
     void on_actionOpen_shadow_seed_triggered();
     void on_actionStructure_visibility_triggered();
     void on_actionBiome_colors_triggered();

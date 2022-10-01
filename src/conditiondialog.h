@@ -161,6 +161,8 @@ private slots:
     void onCheckStartChanged(int state);
     void onClimateLimitChanged();
 
+    void on_lineBiomeSize_textChanged(const QString &text);
+
 private:
     Ui::ConditionDialog *ui;
     QTextEdit *textDescription;

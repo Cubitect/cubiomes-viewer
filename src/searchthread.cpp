@@ -119,7 +119,10 @@ bool SearchMaster::set(
                     .arg(cid, mcs));
             return false;
         }
-        if (finfo.cat == CAT_BIOMES && c.type != F_TEMPS && c.type != F_CLIMATE_NOISE)
+        if (finfo.cat == CAT_BIOMES &&
+            c.type != F_BIOME_CENTER &&
+            c.type != F_TEMPS &&
+            c.type != F_CLIMATE_NOISE)
         {
             uint64_t b = c.biomeToFind;
             uint64_t m = c.biomeToFindM;

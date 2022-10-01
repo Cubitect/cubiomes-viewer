@@ -60,7 +60,6 @@ SOURCES += \
         src/gotodialog.cpp \
         src/presetdialog.cpp \
         src/protobasedialog.cpp \
-        src/quadlistdialog.cpp \
         src/mapview.cpp \
         src/rangedialog.cpp \
         src/rangeslider.cpp \
@@ -68,10 +67,10 @@ SOURCES += \
         src/searchthread.cpp \
         src/tabbiomes.cpp \
         src/tabstructures.cpp \
+        src/tabtriggers.cpp \
         src/mainwindow.cpp \
         src/main.cpp \
         src/structuredialog.cpp \
-        src/tabtriggers.cpp \
         src/world.cpp
 
 HEADERS += \
@@ -93,7 +92,6 @@ HEADERS += \
         src/gotodialog.h \
         src/presetdialog.h \
         src/protobasedialog.h \
-        src/quadlistdialog.h \
         src/mapview.h \
         src/cutil.h \
         src/rangedialog.h \
@@ -103,10 +101,10 @@ HEADERS += \
         src/seedtables.h \
         src/tabbiomes.h \
         src/tabstructures.h \
+        src/tabtriggers.h \
         src/mainwindow.h \
         src/settings.h \
         src/structuredialog.h \
-        src/tabtriggers.h \
         src/world.h
 
 FORMS += \
@@ -122,13 +120,12 @@ FORMS += \
         src/gotodialog.ui \
         src/presetdialog.ui \
         src/protobasedialog.ui \
-        src/quadlistdialog.ui\
         src/mainwindow.ui \
         src/rangedialog.ui \
         src/tabbiomes.ui \
         src/tabstructures.ui \
-        src/structuredialog.ui \
-        src/tabtriggers.ui
+        src/tabtriggers.ui \
+        src/structuredialog.ui
 
 
 TRANSLATIONS += \

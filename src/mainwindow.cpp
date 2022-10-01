@@ -1,7 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include "quadlistdialog.h"
 #include "presetdialog.h"
 #include "aboutdialog.h"
 #include "conditiondialog.h"
@@ -25,7 +24,6 @@
 #include <QtDebug>
 #include <QDataStream>
 #include <QMenu>
-#include <QClipboard>
 #include <QFont>
 #include <QFileDialog>
 #include <QTextStream>
@@ -118,8 +116,8 @@ MainWindow::MainWindow(QWidget *parent)
     addMapAction(D_SHIPWRECK, "shipwreck", tr("Show shipwrecks"));
     addMapAction(D_TREASURE, "treasure", tr("Show buried treasures"));
     addMapAction(D_OUTPOST, "outpost", tr("Show pillager outposts"));
-    addMapAction(D_ANCIENTCITY, "ancient_city", tr("Show ancient cities"));
     addMapAction(D_PORTAL, "portal", tr("Show ruined portals"));
+    addMapAction(D_ANCIENTCITY, "ancient_city", tr("Show ancient cities"));
     ui->toolBar->addSeparator();
     addMapAction(D_FORTESS, "fortress", tr("Show nether fortresses"));
     addMapAction(D_BASTION, "bastion", tr("Show bastions"));
@@ -318,6 +316,10 @@ bool MainWindow::setSeed(WorldInfo wi, int dim, int layeropt)
 
     ui->checkLarge->setEnabled(wi.mc >= MC_1_3);
     ui->comboY->setEnabled(wi.mc >= MC_1_16);
+
+    ISaveTab *tab = dynamic_cast<ISaveTab*>(ui->tabContainer->currentWidget());
+    if (tab)
+        tab->refresh();
     return true;
 }
 
@@ -865,17 +867,14 @@ void MainWindow::onBiomeColorChange()
         initBiomeColors(g_biomeColors);
     }
     getMapView()->refreshBiomeColors();
+    ISaveTab *tab = dynamic_cast<ISaveTab*>(ui->tabContainer->currentWidget());
+    if (tab)
+        tab->refresh();
 }
 
 void MainWindow::on_actionGo_to_triggered()
 {
     getMapView()->onGoto();
-}
-
-void MainWindow::on_actionScan_seed_for_Quad_Huts_triggered()
-{
-    QuadListDialog *dialog = new QuadListDialog(this);
-    dialog->show();
 }
 
 void MainWindow::on_actionOpen_shadow_seed_triggered()

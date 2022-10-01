@@ -16,9 +16,12 @@ public:
         : QThread(parent) {}
 
     virtual void run() override;
+    void runStructs(Generator *g);
+    void runQuads(Generator *g);
 
 signals:
     void itemDone(QTreeWidgetItem *item);
+    void quadDone(QTreeWidgetItem *item);
 
 public:
     QVector<uint64_t> seeds;
@@ -27,6 +30,7 @@ public:
     int x1, z1, x2, z2;
     bool mapshow[STRUCT_NUM];
     bool collect;
+    bool quad;
 };
 
 class TabStructures : public QWidget, public ISaveTab
@@ -42,7 +46,10 @@ public:
 
 private slots:
     void onAnalysisItemDone(QTreeWidgetItem *item);
+    void onAnalysisQuadDone(QTreeWidgetItem *item);
     void onAnalysisFinished();
+
+    void onTreeItemClicked(QTreeWidgetItem *item, int column);
 
     void on_pushStart_clicked();
 
@@ -50,7 +57,6 @@ private slots:
 
     void on_buttonFromVisible_clicked();
 
-    void on_treeWidget_itemClicked(QTreeWidgetItem *item, int column);
 
 private:
     Ui::TabStructures *ui;

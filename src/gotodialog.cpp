@@ -4,6 +4,9 @@
 #include "mapview.h"
 
 #include <QDoubleValidator>
+#include <QKeyEvent>
+#include <QClipboard>
+
 
 GotoDialog::GotoDialog(MapView *map, qreal x, qreal z, qreal scale)
     : QDialog(map)
@@ -49,3 +52,20 @@ void GotoDialog::on_buttonBox_clicked(QAbstractButton *button)
         ui->lineScale->setText("16");
     }
 }
+
+void GotoDialog::keyReleaseEvent(QKeyEvent *event)
+{
+    if (event->matches(QKeySequence::Paste))
+    {
+        QClipboard *clipboard = QGuiApplication::clipboard();
+        QStringList xz = clipboard->text().split(" ");
+        if (xz.count() == 2)
+        {
+            ui->lineX->setText(xz[0].section(",", 0, 0));
+            ui->lineZ->setText(xz[1].section(",", 0, 0));
+            return;
+        }
+    }
+    QWidget::keyReleaseEvent(event);
+}
+

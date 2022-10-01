@@ -367,8 +367,8 @@ QToolButton {
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>1242</width>
-                 <height>663</height>
+                 <width>1244</width>
+                 <height>667</height>
                 </rect>
                </property>
                <property name="sizePolicy">
@@ -550,7 +550,6 @@ QToolButton:checked {
     </widget>
     <addaction name="actionGo_to"/>
     <addaction name="actionOpen_shadow_seed"/>
-    <addaction name="actionScan_seed_for_Quad_Huts"/>
     <addaction name="actionStructure_visibility"/>
     <addaction name="actionExportImg"/>
     <addaction name="actionBiome_colors"/>
@@ -595,11 +594,6 @@ QToolButton:checked {
    <addaction name="menuMap"/>
    <addaction name="menuHelp"/>
   </widget>
-  <action name="actionScan_seed_for_Quad_Huts">
-   <property name="text">
-    <string>Scan seed for Quad-Structures...</string>
-   </property>
-  </action>
   <action name="actionAbout">
    <property name="text">
     <string>About</string>
@@ -751,13 +745,16 @@ QToolButton:checked {
    <property name="text">
     <string>Go to...</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+G</string>
+   </property>
   </action>
   <action name="actionOceanTemp">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>(1.13 - 1.17) O. Temp. 1:25</string>
+    <string>(1.13 - 1.17) O. Temp. 1:256</string>
    </property>
    <property name="shortcut">
     <string>Alt+7</string>

@@ -85,6 +85,22 @@ const QPixmap& getMapIcon(int opt, VarPos *vp)
     return icons[opt];
 }
 
+QIcon getBiomeIcon(int id)
+{
+    static QPixmap pixmap(14, 14);
+    pixmap.fill(QColor(0,0,0,0));
+    QPainter p(&pixmap);
+    p.setRenderHint(QPainter::Antialiasing);
+    QPainterPath path;
+    path.addRoundedRect(QRectF(1, 1, 12, 12), 3, 3);
+    QPen pen(Qt::black, 1);
+    p.setPen(pen);
+    QColor col(g_biomeColors[id][0], g_biomeColors[id][1], g_biomeColors[id][2]);
+    p.fillPath(path, col);
+    p.drawPath(path);
+    return QIcon(pixmap);
+}
+
 QStringList VarPos::detail() const
 {
     QStringList sinfo;

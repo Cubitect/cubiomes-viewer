@@ -71,7 +71,7 @@ bool Condition::versionUpgrade()
     if (version == VER_LEGACY)
     {
         uint64_t oceanToFind;
-        memcpy(&oceanToFind, pad2, sizeof(oceanToFind));
+        memcpy(&oceanToFind, &biomeId, sizeof(oceanToFind));
         biomeToFind &= ~((1ULL << ocean) | (1ULL << deep_ocean));
         biomeToFind |= oceanToFind;
         skipref = 0;
@@ -80,6 +80,7 @@ bool Condition::versionUpgrade()
         memset(pad1, 0, sizeof(pad1));
         memset(pad2, 0, sizeof(pad2));
         memset(pad3, 0, sizeof(pad3));
+        biomeId = biomeSize = tol = 0;
         varflags = varbiome = varstart = 0;
     }
     else if (version == VER_2_3_0)
@@ -274,7 +275,7 @@ int testTreeAt(
         if (branches.empty())
         {
             if (path)
-                path[c.save] = at;
+                path[c.save].x = path[c.save].z = -1;
             return COND_OK; // empty ORs are ignored
         }
         else
@@ -1506,6 +1507,81 @@ L_noise_biome:
                 &cond->bf, (volatile char*)abort) > 0;
         }
         return valid ? COND_OK : COND_FAILED;
+
+
+    case F_BIOME_CENTER:
+        if (pass == PASS_FULL_64)
+        {
+            rx1 = ((cond->x1 << 2) + at.x) >> 2;
+            rz1 = ((cond->z1 << 2) + at.z) >> 2;
+            rx2 = ((cond->x2 << 2) + at.x) >> 2;
+            rz2 = ((cond->z2 << 2) + at.z) >> 2;
+            int w = rx2 - rx1 + 1;
+            int h = rz2 - rz1 + 1;
+            Range r = {4, rx1, rz1, w, h, cond->y >> 2, 1};
+            gen->init4Dim(0);
+
+            if (cond->count == 0)
+            {   // exclusion
+                icnt = getBiomeCenters(
+                    cent, NULL, 1, &gen->g, r, cond->biomeId, cond->biomeSize, cond->tol,
+                    (volatile char*)abort
+                );
+                if (icnt == 0)
+                {
+                    cent->x = (rx1 + rx2) << 1;
+                    cent->z = (rz1 + rz2) << 1;
+                    if (imax) *imax = 1;
+                    return COND_OK;
+                }
+            }
+            else if (imax)
+            {   // just check there are at least *inst (== cond->count) instances
+                *imax = icnt = getBiomeCenters(
+                    cent, NULL, cond->count, &gen->g, r, cond->biomeId, cond->biomeSize, cond->tol,
+                    (volatile char*)abort
+                );
+                if (cond->skipref && icnt > 0)
+                {   // remove origin instance
+                    for (int i = 0; i < icnt; i++)
+                    {
+                        if (cent[i].x == at.x && cent[i].z == at.z)
+                        {
+                            cent[i] = cent[icnt-1];
+                            *imax = --icnt;
+                            break;
+                        }
+                    }
+                }
+                if (icnt >= cond->count)
+                    return COND_OK;
+            }
+            else
+            {   // we need the average position of all instances
+                icnt = getBiomeCenters(
+                    p, NULL, MAX_INSTANCES, &gen->g, r, cond->biomeId, cond->biomeSize, cond->tol,
+                    (volatile char*)abort
+                );
+                xt = zt = 0;
+                int j = 0;
+                for (int i = 0; i < icnt; i++)
+                {
+                    if (cond->skipref && p[i].x == at.x && p[i].z == at.z)
+                        continue;
+                    xt += p[i].x;
+                    zt += p[i].z;
+                    j++;
+                }
+                if (j >= cond->count)
+                {
+                    cent->x = xt / j;
+                    cent->z = zt / j;
+                    return COND_OK;
+                }
+            }
+            return COND_FAILED;
+        }
+        return COND_MAYBE_POS_INVAL;
 
 
     case F_CLIMATE_NOISE:

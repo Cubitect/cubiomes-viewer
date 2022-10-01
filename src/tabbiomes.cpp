@@ -1,10 +1,12 @@
 #include "tabbiomes.h"
 #include "ui_tabbiomes.h"
 #include "cutil.h"
+#include "world.h"
 
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QTextStream>
+#include <QRegularExpressionValidator>
 
 #include <unordered_set>
 
@@ -19,88 +21,128 @@ void AnalysisBiomes::run()
     {
         if (stop) break;
         wi.seed = seed;
-        QVector<uint64_t> idcnt(256);
-        int w = x2 - x1 + 1;
-        int h = z2 - z1 + 1;
-        uint64_t n = w * (uint64_t)h;
+        if (locate < 0)
+            runStatistics(&g);
+        else
+            runLocate(&g);
+    }
+}
 
-        for (int d = 0; d < 3; d++)
-        {
-            if (dims[d] == DIM_UNDEF)
-                continue;
-            applySeed(&g, dims[d], seed);
+void AnalysisBiomes::runStatistics(Generator *g)
+{
+    QVector<uint64_t> idcnt(256);
+    int w = x2 - x1 + 1;
+    int h = z2 - z1 + 1;
+    uint64_t n = w * (uint64_t)h;
 
-            if (samples >= n)
-            {   // full area gen => generate 512x512 areas at a time
-                const int step = 512;
-                for (int x = x1; x <= x2 && !stop; x += step)
-                {
-                    for (int z = z1; z <= z2 && !stop; z += step)
-                    {
-                        int w = x2-x+1 < step ? x2-x+1 : step;
-                        int h = z2-z+1 < step ? z2-z+1 : step;
-                        Range r = {scale, x, z, w, h, wi.y, 1};
-                        int *ids = allocCache(&g, r);
-                        genBiomes(&g, ids, r);
-                        for (int i = 0; i < w*h; i++)
-                            idcnt[ ids[i] & 0xff ]++;
-                        free(ids);
-                    }
-                }
-            }
-            else
+    for (int d = 0; d < 3; d++)
+    {
+        if (dims[d] == DIM_UNDEF)
+            continue;
+        applySeed(g, dims[d], wi.seed);
+
+        if (samples >= n)
+        {   // full area gen => generate 512x512 areas at a time
+            const int step = 512;
+            for (int x = x1; x <= x2 && !stop; x += step)
             {
-                std::vector<uint64_t> order;
-
-                if (samples * 2 >= n)
-                {   // dense regime => shuffle indeces
-                    order.resize(n);
-                    for (uint64_t i = 0; i < n; i++)
-                        order[i] = i;
-                    for (uint64_t i = 0; i < n; i++)
-                    {
-                        if (!(i & 0xffff) && stop)
-                            break;
-                        uint64_t idx = getRnd64() % n;
-                        uint64_t t = order[i];
-                        order[i] = order[idx];
-                        order[idx] = t;
-                    }
-                    order.resize(samples);
-                }
-                else
-                {   // sparse regime => fill randomly without reuse
-                    std::unordered_set<uint64_t> used;
-                    order.reserve(samples);
-                    used.reserve(samples);
-                    for (uint64_t i = 0; order.size() < samples; i++)
-                    {
-                        if (!(i & 0xffff) && stop)
-                            break;
-                        uint64_t idx = getRnd64() % n;
-                        auto it = used.insert(idx);
-                        if (it.second)
-                            order.push_back(idx);
-                    }
-                }
-
-                for (uint64_t i = 0; i < samples && !stop; i++)
+                for (int z = z1; z <= z2 && !stop; z += step)
                 {
-                    uint64_t idx = order[i];
-                    int x = (int) (idx % w);
-                    int z = (int) (idx / w);
-                    int id = getBiomeAt(&g, scale, x1+x, wi.y, z1+z);
-                    idcnt[ id & 0xff ]++;
+                    int w = x2-x+1 < step ? x2-x+1 : step;
+                    int h = z2-z+1 < step ? z2-z+1 : step;
+                    Range r = {scale, x, z, w, h, wi.y, 1};
+                    int *ids = allocCache(g, r);
+                    genBiomes(g, ids, r);
+                    for (int i = 0; i < w*h; i++)
+                        idcnt[ ids[i] & 0xff ]++;
+                    free(ids);
                 }
             }
         }
+        else
+        {
+            std::vector<uint64_t> order;
 
-        if (stop)
-            break; // discard partially processed seed
+            if (samples * 2 >= n)
+            {   // dense regime => shuffle indeces
+                order.resize(n);
+                for (uint64_t i = 0; i < n; i++)
+                    order[i] = i;
+                for (uint64_t i = 0; i < n; i++)
+                {
+                    if (!(i & 0xffff) && stop)
+                        break;
+                    uint64_t idx = getRnd64() % n;
+                    uint64_t t = order[i];
+                    order[i] = order[idx];
+                    order[idx] = t;
+                }
+                order.resize(samples);
+            }
+            else
+            {   // sparse regime => fill randomly without reuse
+                std::unordered_set<uint64_t> used;
+                order.reserve(samples);
+                used.reserve(samples);
+                for (uint64_t i = 0; order.size() < samples; i++)
+                {
+                    if (!(i & 0xffff) && stop)
+                        break;
+                    uint64_t idx = getRnd64() % n;
+                    auto it = used.insert(idx);
+                    if (it.second)
+                        order.push_back(idx);
+                }
+            }
 
-        emit seedDone(seed, idcnt);
+            for (uint64_t i = 0; i < samples && !stop; i++)
+            {
+                uint64_t idx = order[i];
+                int x = (int) (idx % w);
+                int z = (int) (idx / w);
+                int id = getBiomeAt(g, scale, x1+x, wi.y, z1+z);
+                idcnt[ id & 0xff ]++;
+            }
+        }
+    }
+
+    if (!stop) // discard partially processed seed
+        emit seedDone(wi.seed, idcnt);
+}
+
+#include <QDebug>
+void AnalysisBiomes::runLocate(Generator *g)
+{
+    applySeed(g, DIM_OVERWORLD, wi.seed);
+    enum { MAX_LOCATE = 4096 };
+    Pos pos[MAX_LOCATE];
+    int siz[MAX_LOCATE];
+    Range r = {4, x1, z1, x2-x1+1, z2-z1+1, wi.y, 1};
+    int n = getBiomeCenters(
+        pos, siz, MAX_LOCATE, g, r, locate, minsize, tollerance,
+        (volatile char*)&stop
+    );
+    if (n && !stop)
+    {
+        QTreeWidgetItem *seeditem = new QTreeWidgetItem();
+        seeditem->setData(0, Qt::DisplayRole, QVariant::fromValue((qlonglong)wi.seed));
+        seeditem->setData(0, Qt::UserRole+0, QVariant::fromValue(wi.seed));
+        seeditem->setData(0, Qt::UserRole+1, QVariant::fromValue((int)DIM_OVERWORLD));
+        for (int i = 0; i < n; i++)
+        {
+            QTreeWidgetItem* item = new QTreeWidgetItem(seeditem);
+            item->setText(0, "-");
+            item->setData(1, Qt::DisplayRole, QVariant::fromValue(siz[i]));
+            item->setData(2, Qt::DisplayRole, QVariant::fromValue(pos[i].x));
+            item->setData(3, Qt::DisplayRole, QVariant::fromValue(pos[i].z));
+            item->setData(0, Qt::UserRole+0, QVariant::fromValue(wi.seed));
+            item->setData(0, Qt::UserRole+1, QVariant::fromValue((int)DIM_OVERWORLD));
+            item->setData(0, Qt::UserRole+2, QVariant::fromValue(pos[i]));
+        }
+        emit seedItem(seeditem);
     }
 }
+
 
 QVariant BiomeTableModel::data(const QModelIndex& index, int role) const
 {
@@ -185,14 +227,40 @@ TabBiomes::TabBiomes(MainWindow *parent)
     ui->table->setSortingEnabled(true);
     ui->table->sortByColumn(-1);
 
+    ui->treeWidget->setColumnWidth(0, 160);
+    ui->treeWidget->setColumnWidth(1, 120);
+    ui->treeWidget->sortByColumn(0, Qt::AscendingOrder);
+
     QIntValidator *intval = new QIntValidator(-60e6, 60e6, this);
     ui->lineX1->setValidator(intval);
     ui->lineZ1->setValidator(intval);
     ui->lineX2->setValidator(intval);
     ui->lineZ2->setValidator(intval);
 
+    ui->lineBiomeSize->setValidator(new QIntValidator(1, INT_MAX, this));
+    ui->lineTollerance->setValidator(new QIntValidator(0, 255, this));
+    ui->lineBiomeSize->setText("1");
+
     connect(&thread, &AnalysisBiomes::seedDone, this, &TabBiomes::onAnalysisSeedDone);
+    connect(&thread, &AnalysisBiomes::seedItem, this, &TabBiomes::onAnalysisSeedItem);
     connect(&thread, &AnalysisBiomes::finished, this, &TabBiomes::onAnalysisFinished);
+
+    for (int id = 0; id < 256; id++)
+    {
+        const char *s;
+        if ((s = biome2str(MC_1_17, id)))
+            str2biome[s] = id;
+        if ((s = biome2str(MC_NEWEST, id)))
+            str2biome[s] = id;
+    }
+
+    QStringList bnames;
+    for (auto& it : str2biome)
+        bnames.append(it.first);
+    QRegularExpressionValidator *reval = new QRegularExpressionValidator(
+        QRegularExpression("(" + bnames.join("|") + ")"), this
+    );
+    ui->comboBiome->lineEdit()->setValidator(reval);
 }
 
 TabBiomes::~TabBiomes()
@@ -213,6 +281,9 @@ void TabBiomes::save(QSettings& settings)
     settings.setValue("analysis/end", ui->checkEnd->isChecked());
     settings.setValue("analysis/samples", ui->lineSamples->text().toULongLong());
     settings.setValue("analysis/fullarea", ui->radioFullSample->isChecked());
+    settings.setValue("analysis/biomeid", str2biome[ui->comboBiome->currentText()]);
+    settings.setValue("analysis/biomesize", ui->lineBiomeSize->text().toInt());
+    settings.setValue("analysis/tollerance", ui->lineTollerance->text().toInt());
 }
 
 static void loadCheck(QSettings *s, QCheckBox *cb, const char *key)
@@ -244,6 +315,35 @@ void TabBiomes::load(QSettings& settings)
         ui->radioFullSample->setChecked(true);
     else
         ui->radioStochastic->setChecked(true);
+    refreshBiomes(settings.value("analysis/biomeid", -1).toInt());
+    loadLine(&settings, ui->lineBiomeSize, "analysis/biomesize");
+    loadLine(&settings, ui->lineTollerance, "analysis/tollerance");
+}
+
+void TabBiomes::refreshBiomes(int activeid)
+{
+    WorldInfo wi;
+    parent->getSeed(&wi);
+    if (activeid == -1)
+    {
+        QString s = ui->comboBiome->currentText();
+        if (str2biome.count(s))
+            activeid = str2biome[s];
+    }
+    std::vector<int> ids;
+    for (int i = 0; i < 256; i++)
+        if (isOverworld(wi.mc, i) || i == activeid)
+            ids.push_back(i);
+    IdCmp cmp = {IdCmp::SORT_LEX, wi.mc, DIM_UNDEF};
+    std::sort(ids.begin(), ids.end(), cmp);
+    ui->comboBiome->clear();
+    for (int i : ids)
+        ui->comboBiome->addItem(getBiomeIcon(i), biome2str(wi.mc, i), QVariant::fromValue(i));
+    if (activeid >= 0)
+    {
+        int idx = ui->comboBiome->findText(biome2str(wi.mc, activeid));
+        ui->comboBiome->setCurrentIndex(idx);
+    }
 }
 
 void TabBiomes::onAnalysisSeedDone(uint64_t seed, QVector<uint64_t> idcnt)
@@ -267,9 +367,17 @@ void TabBiomes::onAnalysisSeedDone(uint64_t seed, QVector<uint64_t> idcnt)
     ui->pushStart->setText(tr("Stop") + progress);
 }
 
+void TabBiomes::onAnalysisSeedItem(QTreeWidgetItem *item)
+{
+    ui->treeWidget->addTopLevelItem(item);
+
+    QString progress = QString::asprintf(" (%d/%d)", ui->treeWidget->topLevelItemCount()+1, thread.seeds.size());
+    ui->pushStart->setText(tr("Stop") + progress);
+}
+
 void TabBiomes::onAnalysisFinished()
 {
-    ui->pushExport->setEnabled(!model.ids.empty());
+    ui->pushExport->setEnabled(!model.ids.empty() || ui->treeWidget->topLevelItemCount());
     ui->pushStart->setChecked(false);
     ui->pushStart->setText(tr("Analyze"));
 }
@@ -330,13 +438,28 @@ void TabBiomes::on_pushStart_clicked()
         s = 2;
     }
 
+    if (ui->tabWidget->currentWidget() == ui->tabLocate)
+    {
+        ui->treeWidget->clear();
+        thread.locate = str2biome[ui->comboBiome->currentText()];
+        thread.minsize = ui->lineBiomeSize->text().toInt();
+        thread.tollerance = ui->lineTollerance->text().toInt();
+        if (thread.minsize <= 0)
+            thread.minsize = 1;
+        scale = 4;
+        s = 2;
+    }
+    else
+    {
+        model.reset(thread.wi.mc);
+        thread.locate = -1;
+    }
+
     thread.scale = scale;
     thread.x1 = x1 >> s;
     thread.z1 = z1 >> s;
     thread.x2 = x2 >> s;
     thread.z2 = z2 >> s;
-
-    model.reset(thread.wi.mc);
 
     ui->pushExport->setEnabled(false);
     ui->pushStart->setChecked(true);
@@ -362,31 +485,56 @@ void TabBiomes::on_pushExport_clicked()
     }
 
     QTextStream stream(&file);
-
-    if (thread.samples != ~0ULL)
-        stream << "#samples; " << thread.samples << "\n";
-    stream << "#scale; 1:" << thread.scale << "\n";
     stream << "#X1; " << thread.x1 << "; (" << (thread.x1*thread.scale) << ")\n";
     stream << "#Z1; " << thread.z1 << "; (" << (thread.z1*thread.scale) << ")\n";
     stream << "#X2; " << thread.x2 << "; (" << (thread.x2*thread.scale) << ")\n";
     stream << "#Z2; " << thread.z2 << "; (" << (thread.z2*thread.scale) << ")\n";
+    stream << "#scale; 1:" << thread.scale << "\n";
 
-    QList<QString> header;
-    header.append(tr("biome\\seed"));
-    for (int col = 0, ncol = proxy.columnCount(); col < ncol; col++)
-        header.append(proxy.headerData(col, Qt::Horizontal).toString());
-    stream << header.join("; ") << "\n";
-
-    for (int row = 0, nrow = proxy.rowCount(); row < nrow; row++)
+    if (thread.locate < 0)
     {
-        QList<QString> entries;
-        entries.append(proxy.headerData(row, Qt::Vertical).toString());
+        if (thread.samples != ~0ULL)
+            stream << "#samples; " << thread.samples << "\n";
+
+        QList<QString> header;
+        header.append(tr("biome\\seed"));
         for (int col = 0, ncol = proxy.columnCount(); col < ncol; col++)
+            header.append(proxy.headerData(col, Qt::Horizontal).toString());
+        stream << header.join("; ") << "\n";
+
+        for (int row = 0, nrow = proxy.rowCount(); row < nrow; row++)
         {
-            QString cntstr = proxy.data(proxy.index(row, col)).toString();
-            entries.append(cntstr == "" ? "0" : cntstr);
+            QList<QString> entries;
+            entries.append(proxy.headerData(row, Qt::Vertical).toString());
+            for (int col = 0, ncol = proxy.columnCount(); col < ncol; col++)
+            {
+                QString cntstr = proxy.data(proxy.index(row, col)).toString();
+                entries.append(cntstr == "" ? "0" : cntstr);
+            }
+            stream << entries.join("; ") << "\n";
         }
-        stream << entries.join("; ") << "\n";
+    }
+    else
+    {
+        stream << "#biome; " << biome2str(MC_NEWEST, thread.locate) << "\n";
+        stream << "seed; area; x; z;\n";
+        QTreeWidgetItemIterator it(ui->treeWidget);
+        QString seed;
+        for (; *it; ++it)
+        {
+            QTreeWidgetItem *item = *it;
+            if (item->text(0) != "-")
+            {
+                seed = item->text(0);
+                continue;
+            }
+            QStringList cols;
+            cols.append(seed);
+            cols.append(item->text(1));
+            cols.append(item->text(2));
+            cols.append(item->text(3));
+            stream << cols.join(";") << "\n";
+        }
     }
 }
 
@@ -420,5 +568,34 @@ void TabBiomes::on_radioFullSample_toggled(bool checked)
 {
     ui->comboScale->setEnabled(checked);
     ui->lineSamples->setEnabled(!checked);
+}
+
+void TabBiomes::on_lineBiomeSize_textChanged(const QString &text)
+{
+    double area = text.toInt();
+    ui->labelBiomeSize->setText(QString::asprintf("(%g sq. chunks)", area / 16));
+}
+
+void TabBiomes::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
+{
+    (void) column;
+    QVariant dat;
+    dat = item->data(0, Qt::UserRole);
+    if (dat.isValid())
+    {
+        uint64_t seed = qvariant_cast<uint64_t>(dat);
+        int dim = item->data(0, Qt::UserRole+1).toInt();
+        WorldInfo wi;
+        parent->getSeed(&wi);
+        wi.seed = seed;
+        parent->setSeed(wi, dim);
+    }
+
+    dat = item->data(0, Qt::UserRole+2);
+    if (dat.isValid())
+    {
+        Pos p = qvariant_cast<Pos>(dat);
+        parent->getMapView()->setView(p.x+0.5, p.z+0.5);
+    }
 }
 

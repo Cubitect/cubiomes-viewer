@@ -14,65 +14,12 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="5" column="0" colspan="2">
-    <layout class="QGridLayout" name="gridLayout_3">
-     <item row="1" column="0">
-      <widget class="QRadioButton" name="radioStochastic">
-       <property name="text">
-        <string>Random samples (scale 1:4):</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0">
-      <widget class="QRadioButton" name="radioFullSample">
-       <property name="text">
-        <string>Full area sampling with scale:</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QComboBox" name="comboScale">
-       <property name="currentIndex">
-        <number>1</number>
-       </property>
-       <item>
-        <property name="text">
-         <string>1:1</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>1:4</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>1:16</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>1:64</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>1:256</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QLineEdit" name="lineSamples">
-       <property name="text">
-        <string>10000</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
+   <item row="0" column="0" colspan="2">
+    <widget class="QLabel" name="labelDescription">
+     <property name="text">
+      <string>Analyze the biomes inside an area.</string>
+     </property>
+    </widget>
    </item>
    <item row="1" column="0">
     <widget class="QLabel" name="label">
@@ -80,6 +27,50 @@
       <string>Seed(s):</string>
      </property>
     </widget>
+   </item>
+   <item row="7" column="0" colspan="2">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPushButton" name="pushExport">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>Export...</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushStart">
+       <property name="text">
+        <string>Analyze</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="1" column="1">
+    <widget class="QComboBox" name="comboSeedSource">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <item>
+      <property name="text">
+       <string>Current seed</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>From matching seeds list</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="5" column="0" colspan="2">
+    <layout class="QVBoxLayout" name="verticalLayout"/>
    </item>
    <item row="3" column="0" colspan="2">
     <layout class="QGridLayout" name="gridArea">
@@ -189,98 +180,252 @@
      </item>
     </layout>
    </item>
-   <item row="8" column="0" colspan="2">
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QPushButton" name="pushExport">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="text">
-        <string>Export...</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="pushStart">
-       <property name="text">
-        <string>Analyze</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
    <item row="4" column="0" colspan="2">
-    <layout class="QGridLayout" name="gridLayout_4">
-     <item row="0" column="1">
-      <widget class="QCheckBox" name="checkNether">
-       <property name="text">
-        <string>Nether</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="2">
-      <widget class="QCheckBox" name="checkEnd">
-       <property name="text">
-        <string>End</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0">
-      <widget class="QCheckBox" name="checkOverworld">
-       <property name="text">
-        <string>Overworld</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item row="1" column="1">
-    <widget class="QComboBox" name="comboSeedSource">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
      </property>
-     <item>
-      <property name="text">
-       <string>Current seed</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>From matching seeds list</string>
-      </property>
-     </item>
+     <widget class="QWidget" name="tabLocate">
+      <attribute name="title">
+       <string>Locate</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_5">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_6">
+         <property name="text">
+          <string>Biome:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_5">
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Biome area at scale 1:4, representing 4x4 blocks&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="text">
+          <string>Minimum area @ 1:4:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="lineBiomeSize">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QLabel" name="labelBiomeSize">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>(? sq. chunks)</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_4">
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Merge biomes that are separated by a margin that is less than this&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="text">
+          <string>Border tollerance:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0" colspan="3">
+        <widget class="QTreeWidget" name="treeWidget">
+         <property name="font">
+          <font>
+           <family>Monospace</family>
+          </font>
+         </property>
+         <property name="editTriggers">
+          <set>QAbstractItemView::NoEditTriggers</set>
+         </property>
+         <property name="verticalScrollMode">
+          <enum>QAbstractItemView::ScrollPerPixel</enum>
+         </property>
+         <property name="sortingEnabled">
+          <bool>true</bool>
+         </property>
+         <property name="animated">
+          <bool>true</bool>
+         </property>
+         <column>
+          <property name="text">
+           <string>seed</string>
+          </property>
+          <property name="font">
+           <font>
+            <family>Monospace</family>
+           </font>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>area @ 1:4</string>
+          </property>
+          <property name="font">
+           <font>
+            <family>Monospace</family>
+           </font>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>x</string>
+          </property>
+          <property name="font">
+           <font>
+            <family>Monospace</family>
+           </font>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>z</string>
+          </property>
+          <property name="font">
+           <font>
+            <family>Monospace</family>
+           </font>
+          </property>
+         </column>
+        </widget>
+       </item>
+       <item row="0" column="1" colspan="2">
+        <widget class="QComboBox" name="comboBiome">
+         <property name="editable">
+          <bool>true</bool>
+         </property>
+         <property name="maxVisibleItems">
+          <number>20</number>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="lineTollerance">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabStats">
+      <attribute name="title">
+       <string>Statistics</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="0">
+        <layout class="QGridLayout" name="gridLayout_4">
+         <item row="0" column="1">
+          <widget class="QCheckBox" name="checkNether">
+           <property name="text">
+            <string>Nether</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QCheckBox" name="checkEnd">
+           <property name="text">
+            <string>End</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QCheckBox" name="checkOverworld">
+           <property name="text">
+            <string>Overworld</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="1" column="0">
+        <layout class="QGridLayout" name="gridLayout_3">
+         <item row="1" column="0">
+          <widget class="QRadioButton" name="radioStochastic">
+           <property name="text">
+            <string>Random samples (scale 1:4):</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QRadioButton" name="radioFullSample">
+           <property name="text">
+            <string>Full area sampling with scale:</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QComboBox" name="comboScale">
+           <property name="currentIndex">
+            <number>1</number>
+           </property>
+           <item>
+            <property name="text">
+             <string>1:1</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>1:4</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>1:16</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>1:64</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>1:256</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLineEdit" name="lineSamples">
+           <property name="text">
+            <string>10000</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="2" column="0">
+        <widget class="QTableView" name="table">
+         <property name="editTriggers">
+          <set>QAbstractItemView::NoEditTriggers</set>
+         </property>
+         <property name="verticalScrollMode">
+          <enum>QAbstractItemView::ScrollPerPixel</enum>
+         </property>
+         <property name="horizontalScrollMode">
+          <enum>QAbstractItemView::ScrollPerPixel</enum>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </widget>
-   </item>
-   <item row="0" column="0" colspan="2">
-    <widget class="QLabel" name="labelDescription">
-     <property name="text">
-      <string>Analyze the biomes inside an area.</string>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="0" colspan="2">
-    <layout class="QVBoxLayout" name="verticalLayout">
-     <item>
-      <widget class="QTableView" name="table">
-       <property name="editTriggers">
-        <set>QAbstractItemView::NoEditTriggers</set>
-       </property>
-       <property name="verticalScrollMode">
-        <enum>QAbstractItemView::ScrollPerPixel</enum>
-       </property>
-       <property name="horizontalScrollMode">
-        <enum>QAbstractItemView::ScrollPerPixel</enum>
-       </property>
-      </widget>
-     </item>
-    </layout>
    </item>
   </layout>
  </widget>

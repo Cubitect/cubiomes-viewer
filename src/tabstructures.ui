@@ -14,41 +14,6 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="7" column="0" colspan="2">
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QPushButton" name="pushExport">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="text">
-        <string>Export...</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="pushStart">
-       <property name="text">
-        <string>Analyze</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item row="1" column="0">
-    <widget class="QLabel" name="label">
-     <property name="text">
-      <string>Seed(s):</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="0" colspan="2">
-    <widget class="QLabel" name="labelDescription">
-     <property name="text">
-      <string>Analyze the structures within an area.</string>
-     </property>
-    </widget>
-   </item>
    <item row="1" column="1">
     <widget class="QComboBox" name="comboSeedSource">
      <property name="sizePolicy">
@@ -69,30 +34,203 @@
      </item>
     </widget>
    </item>
-   <item row="3" column="0" colspan="2">
-    <layout class="QGridLayout" name="gridOptions">
-     <item row="0" column="0">
-      <widget class="QRadioButton" name="radioMap">
+   <item row="1" column="0">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Seed(s):</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" colspan="2">
+    <widget class="QLabel" name="labelDescription">
+     <property name="text">
+      <string>Analyze the structures within an area.</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="0" colspan="2">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPushButton" name="pushExport">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="text">
-        <string>Active map selections</string>
+        <string>Export...</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
-      <widget class="QRadioButton" name="radioAll">
+     <item>
+      <widget class="QPushButton" name="pushStart">
        <property name="text">
-        <string>All structures</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QCheckBox" name="checkCollect">
-       <property name="text">
-        <string>Collect all instances</string>
+        <string>Analyze</string>
        </property>
       </widget>
      </item>
     </layout>
+   </item>
+   <item row="3" column="0" colspan="2">
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="tabStructures">
+      <attribute name="title">
+       <string>Structures</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="0">
+        <layout class="QGridLayout" name="gridOptions">
+         <item row="0" column="0">
+          <widget class="QRadioButton" name="radioMap">
+           <property name="text">
+            <string>Active map selections</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QRadioButton" name="radioAll">
+           <property name="text">
+            <string>All structures</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QCheckBox" name="checkCollect">
+           <property name="text">
+            <string>Collect all instances</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="1" column="0">
+        <widget class="QTreeWidget" name="treeStructs">
+         <property name="editTriggers">
+          <set>QAbstractItemView::NoEditTriggers</set>
+         </property>
+         <property name="sortingEnabled">
+          <bool>true</bool>
+         </property>
+         <property name="animated">
+          <bool>true</bool>
+         </property>
+         <property name="expandsOnDoubleClick">
+          <bool>false</bool>
+         </property>
+         <column>
+          <property name="text">
+           <string>seed</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>structure</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>count</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>x</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>z</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>details</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabQuads">
+      <attribute name="title">
+       <string>Quad-Structures</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_3">
+       <item row="0" column="0">
+        <widget class="QTreeWidget" name="treeQuads">
+         <property name="font">
+          <font>
+           <family>Monospace</family>
+          </font>
+         </property>
+         <property name="contextMenuPolicy">
+          <enum>Qt::CustomContextMenu</enum>
+         </property>
+         <property name="editTriggers">
+          <set>QAbstractItemView::NoEditTriggers</set>
+         </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::SingleSelection</enum>
+         </property>
+         <property name="selectionBehavior">
+          <enum>QAbstractItemView::SelectRows</enum>
+         </property>
+         <property name="verticalScrollMode">
+          <enum>QAbstractItemView::ScrollPerPixel</enum>
+         </property>
+         <property name="horizontalScrollMode">
+          <enum>QAbstractItemView::ScrollPerPixel</enum>
+         </property>
+         <property name="sortingEnabled">
+          <bool>true</bool>
+         </property>
+         <property name="animated">
+          <bool>true</bool>
+         </property>
+         <column>
+          <property name="text">
+           <string>seed</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>type</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>distance</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>x</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>z</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>radius</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>spawn area</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
    </item>
    <item row="2" column="0" colspan="2">
     <layout class="QGridLayout" name="gridArea">
@@ -201,52 +339,6 @@
       </widget>
      </item>
     </layout>
-   </item>
-   <item row="4" column="0" colspan="2">
-    <widget class="QTreeWidget" name="treeWidget">
-     <property name="editTriggers">
-      <set>QAbstractItemView::NoEditTriggers</set>
-     </property>
-     <property name="sortingEnabled">
-      <bool>true</bool>
-     </property>
-     <property name="animated">
-      <bool>true</bool>
-     </property>
-     <property name="expandsOnDoubleClick">
-      <bool>false</bool>
-     </property>
-     <column>
-      <property name="text">
-       <string>seed</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>structure</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>count</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>x</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>z</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>details</string>
-      </property>
-     </column>
-    </widget>
    </item>
   </layout>
  </widget>

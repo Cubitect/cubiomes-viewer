@@ -17,6 +17,8 @@ public:
     explicit GotoDialog(MapView *map, qreal x, qreal z, qreal scale);
     ~GotoDialog();
 
+    void keyReleaseEvent(QKeyEvent *event) override;
+
 private slots:
     void on_buttonBox_clicked(QAbstractButton *button);
 

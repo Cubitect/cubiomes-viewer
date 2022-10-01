@@ -22,28 +22,6 @@ enum
     CATEGORY_MAX,
 };
 
-struct FilterInfo
-{
-    int cat;    // seed source category
-    bool dep64; // depends on 64-bit seed
-    bool coord; // requires coordinate entry
-    bool area;  // requires area entry
-    bool rmax;  // supports radial range
-    int layer;  // associated generator layer
-    int stype;  // structure type
-    int step;   // coordinate multiplier
-    int pow2;   // bit position of step
-    int count;  // can have instances
-    int mcmin;  // minimum version
-    int mcmax;  // maximum version
-    int dim;    // dimension
-    int hasy;   // has vertical height
-    int disp;   // display order
-    const char *icon;
-    const char *name;
-    const char *description;
-};
-
 enum
 {
     F_SELECT,
@@ -105,8 +83,31 @@ enum
     F_CLIMATE_NOISE,
     F_ANCIENT_CITY,
     F_LOGIC_NOT,
+    F_BIOME_CENTER,
     // new filters should be added here at the end to keep some downwards compatibility
     FILTER_MAX,
+};
+
+struct FilterInfo
+{
+    int cat;    // seed source category
+    bool dep64; // depends on 64-bit seed
+    bool coord; // requires coordinate entry
+    bool area;  // requires area entry
+    bool rmax;  // supports radial range
+    int layer;  // associated generator layer
+    int stype;  // structure type
+    int step;   // coordinate multiplier
+    int pow2;   // bit position of step
+    int count;  // can have instances
+    int mcmin;  // minimum version
+    int mcmax;  // maximum version
+    int dim;    // dimension
+    int hasy;   // has vertical height
+    int disp;   // display order
+    const char *icon;
+    const char *name;
+    const char *description;
 };
 
 // global table of filter data (as constants with enum indexing)
@@ -263,7 +264,7 @@ static const struct FilterList
             CAT_BIOMES, 1, 1, 1, 0, L_VORONOI_1, 0, 1, 0, 0, MC_1_0, MC_1_17, 0, 1, disp++, // disable for 1.18
             ":icons/map.png",
             _("Biomes 1:1"),
-            _("Only seeds with the included (+) biomes in the specified area and "
+            _("Allows only seeds with the included (+) biomes in the specified area and "
             "discard those that have biomes that are explicitly excluded (-).")
         };
 
@@ -271,28 +272,28 @@ static const struct FilterList
             CAT_BIOMES, 1, 1, 1, 0, 0, 0, 4, 2, 0, MC_1_0, MC_NEWEST, 0, 1, disp++,
             ":icons/map.png",
             _("Biomes 1:4"),
-            _("Only seeds with the included (+) biomes in the specified area and "
+            _("Allows only seeds with the included (+) biomes in the specified area and "
             "discard those that have biomes that are explicitly excluded (-).")
         };
         list[F_BIOME_16] = FilterInfo{
             CAT_BIOMES, 1, 1, 1, 0, 0, 0, 16, 4, 0, MC_1_0, MC_NEWEST, 0, 1, disp++,
             ":icons/map.png",
             _("Biomes 1:16"),
-            _("Only seeds with the included (+) biomes in the specified area and "
+            _("Allows only seeds with the included (+) biomes in the specified area and "
             "discard those that have biomes that are explicitly excluded (-).")
         };
         list[F_BIOME_64] = FilterInfo{
             CAT_BIOMES, 1, 1, 1, 0, 0, 0, 64, 6, 0, MC_1_0, MC_NEWEST, 0, 1, disp++,
             ":icons/map.png",
             _("Biomes 1:64"),
-            _("Only seeds with the included (+) biomes in the specified area and "
+            _("Allows only seeds with the included (+) biomes in the specified area and "
             "discard those that have biomes that are explicitly excluded (-).")
         };
         list[F_BIOME_256] = FilterInfo{
             CAT_BIOMES, 1, 1, 1, 0, 0, 0, 256, 8, 0, MC_1_0, MC_NEWEST, 0, 1, disp++,
             ":icons/map.png",
             _("Biomes 1:256"),
-            _("Only seeds with the included (+) biomes in the specified area and "
+            _("Allows only seeds with the included (+) biomes in the specified area and "
             "discard those that have biomes that are explicitly excluded (-).")
         };
 
@@ -300,7 +301,7 @@ static const struct FilterList
             CAT_BIOMES, 1, 1, 1, 0, L_RIVER_MIX_4, 0, 4, 2, 0, MC_1_13, MC_1_17, 0, 0, disp++,
             ":icons/map.png",
             _("Biomes 1:4 RIVER"),
-            _("Only seeds with the included (+) biomes in the specified area and "
+            _("Allows only seeds with the included (+) biomes in the specified area and "
             "discard those that have biomes that are explicitly excluded (-) "
             "at layer RIVER with scale 1:4. "
             "This layer does not generate ocean variants.")
@@ -309,15 +310,22 @@ static const struct FilterList
             CAT_BIOMES, 0, 1, 1, 0, L_OCEAN_TEMP_256, 0, 256, 8, 0, MC_1_13, MC_1_17, 0, 0, disp++,
             ":icons/map.png",
             _("Biomes 1:256 O.TEMP"),
-            _("Only seeds with the included (+) biomes in the specified area and "
+            _("Allows only seeds with the included (+) biomes in the specified area and "
             "discard those that have biomes that are explicitly excluded (-) "
             "at layer OCEAN TEMPERATURE with scale 1:256. "
             "This generation layer depends only on the lower 48-bits of the seed.")
         };
+        list[F_BIOME_CENTER] = FilterInfo{
+            CAT_BIOMES, 1, 1, 1, 0, 0, 0, 4, 2, 1, MC_1_0, MC_NEWEST, 0, 1, disp++,
+            ":icons/map.png",
+            _("Locate biome center 1:4"),
+            _("Finds the center position of a given biome. This requires the full "
+            "generation of those biomes and ")
+        };
         list[F_CLIMATE_NOISE] = FilterInfo{
             CAT_BIOMES, 0, 1, 1, 0, 0, 0, 4, 2, 0, MC_1_18, MC_NEWEST, 0, 0, disp++,
             ":icons/map.png",
-            _("Climate Parameters 1:4"),
+            _("Climate parameters 1:4"),
             _("Custom limits for the required and allowed climate noise parameters that "
             "the specified area should cover.")
         };
@@ -548,7 +556,7 @@ static const struct FilterList
             CAT_STRUCT, 0, 1, 1, 1, 0, End_Gateway, 1, 0, 1, MC_1_13, MC_NEWEST, +1, 0, disp++,
             ":icons/gateway.png",
             _("End gateway"),
-            _("Only scattered return gateways. Does not include those generated "
+            _("Checks only scattered return gateways. Does not include those generated "
             "when defeating the dragon.")
         };
 
@@ -589,7 +597,10 @@ struct /*__attribute__((packed))*/ Condition
     char        text[28];
     uint8_t     pad1[36]; // legacy
     uint64_t    biomeToFind, biomeToFindM; // inclusion biomes
-    uint8_t     pad2[12]; // legacy oceanToFind(8), specialCnt(4)
+    int32_t     biomeId; // legacy oceanToFind(8)
+    uint32_t    biomeSize;
+    uint8_t     tol; // legacy specialCnt(4)
+    uint8_t     pad2[3];
     uint8_t     pad3[2]; // legacy zero initialized
     uint16_t    version; // condition data version
     uint64_t    biomeToExcl, biomeToExclM; // exclusion biomes
