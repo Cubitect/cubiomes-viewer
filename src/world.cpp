@@ -5,6 +5,7 @@
 
 #include <QThreadPool>
 #include <QSettings>
+#include <QPainterPath>
 
 #include <cmath>
 #include <algorithm>
