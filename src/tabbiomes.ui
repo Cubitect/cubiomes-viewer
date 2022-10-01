@@ -233,7 +233,7 @@
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Merge biomes that are separated by a margin that is less than this&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="text">
-          <string>Border tollerance:</string>
+          <string>Border tolerance:</string>
          </property>
         </widget>
        </item>
@@ -309,7 +309,7 @@
         </widget>
        </item>
        <item row="2" column="1">
-        <widget class="QLineEdit" name="lineTollerance">
+        <widget class="QLineEdit" name="lineTolerance">
          <property name="text">
           <string/>
          </property>

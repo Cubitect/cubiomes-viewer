@@ -119,7 +119,7 @@ void AnalysisBiomes::runLocate(Generator *g)
     int siz[MAX_LOCATE];
     Range r = {4, x1, z1, x2-x1+1, z2-z1+1, wi.y, 1};
     int n = getBiomeCenters(
-        pos, siz, MAX_LOCATE, g, r, locate, minsize, tollerance,
+        pos, siz, MAX_LOCATE, g, r, locate, minsize, tolerance,
         (volatile char*)&stop
     );
     if (n && !stop)
@@ -238,7 +238,7 @@ TabBiomes::TabBiomes(MainWindow *parent)
     ui->lineZ2->setValidator(intval);
 
     ui->lineBiomeSize->setValidator(new QIntValidator(1, INT_MAX, this));
-    ui->lineTollerance->setValidator(new QIntValidator(0, 255, this));
+    ui->lineTolerance->setValidator(new QIntValidator(0, 255, this));
     ui->lineBiomeSize->setText("1");
 
     connect(&thread, &AnalysisBiomes::seedDone, this, &TabBiomes::onAnalysisSeedDone);
@@ -283,7 +283,7 @@ void TabBiomes::save(QSettings& settings)
     settings.setValue("analysis/fullarea", ui->radioFullSample->isChecked());
     settings.setValue("analysis/biomeid", str2biome[ui->comboBiome->currentText()]);
     settings.setValue("analysis/biomesize", ui->lineBiomeSize->text().toInt());
-    settings.setValue("analysis/tollerance", ui->lineTollerance->text().toInt());
+    settings.setValue("analysis/tolerance", ui->lineTolerance->text().toInt());
 }
 
 static void loadCheck(QSettings *s, QCheckBox *cb, const char *key)
@@ -317,7 +317,7 @@ void TabBiomes::load(QSettings& settings)
         ui->radioStochastic->setChecked(true);
     refreshBiomes(settings.value("analysis/biomeid", -1).toInt());
     loadLine(&settings, ui->lineBiomeSize, "analysis/biomesize");
-    loadLine(&settings, ui->lineTollerance, "analysis/tollerance");
+    loadLine(&settings, ui->lineTolerance, "analysis/tolerance");
 }
 
 void TabBiomes::refreshBiomes(int activeid)
@@ -443,7 +443,7 @@ void TabBiomes::on_pushStart_clicked()
         ui->treeWidget->clear();
         thread.locate = str2biome[ui->comboBiome->currentText()];
         thread.minsize = ui->lineBiomeSize->text().toInt();
-        thread.tollerance = ui->lineTollerance->text().toInt();
+        thread.tolerance = ui->lineTolerance->text().toInt();
         if (thread.minsize <= 0)
             thread.minsize = 1;
         scale = 4;

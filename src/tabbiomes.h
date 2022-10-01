@@ -41,7 +41,7 @@ public:
     uint64_t samples;
     int locate;
     int minsize;
-    int tollerance;
+    int tolerance;
 };
 
 class BiomeTableModel : public QAbstractTableModel
