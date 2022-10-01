@@ -225,7 +225,7 @@ TabBiomes::TabBiomes(MainWindow *parent)
     QFont font = QFont("monospace", 9);
     ui->table->setFont(font);
     ui->table->setSortingEnabled(true);
-    ui->table->sortByColumn(-1);
+    ui->table->sortByColumn(-1, Qt::AscendingOrder);
 
     ui->treeWidget->setColumnWidth(0, 160);
     ui->treeWidget->setColumnWidth(1, 120);
