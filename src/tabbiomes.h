@@ -47,7 +47,8 @@ public:
 class BiomeTableModel : public QAbstractTableModel
 {
 public:
-    explicit BiomeTableModel(QObject *parent = nullptr) : QAbstractTableModel(parent) {}
+    explicit BiomeTableModel(QObject *parent = nullptr) :
+        QAbstractTableModel(parent), cmp(IdCmp::SORT_LEX, -1, DIM_UNDEF) {}
 
     virtual int rowCount(const QModelIndex&) const override { return ids.size(); }
     virtual int columnCount(const QModelIndex&) const override { return seeds.size(); }

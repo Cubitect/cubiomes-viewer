@@ -168,6 +168,8 @@ struct IdCmp
         SORT_LEX,
     };
 
+    IdCmp(int mode, int mc, int dim) : mode(mode),mc(mc),dim(dim) {}
+
     int mode;
     int mc;
     int dim;

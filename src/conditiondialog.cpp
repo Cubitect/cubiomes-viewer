@@ -208,7 +208,7 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
     std::vector<int> ids;
     for (int id = 0; id < 256; id++)
         ids.push_back(id);
-    IdCmp cmp = {IdCmp::SORT_LEX, mc, DIM_UNDEF};
+    IdCmp cmp(IdCmp::SORT_LEX, mc, DIM_UNDEF);
     std::sort(ids.begin(), ids.end(), cmp);
     QStringList allowed_matches;
     for (int id : ids)

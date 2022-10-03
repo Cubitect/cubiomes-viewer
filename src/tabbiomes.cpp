@@ -111,7 +111,6 @@ void AnalysisBiomes::runStatistics(Generator *g)
         emit seedDone(wi.seed, idcnt);
 }
 
-#include <QDebug>
 void AnalysisBiomes::runLocate(Generator *g)
 {
     applySeed(g, DIM_OVERWORLD, wi.seed);
@@ -336,7 +335,7 @@ void TabBiomes::refreshBiomes(int activeid)
     for (int i = 0; i < 256; i++)
         if (isOverworld(wi.mc, i) || i == activeid)
             ids.push_back(i);
-    IdCmp cmp = {IdCmp::SORT_LEX, wi.mc, DIM_UNDEF};
+    IdCmp cmp(IdCmp::SORT_LEX, wi.mc, DIM_UNDEF);
     std::sort(ids.begin(), ids.end(), cmp);
     ui->comboBiome->clear();
     for (int i : ids)
