@@ -7,6 +7,7 @@
 #include <QFileInfo>
 #include <QTextStream>
 #include <QRegularExpressionValidator>
+#include <QScrollBar>
 
 #include <unordered_set>
 
@@ -171,24 +172,25 @@ QVariant BiomeTableModel::headerData(int section, Qt::Orientation orientation, i
     return QVariant::Invalid;
 }
 
-bool BiomeTableModel::insertId(int id)
+int BiomeTableModel::insertId(int id)
 {
     QList<int>::iterator it = std::lower_bound(ids.begin(), ids.end(), id, cmp);
     if (it != ids.end() && *it == id)
-        return false;
+        return -1;
     int row = std::distance(ids.begin(), it);
-    beginInsertRows(QModelIndex(), row, row);
+    //beginInsertRows(QModelIndex(), row, row);
     ids.insert(row, id);
-    endInsertRows();
-    return true;
+    //endInsertRows();
+    return row;
 }
 
-void BiomeTableModel::insertSeed(uint64_t seed)
+int BiomeTableModel::insertSeed(uint64_t seed)
 {
     int col = seeds.size();
-    beginInsertColumns(QModelIndex(), col, col);
+    //beginInsertColumns(QModelIndex(), col, col);
     seeds.append(seed);
-    endInsertColumns();
+    //endInsertColumns();
+    return col;
 }
 
 void BiomeTableModel::reset(int mc)
@@ -211,13 +213,13 @@ TabBiomes::TabBiomes(MainWindow *parent)
     , ui(new Ui::TabBiomes)
     , parent(parent)
     , thread()
-    , model(this)
-    , proxy(this)
+    , model(new BiomeTableModel(this))
+    , proxy(new BiomeSortProxy(this))
 {
     ui->setupUi(this);
 
-    proxy.setSourceModel(&model);
-    ui->table->setModel(&proxy);
+    proxy->setSourceModel(model);
+    ui->table->setModel(proxy);
 
     QHeaderView *header = ui->table->horizontalHeader();
     connect(header, &QHeaderView::sortIndicatorChanged, this, &TabBiomes::onSort);
@@ -241,8 +243,8 @@ TabBiomes::TabBiomes(MainWindow *parent)
     ui->lineTolerance->setValidator(new QIntValidator(0, 255, this));
     ui->lineBiomeSize->setText("1");
 
-    connect(&thread, &AnalysisBiomes::seedDone, this, &TabBiomes::onAnalysisSeedDone);
-    connect(&thread, &AnalysisBiomes::seedItem, this, &TabBiomes::onAnalysisSeedItem);
+    connect(&thread, &AnalysisBiomes::seedDone, this, &TabBiomes::onAnalysisSeedDone, Qt::BlockingQueuedConnection);
+    connect(&thread, &AnalysisBiomes::seedItem, this, &TabBiomes::onAnalysisSeedItem, Qt::BlockingQueuedConnection);
     connect(&thread, &AnalysisBiomes::finished, this, &TabBiomes::onAnalysisFinished);
 
     for (int id = 0; id < 256; id++)
@@ -348,22 +350,61 @@ void TabBiomes::refreshBiomes(int activeid)
 
 void TabBiomes::onAnalysisSeedDone(uint64_t seed, QVector<uint64_t> idcnt)
 {
+    // save state of table UI
+    int selr = ui->table->selectionModel()->currentIndex().row();
+    int selc = ui->table->selectionModel()->currentIndex().column();
+    int posr = ui->table->verticalScrollBar()->value();
+    int posc = ui->table->horizontalScrollBar()->value();
+
+    int ncol = proxy->columnCount();
+    std::vector<int> colwidth(ncol, 60);
+    for (int c = 0; c < ncol; c++)
+        colwidth[c] = ui->table->columnWidth(c);
+
+    // create new model
     ui->table->setSortingEnabled(false);
-    model.insertSeed(seed);
+    ui->table->setModel(nullptr);
+    BiomeTableModel *m_new = new BiomeTableModel(this);
+
+    m_new->ids = model->ids;
+    m_new->seeds = model->seeds;
+    m_new->cnt = model->cnt;
+
+    if (m_new->insertSeed(seed) < selc)
+        selc++;
 
     for (int id = 0; id < 256; id++)
     {
         if (idcnt[id] == 0)
             continue;
-        model.insertId(id);
-        model.cnt[id][seed] = QVariant::fromValue(idcnt[id]);
+        int r = m_new->insertId(id);
+        if (r >= 0 && r < selr)
+            selr++;
+        m_new->cnt[id][seed] = QVariant::fromValue(idcnt[id]);
     }
 
-    ui->table->resizeRowsToContents();
-    ui->table->resizeColumnsToContents();
+    delete model;
+    model = m_new;
+
+    // restore state of table UI for new model
+    proxy->setSourceModel(model);
+    ui->table->setModel(proxy);
     ui->table->setSortingEnabled(true);
 
-    QString progress = QString::asprintf(" (%d/%d)", model.seeds.size()+1, thread.seeds.size());
+    for (int c = 0; c < ncol; c++)
+        ui->table->setColumnWidth(c, colwidth[c]);
+    ui->table->resizeColumnToContents(ncol);
+
+    int rowheight = QFontMetrics(ui->table->font()).height() + 4;
+    for (int r = 0, nrow = proxy->rowCount(); r < nrow; r++)
+        ui->table->setRowHeight(r, rowheight);
+
+    ui->table->selectionModel()->setCurrentIndex(proxy->index(selr, selc), QItemSelectionModel::SelectCurrent);
+    ui->table->verticalScrollBar()->setValue(posr);
+    ui->table->horizontalScrollBar()->setValue(posc);
+
+
+    QString progress = QString::asprintf(" (%d/%d)", model->seeds.size()+1, thread.seeds.size());
     ui->pushStart->setText(tr("Stop") + progress);
 }
 
@@ -377,7 +418,7 @@ void TabBiomes::onAnalysisSeedItem(QTreeWidgetItem *item)
 
 void TabBiomes::onAnalysisFinished()
 {
-    ui->pushExport->setEnabled(!model.ids.empty() || ui->treeWidget->topLevelItemCount());
+    ui->pushExport->setEnabled(!model->ids.empty() || ui->treeWidget->topLevelItemCount());
     ui->pushStart->setChecked(false);
     ui->pushStart->setText(tr("Analyze"));
 }
@@ -386,11 +427,11 @@ void TabBiomes::onSort(int column, Qt::SortOrder)
 {
     QHeaderView *header = ui->table->horizontalHeader();
 
-    if (proxy.order == Qt::DescendingOrder && proxy.column == column)
+    if (proxy->order == Qt::DescendingOrder && proxy->column == column)
     {
         header->setSortIndicatorShown(false);
         header->setSortIndicator(-1, Qt::AscendingOrder);
-        proxy.column = -1;
+        proxy->column = -1;
     }
     else
     {
@@ -451,7 +492,7 @@ void TabBiomes::on_pushStart_clicked()
     }
     else
     {
-        model.reset(thread.wi.mc);
+        model->reset(thread.wi.mc);
         thread.locate = -1;
     }
 
@@ -498,17 +539,17 @@ void TabBiomes::on_pushExport_clicked()
 
         QList<QString> header;
         header.append(tr("biome\\seed"));
-        for (int col = 0, ncol = proxy.columnCount(); col < ncol; col++)
-            header.append(proxy.headerData(col, Qt::Horizontal).toString());
+        for (int col = 0, ncol = proxy->columnCount(); col < ncol; col++)
+            header.append(proxy->headerData(col, Qt::Horizontal).toString());
         stream << header.join("; ") << "\n";
 
-        for (int row = 0, nrow = proxy.rowCount(); row < nrow; row++)
+        for (int row = 0, nrow = proxy->rowCount(); row < nrow; row++)
         {
             QList<QString> entries;
-            entries.append(proxy.headerData(row, Qt::Vertical).toString());
-            for (int col = 0, ncol = proxy.columnCount(); col < ncol; col++)
+            entries.append(proxy->headerData(row, Qt::Vertical).toString());
+            for (int col = 0, ncol = proxy->columnCount(); col < ncol; col++)
             {
-                QString cntstr = proxy.data(proxy.index(row, col)).toString();
+                QString cntstr = proxy->data(proxy->index(row, col)).toString();
                 entries.append(cntstr == "" ? "0" : cntstr);
             }
             stream << entries.join("; ") << "\n";
@@ -540,8 +581,8 @@ void TabBiomes::on_pushExport_clicked()
 
 void TabBiomes::on_table_doubleClicked(const QModelIndex &index)
 {
-    uint64_t seed = model.seeds[index.column()];
-    int id = model.ids[index.row()];
+    uint64_t seed = model->seeds[index.column()];
+    int id = model->ids[index.row()];
     WorldInfo wi;
     parent->getSeed(&wi);
     wi.seed = seed;

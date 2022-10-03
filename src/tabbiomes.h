@@ -55,8 +55,8 @@ public:
     virtual QVariant data(const QModelIndex& index, int role) const override;
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
-    bool insertId(int id);
-    void insertSeed(uint64_t seed);
+    int insertId(int id);
+    int insertSeed(uint64_t seed);
     void reset(int mc);
 
     QList<int> ids;
@@ -130,8 +130,8 @@ private:
     Ui::TabBiomes *ui;
     MainWindow *parent;
     AnalysisBiomes thread;
-    BiomeTableModel model;
-    BiomeSortProxy proxy;
+    BiomeTableModel *model;
+    BiomeSortProxy *proxy;
     std::map<QString, int> str2biome;
 };
 

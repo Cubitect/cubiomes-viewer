@@ -234,8 +234,8 @@ TabStructures::TabStructures(MainWindow *parent)
     ui->treeQuads->setColumnWidth(0, 160);
     ui->treeQuads->sortByColumn(0, Qt::AscendingOrder);
 
-    connect(&thread, &AnalysisStructures::itemDone, this, &TabStructures::onAnalysisItemDone);
-    connect(&thread, &AnalysisStructures::quadDone, this, &TabStructures::onAnalysisQuadDone);
+    connect(&thread, &AnalysisStructures::itemDone, this, &TabStructures::onAnalysisItemDone, Qt::BlockingQueuedConnection);
+    connect(&thread, &AnalysisStructures::quadDone, this, &TabStructures::onAnalysisQuadDone, Qt::BlockingQueuedConnection);
     connect(&thread, &AnalysisStructures::finished, this, &TabStructures::onAnalysisFinished);
 
     connect(ui->treeStructs, &QTreeWidget::itemClicked, this, &TabStructures::onTreeItemClicked);

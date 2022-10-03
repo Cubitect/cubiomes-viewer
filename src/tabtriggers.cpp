@@ -104,7 +104,7 @@ TabTriggers::TabTriggers(MainWindow *parent)
     ui->treeWidget->setColumnWidth(3, 65);
 
     ui->treeWidget->sortByColumn(0, Qt::AscendingOrder);
-    connect(&thread, &AnalysisTriggers::itemDone, this, &TabTriggers::onAnalysisItemDone);
+    connect(&thread, &AnalysisTriggers::itemDone, this, &TabTriggers::onAnalysisItemDone, Qt::BlockingQueuedConnection);
     connect(&thread, &AnalysisTriggers::finished, this, &TabTriggers::onAnalysisFinished);
 }
 
