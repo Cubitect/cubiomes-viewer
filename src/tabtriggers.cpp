@@ -164,6 +164,8 @@ void TabTriggers::onBufferTimeout()
         qbuf.clear();
     }
 
+    QApplication::processEvents(); // force processing of events so we can time correctly
+
     t += elapsed.elapsed();
     if (8*t > updt)
         updt = 4*t;

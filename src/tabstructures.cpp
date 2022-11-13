@@ -366,6 +366,8 @@ void TabStructures::onBufferTimeout()
     QString progress = QString::asprintf(" (%d/%d)", thread.idx.load(), thread.seeds.size());
     ui->pushStart->setText(tr("Stop") + progress);
 
+    QApplication::processEvents(); // force processing of events so we can time correctly
+
     t += elapsed.elapsed();
     if (8*t > updt)
         updt = 4*t;
