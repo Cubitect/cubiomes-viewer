@@ -15,6 +15,9 @@ unsigned char g_tempsColors[256][3];
 
 ExtGenSettings g_extgen;
 
+QFont g_font_default;
+QFont g_font_mono;
+
 extern "C"
 int getStructureConfig_override(int stype, int mc, StructureConfig *sconf)
 {
@@ -36,26 +39,31 @@ int main(int argc, char *argv[])
     initBiomeColors(g_biomeColors);
     initBiomeTypeColors(g_tempsColors);
 
-    QApplication a(argc, argv);
+    QApplication app(argc, argv);
     QCoreApplication::setApplicationName("cubiomes-viewer");
 
     QTranslator translator;
     translator.load("en_US", ":/lang");
-    a.installTranslator(&translator);
+    app.installTranslator(&translator);
 
     //int fontid = QFontDatabase::addApplicationFont(":/fonts/test.ttf");
     int fontid = QFontDatabase::addApplicationFont(":/fonts/DejaVuSans.ttf");
     if (fontid >= 0)
     {
         QFontDatabase::addApplicationFont(":/fonts/DejaVuSans-Bold.ttf");
-        QFont fontdef = QFontDatabase::applicationFontFamilies(fontid).at(0);
-        fontdef.setPointSize(10);
-        a.setFont(fontdef);
+        int fontid_mono = QFontDatabase::addApplicationFont(":/fonts/DejaVuSansMono.ttf");
+
+        g_font_default = QFontDatabase::applicationFontFamilies(fontid).at(0);
+        g_font_default.setPointSize(10);
+        g_font_mono = QFontDatabase::applicationFontFamilies(fontid_mono).at(0);
+        g_font_mono.setPointSize(9);
+
+        app.setFont(g_font_default);
     }
 
     MainWindow mw;
     mw.show();
-    int ret = a.exec();
+    int ret = app.exec();
 
     return ret;
 }

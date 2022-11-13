@@ -24,7 +24,6 @@
 #include <QtDebug>
 #include <QDataStream>
 #include <QMenu>
-#include <QFont>
 #include <QFileDialog>
 #include <QTextStream>
 #include <QSettings>
@@ -354,6 +353,8 @@ void MainWindow::saveSettings()
     settings.setValue("config/gridSpacing", config.gridSpacing);
     settings.setValue("config/mapCacheSize", config.mapCacheSize);
     settings.setValue("config/biomeColorPath", config.biomeColorPath);
+    settings.setValue("config/separator", config.separator);
+    settings.setValue("config/quote", config.quote);
 
     settings.setValue("world/estimateTerrain", g_extgen.estimateTerrain);
     settings.setValue("world/saltOverride", g_extgen.saltOverride);
@@ -412,6 +413,8 @@ void MainWindow::loadSettings()
     config.gridSpacing = settings.value("config/gridSpacing", config.gridSpacing).toInt();
     config.mapCacheSize = settings.value("config/mapCacheSize", config.mapCacheSize).toInt();
     config.biomeColorPath = settings.value("config/biomeColorPath", config.biomeColorPath).toString();
+    config.separator = settings.value("config/separator", config.separator).toString();
+    config.quote = settings.value("config/quote", config.quote).toString();
 
     if (!config.biomeColorPath.isEmpty())
         onBiomeColorChange();
@@ -587,7 +590,7 @@ bool MainWindow::loadProgress(QString fnam, bool keepresults, bool quiet)
         int button = QMessageBox::warning(this, tr("Warning"),
             tr("File was created with a newer version.\n"
             "Progress may be incomplete or broken.\n\n"
-            "Continue anyway?"),
+            "Continue loading progress anyway?"),
             QMessageBox::Abort|QMessageBox::Yes);
         if (button == QMessageBox::Abort)
             return false;

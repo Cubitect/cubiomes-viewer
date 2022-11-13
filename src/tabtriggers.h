@@ -18,7 +18,7 @@ class AnalysisTriggers : public QThread
     Q_OBJECT
 public:
     explicit AnalysisTriggers(QObject *parent = nullptr)
-        : QThread(parent) {}
+        : QThread(parent), conds(),seeds(),wi(),stop(),idx() {}
 
     virtual void run() override;
 
@@ -30,6 +30,7 @@ public:
     QVector<uint64_t> seeds;
     WorldInfo wi;
     std::atomic_bool stop;
+    std::atomic_int idx;
 };
 
 
@@ -47,17 +48,22 @@ public:
 private slots:
     void onAnalysisItemDone(QTreeWidgetItem *item);
     void onAnalysisFinished();
+    void onBufferTimeout();
 
     void on_pushStart_clicked();
     void on_pushExpand_clicked();
     void on_pushExport_clicked();
-
     void on_treeWidget_itemClicked(QTreeWidgetItem *item, int column);
 
 private:
     Ui::TabTriggers *ui;
     MainWindow *parent;
     AnalysisTriggers thread;
+
+    QElapsedTimer elapsed;
+    uint64_t nextupdate;
+    uint64_t updt;
+    QList<QTreeWidgetItem*> qbuf;
 };
 
 #endif // TABTRIGGERS_H

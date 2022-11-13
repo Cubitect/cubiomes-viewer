@@ -86,16 +86,16 @@ const QPixmap& getMapIcon(int opt, VarPos *vp)
     return icons[opt];
 }
 
-QIcon getBiomeIcon(int id)
+QIcon getBiomeIcon(int id, bool warn)
 {
     static QPixmap pixmap(14, 14);
     pixmap.fill(QColor(0,0,0,0));
     QPainter p(&pixmap);
     p.setRenderHint(QPainter::Antialiasing);
     QPainterPath path;
-    path.addRoundedRect(QRectF(1, 1, 12, 12), 3, 3);
-    QPen pen(Qt::black, 1);
-    p.setPen(pen);
+    int b = warn ? 2 : 1;
+    path.addRoundedRect(pixmap.rect().adjusted(b, b, -b, -b), 3, 3);
+    p.setPen(QPen(warn ? Qt::red : Qt::black, b));
     QColor col(g_biomeColors[id][0], g_biomeColors[id][1], g_biomeColors[id][2]);
     p.fillPath(path, col);
     p.drawPath(path);
@@ -561,7 +561,7 @@ QWorld::QWorld(WorldInfo wi, int dim, int layeropt)
     , selx()
     , selz()
     , selopt(-1)
-    , selvp(Pos{}, -1)
+    , selvp(Pos{0,0}, -1)
     , qual()
 {
     setupGenerator(&g, wi.mc,  wi.large);

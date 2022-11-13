@@ -211,5 +211,6 @@
         <file>dark.qss</file>
         <file>fonts/DejaVuSans.ttf</file>
         <file>fonts/DejaVuSans-Bold.ttf</file>
+        <file>fonts/DejaVuSansMono.ttf</file>
     </qresource>
 </RCC>

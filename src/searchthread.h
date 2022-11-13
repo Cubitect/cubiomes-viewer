@@ -77,7 +77,7 @@ public:
     virtual void run() override;
 
 signals:
-    int results(QVector<uint64_t> seeds, bool countonly);
+    void result(uint64_t seed);
 
 public:
     SearchMaster      * master;

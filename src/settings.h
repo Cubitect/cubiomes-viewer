@@ -5,6 +5,7 @@
 
 #include <QThread>
 #include <QString>
+#include <QFont>
 
 #include <vector>
 
@@ -30,6 +31,10 @@ struct ExtGenSettings
 
 // Keep the extended generator settings in global scope.
 extern ExtGenSettings g_extgen;
+
+// global references to the default fonts
+extern QFont g_font_default;
+extern QFont g_font_mono;
 
 struct WorldInfo
 {
@@ -69,6 +74,8 @@ struct Config
     int gridSpacing;
     int mapCacheSize;
     QString biomeColorPath;
+    QString separator;
+    QString quote;
 
     Config() { reset(); }
 
@@ -85,6 +92,8 @@ struct Config
         gridSpacing = 0;
         mapCacheSize = 256;
         biomeColorPath = "";
+        separator = ";";
+        quote = "";
     }
 };
 

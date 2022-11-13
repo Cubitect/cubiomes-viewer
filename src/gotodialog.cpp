@@ -6,6 +6,7 @@
 #include <QDoubleValidator>
 #include <QKeyEvent>
 #include <QClipboard>
+#include <QMessageBox>
 
 
 GotoDialog::GotoDialog(MapView *map, qreal x, qreal z, qreal scale)
@@ -15,8 +16,8 @@ GotoDialog::GotoDialog(MapView *map, qreal x, qreal z, qreal scale)
 {
     ui->setupUi(this);
 
-    scalemin = 1.0 / 64;
-    scalemax = 1024;
+    scalemin = 1.0 / 4096;
+    scalemax = 65536;
     ui->lineX->setValidator(new QDoubleValidator(-3e7, 3e7, 1, ui->lineX));
     ui->lineZ->setValidator(new QDoubleValidator(-3e7, 3e7, 1, ui->lineZ));
     ui->lineScale->setValidator(new QDoubleValidator(scalemin, scalemax, 16, ui->lineScale));
@@ -40,6 +41,14 @@ void GotoDialog::on_buttonBox_clicked(QAbstractButton *button)
         qreal x = ui->lineX->text().toDouble();
         qreal z = ui->lineZ->text().toDouble();
         qreal scale = ui->lineScale->text().toDouble();
+        if (scale > 4096)
+        {
+            int button = QMessageBox::warning(this, tr("Unsafe Scale"),
+                tr("Setting a very large scale may be unsafe.\n"
+                   "Continue anyway?"), QMessageBox::Abort|QMessageBox::Yes);
+            if (button == QMessageBox::Abort)
+                return;
+        }
         if (scale < scalemin) scale = scalemin;
         if (scale > scalemax) scale = scalemax;
         ui->lineScale->setText(QString::asprintf("%.4f", scale));

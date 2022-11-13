@@ -34,10 +34,10 @@ void AnalysisStructures::run()
     Generator g;
     setupGenerator(&g, wi.mc, wi.large);
 
-    for (int64_t seed : qAsConst(seeds))
+    for (idx = 0; idx < seeds.size(); idx++)
     {
         if (stop) break;
-        wi.seed = seed;
+        wi.seed = seeds[idx];
         if (quad)
             runQuads(&g);
         else
@@ -71,7 +71,7 @@ void AnalysisStructures::runStructs(Generator *g)
             sdim = DIM_NETHER;
         if (sconf.properties & STRUCT_END)
             sdim = DIM_END;
-        getStructs(&st, sconf, wi, sdim, x1, z1, x2, z2);
+        getStructs(&st, sconf, wi, sdim, area.x1, area.z1, area.x2, area.z2);
         if (st.empty())
             continue;
 
@@ -102,7 +102,7 @@ void AnalysisStructures::runStructs(Generator *g)
     {
         applySeed(g, 0, wi.seed);
         Pos pos = getSpawn(g);
-        if (pos.x >= x1 && pos.x <= x2 && pos.z >= z1 && pos.z <= z2)
+        if (pos.x >= area.x1 && pos.x <= area.x2 && pos.z >= area.z1 && pos.z <= area.z2)
         {
             QTreeWidgetItem* item = new QTreeWidgetItem(seeditem);
             item->setText(C_SEED, "-");
@@ -124,8 +124,8 @@ void AnalysisStructures::runStructs(Generator *g)
         applySeed(g, DIM_OVERWORLD, wi.seed);
 
         // get the maximum relevant ring number
-        int rx1 = abs(x1), rx2 = abs(x2);
-        int rz1 = abs(z1), rz2 = abs(z2);
+        int rx1 = abs(area.x1), rx2 = abs(area.x2);
+        int rz1 = abs(area.z1), rz2 = abs(area.z2);
         int xt = (rx1 > rx2 ? rx1 : rx2) + 112+8;
         int zt = (rz1 > rz2 ? rz1 : rz2) + 112+8;
         int rmax = xt*xt + zt*zt;
@@ -136,7 +136,7 @@ void AnalysisStructures::runStructs(Generator *g)
             if (stop || sh.ringnum > rmax)
                 break;
             Pos pos = sh.pos;
-            if (pos.x >= x1 && pos.x <= x2 && pos.z >= z1 && pos.z <= z2)
+            if (pos.x >= area.x1 && pos.x <= area.x2 && pos.z >= area.z1 && pos.z <= area.z2)
                 shp.push_back(pos);
         }
 
@@ -222,6 +222,10 @@ TabStructures::TabStructures(MainWindow *parent)
     , ui(new Ui::TabStructures)
     , parent(parent)
     , thread(this)
+    , sortcols(-1)
+    , sortcolq(-1)
+    , nextupdate()
+    , updt(100)
 {
     ui->setupUi(this);
 
@@ -229,10 +233,12 @@ TabStructures::TabStructures(MainWindow *parent)
     ui->treeStructs->setColumnWidth(C_COUNT, 50);
     ui->treeStructs->setColumnWidth(C_X, 65);
     ui->treeStructs->setColumnWidth(C_Z, 65);
-    ui->treeStructs->sortByColumn(0, Qt::AscendingOrder);
+    ui->treeStructs->sortByColumn(-1, Qt::AscendingOrder);
+    connect(ui->treeStructs->header(), &QHeaderView::sectionClicked, this, [=](){ onHeaderClick(ui->treeStructs); } );
 
     ui->treeQuads->setColumnWidth(0, 160);
-    ui->treeQuads->sortByColumn(0, Qt::AscendingOrder);
+    ui->treeQuads->sortByColumn(-1, Qt::AscendingOrder);
+    connect(ui->treeQuads->header(), &QHeaderView::sectionClicked, this, [=](){ onHeaderClick(ui->treeQuads); } );
 
     connect(&thread, &AnalysisStructures::itemDone, this, &TabStructures::onAnalysisItemDone, Qt::BlockingQueuedConnection);
     connect(&thread, &AnalysisStructures::quadDone, this, &TabStructures::onAnalysisQuadDone, Qt::BlockingQueuedConnection);
@@ -244,6 +250,8 @@ TabStructures::TabStructures(MainWindow *parent)
 
 TabStructures::~TabStructures()
 {
+    thread.stop = true;
+    thread.wait(500);
     delete ui;
 }
 
@@ -285,29 +293,83 @@ void TabStructures::load(QSettings& settings)
         ui->radioAll->setChecked(true);
 }
 
+void TabStructures::onHeaderClick(QTreeView *tree)
+{
+    int& col = (tree == ui->treeStructs) ? sortcols : sortcolq;
+    int section =  tree->header()->sortIndicatorSection();
+    if (tree->header()->sortIndicatorOrder() == Qt::AscendingOrder && col == section)
+    {
+        tree->sortByColumn(-1, Qt::DescendingOrder);
+        section = -1;
+    }
+    col = section;
+}
+
 void TabStructures::onAnalysisItemDone(QTreeWidgetItem *item)
 {
-    ui->treeStructs->addTopLevelItem(item);
-    ui->treeStructs->resizeColumnToContents(C_DETAIL);
-
-    QString progress = QString::asprintf(" (%d/%d)", ui->treeStructs->topLevelItemCount()+1, thread.seeds.size());
-    ui->pushStart->setText(tr("Stop") + progress);
+    qbufs.push_back(item);
+    quint64 ns = elapsed.nsecsElapsed();
+    if (ns > nextupdate)
+    {
+        nextupdate = ns + updt * 1e6;
+        QTimer::singleShot(updt, this, &TabStructures::onBufferTimeout);
+    }
 }
 
 void TabStructures::onAnalysisQuadDone(QTreeWidgetItem *item)
 {
-    ui->treeQuads->addTopLevelItem(item);
-    item->setExpanded(true);
-
-    QString progress = QString::asprintf(" (%d/%d)", ui->treeQuads->topLevelItemCount()+1, thread.seeds.size());
-    ui->pushStart->setText(tr("Stop") + progress);
+    qbufq.push_back(item);
+    quint64 ns = elapsed.nsecsElapsed();
+    if (ns > nextupdate)
+    {
+        nextupdate = ns + updt * 1e6;
+        QTimer::singleShot(updt, this, &TabStructures::onBufferTimeout);
+    }
 }
 
 void TabStructures::onAnalysisFinished()
 {
-    ui->pushExport->setEnabled(ui->treeStructs->topLevelItemCount() > 0);
+    onBufferTimeout();
+    on_tabWidget_currentChanged(-1);
+    ui->treeStructs->setSortingEnabled(true);
+    ui->treeQuads->setSortingEnabled(true);
     ui->pushStart->setChecked(false);
     ui->pushStart->setText(tr("Analyze"));
+}
+
+void TabStructures::onBufferTimeout()
+{
+    if (qbufs.empty() && qbufq.empty())
+        return;
+    uint64_t t = -elapsed.elapsed();
+    if (!qbufs.empty())
+    {
+        ui->treeStructs->setSortingEnabled(false);
+        ui->treeStructs->setUpdatesEnabled(false);
+        ui->treeStructs->addTopLevelItems(qbufs);
+        ui->treeStructs->resizeColumnToContents(C_DETAIL);
+        ui->treeStructs->setUpdatesEnabled(true);
+        ui->treeStructs->setSortingEnabled(true);
+        qbufs.clear();
+    }
+    if (!qbufq.empty())
+    {
+        ui->treeQuads->setSortingEnabled(false);
+        ui->treeQuads->setUpdatesEnabled(false);
+        ui->treeQuads->addTopLevelItems(qbufq);
+        for (QTreeWidgetItem *item: qAsConst(qbufq))
+            item->setExpanded(true);
+        ui->treeQuads->setUpdatesEnabled(true);
+        ui->treeQuads->setSortingEnabled(true);
+        qbufq.clear();
+    }
+    QString progress = QString::asprintf(" (%d/%d)", thread.idx.load(), thread.seeds.size());
+    ui->pushStart->setText(tr("Stop") + progress);
+
+    t += elapsed.elapsed();
+    if (8*t > updt)
+        updt = 4*t;
+    nextupdate = elapsed.nsecsElapsed() + 1e6 * updt;
 }
 
 void TabStructures::onTreeItemClicked(QTreeWidgetItem *item, int column)
@@ -340,6 +402,10 @@ void TabStructures::on_pushStart_clicked()
         thread.stop = true;
         return;
     }
+    updt = 20;
+    nextupdate = 0;
+    elapsed.start();
+
     parent->getSeed(&thread.wi);
     thread.seeds.clear();
     if (ui->comboSeedSource->currentIndex() == 0)
@@ -353,10 +419,7 @@ void TabStructures::on_pushStart_clicked()
     int z2 = ui->lineZ2->text().toInt();
     if (x2 < x1) std::swap(x1, x2);
     if (z2 < z1) std::swap(z1, z2);
-    thread.x1 = x1;
-    thread.z1 = z1;
-    thread.x2 = x2;
-    thread.z2 = z2;
+    thread.area = AnalysisStructures::Dat{x1, z1, x2, z2};
 
     thread.collect = ui->checkCollect->isChecked();
 
@@ -366,20 +429,38 @@ void TabStructures::on_pushStart_clicked()
     if (ui->tabWidget->currentWidget() == ui->tabStructures)
     {
         thread.quad = false;
+        dats = thread.area;
+        ui->treeStructs->setSortingEnabled(false);
         while (ui->treeStructs->topLevelItemCount() > 0)
             delete ui->treeStructs->takeTopLevelItem(0);
+        ui->treeStructs->setSortingEnabled(true);
     }
     else
     {
         thread.quad = true;
-        while (ui->treeStructs->topLevelItemCount() > 0)
-            delete ui->treeStructs->takeTopLevelItem(0);
+        datq = thread.area;
+        ui->treeQuads->setSortingEnabled(false);
+        while (ui->treeQuads->topLevelItemCount() > 0)
+            delete ui->treeQuads->takeTopLevelItem(0);
+        ui->treeQuads->setSortingEnabled(true);
     }
 
     ui->pushExport->setEnabled(false);
     ui->pushStart->setChecked(true);
     ui->pushStart->setText(tr("Stop"));
     thread.start();
+}
+
+static
+void csvline(QTextStream& stream, const QString& qte, const QString& sep, QStringList& cols)
+{
+    if (qte.isEmpty())
+    {
+        for (QString& s : cols)
+            if (s.contains(sep))
+                s = "\"" + s + "\"";
+    }
+    stream << qte << cols.join(sep) << qte << "\n";
 }
 
 void TabStructures::on_pushExport_clicked()
@@ -399,74 +480,104 @@ void TabStructures::on_pushExport_clicked()
         return;
     }
 
+    QString qte = parent->config.quote;
+    QString sep = parent->config.separator;
+
     QTextStream stream(&file);
+    stream << "Sep=" + sep + "\n";
+    sep = qte + sep + qte;
 
-    stream << "#X1; " << thread.x1 << "\n";
-    stream << "#Z1; " << thread.z1 << "\n";
-    stream << "#X2; " << thread.x2 << "\n";
-    stream << "#Z2; " << thread.z2 << "\n";
-
-    QTreeWidgetItemIterator it(ui->treeStructs);
-
-    if (ui->checkCollect->isChecked())
+    if (ui->tabWidget->currentWidget() == ui->tabStructures)
     {
-        stream << "seed; structure; x; z; details\n";
-        QString seed;
-        QString structure;
-        for (; *it; ++it)
-        {
-            QTreeWidgetItem *item = *it;
-            if (item->text(C_SEED) != "-")
-                seed = item->text(C_SEED);
-            if (!item->text(C_STRUCT).isEmpty())
-                structure = item->text(C_STRUCT);
-            if (!item->data(0, Qt::UserRole+2).isValid())
-                continue;
+        stream << qte << "#X1" << sep << dats.x1 << qte << "\n";
+        stream << qte << "#Z1" << sep << dats.z1 << qte << "\n";
+        stream << qte << "#X2" << sep << dats.x2 << qte << "\n";
+        stream << qte << "#Z2" << sep << dats.z2 << qte << "\n";
 
-            QStringList cols;
-            cols.append(seed);
-            cols.append(structure);
-            cols.append(item->text(C_X));
-            cols.append(item->text(C_Z));
-            cols.append(item->text(C_DETAIL));
-            stream << cols.join(";") << "\n";
+        if (ui->checkCollect->isChecked())
+        {
+            QStringList header = { tr("seed"), tr("structure"), tr("x"), tr("z"), tr("details") };
+            csvline(stream, qte, sep, header);
+            QString seed;
+            QString structure;
+            for (QTreeWidgetItemIterator it(ui->treeStructs); *it; ++it)
+            {
+                QTreeWidgetItem *item = *it;
+                if (item->text(C_SEED) != "-")
+                    seed = item->text(C_SEED);
+                if (!item->text(C_STRUCT).isEmpty())
+                    structure = item->text(C_STRUCT);
+                if (!item->data(0, Qt::UserRole+2).isValid())
+                    continue;
+
+                QStringList cols;
+                cols.append(seed);
+                cols.append(structure);
+                cols.append(item->text(C_X));
+                cols.append(item->text(C_Z));
+                cols.append(item->text(C_DETAIL));
+                csvline(stream, qte, sep, cols);
+            }
+        }
+        else
+        {
+            std::set<QString> structures;
+            std::map<uint64_t, std::map<QString, QString>> cnt; // [seed][stype]
+
+            uint64_t seed;
+            QString structure;
+            for (QTreeWidgetItemIterator it(ui->treeStructs); *it; ++it)
+            {
+                QTreeWidgetItem *item = *it;
+                if (item->data(0, Qt::UserRole).isValid())
+                    seed = item->data(0, Qt::UserRole).toLongLong();
+                if (!item->text(C_STRUCT).isEmpty())
+                    structures.insert((structure = item->text(C_STRUCT)));
+                if (!item->text(C_COUNT).isEmpty())
+                    cnt[seed][structure] = item->text(C_COUNT);
+            }
+
+            QStringList header = { tr("seed") };
+            for (auto& sit : structures)
+                header.append(sit);
+            csvline(stream, qte, sep, header);
+            for (auto& m : cnt)
+            {
+                QStringList cols;
+                cols << QString::asprintf("%" PRId64, m.first);
+                for (auto& sit : structures)
+                {
+                    QString cntstr = m.second[sit];
+                    if (cntstr.isEmpty())
+                        cntstr = "0";
+                    cols.append(cntstr);
+                }
+                csvline(stream, qte, sep, cols);
+            }
         }
     }
-    else
+    else if(ui->tabWidget->currentWidget() == ui->tabQuads)
     {
-        std::set<QString> structures;
-        std::map<uint64_t, std::map<QString, QString>> cnt; // [seed][stype]/[row][col]
+        stream << qte << "#X1" << sep << datq.x1 << qte << "\n";
+        stream << qte << "#Z1" << sep << datq.z1 << qte << "\n";
+        stream << qte << "#X2" << sep << datq.x2 << qte << "\n";
+        stream << qte << "#Z2" << sep << datq.z2 << qte << "\n";
 
-        uint64_t seed;
-        QString structure;
-        for (; *it; ++it)
+        QStringList header = { tr("seed"), tr("type"), tr("distance"), tr("x"), tr("z"), tr("radius"), tr("spawn area") };
+        csvline(stream, qte, sep, header);
+        QString seed;
+        for (QTreeWidgetItemIterator it(ui->treeQuads); *it; ++it)
         {
             QTreeWidgetItem *item = *it;
-            if (item->data(0, Qt::UserRole).isValid())
-                seed = item->data(0, Qt::UserRole).toLongLong();
-            if (!item->text(C_STRUCT).isEmpty())
-                structures.insert((structure = item->text(C_STRUCT)));
-            if (!item->text(C_COUNT).isEmpty())
-                cnt[seed][structure] = item->text(C_COUNT);
-        }
-
-        QStringList header;
-        header.append("seed");
-        for (auto& sit : structures)
-            header.append(sit);
-        stream << header.join(";") << "\n";
-        for (auto& m : cnt)
-        {
-            QStringList cols;
-            cols << QString::asprintf("%" PRId64, m.first);
-            for (auto& sit : structures)
+            if (item->text(0) != "-")
             {
-                QString cntstr = m.second[sit];
-                if (cntstr.isEmpty())
-                    cntstr = "0";
-                cols.append(cntstr);
+                seed = item->text(0);
+                continue;
             }
-            stream << cols.join(";") << "\n";
+            QStringList cols = { seed };
+            for (int i = 1, n = item->columnCount(); i < n; i++)
+                cols.append(item->text(i));
+            csvline(stream, qte, sep, cols);
         }
     }
 }
@@ -485,4 +596,17 @@ void TabStructures::on_buttonFromVisible_clicked()
     ui->lineZ1->setText( QString::number(bz0) );
     ui->lineX2->setText( QString::number(bx1) );
     ui->lineZ2->setText( QString::number(bz1) );
+}
+
+void TabStructures::on_tabWidget_currentChanged(int)
+{
+    bool ok = false;
+    if (!thread.isRunning())
+    {
+        if (ui->tabWidget->currentWidget() == ui->tabStructures)
+            ok = ui->treeStructs->topLevelItemCount() > 0;
+        if (ui->tabWidget->currentWidget() == ui->tabQuads)
+            ok = ui->treeQuads->topLevelItemCount() > 0;
+    }
+    ui->pushExport->setEnabled(ok);
 }

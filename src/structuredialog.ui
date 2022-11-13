@@ -10,20 +10,20 @@
     <normaloff>:/icons/logo.png</normaloff>:/icons/logo.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
-   <item row="0" column="0">
-    <widget class="QGroupBox" name="groupVis">
-     <property name="title">
-      <string>Maximum scale for structure visibility</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0">
+   <item row="1" column="0" colspan="2">
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons">
       <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok|QDialogButtonBox::RestoreDefaults</set>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" colspan="2">
+    <widget class="QGroupBox" name="groupVis">
+     <property name="title">
+      <string>Maximum scale for structure visibility</string>
      </property>
     </widget>
    </item>

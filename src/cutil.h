@@ -159,16 +159,18 @@ inline int str2seed(const QString &str, uint64_t *out)
     return S_TEXT;
 }
 
-
 struct IdCmp
 {
     enum
     {
         SORT_ID,
         SORT_LEX,
+        SORT_DIM,
     };
 
-    IdCmp(int mode, int mc, int dim) : mode(mode),mc(mc),dim(dim) {}
+    IdCmp(int mode, int mc, int dim) : mode(mode),mc(mc),dim(dim)
+    {
+    }
 
     int mode;
     int mc;
@@ -190,6 +192,13 @@ struct IdCmp
         }
         if (v1 ^ v2)
             return v1;
+        if (mode == SORT_DIM)
+        {
+            int d1 = getDimension(id1);
+            int d2 = getDimension(id2);
+            if (d1 != d2)
+                return (d1==0 ? 0 : d1==-1 ? 1 : 2) < (d2==0 ? 0 : d2==-1 ? 1 : 2);
+        }
         const char *s1 = biome2str(mc, id1);
         const char *s2 = biome2str(mc, id2);
         if (!s1 && !s2) return id1 < id2;

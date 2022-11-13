@@ -533,7 +533,13 @@ static bool isVariantOk(const Condition *c, WorldGen *g, int stype, int varbiome
     {
         if (g->mc < MC_1_10) return true;
         getVariant(&sv, stype, g->mc, g->seed, pos->x, pos->z, varbiome);
-        if ((c->varflags & Condition::VAR_ABANODONED) && !sv.abandoned) return false;
+        if (c->varflags & Condition::VAR_ABANODONED)
+        {
+            if ((c->varflags & Condition::VAR_NOT) && sv.abandoned)
+                return false;
+            if (!(c->varflags & Condition::VAR_NOT) && !sv.abandoned)
+                return false;
+        }
         if (!(c->varflags & Condition::VAR_WITH_START) || g->mc < MC_1_14) return true;
     }
     else if (stype == Bastion)
@@ -555,10 +561,11 @@ static bool isVariantOk(const Condition *c, WorldGen *g, int stype, int varbiome
         if (!(c->varflags & Condition::VAR_ENDSHIP)) return true;
         Piece pieces[END_CITY_PIECES_MAX];
         int i, n = getEndCityPieces(pieces, g->seed, pos->x >> 4, pos->z >> 4);
+        bool withship = !(c->varflags & Condition::VAR_NOT);
         for (i = 0; i < n; i++)
             if (pieces[i].type == END_SHIP)
-                return true;
-        return false;
+                return withship;
+        return !withship;
     }
     else if (stype == Fortress)
     {
@@ -1261,7 +1268,7 @@ L_qm_any:
         else
         {   // check if the area is entirely outside the radii ranges in which strongholds can generate
             if (rmax < 1408*1408)
-                return COND_FAILED;
+                return cond->count == 0 ? COND_OK : COND_FAILED;
             rmin = sqrt(rmin);
             rmax = sqrt(rmax);
             r = (rmax - 1408) / 3072;       // maximum relevant ring number
@@ -1296,7 +1303,7 @@ L_qm_any:
             gen->init4Dim(0);
             while (nextStronghold(&sh, &gen->g) > 0)
             {
-                if (*abort || sh.ringnum > r)
+                if (*abort)
                     break;
                 bool inside;
                 if (rmax)
@@ -1333,8 +1340,7 @@ L_qm_any:
                         icnt++;
                     }
                 }
-
-                if (sh.ringnum == r && sh.ringidx+1 == sh.ringmax)
+                if (sh.ringnum > r)
                     break;
             }
             if (cond->count == 0)
@@ -1510,15 +1516,17 @@ L_noise_biome:
 
 
     case F_BIOME_CENTER:
+    case F_BIOME_CENTER_256:
         if (pass == PASS_FULL_64)
         {
-            rx1 = ((cond->x1 << 2) + at.x) >> 2;
-            rz1 = ((cond->z1 << 2) + at.z) >> 2;
-            rx2 = ((cond->x2 << 2) + at.x) >> 2;
-            rz2 = ((cond->z2 << 2) + at.z) >> 2;
+            s = finfo.pow2;
+            rx1 = ((cond->x1 << s) + at.x) >> s;
+            rz1 = ((cond->z1 << s) + at.z) >> s;
+            rx2 = ((cond->x2 << s) + at.x) >> s;
+            rz2 = ((cond->z2 << s) + at.z) >> s;
             int w = rx2 - rx1 + 1;
             int h = rz2 - rz1 + 1;
-            Range r = {4, rx1, rz1, w, h, cond->y >> 2, 1};
+            Range r = {finfo.step, rx1, rz1, w, h, cond->y >> 2, 1};
             gen->init4Dim(0);
 
             if (cond->count == 0)

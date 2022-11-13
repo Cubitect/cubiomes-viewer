@@ -21,7 +21,7 @@ class AnalysisBiomes : public QThread
     Q_OBJECT
 public:
     explicit AnalysisBiomes(QObject *parent = nullptr)
-        : QThread(parent) {}
+        : QThread(parent),idx() {}
 
     virtual void run() override;
     void runStatistics(Generator *g);
@@ -35,11 +35,14 @@ public:
     QVector<uint64_t> seeds;
     WorldInfo wi;
     std::atomic_bool stop;
+    std::atomic_int idx;
     int dims[3];
-    int x1, z1, x2, z2;
-    int scale;
-    uint64_t samples;
-    int locate;
+    struct Dat {
+        int x1, z1, x2, z2;
+        int scale;
+        int locate;
+        uint64_t samples;
+    } dat;
     int minsize;
     int tolerance;
 };
@@ -50,14 +53,14 @@ public:
     explicit BiomeTableModel(QObject *parent = nullptr) :
         QAbstractTableModel(parent), cmp(IdCmp::SORT_LEX, -1, DIM_UNDEF) {}
 
-    virtual int rowCount(const QModelIndex&) const override { return ids.size(); }
-    virtual int columnCount(const QModelIndex&) const override { return seeds.size(); }
+    virtual int rowCount(const QModelIndex&) const override { return seeds.size(); }
+    virtual int columnCount(const QModelIndex&) const override { return ids.size(); }
 
     virtual QVariant data(const QModelIndex& index, int role) const override;
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
-    int insertId(int id);
-    int insertSeed(uint64_t seed);
+    void insertIds(QSet<int>& ids);
+    void insertSeeds(QList<uint64_t>& seeds);
     void reset(int mc);
 
     QList<int> ids;
@@ -71,7 +74,7 @@ class BiomeSortProxy : public QSortFilterProxyModel
     Q_OBJECT
 
 public:
-    BiomeSortProxy(QObject *parent = nullptr) : QSortFilterProxyModel(parent),column(),order() {}
+    BiomeSortProxy(QObject *parent = nullptr) : QSortFilterProxyModel(parent),column(),order(Qt::AscendingOrder) {}
 
     virtual bool lessThan(const QModelIndex& a, const QModelIndex& b) const override
     {
@@ -82,6 +85,8 @@ public:
 
     virtual void sort(int column, Qt::SortOrder order) override
     {
+        if (column >= columnCount())
+            return;
         if (this->column == -1)
             QSortFilterProxyModel::sort(-1, order);
         else
@@ -92,6 +97,22 @@ public:
 
     int column;
     Qt::SortOrder order;
+};
+
+class BiomeHeader : public QHeaderView
+{
+    Q_OBJECT
+
+public:
+    BiomeHeader(QWidget *parent = nullptr);
+
+    void onSectionPress(int section);
+    virtual bool event(QEvent *e) override;
+    virtual void paintSection(QPainter *painter, const QRect& rect, int section) const override;
+    virtual QSize sectionSizeFromContents(int section) const override;
+
+    int hover;
+    int pressed;
 };
 
 class TabBiomes : public QWidget, public ISaveTab
@@ -109,23 +130,21 @@ public:
     void refreshBiomes(int activeid = -1);
 
 private slots:
+    void onLocateHeaderClick();
+    void onTableSort(int column, Qt::SortOrder);
     void onAnalysisSeedDone(uint64_t seed, QVector<uint64_t> idcnt);
     void onAnalysisSeedItem(QTreeWidgetItem *item);
     void onAnalysisFinished();
-    void onSort(int column, Qt::SortOrder);
+    void onBufferTimeout();
 
     void on_pushStart_clicked();
     void on_pushExport_clicked();
-
     void on_table_doubleClicked(const QModelIndex &index);
-
     void on_buttonFromVisible_clicked();
-
     void on_radioFullSample_toggled(bool checked);
-
     void on_lineBiomeSize_textChanged(const QString &arg1);
-
-    void on_treeWidget_itemClicked(QTreeWidgetItem *item, int column);
+    void on_treeLocate_itemClicked(QTreeWidgetItem *item, int column);
+    void on_tabWidget_currentChanged(int index);
 
 private:
     Ui::TabBiomes *ui;
@@ -133,7 +152,15 @@ private:
     AnalysisBiomes thread;
     BiomeTableModel *model;
     BiomeSortProxy *proxy;
-    std::map<QString, int> str2biome;
+    QMap<QString, int> str2biome;
+    AnalysisBiomes::Dat dats, datl;
+    int sortcol;
+
+    QElapsedTimer elapsed;
+    uint64_t updt;
+    uint64_t nextupdate;
+    QVector<QVector<uint64_t>> qbufs;
+    QList<QTreeWidgetItem*> qbufl;
 };
 
 #endif // TABBIOMES_H

@@ -29,9 +29,9 @@
         <file>icons/map.png</file>
         <file>icons/quad.png</file>
         <file>icons/tempcat.png</file>
-        <file>icons/check0.png</file>
-        <file>icons/check1.png</file>
-        <file>icons/check2.png</file>
+        <file>icons/check_unchecked.png</file>
+        <file>icons/check_include.png</file>
+        <file>icons/check_exclude.png</file>
         <file>icons/origin.png</file>
         <file>icons/treasure.png</file>
         <file>icons/treasure_d.png</file>
@@ -69,5 +69,7 @@
         <file>icons/portal_lit.png</file>
         <file>icons/portal_giant.png</file>
         <file>icons/end_ship.png</file>
+        <file>icons/check_exclude_d.png</file>
+        <file>icons/check_include_d.png</file>
     </qresource>
 </RCC>

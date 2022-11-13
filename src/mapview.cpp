@@ -52,9 +52,7 @@ MapView::MapView(QWidget *parent)
 {
     memset(sshow, 0, sizeof(sshow));
 
-    QFont mono = QFont("Monospace", 9);
-    mono.setStyleHint(QFont::TypeWriter);
-    setFont(mono);
+    setFont(g_font_mono);
 
     QPalette pal = palette();
     pal.setColor(QPalette::Background, Qt::black);
@@ -67,7 +65,7 @@ MapView::MapView(QWidget *parent)
 
     overlay = new MapOverlay(this);
     overlay->setMouseTracking(true);
-    overlay->setFont(mono);
+    overlay->setFont(g_font_mono);
 
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
@@ -226,7 +224,7 @@ void MapView::showContextMenu(const QPoint &pos)
     menu.addAction(tr("Copy tp:    ")+tp, [=](){ this->copyText(tp); });
     menu.addAction(tr("Copy block: ")+coords, [=](){ this->copyText(coords); });
     menu.addAction(tr("Copy chunk: ")+chunk, [=](){ this->copyText(chunk); });
-    menu.addAction(tr("Go to coordinates..."), this, &MapView::onGoto);
+    menu.addAction(tr("Go to coordinates..."), this, &MapView::onGoto, QKeySequence(Qt::CTRL + Qt::Key_G));
     menu.exec(mapToGlobal(pos));
 }
 
@@ -312,12 +310,14 @@ void MapView::resizeEvent(QResizeEvent *e)
 
 void MapView::wheelEvent(QWheelEvent *e)
 {
+    qreal zoommin = 1.0 / 2048.0, zoommax = 128.0;
     const qreal ang = e->angleDelta().y() / 8; // e->delta() / 8;
+    if (ang < 0 && blocks2pix < zoommin) return;
+    if (ang > 0 && blocks2pix > zoommax) return;
     blocks2pix *= pow(2, ang/100);
-    qreal scalemin = 128.0, scalemax = 1.0 / 4096.0;
-    if (blocks2pix > scalemin) blocks2pix = scalemin;
-    if (blocks2pix < scalemax) blocks2pix = scalemax;
-    update();//repaint();
+    if (ang < 0 && blocks2pix < zoommin) blocks2pix = zoommin;
+    if (ang > 0 && blocks2pix > zoommax) blocks2pix = zoommax;
+    update();
 }
 
 void MapView::mousePressEvent(QMouseEvent *e)

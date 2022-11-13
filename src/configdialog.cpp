@@ -28,9 +28,7 @@ ConfigDialog::ConfigDialog(QWidget *parent, Config *config)
     }
 #endif
 
-    QFont mono = QFont("Monospace", 9);
-    mono.setStyleHint(QFont::TypeWriter);
-    ui->buttonBiomeColor->setFont(mono);
+    ui->buttonBiomeColor->setFont(g_font_mono);
 
     ui->lineMatching->setValidator(new QIntValidator(1, 99999999, ui->lineMatching));
 
@@ -56,6 +54,9 @@ void ConfigDialog::initSettings(Config *config)
     ui->lineMatching->setText(QString::number(config->maxMatching));
     ui->lineGridSpacing->setText(config->gridSpacing ? QString::number(config->gridSpacing) : "");
     ui->spinCacheSize->setValue(config->mapCacheSize);
+    ui->lineSep->setText(config->separator);
+    int idx = config->quote == "\'" ? 1 : config->quote== "\"" ? 2 : 0;
+    ui->comboQuote->setCurrentIndex(idx);
 
     setBiomeColorPath(config->biomeColorPath);
 }
@@ -72,6 +73,9 @@ Config ConfigDialog::getSettings()
     conf.maxMatching = ui->lineMatching->text().toInt();
     conf.gridSpacing = ui->lineGridSpacing->text().toInt();
     conf.mapCacheSize = ui->spinCacheSize->value();
+    conf.separator = ui->lineSep->text();
+    int idx = ui->comboQuote->currentIndex();
+    conf.quote = idx == 1 ? "\'" : idx == 2 ? "\"" : "";
 
     if (!conf.maxMatching) conf.maxMatching = 65536;
 

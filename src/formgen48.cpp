@@ -79,9 +79,7 @@ FormGen48::FormGen48(MainWindow *parent)
     connect(ui->lineSalt, SIGNAL(editingFinished()), SLOT(onChange()));
     connect(ui->lineListSalt, SIGNAL(editingFinished()), SLOT(onChange()));
 
-    QFont mono = QFont("Monospace", 9);
-    mono.setStyleHint(QFont::TypeWriter);
-    ui->lineList48->setFont(mono);
+    ui->lineList48->setFont(g_font_mono);
 
     cond.type = 0;
     Gen48Settings defaults;

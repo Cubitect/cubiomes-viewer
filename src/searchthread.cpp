@@ -121,6 +121,7 @@ bool SearchMaster::set(
         }
         if (finfo.cat == CAT_BIOMES &&
             c.type != F_BIOME_CENTER &&
+            c.type != F_BIOME_CENTER_256 &&
             c.type != F_TEMPS &&
             c.type != F_CLIMATE_NOISE)
         {
@@ -221,7 +222,7 @@ bool SearchMaster::set(
 static int check(uint64_t s48, void *data)
 {
     (void) data;
-    const StructureConfig sconf = {};
+    const StructureConfig sconf = {0,0,0,0,0};
     return isQuadBaseFeature24(sconf, s48, 7+1, 7+1, 9+1) != 0;
 }
 
@@ -487,8 +488,8 @@ void SearchMaster::run()
     {
         SearchWorker *worker = new SearchWorker(this);
         QObject::connect(
-            worker, &SearchWorker::results,
-            parent, &FormSearchControl::searchResultsAdd,
+            worker, &SearchWorker::result,
+            parent, &FormSearchControl::onSearchResult,
             Qt::BlockingQueuedConnection);
         QObject::connect(
             worker, &SearchWorker::finished,
@@ -766,9 +767,8 @@ void SearchWorker::run()
                     == COND_OK
                 )
                 {
-                    QVector<uint64_t> matches = {seed};
                     if (!*abort)
-                        emit results(matches, false);
+                        emit result(seed);
                 }
             }
             //if (ie == len) // done
@@ -793,9 +793,8 @@ void SearchWorker::run()
                         == COND_OK
                     )
                     {
-                        QVector<uint64_t> matches = {seed};
                         if (!*abort)
-                            emit results(matches, false);
+                            emit result(seed);
                     }
 
                     if (++lowidx >= len)
@@ -818,9 +817,8 @@ void SearchWorker::run()
                         == COND_OK
                     )
                     {
-                        QVector<uint64_t> matches = {seed};
                         if (!*abort)
-                            emit results(matches, false);
+                            emit result(seed);
                     }
 
                     if (seed == ~(uint64_t)0)
@@ -865,9 +863,8 @@ void SearchWorker::run()
                     == COND_OK
                 )
                 {
-                    QVector<uint64_t> matches = {seed};
                     if (!*abort)
-                        emit results(matches, false);
+                        emit result(seed);
                 }
 
                 if (++high >= 0x10000)

@@ -6,6 +6,8 @@
 #include <QKeyEvent>
 #include <QMessageBox>
 #include <QElapsedTimer>
+#include <QAbstractTableModel>
+#include <QSortFilterProxyModel>
 
 #include <deque>
 
@@ -19,6 +21,72 @@ class FormSearchControl;
 
 class MainWindow;
 
+class SeedTableModel : public QAbstractTableModel
+{
+public:
+    explicit SeedTableModel(QObject *parent = nullptr) :
+        QAbstractTableModel(parent) {}
+
+    enum { COL_SEED, COL_TOP16, COL_HEX48, COL_MAX };
+
+    virtual int rowCount(const QModelIndex&) const override { return seeds.size(); }
+    virtual int columnCount(const QModelIndex&) const override { return COL_MAX; }
+
+    virtual QVariant data(const QModelIndex& index, int role) const override;
+    virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+
+    int insertSeeds(QVector<uint64_t> seeds);
+    void removeRow(int row);
+    void reset();
+
+    struct Seed
+    {
+        uint64_t seed;
+        QVariant varSeed, varHex48, varTop16;
+        QVariant txtSeed, txtHex48, txtTop16;
+    };
+    QList<Seed> seeds;
+};
+
+class SeedSortProxy : public QSortFilterProxyModel
+{
+    Q_OBJECT
+
+public:
+    SeedSortProxy(QObject *parent = nullptr) : QSortFilterProxyModel(parent),column(),order(Qt::DescendingOrder) {}
+
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override
+    {
+        if (orientation == Qt::Vertical && role == Qt::DisplayRole)
+            return QVariant::fromValue(section + 1);
+        return QSortFilterProxyModel::headerData(section, orientation, role);
+    }
+
+    virtual bool lessThan(const QModelIndex& a, const QModelIndex& b) const override
+    {
+        uint64_t av = sourceModel()->data(a, Qt::UserRole).toULongLong();
+        uint64_t bv = sourceModel()->data(b, Qt::UserRole).toULongLong();
+        if (a.column() == SeedTableModel::COL_SEED)
+            return (int64_t) bv < (int64_t) av;
+        else
+            return bv < av;
+    }
+
+    virtual void sort(int column, Qt::SortOrder order) override
+    {
+        if (column >= columnCount())
+            return;
+        if (this->column == -1)
+            QSortFilterProxyModel::sort(-1, order);
+        else
+            QSortFilterProxyModel::sort(column, order);
+        this->column = column;
+        this->order = order;
+    }
+
+    int column;
+    Qt::SortOrder order;
+};
 
 class FormSearchControl : public QWidget
 {
@@ -53,8 +121,9 @@ public slots:
     void on_buttonStart_clicked();
     void on_buttonMore_clicked();
 
-    void on_listResults_itemSelectionChanged();
-    void on_listResults_customContextMenuRequested(const QPoint& pos);
+    void onSort(int column, Qt::SortOrder);
+    void onSeedSelectionChanged();
+    void on_results_customContextMenuRequested(const QPoint& pos);
 
     void on_buttonSearchHelp_clicked();
 
@@ -62,6 +131,8 @@ public slots:
 
     void pasteResults();
     int pasteList(bool dummy);
+    void onBufferTimeout();
+    void onSearchResult(uint64_t seed);
     int searchResultsAdd(QVector<uint64_t> seeds, bool countonly);
     void searchProgressReset();
     void searchProgress(uint64_t last, uint64_t end, int64_t seed);
@@ -75,9 +146,12 @@ protected:
 
 public: 
     struct TProg { uint64_t ns, prog; };
+
 private:
     MainWindow *parent;
     Ui::FormSearchControl *ui;
+    SeedTableModel *model;
+    SeedSortProxy *proxy;
     ProtoBaseDialog *protodialog;
     SearchMaster sthread;
     QTimer stimer;
@@ -94,6 +168,10 @@ private:
 
     // min and max seeds values
     uint64_t smin, smax;
+
+    // found seeds that are waiting to be added to results
+    QVector<uint64_t> qbuf;
+    quint64 nextupdate;
 };
 
 #endif // FORMSEARCHCONTROL_H

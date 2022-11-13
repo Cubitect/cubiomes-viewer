@@ -12,12 +12,91 @@
 #include <QClipboard>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QFontMetrics>
 
+
+QVariant SeedTableModel::data(const QModelIndex& index, int role) const
+{
+    if (role == Qt::DisplayRole)
+    {
+        if (index.column() == COL_SEED)
+            return seeds[index.row()].txtSeed;
+        if (index.column() == COL_HEX48)
+            return seeds[index.row()].txtHex48;
+        if (index.column() == COL_TOP16)
+            return seeds[index.row()].txtTop16;
+    }
+    else if (role == Qt::UserRole)
+    {
+        if (index.column() == COL_HEX48)
+            return seeds[index.row()].varHex48;
+        if (index.column() == COL_TOP16)
+            return seeds[index.row()].varTop16;
+        return seeds[index.row()].varSeed;
+    }
+    return QVariant::Invalid;
+}
+
+QVariant SeedTableModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (section < 0)
+        return QVariant::Invalid;
+    if (role == Qt::InitialSortOrderRole)
+        return QVariant::fromValue(Qt::DescendingOrder);
+    if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
+    {
+        if (section == COL_SEED)
+            return QVariant::fromValue(tr("seed"));
+        if (section == COL_TOP16)
+            return QVariant::fromValue(tr("top 16"));
+        if (section == COL_HEX48)
+            return QVariant::fromValue(tr("lower 48 bit"));
+    }
+    if (role == Qt::DisplayRole && orientation == Qt::Vertical)
+        return QVariant::fromValue(section + 1);
+    return QVariant::Invalid;
+}
+
+int SeedTableModel::insertSeeds(QVector<uint64_t> newseeds)
+{
+    int row = seeds.size();
+    beginInsertRows(QModelIndex(), row, row + newseeds.size()-1);
+    for (uint64_t seed : qAsConst(newseeds))
+    {
+        Seed s;
+        s.seed = seed;
+        s.varSeed = QVariant::fromValue(seed);
+        s.varTop16 = QVariant::fromValue((quint64)(seed>>48) & 0xFFFF);
+        s.varHex48 = QVariant::fromValue((quint64)(seed & MASK48));
+        s.txtSeed = QVariant::fromValue(QString::asprintf("%" PRId64, seed));
+        s.txtTop16 = QVariant::fromValue(QString::asprintf("%04llx", (quint64)(seed>>48) & 0xFFFF));
+        s.txtHex48 = QVariant::fromValue(QString::asprintf("%012llx", (quint64)(seed & MASK48)));
+        seeds.append(s);
+    }
+    endInsertRows();
+    return row;
+}
+
+void SeedTableModel::removeRow(int row)
+{
+    beginRemoveRows(QModelIndex(), row, row);
+    seeds.removeAt(row);
+    endRemoveRows();
+}
+
+void SeedTableModel::reset()
+{
+    beginRemoveRows(QModelIndex(), 0, seeds.size());
+    seeds.clear();
+    endRemoveRows();
+}
 
 FormSearchControl::FormSearchControl(MainWindow *parent)
     : QWidget(parent)
     , parent(parent)
     , ui(new Ui::FormSearchControl)
+    , model(new SeedTableModel(this))
+    , proxy(new SeedSortProxy(this))
     , protodialog()
     , sthread(this)
     , stimer()
@@ -28,21 +107,37 @@ FormSearchControl::FormSearchControl(MainWindow *parent)
     , slist64()
     , smin(0)
     , smax(~(uint64_t)0)
+    , qbuf()
+    , nextupdate()
 {
     ui->setupUi(this);
     protodialog = new ProtoBaseDialog(this);
 
-    QFont mono = QFont("Monospace", 9);
-    mono.setStyleHint(QFont::TypeWriter);
-    ui->listResults->setFont(mono);
-    ui->progressBar->setFont(mono);
-    ui->labelStatus->setFont(mono);
+    ui->results->setFont(g_font_mono);
+    ui->progressBar->setFont(g_font_mono);
+    ui->labelStatus->setFont(g_font_mono);
 
-    ui->listResults->horizontalHeader()->setFont(mono);
+    proxy->setSourceModel(model);
+    ui->results->setModel(proxy);
+
+    ui->results->horizontalHeader()->setFont(g_font_mono);
+    ui->results->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+    ui->results->verticalHeader()->setDefaultSectionSize(QFontMetrics(g_font_mono).height());
+    ui->results->setColumnWidth(SeedTableModel::COL_SEED, 200);
+    ui->results->setColumnWidth(SeedTableModel::COL_TOP16, 60);
+    ui->results->setColumnWidth(SeedTableModel::COL_HEX48, 120);
+
+    connect(ui->results->horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &FormSearchControl::onSort);
+    ui->results->sortByColumn(-1, Qt::AscendingOrder);
 
     connect(&sthread, &SearchMaster::searchFinish, this, &FormSearchControl::searchFinish, Qt::QueuedConnection);
 
     connect(&stimer, &QTimer::timeout, this, QOverload<>::of(&FormSearchControl::resultTimeout));
+
+    connect(
+        ui->results->selectionModel(),
+        SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
+        SLOT(onSeedSelectionChanged()));
 
     searchProgressReset();
     ui->spinThreads->setMaximum(QThread::idealThreadCount());
@@ -62,11 +157,11 @@ FormSearchControl::~FormSearchControl()
 
 QVector<uint64_t> FormSearchControl::getResults()
 {
-    int n = ui->listResults->rowCount();
+    int n = proxy->rowCount();
     QVector<uint64_t> results = QVector<uint64_t>(n);
     for (int i = 0; i < n; i++)
     {
-        results[i] = ui->listResults->item(i, 0)->data(Qt::UserRole).toULongLong();
+        results[i] = proxy->data(proxy->index(i, SeedTableModel::COL_SEED), Qt::UserRole).toULongLong();
     }
     return results;
 }
@@ -210,8 +305,7 @@ void FormSearchControl::closeProtobaseMsg()
 
 void FormSearchControl::on_buttonClear_clicked()
 {
-    ui->listResults->clearContents();
-    ui->listResults->setRowCount(0);
+    model->reset();
     searchProgressReset();
     ui->lineStart->setText("0");
 }
@@ -266,6 +360,7 @@ void FormSearchControl::on_buttonStart_clicked()
             ui->buttonStart->setText(tr("Abort search"));
             ui->buttonStart->setIcon(QIcon(":/icons/cancel.png"));
             searchLockUi(true);
+            nextupdate = 0;
             sthread.start();
             elapsed.start();
             stimer.start(250);
@@ -310,17 +405,18 @@ void FormSearchControl::on_buttonMore_clicked()
     }
 }
 
-void FormSearchControl::on_listResults_itemSelectionChanged()
+void FormSearchControl::onSeedSelectionChanged()
 {
-    int row = ui->listResults->currentRow();
-    if (row >= 0 && row < ui->listResults->rowCount())
+    int row = ui->results->currentIndex().row();
+    if (row >= 0 && row < ui->results->model()->rowCount())
     {
-        uint64_t s = ui->listResults->item(row, 0)->data(Qt::UserRole).toULongLong();
+        QModelIndex idx = ui->results->model()->index(row, SeedTableModel::COL_SEED);
+        uint64_t s = ui->results->model()->data(idx, Qt::UserRole).toULongLong();
         emit selectedSeedChanged(s);
     }
 }
 
-void FormSearchControl::on_listResults_customContextMenuRequested(const QPoint &pos)
+void FormSearchControl::on_results_customContextMenuRequested(const QPoint &pos)
 {
     QMenu menu(this);
 
@@ -330,19 +426,19 @@ void FormSearchControl::on_listResults_customContextMenuRequested(const QPoint &
     QAction *actremove = menu.addAction(QIcon::fromTheme("list-remove"),
         tr("Remove selected seed"), this,
         &FormSearchControl::removeCurrent, QKeySequence::Delete);
-    actremove->setEnabled(!ui->listResults->selectedItems().empty());
+    actremove->setEnabled(!ui->results->selectionModel()->hasSelection());
 
     QAction *actcopy = menu.addAction(QIcon::fromTheme("edit-copy"),
         tr("Copy list to clipboard"), this,
         &FormSearchControl::copyResults, QKeySequence::Copy);
-    actcopy->setEnabled(ui->listResults->rowCount() > 0);
+    actcopy->setEnabled(ui->results->model()->rowCount() > 0);
 
     int n = pasteList(true);
     QAction *actpaste = menu.addAction(QIcon::fromTheme("edit-paste"),
         tr("Paste %n seed(s) from clipboard", "", n), this,
         &FormSearchControl::pasteResults, QKeySequence::Paste);
     actpaste->setEnabled(n > 0);
-    menu.exec(ui->listResults->mapToGlobal(pos));
+    menu.exec(ui->results->mapToGlobal(pos));
 }
 
 void FormSearchControl::on_buttonSearchHelp_clicked()
@@ -409,11 +505,51 @@ int FormSearchControl::pasteList(bool dummy)
     return 0;
 }
 
+void FormSearchControl::onSort(int, Qt::SortOrder)
+{
+    // We want to achieve: none -> descending -> ascending -> none
+    // The headerview flips the indicator with the logic:
+    //  if (same_section)
+    //      new_order = old_order == descending ? ascending : descending
+    //  else
+    //      new_order = InitialSortOrder (else ascending)
+    QHeaderView *header = ui->results->horizontalHeader();
+
+    if (proxy->order == Qt::AscendingOrder && proxy->column != -1)
+    {
+        header->setSortIndicatorShown(false);
+        header->setSortIndicator(-1, Qt::DescendingOrder);
+        proxy->column = -1;
+    }
+    else
+    {
+        header->setSortIndicatorShown(true);
+    }
+}
+
+void FormSearchControl::onSearchResult(uint64_t seed)
+{
+    qbuf.push_back(seed);
+    quint64 ns = elapsed.nsecsElapsed();
+    if (ns > nextupdate)
+    {
+        quint64 buffer_ms = 100; // advanced option
+        QTimer::singleShot(buffer_ms, this, &FormSearchControl::onBufferTimeout);
+        nextupdate = ns + buffer_ms * 1e6;
+    }
+}
+
+void FormSearchControl::onBufferTimeout()
+{
+    searchResultsAdd(qbuf, false);
+    qbuf.clear();
+    nextupdate = 0;
+}
 
 int FormSearchControl::searchResultsAdd(QVector<uint64_t> seeds, bool countonly)
 {
     const Config& config = parent->config;
-    int ns = ui->listResults->rowCount();
+    int ns = model->seeds.size();
     int n = ns;
     if (n >= config.maxMatching)
         return 0;
@@ -425,12 +561,9 @@ int FormSearchControl::searchResultsAdd(QVector<uint64_t> seeds, bool countonly)
     QSet<uint64_t> current;
     current.reserve(n + seeds.size());
     for (int i = 0; i < n; i++)
-    {
-        uint64_t seed = ui->listResults->item(i, 0)->data(Qt::UserRole).toULongLong();
-        current.insert(seed);
-    }
+        current.insert(model->seeds[i].seed);
 
-    ui->listResults->setSortingEnabled(false);
+    QVector<uint64_t> newseeds;
     for (uint64_t s : seeds)
     {
         if (current.contains(s))
@@ -441,19 +574,15 @@ int FormSearchControl::searchResultsAdd(QVector<uint64_t> seeds, bool countonly)
             continue;
         }
         current.insert(s);
-        QTableWidgetItem* s48item = new QTableWidgetItem();
-        QTableWidgetItem* seeditem = new QTableWidgetItem();
-        s48item->setData(Qt::UserRole, QVariant::fromValue(s));
-        s48item->setText(QString::asprintf("%012llx|%04x",
-                (qulonglong)(s & MASK48), (uint)(s >> 48) & 0xffff));
-        seeditem->setData(Qt::DisplayRole, QVariant::fromValue((int64_t)s));
-        ui->listResults->insertRow(n);
-        ui->listResults->setItem(n, 0, s48item);
-        ui->listResults->setItem(n, 1, seeditem);
+        newseeds.append(s);
         n++;
     }
-    ui->listResults->setSortingEnabled(true);
-
+    if (!newseeds.empty())
+    {
+        ui->results->setSortingEnabled(false);
+        model->insertSeeds(newseeds);
+        ui->results->setSortingEnabled(true);
+    }
     if (countonly == false && n >= config.maxMatching)
     {
         sthread.stop();
@@ -640,18 +769,19 @@ void FormSearchControl::resultTimeout()
 
 void FormSearchControl::removeCurrent()
 {
-    int row = ui->listResults->currentRow();
+    int row = ui->results->selectionModel()->currentIndex().row();
     if (row >= 0)
-        ui->listResults->removeRow(row);
+        model->removeRow(row);
 }
 
 void FormSearchControl::copyResults()
 {
     QString text;
-    int n = ui->listResults->rowCount();
+    int n = ui->results->model()->rowCount();
     for (int i = 0; i < n; i++)
     {
-        uint64_t seed = ui->listResults->item(i, 0)->data(Qt::UserRole).toULongLong();
+        QModelIndex idx = ui->results->model()->index(i, SeedTableModel::COL_SEED);
+        uint64_t seed = ui->results->model()->data(idx, Qt::UserRole).toULongLong();
         text += QString::asprintf("%" PRId64 "\n", seed);
     }
 
@@ -661,7 +791,7 @@ void FormSearchControl::copyResults()
 
 void FormSearchControl::keyReleaseEvent(QKeyEvent *event)
 {
-    if (ui->listResults->hasFocus())
+    if (ui->results->hasFocus())
     {
         if (event->matches(QKeySequence::Delete))
             removeCurrent();

@@ -84,6 +84,7 @@ enum
     F_ANCIENT_CITY,
     F_LOGIC_NOT,
     F_BIOME_CENTER,
+    F_BIOME_CENTER_256,
     // new filters should be added here at the end to keep some downwards compatibility
     FILTER_MAX,
 };
@@ -315,19 +316,24 @@ static const struct FilterList
             "at layer OCEAN TEMPERATURE with scale 1:256. "
             "This generation layer depends only on the lower 48-bits of the seed.")
         };
-        list[F_BIOME_CENTER] = FilterInfo{
-            CAT_BIOMES, 1, 1, 1, 0, 0, 0, 4, 2, 1, MC_1_0, MC_NEWEST, 0, 1, disp++,
-            ":icons/map.png",
-            _("Locate biome center 1:4"),
-            _("Finds the center position of a given biome. This requires the full "
-            "generation of those biomes and ")
-        };
         list[F_CLIMATE_NOISE] = FilterInfo{
             CAT_BIOMES, 0, 1, 1, 0, 0, 0, 4, 2, 0, MC_1_18, MC_NEWEST, 0, 0, disp++,
             ":icons/map.png",
             _("Climate parameters 1:4"),
             _("Custom limits for the required and allowed climate noise parameters that "
             "the specified area should cover.")
+        };
+        list[F_BIOME_CENTER] = FilterInfo{
+            CAT_BIOMES, 1, 1, 1, 0, 0, 0, 4, 2, 1, MC_1_0, MC_NEWEST, 0, 1, disp++,
+            ":icons/map.png",
+            _("Locate biome center 1:4"),
+            _("Finds the center position of a given biome.")
+        };
+        list[F_BIOME_CENTER_256] = FilterInfo{
+            CAT_BIOMES, 1, 1, 1, 0, 0, 0, 256, 8, 1, MC_1_0, MC_1_17, 0, 1, disp++,
+            ":icons/map.png",
+            _("Locate biome center 1:256"),
+            _("Finds the center position of a given biome. Based on the 1:256 biome layer.")
         };
         list[F_TEMPS] = FilterInfo{
             CAT_BIOMES, 1, 1, 1, 0, 0, 0, 1024, 10, 0, MC_1_7, MC_1_17, 0, 0, disp++,
@@ -586,6 +592,7 @@ struct /*__attribute__((packed))*/ Condition
         VAR_ABANODONED  = 0x02, // zombie village
         VAR_ENDSHIP     = 0x04, // end city ship
         VAR_DENSE_BB    = 0x08, // fortress with a 2x2 arrangement of start/crossings
+        VAR_NOT         = 0x10, // invert flag (e.g. not abandoned)
     };
     int16_t     type;
     uint16_t    meta;

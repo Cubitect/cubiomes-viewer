@@ -489,7 +489,7 @@
           <number>0</number>
          </property>
          <property name="currentIndex">
-          <number>2</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="pageNone">
           <property name="enabled">
@@ -701,8 +701,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>60</width>
-                   <height>20</height>
+                   <width>634</width>
+                   <height>300</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -1013,8 +1013,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>60</width>
-                   <height>20</height>
+                   <width>634</width>
+                   <height>253</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -1068,6 +1068,9 @@
                 <property name="text">
                  <string>Abandoned</string>
                 </property>
+                <property name="tristate">
+                 <bool>true</bool>
+                </property>
                </widget>
               </item>
               <item row="1" column="0" colspan="2">
@@ -1080,8 +1083,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>60</width>
-                   <height>20</height>
+                   <width>634</width>
+                   <height>335</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_3_1">
@@ -1137,8 +1140,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>60</width>
-                   <height>20</height>
+                   <width>634</width>
+                   <height>335</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_3_2">
@@ -1242,8 +1245,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>60</width>
-                   <height>20</height>
+                   <width>634</width>
+                   <height>335</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_3_3">
@@ -1283,6 +1286,9 @@
                <widget class="QCheckBox" name="checkEndShip">
                 <property name="text">
                  <string>End ship</string>
+                </property>
+                <property name="tristate">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>

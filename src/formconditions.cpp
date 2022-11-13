@@ -40,9 +40,7 @@ FormConditions::FormConditions(QWidget *parent)
     qRegisterMetaType< Condition >("Condition");
     qRegisterMetaTypeStreamOperators< Condition >("Condition");
 
-    QFont mono = QFont("Monospace", 9);
-    mono.setStyleHint(QFont::TypeWriter);
-    ui->listConditionsFull->setFont(mono);
+    ui->listConditionsFull->setFont(g_font_mono);
 }
 
 FormConditions::~FormConditions()

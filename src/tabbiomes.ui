@@ -238,7 +238,7 @@
         </widget>
        </item>
        <item row="3" column="0" colspan="3">
-        <widget class="QTreeWidget" name="treeWidget">
+        <widget class="QTreeWidget" name="treeLocate">
          <property name="font">
           <font>
            <family>Monospace</family>

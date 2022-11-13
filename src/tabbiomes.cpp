@@ -18,22 +18,22 @@ void AnalysisBiomes::run()
     Generator g;
     setupGenerator(&g, wi.mc, wi.large);
 
-    for (int64_t seed : qAsConst(seeds))
+    for (idx = 0; idx < seeds.size(); idx++)
     {
         if (stop) break;
-        wi.seed = seed;
-        if (locate < 0)
-            runStatistics(&g);
-        else
+        wi.seed = seeds[idx];
+        if (dat.locate >= 0)
             runLocate(&g);
+        else
+            runStatistics(&g);
     }
 }
 
 void AnalysisBiomes::runStatistics(Generator *g)
 {
     QVector<uint64_t> idcnt(256);
-    int w = x2 - x1 + 1;
-    int h = z2 - z1 + 1;
+    int w = dat.x2 - dat.x1 + 1;
+    int h = dat.z2 - dat.z1 + 1;
     uint64_t n = w * (uint64_t)h;
 
     for (int d = 0; d < 3; d++)
@@ -42,16 +42,16 @@ void AnalysisBiomes::runStatistics(Generator *g)
             continue;
         applySeed(g, dims[d], wi.seed);
 
-        if (samples >= n)
+        if (dat.samples >= n)
         {   // full area gen => generate 512x512 areas at a time
             const int step = 512;
-            for (int x = x1; x <= x2 && !stop; x += step)
+            for (int x = dat.x1; x <= dat.x2 && !stop; x += step)
             {
-                for (int z = z1; z <= z2 && !stop; z += step)
+                for (int z = dat.z1; z <= dat.z2 && !stop; z += step)
                 {
-                    int w = x2-x+1 < step ? x2-x+1 : step;
-                    int h = z2-z+1 < step ? z2-z+1 : step;
-                    Range r = {scale, x, z, w, h, wi.y, 1};
+                    int w = dat.x2-x+1 < step ? dat.x2-x+1 : step;
+                    int h = dat.z2-z+1 < step ? dat.z2-z+1 : step;
+                    Range r = {dat.scale, x, z, w, h, wi.y, 1};
                     int *ids = allocCache(g, r);
                     genBiomes(g, ids, r);
                     for (int i = 0; i < w*h; i++)
@@ -64,7 +64,7 @@ void AnalysisBiomes::runStatistics(Generator *g)
         {
             std::vector<uint64_t> order;
 
-            if (samples * 2 >= n)
+            if (dat.samples * 2 >= n)
             {   // dense regime => shuffle indeces
                 order.resize(n);
                 for (uint64_t i = 0; i < n; i++)
@@ -78,14 +78,14 @@ void AnalysisBiomes::runStatistics(Generator *g)
                     order[i] = order[idx];
                     order[idx] = t;
                 }
-                order.resize(samples);
+                order.resize(dat.samples);
             }
             else
             {   // sparse regime => fill randomly without reuse
                 std::unordered_set<uint64_t> used;
-                order.reserve(samples);
-                used.reserve(samples);
-                for (uint64_t i = 0; order.size() < samples; i++)
+                order.reserve(dat.samples);
+                used.reserve(dat.samples);
+                for (uint64_t i = 0; order.size() < dat.samples; i++)
                 {
                     if (!(i & 0xffff) && stop)
                         break;
@@ -96,12 +96,12 @@ void AnalysisBiomes::runStatistics(Generator *g)
                 }
             }
 
-            for (uint64_t i = 0; i < samples && !stop; i++)
+            for (uint64_t i = 0; i < dat.samples && !stop; i++)
             {
                 uint64_t idx = order[i];
                 int x = (int) (idx % w);
                 int z = (int) (idx / w);
-                int id = getBiomeAt(g, scale, x1+x, wi.y, z1+z);
+                int id = getBiomeAt(g, dat.scale, dat.x1+x, wi.y, dat.z1+z);
                 idcnt[ id & 0xff ]++;
             }
         }
@@ -117,9 +117,9 @@ void AnalysisBiomes::runLocate(Generator *g)
     enum { MAX_LOCATE = 4096 };
     Pos pos[MAX_LOCATE];
     int siz[MAX_LOCATE];
-    Range r = {4, x1, z1, x2-x1+1, z2-z1+1, wi.y, 1};
+    Range r = {4, dat.x1, dat.z1, dat.x2-dat.x1+1, dat.z2-dat.z1+1, wi.y, 1};
     int n = getBiomeCenters(
-        pos, siz, MAX_LOCATE, g, r, locate, minsize, tolerance,
+        pos, siz, MAX_LOCATE, g, r, dat.locate, minsize, tolerance,
         (volatile char*)&stop
     );
     if (n && !stop)
@@ -148,63 +148,172 @@ QVariant BiomeTableModel::data(const QModelIndex& index, int role) const
 {
     if (role != Qt::DisplayRole || index.row() < 0 || index.column() < 0)
         return QVariant::Invalid;
-    int id = ids[index.row()];
-    int col = index.column();
-    uint64_t seed = seeds[col];
+    int id = ids[index.column()];
+    uint64_t seed = seeds[index.row()];
     return cnt[id][seed];
 }
 
 QVariant BiomeTableModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if (role != Qt::DisplayRole || section < 0)
+    if (section < 0)
         return QVariant::Invalid;
-    if (orientation == Qt::Horizontal)
+    if (role == Qt::InitialSortOrderRole)
+        return QVariant::fromValue(Qt::AscendingOrder);
+    if (role == Qt::DisplayRole && orientation == Qt::Vertical)
     {
         if  (section < seeds.size())
-            return QVariant::fromValue(seeds[section]);
+            return QVariant::fromValue((int64_t)seeds[section]);
     }
-    else
+    if (orientation == Qt::Horizontal)
     {
         if (section < ids.size())
-            return QVariant::fromValue(QString(biome2str(cmp.mc, ids[section])));
+        {
+            if (role == Qt::DisplayRole)
+                return QVariant::fromValue(QString(biome2str(cmp.mc, ids[section])));
+            else
+                return QVariant::fromValue(ids[section]);
+        }
     }
     return QVariant::Invalid;
 }
 
-int BiomeTableModel::insertId(int id)
+void BiomeTableModel::insertIds(QSet<int>& nids)
 {
-    QList<int>::iterator it = std::lower_bound(ids.begin(), ids.end(), id, cmp);
-    if (it != ids.end() && *it == id)
-        return -1;
-    int row = std::distance(ids.begin(), it);
-    //beginInsertRows(QModelIndex(), row, row);
-    ids.insert(row, id);
-    //endInsertRows();
-    return row;
+    for (int id : qAsConst(nids))
+    {
+        QList<int>::iterator it = std::lower_bound(ids.begin(), ids.end(), id, cmp);
+        if (it != ids.end() && *it == id)
+            continue;
+        int i = std::distance(ids.begin(), it);
+        beginInsertColumns(QModelIndex(), i, i);
+        ids.insert(i, id);
+        endInsertColumns();
+    }
 }
 
-int BiomeTableModel::insertSeed(uint64_t seed)
+void BiomeTableModel::insertSeeds(QList<uint64_t>& nseeds)
 {
-    int col = seeds.size();
-    //beginInsertColumns(QModelIndex(), col, col);
-    seeds.append(seed);
-    //endInsertColumns();
-    return col;
+    int i = seeds.size();
+    beginInsertRows(QModelIndex(), i, i+nseeds.size()-1);
+    seeds.append(nseeds);
+    endInsertRows();
 }
 
 void BiomeTableModel::reset(int mc)
 {
-    beginRemoveRows(QModelIndex(), 0, ids.size());
-    ids.clear();
-    endRemoveRows();
-    beginRemoveColumns(QModelIndex(), 0, seeds.size());
+    beginResetModel();
     seeds.clear();
-    endRemoveColumns();
+    ids.clear();
     cnt.clear();
-    cmp.mode = IdCmp::SORT_LEX;
+    cmp.mode = IdCmp::SORT_DIM;
     cmp.dim = DIM_UNDEF;
     cmp.mc = mc;
+    endResetModel();
 }
+
+BiomeHeader::BiomeHeader(QWidget *parent)
+    : QHeaderView(Qt::Horizontal, parent)
+    , hover(-1)
+    , pressed(-1)
+{
+    setSectionsClickable(true);
+    setHighlightSections(true);
+    connect(this, &QHeaderView::sectionPressed, this, &BiomeHeader::onSectionPress);
+}
+
+void BiomeHeader::onSectionPress(int section)
+{
+    pressed = section;
+}
+
+bool BiomeHeader::event(QEvent *e)
+{
+    switch (e->type())
+    {
+    case QEvent::HoverEnter:
+    case QEvent::HoverMove:
+        hover = logicalIndexAt(((QHoverEvent*)e)->pos());
+        break;
+    case QEvent::Leave:
+    case QEvent::HoverLeave:
+        hover = -1;
+        break;
+    default: break;
+    }
+    return QHeaderView::event(e);
+}
+
+void BiomeHeader::paintSection(QPainter *painter, const QRect& rect, int section) const
+{
+    if (!rect.isValid() || !model())
+        return;
+
+    QStyleOptionHeader opt;
+    initStyleOption(&opt);
+
+    QStyle::State state = QStyle::State_None;
+    state |= QStyle::State_Enabled;
+    state |= QStyle::State_Active;
+    if (section == hover)
+        state |= QStyle::State_MouseOver;
+    if (section == pressed)
+        state |= QStyle::State_Sunken;
+
+    QString s = model()->headerData(section, orientation()).toString();
+    painter->setFont(font());
+    QFontMetrics fm(font());
+    int indicator_height = 0;
+    int margin = 2 * style()->pixelMetric(QStyle::PM_HeaderMargin, 0, this);
+    QStyleOptionHeader::SortIndicator sortindicator = QStyleOptionHeader::None;
+
+    if (isSortIndicatorShown() && sortIndicatorSection() == section)
+    {
+        if (sortIndicatorOrder() == Qt::AscendingOrder)
+            sortindicator = QStyleOptionHeader::SortDown;
+        else
+            sortindicator = QStyleOptionHeader::SortUp;
+        indicator_height = 20;
+    }
+
+    int x = -rect.height() + margin + indicator_height;
+    int y = rect.left() + (rect.width() + fm.descent()) / 2 + margin;
+
+    opt.rect = rect;
+    opt.section = section;
+    opt.state = state;
+
+    QPointF oldBO = painter->brushOrigin();
+    painter->save();
+
+    painter->setBrushOrigin(opt.rect.topLeft());
+    style()->drawControl(QStyle::CE_Header, &opt, painter, this);
+
+    painter->restore();
+
+    painter->rotate(-90);
+    painter->drawText(x, y, s);
+    painter->rotate(+90);
+
+    if (sortindicator != QStyleOptionHeader::None)
+    {
+        opt.sortIndicator = sortindicator;
+        opt.rect = rect.adjusted(0, rect.bottom()-rect.y()-indicator_height, 0, 0);
+        style()->drawControl(QStyle::CE_Header, &opt, painter, this);
+        painter->setBrushOrigin(oldBO);
+    }
+    painter->setBrushOrigin(oldBO);
+}
+
+QSize BiomeHeader::sectionSizeFromContents(int section) const
+{
+    if (!model())
+        return QSize();
+    int margin = 2 * style()->pixelMetric(QStyle::PM_HeaderMargin, 0, this);
+    QFontMetrics fm(font());
+    int w = fm.boundingRect(model()->headerData(section, orientation()).toString()).width();
+    return QSize(fm.height() + 2*margin, w + 2*margin);
+}
+
 
 
 TabBiomes::TabBiomes(MainWindow *parent)
@@ -214,23 +323,29 @@ TabBiomes::TabBiomes(MainWindow *parent)
     , thread()
     , model(new BiomeTableModel(this))
     , proxy(new BiomeSortProxy(this))
+    , sortcol(-1)
+    , elapsed()
+    , updt(20)
+    , nextupdate()
 {
     ui->setupUi(this);
 
     proxy->setSourceModel(model);
     ui->table->setModel(proxy);
 
-    QHeaderView *header = ui->table->horizontalHeader();
-    connect(header, &QHeaderView::sortIndicatorChanged, this, &TabBiomes::onSort);
+    BiomeHeader *header = new BiomeHeader(ui->table);
+    ui->table->setHorizontalHeader(header);
+    //QHeaderView *header = ui->table->horizontalHeader();
+    connect(header, &QHeaderView::sortIndicatorChanged, this, &TabBiomes::onTableSort);
 
-    QFont font = QFont("monospace", 9);
-    ui->table->setFont(font);
+    ui->table->setFont(g_font_mono);
     ui->table->setSortingEnabled(true);
-    ui->table->sortByColumn(-1, Qt::AscendingOrder);
 
-    ui->treeWidget->setColumnWidth(0, 160);
-    ui->treeWidget->setColumnWidth(1, 120);
-    ui->treeWidget->sortByColumn(0, Qt::AscendingOrder);
+    ui->treeLocate->setColumnWidth(0, 160);
+    ui->treeLocate->setColumnWidth(1, 120);
+    ui->treeLocate->sortByColumn(-1, Qt::DescendingOrder);
+    ui->treeLocate->setSortingEnabled(true);
+    connect(ui->treeLocate->header(), &QHeaderView::sectionClicked, this, &TabBiomes::onLocateHeaderClick);
 
     QIntValidator *intval = new QIntValidator(-60e6, 60e6, this);
     ui->lineX1->setValidator(intval);
@@ -255,9 +370,7 @@ TabBiomes::TabBiomes(MainWindow *parent)
             str2biome[s] = id;
     }
 
-    QStringList bnames;
-    for (auto& it : str2biome)
-        bnames.append(it.first);
+    const QStringList bnames = str2biome.keys();
     QRegularExpressionValidator *reval = new QRegularExpressionValidator(
         QRegularExpression("(" + bnames.join("|") + ")"), this
     );
@@ -266,6 +379,8 @@ TabBiomes::TabBiomes(MainWindow *parent)
 
 TabBiomes::~TabBiomes()
 {
+    thread.stop = true;
+    thread.wait(500);
     delete ui;
 }
 
@@ -347,86 +462,22 @@ void TabBiomes::refreshBiomes(int activeid)
     }
 }
 
-void TabBiomes::onAnalysisSeedDone(uint64_t seed, QVector<uint64_t> idcnt)
+void TabBiomes::onLocateHeaderClick()
 {
-    // save state of table UI
-    int selr = ui->table->selectionModel()->currentIndex().row();
-    int selc = ui->table->selectionModel()->currentIndex().column();
-    int posr = ui->table->verticalScrollBar()->value();
-    int posc = ui->table->horizontalScrollBar()->value();
-
-    int ncol = proxy->columnCount();
-    std::vector<int> colwidth(ncol, 60);
-    for (int c = 0; c < ncol; c++)
-        colwidth[c] = ui->table->columnWidth(c);
-
-    // create new model
-    ui->table->setSortingEnabled(false);
-    ui->table->setModel(nullptr);
-    BiomeTableModel *m_new = new BiomeTableModel(this);
-
-    m_new->ids = model->ids;
-    m_new->seeds = model->seeds;
-    m_new->cnt = model->cnt;
-
-    if (m_new->insertSeed(seed) < selc)
-        selc++;
-
-    for (int id = 0; id < 256; id++)
+    int section =  ui->treeLocate->header()->sortIndicatorSection();
+    if (ui->treeLocate->header()->sortIndicatorOrder() == Qt::AscendingOrder && sortcol == section)
     {
-        if (idcnt[id] == 0)
-            continue;
-        int r = m_new->insertId(id);
-        if (r >= 0 && r < selr)
-            selr++;
-        m_new->cnt[id][seed] = QVariant::fromValue(idcnt[id]);
+        ui->treeLocate->sortByColumn(-1, Qt::DescendingOrder);
+        section = -1;
     }
-
-    delete model;
-    model = m_new;
-
-    // restore state of table UI for new model
-    proxy->setSourceModel(model);
-    ui->table->setModel(proxy);
-    ui->table->setSortingEnabled(true);
-
-    for (int c = 0; c < ncol; c++)
-        ui->table->setColumnWidth(c, colwidth[c]);
-    ui->table->resizeColumnToContents(ncol);
-
-    int rowheight = QFontMetrics(ui->table->font()).height() + 4;
-    for (int r = 0, nrow = proxy->rowCount(); r < nrow; r++)
-        ui->table->setRowHeight(r, rowheight);
-
-    ui->table->selectionModel()->setCurrentIndex(proxy->index(selr, selc), QItemSelectionModel::SelectCurrent);
-    ui->table->verticalScrollBar()->setValue(posr);
-    ui->table->horizontalScrollBar()->setValue(posc);
-
-
-    QString progress = QString::asprintf(" (%d/%d)", model->seeds.size()+1, thread.seeds.size());
-    ui->pushStart->setText(tr("Stop") + progress);
+    sortcol = section;
 }
 
-void TabBiomes::onAnalysisSeedItem(QTreeWidgetItem *item)
-{
-    ui->treeWidget->addTopLevelItem(item);
-
-    QString progress = QString::asprintf(" (%d/%d)", ui->treeWidget->topLevelItemCount()+1, thread.seeds.size());
-    ui->pushStart->setText(tr("Stop") + progress);
-}
-
-void TabBiomes::onAnalysisFinished()
-{
-    ui->pushExport->setEnabled(!model->ids.empty() || ui->treeWidget->topLevelItemCount());
-    ui->pushStart->setChecked(false);
-    ui->pushStart->setText(tr("Analyze"));
-}
-
-void TabBiomes::onSort(int column, Qt::SortOrder)
+void TabBiomes::onTableSort(int, Qt::SortOrder)
 {
     QHeaderView *header = ui->table->horizontalHeader();
 
-    if (proxy->order == Qt::DescendingOrder && proxy->column == column)
+    if (proxy->order == Qt::DescendingOrder && proxy->column != -1)
     {
         header->setSortIndicatorShown(false);
         header->setSortIndicator(-1, Qt::AscendingOrder);
@@ -438,6 +489,113 @@ void TabBiomes::onSort(int column, Qt::SortOrder)
     }
 }
 
+void TabBiomes::onAnalysisSeedDone(uint64_t seed, QVector<uint64_t> idcnt)
+{
+    idcnt.push_back(seed);
+    qbufs.push_back(idcnt);
+    quint64 ns = elapsed.nsecsElapsed();
+    if (ns > nextupdate)
+    {
+        nextupdate = ns + updt * 1e6;
+        QTimer::singleShot(updt, this, &TabBiomes::onBufferTimeout);
+    }
+}
+
+void TabBiomes::onAnalysisSeedItem(QTreeWidgetItem *item)
+{
+    qbufl.push_back(item);
+    quint64 ns = elapsed.nsecsElapsed();
+    if (ns > nextupdate)
+    {
+        nextupdate = ns + updt * 1e6;
+        QTimer::singleShot(updt, this, &TabBiomes::onBufferTimeout);
+    }
+}
+
+void TabBiomes::onAnalysisFinished()
+{
+    onBufferTimeout();
+    on_tabWidget_currentChanged(-1);
+    ui->pushStart->setChecked(false);
+    ui->pushStart->setText(tr("Analyze"));
+}
+
+void TabBiomes::onBufferTimeout()
+{
+    if (qbufs.empty() && qbufl.empty())
+        return;
+
+    uint64_t t = -elapsed.elapsed();
+
+    if (!qbufs.empty())
+    {
+        ui->table->setSortingEnabled(false);
+        ui->table->setUpdatesEnabled(false);
+
+        QMap<int, int> colwidth;
+        for (int c = 0, n = model->ids.size(); c < n; c++)
+            colwidth[model->ids[c]] = ui->table->columnWidth(c);
+
+        QList<uint64_t> new_seeds;
+        QSet<int> new_ids;
+        QFontMetrics fm(font());
+
+        for (int i = 0, n = qbufs.size(); i < n; i++)
+        {
+            QVector<uint64_t>& scnt = qbufs[i];
+            uint64_t seed = scnt.back();
+            scnt.resize(scnt.size()-1);
+
+            new_seeds.push_back(seed);
+            for (int id = 0, idn = scnt.size(); id < idn; id++)
+            {
+                uint64_t cnt = scnt[id];
+                if (cnt == 0)
+                    continue;
+                new_ids.insert(id);
+                model->cnt[id][seed] = QVariant::fromValue(cnt);
+                int w = fm.boundingRect(QString::number(cnt) + "_").width() + 2;
+                if (w > colwidth[id])
+                    colwidth[id] = w;
+            }
+        }
+        model->insertIds(new_ids);
+        model->insertSeeds(new_seeds);
+
+        ui->table->setUpdatesEnabled(true);
+        ui->table->setSortingEnabled(true);
+
+        //ui->table->resizeColumnsToContents();
+        for (int i = 0, n = proxy->columnCount(); i < n; i++)
+        {
+            int id = proxy->headerData(i, Qt::Horizontal, Qt::UserRole).toInt();
+            ui->table->setColumnWidth(i, colwidth[id]);
+        }
+        int rowheight = fm.height() + 4;
+        for (int i = 0, n = proxy->rowCount(); i < n; i++)
+            ui->table->setRowHeight(i, rowheight);
+        qbufs.clear();
+    }
+
+    if (!qbufl.empty())
+    {
+        ui->treeLocate->setSortingEnabled(false);
+        ui->treeLocate->setUpdatesEnabled(false);
+        ui->treeLocate->addTopLevelItems(qbufl);
+        ui->treeLocate->setUpdatesEnabled(true);
+        ui->treeLocate->setSortingEnabled(true);
+        qbufl.clear();
+    }
+
+    QString progress = QString::asprintf(" (%d/%d)", thread.idx.load(), thread.seeds.size());
+    ui->pushStart->setText(tr("Stop") + progress);
+
+    t += elapsed.elapsed();
+    if (8*t > updt)
+        updt = 4*t;
+    nextupdate = elapsed.nsecsElapsed() + 1e6 * updt;
+}
+
 void TabBiomes::on_pushStart_clicked()
 {
     if (thread.isRunning())
@@ -445,6 +603,10 @@ void TabBiomes::on_pushStart_clicked()
         thread.stop = true;
         return;
     }
+
+    updt = 20;
+    nextupdate = 0;
+    elapsed.start();
 
     parent->getSeed(&thread.wi);
     thread.seeds.clear();
@@ -469,19 +631,23 @@ void TabBiomes::on_pushStart_clicked()
 
     if (ui->radioFullSample->isChecked())
     {
-        thread.samples = ~0ULL;
+        thread.dat.samples = ~0ULL;
     }
     else
     {
-        thread.samples = ui->lineSamples->text().toULongLong();
+        thread.dat.samples = ui->lineSamples->text().toULongLong();
         scale = 4;
         s = 2;
     }
 
     if (ui->tabWidget->currentWidget() == ui->tabLocate)
     {
-        ui->treeWidget->clear();
-        thread.locate = str2biome[ui->comboBiome->currentText()];
+        //ui->treeWidget->clear();
+        ui->treeLocate->setSortingEnabled(false);
+        while (ui->treeLocate->topLevelItemCount() > 0)
+            delete ui->treeLocate->takeTopLevelItem(0);
+        ui->treeLocate->setSortingEnabled(true);
+        thread.dat.locate = str2biome[ui->comboBiome->currentText()];
         thread.minsize = ui->lineBiomeSize->text().toInt();
         thread.tolerance = ui->lineTolerance->text().toInt();
         if (thread.minsize <= 0)
@@ -492,19 +658,36 @@ void TabBiomes::on_pushStart_clicked()
     else
     {
         model->reset(thread.wi.mc);
-        thread.locate = -1;
+        thread.dat.locate = -1;
     }
 
-    thread.scale = scale;
-    thread.x1 = x1 >> s;
-    thread.z1 = z1 >> s;
-    thread.x2 = x2 >> s;
-    thread.z2 = z2 >> s;
+    thread.dat.scale = scale;
+    thread.dat.x1 = x1 >> s;
+    thread.dat.z1 = z1 >> s;
+    thread.dat.x2 = x2 >> s;
+    thread.dat.z2 = z2 >> s;
+
+    if (thread.dat.locate < 0)
+        dats = thread.dat;
+    else
+        datl = thread.dat;
 
     ui->pushExport->setEnabled(false);
     ui->pushStart->setChecked(true);
     ui->pushStart->setText(tr("Stop"));
     thread.start();
+}
+
+static
+void csvline(QTextStream& stream, const QString& qte, const QString& sep, QStringList& cols)
+{
+    if (qte.isEmpty())
+    {
+        for (QString& s : cols)
+            if (s.contains(sep))
+                s = "\"" + s + "\"";
+    }
+    stream << qte << cols.join(sep) << qte << "\n";
 }
 
 void TabBiomes::on_pushExport_clicked()
@@ -524,41 +707,53 @@ void TabBiomes::on_pushExport_clicked()
         return;
     }
 
+    QString qte = parent->config.quote;
+    QString sep = parent->config.separator;
+
     QTextStream stream(&file);
-    stream << "#X1; " << thread.x1 << "; (" << (thread.x1*thread.scale) << ")\n";
-    stream << "#Z1; " << thread.z1 << "; (" << (thread.z1*thread.scale) << ")\n";
-    stream << "#X2; " << thread.x2 << "; (" << (thread.x2*thread.scale) << ")\n";
-    stream << "#Z2; " << thread.z2 << "; (" << (thread.z2*thread.scale) << ")\n";
-    stream << "#scale; 1:" << thread.scale << "\n";
+    stream << "Sep=" + sep + "\n";
+    sep = qte + sep + qte;
 
-    if (thread.locate < 0)
+    if (ui->tabWidget->currentWidget() == ui->tabStats)
     {
-        if (thread.samples != ~0ULL)
-            stream << "#samples; " << thread.samples << "\n";
+        stream << qte << "#X1" << sep << dats.x1 << sep << "(" << (dats.x1*dats.scale) << ")" << qte << "\n";
+        stream << qte << "#Z1" << sep << dats.z1 << sep << "(" << (dats.z1*dats.scale) << ")" << qte << "\n";
+        stream << qte << "#X2" << sep << dats.x2 << sep << "(" << (dats.x2*dats.scale) << ")" << qte << "\n";
+        stream << qte << "#Z2" << sep << dats.z2 << sep << "(" << (dats.z2*dats.scale) << ")" << qte << "\n";
+        stream << qte << "#scale" << sep << "1:" << dats.scale << qte << "\n";
+        if (dats.samples != ~0ULL)
+            stream << qte << "#samples" << sep << dats.samples << qte << "\n";
 
-        QList<QString> header;
-        header.append(tr("biome\\seed"));
+        QStringList header = { tr("seed") };
         for (int col = 0, ncol = proxy->columnCount(); col < ncol; col++)
             header.append(proxy->headerData(col, Qt::Horizontal).toString());
-        stream << header.join("; ") << "\n";
+        csvline(stream, qte, sep, header);
 
         for (int row = 0, nrow = proxy->rowCount(); row < nrow; row++)
         {
-            QList<QString> entries;
-            entries.append(proxy->headerData(row, Qt::Vertical).toString());
+            QStringList cols;
+            cols.append(proxy->headerData(row, Qt::Vertical).toString());
             for (int col = 0, ncol = proxy->columnCount(); col < ncol; col++)
             {
                 QString cntstr = proxy->data(proxy->index(row, col)).toString();
-                entries.append(cntstr == "" ? "0" : cntstr);
+                cols.append(cntstr == "" ? "0" : cntstr);
             }
-            stream << entries.join("; ") << "\n";
+            csvline(stream, qte, sep, cols);
         }
     }
-    else
+    else if (ui->tabWidget->currentWidget() == ui->tabLocate)
     {
-        stream << "#biome; " << biome2str(MC_NEWEST, thread.locate) << "\n";
-        stream << "seed; area; x; z;\n";
-        QTreeWidgetItemIterator it(ui->treeWidget);
+        stream << qte << "#X1" << sep << datl.x1 << sep << "(" << (datl.x1*datl.scale) << ")" << qte << "\n";
+        stream << qte << "#Z1" << sep << datl.z1 << sep << "(" << (datl.z1*datl.scale) << ")" << qte << "\n";
+        stream << qte << "#X2" << sep << datl.x2 << sep << "(" << (datl.x2*datl.scale) << ")" << qte << "\n";
+        stream << qte << "#Z2" << sep << datl.z2 << sep << "(" << (datl.z2*datl.scale) << ")" << qte << "\n";
+        stream << qte << "#scale" << sep << "1:" << datl.scale << qte << "\n";
+        stream << qte << "#biome" << sep << biome2str(MC_NEWEST, datl.locate) << qte << "\n";
+
+        QStringList header = { tr("seed"), tr("area"), tr("x"), tr("z") };
+        csvline(stream, qte, sep, header);
+
+        QTreeWidgetItemIterator it(ui->treeLocate);
         QString seed;
         for (; *it; ++it)
         {
@@ -573,7 +768,7 @@ void TabBiomes::on_pushExport_clicked()
             cols.append(item->text(1));
             cols.append(item->text(2));
             cols.append(item->text(3));
-            stream << cols.join(";") << "\n";
+            csvline(stream, qte, sep, cols);
         }
     }
 }
@@ -616,7 +811,7 @@ void TabBiomes::on_lineBiomeSize_textChanged(const QString &text)
     ui->labelBiomeSize->setText(QString::asprintf("(%g sq. chunks)", area / 16));
 }
 
-void TabBiomes::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
+void TabBiomes::on_treeLocate_itemClicked(QTreeWidgetItem *item, int column)
 {
     (void) column;
     QVariant dat;
@@ -639,3 +834,15 @@ void TabBiomes::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
     }
 }
 
+void TabBiomes::on_tabWidget_currentChanged(int)
+{
+    bool ok = false;
+    if (!thread.isRunning())
+    {
+        if (ui->tabWidget->currentWidget() == ui->tabStats)
+            ok = !model->ids.empty();
+        if (ui->tabWidget->currentWidget() == ui->tabLocate)
+            ok = ui->treeLocate->topLevelItemCount() > 0;
+    }
+    ui->pushExport->setEnabled(ok);
+}

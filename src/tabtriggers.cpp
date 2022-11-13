@@ -54,9 +54,10 @@ void AnalysisTriggers::run()
 {
     stop = false;
 
-    for (int64_t seed : qAsConst(seeds))
+    for (idx = 0; idx < seeds.size(); idx++)
     {
         if (stop) break;
+        int64_t seed = seeds[idx];
         wi.seed = seed;
         QTreeWidgetItem *seeditem = new QTreeWidgetItem();
         seeditem->setText(0, QString::asprintf("%" PRId64, seed));
@@ -97,19 +98,23 @@ TabTriggers::TabTriggers(MainWindow *parent)
     , ui(new Ui::TabTriggers)
     , parent(parent)
     , thread()
+    , nextupdate()
+    , updt(20)
 {
     ui->setupUi(this);
     ui->treeWidget->setColumnWidth(1, 280);
     ui->treeWidget->setColumnWidth(2, 65);
     ui->treeWidget->setColumnWidth(3, 65);
+    ui->treeWidget->setSortingEnabled(false); // sortable triggers are not necessary
 
-    ui->treeWidget->sortByColumn(0, Qt::AscendingOrder);
     connect(&thread, &AnalysisTriggers::itemDone, this, &TabTriggers::onAnalysisItemDone, Qt::BlockingQueuedConnection);
     connect(&thread, &AnalysisTriggers::finished, this, &TabTriggers::onAnalysisFinished);
 }
 
 TabTriggers::~TabTriggers()
 {
+    thread.stop = true;
+    thread.wait(500);
     delete ui;
 }
 
@@ -126,16 +131,43 @@ void TabTriggers::load(QSettings& settings)
 
 void TabTriggers::onAnalysisItemDone(QTreeWidgetItem *item)
 {
-    ui->treeWidget->addTopLevelItem(item);
-    QString progress = QString::asprintf(" (%d/%d)", ui->treeWidget->topLevelItemCount()+1, thread.seeds.size());
-    ui->pushStart->setText(tr("Stop") + progress);
+    qbuf.push_back(item);
+    quint64 ns = elapsed.nsecsElapsed();
+    if (ns > nextupdate)
+    {
+        nextupdate = ns + updt * 1e6;
+        QTimer::singleShot(updt, this, &TabTriggers::onBufferTimeout);
+    }
 }
 
 void TabTriggers::onAnalysisFinished()
 {
+    onBufferTimeout();
     ui->pushExport->setEnabled(ui->treeWidget->topLevelItemCount() > 0);
     ui->pushStart->setChecked(false);
     ui->pushStart->setText(tr("Analyze"));
+}
+
+void TabTriggers::onBufferTimeout()
+{
+    uint64_t t = -elapsed.elapsed();
+
+    if (!qbuf.empty())
+    {
+        ui->treeWidget->setUpdatesEnabled(false);
+        ui->treeWidget->addTopLevelItems(qbuf);
+        ui->treeWidget->setUpdatesEnabled(true);
+
+        QString progress = QString::asprintf(" (%d/%d)", thread.idx.load(), thread.seeds.size());
+        ui->pushStart->setText(tr("Stop") + progress);
+
+        qbuf.clear();
+    }
+
+    t += elapsed.elapsed();
+    if (8*t > updt)
+        updt = 4*t;
+    nextupdate = elapsed.nsecsElapsed() + 1e6 * updt;
 }
 
 void TabTriggers::on_pushStart_clicked()
@@ -145,6 +177,10 @@ void TabTriggers::on_pushStart_clicked()
         thread.stop = true;
         return;
     }
+    updt = 20;
+    nextupdate = 0;
+    elapsed.start();
+
     parent->getSeed(&thread.wi);
     thread.conds = parent->formCond->getConditions();
     thread.seeds.clear();
@@ -153,6 +189,7 @@ void TabTriggers::on_pushStart_clicked()
     else
         thread.seeds = parent->formControl->getResults();
 
+    //ui->treeWidget->setSortingEnabled(false);
     while (ui->treeWidget->topLevelItemCount() > 0)
         delete ui->treeWidget->takeTopLevelItem(0);
 
@@ -191,6 +228,18 @@ void TabTriggers::on_pushExpand_clicked()
     ui->treeWidget->expandAll();
 }
 
+static
+void csvline(QTextStream& stream, const QString& qte, const QString& sep, QStringList& cols)
+{
+    if (qte.isEmpty())
+    {
+        for (QString& s : cols)
+            if (s.contains(sep))
+                s = "\"" + s + "\"";
+    }
+    stream << qte << cols.join(sep) << qte << "\n";
+}
+
 void TabTriggers::on_pushExport_clicked()
 {
     QString fnam = QFileDialog::getSaveFileName(
@@ -208,8 +257,15 @@ void TabTriggers::on_pushExport_clicked()
         return;
     }
 
+    QString qte = parent->config.quote;
+    QString sep = parent->config.separator;
+
     QTextStream stream(&file);
-    stream << "#seed; condition; x; z\n";
+    stream << "Sep=" + sep + "\n";
+    sep = qte + sep + qte;
+
+    QStringList header = { tr("seed"), tr("condition"), tr("x"), tr("z") };
+    csvline(stream, qte, sep, header);
 
     QTreeWidgetItemIterator it(ui->treeWidget);
     for (; *it; ++it)
@@ -218,12 +274,11 @@ void TabTriggers::on_pushExport_clicked()
         QStringList cols;
         for (int i = 0, n = item->columnCount(); i < n; i++)
         {
-            QString txt = item->text(i);
-            if (txt == "-") txt = "";
-            if (i == 1) txt = "\"" + txt + "\"";
-            cols << txt;
+            QString s = item->text(i);
+            if (s == "-") s = "";
+            cols.append(s);
         }
-        stream << cols.join("; ") << "\n";
+        csvline(stream, qte, sep, cols);
     }
 }
 
