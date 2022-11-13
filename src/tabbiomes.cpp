@@ -338,7 +338,7 @@ TabBiomes::TabBiomes(MainWindow *parent)
     //QHeaderView *header = ui->table->horizontalHeader();
     connect(header, &QHeaderView::sortIndicatorChanged, this, &TabBiomes::onTableSort);
 
-    ui->table->setFont(g_font_mono);
+    ui->table->setFont(*gp_font_mono);
     ui->table->setSortingEnabled(true);
 
     ui->treeLocate->setColumnWidth(0, 160);

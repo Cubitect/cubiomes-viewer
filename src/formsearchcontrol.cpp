@@ -113,16 +113,17 @@ FormSearchControl::FormSearchControl(MainWindow *parent)
     ui->setupUi(this);
     protodialog = new ProtoBaseDialog(this);
 
-    ui->results->setFont(g_font_mono);
-    ui->progressBar->setFont(g_font_mono);
-    ui->labelStatus->setFont(g_font_mono);
+    QFont mono = *gp_font_mono;
+    ui->results->setFont(mono);
+    ui->progressBar->setFont(mono);
+    ui->labelStatus->setFont(mono);
 
     proxy->setSourceModel(model);
     ui->results->setModel(proxy);
 
-    ui->results->horizontalHeader()->setFont(g_font_mono);
+    ui->results->horizontalHeader()->setFont(mono);
     ui->results->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-    ui->results->verticalHeader()->setDefaultSectionSize(QFontMetrics(g_font_mono).height());
+    ui->results->verticalHeader()->setDefaultSectionSize(QFontMetrics(mono).height());
     ui->results->setColumnWidth(SeedTableModel::COL_SEED, 200);
     ui->results->setColumnWidth(SeedTableModel::COL_TOP16, 60);
     ui->results->setColumnWidth(SeedTableModel::COL_HEX48, 120);

@@ -55,7 +55,7 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
     QString mcs = tr("MC %1", "Minecraft version").arg(p_mcs ? p_mcs : "?");
     ui->labelMC->setText(mcs);
 
-    ui->lineSummary->setFont(g_font_mono);
+    ui->lineSummary->setFont(*gp_font_mono);
 
     // prevent bold font of group box title getting inherited
     QFont dfont = font();

@@ -40,7 +40,7 @@ FormConditions::FormConditions(QWidget *parent)
     qRegisterMetaType< Condition >("Condition");
     qRegisterMetaTypeStreamOperators< Condition >("Condition");
 
-    ui->listConditionsFull->setFont(g_font_mono);
+    ui->listConditionsFull->setFont(*gp_font_mono);
 }
 
 FormConditions::~FormConditions()

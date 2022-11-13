@@ -15,8 +15,8 @@ unsigned char g_tempsColors[256][3];
 
 ExtGenSettings g_extgen;
 
-QFont g_font_default;
-QFont g_font_mono;
+QFont *gp_font_default;
+QFont *gp_font_mono;
 
 extern "C"
 int getStructureConfig_override(int stype, int mc, StructureConfig *sconf)
@@ -53,12 +53,15 @@ int main(int argc, char *argv[])
         QFontDatabase::addApplicationFont(":/fonts/DejaVuSans-Bold.ttf");
         int fontid_mono = QFontDatabase::addApplicationFont(":/fonts/DejaVuSansMono.ttf");
 
-        g_font_default = QFontDatabase::applicationFontFamilies(fontid).at(0);
-        g_font_default.setPointSize(10);
-        g_font_mono = QFontDatabase::applicationFontFamilies(fontid_mono).at(0);
-        g_font_mono.setPointSize(9);
+        static QFont font_default = QFontDatabase::applicationFontFamilies(fontid).at(0);
+        font_default.setPointSize(10);
+        static QFont font_mono = QFontDatabase::applicationFontFamilies(fontid_mono).at(0);
+        font_mono.setPointSize(9);
 
-        app.setFont(g_font_default);
+        app.setFont(font_default);
+
+        gp_font_default = &font_default;
+        gp_font_mono = &font_mono;
     }
 
     MainWindow mw;

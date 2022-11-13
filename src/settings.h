@@ -33,8 +33,8 @@ struct ExtGenSettings
 extern ExtGenSettings g_extgen;
 
 // global references to the default fonts
-extern QFont g_font_default;
-extern QFont g_font_mono;
+extern QFont *gp_font_default;
+extern QFont *gp_font_mono;
 
 struct WorldInfo
 {

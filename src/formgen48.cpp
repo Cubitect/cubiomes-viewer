@@ -79,7 +79,7 @@ FormGen48::FormGen48(MainWindow *parent)
     connect(ui->lineSalt, SIGNAL(editingFinished()), SLOT(onChange()));
     connect(ui->lineListSalt, SIGNAL(editingFinished()), SLOT(onChange()));
 
-    ui->lineList48->setFont(g_font_mono);
+    ui->lineList48->setFont(*gp_font_mono);
 
     cond.type = 0;
     Gen48Settings defaults;

@@ -61,7 +61,7 @@ PresetDialog::PresetDialog(QWidget *parent, WorldInfo wi, bool showEamples)
     connect(ui->buttonOk, &QPushButton::clicked, this, &QDialog::accept);
     connect(ui->buttonCancel, &QPushButton::clicked, this, &QDialog::reject);
 
-    ui->listFilters->setFont(g_font_mono);
+    ui->listFilters->setFont(*gp_font_mono);
 
     if (showEamples)
         ui->tabWidget->setCurrentWidget(ui->tabExamples);

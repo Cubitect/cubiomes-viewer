@@ -28,7 +28,7 @@ ConfigDialog::ConfigDialog(QWidget *parent, Config *config)
     }
 #endif
 
-    ui->buttonBiomeColor->setFont(g_font_mono);
+    ui->buttonBiomeColor->setFont(*gp_font_mono);
 
     ui->lineMatching->setValidator(new QIntValidator(1, 99999999, ui->lineMatching));
 
