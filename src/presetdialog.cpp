@@ -99,6 +99,12 @@ PresetDialog::PresetDialog(QWidget *parent, WorldInfo wi, bool showEamples)
         "Works best with the 48-bit family search."),
         wi.mc >= MC_1_9);
 
+    addPreset(":/examples/all_fish.txt",
+        tr("All the Fish (1.13+)"),
+        tr("A River bordering a Lukewarm Ocean somewhere within 2000 blocks, "
+           "a combination where all fish variants can spawn."),
+        wi.mc >= MC_1_13);
+
     addPreset(":/examples/portal_village_or_treasure.txt",
         tr("Village or Treasure with Portal (1.16+)"),
         tr("Spawn at a Ruined Portal right beside a Village <b>OR</b> Buried Treasure."),

@@ -676,7 +676,8 @@ void TabBiomes::on_pushStart_clicked()
 
     ui->pushExport->setEnabled(false);
     ui->pushStart->setChecked(true);
-    ui->pushStart->setText(tr("Stop"));
+    QString progress = QString::asprintf(" (0/%d)", thread.seeds.size());
+    ui->pushStart->setText(tr("Stop") + progress);
     thread.start();
 }
 

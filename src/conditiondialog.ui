@@ -489,7 +489,7 @@
           <number>0</number>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>4</number>
          </property>
          <widget class="QWidget" name="pageNone">
           <property name="enabled">
@@ -999,7 +999,7 @@
               <item row="1" column="0">
                <widget class="QLabel" name="label_10">
                 <property name="text">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Resulting biomes (&lt;span style=&quot; font-weight:600;&quot;&gt;at least one&lt;/span&gt; with &lt;img src=&quot;:/icons/check1.png&quot;/&gt;, &lt;span style=&quot; font-weight:600;&quot;&gt;any&lt;/span&gt; with &lt;img src=&quot;:/icons/check0.png&quot;/&gt;, &lt;span style=&quot; font-weight:600;&quot;&gt;none&lt;/span&gt; with &lt;img src=&quot;:/icons/check2.png&quot;/&gt;):&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Resulting biomes (&lt;span style=&quot; font-weight:600;&quot;&gt;at least one&lt;/span&gt; with &lt;img src=&quot;:/icons/check_include.png&quot;/&gt;, &lt;span style=&quot; font-weight:600;&quot;&gt;any&lt;/span&gt; with &lt;img src=&quot;:/icons/check_unchecked.png&quot;/&gt;, &lt;span style=&quot; font-weight:600;&quot;&gt;none&lt;/span&gt; with &lt;img src=&quot;:/icons/check_exclude.png&quot;/&gt;):&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                </widget>
               </item>
@@ -1014,7 +1014,7 @@
                    <x>0</x>
                    <y>0</y>
                    <width>634</width>
-                   <height>253</height>
+                   <height>251</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -1083,8 +1083,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>634</width>
-                   <height>335</height>
+                   <width>98</width>
+                   <height>28</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_3_1">
@@ -1140,8 +1140,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>634</width>
-                   <height>335</height>
+                   <width>98</width>
+                   <height>28</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_3_2">
@@ -1245,8 +1245,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>634</width>
-                   <height>335</height>
+                   <width>98</width>
+                   <height>28</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_3_3">

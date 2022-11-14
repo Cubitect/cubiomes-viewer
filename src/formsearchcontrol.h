@@ -172,6 +172,7 @@ private:
     // found seeds that are waiting to be added to results
     QVector<uint64_t> qbuf;
     quint64 nextupdate;
+    quint64 updt;
 };
 
 #endif // FORMSEARCHCONTROL_H

@@ -109,6 +109,7 @@ FormSearchControl::FormSearchControl(MainWindow *parent)
     , smax(~(uint64_t)0)
     , qbuf()
     , nextupdate()
+    , updt(20)
 {
     ui->setupUi(this);
     protodialog = new ProtoBaseDialog(this);
@@ -362,6 +363,7 @@ void FormSearchControl::on_buttonStart_clicked()
             ui->buttonStart->setIcon(QIcon(":/icons/cancel.png"));
             searchLockUi(true);
             nextupdate = 0;
+            updt = 20;
             sthread.start();
             elapsed.start();
             stimer.start(250);
@@ -534,17 +536,24 @@ void FormSearchControl::onSearchResult(uint64_t seed)
     quint64 ns = elapsed.nsecsElapsed();
     if (ns > nextupdate)
     {
-        quint64 buffer_ms = 100; // advanced option
-        QTimer::singleShot(buffer_ms, this, &FormSearchControl::onBufferTimeout);
-        nextupdate = ns + buffer_ms * 1e6;
+        nextupdate = ns + updt * 1e6;
+        QTimer::singleShot(updt, this, &FormSearchControl::onBufferTimeout);
     }
 }
 
 void FormSearchControl::onBufferTimeout()
 {
+    uint64_t t = -elapsed.elapsed();
+
     searchResultsAdd(qbuf, false);
     qbuf.clear();
-    nextupdate = 0;
+
+    QApplication::processEvents(); // force processing of events so we can time correctly
+
+    t += elapsed.elapsed();
+    if (8*t > updt)
+        updt = 4*t;
+    nextupdate = elapsed.nsecsElapsed() + 1e6 * updt;
 }
 
 int FormSearchControl::searchResultsAdd(QVector<uint64_t> seeds, bool countonly)
