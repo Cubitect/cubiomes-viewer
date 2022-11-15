@@ -533,6 +533,12 @@ void FormSearchControl::onSort(int, Qt::SortOrder)
 void FormSearchControl::onSearchResult(uint64_t seed)
 {
     qbuf.push_back(seed);
+    if (ui->checkStop->isChecked())
+    {
+        onBufferTimeout();
+        return;
+    }
+
     quint64 ns = elapsed.nsecsElapsed();
     if (ns > nextupdate)
     {
