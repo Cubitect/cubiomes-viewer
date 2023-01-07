@@ -2,6 +2,7 @@
 #include "ui_conditiondialog.h"
 
 #include "mainwindow.h"
+#include "scripts.h"
 
 #include <QCheckBox>
 #include <QIntValidator>
@@ -12,6 +13,12 @@
 #include <QMessageBox>
 #include <QScrollBar>
 #include <QSpacerItem>
+#include <QTextStream>
+#include <QStandardPaths>
+#include <QDesktopServices>
+#include <QDir>
+#include <QFileDialog>
+#include <QInputDialog>
 
 #define SETUP_TEMPCAT_SPINBOX(B) do {\
         tempsboxes[B] = new SpinExclude();\
@@ -40,6 +47,7 @@ static QString getTip(int mc, int layer, uint32_t flags, int id)
 ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcversion, QListWidgetItem *item, Condition *initcond)
     : QDialog(parent, Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint)
     , ui(new Ui::ConditionDialog)
+    , luahash()
     , config(config)
     , item(item)
     , mc(mcversion)
@@ -56,6 +64,7 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
     ui->labelMC->setText(mcs);
 
     ui->lineSummary->setFont(*gp_font_mono);
+    ui->textEditLua->setTabStopWidth(QFontMetrics(ui->textEditLua->font()).width(" ") * 4);
 
     // prevent bold font of group box title getting inherited
     QFont dfont = font();
@@ -249,6 +258,15 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
             noisebiomes[id]->setIcon(icon);
     }
 
+    QMap<uint64_t, QString> scripts;
+    getScripts(scripts);
+    for (auto it = scripts.begin(); it != scripts.end(); ++it)
+    {
+        QFileInfo finfo(it.value());
+        ui->comboLua->addItem(finfo.baseName(), QVariant::fromValue(it.key()));
+    }
+    ui->comboLua->model()->sort(0, Qt::AscendingOrder);
+
     // defaults
     ui->checkEnabled->setChecked(true);
     ui->spinBox->setValue(1);
@@ -264,9 +282,12 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
         const FilterInfo &ft = g_filterinfo.list[cond.type];
 
         ui->checkEnabled->setChecked(!(cond.meta & Condition::DISABLED));
+        ui->lineSummary->setText(QString::fromLocal8Bit(QByteArray(cond.text, sizeof(cond.text))));
         ui->lineSummary->setPlaceholderText(QApplication::translate("Filter", ft.name));
-        QByteArray txta = QByteArray(cond.text, sizeof(cond.text));
-        ui->lineSummary->setText(QString::fromLocal8Bit(txta));
+
+        if (!scripts.contains(cond.hash))
+            ui->comboLua->addItem(tr("[script not found]"), QVariant::fromValue(cond.hash));
+        ui->comboLua->setCurrentIndex(ui->comboLua->findData(QVariant::fromValue(cond.hash)));
 
         ui->comboBoxCat->setCurrentIndex(ft.cat);
         for (int i = 0; i < ui->comboBoxType->count(); i++)
@@ -497,6 +518,10 @@ void ConditionDialog::updateMode()
     {
         ui->stackedWidget->setCurrentWidget(ui->pageEndCity);
         ui->checkEndShip->setEnabled(mc >= MC_1_9);
+    }
+    else if (filterindex == F_LUA)
+    {
+        ui->stackedWidget->setCurrentWidget(ui->pageLua);
     }
     else
     {
@@ -740,7 +765,10 @@ int ConditionDialog::warnIfBad(Condition cond)
         if (mc >= MC_1_18)
         {
             uint64_t m = cond.biomeToFindM;
-            uint64_t underground = (1ULL << (dripstone_caves-128)) | (1ULL << (lush_caves-128));
+            uint64_t underground =
+                    (1ULL << (dripstone_caves-128)) |
+                    (1ULL << (lush_caves-128)) |
+                    (1ULL << (deep_dark-128));
             if ((m & underground) && cond.y > 246)
             {
                 return QMessageBox::warning(this, tr("Bad Surface Height"),
@@ -842,11 +870,14 @@ void ConditionDialog::on_lineSquare_editingFinished()
 
 void ConditionDialog::on_buttonCancel_clicked()
 {
+    on_comboLua_currentIndexChanged(-1);
     close();
 }
 
 void ConditionDialog::on_buttonOk_clicked()
 {
+    on_comboLua_currentIndexChanged(-1);
+
     Condition c = cond;
     c.version = Condition::VER_CURRENT;
     c.type = ui->comboBoxType->currentData().toInt();
@@ -861,6 +892,8 @@ void ConditionDialog::on_buttonOk_clicked()
 
     QByteArray text = ui->lineSummary->text().toLocal8Bit().leftJustified(sizeof(c.text), '\0');
     memcpy(c.text, text.data(), sizeof(c.text));
+
+    c.hash = ui->comboLua->currentData().toULongLong();
 
     if (ui->radioSquare->isChecked())
     {
@@ -1136,3 +1169,130 @@ void ConditionDialog::on_lineBiomeSize_textChanged(const QString &)
     ui->labelBiomeSize->setText(s);
 }
 
+void ConditionDialog::on_comboLua_currentIndexChanged(int)
+{
+    if (ui->textEditLua->document()->isModified())
+    {
+        int button = QMessageBox::warning(this, tr("Unsaved changes"),
+            tr("Discard unsaved changes?"),
+            QMessageBox::Save|QMessageBox::Discard);
+        if (button == QMessageBox::Save)
+        {
+            if (luahash)
+                on_pushLuaSave_clicked();
+            else
+                on_pushLuaSaveAs_clicked();
+        }
+    }
+    ui->labelLuaCall->setText("");
+    ui->textEditLuaOut->document()->setPlainText("");
+    ui->textEditLua->document()->setPlainText("");
+    ui->textEditLua->document()->setModified(false);
+    luahash = 0;
+    uint64_t hash = ui->comboLua->currentData().toULongLong();
+    QMap<uint64_t, QString> scripts;
+    getScripts(scripts);
+    if (!scripts.contains(hash))
+        return;
+    QString path = scripts.value(hash);
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly))
+        return;
+    QTextStream stream(&file);
+    QString text = stream.readAll();
+    const LuaOutput& lo = g_lua_output[cond.save];
+    if (lo.hash == hash)
+    {
+        QString call = QString::asprintf(
+            "function %s(seed=%" PRId64 ", at={x=%d, z=%d}, ...)",
+            lo.func, lo.seed, lo.at.x, lo.at.z);
+        ui->labelLuaCall->setText(call);
+        ui->textEditLuaOut->document()->setPlainText(lo.out);
+    }
+    ui->textEditLua->document()->setPlainText(text);
+    ui->textEditLua->document()->setModified(false);
+    luahash = hash;
+}
+
+void ConditionDialog::on_pushLuaSave_clicked()
+{
+    if (luahash == 0)
+    {
+        on_pushLuaSaveAs_clicked();
+        return;
+    }
+    QMap<uint64_t, QString> scripts;
+    getScripts(scripts);
+    if (!scripts.contains(luahash))
+        return;
+    QFile file(scripts.value(luahash));
+    if (!file.open(QIODevice::WriteOnly))
+        return;
+    QTextStream stream(&file);
+    stream << ui->textEditLua->document()->toPlainText();
+    ui->textEditLua->document()->setModified(false);
+}
+
+void ConditionDialog::on_pushLuaSaveAs_clicked()
+{
+    QString fnam = QFileDialog::getSaveFileName(
+        this, tr("Save lua script"), getLuaDir(), tr("Lua script (*.lua)"));
+    if (fnam.isEmpty())
+        return;
+    if (!fnam.endsWith(".lua"))
+        fnam += ".lua";
+    QFile file(fnam);
+    if (!file.open(QIODevice::WriteOnly))
+        return;
+    QTextStream stream(&file);
+    stream << ui->textEditLua->document()->toPlainText();
+    stream.flush();
+    file.close();
+    ui->textEditLua->document()->setModified(false);
+    uint64_t hash = getScriptHash(fnam);
+    ui->comboLua->addItem(QFileInfo(fnam).baseName(), QVariant::fromValue(hash));
+    ui->comboLua->setCurrentIndex(ui->comboLua->count() - 1);
+}
+
+void ConditionDialog::on_pushLuaOpen_clicked()
+{
+    QDesktopServices::openUrl(getLuaDir());
+}
+
+void ConditionDialog::on_pushLuaExample_clicked()
+{
+    QStringList examples = {
+        tr("Empty check functions"),
+    };
+    QMap<QString, QString> code = {
+        {   examples[0],
+            "-- check48() is an optional function to check 48-bit seed bases.\n"
+            "function check48(seed, at, deps)\n"
+            "\t-- Return a position {x, z}, or nil to fail the check.\n"
+            "\treturn at.x, at.z\n"
+            "end\n\n"
+            "-- check() determines if the condition passes.\n"
+            "-- seed: current seed\n"
+            "-- at  : {x, z} where the condition is tested\n"
+            "-- deps: list of {x, z, id, parent} entries for the dependent\n"
+            "--       conditions (i.e. those later in the condition list),\n"
+            "--       with the evaluated position, identifer and the id of the\n"
+            "--       parent condition\n"
+            "function check(seed, at, deps)\n"
+            "\t-- Return a position {x, z}, or nil to fail the check.\n"
+            "\treturn at.x, at.z\n"
+            "end\n"
+        },
+    };
+
+    bool ok = false;
+    QString choice = QInputDialog::getItem(this,
+        tr("Lua examples"),
+        tr("Replace editor content with example:"),
+        examples, 0, false, &ok
+    );
+    if (ok && !choice.isEmpty())
+    {
+        ui->textEditLua->document()->setPlainText(code[choice]);
+    }
+}

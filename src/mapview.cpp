@@ -80,8 +80,12 @@ MapView::~MapView()
 
 void MapView::deleteWorld()
 {
-    delete world;
-    world = NULL;
+    if (world)
+    {
+        disconnect(world);
+        delete world;
+        world = nullptr;
+    }
 }
 
 void MapView::refresh()
@@ -90,8 +94,9 @@ void MapView::refresh()
     {
         WorldInfo wi = world->wi;
         int dim = world->dim;
-        delete world;
+        deleteWorld();
         world = new QWorld(wi, dim, layeropt);
+        QObject::connect(world, &QWorld::update, this, &MapView::mapUpdate);
     }
 }
 
@@ -105,8 +110,9 @@ void MapView::setSeed(WorldInfo wi, int dim, int lopt)
 
     if (world == NULL || !wi.equals(world->wi))
     {
-        delete world;
+        deleteWorld();
         world = new QWorld(wi, dim, layeropt);
+        QObject::connect(world, &QWorld::update, this, &MapView::mapUpdate);
     }
     else if (world->dim != dim || world->layeropt != layeropt)
     {
@@ -206,6 +212,11 @@ Pos MapView::getActivePos()
     if (world && world->selopt != D_NONE)
         p = world->selvp.p;
     return p;
+}
+
+void MapView::mapUpdate()
+{
+    update(1);
 }
 
 void MapView::showContextMenu(const QPoint &pos)

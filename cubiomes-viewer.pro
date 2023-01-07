@@ -26,6 +26,8 @@ win32: {
     QMAKE_EXTRA_TARGETS += libwinsane
     PRE_TARGETDEPS      += libwinsane
     LIBS                += $$LIBWINSANE/libwinsane.o
+} else {
+    DEFINES += "LUA_USE_POSIX=1"
 }
 static_gnu: {
     LIBS += -static -static-libgcc -static-libstdc++
@@ -42,11 +44,44 @@ QMAKE_PRE_LINK      += $(MAKE) -C $$CUPATH -f $$CUPATH/makefile CFLAGS=\"$$QMAKE
 QMAKE_CLEAN         += $$CUPATH/*.o $$CUPATH/libcubiomes.a
 LIBS                += -lm $$CUPATH/libcubiomes.a
 
+LUAPATH             = $$PWD/lua-5.4.4/src
 
 TARGET = cubiomes-viewer
 
 
 SOURCES += \
+        $$LUAPATH/lapi.c \
+        $$LUAPATH/lauxlib.c \
+        $$LUAPATH/lbaselib.c \
+        $$LUAPATH/lcode.c \
+        $$LUAPATH/lcorolib.c \
+        $$LUAPATH/lctype.c \
+        $$LUAPATH/ldblib.c \
+        $$LUAPATH/ldebug.c \
+        $$LUAPATH/ldo.c \
+        $$LUAPATH/ldump.c \
+        $$LUAPATH/lfunc.c \
+        $$LUAPATH/lgc.c \
+        $$LUAPATH/linit.c \
+        $$LUAPATH/liolib.c \
+        $$LUAPATH/llex.c \
+        $$LUAPATH/lmathlib.c \
+        $$LUAPATH/lmem.c \
+        $$LUAPATH/loadlib.c \
+        $$LUAPATH/lobject.c \
+        $$LUAPATH/lopcodes.c \
+        $$LUAPATH/loslib.c \
+        $$LUAPATH/lparser.c \
+        $$LUAPATH/lstate.c \
+        $$LUAPATH/lstring.c \
+        $$LUAPATH/lstrlib.c \
+        $$LUAPATH/ltable.c \
+        $$LUAPATH/ltablib.c \
+        $$LUAPATH/ltm.c \
+        $$LUAPATH/lundump.c \
+        $$LUAPATH/lutf8lib.c \
+        $$LUAPATH/lvm.c \
+        $$LUAPATH/lzio.c \
         src/aboutdialog.cpp \
         src/biomecolordialog.cpp \
         src/collapsible.cpp \
@@ -63,6 +98,7 @@ SOURCES += \
         src/mapview.cpp \
         src/rangedialog.cpp \
         src/rangeslider.cpp \
+        src/scripts.cpp \
         src/search.cpp \
         src/searchthread.cpp \
         src/tabbiomes.cpp \
@@ -79,6 +115,34 @@ HEADERS += \
         $$CUPATH/layers.h \
         $$CUPATH/quadbase.h \
         $$CUPATH/util.h \
+        $$LUAPATH/lapi.h \
+        $$LUAPATH/lauxlib.h \
+        $$LUAPATH/lcode.h \
+        $$LUAPATH/lctype.h \
+        $$LUAPATH/ldebug.h \
+        $$LUAPATH/ldo.h \
+        $$LUAPATH/lfunc.h \
+        $$LUAPATH/lgc.h \
+        $$LUAPATH/ljumptab.h \
+        $$LUAPATH/llex.h \
+        $$LUAPATH/llimits.h \
+        $$LUAPATH/lmem.h \
+        $$LUAPATH/lobject.h \
+        $$LUAPATH/lopcodes.h \
+        $$LUAPATH/lopnames.h \
+        $$LUAPATH/lparser.h \
+        $$LUAPATH/lprefix.h \
+        $$LUAPATH/lstate.h \
+        $$LUAPATH/lstring.h \
+        $$LUAPATH/ltable.h \
+        $$LUAPATH/ltm.h \
+        $$LUAPATH/lua.h \
+        $$LUAPATH/lua.hpp \
+        $$LUAPATH/luaconf.h \
+        $$LUAPATH/lualib.h \
+        $$LUAPATH/lundump.h \
+        $$LUAPATH/lvm.h \
+        $$LUAPATH/lzio.h \
         src/aboutdialog.h \
         src/biomecolordialog.h \
         src/collapsible.h \
@@ -96,6 +160,7 @@ HEADERS += \
         src/cutil.h \
         src/rangedialog.h \
         src/rangeslider.h \
+        src/scripts.h \
         src/search.h \
         src/searchthread.h \
         src/seedtables.h \

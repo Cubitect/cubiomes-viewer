@@ -82,10 +82,6 @@ signals:
 public:
     SearchMaster      * master;
 
-    int                 searchtype;
-    int                 mc;
-    int                 large;
-    ConditionTree     * pctree;
     const uint64_t    * slist;      // candidate list
     uint64_t            len;        // number of candidates
     std::atomic_bool  * abort;

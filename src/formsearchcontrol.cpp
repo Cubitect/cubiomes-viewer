@@ -341,9 +341,6 @@ void FormSearchControl::on_buttonStart_clicked()
 
         if (ok)
         {
-            for (Condition& c : condvec)
-                c.apply(wi);
-
             Gen48Settings gen48 = parent->formGen48->getSettings(true);
             // the search can either use a full list or a 48-bit list
             if (sc.searchtype == SEARCH_LIST)

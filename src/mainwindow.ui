@@ -367,8 +367,8 @@ QToolButton {
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>1244</width>
-                 <height>667</height>
+                 <width>1240</width>
+                 <height>663</height>
                 </rect>
                </property>
                <property name="sizePolicy">
@@ -547,6 +547,8 @@ QToolButton:checked {
      <addaction name="actionParaErosion"/>
      <addaction name="actionParaDepth"/>
      <addaction name="actionParaWeirdness"/>
+     <addaction name="separator"/>
+     <addaction name="actionHeight"/>
     </widget>
     <addaction name="actionGo_to"/>
     <addaction name="actionOpen_shadow_seed"/>
@@ -853,6 +855,17 @@ QToolButton:checked {
    </property>
    <property name="text">
     <string>Dockable</string>
+   </property>
+  </action>
+  <action name="actionHeight">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Approx. surface height</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+Y</string>
    </property>
   </action>
  </widget>

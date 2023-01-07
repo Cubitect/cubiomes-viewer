@@ -9,6 +9,7 @@
 #include <QPainter>
 #include <QAtomicPointer>
 #include <QIcon>
+#include <QMutex>
 
 #include "cubiomes/quadbase.h"
 
@@ -58,6 +59,7 @@ enum {
     LOPT_NOISE_E_4,
     LOPT_NOISE_D_4,
     LOPT_NOISE_W_4,
+    LOPT_HEIGHT_4,
     LOPT_MAX,
 };
 
@@ -170,9 +172,19 @@ QIcon getBiomeIcon(int id, bool warn = false);
 void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
         WorldInfo wi, int dim, int x0, int z0, int x1, int z1);
 
-class Quad : public QRunnable
+struct Scheduled : public QRunnable
 {
-public:
+    Scheduled() : prio(),stopped(),next(),done(),isdel() {}
+    // externally managed (read/write in controller thread only)
+    float prio;
+    int stopped; // not done, and also not in processing queue
+    Scheduled *next;
+    std::atomic_bool done; // indicates that no further processing will occur
+    std::atomic_bool *isdel;
+};
+
+struct Quad : public Scheduled
+{
     Quad(const Level* l, int i, int j);
     ~Quad();
 
@@ -181,6 +193,8 @@ public:
     WorldInfo wi;
     int dim;
     const Generator *g;
+    const SurfaceNoise *sn;
+    int hd;
     int scale;
     int ti, tj;
     int blocks;
@@ -194,14 +208,6 @@ public:
     // img and spos act as an atomic gate (with NULL or non-NULL indicating available results)
     QAtomicPointer<QImage> img;
     QAtomicPointer<std::vector<VarPos>> spos;
-
-    std::atomic_bool done; // indicates that no further processing will occur
-    std::atomic_bool *isdel;
-
-public:
-    // externally managed (read/write in controller thread only)
-    int prio;
-    int stopped; // not done, and also not in processing queue
 };
 
 struct QWorld;
@@ -210,18 +216,21 @@ struct Level
     Level();
     ~Level();
 
-    void init4map(QWorld *w, int pix, int layerscale);
-    void init4struct(QWorld *w, int dim, int blocks, double vis, int sopt);
+    void init4map(QWorld *world, int pix, int layerscale);
+    void init4struct(QWorld *world, int dim, int blocks, double vis, int sopt);
 
     void resizeLevel(std::vector<Quad*>& cache, int x, int z, int w, int h);
     void update(std::vector<Quad*>& cache, qreal bx0, qreal bz0, qreal bx1, qreal bz1);
 
+    QWorld *world;
     std::vector<Quad*> cells;
     Generator g;
+    SurfaceNoise sn;
     Layer *entry;
     WorldInfo wi;
     int dim;
     int tx, tz, tw, th;
+    int hd;
     int scale;
     int blocks;
     int pixs;
@@ -239,12 +248,25 @@ struct PosElement
     Pos p;
 };
 
-struct QWorld
+class MapWorker : public QThread
 {
-    QWorld(WorldInfo wi, int dim = 0, int layeropt = LOPT_DEFAULT_1);
-    ~QWorld();
+    Q_OBJECT
+public:
+    MapWorker() : QThread(), world() {}
+    virtual ~MapWorker() {}
+    virtual void run() override;
+signals:
+    void quadDone();
+public:
+    QWorld *world;
+};
 
-    void clearPool();
+class QWorld : public QObject
+{
+    Q_OBJECT
+public:
+    QWorld(WorldInfo wi, int dim = 0, int layeropt = LOPT_DEFAULT_1);
+    virtual ~QWorld();
 
     void setDim(int dim, int layeropt);
 
@@ -257,10 +279,21 @@ struct QWorld
 
     void refreshBiomeColors();
 
+    void startWorkers();
+    void clear();
+    void add(Scheduled *q);
+    Scheduled *take(Scheduled *q);
+    Scheduled *requestQuad();
+
+signals:
+    void update();
+
+public:
     WorldInfo wi;
     int dim;
     int layeropt;
     Generator g;
+    SurfaceNoise sn;
 
     // the visible area is managed in Quads of different scales (for biomes and structures),
     // which are managed in rectangular sections as levels
@@ -272,6 +305,9 @@ struct QWorld
     std::vector<Quad*> cachedbiomes;
     std::vector<Quad*> cachedstruct;
     uint64_t memlimit;
+    QMutex mutex;
+    Scheduled *queue;
+    std::vector<MapWorker> workers;
 
     bool sshow[STRUCT_NUM];
     bool showBB;
@@ -297,7 +333,6 @@ struct QWorld
 
     qreal qual; // quality, i.e. maximum pixels per 'block' at the current layer
 };
-
 
 
 #endif // WORLD_H

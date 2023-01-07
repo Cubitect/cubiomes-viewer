@@ -199,10 +199,23 @@ bool SearchMaster::set(
         }
     }
 
+    QString err = condtree.set(cv, wi.mc);
+    if (err.isEmpty())
+    {
+        // test env initialization (checking for scripts etc.)
+        SearchThreadEnv env;
+        err = env.init(wi.mc, wi.large, &condtree);
+    }
+    if (!err.isEmpty())
+    {
+        QMessageBox::warning(parent, tr("Warning"),
+                tr("Failed to setup search environment:\n%1").arg(err));
+        return false;
+    }
+
     this->searchtype = sc.searchtype;
     this->mc = wi.mc;
     this->large = wi.large;
-    this->condtree.set(cv, wi);
     this->itemsize = 1; //config.seedsPerItem;
     this->threadcnt = sc.threads;
     this->slist = slist;
@@ -678,9 +691,9 @@ bool SearchMaster::requestItem(SearchWorker *item)
         }
         else
         {
-            WorldGen gen;
             Pos origin = {0,0};
-            gen.init(mc, large);
+            SearchThreadEnv env;
+            env.init(mc, large, &condtree);
 
             uint64_t high = (seed >> 48) & 0xffff;
             uint64_t low = seed & MASK48;
@@ -693,8 +706,8 @@ bool SearchMaster::requestItem(SearchWorker *item)
 
                 for (; low <= MASK48 && !abort; low++)
                 {
-                    gen.setSeed(low);
-                    if (testTreeAt(origin, &condtree, PASS_FAST_48, &gen, &abort)
+                    env.setSeed(low);
+                    if (testTreeAt(origin, &env, PASS_FAST_48, &abort)
                         != COND_FAILED)
                     {
                         break;
@@ -731,10 +744,6 @@ SearchWorker::SearchWorker(SearchMaster *master)
     : QThread(nullptr)
     , master(master)
 {
-    this->searchtype    = master->searchtype;
-    this->mc            = master->mc;
-    this->large         = master->large;
-    this->pctree        = &master->condtree;
     this->slist         = master->slist.empty() ? NULL : master->slist.data();
     this->len           = master->slist.size();
     this->abort         = &master->abort;
@@ -749,11 +758,11 @@ SearchWorker::SearchWorker(SearchMaster *master)
 
 void SearchWorker::run()
 {
-    WorldGen gen;
     Pos origin = {0,0};
-    gen.init(mc, large);
+    SearchThreadEnv env;
+    env.init(master->mc, master->large, &master->condtree);
 
-    switch (searchtype)
+    switch (master->searchtype)
     {
     case SEARCH_LIST:
         while (!*abort && master->requestItem(this))
@@ -762,8 +771,8 @@ void SearchWorker::run()
             for (uint64_t i = idx; i < ie; i++)
             {
                 seed = slist[i];
-                gen.setSeed(seed);
-                if (testTreeAt(origin, pctree, PASS_FULL_64, &gen, abort)
+                env.setSeed(seed);
+                if (testTreeAt(origin, &env, PASS_FULL_64, abort)
                     == COND_OK
                 )
                 {
@@ -788,8 +797,8 @@ void SearchWorker::run()
                 {
                     seed = (high << 48) | slist[lowidx];
 
-                    gen.setSeed(seed);
-                    if (testTreeAt(origin, pctree, PASS_FULL_64, &gen, abort)
+                    env.setSeed(seed);
+                    if (testTreeAt(origin, &env, PASS_FULL_64, abort)
                         == COND_OK
                     )
                     {
@@ -812,8 +821,8 @@ void SearchWorker::run()
                 seed = sstart;
                 for (int i = 0; i < scnt; i++)
                 {
-                    gen.setSeed(seed);
-                    if (testTreeAt(origin, pctree, PASS_FULL_64, &gen, abort)
+                    env.setSeed(seed);
+                    if (testTreeAt(origin, &env, PASS_FULL_64, abort)
                         == COND_OK
                     )
                     {
@@ -846,8 +855,8 @@ void SearchWorker::run()
             else
                 low = sstart & MASK48;
 
-            gen.setSeed(low);
-            if (testTreeAt(origin, pctree, PASS_FULL_48, &gen, abort)
+            env.setSeed(low);
+            if (testTreeAt(origin, &env, PASS_FULL_48, abort)
                 == COND_FAILED
             )
             {
@@ -858,8 +867,8 @@ void SearchWorker::run()
             {
                 seed = (high << 48) | low;
 
-                gen.setSeed(seed);
-                if (testTreeAt(origin, pctree, PASS_FULL_64, &gen, abort)
+                env.setSeed(seed);
+                if (testTreeAt(origin, &env, PASS_FULL_64, abort)
                     == COND_OK
                 )
                 {

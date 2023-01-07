@@ -1,7 +1,7 @@
 #include "aboutdialog.h"
 #include "ui_aboutdialog.h"
 
-
+#include "lua-5.4.4/src/lua.hpp"
 
 AboutDialog::AboutDialog(QWidget *parent) :
     QDialog(parent),
@@ -13,6 +13,8 @@ AboutDialog::AboutDialog(QWidget *parent) :
     text.replace("_QT_MAJOR_", QString::number(QT_VERSION_MAJOR));
     text.replace("_QT_MINOR_", QString::number(QT_VERSION_MINOR));
     text.replace("_VERSION_", getVersStr());
+    text.replace("_LUA_VERS_", LUA_VERSION_MAJOR "." LUA_VERSION_MINOR "." LUA_VERSION_RELEASE);
+
     ui->label->setText(text);
 }
 

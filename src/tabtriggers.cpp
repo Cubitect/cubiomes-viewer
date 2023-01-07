@@ -65,16 +65,17 @@ void AnalysisTriggers::run()
 
         if (!conds.empty())
         {
-            WorldGen gen;
-            gen.init(wi.mc, wi.large);
-            gen.setSeed(wi.seed);
-
             ConditionTree condtree;
-            condtree.set(conds, wi);
+            QString err = condtree.set(conds, wi.mc);
+            if (!err.isEmpty())
+                break;
+            SearchThreadEnv env;
+            env.init(wi.mc, wi.large, &condtree);
+            env.setSeed(wi.seed);
 
             Pos origin = {0, 0};
             Pos cpos[MAX_INSTANCES] = {};
-            if (testTreeAt(origin, &condtree, PASS_FULL_64, &gen, &stop, cpos)
+            if (testTreeAt(origin, &env, PASS_FULL_64, &stop, cpos)
                 == COND_OK)
             {
                 setConditionTreeItems(condtree, 0, seed, cpos, seeditem, true);

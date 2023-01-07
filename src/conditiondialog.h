@@ -163,6 +163,12 @@ private slots:
 
     void on_lineBiomeSize_textChanged(const QString &text);
 
+    void on_comboLua_currentIndexChanged(int index);
+    void on_pushLuaSaveAs_clicked();
+    void on_pushLuaSave_clicked();
+    void on_pushLuaOpen_clicked();
+    void on_pushLuaExample_clicked();
+
 private:
     Ui::ConditionDialog *ui;
     QTextEdit *textDescription;
@@ -175,6 +181,7 @@ private:
     std::map<int, NoiseBiomeIndicator*> noisebiomes;
 
     QVector<VariantCheckBox*> variantboxes;
+    uint64_t luahash;
 
 public:
     Config *config;

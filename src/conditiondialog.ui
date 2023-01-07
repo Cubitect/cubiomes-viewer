@@ -489,7 +489,7 @@
           <number>0</number>
          </property>
          <property name="currentIndex">
-          <number>4</number>
+          <number>5</number>
          </property>
          <widget class="QWidget" name="pageNone">
           <property name="enabled">
@@ -701,8 +701,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>634</width>
-                   <height>300</height>
+                   <width>60</width>
+                   <height>20</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -1013,8 +1013,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>634</width>
-                   <height>251</height>
+                   <width>60</width>
+                   <height>20</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -1030,6 +1030,115 @@
               </item>
              </layout>
             </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="pageLua">
+          <layout class="QGridLayout" name="gridLayout_20">
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_7">
+             <property name="text">
+              <string>Lua script:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0" colspan="4">
+            <widget class="QTabWidget" name="tabWidgetLua">
+             <property name="currentIndex">
+              <number>0</number>
+             </property>
+             <widget class="QWidget" name="tabLuaText">
+              <attribute name="title">
+               <string>Edit</string>
+              </attribute>
+              <layout class="QGridLayout" name="gridLayout_21">
+               <item row="1" column="2">
+                <widget class="QPushButton" name="pushLuaSave">
+                 <property name="text">
+                  <string>Save</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QPushButton" name="pushLuaSaveAs">
+                 <property name="text">
+                  <string>Save as...</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QPushButton" name="pushLuaExample">
+                 <property name="text">
+                  <string>Examples...</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="0" colspan="3">
+                <widget class="ScriptEditor" name="textEditLua">
+                 <property name="font">
+                  <font>
+                   <family>DejaVu Sans Mono</family>
+                  </font>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+             <widget class="QWidget" name="tabLuaOutput">
+              <attribute name="title">
+               <string>Errors</string>
+              </attribute>
+              <layout class="QGridLayout" name="gridLayout_22">
+               <item row="1" column="0" colspan="2">
+                <widget class="QPlainTextEdit" name="textEditLuaOut">
+                 <property name="font">
+                  <font>
+                   <family>DejaVu Sans Mono</family>
+                  </font>
+                 </property>
+                 <property name="readOnly">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="0" colspan="2">
+                <widget class="QLabel" name="labelLuaCall">
+                 <property name="font">
+                  <font>
+                   <family>DejaVu Sans Mono</family>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </widget>
+           </item>
+           <item row="0" column="3">
+            <widget class="QPushButton" name="pushLuaOpen">
+             <property name="text">
+              <string>Open directory...</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QComboBox" name="comboLua"/>
+           </item>
+           <item row="2" column="1">
+            <spacer name="horizontalSpacer_6">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
            </item>
           </layout>
          </widget>
@@ -1083,8 +1192,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>98</width>
-                   <height>28</height>
+                   <width>60</width>
+                   <height>20</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_3_1">
@@ -1140,8 +1249,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>98</width>
-                   <height>28</height>
+                   <width>60</width>
+                   <height>20</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_3_2">
@@ -1245,8 +1354,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>98</width>
-                   <height>28</height>
+                   <width>60</width>
+                   <height>20</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_3_3">
@@ -1371,6 +1480,11 @@
    <class>SpinInstances</class>
    <extends>QSpinBox</extends>
    <header>src/conditiondialog.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ScriptEditor</class>
+   <extends>QPlainTextEdit</extends>
+   <header>src/scripts.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

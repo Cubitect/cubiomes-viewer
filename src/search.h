@@ -3,8 +3,11 @@
 
 #include "settings.h"
 
+#include "lua-5.4.4/src/lua.hpp"
+
 #include <QVector>
 #include <QString>
+#include <QMap>
 #include <atomic>
 
 #define PRECOMPUTE48_BUFSIZ ((int64_t)1 << 30)
@@ -85,6 +88,7 @@ enum
     F_LOGIC_NOT,
     F_BIOME_CENTER,
     F_BIOME_CENTER_256,
+    F_LUA,
     // new filters should be added here at the end to keep some downwards compatibility
     FILTER_MAX,
 };
@@ -144,6 +148,12 @@ static const struct FilterList
             _("Evaluates as true when none of the conditions that reference it "
             "(by relative location) are met. When no referencing conditions are "
             "defined, it defaults to true.")
+        };
+        list[F_LUA] = FilterInfo{
+            CAT_HELPER, 0, 0, 0, 0, 0, 0, 1, 0, 0, MC_1_0, MC_NEWEST, DIM_UNDEF, 0, disp++,
+            ":icons/helper.png",
+            _("Lua"),
+            _("")
         };
         list[F_SCALE_TO_NETHER] = FilterInfo{
             CAT_HELPER, 0, 0, 0, 0, 0, 0, 1, 0, 0, MC_1_0, MC_NEWEST, DIM_UNDEF, 0, disp++,
@@ -602,7 +612,9 @@ struct /*__attribute__((packed))*/ Condition
     uint8_t     skipref;
     uint8_t     pad0[3]; // legacy
     char        text[28];
-    uint8_t     pad1[36]; // legacy
+    uint8_t     pad1[12]; // legacy
+    uint64_t    hash;
+    uint8_t     deps[16];
     uint64_t    biomeToFind, biomeToFindM; // inclusion biomes
     int32_t     biomeId; // legacy oceanToFind(8)
     uint32_t    biomeSize;
@@ -626,9 +638,11 @@ struct /*__attribute__((packed))*/ Condition
     uint8_t     generated_start[0]; // address dummy
     BiomeFilter bf;
 
-    // initialize the generated members and perform version upgrades
+    // perform version upgrades
     bool versionUpgrade();
-    bool apply(WorldInfo wi);
+
+    // initialize the generated members
+    QString apply(int mc);
 
     QString toHex() const;
     bool readHex(const QString& hex);
@@ -636,16 +650,24 @@ struct /*__attribute__((packed))*/ Condition
     QString summary() const;
 };
 
+static_assert(
+    offsetof(Condition, generated_start) == 304,
+    "Layout of Condition has changed!"
+);
+
 struct ConditionTree
 {
     QVector<Condition> condvec;
     std::vector<std::vector<char>> references;
 
-    void set(const QVector<Condition>& cv, WorldInfo wi);
+    ~ConditionTree();
+    QString set(const QVector<Condition>& cv, int mc);
 };
 
-struct WorldGen
+struct SearchThreadEnv
 {
+    ConditionTree *condtree;
+
     Generator g;
     SurfaceNoise sn;
 
@@ -653,45 +675,20 @@ struct WorldGen
     uint64_t seed;
     bool initsurf;
 
-    void init(int mc, bool large)
-    {
-        this->mc = mc;
-        this->large = large;
-        this->seed = 0;
-        this->initsurf = false;
-        uint32_t flags = 0;
-        if (large)
-            flags |= LARGE_BIOMES;
-        setupGenerator(&g, mc, flags);
-    }
+    std::map<uint64_t, lua_State*> l_states;
 
-    void setSeed(uint64_t seed)
+    SearchThreadEnv() : condtree(),mc(),large(),seed(),initsurf(),l_states()
     {
-        this->seed = seed;
+        memset(&g, 0, sizeof(g));
+        memset(&sn, 0, sizeof(sn));
     }
+    ~SearchThreadEnv();
 
-    void init4Dim(int dim)
-    {
-        uint64_t mask = (dim == 0 ? ~0ULL : MASK48);
-        if (dim != g.dim || (seed & mask) != (g.seed & mask))
-        {
-            applySeed(&g, dim, seed);
-            initsurf = false;
-        }
-        else if (g.mc >= MC_1_15 && seed != g.seed)
-        {
-            g.sha = getVoronoiSHA(seed);
-        }
-    }
+    QString init(int mc, bool large, ConditionTree *condtree);
 
-    void setSurfaceNoise()
-    {
-        if (!initsurf)
-        {
-            initSurfaceNoiseEnd(&sn, seed);
-            initsurf = true;
-        }
-    }
+    void setSeed(uint64_t seed);
+    void init4Dim(int dim);
+    void prepareSurfaceNoise();
 };
 
 
@@ -718,26 +715,25 @@ enum
     MATCH_ANY   = 0x10,
 };
 
-/* Checks if a seeds satisfies the conditions tree.
+/* Checks if a seed satisfies the conditions tree.
  * Returns the lowest condition fulfillment status.
  */
 int testTreeAt(
     Pos                         at,             // relative origin
-    ConditionTree             * tree,           // condition tree
+    SearchThreadEnv           * env,            // thread-local environment
     int                         pass,           // search pass
-    WorldGen                  * gen,            // world generator
     std::atomic_bool          * abort,          // abort signal
     Pos                       * path = 0        // ok trigger positions
 );
 
 int testCondAt(
     Pos                         at,             // relative origin
+    SearchThreadEnv           * env,            // thread-local environment
+    int                         pass,           // search pass
+    std::atomic_bool          * abort,          // abort signal
     Pos                       * cent,           // output center position(s)
     int                       * imax,           // max instances (NULL for avg)
-    Condition                 * cond,           // condition to check
-    int                         pass,
-    WorldGen                  * gen,
-    std::atomic_bool          * abort
+    Condition                 * cond            // condition to check
 );
 
 struct QuadInfo

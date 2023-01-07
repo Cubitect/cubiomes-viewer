@@ -171,12 +171,11 @@ QStringList VarPos::detail() const
 
 
 Quad::Quad(const Level* l, int i, int j)
-    : wi(l->wi),dim(l->dim),g(&l->g),scale(l->scale)
+    : wi(l->wi),dim(l->dim),g(&l->g),sn(&l->sn),hd(l->hd),scale(l->scale)
     , ti(i),tj(j),blocks(l->blocks),pixs(l->pixs),sopt(l->sopt),lopt(l->lopt)
     , biomes(),rgb(),img(),spos()
-    , done(),isdel(l->isdel)
-    , prio(),stopped()
 {
+    isdel = l->isdel;
     setAutoDelete(false);
 }
 
@@ -222,7 +221,7 @@ void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
                 if (sconf.structType == End_City)
                 {
                     SurfaceNoise sn;
-                    initSurfaceNoiseEnd(&sn, wi.seed);
+                    initSurfaceNoise(&sn, DIM_END, wi.seed);
                     id = isViableEndCityTerrain(&g.en, &sn, p.x, p.z);
                     if (!id)
                         continue;
@@ -291,6 +290,68 @@ void Quad::run()
             g_mutex.lock();
             g_mutex.unlock();
             biomesToImage(rgb, g_biomeColors, biomes, w, h, 1, 1);
+
+            if (lopt == LOPT_HEIGHT_4 && dim == 0)
+            {
+                // sampling grid
+                int ps = (hd ? 0 : 2);
+                int px = x >> ps;
+                int pz = z >> ps;
+                int pw = ((x+w+2) >> ps) - px + 1;
+                int ph = ((z+h+2) >> ps) - pz + 1;
+                std::vector<int> buf(pw * ph);
+                for (int j = 0; j < ph; j++)
+                {
+                    for (int i = 0; i < pw; i++)
+                    {
+                        int samplex = ((px + i) << ps) * scale / 4;
+                        int samplez = ((pz + j) << ps) * scale / 4;
+                        mapApproxHeight(&buf[j*pw+i], 0, g, sn,
+                                samplex, samplez, 1, 1);
+                    }
+                }
+
+                // interpolate height
+                std::vector<int> height((w+2) * (h+2));
+                for (int j = 0; j < h+2; j++)
+                {
+                    for (int i = 0; i < w+2; i++)
+                    {
+                        int pi = ((x + i) >> ps) - px;
+                        int pj = ((z + j) >> ps) - pz;
+                        int v00 = buf[(pj+0)*pw + pi+0];
+                        int v01 = buf[(pj+0)*pw + pi+1];
+                        int v10 = buf[(pj+1)*pw + pi+0];
+                        int v11 = buf[(pj+1)*pw + pi+1];
+                        int m = 1 << ps;
+                        qreal di = ((x + i) & (m - 1)) / (qreal)m;
+                        qreal dj = ((z + j) & (m - 1)) / (qreal)m;
+                        int v = (int) round(lerp2(di, dj, v00, v01, v10, v11));
+                        if (v > wi.y) v = 255;
+                        height[j*(w+2)+i] = v;
+                    }
+                }
+
+                // apply shading based on height changes
+                qreal mul = (wi.mc >= MC_1_18 ? 0.6 : 0.2) / scale;
+                for (int j = 0; j < h; j++)
+                {
+                    for (int i = 0; i < w; i++)
+                    {
+                        qreal d0 = height[(j+0)*(w+2) + i+0];
+                        qreal d1 = height[(j+2)*(w+2) + i+2];
+                        qreal light = 1.0 + (d1 - d0) * mul;
+                        if (light < 0.4) light = 0.4;
+                        if (light > 1.6) light = 1.6;
+                        uchar *col = rgb + 3*(j*w + i);
+                        for (int k = 0; k < 3; k++)
+                        {
+                            qreal c = col[k] * light;
+                            col[k] = (c <= 0) ? 0 : (c > 0xff) ? 0xff : (uchar)(c);
+                        }
+                    }
+                }
+            }
         }
         else // climate parameter
         {
@@ -323,18 +384,17 @@ void Quad::run()
     done = true;
 }
 
-
 Level::Level()
-    : cells(),g(),entry(),wi(),dim()
+    : cells(),g(),sn(),entry(),wi(),dim()
     , tx(),tz(),tw(),th()
-    , scale(),blocks(),pixs()
+    , hd(),scale(),blocks(),pixs()
     , sopt(),lopt()
 {
 }
 
 Level::~Level()
 {
-    QThreadPool::globalInstance()->waitForDone();
+    //QThreadPool::globalInstance()->waitForDone();
     for (Quad *q : cells)
         delete q;
 }
@@ -342,11 +402,13 @@ Level::~Level()
 
 void Level::init4map(QWorld *w, int pix, int layerscale)
 {
+    this->world = w;
     this->wi = w->wi;
     this->dim = w->dim;
 
     tx = tz = tw = th = 0;
 
+    hd = (layerscale == 1);
     scale = layerscale;
     pixs = pix;
     blocks = pix * layerscale;
@@ -360,6 +422,7 @@ void Level::init4map(QWorld *w, int pix, int layerscale)
     case LOPT_NOISE_E_4:
     case LOPT_NOISE_D_4:
     case LOPT_NOISE_W_4:
+    case LOPT_HEIGHT_4:
     case LOPT_RIVER_4:
     case LOPT_DEFAULT_4:
         optlscale = 4;
@@ -400,12 +463,12 @@ void Level::init4map(QWorld *w, int pix, int layerscale)
     }
 
     applySeed(&g, dim, wi.seed);
+    initSurfaceNoise(&sn, dim, wi.seed);
     this->isdel = &w->isdel;
     sopt = D_NONE;
-    lopt = 0;
-    if (dim == 0 && wi.mc >= MC_1_18)
+    lopt = w->layeropt;
+    if (dim == DIM_OVERWORLD && wi.mc >= MC_1_18)
     {
-        lopt = w->layeropt;
         switch (w->layeropt)
         {
         case LOPT_NOISE_T_4: g.bn.nptype = NP_TEMPERATURE; break;
@@ -420,6 +483,7 @@ void Level::init4map(QWorld *w, int pix, int layerscale)
 
 void Level::init4struct(QWorld *w, int dim, int blocks, double vis, int sopt)
 {
+    this->world = w;
     this->wi = w->wi;
     this->dim = dim;
     this->blocks = blocks;
@@ -431,7 +495,7 @@ void Level::init4struct(QWorld *w, int dim, int blocks, double vis, int sopt)
     this->isdel = &w->isdel;
 }
 
-static int sqdist(int x, int z) { return x*x + z*z; }
+static float sqdist(int x, int z) { return x*x + z*z; }
 
 void Level::resizeLevel(std::vector<Quad*>& cache, int x, int z, int w, int h)
 {
@@ -460,7 +524,7 @@ void Level::resizeLevel(std::vector<Quad*>& cache, int x, int z, int w, int h)
         if (c->blocks == blocks && c->sopt == sopt && c->dim == dim)
         {
             // remove outside quads from schedule
-            if (QThreadPool::globalInstance()->tryTake(c))
+            if (world->take(c))
             {
                 c->stopped = true;
             }
@@ -490,7 +554,7 @@ void Level::resizeLevel(std::vector<Quad*>& cache, int x, int z, int w, int h)
                 g->prio = sqdist(i-w/2, j-h/2);
                 togen.push_back(g);
             }
-            else if (g->stopped || QThreadPool::globalInstance()->tryTake(g))
+            else if (g->stopped || world->take(g))
             {
                 if (!g->done)
                 {
@@ -508,7 +572,8 @@ void Level::resizeLevel(std::vector<Quad*>& cache, int x, int z, int w, int h)
     std::sort(togen.begin(), togen.end(),
               [](Quad* a, Quad* b) { return a->prio < b->prio; });
     for (Quad *q : togen)
-        QThreadPool::globalInstance()->start(q, scale);
+        world->add(q);
+    world->startWorkers();
 
     cells.swap(grid);
     tx = x;
@@ -537,9 +602,18 @@ void Level::update(std::vector<Quad*>& cache, qreal bx0, qreal bz0, qreal bx1, q
     }
 }
 
+void MapWorker::run()
+{
+    while (Scheduled *q = world->requestQuad())
+    {
+        q->run();
+        emit quadDone();
+    }
+}
 
 QWorld::QWorld(WorldInfo wi, int dim, int layeropt)
-    : wi(wi)
+    : QObject()
+    , wi(wi)
     , dim(dim)
     , layeropt(layeropt)
     , lvb()
@@ -548,6 +622,9 @@ QWorld::QWorld(WorldInfo wi, int dim, int layeropt)
     , cachedbiomes()
     , cachedstruct()
     , memlimit()
+    , mutex()
+    , queue()
+    , workers(QThread::idealThreadCount())
     , showBB()
     , gridspacing()
     , spawn()
@@ -567,6 +644,11 @@ QWorld::QWorld(WorldInfo wi, int dim, int layeropt)
     setupGenerator(&g, wi.mc,  wi.large);
 
     memlimit = 256ULL * 1024*1024;
+    for (MapWorker& w : workers)
+    {
+        w.world = this;
+        QObject::connect(&w, &MapWorker::quadDone, this, &QWorld::update);
+    }
 
     setDim(dim, layeropt);
 
@@ -593,7 +675,8 @@ QWorld::QWorld(WorldInfo wi, int dim, int layeropt)
 
 QWorld::~QWorld()
 {
-    clearPool();
+    clear();
+
     for (Quad *q : cachedbiomes)
         delete q;
     for (Quad *q : cachedstruct)
@@ -606,17 +689,9 @@ QWorld::~QWorld()
     }
 }
 
-void QWorld::clearPool()
-{
-    isdel = true;
-    QThreadPool::globalInstance()->clear();
-    QThreadPool::globalInstance()->waitForDone();
-    isdel = false;
-}
-
 void QWorld::setDim(int dim, int layeropt)
 {
-    clearPool();
+    clear();
     if (this->layeropt != layeropt)
     {
         for (Level& l : lvb)
@@ -627,6 +702,7 @@ void QWorld::setDim(int dim, int layeropt)
     this->dim = dim;
     this->layeropt = layeropt;
     applySeed(&g, dim, wi.seed);
+    initSurfaceNoise(&sn, DIM_OVERWORLD, g.seed);
 
     // cache existing quads
     for (Level& l : lvb)
@@ -702,7 +778,22 @@ QString QWorld::getBiomeName(Pos p)
         return c + QString::number(id);
     }
     const char *s = biome2str(wi.mc, id);
-    return s ? s : "";
+    QString ret = s ? s : "";
+    if (layeropt == LOPT_HEIGHT_4 && dim == 0)
+    {
+        int y, id;
+        mapApproxHeight(&y, &id, &g, &sn, p.x>>2, p.z>>2, 1, 1);
+        ret = QString::asprintf("Y~%d ", y) + ret;
+    }
+    /*if (layeropt == LOPT_HEIGHT_4 && wi.mc >= MC_1_18 && dim == 0)
+    {
+        Generator gd = g;
+        gd.bn.nptype = NP_DEPTH;
+        int depth = getBiomeAt(&gd, 4, p.x>>2, 0, p.z>>2);
+        int y = (depth + 64) / 128 + 25;
+        ret = QString::asprintf("Y~%d ", y) + ret;
+    }*/
+    return ret;
 }
 
 static void refreshQuadColor(Quad *q)
@@ -716,7 +807,7 @@ static void refreshQuadColor(Quad *q)
 
 void QWorld::refreshBiomeColors()
 {
-    g_mutex.lock();
+    QMutexLocker locker(&g_mutex);
     for (Level& l : lvb)
     {
         for (Quad *q : l.cells)
@@ -724,9 +815,86 @@ void QWorld::refreshBiomeColors()
     }
     for (Quad *q : cachedbiomes)
         refreshQuadColor(q);
-    g_mutex.unlock();
 }
 
+void QWorld::clear()
+{
+    mutex.lock();
+    queue = nullptr;
+    isdel = true;
+    mutex.unlock();
+    for (MapWorker& w : workers)
+        w.wait(-1);
+    isdel = false;
+}
+
+void QWorld::startWorkers()
+{
+    for (MapWorker& w : workers)
+        w.start();
+}
+
+void QWorld::add(Scheduled *q)
+{
+    QMutexLocker locker(&mutex);
+    if (!queue)
+    {   // new start
+        q->next = nullptr;
+        queue = q;
+        return;
+    }
+    if (q->prio <= queue->prio)
+    {   // new head
+        q->next = queue;
+        queue = q;
+        return;
+    }
+    Scheduled *prev = queue, *p = prev->next;
+    while (p)
+    {
+        if (p->prio >= q->prio)
+            break;
+        prev = p;
+        p = p->next;
+    }
+    q->next = p;
+    prev->next = q;
+}
+
+Scheduled *QWorld::take(Scheduled *q)
+{
+    QMutexLocker locker(&mutex);
+    if (Scheduled *p = queue)
+    {
+        if (p == q)
+        {
+            queue = p->next;
+            return p;
+        }
+        Scheduled *prev = p;
+        while ((p = p->next))
+        {
+            if (p == q)
+            {
+                prev->next = p->next;
+                return p;
+            }
+            prev = p;
+        }
+    }
+    return nullptr;
+}
+
+Scheduled *QWorld::requestQuad()
+{
+    if (isdel)
+        return nullptr;
+    QMutexLocker locker(&mutex);
+    Scheduled *q;
+    if ((q = queue))
+        queue = q->next;
+    return q;
+}
 
 void QWorld::cleancache(std::vector<Quad*>& cache, unsigned int maxsize)
 {
@@ -747,7 +915,7 @@ void QWorld::cleancache(std::vector<Quad*>& cache, unsigned int maxsize)
         }
         if (n - i >= targetsize)
         {
-            if (q->done || QThreadPool::globalInstance()->tryTake(q))
+            if (q->done || take(q))
             {
                 delete q;
                 continue;
@@ -759,7 +927,7 @@ void QWorld::cleancache(std::vector<Quad*>& cache, unsigned int maxsize)
     cache.swap(newcache);
 }
 
-struct SpawnStronghold : public QRunnable
+struct SpawnStronghold : public Scheduled
 {
     QWorld *world;
     WorldInfo wi;
@@ -866,6 +1034,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
             // account for the seam buffer pixels
             //ps += ((q->pixs / 128) * q->blocks / (qreal)q->pixs) * blocks2pix;
             QRect rec(floor(px),floor(pz), ceil(ps),ceil(ps));
+            //QImage img = (*q->img).scaledToWidth(rec.width(), Qt::SmoothTransformation);
             painter.drawImage(rec, *q->img);
 
             if (sshow[D_GRID] && !gridspacing)
@@ -1104,7 +1273,8 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
         if (sshow[D_SPAWN] || sshow[D_STRONGHOLD] || (showBB && blocks2pix >= 1.0))
         {
             spawn = (Pos*) -1;
-            QThreadPool::globalInstance()->start(new SpawnStronghold(this, wi));
+            add(new SpawnStronghold(this, wi));
+            startWorkers();
         }
     }
 

@@ -2,6 +2,7 @@
 #include "seedtables.h"
 #include "mainwindow.h"
 #include "cutil.h"
+#include "scripts.h"
 
 #include "cubiomes/quadbase.h"
 #include "cubiomes/finders.h"
@@ -9,6 +10,8 @@
 #include <QThread>
 #include <QByteArray>
 #include <QApplication>
+#include <QStandardPaths>
+#include <QDir>
 
 #include <algorithm>
 
@@ -43,6 +46,15 @@ QString Condition::summary() const
     else
     {
         txts = QApplication::translate("Filter", ft.name);
+        if (type == F_LUA)
+        {
+            QMap<uint64_t, QString> scripts;
+            getScripts(scripts);
+            if (scripts.contains(hash))
+                txts += ": " + QFileInfo(scripts.value(hash)).baseName();
+            else
+                txts += ": " + QApplication::tr("[script missing]");
+        }
     }
 
     s += QString(" %2%3").arg(txts, -28, ' ').arg(cnts, -4, QChar(' '));
@@ -78,6 +90,8 @@ bool Condition::versionUpgrade()
         memset(pad0, 0, sizeof(pad0));
         memset(text, 0, sizeof(text));
         memset(pad1, 0, sizeof(pad1));
+        hash = 0;
+        memset(deps, 0, sizeof(deps));
         memset(pad2, 0, sizeof(pad2));
         memset(pad3, 0, sizeof(pad3));
         biomeId = biomeSize = tol = 0;
@@ -91,7 +105,7 @@ bool Condition::versionUpgrade()
     return true;
 }
 
-bool Condition::apply(WorldInfo wi)
+QString Condition::apply(int mc)
 {
     int in[256] = {}, inlen = 0, ex[256] = {}, exlen = 0;
     for (int i = 0; i < 64; i++)
@@ -109,10 +123,10 @@ bool Condition::apply(WorldInfo wi)
     if (flags & APPROX)
         bfflags |= BF_APPROX;
     if (flags & MATCH_ANY)
-        setupBiomeFilter(&bf, wi.mc, bfflags, 0, 0, ex, exlen, in, inlen);
+        setupBiomeFilter(&bf, mc, bfflags, 0, 0, ex, exlen, in, inlen);
     else
-        setupBiomeFilter(&bf, wi.mc, bfflags, in, inlen, ex, exlen, 0, 0);
-    return true;
+        setupBiomeFilter(&bf, mc, bfflags, in, inlen, ex, exlen, 0, 0);
+    return "";
 }
 
 QString Condition::toHex() const
@@ -140,7 +154,11 @@ bool Condition::readHex(const QString& hex)
     return ok;
 }
 
-void ConditionTree::set(const QVector<Condition>& cv, WorldInfo wi)
+ConditionTree::~ConditionTree()
+{
+}
+
+QString ConditionTree::set(const QVector<Condition>& cv, int mc)
 {
     int cmax = 0;
     for (const Condition& c : cv)
@@ -155,23 +173,94 @@ void ConditionTree::set(const QVector<Condition>& cv, WorldInfo wi)
         if (c.meta & Condition::DISABLED)
             continue;
         condvec[c.save] = c;
-        condvec[c.save].apply(wi);
+        QString err = condvec[c.save].apply(mc);
+        if (!err.isEmpty())
+            return err;
         if (c.relative <= cmax)
             references[c.relative].push_back(c.save);
     }
+    return "";
 }
 
+SearchThreadEnv::~SearchThreadEnv()
+{
+    for (auto& it : l_states)
+        lua_close(it.second);
+}
+
+QString SearchThreadEnv::init(int mc, bool large, ConditionTree *condtree)
+{
+    this->condtree = condtree;
+    this->mc = mc;
+    this->large = large;
+    this->seed = 0;
+    this->initsurf = false;
+    uint32_t flags = 0;
+    if (large)
+        flags |= LARGE_BIOMES;
+    setupGenerator(&g, mc, flags);
+
+    QMap<uint64_t, QString> scripts;
+    getScripts(scripts);
+    for (auto& it : l_states)
+        lua_close(it.second);
+    l_states.clear();
+
+    for (const Condition& c: qAsConst(condtree->condvec))
+    {
+        if (c.type != F_LUA)
+            continue;
+        if (!scripts.contains(c.hash))
+            return QApplication::tr("missing script for condition %1").arg(c.save);
+        QString err;
+        lua_State *L = loadScript(scripts.value(c.hash), &err);
+        if (!L)
+            return QApplication::tr("Condition %1: ").arg(c.save) + err;
+        l_states[c.hash] = L;
+    }
+    return "";
+}
+
+void SearchThreadEnv::setSeed(uint64_t seed)
+{
+    this->seed = seed;
+}
+
+void SearchThreadEnv::init4Dim(int dim)
+{
+    uint64_t mask = (dim == 0 ? ~0ULL : MASK48);
+    if (dim != g.dim || (seed & mask) != (g.seed & mask))
+    {
+        applySeed(&g, dim, seed);
+        initsurf = false;
+    }
+    else if (g.mc >= MC_1_15 && seed != g.seed)
+    {
+        g.sha = getVoronoiSHA(seed);
+    }
+}
+
+void SearchThreadEnv::prepareSurfaceNoise()
+{
+    if (!initsurf)
+    {
+        initSurfaceNoise(&sn, DIM_END, seed);
+        initsurf = true;
+    }
+}
+
+#include <QDebug>
 static
 int testTreeAt(
-    Pos                         at,
-    ConditionTree             * tree,
-    int                         node,
-    int                         pass,
-    WorldGen                  * gen,
-    std::atomic_bool          * abort,
-    Pos                       * path
+    Pos                         at,             // relative origin
+    SearchThreadEnv           * env,            // thread-local environment
+    int                         pass,           // search pass
+    std::atomic_bool          * abort,          // abort signal
+    Pos                       * path,           // output center position(s)
+    int                         node
 )
 {
+    ConditionTree *tree = env->condtree;
     Condition& c = tree->condvec[node];
     const std::vector<char>& branches = tree->references[c.save];
     int st;
@@ -207,15 +296,7 @@ int testTreeAt(
                 int sta = COND_OK;
                 for (int b : branches)
                 {
-                    int stb = testTreeAt(
-                        pos,
-                        tree,
-                        b,
-                        pass,
-                        gen,
-                        abort,
-                        path
-                    );
+                    int stb = testTreeAt(pos, env, pass, abort, path, b);
                     if (*abort)
                         return COND_FAILED;
                     if (stb < sta)
@@ -223,15 +304,12 @@ int testTreeAt(
                     if (sta == COND_FAILED)
                         break;
                 }
-
                 if (sta > st)
                     st = sta;
+                if (st >= COND_MAYBE_POS_VALID && path)
+                    path[c.save] = pos;
                 if (st == COND_OK)
-                {
-                    if (path)
-                        path[c.save] = pos;
                     return COND_OK;
-                }
             }
         }
         return st;
@@ -250,15 +328,7 @@ int testTreeAt(
         st = COND_OK;
         for (int b : branches)
         {
-            int sta = testTreeAt(
-                pos,
-                tree,
-                b,
-                pass,
-                gen,
-                abort,
-                path
-            );
+            int sta = testTreeAt(pos, env, pass, abort, path, b);
             if (*abort)
                 return COND_FAILED;
             if (sta < st)
@@ -266,7 +336,7 @@ int testTreeAt(
             if (st == COND_FAILED)
                 break;
         }
-        if (path && st == COND_OK)
+        if (path && st >= COND_MAYBE_POS_VALID)
             path[c.save] = pos;
         return st;
 
@@ -280,34 +350,26 @@ int testTreeAt(
         }
         else
         {
-            int bok = 0;
+            int b_ok = 0;
             st = COND_FAILED;
             for (int b : branches)
             {
-                int sta = testTreeAt(
-                    at,
-                    tree,
-                    b,
-                    pass,
-                    gen,
-                    abort,
-                    path
-                );
+                int sta = testTreeAt(at, env, pass, abort, path, b);
                 if (*abort)
                     return COND_FAILED;
                 if (sta > st)
                     st = sta;
-                if (st == COND_OK) {
-                    bok = b;
+                if (st >= COND_MAYBE_POS_VALID)
+                    b_ok = b;
+                if (st == COND_OK)
                     break;
-                }
             }
-            if (path && st == COND_OK)
+            if (path && st >= COND_MAYBE_POS_VALID)
             {
                 path[c.save] = at;
                 for (int b : branches)
                 {   // invalidate the other branches
-                    if (b == bok)
+                    if (b == b_ok)
                         continue;
                     Pos *p = path + tree->condvec[b].save;
                     p->x = p->z = -1;
@@ -321,15 +383,7 @@ int testTreeAt(
         st = COND_OK;
         for (int b : branches)
         {
-            int sta = testTreeAt(
-                at,
-                tree,
-                b,
-                pass,
-                gen,
-                abort,
-                path
-            );
+            int sta = testTreeAt(at, env, pass, abort, path, b);
             if (*abort)
                 return COND_FAILED;
             if      (sta == COND_OK) { st = COND_FAILED; break; }
@@ -338,13 +392,39 @@ int testTreeAt(
         }
         return st;
 
+    case F_LUA:
+        st = COND_OK;
+        if (lua_State *L = env->l_states[c.hash])
+        {
+            Pos *buf = path ? path : inst;
+            for (int b : branches)
+            {
+                int sta = testTreeAt(at, env, pass, abort, buf, b);
+                if (*abort)
+                    return COND_FAILED;
+                if (sta < st) {
+                    st = sta;
+                    if (st == COND_FAILED)
+                        return st;
+                }
+            }
+            if (st <= COND_MAYBE_POS_INVAL)
+                return st;
+            int sta = runCheckScript(L, at, env, pass, buf, &c);
+            if (*abort)
+                return COND_FAILED;
+            if (sta < st)
+                st = sta;
+        }
+        return st;
+
     default:
 
         if (branches.empty())
         {   // this is a leaf node => check only for presence of instances
             int icnt = c.count;
-            st = testCondAt(at, inst, &icnt, &c, pass, gen, abort);
-            if (path && st == COND_OK)
+            st = testCondAt(at, env, pass, abort, inst, &icnt, &c);
+            if (path && st >= COND_MAYBE_POS_VALID)
             {
                 if (icnt == 1)
                     path[c.save] = *inst;
@@ -361,7 +441,7 @@ int testTreeAt(
             // quad conditions are also processed here since we want to
             // examine all instances without support for averaging
             int icnt = MAX_INSTANCES;
-            st = testCondAt(at, inst, &icnt, &c, pass, gen, abort);
+            st = testCondAt(at, env, pass, abort, inst, &icnt, &c);
             if (st == COND_FAILED || st == COND_MAYBE_POS_INVAL)
                 return st;
             int sta = COND_FAILED;
@@ -372,15 +452,7 @@ int testTreeAt(
                 pos = inst[i];
                 for (int b : branches) // AND dependent conditions
                 {
-                    int stc = testTreeAt(
-                        pos,
-                        tree,
-                        b,
-                        pass,
-                        gen,
-                        abort,
-                        path
-                    );
+                    int stc = testTreeAt(pos, env, pass, abort, path, b);
                     if (*abort)
                         return COND_FAILED;
                     // worst branch dictates status for instance
@@ -392,16 +464,16 @@ int testTreeAt(
                 // best instance dictates status
                 if (stb > sta) {
                     sta = stb;
-                    if (sta == COND_OK)
+                    if (sta >= COND_MAYBE_POS_VALID)
                         iok = i; // save position with ok path
                 }
-                if (sta > st)
-                    break;
+                if (sta >= st)
+                    break; // status is as good as we need
             }
             // status cannot be better than it was for this condition
             if (sta < st)
                 st = sta;
-            if (path && st == COND_OK)
+            if (path && st >= COND_MAYBE_POS_VALID)
                 path[c.save] = inst[iok];
             return st;
         }
@@ -415,7 +487,7 @@ int testTreeAt(
             }
             else
             {
-                st = testCondAt(at, inst, NULL, &c, pass, gen, abort);
+                st = testCondAt(at, env, pass, abort, inst, NULL, &c);
                 if (st == COND_FAILED || st == COND_MAYBE_POS_INVAL)
                     return st;
                 pos = inst[0]; // center point of instances
@@ -424,21 +496,13 @@ int testTreeAt(
             {
                 if (st == COND_FAILED)
                     break;
-                int sta = testTreeAt(
-                    pos,
-                    tree,
-                    b,
-                    pass,
-                    gen,
-                    abort,
-                    path
-                );
+                int sta = testTreeAt(pos, env, pass, abort, path, b);
                 if (*abort)
                     return COND_FAILED;
                 if (sta < st)
                     st = sta;
             }
-            if (path && st == COND_OK)
+            if (path && st >= COND_MAYBE_POS_VALID)
                 path[c.save] = pos;
             return st;
         }
@@ -446,21 +510,20 @@ int testTreeAt(
 }
 
 int testTreeAt(
-    Pos                         at,
-    ConditionTree             * tree,
-    int                         pass,
-    WorldGen                  * gen,
-    std::atomic_bool          * abort,
-    Pos                       * path
+    Pos                         at,             // relative origin
+    SearchThreadEnv           * env,            // thread-local environment
+    int                         pass,           // search pass
+    std::atomic_bool          * abort,          // abort signal
+    Pos                       * path            // ok trigger positions
 )
 {
     if (pass != PASS_FAST_48)
-    {   // do a fast check first
-        int st = testTreeAt(at, tree, 0, PASS_FAST_48, gen, abort, NULL);
+    {   // do a fast check before continuing with slower checks
+        int st = testTreeAt(at, env, PASS_FAST_48, abort, NULL, 0);
         if (st == COND_FAILED)
             return st;
     }
-    return testTreeAt(at, tree, 0, pass, gen, abort, path);
+    return testTreeAt(at, env, pass, abort, path, 0);
 }
 
 
@@ -525,14 +588,14 @@ void _init(void)
     }
 }
 
-static bool isVariantOk(const Condition *c, WorldGen *g, int stype, int varbiome, Pos *pos)
+static bool isVariantOk(const Condition *c, SearchThreadEnv *e, int stype, int varbiome, Pos *pos)
 {
     StructureVariant sv;
 
     if (stype == Village)
     {
-        if (g->mc < MC_1_10) return true;
-        getVariant(&sv, stype, g->mc, g->seed, pos->x, pos->z, varbiome);
+        if (e->mc < MC_1_10) return true;
+        getVariant(&sv, stype, e->mc, e->seed, pos->x, pos->z, varbiome);
         if (c->varflags & Condition::VAR_ABANODONED)
         {
             if ((c->varflags & Condition::VAR_NOT) && sv.abandoned)
@@ -540,27 +603,27 @@ static bool isVariantOk(const Condition *c, WorldGen *g, int stype, int varbiome
             if (!(c->varflags & Condition::VAR_NOT) && !sv.abandoned)
                 return false;
         }
-        if (!(c->varflags & Condition::VAR_WITH_START) || g->mc < MC_1_14) return true;
+        if (!(c->varflags & Condition::VAR_WITH_START) || e->mc < MC_1_14) return true;
     }
     else if (stype == Bastion)
     {
-        if (g->mc < MC_1_16) return true;
-        getVariant(&sv, stype, g->mc, g->seed, pos->x, pos->z, -1);
+        if (e->mc < MC_1_16) return true;
+        getVariant(&sv, stype, e->mc, e->seed, pos->x, pos->z, -1);
         if (!(c->varflags & Condition::VAR_WITH_START)) return true;
     }
     else if (stype == Ruined_Portal || stype == Ruined_Portal_N)
     {
-        if (g->mc < MC_1_16) return true;
-        g->init4Dim(stype == Ruined_Portal ? DIM_OVERWORLD : DIM_NETHER);
-        varbiome = getBiomeAt(&g->g, 4, (pos->x >> 2) + 2, 0, (pos->z >> 2) + 2);
-        getVariant(&sv, stype, g->mc, g->seed, pos->x, pos->z, varbiome);
+        if (e->mc < MC_1_16) return true;
+        e->init4Dim(stype == Ruined_Portal ? DIM_OVERWORLD : DIM_NETHER);
+        varbiome = getBiomeAt(&e->g, 4, (pos->x >> 2) + 2, 0, (pos->z >> 2) + 2);
+        getVariant(&sv, stype, e->mc, e->seed, pos->x, pos->z, varbiome);
         if (!(c->varflags & Condition::VAR_WITH_START)) return true;
     }
     else if (stype == End_City)
     {
         if (!(c->varflags & Condition::VAR_ENDSHIP)) return true;
         Piece pieces[END_CITY_PIECES_MAX];
-        int i, n = getEndCityPieces(pieces, g->seed, pos->x >> 4, pos->z >> 4);
+        int i, n = getEndCityPieces(pieces, e->seed, pos->x >> 4, pos->z >> 4);
         bool withship = !(c->varflags & Condition::VAR_NOT);
         for (i = 0; i < n; i++)
             if (pieces[i].type == END_SHIP)
@@ -573,7 +636,7 @@ static bool isVariantOk(const Condition *c, WorldGen *g, int stype, int varbiome
         enum { FP_MAX = 400 };
         Piece p[FP_MAX];
         int i, n, b;
-        n = getFortressPieces(p, FP_MAX, g->mc, g->seed, pos->x >> 4, pos->z >> 4);
+        n = getFortressPieces(p, FP_MAX, e->mc, e->seed, pos->x >> 4, pos->z >> 4);
         for (b = i = 0; i < n; i++)
             if (p[i].type == FORTRESS_START || p[i].type == BRIDGE_CROSSING)
                 p[b++] = p[i];
@@ -694,13 +757,13 @@ static int f_confine(void *data, int x, int z, double p)
  */
 int
 testCondAt(
-    Pos                 at,     // relative origin
-    Pos               * cent,   // output center position(s)
-    int               * imax,   // max instances (NULL for avg)
-    Condition         * cond,   // condition to check
-    int                 pass,
-    WorldGen          * gen,
-    std::atomic_bool  * abort
+    Pos                         at,             // relative origin
+    SearchThreadEnv           * env,            // thread-local environment
+    int                         pass,           // search pass
+    std::atomic_bool          * abort,          // abort signal
+    Pos                       * cent,           // output center position(s)
+    int                       * imax,           // max instances (NULL for avg)
+    Condition                 * cond            // condition to check
     )
 {
     int x1, x2, z1, z2;
@@ -719,7 +782,7 @@ testCondAt(
 
     if ((st = finfo.stype) > 0)
     {
-        if (!getStructureConfig_override(finfo.stype, gen->mc, &sconf))
+        if (!getStructureConfig_override(finfo.stype, env->mc, &sconf))
             return COND_FAILED;
     }
 
@@ -735,6 +798,8 @@ testCondAt(
     case F_SCALE_TO_NETHER:
     case F_SCALE_TO_OVERWORLD:
     case F_LOGIC_OR:
+    case F_LOGIC_NOT:
+    case F_LUA:
         // helper conditions should not reach here
         //exit(1);
         return COND_OK;
@@ -762,7 +827,7 @@ L_qh_any:
         rz2 = ((cond->z2 << 9) + at.z) >> 9;
 
         n = scanForQuads(
-                sconf, 128, (gen->seed) & MASK48, seeds, n, 20, sconf.salt,
+                sconf, 128, (env->seed) & MASK48, seeds, n, 20, sconf.salt,
                 rx1, rz1, rx2 - rx1 + 1, rz2 - rz1 + 1, p, MAX_INSTANCES);
         if (n < 1)
             return COND_FAILED;
@@ -770,7 +835,7 @@ L_qh_any:
         for (i = 0; i < n; i++)
         {
             pc = p[i];
-            s = moveStructure(gen->seed, -pc.x, -pc.z);
+            s = moveStructure(env->seed, -pc.x, -pc.z);
 
             // find the constellation info
             uint64_t cst = (s + sconf.salt) & 0xfffff;
@@ -812,7 +877,7 @@ L_qm_any:
         rz2 = ((cond->z2 << 9) + at.z) >> 9;
         // we don't really need to check for more than one instance here
         n = scanForQuads(
-                sconf, 160, (gen->seed) & MASK48, g_qm_90,
+                sconf, 160, (env->seed) & MASK48, g_qm_90,
                 sizeof(g_qm_90) / sizeof(uint64_t), 48, sconf.salt,
                 rx1, rz1, rx2 - rx1 + 1, rz2 - rz1 + 1, p, 1);
         if (n < 1)
@@ -821,13 +886,13 @@ L_qm_any:
         for (i = 0; i < n; i++)
         {
             rx = p[i].x; rz = p[i].z;
-            s = moveStructure(gen->seed, -rx, -rz);
+            s = moveStructure(env->seed, -rx, -rz);
             if (qmonumentQual(s + sconf.salt) >= qual)
             {
-                getStructurePos(st, gen->mc, gen->seed, rx+0, rz+0, p+0);
-                getStructurePos(st, gen->mc, gen->seed, rx+0, rz+1, p+1);
-                getStructurePos(st, gen->mc, gen->seed, rx+1, rz+0, p+2);
-                getStructurePos(st, gen->mc, gen->seed, rx+1, rz+1, p+3);
+                getStructurePos(st, env->mc, env->seed, rx+0, rz+0, p+0);
+                getStructurePos(st, env->mc, env->seed, rx+0, rz+1, p+1);
+                getStructurePos(st, env->mc, env->seed, rx+1, rz+0, p+2);
+                getStructurePos(st, env->mc, env->seed, rx+1, rz+1, p+3);
                 pc = getOptimalAfk(p, 58,23,58, 0);
                 pc.x -= 29; // monument is centered
                 pc.z -= 29;
@@ -915,7 +980,7 @@ L_qm_any:
         {
             for (rx = rx1; rx <= rx2; rx++)
             {
-                if (!getStructurePos(st, gen->mc, gen->seed, rx+0, rz+0, &pc))
+                if (!getStructurePos(st, env->mc, env->seed, rx+0, rz+0, &pc))
                     continue;
                 if (cond->skipref && pc.x == at.x && pc.z == at.z)
                     continue;
@@ -942,35 +1007,35 @@ L_qm_any:
                             plains, desert, savanna, taiga, snowy_tundra,
                             // plains village variant covers meadows
                         };
-                        int vn = gen->mc <= MC_1_13 ? 1 : sizeof(vv) / sizeof(int);
+                        int vn = env->mc <= MC_1_13 ? 1 : sizeof(vv) / sizeof(int);
                         int i;
                         for (i = 0; i < vn; i++)
-                            if (isVariantOk(cond, gen, st, vv[i], &pc))
+                            if (isVariantOk(cond, env, st, vv[i], &pc))
                                 break;
                         if (i >= vn) // no suitable village variants here
                             continue;
                     }
 
-                    gen->init4Dim(finfo.dim);
-                    int id = isViableStructurePos(st, &gen->g, pc.x, pc.z, 0);
+                    env->init4Dim(finfo.dim);
+                    int id = isViableStructurePos(st, &env->g, pc.x, pc.z, 0);
                     if (!id)
                         continue;
                     if (st == End_City)
                     {
-                        gen->setSurfaceNoise();
+                        env->prepareSurfaceNoise();
                         if (!isViableEndCityTerrain(
-                            &gen->g.en, &gen->sn, pc.x, pc.z))
+                            &env->g.en, &env->sn, pc.x, pc.z))
                             continue;
                     }
                     if (cond->varflags)
                     {
-                        if (!isVariantOk(cond, gen, st, id, &pc))
+                        if (!isVariantOk(cond, env, st, id, &pc))
                             continue;
                     }
-                    if (gen->mc >= MC_1_18)
+                    if (env->mc >= MC_1_18)
                     {
                         if (g_extgen.estimateTerrain &&
-                            !isViableStructureTerrain(st, &gen->g, pc.x, pc.z))
+                            !isViableStructureTerrain(st, &env->g, pc.x, pc.z))
                         {
                             continue;
                         }
@@ -987,17 +1052,17 @@ L_qm_any:
                 {
                     cent[icnt-1] = pc;
                     if (icnt >= *imax)
-                        return COND_OK;
+                        goto L_struct_decide;
                 }
                 else
                 {
-                    goto L_struct_failed_exclusion;
+                    goto L_struct_decide;
                 }
             }
         }
-        if (cond->count == 0)
+    L_struct_decide:
+        if (cond->count <= 0)
         {   // structure exclusion filter
-    L_struct_failed_exclusion:
             cent->x = (x1 + x2) >> 1;
             cent->z = (z1 + z2) >> 1;
             if (imax) *imax = 1;
@@ -1017,7 +1082,6 @@ L_qm_any:
             if (imax)
             {
                 *imax = icnt;
-                return COND_OK;
             }
             else
             {
@@ -1061,9 +1125,9 @@ L_qm_any:
         rx2 = x2 >> 4;
         rz2 = z2 >> 4;
 
-        if (cond->count == 0)
+        if (cond->count <= 0)
         {   // exclusion
-            icnt = getMineshafts(gen->mc, gen->seed, rx1, rz1, rx2, rz2, cent, 1);
+            icnt = getMineshafts(env->mc, env->seed, rx1, rz1, rx2, rz2, cent, 1);
             if (icnt == 1 && cond->skipref && cent->x == at.x && cent->z == at.z)
                 icnt = 0;
             cent->x = (x1 + x2) >> 1;
@@ -1077,7 +1141,7 @@ L_qm_any:
         else if (imax)
         {   // just check there are at least *inst (== cond->count) instances
             *imax = icnt =
-                getMineshafts(gen->mc, gen->seed, rx1, rz1, rx2, rz2, cent, *imax);
+                getMineshafts(env->mc, env->seed, rx1, rz1, rx2, rz2, cent, *imax);
             if (rmax)
             {   // filter out the instances that are outside the radius
                 int j = 0;
@@ -1108,7 +1172,7 @@ L_qm_any:
         }
         else
         {   // we need the average position of all instances
-            icnt = getMineshafts(gen->mc, gen->seed, rx1, rz1, rx2, rz2, p, MAX_INSTANCES);
+            icnt = getMineshafts(env->mc, env->seed, rx1, rz1, rx2, rz2, p, MAX_INSTANCES);
             if (icnt < cond->count)
                 return COND_FAILED;
             xt = zt = 0;
@@ -1162,8 +1226,8 @@ L_qm_any:
             z2 = cond->z2 + at.z;
         }
         if (*abort) return COND_FAILED;
-        gen->init4Dim(0);
-        pc = getSpawn(&gen->g);
+        env->init4Dim(0);
+        pc = getSpawn(&env->g);
         if (rmax)
         {
             int dx = pc.x - at.x;
@@ -1186,7 +1250,7 @@ L_qm_any:
     case F_FIRST_STRONGHOLD:
         {
             StrongholdIter sh;
-            *cent = pc = initFirstStronghold(&sh, gen->mc, gen->seed);
+            *cent = pc = initFirstStronghold(&sh, env->mc, env->seed);
         }
         if (cond->rmax > 0)
         {
@@ -1257,7 +1321,7 @@ L_qm_any:
         // MC_1_9+ formula:
         // r = 1408 + 3072*n + 1280*[0,1] (+/-112)
 
-        if (gen->mc < MC_1_9)
+        if (env->mc < MC_1_9)
         {
             if (rmax < 640*640 || rmin > 1152*1152)
                 return cond->count == 0 ? COND_OK : COND_FAILED;
@@ -1281,7 +1345,7 @@ L_qm_any:
             rmax = 1408+1280;
         }
         // if we are only looking at the inner ring, we can check if the generation angles are suitable
-        if (r == 0 && !isInnerRingOk(gen->mc, gen->seed, x1-112-8, z1-112-8, x2+112+8, z2+112+8, rmin, rmax))
+        if (r == 0 && !isInnerRingOk(env->mc, env->seed, x1-112-8, z1-112-8, x2+112+8, z2+112+8, rmin, rmax))
             return cond->count == 0 ? COND_OK : COND_FAILED;
 
         // pre-biome-checks complete, the area appears to line up with possible generation positions
@@ -1297,11 +1361,11 @@ L_qm_any:
                 rmax = 0;
 
             StrongholdIter sh;
-            initFirstStronghold(&sh, gen->mc, gen->seed);
+            initFirstStronghold(&sh, env->mc, env->seed);
             icnt = 0;
             xt = zt = 0;
-            gen->init4Dim(0);
-            while (nextStronghold(&sh, &gen->g) > 0)
+            env->init4Dim(0);
+            while (nextStronghold(&sh, &env->g) > 0)
             {
                 if (*abort)
                     break;
@@ -1378,7 +1442,7 @@ L_qm_any:
             {
                 if (cond->skipref && rx == at.x >> 4 && rz == at.z >> 4)
                     continue;
-                if (isSlimeChunk(gen->seed, rx, rz))
+                if (isSlimeChunk(env->seed, rx, rz))
                 {
                     if (cond->count == 0)
                     {
@@ -1424,12 +1488,12 @@ L_qm_any:
     // biome filters reference specific layers
     // MAYBE: options for layers in different versions?
     case F_BIOME:
-        if (gen->mc >= MC_1_18) goto L_noise_biome;
+        if (env->mc >= MC_1_18) goto L_noise_biome;
         // fallthrough
     case F_BIOME_4_RIVER:
     case F_BIOME_256_OTEMP:
 
-        if (gen->mc >= MC_1_18)
+        if (env->mc >= MC_1_18)
             return COND_FAILED;
         s = finfo.pow2;
         rx1 = ((cond->x1 << s) + at.x) >> s;
@@ -1442,7 +1506,7 @@ L_qm_any:
             return COND_MAYBE_POS_VALID;
         if (pass == PASS_FULL_48)
         {
-            if (gen->mc < MC_1_13 || finfo.layer != L_OCEAN_TEMP_256)
+            if (env->mc < MC_1_13 || finfo.layer != L_OCEAN_TEMP_256)
                 return COND_MAYBE_POS_VALID;
         }
         valid = COND_FAILED;
@@ -1450,9 +1514,9 @@ L_qm_any:
         {
             int w = rx2-rx1+1;
             int h = rz2-rz1+1;
-            //gen->init4Dim(0); // seed gets applied by checkForBiomesAtLayer
-            if (checkForBiomesAtLayer(&gen->g.ls, &gen->g.ls.layers[finfo.layer],
-                NULL, gen->seed, rx1, rz1, w, h, &cond->bf) > 0)
+            //env->init4Dim(0); // seed gets applied by checkForBiomesAtLayer
+            if (checkForBiomesAtLayer(&env->g.ls, &env->g.ls.layers[finfo.layer],
+                NULL, env->seed, rx1, rz1, w, h, &cond->bf) > 0)
             {
                 valid = COND_OK;
             }
@@ -1461,7 +1525,7 @@ L_qm_any:
 
 
     case F_TEMPS:
-        if (gen->mc >= MC_1_18)
+        if (env->mc >= MC_1_18)
             return COND_FAILED;
         rx1 = ((cond->x1 << 10) + at.x) >> 10;
         rz1 = ((cond->z1 << 10) + at.z) >> 10;
@@ -1471,8 +1535,8 @@ L_qm_any:
         cent->z = ((rz1 + rz2) << 10) >> 1;
         if (pass != PASS_FULL_64)
             return COND_MAYBE_POS_VALID;
-        gen->init4Dim(0);
-        if (checkForTemps(&gen->g.ls, gen->seed, rx1, rz1, rx2-rx1+1, rz2-rz1+1, cond->temps))
+        env->init4Dim(0);
+        if (checkForTemps(&env->g.ls, env->seed, rx1, rz1, rx2-rx1+1, rz2-rz1+1, cond->temps))
             return COND_OK;
         return COND_FAILED;
 
@@ -1509,7 +1573,7 @@ L_noise_biome:
             int h = rz2 - rz1 + 1;
             int y = (s == 0 ? cond->y : cond->y >> 2);
             Range r = {1<<s, rx1, rz1, w, h, y, 1};
-            valid = checkForBiomes(&gen->g, NULL, r, finfo.dim, gen->seed,
+            valid = checkForBiomes(&env->g, NULL, r, finfo.dim, env->seed,
                 &cond->bf, (volatile char*)abort) > 0;
         }
         return valid ? COND_OK : COND_FAILED;
@@ -1527,12 +1591,12 @@ L_noise_biome:
             int w = rx2 - rx1 + 1;
             int h = rz2 - rz1 + 1;
             Range r = {finfo.step, rx1, rz1, w, h, cond->y >> 2, 1};
-            gen->init4Dim(0);
+            env->init4Dim(0);
 
             if (cond->count == 0)
             {   // exclusion
                 icnt = getBiomeCenters(
-                    cent, NULL, 1, &gen->g, r, cond->biomeId, cond->biomeSize, cond->tol,
+                    cent, NULL, 1, &env->g, r, cond->biomeId, cond->biomeSize, cond->tol,
                     (volatile char*)abort
                 );
                 if (icnt == 0)
@@ -1546,7 +1610,7 @@ L_noise_biome:
             else if (imax)
             {   // just check there are at least *inst (== cond->count) instances
                 *imax = icnt = getBiomeCenters(
-                    cent, NULL, cond->count, &gen->g, r, cond->biomeId, cond->biomeSize, cond->tol,
+                    cent, NULL, cond->count, &env->g, r, cond->biomeId, cond->biomeSize, cond->tol,
                     (volatile char*)abort
                 );
                 if (cond->skipref && icnt > 0)
@@ -1567,7 +1631,7 @@ L_noise_biome:
             else
             {   // we need the average position of all instances
                 icnt = getBiomeCenters(
-                    p, NULL, MAX_INSTANCES, &gen->g, r, cond->biomeId, cond->biomeSize, cond->tol,
+                    p, NULL, MAX_INSTANCES, &env->g, r, cond->biomeId, cond->biomeSize, cond->tol,
                     (volatile char*)abort
                 );
                 xt = zt = 0;
@@ -1593,7 +1657,7 @@ L_noise_biome:
 
 
     case F_CLIMATE_NOISE:
-        if (gen->mc < MC_1_18)
+        if (env->mc < MC_1_18)
             return COND_FAILED;
         rx1 = ((cond->x1 << 2) + at.x) >> 2;
         rz1 = ((cond->z1 << 2) + at.z) >> 2;
@@ -1607,7 +1671,7 @@ L_noise_biome:
             int w = rx2 - rx1 + 1;
             int h = rz2 - rz1 + 1;
             //int y = cond->y >> 2;
-            gen->init4Dim(0);
+            env->init4Dim(0);
             int order[] = { // use this order for performance
                 NP_TEMPERATURE,
                 NP_HUMIDITY,
@@ -1629,7 +1693,7 @@ L_noise_biome:
                     (double)cond->limex[i][0],
                     (double)cond->limex[i][1],
                 };
-                int err = getParaRange(&gen->g.bn.climate[i], &pmin, &pmax, rx1, rz1, w, h, (void*)bounds, f_confine);
+                int err = getParaRange(&env->g.bn.climate[i], &pmin, &pmax, rx1, rz1, w, h, (void*)bounds, f_confine);
                 if (err)
                 {
                     valid = 0;

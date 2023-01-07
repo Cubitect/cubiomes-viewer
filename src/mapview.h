@@ -30,7 +30,7 @@ class MapView : public QWidget
 
 public:
     explicit MapView(QWidget *parent = nullptr);
-    ~MapView();
+    virtual ~MapView();
 
     qreal getX();
     qreal getZ();
@@ -58,6 +58,7 @@ private:
 signals:
 
 public slots:
+    void mapUpdate();
     void showContextMenu(const QPoint &pos);
     void copySeed();
     void copyText(QString txt);
