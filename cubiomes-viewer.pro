@@ -44,7 +44,7 @@ QMAKE_PRE_LINK      += $(MAKE) -C $$CUPATH -f $$CUPATH/makefile CFLAGS=\"$$QMAKE
 QMAKE_CLEAN         += $$CUPATH/*.o $$CUPATH/libcubiomes.a
 LIBS                += -lm $$CUPATH/libcubiomes.a
 
-LUAPATH             = $$PWD/lua-5.4.4/src
+LUAPATH             = $$PWD/lua/src
 
 TARGET = cubiomes-viewer
 

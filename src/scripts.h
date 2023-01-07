@@ -8,7 +8,7 @@
 
 #include "cubiomes/finders.h"
 
-#include "lua-5.4.4/src/lua.hpp"
+#include "lua/src/lua.hpp"
 
 struct SearchThreadEnv;
 struct Condition;
