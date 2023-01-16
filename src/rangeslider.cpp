@@ -23,8 +23,8 @@ RangeSlider::RangeSlider(QWidget *parent, int vmin, int vmax)
         "QSlider { background-color: rgba(180, 180, 180, 0); }\n"
         "QSlider::sub-page { background-color: rgba(255, 255, 255, 0); }"
     );
-    colinner = palette().color(QPalette::Highlight);
-    colouter = QColor(0, 0, 0, 0);
+    //colinner = palette().color(QPalette::Highlight);
+    //colouter = QColor(0, 0, 0, 0);
 }
 
 RangeSlider::~RangeSlider()
@@ -50,26 +50,26 @@ void RangeSlider::paintEvent(QPaintEvent *)
     opt.sliderValue = opt.sliderPosition = pos1;
     QRect handle1 = style()->subControlRect(QStyle::CC_Slider, &opt, QStyle::SC_SliderHandle, this);
 
-    if (colinner.alpha() > 0)
+    if (colinner.isValid())
     {
         painter.setBrush(QBrush(colinner));
         painter.setPen(QPen(colinner, 0));
         int x0 = handle0.center().x();
         int x1 = handle1.center().x();
-        int y  = handle0.center().y();
-        QRect span = QRect(x0, y-1, x1-x0, 3);
+        int y  = handle0.center().y() - 1;
+        QRect span = QRect(x0, y, x1-x0, 3);
         painter.drawRect(groove.intersected(span));
     }
-    if (colouter.alpha() > 0)
+    if (colouter.isValid())
     {
         painter.setBrush(QBrush(colouter));
         painter.setPen(QPen(colouter, 0));
         int x0 = handle0.center().x();
         int x1 = handle1.center().x();
-        int y  = handle0.center().y();
-        QRect left = QRect(groove.x()+1, y-1, x0-groove.x()-2, 3);
+        int y  = handle0.center().y() - 1;
+        QRect left = QRect(groove.x()+1, y, x0-groove.x()-2, 3);
         painter.drawRect(groove.intersected(left));
-        QRect right = QRect(x1+1, y-1, groove.right()-x1-2, 3);
+        QRect right = QRect(x1+1, y, groove.right()-x1-2, 3);
         painter.drawRect(groove.intersected(right));
     }
 
@@ -197,8 +197,8 @@ LabeledRange::LabeledRange(QWidget *parent, int vmin, int vmax)
     slider = new RangeSlider(this, vmin, vmax);
     minlabel = new QLabel(this);
     maxlabel = new QLabel(this);
-    minlabel->setAlignment(Qt::AlignRight);
-    maxlabel->setAlignment(Qt::AlignLeft);
+    minlabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    maxlabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     int w = fontMetrics().tightBoundingRect("+012345").width();
     minlabel->setFixedWidth(w);
     maxlabel->setFixedWidth(w);

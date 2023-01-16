@@ -2,9 +2,12 @@
 #define SCRIPTS_H
 
 #include <QString>
+#include <QTime>
 #include <QFileInfo>
 #include <QMap>
 #include <QPlainTextEdit>
+#include <QMutex>
+#include <QSyntaxHighlighter>
 
 #include "cubiomes/finders.h"
 
@@ -20,7 +23,21 @@ struct LuaOutput
     uint64_t seed;
     const char *func;
     Pos at;
-    QString out;
+    QTime time;
+    QString msg;
+    QMutex mutex;
+    LuaOutput() : mutex() { set(0,0,0,Pos{0,0},""); }
+    void set(uint64_t h, uint64_t s, const char *f, Pos a, QString m)
+    {
+        mutex.lock();
+        hash = h;
+        seed = s;
+        func = f;
+        at = a;
+        time = QTime::currentTime();
+        msg = m;
+        mutex.unlock();
+    }
 };
 extern LuaOutput g_lua_output[100];
 
@@ -41,6 +58,39 @@ int runCheckScript(
         Condition         * cond
 );
 
+struct Rule
+{
+    QRegExp pattern;
+    QTextCharFormat format;
+    bool overlay;
+    Rule() : pattern(),format(),overlay() {}
+    Rule(const QString& p, const QTextCharFormat& f, bool o = false)
+        : pattern(p), format(f), overlay(o) {}
+};
+struct BlockRule
+{
+    QRegExp start, end;
+    QTextCharFormat format;
+    BlockRule() : start(), end(), format() {}
+    BlockRule(const QString& s, const QString& e, const QTextCharFormat& f)
+        : start(s), end(e), format(f) {}
+};
+
+class LuaHighlighter : public QSyntaxHighlighter
+{
+    Q_OBJECT
+public:
+    LuaHighlighter(QTextDocument *parent = nullptr);
+
+    BlockRule *nextBlockRule(const QString& text, int *pos, int *next);
+    virtual void highlightBlock(const QString& text) override;
+    void markFormated(QString *text, int start, int count, const QTextCharFormat& format);
+
+    QVector<Rule> rules;
+    QVector<BlockRule> blockrules;
+    QTextCharFormat spaceformat;
+};
+
 class ScriptEditor : public QPlainTextEdit
 {
     Q_OBJECT
@@ -52,6 +102,7 @@ public:
     int lineNumberAreaWidth();
 
     void resizeEvent(QResizeEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
 
 private slots:
     void updateLineNumberAreaWidth(int newBlockCount);
@@ -60,6 +111,7 @@ private slots:
 
 private:
     QWidget *lineNumberArea;
+    LuaHighlighter *highlighter;
 };
 
 #endif // SCRIPTS_H

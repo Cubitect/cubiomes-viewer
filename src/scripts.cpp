@@ -9,9 +9,10 @@
 #include <QDirIterator>
 #include <QPainter>
 #include <QTextBlock>
+#include <QTextDocumentFragment>
 
 
-LuaOutput g_lua_output[100] = {};
+LuaOutput g_lua_output[100];
 
 
 static inline uint64_t murmur64(const void *key, int len, uint64_t h = 0)
@@ -240,13 +241,7 @@ int runCheckScript(
     {
         QString err = lua_tostring(L, -1);
         qDebug() << err;
-        LuaOutput lout = {
-            cond->hash, env->seed, func, at,
-            err,
-        };
-        g_mutex.lock();
-        g_lua_output[cond->save] = lout;
-        g_mutex.unlock();
+        g_lua_output[cond->save].set(cond->hash, env->seed, func, at, err);
         lua_settop(L, top);
         return COND_FAILED;
     }
@@ -259,15 +254,10 @@ int runCheckScript(
             float x = lua_tonumber(L, -1);
             lua_pop(L, 1);
             lua_settop(L, top);
-            if (!(abs(x) <= 30e6 && abs(z) <= 30e6)) // negate to capture nan and inf
+            if (!(abs(x) <= 30e6 && abs(z) <= 30e6)) // negate condition to capture nan and inf
             {
-                LuaOutput lout = {
-                    cond->hash, env->seed, func, at,
-                    QString::asprintf("Output is invalid or out of range: {%g, %g}", x, z)
-                };
-                g_mutex.lock();
-                g_lua_output[cond->save] = lout;
-                g_mutex.unlock();
+                QString err = QString::asprintf("Output is invalid or out of range: {%g, %g}", x, z);
+                g_lua_output[cond->save].set(cond->hash, env->seed, func, at, err);
                 return COND_FAILED;
             }
             path[cond->save].x = (int) x;
@@ -279,6 +269,122 @@ int runCheckScript(
     }
     lua_settop(L, top);
     return COND_FAILED;
+}
+
+
+LuaHighlighter::LuaHighlighter(QTextDocument *parent)
+    : QSyntaxHighlighter(parent)
+{
+    const QString keywords[] = {
+        "and", "break", "do", "else", "elseif", "end", "false", "for",
+        "function", "goto", "if", "in", "local", "nil", "not", "or", "repeat",
+        "return", "then", "true", "until", "while",
+    };
+    QTextCharFormat format;
+    //keywordFormat.setFontWeight(QFont::Bold);
+    format.setForeground(QColor(255, 20, 20));
+    for (const QString& k : keywords)
+        rules.append(Rule("\\b" + k + "\\b", format));
+
+    format.setFontWeight(QFont::Bold);
+    format.setForeground(QColor(0, 168, 255));
+    rules.append(Rule("\\b" "check" "\\b", format));
+    rules.append(Rule("\\b" "check48" "\\b", format));
+    rules.append(Rule("\\b" "getBiomeAt" "\\b", format));
+
+    format.setFontWeight(QFont::Normal);
+    format.setForeground(QColor(0, 160, 0));
+    format.setFontItalic(true);
+    rules.append(Rule("--(?!\\[\\[)[^\n]*", format));
+    blockrules.append(BlockRule("--\\[\\[", "\\]\\]", format));
+
+    format.setFontWeight(QFont::Normal);
+    format.setForeground(QColor(48, 96, 255));
+    format.setFontItalic(false);
+    blockrules.append(BlockRule("\\[\\[", "\\]\\]", format));
+    blockrules.append(BlockRule("\"", "(\"|$)", format));
+    blockrules.append(BlockRule("'", "('|$)", format));
+
+    spaceformat.setForeground(QColor(128, 128, 128, 40));
+    rules.append(Rule("\\s+", spaceformat, true));
+}
+
+BlockRule *LuaHighlighter::nextBlockRule(const QString& text, int *pos, int *next)
+{
+    BlockRule *rule = nullptr;
+    int min = INT_MAX;
+    for (int i = 0, n = blockrules.size(); i < n; i++)
+    {
+        int s = blockrules[i].start.indexIn(text, *pos);
+        if (s >= 0 && s < min)
+        {
+            rule = &blockrules[i];
+            min = s;
+        }
+    }
+    if (rule)
+    {
+        *pos = min;
+        *next = min + rule->start.matchedLength();
+    }
+    return rule;
+}
+
+void LuaHighlighter::highlightBlock(const QString& text)
+{
+    QString line = text;
+    BlockRule *rule = nullptr;
+    int match = 0;
+    int start = 0;
+    int state = previousBlockState();
+    if (state < 0)
+        rule = nextBlockRule(line, &start, &match);
+    else
+        rule = &blockrules[state];
+
+    while (rule)
+    {
+        int end = rule->end.indexIn(text, match);
+        if (end == -1)
+        {
+            markFormated(&line, start, line.length() - start, rule->format);
+            break;
+        }
+        else
+        {
+            end += rule->end.matchedLength();
+            markFormated(&line, start, end - start, rule->format);
+            start = end;
+            rule = nextBlockRule(line, &start, &match);
+        }
+    }
+    if (rule)
+        setCurrentBlockState(rule - &blockrules[0]);
+    else
+        setCurrentBlockState(-1);
+
+    for (const Rule &rule : qAsConst(rules))
+    {
+        const QString *l = rule.overlay ? &text : &line;
+        QRegExp expression(rule.pattern);
+        int index = expression.indexIn(*l);
+        while (index >= 0)
+        {
+            int length = expression.matchedLength();
+            setFormat(index, length, rule.format);
+            index = expression.indexIn(*l, index + length);
+        }
+    }
+}
+
+void LuaHighlighter::markFormated(QString *text, int start, int count, const QTextCharFormat& format)
+{
+    setFormat(start, count, format);
+    if (text)
+    {
+        for (int i = 0; i < count; i++)
+            (*text)[start+i] = QChar(' ');
+    }
 }
 
 
@@ -303,10 +409,16 @@ public:
 ScriptEditor::ScriptEditor(QWidget *parent) : QPlainTextEdit(parent)
 {
     lineNumberArea = new LineNumberArea(this);
+    highlighter = new LuaHighlighter(document());
 
     connect(this, &ScriptEditor::blockCountChanged, this, &ScriptEditor::updateLineNumberAreaWidth);
     connect(this, &ScriptEditor::updateRequest, this, &ScriptEditor::updateLineNumberArea);
     connect(this, &ScriptEditor::cursorPositionChanged, this, &ScriptEditor::highlightCurrentLine);
+
+    QTextOption opt = document()->defaultTextOption();
+    opt.setFlags(opt.flags() | QTextOption::ShowTabsAndSpaces);
+    document()->setDefaultTextOption(opt);
+    setLineWrapMode(LineWrapMode::NoWrap);
 
     updateLineNumberAreaWidth(0);
     highlightCurrentLine();
@@ -347,7 +459,7 @@ void ScriptEditor::highlightCurrentLine()
     QList<QTextEdit::ExtraSelection> extraSelections;
     QTextEdit::ExtraSelection selection;
 
-    QColor lineColor = QColor::fromRgb(255, 255, 0, 64);
+    QColor lineColor = QColor::fromRgb(255, 255, 0, 28);
     selection.format.setBackground(lineColor);
     selection.format.setProperty(QTextFormat::FullWidthSelection, true);
     selection.cursor = textCursor();
@@ -378,6 +490,61 @@ void ScriptEditor::paintLineNumbers(QPaintEvent *event)
         bottom = top + qRound(blockBoundingRect(block).height());
         ++blockNumber;
     }
+}
+
+void ScriptEditor::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Return)
+    {
+        QTextCursor cursor = textCursor();
+        int pos = cursor.position();
+        int start = pos - cursor.positionInBlock();
+        int end = start;
+        while (end < pos)
+        {
+            if (!document()->characterAt(end).isSpace())
+                break;
+            end++;
+        }
+        if (start < end)
+        {
+            const QString text = document()->toPlainText();
+            const QChar linebreak = QChar(0x2029);
+            QString ws = linebreak + QStringRef(&text, start, end-start).toString();
+            cursor.beginEditBlock();
+            cursor.insertText(ws, highlighter->spaceformat);
+            cursor.endEditBlock();
+            return; // cancel normal enter
+        }
+    }
+    else if (event->key() == Qt::Key_Tab || event->key() == Qt::Key_Backtab)
+    {
+        bool back = event->key() == Qt::Key_Backtab;
+        QTextCursor cursor = textCursor();
+
+        if (back || cursor.hasSelection())
+        {
+            int s = cursor.selectionStart();
+            int e = cursor.selectionEnd();
+            cursor.setPosition(e);
+            e = cursor.block().blockNumber();
+            cursor.setPosition(s);
+            s = cursor.block().blockNumber();
+            cursor.beginEditBlock();
+            for (int i = s; i <= e; i++)
+            {
+                cursor.movePosition(QTextCursor::StartOfBlock);
+                if (back == false)
+                    cursor.insertText("\t", highlighter->spaceformat);
+                else if (document()->characterAt(cursor.position()) == '\t')
+                    cursor.deleteChar();
+                cursor.movePosition(QTextCursor::NextBlock);
+            }
+            cursor.endEditBlock();
+            return;
+        }
+    }
+    QPlainTextEdit::keyPressEvent(event);
 }
 
 

@@ -256,6 +256,15 @@ void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
 
 static QMutex g_mutex;
 
+static qreal cubic_hermite(qreal p[4], qreal u)
+{
+    qreal a = p[1];
+    qreal b = 0.5 * (-p[0] + p[2]);
+    qreal c = p[0] - 2.5*p[1] + 2*p[2] - 0.5*p[3];
+    qreal d = 0.5 * (-p[0] + 3*p[1] - 3*p[2] + p[3]);
+    return a + b*u + c*u*u + d*u*u*u;
+}
+
 void Quad::run()
 {
     if (done || *isdel)
@@ -293,53 +302,72 @@ void Quad::run()
 
             if (lopt == LOPT_HEIGHT_4 && dim == 0)
             {
+                const bool bicubic = false;
                 // sampling grid
+                int od = bicubic ? 3 : 1;
                 int ps = (hd ? 0 : 2);
-                int px = x >> ps;
-                int pz = z >> ps;
-                int pw = ((x+w+2) >> ps) - px + 1;
-                int ph = ((z+h+2) >> ps) - pz + 1;
-                std::vector<int> buf(pw * ph);
+                int st = (1 << ps) - 1;
+                int px = (x >> ps) - od/2;
+                int pz = (z >> ps) - od/2;
+                int pw = ((x+w+st) >> ps) - px + od + 1;
+                int ph = ((z+h+st) >> ps) - pz + od + 1;
+                std::vector<qreal> buf(pw * ph);
                 for (int j = 0; j < ph; j++)
                 {
                     for (int i = 0; i < pw; i++)
                     {
-                        int samplex = ((px + i) << ps) * scale / 4;
-                        int samplez = ((pz + j) << ps) * scale / 4;
-                        mapApproxHeight(&buf[j*pw+i], 0, g, sn,
-                                samplex, samplez, 1, 1);
+                        int samplex = (((px + i) << ps)) * scale / 4;
+                        int samplez = (((pz + j) << ps)) * scale / 4;
+                        float y = 0;
+                        mapApproxHeight(&y, 0, g, sn, samplex, samplez, 1, 1);
+                        buf[j*pw+i] = y;
                     }
                 }
 
                 // interpolate height
-                std::vector<int> height((w+2) * (h+2));
+                std::vector<qreal> height((w+2) * (h+2));
                 for (int j = 0; j < h+2; j++)
                 {
                     for (int i = 0; i < w+2; i++)
                     {
-                        int pi = ((x + i) >> ps) - px;
-                        int pj = ((z + j) >> ps) - pz;
-                        int v00 = buf[(pj+0)*pw + pi+0];
-                        int v01 = buf[(pj+0)*pw + pi+1];
-                        int v10 = buf[(pj+1)*pw + pi+0];
-                        int v11 = buf[(pj+1)*pw + pi+1];
-                        int m = 1 << ps;
-                        qreal di = ((x + i) & (m - 1)) / (qreal)m;
-                        qreal dj = ((z + j) & (m - 1)) / (qreal)m;
-                        int v = (int) round(lerp2(di, dj, v00, v01, v10, v11));
+                        int pi = ((x + i) >> ps) - px - od/2;
+                        int pj = ((z + j) >> ps) - pz - od/2;
+                        qreal di = ((x + i) & st) / (qreal)(st + 1);
+                        qreal dj = ((z + j) & st) / (qreal)(st + 1);
+                        qreal v = 0;
+                        if (bicubic)
+                        {
+                            qreal p[] = {
+                                cubic_hermite(&buf[(pj+0)*pw + pi], di),
+                                cubic_hermite(&buf[(pj+1)*pw + pi], di),
+                                cubic_hermite(&buf[(pj+2)*pw + pi], di),
+                                cubic_hermite(&buf[(pj+3)*pw + pi], di),
+                            };
+                            v = cubic_hermite(p, dj);
+                        }
+                        else // bilinear
+                        {
+                            qreal v00 = buf[(pj+0)*pw + pi+0];
+                            qreal v01 = buf[(pj+0)*pw + pi+1];
+                            qreal v10 = buf[(pj+1)*pw + pi+0];
+                            qreal v11 = buf[(pj+1)*pw + pi+1];
+                            v = lerp2(di, dj, v00, v01, v10, v11);
+                        }
                         if (v > wi.y) v = 255;
-                        height[j*(w+2)+i] = v;
+                        height[j*(w+2)+i] = hd ? round(v) : v;
                     }
                 }
 
                 // apply shading based on height changes
-                qreal mul = (wi.mc >= MC_1_18 ? 0.6 : 0.2) / scale;
+                qreal mul = (wi.mc >= MC_1_18 ? 0.3 : 0.1) / scale;
                 for (int j = 0; j < h; j++)
                 {
                     for (int i = 0; i < w; i++)
                     {
-                        qreal d0 = height[(j+0)*(w+2) + i+0];
-                        qreal d1 = height[(j+2)*(w+2) + i+2];
+                        const qreal *ty = height.data();
+                        int tw = w+2;
+                        qreal d0 = ty[(j+0)*tw + i+1] + ty[(j+1)*tw + i+0];
+                        qreal d1 = ty[(j+2)*tw + i+1] + ty[(j+1)*tw + i+2];
                         qreal light = 1.0 + (d1 - d0) * mul;
                         if (light < 0.4) light = 0.4;
                         if (light > 1.6) light = 1.6;
@@ -781,18 +809,11 @@ QString QWorld::getBiomeName(Pos p)
     QString ret = s ? s : "";
     if (layeropt == LOPT_HEIGHT_4 && dim == 0)
     {
-        int y, id;
+        float y;
+        int id;
         mapApproxHeight(&y, &id, &g, &sn, p.x>>2, p.z>>2, 1, 1);
-        ret = QString::asprintf("Y~%d ", y) + ret;
+        ret = QString::asprintf("Y~%d ", (int) round(y)) + ret;
     }
-    /*if (layeropt == LOPT_HEIGHT_4 && wi.mc >= MC_1_18 && dim == 0)
-    {
-        Generator gd = g;
-        gd.bn.nptype = NP_DEPTH;
-        int depth = getBiomeAt(&gd, 4, p.x>>2, 0, p.z>>2);
-        int y = (depth + 64) / 128 + 25;
-        ret = QString::asprintf("Y~%d ", y) + ret;
-    }*/
     return ret;
 }
 

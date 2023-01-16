@@ -118,6 +118,8 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
 
     ui->comboY->lineEdit()->setValidator(new QIntValidator(-64, 320, this));
 
+    ui->lineMinMax->setValidator(new QDoubleValidator(-1e6, 1e6, 4, this));
+
     for (int i = 0; i < 256; i++)
     {
         const char *str = biome2str(mc, i);
@@ -178,35 +180,43 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
     memset(climaterange, 0, sizeof(climaterange));
     memset(climatecomplete, 0, sizeof(climatecomplete));
     const int *extremes = getBiomeParaExtremes(MC_NEWEST);
-    struct { QString name; int idx; } climates[] =
-    {
-        {tr("Temperature:"),        NP_TEMPERATURE      },
-        {tr("Humidity:"),           NP_HUMIDITY         },
-        {tr("Continentalness:"),    NP_CONTINENTALNESS  },
-        {tr("Erosion:"),            NP_EROSION          },
-        // depth has more dependencies and is not supported
-        {tr("Weirdness:"),          NP_WEIRDNESS        },
+    const QString climate[] = {
+        tr("Temperature"), tr("Humidity"), tr("Continentalness"),
+        tr("Erosion"), tr("Depth"), tr("Weirdness"),
     };
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < NP_MAX; i++)
     {
-        QLabel *label = new QLabel(climates[i].name, this);
-        int cmin = extremes[2*climates[i].idx + 0];
-        int cmax = extremes[2*climates[i].idx + 1];
+        if (i == NP_DEPTH)
+        {
+            LabeledRange *lr;
+            if (mc <= MC_1_17)
+                lr = new LabeledRange(this, 0, 256);
+            else
+                lr = new LabeledRange(this, -64, 320);
+            climaterange[0][i] = lr;
+            ui->gridHeightRange->addWidget(lr);
+            on_comboHeightRange_currentIndexChanged(0);
+            continue;
+        }
+        ui->comboClimatePara->addItem(climate[i], QVariant::fromValue(i));
+        QLabel *label = new QLabel(climate[i] + ":", this);
+        int cmin = extremes[2*i + 0];
+        int cmax = extremes[2*i + 1];
         LabeledRange *ok = new LabeledRange(this, cmin-1, cmax+1);
         LabeledRange *ex = new LabeledRange(this, cmin-1, cmax+1);
         ok->setLimitText(tr("-Inf"), tr("+Inf"));
         ex->setLimitText(tr("-Inf"), tr("+Inf"));
-        ex->setHighlight(QColor(0,0,0,0), QColor(Qt::red));
+        ex->setHighlight(QColor::Invalid, QColor(Qt::red));
         connect(ok, SIGNAL(onRangeChange()), this, SLOT(onClimateLimitChanged()));
         connect(ex, SIGNAL(onRangeChange()), this, SLOT(onClimateLimitChanged()));
-        climaterange[0][climates[i].idx] = ok;
-        climaterange[1][climates[i].idx] = ex;
+        climaterange[0][i] = ok;
+        climaterange[1][i] = ex;
 
         QCheckBox *all = new QCheckBox(this);
         all->setFixedWidth(20);
         all->setToolTip(tr("Require full range instead of intersection"));
         connect(all, SIGNAL(stateChanged(int)), this, SLOT(onClimateLimitChanged()));
-        climatecomplete[climates[i].idx] = all;
+        climatecomplete[i] = all;
 
         int row = ui->gridNoiseAllowed->rowCount();
         ui->gridNoiseName->addWidget(label, row, 0, 1, 2);
@@ -228,10 +238,12 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
             continue;
         NoiseBiomeIndicator *cb = new NoiseBiomeIndicator(biome2str(mc, id), this);
         QString tip = "<pre>";
-        for (int j = 0; j < 5; j++)
+        for (int j = 0; j < NP_MAX; j++)
         {
-            tip += climates[j].name.leftJustified(18);
-            const int *l = lim + 2 * climates[j].idx;
+            if (j == NP_DEPTH)
+                continue;
+            tip += climate[j].leftJustified(18);
+            const int *l = lim + 2 * j;
             tip += (l[0] == INT_MIN) ? tr("  -Inf") : QString::asprintf("%6d", (int)l[0]);
             tip += " - ";
             tip += (l[1] == INT_MAX) ? tr("  +Inf") : QString::asprintf("%6d", (int)l[1]);
@@ -287,6 +299,8 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
 
         if (!scripts.contains(cond.hash))
             ui->comboLua->addItem(tr("[script not found]"), QVariant::fromValue(cond.hash));
+        else
+            ui->comboLua->setCurrentIndex(-1); // force index change
         ui->comboLua->setCurrentIndex(ui->comboLua->findData(QVariant::fromValue(cond.hash)));
 
         ui->comboBoxCat->setCurrentIndex(ft.cat);
@@ -306,6 +320,10 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
         ui->comboMatchBiome->insertItem(0, biome2str(mc, cond.biomeId), QVariant::fromValue(cond.biomeId));
         ui->comboMatchBiome->setCurrentIndex(0);
 
+        ui->comboClimatePara->setCurrentIndex(ui->comboClimatePara->findData(QVariant::fromValue(cond.para)));
+        ui->comboMinMax->setCurrentIndex(cond.minmax);
+        ui->lineMinMax->setText(QString::number(cond.value));
+
         updateMode();
 
         ui->spinBox->setValue(cond.count);
@@ -315,8 +333,8 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
         ui->lineEditX2->setText(QString::number(cond.x2));
         ui->lineEditZ2->setText(QString::number(cond.z2));
 
-        ui->checkApprox->setChecked(cond.flags & APPROX);
-        ui->checkMatchAny->setChecked(cond.flags & MATCH_ANY);
+        ui->checkApprox->setChecked(cond.flags & Condition::FLG_APPROX);
+        ui->checkMatchAny->setChecked(cond.flags & Condition::FLG_MATCH_ANY);
         int i, n = ui->comboY->count();
         for (i = 0; i < n; i++)
             if (ui->comboY->itemText(i).section(' ', 0, 0).toInt() == cond.y)
@@ -397,6 +415,8 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
         }
         setClimateLimits(climaterange[0], cond.limok, true);
         setClimateLimits(climaterange[1], cond.limex, false);
+
+        ui->comboHeightRange->setCurrentIndex(cond.flags & Condition::FLG_INRANGE ? 0 : 1);
     }
 
     on_lineSquare_editingFinished();
@@ -483,6 +503,10 @@ void ConditionDialog::updateMode()
     {
         ui->stackedWidget->setCurrentWidget(ui->pageClimates);
     }
+    else if (filterindex == F_CLIMATE_MINMAX)
+    {
+        ui->stackedWidget->setCurrentWidget(ui->pageMinMax);
+    }
     else if (filterindex == F_BIOME_CENTER || filterindex == F_BIOME_CENTER_256)
     {
         ui->stackedWidget->setCurrentWidget(ui->pageBiomeCenter);
@@ -518,6 +542,10 @@ void ConditionDialog::updateMode()
     {
         ui->stackedWidget->setCurrentWidget(ui->pageEndCity);
         ui->checkEndShip->setEnabled(mc >= MC_1_9);
+    }
+    else if (filterindex == F_HEIGHT)
+    {
+        ui->stackedWidget->setCurrentWidget(ui->pageHeight);
     }
     else if (filterindex == F_LUA)
     {
@@ -876,7 +904,7 @@ void ConditionDialog::on_buttonCancel_clicked()
 
 void ConditionDialog::on_buttonOk_clicked()
 {
-    on_comboLua_currentIndexChanged(-1);
+    on_pushLuaSave_clicked();
 
     Condition c = cond;
     c.version = Condition::VER_CURRENT;
@@ -884,6 +912,8 @@ void ConditionDialog::on_buttonOk_clicked()
     c.relative = ui->comboBoxRelative->currentData().toInt();
     c.count = ui->spinBox->value();
     c.skipref = ui->checkSkipRef->isChecked();
+
+    const FilterInfo &ft = g_filterinfo.list[cond.type];
 
     if (ui->checkEnabled->isChecked())
         c.meta &= ~Condition::DISABLED;
@@ -895,7 +925,7 @@ void ConditionDialog::on_buttonOk_clicked()
 
     c.hash = ui->comboLua->currentData().toULongLong();
 
-    if (ui->radioSquare->isChecked())
+    if (ui->radioSquare->isEnabled() && ui->radioSquare->isChecked())
     {
         int d = ui->lineSquare->text().toInt();
         c.x1 = (-d) >> 1;
@@ -910,8 +940,12 @@ void ConditionDialog::on_buttonOk_clicked()
         c.x2 = ui->lineEditX2->text().toInt();
         c.z2 = ui->lineEditZ2->text().toInt();
     }
-    if (c.x1 > c.x2) std::swap(c.x1, c.x2);
-    if (c.z1 > c.z2) std::swap(c.z1, c.z2);
+
+    if (ft.area)
+    {
+        if (c.x1 > c.x2) std::swap(c.x1, c.x2);
+        if (c.z1 > c.z2) std::swap(c.z1, c.z2);
+    }
 
     if (ui->checkRadius->isChecked())
         c.rmax = ui->lineRadius->text().toInt() + 1;
@@ -949,6 +983,12 @@ void ConditionDialog::on_buttonOk_clicked()
         c.biomeSize = ui->lineBiomeSize->text().toInt();
         c.tol = ui->lineTollerance->text().toInt();
     }
+    if (ui->stackedWidget->currentWidget() == ui->pageMinMax)
+    {
+        c.minmax = ui->comboMinMax->currentIndex();
+        c.para = ui->comboClimatePara->currentData().toInt();
+        c.value = ui->lineMinMax->text().toFloat();
+    }
     if (ui->stackedWidget->currentWidget() == ui->pageTemps)
     {
         c.count = 0;
@@ -967,9 +1007,11 @@ void ConditionDialog::on_buttonOk_clicked()
 
     c.flags = 0;
     if (ui->checkApprox->isChecked())
-        c.flags |= APPROX;
+        c.flags |= Condition::FLG_APPROX;
     if (ui->checkMatchAny->isChecked())
-        c.flags |= MATCH_ANY;
+        c.flags |= Condition::FLG_MATCH_ANY;
+    if (ui->comboHeightRange->currentIndex() == 0)
+        c.flags |= Condition::FLG_INRANGE;
 
     c.varflags = c.varstart = 0;
     if (ui->checkStartPieces->isChecked())
@@ -1086,7 +1128,7 @@ void ConditionDialog::getClimateLimits(int limok[6][2], int limex[6][2])
             QColor col = QColor(Qt::darkCyan);
             if (climatecomplete[i]->isChecked())
                 col = QColor(Qt::darkGreen);
-            climaterange[0][i]->setHighlight(col, QColor(0,0,0,0));
+            climaterange[0][i]->setHighlight(col, QColor(QColor::Invalid));
         }
     }
 }
@@ -1184,6 +1226,9 @@ void ConditionDialog::on_comboLua_currentIndexChanged(int)
                 on_pushLuaSaveAs_clicked();
         }
     }
+    ui->tabLuaOutput->setEnabled(false);
+    ui->tabWidgetLua->tabBar()->setTabTextColor(
+            ui->tabWidgetLua->indexOf(ui->tabLuaOutput), QColor(QColor::Invalid));
     ui->labelLuaCall->setText("");
     ui->textEditLuaOut->document()->setPlainText("");
     ui->textEditLua->document()->setPlainText("");
@@ -1200,14 +1245,18 @@ void ConditionDialog::on_comboLua_currentIndexChanged(int)
         return;
     QTextStream stream(&file);
     QString text = stream.readAll();
-    const LuaOutput& lo = g_lua_output[cond.save];
+    LuaOutput& lo = g_lua_output[cond.save];
+    QMutexLocker locker(&lo.mutex);
     if (lo.hash == hash)
     {
-        QString call = QString::asprintf(
+        QString call = lo.time.toString() + ": " + QString::asprintf(
             "function %s(seed=%" PRId64 ", at={x=%d, z=%d}, ...)",
             lo.func, lo.seed, lo.at.x, lo.at.z);
         ui->labelLuaCall->setText(call);
-        ui->textEditLuaOut->document()->setPlainText(lo.out);
+        ui->textEditLuaOut->document()->setPlainText(lo.msg);
+        ui->tabLuaOutput->setEnabled(true);
+        ui->tabWidgetLua->tabBar()->setTabTextColor(
+                ui->tabWidgetLua->indexOf(ui->tabLuaOutput), QColor(255,0,0));
     }
     ui->textEditLua->document()->setPlainText(text);
     ui->textEditLua->document()->setModified(false);
@@ -1275,13 +1324,11 @@ void ConditionDialog::on_pushLuaExample_clicked()
             "-- seed: current seed\n"
             "-- at  : {x, z} where the condition is tested\n"
             "-- deps: list of {x, z, id, parent} entries for the dependent\n"
-            "--       conditions (i.e. those later in the condition list),\n"
-            "--       with the evaluated position, identifer and the id of the\n"
-            "--       parent condition\n"
+            "--       conditions (i.e. those later in the condition list)\n"
             "function check(seed, at, deps)\n"
             "\t-- Return a position {x, z}, or nil to fail the check.\n"
             "\treturn at.x, at.z\n"
-            "end\n"
+            "end"
         },
     };
 
@@ -1296,3 +1343,15 @@ void ConditionDialog::on_pushLuaExample_clicked()
         ui->textEditLua->document()->setPlainText(code[choice]);
     }
 }
+
+void ConditionDialog::on_comboHeightRange_currentIndexChanged(int index)
+{
+    LabeledRange *range = climaterange[0][NP_DEPTH];
+    QColor ok = QColor(Qt::darkCyan);
+    QColor nok = QColor::Invalid;
+    if (index == 0) // inside
+        range->setHighlight(ok, nok);
+    else // outside
+        range->setHighlight(nok, ok);
+}
+

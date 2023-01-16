@@ -88,6 +88,8 @@ enum
     F_LOGIC_NOT,
     F_BIOME_CENTER,
     F_BIOME_CENTER_256,
+    F_CLIMATE_MINMAX,
+    F_HEIGHT,
     F_LUA,
     // new filters should be added here at the end to keep some downwards compatibility
     FILTER_MAX,
@@ -333,6 +335,12 @@ static const struct FilterList
             _("Custom limits for the required and allowed climate noise parameters that "
             "the specified area should cover.")
         };
+        list[F_CLIMATE_MINMAX] = FilterInfo{
+            CAT_BIOMES, 0, 1, 1, 0, 0, 0, 4, 2, 0, MC_1_18, MC_NEWEST, 0, 0, disp++,
+            ":icons/map.png",
+            _("Locate climate extreme 1:4"),
+            _("Finds the location where a climate parameter reaches its minimum or maximum.")
+        };
         list[F_BIOME_CENTER] = FilterInfo{
             CAT_BIOMES, 1, 1, 1, 0, 0, 0, 4, 2, 1, MC_1_0, MC_NEWEST, 0, 1, disp++,
             ":icons/map.png",
@@ -420,6 +428,12 @@ static const struct FilterList
             ":icons/slime.png",
             _("Slime chunk"),
             ""
+        };
+        list[F_HEIGHT] = FilterInfo{
+            CAT_OTHER, 0, 1, 0, 0, 0, 0, 4, 2, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
+            ":icons/overworld.png",
+            _("Surface height"),
+            _("Check the approximate surface height at scale 1:4 at a single coordinate.")
         };
 
         list[F_FIRST_STRONGHOLD] = FilterInfo{
@@ -597,6 +611,11 @@ struct /*__attribute__((packed))*/ Condition
     enum { // meta flags
         DISABLED = 0x0001,
     };
+    enum { // condition flags
+        FLG_APPROX      = 0x0001,
+        FLG_MATCH_ANY   = 0x0010,
+        FLG_INRANGE     = 0x0020,
+    };
     enum { // variant flags
         VAR_WITH_START  = 0x01, // restrict start piece index and biome
         VAR_ABANODONED  = 0x02, // zombie village
@@ -619,7 +638,9 @@ struct /*__attribute__((packed))*/ Condition
     int32_t     biomeId; // legacy oceanToFind(8)
     uint32_t    biomeSize;
     uint8_t     tol; // legacy specialCnt(4)
-    uint8_t     pad2[3];
+    uint8_t     minmax;
+    uint8_t     para;
+    uint8_t     pad2[1];
     uint8_t     pad3[2]; // legacy zero initialized
     uint16_t    version; // condition data version
     uint64_t    biomeToExcl, biomeToExclM; // exclusion biomes
@@ -633,6 +654,7 @@ struct /*__attribute__((packed))*/ Condition
     uint64_t    varstart;
     int32_t     limok[NP_MAX][2];
     int32_t     limex[NP_MAX][2];
+    float       value;
 
     // generated members - initialized when the search is started
     uint8_t     generated_start[0]; // address dummy
@@ -651,7 +673,7 @@ struct /*__attribute__((packed))*/ Condition
 };
 
 static_assert(
-    offsetof(Condition, generated_start) == 304,
+    offsetof(Condition, generated_start) == 308,
     "Layout of Condition has changed!"
 );
 
@@ -673,11 +695,11 @@ struct SearchThreadEnv
 
     int mc, large;
     uint64_t seed;
-    bool initsurf;
+    int surfdim;
 
     std::map<uint64_t, lua_State*> l_states;
 
-    SearchThreadEnv() : condtree(),mc(),large(),seed(),initsurf(),l_states()
+    SearchThreadEnv() : condtree(),mc(),large(),seed(),surfdim(DIM_UNDEF),l_states()
     {
         memset(&g, 0, sizeof(g));
         memset(&sn, 0, sizeof(sn));
@@ -688,7 +710,7 @@ struct SearchThreadEnv
 
     void setSeed(uint64_t seed);
     void init4Dim(int dim);
-    void prepareSurfaceNoise();
+    void prepareSurfaceNoise(int dim);
 };
 
 
@@ -707,12 +729,6 @@ enum
     PASS_FAST_48,       // only do fast checks that do not require biome gen
     PASS_FULL_48,       // include possible biome checks for 48-bit seeds
     PASS_FULL_64,       // run full test on a 64-bit seed
-};
-
-enum
-{
-    APPROX      = 0x01,
-    MATCH_ANY   = 0x10,
 };
 
 /* Checks if a seed satisfies the conditions tree.

@@ -169,6 +169,8 @@ private slots:
     void on_pushLuaOpen_clicked();
     void on_pushLuaExample_clicked();
 
+    void on_comboHeightRange_currentIndexChanged(int index);
+
 private:
     Ui::ConditionDialog *ui;
     QTextEdit *textDescription;

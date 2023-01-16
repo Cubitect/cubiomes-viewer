@@ -123,7 +123,8 @@ bool SearchMaster::set(
             c.type != F_BIOME_CENTER &&
             c.type != F_BIOME_CENTER_256 &&
             c.type != F_TEMPS &&
-            c.type != F_CLIMATE_NOISE)
+            c.type != F_CLIMATE_NOISE &&
+            c.type != F_CLIMATE_MINMAX)
         {
             uint64_t b = c.biomeToFind;
             uint64_t m = c.biomeToFindM;

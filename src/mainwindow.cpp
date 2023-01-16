@@ -431,22 +431,14 @@ void MainWindow::loadSettings()
         g_extgen.salts[st] = settings.value(QString("world/salt_") + struct2str(st), v).toULongLong();
     }
 
-    WorldInfo wi;
-    getSeed(&wi, true);
-    wi.mc = settings.value("map/mc", wi.mc).toInt();
-    wi.large = settings.value("map/large", wi.large).toBool();
-    wi.seed = (uint64_t) settings.value("map/seed", QVariant::fromValue((qlonglong)wi.seed)).toLongLong();
-    wi.y = settings.value("map/y", 256).toInt();
-    int dim = settings.value("map/dim", getDim()).toInt();
-    setSeed(wi, dim);
-
+    getMapView()->deleteWorld();
     qreal x = getMapView()->getX();
     qreal z = getMapView()->getZ();
     qreal scale = getMapView()->getScale();
-
     x = settings.value("map/x", x).toDouble();
     z = settings.value("map/z", z).toDouble();
     scale = settings.value("map/scale", scale).toDouble();
+    mapGoto(x, z, scale);
 
     for (int sopt = 0; sopt < STRUCT_NUM; sopt++)
     {
@@ -457,7 +449,16 @@ void MainWindow::loadSettings()
             saction[sopt]->setChecked(show);
         getMapView()->setShow(sopt, show);
     }
-    mapGoto(x, z, scale);
+
+    WorldInfo wi;
+    getSeed(&wi, true);
+    // NOTE: version can be wrong when the mc-enum changes, but the session file should correct it
+    wi.mc = settings.value("map/mc", wi.mc).toInt();
+    wi.large = settings.value("map/large", wi.large).toBool();
+    wi.seed = (uint64_t) settings.value("map/seed", QVariant::fromValue((qlonglong)wi.seed)).toLongLong();
+    wi.y = settings.value("map/y", 256).toInt();
+    int dim = settings.value("map/dim", getDim()).toInt();
+    setSeed(wi, dim);
 
     if (config.restoreSession)
     {

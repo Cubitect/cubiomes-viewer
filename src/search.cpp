@@ -94,7 +94,7 @@ bool Condition::versionUpgrade()
         memset(deps, 0, sizeof(deps));
         memset(pad2, 0, sizeof(pad2));
         memset(pad3, 0, sizeof(pad3));
-        biomeId = biomeSize = tol = 0;
+        biomeId = biomeSize = tol = minmax = para = 0;
         varflags = varbiome = varstart = 0;
     }
     else if (version == VER_2_3_0)
@@ -120,9 +120,9 @@ QString Condition::apply(int mc)
             ex[exlen++] = i + 128;
     }
     uint32_t bfflags = BF_FORCED_OCEAN;
-    if (flags & APPROX)
+    if (flags & Condition::FLG_APPROX)
         bfflags |= BF_APPROX;
-    if (flags & MATCH_ANY)
+    if (flags & Condition::FLG_MATCH_ANY)
         setupBiomeFilter(&bf, mc, bfflags, 0, 0, ex, exlen, in, inlen);
     else
         setupBiomeFilter(&bf, mc, bfflags, in, inlen, ex, exlen, 0, 0);
@@ -194,7 +194,7 @@ QString SearchThreadEnv::init(int mc, bool large, ConditionTree *condtree)
     this->mc = mc;
     this->large = large;
     this->seed = 0;
-    this->initsurf = false;
+    this->surfdim = DIM_UNDEF;
     uint32_t flags = 0;
     if (large)
         flags |= LARGE_BIOMES;
@@ -232,7 +232,7 @@ void SearchThreadEnv::init4Dim(int dim)
     if (dim != g.dim || (seed & mask) != (g.seed & mask))
     {
         applySeed(&g, dim, seed);
-        initsurf = false;
+        surfdim = DIM_UNDEF;
     }
     else if (g.mc >= MC_1_15 && seed != g.seed)
     {
@@ -240,12 +240,12 @@ void SearchThreadEnv::init4Dim(int dim)
     }
 }
 
-void SearchThreadEnv::prepareSurfaceNoise()
+void SearchThreadEnv::prepareSurfaceNoise(int dim)
 {
-    if (!initsurf)
+    if (surfdim != dim)
     {
-        initSurfaceNoise(&sn, DIM_END, seed);
-        initsurf = true;
+        initSurfaceNoise(&sn, dim, seed);
+        surfdim = dim;
     }
 }
 
@@ -747,6 +747,34 @@ static int f_confine(void *data, int x, int z, double p)
     return p < lim[0] || p > lim[1];
 }
 
+struct track_minmax_t
+{
+    Pos pos;
+    double value;
+};
+static int f_track_min(void *data, int x, int z, double p)
+{
+    track_minmax_t *info = (track_minmax_t *) data;
+    if (p < info->value)
+    {
+        info->pos.x = x;
+        info->pos.z = z;
+        info->value = p;
+    }
+    return 0;
+}
+static int f_track_max(void *data, int x, int z, double p)
+{
+    track_minmax_t *info = (track_minmax_t *) data;
+    if (p > info->value)
+    {
+        info->pos.x = x;
+        info->pos.z = z;
+        info->value = p;
+    }
+    return 0;
+}
+
 
 /* Tests if a condition is satisfied with 'at' as origin for a search pass.
  * If sufficiently satisfied (check return value) then:
@@ -1022,7 +1050,7 @@ L_qm_any:
                         continue;
                     if (st == End_City)
                     {
-                        env->prepareSurfaceNoise();
+                        env->prepareSurfaceNoise(DIM_END);
                         if (!isViableEndCityTerrain(
                             &env->g.en, &env->sn, pc.x, pc.z))
                             continue;
@@ -1226,7 +1254,7 @@ L_qm_any:
             z2 = cond->z2 + at.z;
         }
         if (*abort) return COND_FAILED;
-        env->init4Dim(0);
+        env->init4Dim(DIM_OVERWORLD);
         pc = getSpawn(&env->g);
         if (rmax)
         {
@@ -1364,7 +1392,7 @@ L_qm_any:
             initFirstStronghold(&sh, env->mc, env->seed);
             icnt = 0;
             xt = zt = 0;
-            env->init4Dim(0);
+            env->init4Dim(DIM_OVERWORLD);
             while (nextStronghold(&sh, &env->g) > 0)
             {
                 if (*abort)
@@ -1535,7 +1563,7 @@ L_qm_any:
         cent->z = ((rz1 + rz2) << 10) >> 1;
         if (pass != PASS_FULL_64)
             return COND_MAYBE_POS_VALID;
-        env->init4Dim(0);
+        env->init4Dim(DIM_OVERWORLD);
         if (checkForTemps(&env->g.ls, env->seed, rx1, rz1, rx2-rx1+1, rz2-rz1+1, cond->temps))
             return COND_OK;
         return COND_FAILED;
@@ -1591,7 +1619,7 @@ L_noise_biome:
             int w = rx2 - rx1 + 1;
             int h = rz2 - rz1 + 1;
             Range r = {finfo.step, rx1, rz1, w, h, cond->y >> 2, 1};
-            env->init4Dim(0);
+            env->init4Dim(DIM_OVERWORLD);
 
             if (cond->count == 0)
             {   // exclusion
@@ -1655,6 +1683,41 @@ L_noise_biome:
         }
         return COND_MAYBE_POS_INVAL;
 
+    case F_CLIMATE_MINMAX:
+        if (env->mc < MC_1_18 || cond->para >= NP_MAX)
+            return COND_FAILED;
+        rx1 = ((cond->x1 << 2) + at.x) >> 2;
+        rz1 = ((cond->z1 << 2) + at.z) >> 2;
+        rx2 = ((cond->x2 << 2) + at.x) >> 2;
+        rz2 = ((cond->z2 << 2) + at.z) >> 2;
+        if (pass != PASS_FULL_64)
+            return COND_MAYBE_POS_INVAL;
+        {
+            track_minmax_t info = {at, 0};
+            int w = rx2 - rx1 + 1;
+            int h = rz2 - rz1 + 1;
+            double para;
+            env->init4Dim(DIM_OVERWORLD);
+            if (cond->minmax == 0)
+            {   // min
+                info.value = para = +INFINITY;
+                getParaRange(&env->g.bn.climate[cond->para], &para, 0,
+                        rx1, rz1, w, h, &info, f_track_min);
+                if (para > cond->value)
+                    return COND_FAILED;
+            }
+            else
+            {   // max
+                info.value = para = -INFINITY;
+                getParaRange(&env->g.bn.climate[cond->para], 0, &para,
+                        rx1, rz1, w, h, &info, f_track_max);
+                if (para < cond->value)
+                    return COND_FAILED;
+            }
+            cent->x = info.pos.x << 2;
+            cent->z = info.pos.z << 2;
+            return COND_OK;
+        }
 
     case F_CLIMATE_NOISE:
         if (env->mc < MC_1_18)
@@ -1671,7 +1734,7 @@ L_noise_biome:
             int w = rx2 - rx1 + 1;
             int h = rz2 - rz1 + 1;
             //int y = cond->y >> 2;
-            env->init4Dim(0);
+            env->init4Dim(DIM_OVERWORLD);
             int order[] = { // use this order for performance
                 NP_TEMPERATURE,
                 NP_HUMIDITY,
@@ -1715,6 +1778,28 @@ L_noise_biome:
                     break;
                 }
             }
+        }
+        return valid ? COND_OK : COND_FAILED;
+
+
+    case F_HEIGHT:
+        rx1 = ((cond->x1 << 2) + at.x) >> 2;
+        rz1 = ((cond->z1 << 2) + at.z) >> 2;
+        cent->x = rx1 << 2;
+        cent->z = rz1 << 2;
+        if (pass != PASS_FULL_64)
+            return COND_MAYBE_POS_VALID;
+        env->init4Dim(DIM_OVERWORLD);
+        env->prepareSurfaceNoise(DIM_OVERWORLD);
+        {
+            int ymin = cond->limok[NP_DEPTH][0];
+            int ymax = cond->limok[NP_DEPTH][1];
+            float y;
+            mapApproxHeight(&y, nullptr, &env->g, &env->sn, rx1, rz1, 1, 1);
+            if (cond->flags & Condition::FLG_INRANGE)
+                valid = y >= ymin && y <= ymax;
+            else
+                valid = y <= ymin || y >= ymax;
         }
         return valid ? COND_OK : COND_FAILED;
 

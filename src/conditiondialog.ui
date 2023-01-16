@@ -489,7 +489,7 @@
           <number>0</number>
          </property>
          <property name="currentIndex">
-          <number>5</number>
+          <number>6</number>
          </property>
          <widget class="QWidget" name="pageNone">
           <property name="enabled">
@@ -701,8 +701,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>60</width>
-                   <height>20</height>
+                   <width>634</width>
+                   <height>300</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -1013,8 +1013,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>60</width>
-                   <height>20</height>
+                   <width>634</width>
+                   <height>253</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -1027,6 +1027,148 @@
                  </layout>
                 </widget>
                </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="pageMinMax">
+          <layout class="QGridLayout" name="gridLayout_23">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item row="0" column="0">
+            <widget class="QGroupBox" name="groupBox_10">
+             <property name="title">
+              <string>Locate climate minimum/maximum</string>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_24">
+              <item row="1" column="2">
+               <widget class="QLineEdit" name="lineMinMax">
+                <property name="text">
+                 <string>0</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_8">
+                <property name="text">
+                 <string>Climate parameter: </string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QComboBox" name="comboMinMax">
+                <item>
+                 <property name="text">
+                  <string>Minimum	 &lt;=</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Maximum	 &gt;=</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <spacer name="verticalSpacer_5">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>252</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item row="0" column="1" colspan="2">
+               <widget class="QComboBox" name="comboClimatePara"/>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_9">
+                <property name="text">
+                 <string>Locate value:</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="pageHeight">
+          <layout class="QGridLayout" name="gridLayout_25">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item row="0" column="0">
+            <widget class="QGroupBox" name="groupBox_11">
+             <property name="title">
+              <string>Approximate surface height</string>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_26">
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_11">
+                <property name="text">
+                 <string>Height (Y-level)</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QComboBox" name="comboHeightRange">
+                <item>
+                 <property name="text">
+                  <string>Inside range:</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Outside range:</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <spacer name="verticalSpacer_6">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>332</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item row="0" column="2">
+               <layout class="QGridLayout" name="gridHeightRange">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
+               </layout>
               </item>
              </layout>
             </widget>
@@ -1192,8 +1334,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>60</width>
-                   <height>20</height>
+                   <width>634</width>
+                   <height>335</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_3_1">
