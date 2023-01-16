@@ -359,7 +359,7 @@ void Quad::run()
                 }
 
                 // apply shading based on height changes
-                qreal mul = (wi.mc >= MC_1_18 ? 0.3 : 0.1) / scale;
+                qreal mul = 0.25 / scale;
                 for (int j = 0; j < h; j++)
                 {
                     for (int i = 0; i < w; i++)

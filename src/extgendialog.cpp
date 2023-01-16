@@ -61,6 +61,8 @@ ExtGenDialog::~ExtGenDialog()
 
 void ExtGenDialog::initSettings(ExtGenSettings *extgen)
 {
+    ui->checkExperimental->setChecked(extgen->experimentalVers);
+
     ui->checkEstimate->setChecked(extgen->estimateTerrain);
 
     // start checked, otherwise Qt doesn't respond to initial uncheck
@@ -89,6 +91,7 @@ void ExtGenDialog::initSettings(ExtGenSettings *extgen)
 
 ExtGenSettings ExtGenDialog::getSettings()
 {
+    extgen.experimentalVers = ui->checkExperimental->isChecked();
     extgen.estimateTerrain = ui->checkEstimate->isChecked();
     extgen.saltOverride = ui->groupSalts->isChecked();
 

@@ -70,7 +70,9 @@ void AnalysisTriggers::run()
             if (!err.isEmpty())
                 break;
             SearchThreadEnv env;
-            env.init(wi.mc, wi.large, &condtree);
+            err = env.init(wi.mc, wi.large, &condtree);
+            if (!err.isEmpty())
+                break;
             env.setSeed(wi.seed);
 
             Pos origin = {0, 0};

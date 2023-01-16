@@ -64,6 +64,7 @@ protected:
     void updateMapSeed();
     void setDockable(bool dockable);
     void applyConfigChanges(const Config old, const Config conf);
+    void setMCList(bool experimental);
 
 signals:
     void mapUpdated();
@@ -85,7 +86,7 @@ private slots:
     void on_actionQuit_triggered();
     void on_actionPreferences_triggered();
     void on_actionGo_to_triggered();
-    void on_actionOpen_shadow_seed_triggered();
+    void on_actionOpenShadow_triggered();
     void on_actionStructure_visibility_triggered();
     void on_actionBiome_colors_triggered();
     void on_actionPresetLoad_triggered();

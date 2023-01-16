@@ -14,6 +14,7 @@ extern unsigned char g_tempsColors[256][3];
 
 struct ExtGenSettings
 {
+    bool experimentalVers;
     bool estimateTerrain;
     bool saltOverride;
     uint64_t salts[FEATURE_NUM];
@@ -22,6 +23,7 @@ struct ExtGenSettings
 
     void reset()
     {
+        experimentalVers = false;
         estimateTerrain = true;
         saltOverride = false;
         for (int i = 0; i < FEATURE_NUM; i++)

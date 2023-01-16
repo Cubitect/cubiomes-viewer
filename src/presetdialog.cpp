@@ -108,13 +108,13 @@ PresetDialog::PresetDialog(QWidget *parent, WorldInfo wi, bool showEamples)
     addPreset(":/examples/portal_village_or_treasure.txt",
         tr("Village or Treasure with Portal (1.16+)"),
         tr("Spawn at a Ruined Portal right beside a Village <b>OR</b> Buried Treasure."),
-        wi.mc >= MC_1_16);
+        wi.mc >= MC_1_16_1);
 
     addPreset(":/examples/village_portal_stronghold.txt",
         tr("Speedrunner Village (1.16+)"),
         tr("Spawn in a Village with a Ruined Portal leading to a Stronghold.\n\n"
         "Works best with the 48-bit family search."),
-        wi.mc >= MC_1_16);
+        wi.mc >= MC_1_16_1);
 
     /*
     addPreset(":/examples/biome_diversity_1_17.txt",

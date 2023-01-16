@@ -265,8 +265,8 @@ bool MainWindow::getSeed(WorldInfo *wi, bool applyrand)
     wi->mc = str2mc(mcs.c_str());
     if (wi->mc < 0)
     {
+        qDebug() << "Unknown MC version: " << mcs.c_str();
         wi->mc = MC_NEWEST;
-        qDebug() << "Unknown MC version: " << wi->mc;
         ok = false;
     }
 
@@ -356,6 +356,7 @@ void MainWindow::saveSettings()
     settings.setValue("config/separator", config.separator);
     settings.setValue("config/quote", config.quote);
 
+    settings.setValue("world/experimentalVers", g_extgen.experimentalVers);
     settings.setValue("world/estimateTerrain", g_extgen.estimateTerrain);
     settings.setValue("world/saltOverride", g_extgen.saltOverride);
     for (int st = 0; st < FEATURE_NUM; st++)
@@ -419,10 +420,7 @@ void MainWindow::loadSettings()
     if (!config.biomeColorPath.isEmpty())
         onBiomeColorChange();
 
-    getMapView()->setConfig(config);
-    onStyleChanged(config.uistyle);
-    setDockable(config.dockable);
-
+    g_extgen.experimentalVers = settings.value("world/experimentalVers", g_extgen.experimentalVers).toBool();
     g_extgen.estimateTerrain = settings.value("world/estimateTerrain", g_extgen.estimateTerrain).toBool();
     g_extgen.saltOverride = settings.value("world/saltOverride", g_extgen.saltOverride).toBool();
     for (int st = 0; st < FEATURE_NUM; st++)
@@ -430,8 +428,13 @@ void MainWindow::loadSettings()
         QVariant v = QVariant::fromValue(~(qulonglong)0);
         g_extgen.salts[st] = settings.value(QString("world/salt_") + struct2str(st), v).toULongLong();
     }
+    setMCList(g_extgen.experimentalVers);
 
     getMapView()->deleteWorld();
+    getMapView()->setConfig(config);
+    onStyleChanged(config.uistyle);
+    setDockable(config.dockable);
+
     qreal x = getMapView()->getX();
     qreal z = getMapView()->getZ();
     qreal scale = getMapView()->getScale();
@@ -708,6 +711,9 @@ void MainWindow::updateMapSeed()
     ui->actionParaDepth->setEnabled(state);
     ui->actionParaWeirdness->setEnabled(state);
 
+    ui->actionAddShadow->setEnabled(wi.mc <= MC_1_17);
+    ui->actionOpenShadow->setEnabled(wi.mc <= MC_1_17);
+
     emit mapUpdated();
 }
 
@@ -755,6 +761,31 @@ void MainWindow::applyConfigChanges(const Config old, const Config conf)
         setDockable(conf.dockable);
 }
 
+void MainWindow::setMCList(bool experimental)
+{
+    WorldInfo wi;
+    if (ui->comboBoxMC->count())
+        getSeed(&wi, false);
+    else
+        wi.mc = MC_NEWEST;
+    QStringList mclist;
+    for (int mc = MC_NEWEST; mc > MC_UNDEF; mc--)
+    {
+        if (!experimental && mc != wi.mc)
+        {
+            if (mc == MC_B1_8 || mc == MC_1_0 || mc == MC_1_16_1)
+                continue;
+        }
+        const char *mcs = mc2str(mc);
+        if (mcs)
+            mclist.append(mcs);
+    }
+    const QString s = mc2str(wi.mc);
+    ui->comboBoxMC->clear();
+    ui->comboBoxMC->addItems(mclist);
+    ui->comboBoxMC->setCurrentText(s);
+}
+
 int MainWindow::warning(QString text, QMessageBox::StandardButtons buttons)
 {
     return QMessageBox::warning(this, tr("Warning"), text, buttons);
@@ -773,8 +804,11 @@ void MainWindow::setBiomeColorRc(QString rc)
 
 void MainWindow::on_comboBoxMC_currentIndexChanged(int)
 {
-    updateMapSeed();
-    update();
+    if (ui->comboBoxMC->count())
+    {
+        updateMapSeed();
+        update();
+    }
 }
 void MainWindow::on_seedEdit_editingFinished()
 {
@@ -881,7 +915,7 @@ void MainWindow::on_actionGo_to_triggered()
     getMapView()->onGoto();
 }
 
-void MainWindow::on_actionOpen_shadow_seed_triggered()
+void MainWindow::on_actionOpenShadow_triggered()
 {
     WorldInfo wi;
     if (getSeed(&wi))
@@ -966,6 +1000,7 @@ void MainWindow::on_actionExtGen_triggered()
         g_extgen = dialog->getSettings();
         // invalidate the map world, forcing an update
         getMapView()->deleteWorld();
+        setMCList(g_extgen.experimentalVers);
         updateMapSeed();
         update();
     }

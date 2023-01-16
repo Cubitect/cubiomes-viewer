@@ -25,7 +25,8 @@
         QLabel *l = new QLabel(#B);\
         ui->gridLayoutTemps->addWidget(tempsboxes[B], (B) % Special, (B) / Special * 2 + 0);\
         ui->gridLayoutTemps->addWidget(l, (B) % Special, (B) / Special * 2 + 1);\
-        l->setToolTip(getTip( MC_1_16, L_SPECIAL_1024, 0, (B) % Special + ((B)>=Special?256:0) ));\
+        if (mc > MC_1_6 && mc <= MC_1_17) \
+            l->setToolTip(getTip(mc, L_SPECIAL_1024, 0, (B) % Special + ((B)>=Special?256:0) ));\
     } while (0)
 
 static QString getTip(int mc, int layer, uint32_t flags, int id)
@@ -531,12 +532,12 @@ void ConditionDialog::updateMode()
     else if (filterindex == F_BASTION)
     {
         ui->stackedWidget->setCurrentWidget(ui->pageBastion);
-        ui->checkStartBastion->setEnabled(mc >= MC_1_16);
+        ui->checkStartBastion->setEnabled(mc >= MC_1_16_1);
     }
     else if (filterindex == F_PORTAL || filterindex == F_PORTALN)
     {
         ui->stackedWidget->setCurrentWidget(ui->pagePortal);
-        ui->checkStartPortal->setEnabled(mc >= MC_1_16);
+        ui->checkStartPortal->setEnabled(mc >= MC_1_16_1);
     }
     else if (filterindex == F_ENDCITY)
     {
@@ -1312,6 +1313,7 @@ void ConditionDialog::on_pushLuaExample_clicked()
 {
     QStringList examples = {
         tr("Empty check functions"),
+        tr("Average parent positions"),
     };
     QMap<QString, QString> code = {
         {   examples[0],
@@ -1330,6 +1332,23 @@ void ConditionDialog::on_pushLuaExample_clicked()
             "\treturn at.x, at.z\n"
             "end"
         },
+        {   examples[1],
+            "function check(seed, at, deps)\n"
+            "\tlocal n = #deps\n"
+            "\tif n == 0 then -- no dependencies\n"
+            "\t\treturn nil\n"
+            "\tend\n"
+            "\tlocal self = deps[1].parent -- own condition id\n"
+            "\tlocal x, z, cnt = 0, 0, 0\n"
+            "\tfor i = 1, n do\n"
+            "\t\tif deps[i].parent == self then -- only direct dependencies\n"
+            "\t\t\tx, z = (x + deps[i].x), (z + deps[i].z)\n"
+            "\t\t\tcnt = cnt + 1\n"
+            "\t\tend\n"
+            "\tend\n"
+            "\treturn (x / cnt), (z / cnt) -- return average position\n"
+            "end"
+        }
     };
 
     bool ok = false;

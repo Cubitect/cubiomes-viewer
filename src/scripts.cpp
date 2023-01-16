@@ -254,7 +254,7 @@ int runCheckScript(
             float x = lua_tonumber(L, -1);
             lua_pop(L, 1);
             lua_settop(L, top);
-            if (!(abs(x) <= 30e6 && abs(z) <= 30e6)) // negate condition to capture nan and inf
+            if (x != x || z != z || fabs(x) > 30e6 || fabs(z) > 30e6)
             {
                 QString err = QString::asprintf("Output is invalid or out of range: {%g, %g}", x, z);
                 g_lua_output[cond->save].set(cond->hash, env->seed, func, at, err);
@@ -383,7 +383,7 @@ void LuaHighlighter::markFormated(QString *text, int start, int count, const QTe
     if (text)
     {
         for (int i = 0; i < count; i++)
-            (*text)[start+i] = QChar(' ');
+            (*text)[start+i] = QChar(0x02);
     }
 }
 
@@ -512,7 +512,7 @@ void ScriptEditor::keyPressEvent(QKeyEvent *event)
             const QChar linebreak = QChar(0x2029);
             QString ws = linebreak + QStringRef(&text, start, end-start).toString();
             cursor.beginEditBlock();
-            cursor.insertText(ws, highlighter->spaceformat);
+            cursor.insertText(ws);
             cursor.endEditBlock();
             return; // cancel normal enter
         }
@@ -535,7 +535,7 @@ void ScriptEditor::keyPressEvent(QKeyEvent *event)
             {
                 cursor.movePosition(QTextCursor::StartOfBlock);
                 if (back == false)
-                    cursor.insertText("\t", highlighter->spaceformat);
+                    cursor.insertText("\t");
                 else if (document()->characterAt(cursor.position()) == '\t')
                     cursor.deleteChar();
                 cursor.movePosition(QTextCursor::NextBlock);

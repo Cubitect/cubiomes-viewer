@@ -182,6 +182,13 @@ QString ConditionTree::set(const QVector<Condition>& cv, int mc)
     return "";
 }
 
+SearchThreadEnv::SearchThreadEnv()
+    : condtree(),mc(),large(),seed(),surfdim(DIM_UNDEF),l_states()
+{
+    memset(&g, 0, sizeof(g));
+    memset(&sn, 0, sizeof(sn));
+}
+
 SearchThreadEnv::~SearchThreadEnv()
 {
     for (auto& it : l_states)
@@ -607,13 +614,13 @@ static bool isVariantOk(const Condition *c, SearchThreadEnv *e, int stype, int v
     }
     else if (stype == Bastion)
     {
-        if (e->mc < MC_1_16) return true;
+        if (e->mc <= MC_1_15) return true;
         getVariant(&sv, stype, e->mc, e->seed, pos->x, pos->z, -1);
         if (!(c->varflags & Condition::VAR_WITH_START)) return true;
     }
     else if (stype == Ruined_Portal || stype == Ruined_Portal_N)
     {
-        if (e->mc < MC_1_16) return true;
+        if (e->mc <= MC_1_15) return true;
         e->init4Dim(stype == Ruined_Portal ? DIM_OVERWORLD : DIM_NETHER);
         varbiome = getBiomeAt(&e->g, 4, (pos->x >> 2) + 2, 0, (pos->z >> 2) + 2);
         getVariant(&sv, stype, e->mc, e->seed, pos->x, pos->z, varbiome);
