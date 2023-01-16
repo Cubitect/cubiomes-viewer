@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+
+  <id>com.github.cubitect.cubiomes-viewer</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0</project_license>
+
+  <developer_name>Cubitect</developer_name>
+  <name>Cubiomes Viewer</name>
+  <summary>An efficient Minecraft seed finder and map viewer.</summary>
+  <description>
+    <p>Cubiomes Viewer offers highly customizable seed-finding utilities and a map viewer for the biome and structure generation of Minecraft Java Edition for the main releases up to 1.19.</p>
+  </description>
+
+  <releases>
+    <release version="2.6.1" date="2022-11-14">
+    </release>
+  </releases>
+
+  <launchable type="desktop-id">com.github.cubitect.cubiomes-viewer.desktop</launchable>
+  <screenshots>
+    <screenshot type="default">
+      <image type="source">https://raw.githubusercontent.com/Cubitect/cubiomes-viewer/2.6.1/etc/screenshot_maingui.png</image>
+    </screenshot>
+    <screenshot type="default">
+      <image type="source">https://raw.githubusercontent.com/Cubitect/cubiomes-viewer/2.6.1/etc/screenshot_biomes.png</image>
+    </screenshot>
+    <screenshot type="default">
+      <image type="source">https://raw.githubusercontent.com/Cubitect/cubiomes-viewer/2.6.1/etc/screenshot_structures.png</image>
+    </screenshot>
+  </screenshots>
+
+  <url type="homepage">https://github.com/cubitect/cubiomes-viewer</url>
+  <url type="bugtracker">https://github.com/cubitect/cubiomes-viewer/issues</url>
+
+  <content_rating type="oars-1.0"/>
+
+</component>
