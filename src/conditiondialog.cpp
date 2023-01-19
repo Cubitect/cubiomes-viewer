@@ -19,6 +19,7 @@
 #include <QDir>
 #include <QFileDialog>
 #include <QInputDialog>
+#include <QFontMetricsF>
 
 #define SETUP_TEMPCAT_SPINBOX(B) do {\
         tempsboxes[B] = new SpinExclude();\
@@ -65,7 +66,12 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
     ui->labelMC->setText(mcs);
 
     ui->lineSummary->setFont(*gp_font_mono);
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 11, 0)
     ui->textEditLua->setTabStopWidth(QFontMetrics(ui->textEditLua->font()).width(" ") * 4);
+#else
+    ui->textEditLua->setTabStopDistance(QFontMetricsF(ui->textEditLua->font()).horizontalAdvance(" ") * 4);
+#endif
 
     // prevent bold font of group box title getting inherited
     QFont dfont = font();
