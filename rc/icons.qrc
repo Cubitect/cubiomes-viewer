@@ -71,5 +71,6 @@
         <file>icons/check_exclude_d.png</file>
         <file>icons/check_include_d.png</file>
         <file>icons/check_unchecked.png</file>
+        <file>icons/height.png</file>
     </qresource>
 </RCC>

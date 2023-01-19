@@ -769,11 +769,26 @@ void FormSearchControl::resultTimeout()
     {
         double min, avg, max;
         estmateSpeed(proghist, &min, &avg, &max);
-        status = tr("seeds/sec: %1 min: %2 max: %3 isize: %4")
+        double remain = ((double)end - prog) / (avg + 1e-6);
+        QString eta;
+        if (remain >= 3600*24*1000)
+            eta = "years";
+        else
+        {
+            int s = (int) remain;
+            if (s > 86400)
+                eta = QString("%1d:%2").arg(s / 86400).arg((s % 86400) / 3600, 2, 10, QLatin1Char('0'));
+            else if (s > 3600)
+                eta = QString("%1h:%2").arg(s / 3600).arg((s % 3600) / 60, 2, 10, QLatin1Char('0'));
+            else
+                eta = QString("%1:%2").arg(s / 60).arg(s % 60, 2, 10, QLatin1Char('0'));
+        }
+        status = tr("seeds/sec: %1 min: %2 max: %3 isize: %4 eta: %5")
             .arg(getAbbrNum(avg), -8)
             .arg(getAbbrNum(min), -8)
             .arg(getAbbrNum(max), -8)
-            .arg(sthread.itemsize);
+            .arg(sthread.itemsize, -3)
+            .arg(eta);
     }
     ui->labelStatus->setText(status);
 

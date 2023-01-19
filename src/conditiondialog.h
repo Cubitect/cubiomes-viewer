@@ -171,6 +171,8 @@ private slots:
 
     void on_comboHeightRange_currentIndexChanged(int index);
 
+    void on_pushInfoLua_clicked();
+
 private:
     Ui::ConditionDialog *ui;
     QTextEdit *textDescription;

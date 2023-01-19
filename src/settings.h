@@ -68,6 +68,8 @@ struct Config
     bool dockable;
     bool smoothMotion;
     bool showBBoxes;
+    bool shading;
+    bool contours;
     bool restoreSession;
     bool checkForUpdates;
     int autosaveCycle;
@@ -86,6 +88,8 @@ struct Config
         dockable = true;
         smoothMotion = true;
         showBBoxes = true;
+        shading = true;
+        contours = false;
         restoreSession = true;
         checkForUpdates = false;
         autosaveCycle = 10;

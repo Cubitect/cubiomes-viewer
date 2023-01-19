@@ -66,13 +66,16 @@ void AnalysisTriggers::run()
         if (!conds.empty())
         {
             ConditionTree condtree;
-            QString err = condtree.set(conds, wi.mc);
-            if (!err.isEmpty())
-                break;
             SearchThreadEnv env;
-            err = env.init(wi.mc, wi.large, &condtree);
+            QString err = condtree.set(conds, wi.mc);
+            if (err.isEmpty())
+                err = env.init(wi.mc, wi.large, &condtree);
             if (!err.isEmpty())
+            {
+                delete seeditem;
+                emit warning(err, QMessageBox::Ok);
                 break;
+            }
             env.setSeed(wi.seed);
 
             Pos origin = {0, 0};
@@ -110,6 +113,7 @@ TabTriggers::TabTriggers(MainWindow *parent)
     ui->treeWidget->setColumnWidth(3, 65);
     ui->treeWidget->setSortingEnabled(false); // sortable triggers are not necessary
 
+    connect(&thread, &AnalysisTriggers::warning, parent, &MainWindow::warning, Qt::BlockingQueuedConnection);
     connect(&thread, &AnalysisTriggers::itemDone, this, &TabTriggers::onAnalysisItemDone, Qt::BlockingQueuedConnection);
     connect(&thread, &AnalysisTriggers::finished, this, &TabTriggers::onAnalysisFinished);
 }

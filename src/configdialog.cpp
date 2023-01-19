@@ -15,7 +15,7 @@
 ConfigDialog::ConfigDialog(QWidget *parent, Config *config)
     : QDialog(parent)
     , ui(new Ui::ConfigDialog)
-    , structVisModified()
+    , visModified()
 {
     ui->setupUi(this);
 
@@ -45,6 +45,8 @@ void ConfigDialog::initSettings(Config *config)
     ui->checkDockable->setChecked(config->dockable);
     ui->checkSmooth->setChecked(config->smoothMotion);
     ui->checkBBoxes->setChecked(config->showBBoxes);
+    ui->checkShading->setChecked(config->shading);
+    ui->checkContours->setChecked(config->contours);
     ui->checkRestore->setChecked(config->restoreSession);
     ui->checkUpdates->setChecked(config->checkForUpdates);
     ui->checkAutosave->setChecked(config->autosaveCycle != 0);
@@ -66,6 +68,8 @@ Config ConfigDialog::getSettings()
     conf.dockable = ui->checkDockable->isChecked();
     conf.smoothMotion = ui->checkSmooth->isChecked();
     conf.showBBoxes = ui->checkBBoxes->isChecked();
+    conf.shading = ui->checkShading->isChecked();
+    conf.contours = ui->checkContours->isChecked();
     conf.restoreSession = ui->checkRestore->isChecked();
     conf.checkForUpdates = ui->checkUpdates->isChecked();
     conf.autosaveCycle = ui->checkAutosave->isChecked() ? ui->spinAutosave->value() : 0;
@@ -160,7 +164,7 @@ void ConfigDialog::on_buttonStructVisEdit_clicked()
     StructureDialog *dialog = new StructureDialog(this);
     if (dialog->exec() == QDialog::Accepted)
     {
-        if ((structVisModified |= dialog->modified))
+        if ((visModified |= dialog->modified))
             saveStructVis(dialog->structvis);
     }
 }
@@ -191,4 +195,13 @@ void ConfigDialog::on_buttonColorHelp_clicked()
     QMessageBox::information(this, tr("Help: custom biome colors"), msg, QMessageBox::Ok);
 }
 
+void ConfigDialog::on_checkShading_stateChanged(int)
+{
+    visModified = true;
+}
+
+void ConfigDialog::on_checkContours_stateChanged(int)
+{
+    visModified = true;
+}
 

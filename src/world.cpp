@@ -173,6 +173,7 @@ QStringList VarPos::detail() const
 Quad::Quad(const Level* l, int i, int j)
     : wi(l->wi),dim(l->dim),g(&l->g),sn(&l->sn),hd(l->hd),scale(l->scale)
     , ti(i),tj(j),blocks(l->blocks),pixs(l->pixs),sopt(l->sopt),lopt(l->lopt)
+    , shading(l->world->shading), contours(l->world->contours)
     , biomes(),rgb(),img(),spos()
 {
     isdel = l->isdel;
@@ -303,14 +304,19 @@ void Quad::run()
             if (lopt == LOPT_HEIGHT_4 && dim == 0)
             {
                 const bool bicubic = false;
-                // sampling grid
-                int od = bicubic ? 3 : 1;
-                int ps = (hd ? 0 : 2);
-                int st = (1 << ps) - 1;
-                int px = (x >> ps) - od/2;
-                int pz = (z >> ps) - od/2;
-                int pw = ((x+w+st) >> ps) - px + od + 1;
-                int ph = ((z+h+st) >> ps) - pz + od + 1;
+                int bd = bicubic ? 1 : 0; // sampling border
+                int ps = (hd ? 0 : 2); // bits in step size
+                int st = (1 << ps) - 1; // step mask
+                // the sampling spans [x-1, x+w+1), reduced to the stepped grid
+                int px = ((x-1) >> ps);
+                int pz = ((z-1) >> ps);
+                int pw = ((x+w+2+st) >> ps) - px + 1;
+                int ph = ((z+h+2+st) >> ps) - pz + 1;
+                if (bd)
+                {   // add border for cubic sampling
+                    px -= bd; pz -= bd;
+                    pw += 2*bd; ph += 2*bd;
+                }
                 std::vector<qreal> buf(pw * ph);
                 for (int j = 0; j < ph; j++)
                 {
@@ -323,54 +329,67 @@ void Quad::run()
                         buf[j*pw+i] = y;
                     }
                 }
-
                 // interpolate height
                 std::vector<qreal> height((w+2) * (h+2));
                 for (int j = 0; j < h+2; j++)
                 {
                     for (int i = 0; i < w+2; i++)
                     {
-                        int pi = ((x + i) >> ps) - px - od/2;
-                        int pj = ((z + j) >> ps) - pz - od/2;
-                        qreal di = ((x + i) & st) / (qreal)(st + 1);
-                        qreal dj = ((z + j) & st) / (qreal)(st + 1);
+                        int pi = ((x + i - 1) >> ps) - px - bd;
+                        int pj = ((z + j - 1) >> ps) - pz - bd;
+                        qreal di = ((x + i - 1) & st) / (qreal)(st + 1);
+                        qreal dj = ((z + j - 1) & st) / (qreal)(st + 1);
                         qreal v = 0;
                         if (bicubic)
                         {
                             qreal p[] = {
-                                cubic_hermite(&buf[(pj+0)*pw + pi], di),
-                                cubic_hermite(&buf[(pj+1)*pw + pi], di),
-                                cubic_hermite(&buf[(pj+2)*pw + pi], di),
-                                cubic_hermite(&buf[(pj+3)*pw + pi], di),
+                                cubic_hermite(&buf.at((pj+0)*pw + pi), di),
+                                cubic_hermite(&buf.at((pj+1)*pw + pi), di),
+                                cubic_hermite(&buf.at((pj+2)*pw + pi), di),
+                                cubic_hermite(&buf.at((pj+3)*pw + pi), di),
                             };
                             v = cubic_hermite(p, dj);
                         }
                         else // bilinear
                         {
-                            qreal v00 = buf[(pj+0)*pw + pi+0];
-                            qreal v01 = buf[(pj+0)*pw + pi+1];
-                            qreal v10 = buf[(pj+1)*pw + pi+0];
-                            qreal v11 = buf[(pj+1)*pw + pi+1];
+                            qreal v00 = buf.at((pj+0)*pw + pi+0);
+                            qreal v01 = buf.at((pj+0)*pw + pi+1);
+                            qreal v10 = buf.at((pj+1)*pw + pi+0);
+                            qreal v11 = buf.at((pj+1)*pw + pi+1);
                             v = lerp2(di, dj, v00, v01, v10, v11);
                         }
-                        if (v > wi.y) v = 255;
-                        height[j*(w+2)+i] = hd ? round(v) : v;
+                        height[j*(w+2)+i] = v;
                     }
                 }
-
                 // apply shading based on height changes
                 qreal mul = 0.25 / scale;
+                qreal lout = 0.65;
+                qreal lmin = 0.5;
+                qreal lmax = 1.5;
                 for (int j = 0; j < h; j++)
                 {
                     for (int i = 0; i < w; i++)
                     {
-                        const qreal *ty = height.data();
                         int tw = w+2;
-                        qreal d0 = ty[(j+0)*tw + i+1] + ty[(j+1)*tw + i+0];
-                        qreal d1 = ty[(j+2)*tw + i+1] + ty[(j+1)*tw + i+2];
-                        qreal light = 1.0 + (d1 - d0) * mul;
-                        if (light < 0.4) light = 0.4;
-                        if (light > 1.6) light = 1.6;
+                        qreal t01 = height[(j+0)*tw + i+1];
+                        qreal t10 = height[(j+1)*tw + i+0];
+                        qreal t11 = height[(j+1)*tw + i+1];
+                        qreal t12 = height[(j+1)*tw + i+2];
+                        qreal t21 = height[(j+2)*tw + i+1];
+                        qreal d0 = t01 + t10;
+                        qreal d1 = t12 + t21;
+                        qreal light = 1.0;
+                        if (shading) light += (d1 - d0) * mul;
+                        if (t11 > wi.y) light = lout;
+                        if (light < lmin) light = lmin;
+                        if (light > lmax) light = lmax;
+                        if (contours)
+                        {
+                            qreal spacing = 16.0;
+                            qreal tmin = std::min({t01, t10, t12, t21});
+                            if (floor(tmin / spacing) != floor(t11 / spacing))
+                                light *= 0.5;
+                        }
                         uchar *col = rgb + 3*(j*w + i);
                         for (int k = 0; k < 3; k++)
                         {
@@ -532,6 +551,8 @@ void Level::resizeLevel(std::vector<Quad*>& cache, int x, int z, int w, int h)
     std::vector<Quad*> grid(w*h);
     std::vector<Quad*> togen;
 
+    world->mutex.lock();
+
     for (Quad *q : cells)
     {
         int gx = q->ti - x;
@@ -608,6 +629,8 @@ void Level::resizeLevel(std::vector<Quad*>& cache, int x, int z, int w, int h)
     tz = z;
     tw = w;
     th = h;
+
+    world->mutex.unlock();
 }
 
 void Level::update(std::vector<Quad*>& cache, qreal bx0, qreal bz0, qreal bx1, qreal bz1)
@@ -635,7 +658,8 @@ void MapWorker::run()
     while (Scheduled *q = world->requestQuad())
     {
         q->run();
-        emit quadDone();
+        if (q->done)
+            emit quadDone();
     }
 }
 
@@ -654,6 +678,8 @@ QWorld::QWorld(WorldInfo wi, int dim, int layeropt)
     , queue()
     , workers(QThread::idealThreadCount())
     , showBB()
+    , shading()
+    , contours()
     , gridspacing()
     , spawn()
     , strongholds()
@@ -812,7 +838,7 @@ QString QWorld::getBiomeName(Pos p)
         float y;
         int id;
         mapApproxHeight(&y, &id, &g, &sn, p.x>>2, p.z>>2, 1, 1);
-        ret = QString::asprintf("Y~%d ", (int) round(y)) + ret;
+        ret = QString::asprintf("Y~%d ", (int) floor(y)) + ret;
     }
     return ret;
 }
@@ -857,7 +883,7 @@ void QWorld::startWorkers()
 
 void QWorld::add(Scheduled *q)
 {
-    QMutexLocker locker(&mutex);
+    //QMutexLocker locker(&mutex);
     if (!queue)
     {   // new start
         q->next = nullptr;
@@ -884,7 +910,7 @@ void QWorld::add(Scheduled *q)
 
 Scheduled *QWorld::take(Scheduled *q)
 {
-    QMutexLocker locker(&mutex);
+    //QMutexLocker locker(&mutex);
     if (Scheduled *p = queue)
     {
         if (p == q)
@@ -925,6 +951,7 @@ void QWorld::cleancache(std::vector<Quad*>& cache, unsigned int maxsize)
 
     size_t targetsize = 4 * maxsize / 5;
 
+    mutex.lock();
     std::vector<Quad*> newcache;
     for (size_t i = 0; i < n; i++)
     {
@@ -946,6 +973,7 @@ void QWorld::cleancache(std::vector<Quad*>& cache, unsigned int maxsize)
     }
     //printf("%zu -> %zu [%u]\n", n, newcache.size(), maxsize);
     cache.swap(newcache);
+    mutex.unlock();
 }
 
 struct SpawnStronghold : public Scheduled
@@ -1294,8 +1322,10 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
         if (sshow[D_SPAWN] || sshow[D_STRONGHOLD] || (showBB && blocks2pix >= 1.0))
         {
             spawn = (Pos*) -1;
+            mutex.lock();
             add(new SpawnStronghold(this, wi));
             startWorkers();
+            mutex.unlock();
         }
     }
 

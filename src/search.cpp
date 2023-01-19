@@ -222,7 +222,11 @@ QString SearchThreadEnv::init(int mc, bool large, ConditionTree *condtree)
         QString err;
         lua_State *L = loadScript(scripts.value(c.hash), &err);
         if (!L)
-            return QApplication::tr("Condition %1: ").arg(c.save) + err;
+        {
+            QString s = QApplication::tr("Condition %1:\n").arg(c.save);
+            s += err;
+            return s;
+        }
         l_states[c.hash] = L;
     }
     return "";
@@ -279,44 +283,66 @@ int testTreeAt(
 
     switch (c.type)
     {
-    case F_REFERENCE_1:     sref = 0;  goto L_ref_pow2;
-    case F_REFERENCE_4:     sref = 2;  goto L_ref_pow2;
-    case F_REFERENCE_16:    sref = 4;  goto L_ref_pow2;
-    case F_REFERENCE_64:    sref = 6;  goto L_ref_pow2;
-    case F_REFERENCE_256:   sref = 8;  goto L_ref_pow2;
-    case F_REFERENCE_512:   sref = 9;  goto L_ref_pow2;
-    case F_REFERENCE_1024:  sref = 10; goto L_ref_pow2;
+    case F_SPIRAL_1:     sref = 0;  goto L_ref_pow2;
+    case F_SPIRAL_4:     sref = 2;  goto L_ref_pow2;
+    case F_SPIRAL_16:    sref = 4;  goto L_ref_pow2;
+    case F_SPIRAL_64:    sref = 6;  goto L_ref_pow2;
+    case F_SPIRAL_256:   sref = 8;  goto L_ref_pow2;
+    case F_SPIRAL_512:   sref = 9;  goto L_ref_pow2;
+    case F_SPIRAL_1024:  sref = 10; goto L_ref_pow2;
     L_ref_pow2:
         rx1 = ((c.x1 << sref) + at.x) >> sref;
         rz1 = ((c.z1 << sref) + at.z) >> sref;
         rx2 = ((c.x2 << sref) + at.x) >> sref;
         rz2 = ((c.z2 << sref) + at.z) >> sref;
         st = COND_FAILED;
-        for (int z = rz1; z <= rz2; z++)
-        {
-            for (int x = rx1; x <= rx2; x++)
+        {   // run a spiral iterator over the rectangle
+            int x = (rx1 + rx2) >> 1;
+            int z = (rz1 + rz2) >> 1;
+            int i = 0, dl = 1;
+            int dx = 1, dz = 0;
+            while (true)
             {
-                pos.x = (x << sref);
-                pos.z = (z << sref);
-
-                // children are combined via AND
-                int sta = COND_OK;
-                for (int b : branches)
+                bool inx = (x >= rx1 && x <= rx2);
+                bool inz = (z >= rz1 && z <= rz2);
+                if (!inx && !inz)
+                    break;
+                if (inx && inz)
                 {
-                    int stb = testTreeAt(pos, env, pass, abort, path, b);
-                    if (*abort)
-                        return COND_FAILED;
-                    if (stb < sta)
-                        sta = stb;
-                    if (sta == COND_FAILED)
-                        break;
+                    pos.x = (x << sref);
+                    pos.z = (z << sref);
+                    // children are combined via AND
+                    int sta = COND_OK;
+                    for (int b : branches)
+                    {
+                        int stb = testTreeAt(pos, env, pass, abort, path, b);
+                        if (*abort)
+                            return COND_FAILED;
+                        if (stb < sta)
+                            sta = stb;
+                        if (sta == COND_FAILED)
+                            break;
+                    }
+                    if (sta == COND_MAYBE_POS_VALID )
+                        sta = COND_MAYBE_POS_INVAL; // position moves => invalidate
+                    if (sta > st)
+                        st = sta;
+                    if (path && st >= COND_MAYBE_POS_VALID)
+                        path[c.save] = pos;
+                    if (st == COND_OK)
+                        return COND_OK;
                 }
-                if (sta > st)
-                    st = sta;
-                if (st >= COND_MAYBE_POS_VALID && path)
-                    path[c.save] = pos;
-                if (st == COND_OK)
-                    return COND_OK;
+                x += dx;
+                z += dz;
+                if (++i == dl)
+                {
+                    i = 0;
+                    int tmp = dx;
+                    dx = -dz;
+                    dz = tmp;
+                    if (dz == 0)
+                        dl++;
+                }
             }
         }
         return st;
@@ -823,13 +849,13 @@ testCondAt(
 
     switch (cond->type)
     {
-    case F_REFERENCE_1:
-    case F_REFERENCE_4:
-    case F_REFERENCE_16:
-    case F_REFERENCE_64:
-    case F_REFERENCE_256:
-    case F_REFERENCE_512:
-    case F_REFERENCE_1024:
+    case F_SPIRAL_1:
+    case F_SPIRAL_4:
+    case F_SPIRAL_16:
+    case F_SPIRAL_64:
+    case F_SPIRAL_256:
+    case F_SPIRAL_512:
+    case F_SPIRAL_1024:
     case F_SCALE_TO_NETHER:
     case F_SCALE_TO_OVERWORLD:
     case F_LOGIC_OR:

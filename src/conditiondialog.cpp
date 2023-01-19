@@ -298,7 +298,7 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
         ui->lineSummary->setText(QString::fromLocal8Bit(QByteArray(cond.text, sizeof(cond.text))));
         ui->lineSummary->setPlaceholderText(QApplication::translate("Filter", ft.name));
 
-        if (!scripts.contains(cond.hash))
+        if (cond.hash && !scripts.contains(cond.hash))
             ui->comboLua->addItem(tr("[script not found]"), QVariant::fromValue(cond.hash));
         else
             ui->comboLua->setCurrentIndex(-1); // force index change
@@ -317,6 +317,7 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
 
         ui->comboBoxRelative->setCurrentIndex(initindex);
         on_comboBoxRelative_activated(initindex);
+        ui->textEditLua->document()->setModified(false);
 
         ui->comboMatchBiome->insertItem(0, biome2str(mc, cond.biomeId), QVariant::fromValue(cond.biomeId));
         ui->comboMatchBiome->setCurrentIndex(0);
@@ -1268,7 +1269,8 @@ void ConditionDialog::on_pushLuaSave_clicked()
 {
     if (luahash == 0)
     {
-        on_pushLuaSaveAs_clicked();
+        if (!ui->textEditLua->document()->isEmpty())
+            on_pushLuaSaveAs_clicked();
         return;
     }
     QMap<uint64_t, QString> scripts;
@@ -1313,13 +1315,13 @@ void ConditionDialog::on_pushLuaExample_clicked()
 {
     QStringList examples = {
         tr("Empty check functions"),
-        tr("Average parent positions"),
+        tr("Village along the way from A to B"),
     };
     QMap<QString, QString> code = {
         {   examples[0],
             "-- check48() is an optional function to check 48-bit seed bases.\n"
             "function check48(seed, at, deps)\n"
-            "\t-- Return a position {x, z}, or nil to fail the check.\n"
+            "\t-- Return a position (x, z), or nil to fail the check.\n"
             "\treturn at.x, at.z\n"
             "end\n\n"
             "-- check() determines if the condition passes.\n"
@@ -1328,27 +1330,29 @@ void ConditionDialog::on_pushLuaExample_clicked()
             "-- deps: list of {x, z, id, parent} entries for the dependent\n"
             "--       conditions (i.e. those later in the condition list)\n"
             "function check(seed, at, deps)\n"
-            "\t-- Return a position {x, z}, or nil to fail the check.\n"
+            "\t-- Return a position (x, z), or nil to fail the check.\n"
             "\treturn at.x, at.z\n"
             "end"
         },
         {   examples[1],
+            "-- Look for a village located between the first two dependent conditions\n"
             "function check(seed, at, deps)\n"
-            "\tlocal n = #deps\n"
-            "\tif n == 0 then -- no dependencies\n"
-            "\t\treturn nil\n"
-            "\tend\n"
-            "\tlocal self = deps[1].parent -- own condition id\n"
-            "\tlocal x, z, cnt = 0, 0, 0\n"
-            "\tfor i = 1, n do\n"
-            "\t\tif deps[i].parent == self then -- only direct dependencies\n"
-            "\t\t\tx, z = (x + deps[i].x), (z + deps[i].z)\n"
-            "\t\t\tcnt = cnt + 1\n"
+            "\tif #deps < 2 then return nil end -- fail with no dependencies\n"
+            "\tlocal a, b = deps[1], deps[2]\n"
+            "\tvils = getStructures(Village, a.x, a.z, b.x, b.z)\n"
+            "\tif vils == nil then return nil end\n"
+            "\tfor i = 1, #vils do\n"
+            "\t\t-- calculate the square distance to the line a -> b\n"
+            "\t\tlocal dx, dz = b.x - a.x, b.z - a.z\n"
+            "\t\tlocal d = dx * (vils[i].z - a.z) - dz * (vils[i].x - a.x)\n"
+            "\t\td = (d * d) / (dx * dx + dz * dz + 1)\n"
+            "\t\tif d < 32*32 then -- village within 32 blocks of the line\n"
+            "\t\t\treturn vils[i].x, vils[i].z\n"
             "\t\tend\n"
             "\tend\n"
-            "\treturn (x / cnt), (z / cnt) -- return average position\n"
+            "\treturn nil\n"
             "end"
-        }
+        },
     };
 
     bool ok = false;
@@ -1372,5 +1376,51 @@ void ConditionDialog::on_comboHeightRange_currentIndexChanged(int index)
         range->setHighlight(ok, nok);
     else // outside
         range->setHighlight(nok, ok);
+}
+
+void ConditionDialog::on_pushInfoLua_clicked()
+{
+    QMessageBox mb(this);
+    mb.setIcon(QMessageBox::Information);
+    mb.setWindowTitle(tr("Help: Lua script"));
+    mb.setText( tr(
+        "<html><head/><body><p>"
+        "Lua scripts allow the user to write custom filters. "
+        "A valid Lua filtering script has to define a"
+        "</p><p><b>check(seed, at, deps)</b></p><p>"
+        "function, that evaluates when a seed satisfies the condition. "
+        "It should return a <b>x, z</b> value pair that is the block position "
+        "for other conditions to reference as the relative location. "
+        "If the condition fails, the function can return <b>nil</b> instead."
+        "</p><p>"
+        "The arguments of <b>check()</b> are in order:</p><p>"
+        "<dl><dt><b>seed</b>"
+        "<dd>the current world seed"
+        "<dt><b>at</b> = {x, z}"
+        "<dd>the relative location of the parent condition"
+        "<dt><b>deps</b> = [..]{x, z, id, parent}"
+        "<dd>a list of tables with information on the dependent conditions "
+        "(i.e. those later in the conditions list)"
+        "</dl>"
+        "</p><p>"
+        "Optionally, the script can also define a <b>check48()</b> "
+        "function, with a similar prototype, that tests whether a given "
+        "48-bit seed base is worth investigating further."
+        "</p><p>"
+        "A few global symbols are predefined. These include the biome ID "
+        "and structure type enums from cubiomes, which means they can be "
+        "referred to by their names (such as <b>flower_forest</b> or "
+        "<b>Village</b>). Furthermore, the following functions are available:"
+        "</p><p>"
+        "<dl><dt><b>getBiomeAt(x, z)</b><dt><b>getBiomeAt(x, y, z)</b>"
+        "<dd>returns the overworld biome at the given block coordinates"
+        "</p><p>"
+        "<dt><b>getStructures(type, x1, z1, x2, z2)</b>"
+        "<dd>returns a list of <b>{x, z}</b> structure positions for the "
+        "specified structure <b>type</b> within the area spanning the block "
+        "positions <b>x1, z1</b> to <b>x2, z2</b>, or <b>nil</b> upon failure"
+        "</p></body></html>"
+        ));
+    mb.exec();
 }
 

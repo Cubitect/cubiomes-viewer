@@ -24,6 +24,7 @@ public:
 
 signals:
     void itemDone(QTreeWidgetItem *item);
+    int warning(QString text, QMessageBox::StandardButtons buttons);
 
 public:
     QVector<Condition> conds;

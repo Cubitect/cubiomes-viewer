@@ -5,16 +5,16 @@ seed-finding utilities provided by [cubiomes](https://github.com/Cubitect/cubiom
 and a map viewer for the Minecraft biomes and structure generation.
 
 The tool is designed for high performance and supports Minecraft Java Edition
-main releases 1.0 - 1.19.
+main releases up to 1.19.
 
 
 ## Download
 
-Precompiled binaries can be found for Linux and Windows under
-[Releases on GitHub](https://github.com/Cubitect/cubiomes-viewer/releases).
-The builds are statically linked against [Qt](https://www.qt.io) and should run
-as-is on most newer distributions. For the Linux build you will probably have to
-add the executable flags to the binary.
+Precompiled binaries can be found for Linux and Windows in the 
+[Releases](https://github.com/Cubitect/cubiomes-viewer/releases) section on
+GitHub. The builds are statically linked against [Qt](https://www.qt.io) and
+should run as-is on most newer distributions. For the Linux build you will
+probably have to add the executable flags to the binary.
 
 A Flatpak for the tool is available on
 [Flathub](https://flathub.org/apps/details/com.github.cubitect.cubiomes-viewer).
@@ -45,9 +45,11 @@ The integrated seed finder is highly customizable, utilizing a hierarchical
 condition system that allows the user to look for features that are relative to
 one another. Conditions can be based on a varity of criteria, including
 structure placement, world spawn point and requirements for the biomes of an
-area. Filters can use logic gates in the form of helper conditions for even
-more control, as well as Quad-Hut and Quad-Monument seed generators to quickly
-look for seeds that include extremely rare structure constellations.
+area. The search supports Quad-Hut and Quad-Monument seed generators, which can
+quickly look for seeds that include extremely rare structure constellations.
+For more complex searches, the tool provides logic gates in the form of helper
+conditions and can integrate Lua scripts to create custom filters that can be
+edited right inside the tool.
 
 In the Trigger, Biome and Structure tabs the user can analyze the current seed
 or the matching seeds list and inspect how the search conditions are applied
@@ -57,17 +59,19 @@ area.
 
 ## Screenshots
 
-Screenshots were taken of Cubiomes-Viewer v2.5.
+Screenshots were taken of Cubiomes-Viewer v3.0.
 
-![maingui](etc/screenshot_maingui.png
+![maingui](etc/screenshot_maingui-fs8.png
 "Searching for a quad-hut near a stronghold with a good biome variety")
 
-![biomes](etc/screenshot_biomes.png
+![biomes](etc/screenshot_biomes-fs8.png
 "Locating and highlighting a given biome")
 
-![structures](etc/screenshot_structures.png
+![structures](etc/screenshot_structures-fs8.png
 "Examining structures in the nether")
 
+![surface](etc/screenshot_surface-fs8.png
+"Overlay with an approximation of the surface height")
 
 ## Known issues
 

@@ -38,11 +38,14 @@ private slots:
 
     void on_buttonColorHelp_clicked();
 
+    void on_checkShading_stateChanged(int arg1);
+    void on_checkContours_stateChanged(int arg1);
+
 private:
     Ui::ConfigDialog *ui;
     Config conf;
 public:
-    bool structVisModified;
+    bool visModified;
 };
 
 #endif // CONFIGDIALOG_H

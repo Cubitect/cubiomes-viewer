@@ -428,34 +428,11 @@ QToolButton:checked {
     <property name="title">
      <string>Map</string>
     </property>
-    <widget class="QMenu" name="menuBiome_layer">
-     <property name="title">
-      <string>Biome layer/scale limit</string>
-     </property>
-     <addaction name="actionDefault_1"/>
-     <addaction name="actionDefault_4"/>
-     <addaction name="actionDefault_16"/>
-     <addaction name="actionDefault_64"/>
-     <addaction name="actionDefault_256"/>
-     <addaction name="separator"/>
-     <addaction name="actionRiver"/>
-     <addaction name="actionOceanTemp"/>
-     <addaction name="separator"/>
-     <addaction name="actionParaTemperature"/>
-     <addaction name="actionParaHumidity"/>
-     <addaction name="actionParaContinentalness"/>
-     <addaction name="actionParaErosion"/>
-     <addaction name="actionParaDepth"/>
-     <addaction name="actionParaWeirdness"/>
-     <addaction name="separator"/>
-     <addaction name="actionHeight"/>
-    </widget>
     <addaction name="actionGo_to"/>
     <addaction name="actionOpenShadow"/>
     <addaction name="actionStructure_visibility"/>
     <addaction name="actionExportImg"/>
     <addaction name="actionBiome_colors"/>
-    <addaction name="menuBiome_layer"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -491,9 +468,32 @@ QToolButton:checked {
     <addaction name="actionExtGen"/>
     <addaction name="actionPreferences"/>
    </widget>
+   <widget class="QMenu" name="menuLayer">
+    <property name="title">
+     <string>Layer</string>
+    </property>
+    <addaction name="actionDefault_1"/>
+    <addaction name="actionDefault_4"/>
+    <addaction name="actionDefault_16"/>
+    <addaction name="actionDefault_64"/>
+    <addaction name="actionDefault_256"/>
+    <addaction name="separator"/>
+    <addaction name="actionRiver"/>
+    <addaction name="actionOceanTemp"/>
+    <addaction name="separator"/>
+    <addaction name="actionParaTemperature"/>
+    <addaction name="actionParaHumidity"/>
+    <addaction name="actionParaContinentalness"/>
+    <addaction name="actionParaErosion"/>
+    <addaction name="actionParaDepth"/>
+    <addaction name="actionParaWeirdness"/>
+    <addaction name="separator"/>
+    <addaction name="actionHeight"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuMap"/>
+   <addaction name="menuLayer"/>
    <addaction name="menuHelp"/>
   </widget>
   <action name="actionAbout">

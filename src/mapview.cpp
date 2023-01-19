@@ -161,6 +161,8 @@ void MapView::settingsToWorld()
     for (int s = 0; s < STRUCT_NUM; s++)
         world->sshow[s] = sshow[s];
     world->showBB = config.showBBoxes;
+    world->shading = config.shading;
+    world->contours = config.contours;
     world->gridspacing = config.gridSpacing;
     world->memlimit = (uint64_t) config.mapCacheSize * 1024 * 1024;
     world->layeropt = layeropt;

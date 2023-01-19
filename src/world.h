@@ -201,6 +201,8 @@ struct Quad : public Scheduled
     int pixs;
     int sopt;
     int lopt;
+    bool shading;
+    bool contours;
 
     int *biomes;
     uchar *rgb;
@@ -261,7 +263,7 @@ public:
     QWorld *world;
 };
 
-class QWorld : public QObject
+struct QWorld : public QObject
 {
     Q_OBJECT
 public:
@@ -311,6 +313,8 @@ public:
 
     bool sshow[STRUCT_NUM];
     bool showBB;
+    bool shading;
+    bool contours;
     int gridspacing;
 
     // some features such as the world spawn and strongholds will be filled by

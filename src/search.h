@@ -71,17 +71,17 @@ enum
     F_PORTALN,
     F_GATEWAY,
     F_MINESHAFT,
-    F_REFERENCE_1,
-    F_REFERENCE_16,
-    F_REFERENCE_64,
-    F_REFERENCE_256,
-    F_REFERENCE_512,
-    F_REFERENCE_1024,
+    F_SPIRAL_1,
+    F_SPIRAL_16,
+    F_SPIRAL_64,
+    F_SPIRAL_256,
+    F_SPIRAL_512,
+    F_SPIRAL_1024,
     F_BIOME_4, // differs from F_BIOME_4_RIVER, since this may include oceans
     F_SCALE_TO_NETHER,
     F_SCALE_TO_OVERWORLD,
     F_LOGIC_OR,
-    F_REFERENCE_4,
+    F_SPIRAL_4,
     F_FIRST_STRONGHOLD,
     F_CLIMATE_NOISE,
     F_ANCIENT_CITY,
@@ -155,7 +155,7 @@ static const struct FilterList
             CAT_HELPER, 0, 0, 0, 0, 0, 0, 1, 0, 0, MC_UNDEF, MC_NEWEST, DIM_UNDEF, 0, disp++,
             ":icons/helper.png",
             _("Lua"),
-            _("")
+            _("Define custom conditions using Lua scripts.")
         };
         list[F_SCALE_TO_NETHER] = FilterInfo{
             CAT_HELPER, 0, 0, 0, 0, 0, 0, 1, 0, 0, MC_UNDEF, MC_NEWEST, DIM_UNDEF, 0, disp++,
@@ -169,53 +169,55 @@ static const struct FilterList
             _("Coordinate factor x*8"),
             _("Multiplies relative location by 8, from Nether to Overworld.")
         };
-        const char *ref_desc = _(
+        const char *spiral_desc = _(
             "<html><head/><body>"
-            "Reference points can be used to iterate over an area with a "
-            "certain step size."
+            "Spiral iterator conditions can be used to move a testing position across "
+            "a given area using a certain step size. Other conditions that refer to it "
+            "as a relative location will be checked at each step. The iteration is "
+            "performed in a spiral, so positions closer to the center get priority."
             "</body></html>"
         );
-        list[F_REFERENCE_1] = FilterInfo{
+        list[F_SPIRAL_1] = FilterInfo{
             CAT_HELPER, 0, 1, 1, 0, 0, 0, 1, 0, 0, MC_UNDEF, MC_NEWEST, DIM_UNDEF, 0, disp++,
             ":icons/reference.png",
-            _("Reference point 1:1"),
-            ref_desc
+            _("Spiral iterator 1:1"),
+            spiral_desc
         };
-        list[F_REFERENCE_4] = FilterInfo{
+        list[F_SPIRAL_4] = FilterInfo{
             CAT_HELPER, 0, 1, 1, 0, 0, 0, 4, 2, 0, MC_UNDEF, MC_NEWEST, DIM_UNDEF, 0, disp++,
             ":icons/reference.png",
-            _("Reference point 1:4"),
-            ref_desc
+            _("Spiral iterator 1:4"),
+            spiral_desc
         };
-        list[F_REFERENCE_16] = FilterInfo{
+        list[F_SPIRAL_16] = FilterInfo{
             CAT_HELPER, 0, 1, 1, 0, 0, 0, 16, 4, 0, MC_UNDEF, MC_NEWEST, DIM_UNDEF, 0, disp++,
             ":icons/reference.png",
-            _("Reference point 1:16"),
-            ref_desc
+            _("Spiral iterator 1:16"),
+            spiral_desc
         };
-        list[F_REFERENCE_64] = FilterInfo{
+        list[F_SPIRAL_64] = FilterInfo{
             CAT_HELPER, 0, 1, 1, 0, 0, 0, 64, 6, 0, MC_UNDEF, MC_NEWEST, DIM_UNDEF, 0, disp++,
             ":icons/reference.png",
-            _("Reference point 1:64"),
-            ref_desc
+            _("Spiral iterator 1:64"),
+            spiral_desc
         };
-        list[F_REFERENCE_256] = FilterInfo{
+        list[F_SPIRAL_256] = FilterInfo{
             CAT_HELPER, 0, 1, 1, 0, 0, 0, 256, 8, 0, MC_UNDEF, MC_NEWEST, DIM_UNDEF, 0, disp++,
             ":icons/reference.png",
-            _("Reference point 1:256"),
-            ref_desc
+            _("Spiral iterator 1:256"),
+            spiral_desc
         };
-        list[F_REFERENCE_512] = FilterInfo{
+        list[F_SPIRAL_512] = FilterInfo{
             CAT_HELPER, 0, 1, 1, 0, 0, 0, 512, 9, 0, MC_UNDEF, MC_NEWEST, DIM_UNDEF, 0, disp++,
             ":icons/reference.png",
-            _("Reference point 1:512"),
-            ref_desc
+            _("Spiral iterator 1:512"),
+            spiral_desc
         };
-        list[F_REFERENCE_1024] = FilterInfo{
+        list[F_SPIRAL_1024] = FilterInfo{
             CAT_HELPER, 0, 1, 1, 0, 0, 0, 1024, 10, 0, MC_UNDEF, MC_NEWEST, DIM_UNDEF, 0, disp++,
             ":icons/reference.png",
-            _("Reference point 1:1024"),
-            ref_desc
+            _("Spiral iterator 1:1024"),
+            spiral_desc
         };
 
         list[F_QH_IDEAL] = FilterInfo{
@@ -431,7 +433,7 @@ static const struct FilterList
         };
         list[F_HEIGHT] = FilterInfo{
             CAT_OTHER, 0, 1, 0, 0, 0, 0, 4, 2, 0, MC_UNDEF, MC_NEWEST, 0, 0, disp++,
-            ":icons/overworld.png",
+            ":icons/height.png",
             _("Surface height"),
             _("Check the approximate surface height at scale 1:4 at a single coordinate.")
         };
@@ -603,13 +605,13 @@ struct /*__attribute__((packed))*/ Condition
     // layout needs to remain consistent across versions
 
     enum { // condition version upgrades
-        VER_LEGACY  = 0,
-        VER_2_3_0   = 1,
-        VER_2_4_0   = 2,
-        VER_CURRENT = VER_2_4_0,
+        VER_LEGACY      = 0,
+        VER_2_3_0       = 1,
+        VER_2_4_0       = 2,
+        VER_CURRENT     = VER_2_4_0,
     };
     enum { // meta flags
-        DISABLED = 0x0001,
+        DISABLED        = 0x0001,
     };
     enum { // condition flags
         FLG_APPROX      = 0x0001,
@@ -633,7 +635,7 @@ struct /*__attribute__((packed))*/ Condition
     char        text[28];
     uint8_t     pad1[12]; // legacy
     uint64_t    hash;
-    uint8_t     deps[16];
+    uint8_t     deps[16]; // currently unused
     uint64_t    biomeToFind, biomeToFindM; // inclusion biomes
     int32_t     biomeId; // legacy oceanToFind(8)
     uint32_t    biomeSize;

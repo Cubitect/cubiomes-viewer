@@ -10,6 +10,7 @@
 #include <QPainter>
 #include <QTextBlock>
 #include <QTextDocumentFragment>
+#include <QDebug>
 
 
 LuaOutput g_lua_output[100];
@@ -50,8 +51,6 @@ static inline uint64_t murmur64(const void *key, int len, uint64_t h = 0)
     return h;
 }
 
-#include <QDebug>
-
 QString getLuaDir()
 {
     QString luadir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation) + "/lua";
@@ -83,6 +82,11 @@ void getScripts(QMap<uint64_t, QString>& scripts)
     }
 }
 
+static bool validPos(int x, int y, int z)
+{
+    return abs(x) <= 3e7 && abs(z) <= 3e7 && y >= -64 && y <= 320;
+}
+
 static int l_getBiomeAt(lua_State *L)
 {
     lua_getglobal(L, "_cb_env");
@@ -102,8 +106,100 @@ static int l_getBiomeAt(lua_State *L)
         x = (int) lua_tonumber(L, -1);
         lua_pop(L, 1);
     }
-    lua_Integer id = getBiomeAt(&env->g, 4, x, y, z);
+    lua_Integer id = none;
+    if (validPos(x, y, z))
+        id = getBiomeAt(&env->g, 1, x, y, z);
     lua_pushinteger(L, id);
+    return 1;
+}
+
+static int l_getStructures(lua_State *L)
+{
+    lua_getglobal(L, "_cb_env");
+    SearchThreadEnv *env = (SearchThreadEnv*) lua_touserdata(L, -1);
+    lua_pop(L, 1);
+
+    int styp, x0, z0, x1, z1;
+    z1 = (int) lua_tonumber(L, -1);
+    lua_pop(L, 1);
+    x1 = (int) lua_tonumber(L, -1);
+    lua_pop(L, 1);
+    z0 = (int) lua_tonumber(L, -1);
+    lua_pop(L, 1);
+    x0 = (int) lua_tonumber(L, -1);
+    lua_pop(L, 1);
+    styp = (int) lua_tonumber(L, -1);
+    lua_pop(L, 1);
+
+    if (x0 > x1) std::swap(x0, x1);
+    if (z0 > z1) std::swap(z0, z1);
+
+    StructureConfig sconf;
+    if (!getStructureConfig(styp, env->mc, &sconf) || !validPos(x0, 0, z0) || !validPos(x1, 0, z1))
+    {   // bad structure type, mc version or positions
+        return 0;
+    }
+
+    int dim = DIM_OVERWORLD;
+    if (sconf.properties & STRUCT_NETHER)
+        dim = DIM_NETHER;
+    else if (sconf.properties & STRUCT_END)
+        dim = DIM_END;
+
+    env->init4Dim(dim);
+
+    if (styp == End_City)
+    {
+        env->prepareSurfaceNoise(DIM_END);
+    }
+
+    // segment area into structure regions
+    double blocksPerRegion = sconf.regionSize * 16.0;
+    int rx0 = (int) floor(x0 / blocksPerRegion);
+    int rz0 = (int) floor(z0 / blocksPerRegion);
+    int rx1 = (int) ceil(x1 / blocksPerRegion);
+    int rz1 = (int) ceil(z1 / blocksPerRegion);
+    int i, j;
+
+    // TODO: process abort signals
+    std::vector<Pos> inst;
+
+    for (j = rz0; j <= rz1; j++)
+    {
+        for (i = rx0; i <= rx1; i++)
+        {   // check the structure generation attempt in region (i, j)
+
+            Pos pos;
+            if (!getStructurePos(styp, env->mc, env->seed, i, j, &pos))
+                continue; // this region is not suitable
+            if (pos.x < x0 || pos.x > x1 || pos.z < z0 || pos.z > z1)
+                continue; // structure is outside the specified area
+            if (!isViableStructurePos(styp, &env->g, pos.x, pos.z, 0))
+                continue; // biomes are not viable
+            if (styp == End_City)
+            {   // end cities have a dedicated terrain checker
+                if (!isViableEndCityTerrain(&env->g.en, &env->sn, pos.x, pos.z))
+                    continue;
+            }
+            else if (env->mc >= MC_1_18)
+            {   // some structures in 1.18+ depend on the terrain
+                if (!isViableStructureTerrain(styp, &env->g, pos.x, pos.z))
+                    continue;
+            }
+            inst.push_back(pos);
+        }
+    }
+
+    lua_createtable(L, inst.size(), 0);
+    for (int i = 0, n = inst.size(); i < n; i++)
+    {
+        lua_createtable(L, 0, 2);
+        lua_pushinteger(L, inst[i].x);
+        lua_setfield(L, -2, "x");
+        lua_pushinteger(L, inst[i].z);
+        lua_setfield(L, -2, "z");
+        lua_seti(L, -2, i+1);
+    }
     return 1;
 }
 
@@ -145,8 +241,36 @@ lua_State *loadScript(QString path, QString *err)
                 }
             }
         }
+        struct { int value; const char *name; } values[] = {
+            {Desert_Pyramid, "Desert_Pyramid"},
+            {Jungle_Temple, "Jungle_Temple"},
+            {Swamp_Hut, "Swamp_Hut"},
+            {Igloo, "Igloo"},
+            {Village, "Village"},
+            {Ocean_Ruin, "Ocean_Ruin"},
+            {Shipwreck, "Shipwreck"},
+            {Monument, "Monument"},
+            {Mansion, "Mansion"},
+            {Outpost, "Outpost"},
+            {Ruined_Portal, "Ruined_Portal"},
+            {Ruined_Portal_N, "Ruined_Portal_N"},
+            {Treasure, "Treasure"},
+            {Mineshaft, "Mineshaft"},
+            {Fortress, "Fortress"},
+            {Bastion, "Bastion"},
+            {End_City, "End_City"},
+            {End_Gateway, "End_Gateway"},
+            {Ancient_City, "Ancient_City"},
+        };
+        for (size_t i = 0; i < sizeof(values)/sizeof(values[0]); i++)
+        {
+            lua_pushinteger(L, values[i].value);
+            lua_setglobal(L, values[i].name);
+        }
         lua_pushcfunction(L, l_getBiomeAt);
         lua_setglobal(L, "getBiomeAt");
+        lua_pushcfunction(L, l_getStructures);
+        lua_setglobal(L, "getStructures");
         ok = true;
     }
     while (0);
@@ -174,10 +298,9 @@ static void gather_nodes(std::vector<node_t>& nodes, const ConditionTree *tree, 
     }
 }
 
-#include <QDebug>
-
 static QMutex g_mutex;
 
+// TODO: honor abort signals
 int runCheckScript(
     lua_State         * L,
     Pos                 at,
@@ -240,7 +363,7 @@ int runCheckScript(
     if (lua_pcallk(L, 3, LUA_MULTRET, 0, 0, NULL) != 0)
     {
         QString err = lua_tostring(L, -1);
-        qDebug() << err;
+        //qDebug() << err;
         g_lua_output[cond->save].set(cond->hash, env->seed, func, at, err);
         lua_settop(L, top);
         return COND_FAILED;

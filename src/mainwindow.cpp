@@ -66,7 +66,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->tabContainer->addTab(new TabBiomes(this), tr("Biomes"));
     ui->tabContainer->addTab(new TabStructures(this), tr("Structures"));
 
-    QList<QAction*> layeracts = ui->menuBiome_layer->actions();
+    QList<QAction*> layeracts = ui->menuLayer->actions();
     int lopt = LOPT_DEFAULT_1;
     for (int i = 0; i < layeracts.size(); i++)
     {
@@ -151,16 +151,19 @@ MainWindow::MainWindow(QWidget *parent)
         "The search conditions define the properties by which potential seeds "
         "are filtered."
         "</p><p>"
-        "Conditions can reference each other to produce relative positionial "
-        "dependencies (indicated with the ID in square brackets [XY]). These "
-        "will usually be checked at the geometric <b>average position</b> of the "
-        "parent trigger. When multiple trigger positions are encountered in the "
-        "same seed <b>and the required instance count is exactly one</b>, the "
-        "instances are checked individually instead."
+        "Conditions can reference each other to produce relative positional "
+        "dependencies (indicated with the ID in square brackets [XY]). "
+        "When a condition passes, it will usually yield a single position that "
+        "its children can reference. An exception to this are structure "
+        "conditions with a required instance count of exactly one. In this "
+        "case, each occurence is checked individually instead. A condition of "
+        "a structure cluster with multiple required instances will yield the "
+        "geometric average position of the occurences."
         "</p><p>"
-        "Biome conditions <b>do not have trigger instances</b> and always yield "
-        "the center point of the testing area. You can use reference point "
-        "helpers to construct relative biome dependencies."
+        "Standard biome conditions yield the center of the testing area "
+        "since they evaluate the area as a whole. To <b>locate</b> the position "
+        "of a given biome you can use the designated locate filters, or use "
+        "spiral iterator conditions to scan an area with a localized condition."
         "</p></body></html>"
     ));
 
@@ -314,7 +317,6 @@ bool MainWindow::setSeed(WorldInfo wi, int dim, int layeropt)
     getMapView()->setSeed(wi, dim, layeropt);
 
     ui->checkLarge->setEnabled(wi.mc >= MC_1_3);
-    ui->comboY->setEnabled(wi.mc >= MC_1_16);
 
     ISaveTab *tab = dynamic_cast<ISaveTab*>(ui->tabContainer->currentWidget());
     if (tab)
@@ -345,6 +347,8 @@ void MainWindow::saveSettings()
     settings.setValue("config/dockable", config.dockable);
     settings.setValue("config/smoothMotion", config.smoothMotion);
     settings.setValue("config/showBBoxes", config.showBBoxes);
+    settings.setValue("config/shading", config.shading);
+    settings.setValue("config/contours", config.contours);
     settings.setValue("config/restoreSession", config.restoreSession);
     settings.setValue("config/checkForUpdates", config.checkForUpdates);
     settings.setValue("config/autosaveCycle", config.autosaveCycle);
@@ -399,6 +403,8 @@ void MainWindow::loadSettings()
 {
     QSettings settings("cubiomes-viewer", "cubiomes-viewer");
 
+    getMapView()->deleteWorld();
+
     resize(settings.value("mainwindow/size", size()).toSize());
     move(settings.value("mainwindow/pos", pos()).toPoint());
     prevdir = settings.value("mainwindow/prevdir", pos()).toString();
@@ -406,6 +412,8 @@ void MainWindow::loadSettings()
     config.dockable = settings.value("config/dockable", config.dockable).toBool();
     config.smoothMotion = settings.value("config/smoothMotion", config.smoothMotion).toBool();
     config.showBBoxes = settings.value("config/showBBoxes", config.showBBoxes).toBool();
+    config.shading = settings.value("config/shading", config.shading).toBool();
+    config.contours = settings.value("config/contours", config.contours).toBool();
     config.restoreSession = settings.value("config/restoreSession", config.restoreSession).toBool();
     config.checkForUpdates = settings.value("config/checkForUpdates", config.checkForUpdates).toBool();
     config.autosaveCycle = settings.value("config/autosaveCycle", config.autosaveCycle).toInt();
@@ -430,7 +438,6 @@ void MainWindow::loadSettings()
     }
     setMCList(g_extgen.experimentalVers);
 
-    getMapView()->deleteWorld();
     getMapView()->setConfig(config);
     onStyleChanged(config.uistyle);
     setDockable(config.dockable);
@@ -877,7 +884,7 @@ void MainWindow::on_actionPreferences_triggered()
     {
         applyConfigChanges(config, dialog->getSettings());
     }
-    if (dialog->structVisModified)
+    if (dialog->visModified)
     {
         getMapView()->deleteWorld();
         updateMapSeed();
@@ -1057,7 +1064,7 @@ void MainWindow::onActionBiomeLayerSelect(bool state, QAction *src, int lopt)
 {
     if (state == false)
         return;
-    const QList<QAction*> actions = ui->menuBiome_layer->actions();
+    const QList<QAction*> actions = ui->menuLayer->actions();
     for (QAction *act : actions)
         if (act != src)
             act->setChecked(false);
