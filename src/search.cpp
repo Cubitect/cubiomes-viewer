@@ -1731,12 +1731,14 @@ L_noise_biome:
             int h = rz2 - rz1 + 1;
             double para;
             env->init4Dim(DIM_OVERWORLD);
-            if (cond->minmax == 0)
+            if (cond->minmax == 0 || cond->minmax == 2)
             {   // min
                 info.value = para = +INFINITY;
                 getParaRange(&env->g.bn.climate[cond->para], &para, 0,
                         rx1, rz1, w, h, &info, f_track_min);
-                if (para > cond->value)
+                if (cond->minmax == 0 && para > cond->value)
+                    return COND_FAILED;
+                if (cond->minmax == 2 && para < cond->value)
                     return COND_FAILED;
             }
             else
@@ -1744,7 +1746,9 @@ L_noise_biome:
                 info.value = para = -INFINITY;
                 getParaRange(&env->g.bn.climate[cond->para], 0, &para,
                         rx1, rz1, w, h, &info, f_track_max);
-                if (para < cond->value)
+                if (cond->minmax == 1 && para < cond->value)
+                    return COND_FAILED;
+                if (cond->minmax == 3 && para > cond->value)
                     return COND_FAILED;
             }
             cent->x = info.pos.x << 2;

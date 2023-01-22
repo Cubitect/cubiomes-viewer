@@ -67,11 +67,18 @@ void GotoDialog::keyReleaseEvent(QKeyEvent *event)
     if (event->matches(QKeySequence::Paste))
     {
         QClipboard *clipboard = QGuiApplication::clipboard();
-        QStringList xz = clipboard->text().split(" ");
+        QString s = clipboard->text().trimmed();
+        QStringList xz = s.split(" ", QString::SkipEmptyParts);
         if (xz.count() == 2)
         {
             ui->lineX->setText(xz[0].section(",", 0, 0));
             ui->lineZ->setText(xz[1].section(",", 0, 0));
+            return;
+        }
+        else if (xz.count() == 3)
+        {
+            ui->lineX->setText(xz[0].section(",", 0, 0));
+            ui->lineZ->setText(xz[2].section(",", 0, 0));
             return;
         }
     }

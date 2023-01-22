@@ -489,7 +489,7 @@
           <number>0</number>
          </property>
          <property name="currentIndex">
-          <number>7</number>
+          <number>5</number>
          </property>
          <widget class="QWidget" name="pageNone">
           <property name="enabled">
@@ -701,8 +701,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>60</width>
-                   <height>20</height>
+                   <width>98</width>
+                   <height>28</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -1013,8 +1013,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>60</width>
-                   <height>20</height>
+                   <width>98</width>
+                   <height>28</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -1077,6 +1077,16 @@
                 <item>
                  <property name="text">
                   <string>Maximum	 &gt;=</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Minimum	 &gt;=</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Maximum	 &lt;=</string>
                  </property>
                 </item>
                </widget>
@@ -1378,8 +1388,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>60</width>
-                   <height>20</height>
+                   <width>98</width>
+                   <height>28</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_3_1">
@@ -1435,8 +1445,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>60</width>
-                   <height>20</height>
+                   <width>98</width>
+                   <height>28</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_3_2">
@@ -1540,8 +1550,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>60</width>
-                   <height>20</height>
+                   <width>98</width>
+                   <height>28</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_3_3">
