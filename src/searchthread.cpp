@@ -19,6 +19,7 @@ SearchMaster::SearchMaster(FormSearchControl *parent)
     , abort()
     , timer()
     , count()
+    , env()
     , searchtype()
     , mc()
     , large()
@@ -203,8 +204,6 @@ bool SearchMaster::set(
     QString err = condtree.set(cv, wi.mc);
     if (err.isEmpty())
     {
-        // test env initialization (checking for scripts etc.)
-        SearchThreadEnv env;
         err = env.init(wi.mc, wi.large, &condtree);
     }
     if (!err.isEmpty())
@@ -693,9 +692,6 @@ bool SearchMaster::requestItem(SearchWorker *item)
         else
         {
             Pos origin = {0,0};
-            SearchThreadEnv env;
-            env.init(mc, large, &condtree);
-
             uint64_t high = (seed >> 48) & 0xffff;
             uint64_t low = seed & MASK48;
             high += itemsize;

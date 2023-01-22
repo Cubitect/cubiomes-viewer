@@ -50,6 +50,8 @@ public:
     QElapsedTimer               timer;
     uint64_t                    count;
 
+    SearchThreadEnv             env;
+
     int                         searchtype;
     int                         mc;
     int                         large;
