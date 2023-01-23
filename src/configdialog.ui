@@ -145,29 +145,38 @@
       <string>Interface</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="2" column="1">
-       <widget class="QPushButton" name="buttonColorHelp">
+      <item row="5" column="0" colspan="2">
+       <widget class="QLabel" name="label_7">
+        <property name="text">
+         <string>Map cache size:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2" colspan="3">
+       <widget class="QPushButton" name="buttonBiomeColorEditor">
+        <property name="text">
+         <string>Edit biome colors...</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0" colspan="2">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Maximum structure zoom:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="4">
+       <widget class="QPushButton" name="buttonClear">
         <property name="maximumSize">
          <size>
-          <width>14</width>
-          <height>14</height>
+          <width>20</width>
+          <height>16777215</height>
          </size>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">border: none;</string>
-        </property>
-        <property name="text">
-         <string/>
         </property>
         <property name="icon">
          <iconset resource="../rc/icons.qrc">
-          <normaloff>:/icons/info.png</normaloff>:/icons/info.png</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>14</width>
-          <height>14</height>
-         </size>
+          <normaloff>:/icons/clear.png</normaloff>:/icons/clear.png</iconset>
         </property>
        </widget>
       </item>
@@ -178,7 +187,21 @@
         </property>
        </widget>
       </item>
-      <item row="7" column="0" colspan="5">
+      <item row="8" column="0" colspan="5">
+       <widget class="QCheckBox" name="checkDockable">
+        <property name="text">
+         <string>Undockable map</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2" colspan="2">
+       <widget class="QPushButton" name="buttonBiomeColor">
+        <property name="text">
+         <string>[none]</string>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="0" colspan="5">
        <widget class="QCheckBox" name="checkSmooth">
         <property name="toolTip">
          <string>Simulate innertia for the map view</string>
@@ -208,44 +231,6 @@
         </item>
        </widget>
       </item>
-      <item row="4" column="2" colspan="3">
-       <widget class="QLineEdit" name="lineGridSpacing"/>
-      </item>
-      <item row="0" column="0" colspan="2">
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>GUI style:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2" colspan="3">
-       <widget class="QPushButton" name="buttonBiomeColorEditor">
-        <property name="text">
-         <string>Edit biome colors...</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0" colspan="2">
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>Maximum structure zoom:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0" colspan="2">
-       <widget class="QLabel" name="label_7">
-        <property name="text">
-         <string>Map cache size:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="0" colspan="5">
-       <widget class="QCheckBox" name="checkBBoxes">
-        <property name="text">
-         <string>Outline known bounding boxes</string>
-        </property>
-       </widget>
-      </item>
       <item row="4" column="0" colspan="2">
        <widget class="QLabel" name="label_6">
         <property name="toolTip">
@@ -257,33 +242,15 @@ Leave blank for the default behaviour</string>
         </property>
        </widget>
       </item>
-      <item row="6" column="0" colspan="5">
-       <widget class="QCheckBox" name="checkDockable">
+      <item row="0" column="0" colspan="2">
+       <widget class="QLabel" name="label_4">
         <property name="text">
-         <string>Undockable map</string>
+         <string>GUI style:</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="2" colspan="2">
-       <widget class="QPushButton" name="buttonBiomeColor">
-        <property name="text">
-         <string>[none]</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="4">
-       <widget class="QPushButton" name="buttonClear">
-        <property name="maximumSize">
-         <size>
-          <width>20</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="icon">
-         <iconset resource="../rc/icons.qrc">
-          <normaloff>:/icons/clear.png</normaloff>:/icons/clear.png</iconset>
-        </property>
-       </widget>
+      <item row="4" column="2" colspan="3">
+       <widget class="QLineEdit" name="lineGridSpacing"/>
       </item>
       <item row="5" column="2" colspan="3">
        <widget class="QSpinBox" name="spinCacheSize">
@@ -304,6 +271,39 @@ Leave blank for the default behaviour</string>
         </property>
        </widget>
       </item>
+      <item row="2" column="1">
+       <widget class="QPushButton" name="buttonColorHelp">
+        <property name="maximumSize">
+         <size>
+          <width>14</width>
+          <height>14</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">border: none;</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../rc/icons.qrc">
+          <normaloff>:/icons/info.png</normaloff>:/icons/info.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>14</width>
+          <height>14</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item row="10" column="0" colspan="5">
+       <widget class="QCheckBox" name="checkBBoxes">
+        <property name="text">
+         <string>Outline known bounding boxes</string>
+        </property>
+       </widget>
+      </item>
       <item row="1" column="0" colspan="2">
        <widget class="QLabel" name="label_5">
         <property name="text">
@@ -311,18 +311,35 @@ Leave blank for the default behaviour</string>
         </property>
        </widget>
       </item>
-      <item row="9" column="0" colspan="5">
-       <widget class="QCheckBox" name="checkShading">
+      <item row="6" column="0">
+       <widget class="QLabel" name="label_9">
         <property name="text">
-         <string>Shading (in surface height view)</string>
+         <string>Height visualization:</string>
         </property>
        </widget>
       </item>
-      <item row="10" column="0" colspan="5">
-       <widget class="QCheckBox" name="checkContours">
-        <property name="text">
-         <string>Contours (in surface height view)</string>
-        </property>
+      <item row="6" column="2" colspan="3">
+       <widget class="QComboBox" name="comboHeightVis">
+        <item>
+         <property name="text">
+          <string>Grayscale</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Map with shading</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Map with contours</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Map with shading and contours</string>
+         </property>
+        </item>
        </widget>
       </item>
      </layout>

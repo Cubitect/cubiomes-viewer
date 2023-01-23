@@ -347,8 +347,7 @@ void MainWindow::saveSettings()
     settings.setValue("config/dockable", config.dockable);
     settings.setValue("config/smoothMotion", config.smoothMotion);
     settings.setValue("config/showBBoxes", config.showBBoxes);
-    settings.setValue("config/shading", config.shading);
-    settings.setValue("config/contours", config.contours);
+    settings.setValue("config/heightVis", config.heightVis);
     settings.setValue("config/restoreSession", config.restoreSession);
     settings.setValue("config/checkForUpdates", config.checkForUpdates);
     settings.setValue("config/autosaveCycle", config.autosaveCycle);
@@ -412,8 +411,7 @@ void MainWindow::loadSettings()
     config.dockable = settings.value("config/dockable", config.dockable).toBool();
     config.smoothMotion = settings.value("config/smoothMotion", config.smoothMotion).toBool();
     config.showBBoxes = settings.value("config/showBBoxes", config.showBBoxes).toBool();
-    config.shading = settings.value("config/shading", config.shading).toBool();
-    config.contours = settings.value("config/contours", config.contours).toBool();
+    config.heightVis = settings.value("config/heightVis", config.heightVis).toInt();
     config.restoreSession = settings.value("config/restoreSession", config.restoreSession).toBool();
     config.checkForUpdates = settings.value("config/checkForUpdates", config.checkForUpdates).toBool();
     config.autosaveCycle = settings.value("config/autosaveCycle", config.autosaveCycle).toInt();

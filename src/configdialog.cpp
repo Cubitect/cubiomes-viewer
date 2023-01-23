@@ -33,6 +33,7 @@ ConfigDialog::ConfigDialog(QWidget *parent, Config *config)
     ui->lineMatching->setValidator(new QIntValidator(1, 99999999, ui->lineMatching));
 
     initSettings(config);
+    visModified = false;
 }
 
 ConfigDialog::~ConfigDialog()
@@ -45,14 +46,13 @@ void ConfigDialog::initSettings(Config *config)
     ui->checkDockable->setChecked(config->dockable);
     ui->checkSmooth->setChecked(config->smoothMotion);
     ui->checkBBoxes->setChecked(config->showBBoxes);
-    ui->checkShading->setChecked(config->shading);
-    ui->checkContours->setChecked(config->contours);
     ui->checkRestore->setChecked(config->restoreSession);
     ui->checkUpdates->setChecked(config->checkForUpdates);
     ui->checkAutosave->setChecked(config->autosaveCycle != 0);
     if (config->autosaveCycle)
         ui->spinAutosave->setValue(config->autosaveCycle);
     ui->comboStyle->setCurrentIndex(config->uistyle);
+    ui->comboHeightVis->setCurrentIndex(config->heightVis);
     ui->lineMatching->setText(QString::number(config->maxMatching));
     ui->lineGridSpacing->setText(config->gridSpacing ? QString::number(config->gridSpacing) : "");
     ui->spinCacheSize->setValue(config->mapCacheSize);
@@ -68,12 +68,11 @@ Config ConfigDialog::getSettings()
     conf.dockable = ui->checkDockable->isChecked();
     conf.smoothMotion = ui->checkSmooth->isChecked();
     conf.showBBoxes = ui->checkBBoxes->isChecked();
-    conf.shading = ui->checkShading->isChecked();
-    conf.contours = ui->checkContours->isChecked();
     conf.restoreSession = ui->checkRestore->isChecked();
     conf.checkForUpdates = ui->checkUpdates->isChecked();
     conf.autosaveCycle = ui->checkAutosave->isChecked() ? ui->spinAutosave->value() : 0;
     conf.uistyle = ui->comboStyle->currentIndex();
+    conf.heightVis = ui->comboHeightVis->currentIndex();
     conf.maxMatching = ui->lineMatching->text().toInt();
     conf.gridSpacing = ui->lineGridSpacing->text().toInt();
     conf.mapCacheSize = ui->spinCacheSize->value();
@@ -195,12 +194,7 @@ void ConfigDialog::on_buttonColorHelp_clicked()
     QMessageBox::information(this, tr("Help: custom biome colors"), msg, QMessageBox::Ok);
 }
 
-void ConfigDialog::on_checkShading_stateChanged(int)
-{
-    visModified = true;
-}
-
-void ConfigDialog::on_checkContours_stateChanged(int)
+void ConfigDialog::on_comboHeightVis_currentIndexChanged(int)
 {
     visModified = true;
 }

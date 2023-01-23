@@ -201,8 +201,7 @@ struct Quad : public Scheduled
     int pixs;
     int sopt;
     int lopt;
-    bool shading;
-    bool contours;
+    int heightvis;
 
     int *biomes;
     uchar *rgb;
@@ -313,8 +312,7 @@ public:
 
     bool sshow[STRUCT_NUM];
     bool showBB;
-    bool shading;
-    bool contours;
+    int heightvis;
     int gridspacing;
 
     // some features such as the world spawn and strongholds will be filled by

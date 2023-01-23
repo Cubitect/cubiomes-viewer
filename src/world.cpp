@@ -173,7 +173,7 @@ QStringList VarPos::detail() const
 Quad::Quad(const Level* l, int i, int j)
     : wi(l->wi),dim(l->dim),g(&l->g),sn(&l->sn),hd(l->hd),scale(l->scale)
     , ti(i),tj(j),blocks(l->blocks),pixs(l->pixs),sopt(l->sopt),lopt(l->lopt)
-    , shading(l->world->shading), contours(l->world->contours)
+    , heightvis(l->world->heightvis)
     , biomes(),rgb(),img(),spos()
 {
     isdel = l->isdel;
@@ -379,18 +379,26 @@ void Quad::run()
                         qreal d0 = t01 + t10;
                         qreal d1 = t12 + t21;
                         qreal light = 1.0;
-                        if (shading) light += (d1 - d0) * mul;
+                        uchar *col = rgb + 3*(j*w + i);
+                        if (heightvis == HV_GRAYSCALE)
+                        {
+                            qreal v = t11;
+                            uchar c = (v <= 0) ? 0 : (v > 0xff) ? 0xff : (uchar)(v);
+                            col[0] = col[1] = col[2] = c;
+                            continue;
+                        }
+                        if (heightvis == HV_SHADING || heightvis == HV_CONTOURS_SHADING)
+                            light += (d1 - d0) * mul;
                         if (t11 > wi.y) light = lout;
                         if (light < lmin) light = lmin;
                         if (light > lmax) light = lmax;
-                        if (contours)
+                        if (heightvis == HV_CONTOURS || heightvis == HV_CONTOURS_SHADING)
                         {
                             qreal spacing = 16.0;
                             qreal tmin = std::min({t01, t10, t12, t21});
                             if (floor(tmin / spacing) != floor(t11 / spacing))
                                 light *= 0.5;
                         }
-                        uchar *col = rgb + 3*(j*w + i);
                         for (int k = 0; k < 3; k++)
                         {
                             qreal c = col[k] * light;
@@ -678,8 +686,7 @@ QWorld::QWorld(WorldInfo wi, int dim, int layeropt)
     , queue()
     , workers(QThread::idealThreadCount())
     , showBB()
-    , shading()
-    , contours()
+    , heightvis(HV_SHADING)
     , gridspacing()
     , spawn()
     , strongholds()

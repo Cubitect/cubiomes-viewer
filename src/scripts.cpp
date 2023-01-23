@@ -551,7 +551,7 @@ int ScriptEditor::lineNumberAreaWidth()
 {
     int d = blockCount();
     d = 1 + (int) log10(d ? d : 1);
-    return 3 + d * fontMetrics().horizontalAdvance('_');
+    return 3 + d * fontMetrics().size(0, " ").width();
 }
 
 void ScriptEditor::updateLineNumberAreaWidth(int)

@@ -38,8 +38,7 @@ private slots:
 
     void on_buttonColorHelp_clicked();
 
-    void on_checkShading_stateChanged(int arg1);
-    void on_checkContours_stateChanged(int arg1);
+    void on_comboHeightVis_currentIndexChanged(int index);
 
 private:
     Ui::ConfigDialog *ui;

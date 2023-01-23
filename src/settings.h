@@ -62,14 +62,18 @@ struct WorldInfo
 };
 
 enum { STYLE_SYSTEM, STYLE_DARK };
+enum {
+    HV_GRAYSCALE        = 0,
+    HV_SHADING          = 1,
+    HV_CONTOURS         = 2,
+    HV_CONTOURS_SHADING = 3,
+};
 
 struct Config
 {
     bool dockable;
     bool smoothMotion;
     bool showBBoxes;
-    bool shading;
-    bool contours;
     bool restoreSession;
     bool checkForUpdates;
     int autosaveCycle;
@@ -77,6 +81,7 @@ struct Config
     int maxMatching;
     int gridSpacing;
     int mapCacheSize;
+    int heightVis;
     QString biomeColorPath;
     QString separator;
     QString quote;
@@ -88,8 +93,6 @@ struct Config
         dockable = true;
         smoothMotion = true;
         showBBoxes = true;
-        shading = true;
-        contours = false;
         restoreSession = true;
         checkForUpdates = false;
         autosaveCycle = 10;
@@ -97,6 +100,7 @@ struct Config
         maxMatching = 65536;
         gridSpacing = 0;
         mapCacheSize = 256;
+        heightVis = HV_SHADING;
         biomeColorPath = "";
         separator = ";";
         quote = "";
