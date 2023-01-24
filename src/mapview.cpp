@@ -108,7 +108,8 @@ void MapView::setSeed(WorldInfo wi, int dim, int lopt)
     if (lopt >= 0)
         layeropt = lopt;
 
-    if (world == NULL || !wi.equals(world->wi))
+    if (world == NULL || !wi.equals(world->wi) ||
+        world->layeropt == LOPT_STRUCTS || layeropt == LOPT_STRUCTS)
     {
         deleteWorld();
         world = new QWorld(wi, dim, layeropt);

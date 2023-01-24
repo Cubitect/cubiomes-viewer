@@ -644,6 +644,16 @@ void TabBiomes::on_pushStart_clicked()
 
     if (ui->tabWidget->currentWidget() == ui->tabLocate)
     {
+        uint64_t sx = x2 - x1 + 1;
+        uint64_t sz = z2 - z1 + 1;
+        if (sx * sz > INT_MAX)
+        {
+            QString msg = tr("The locate biome feature is limited to an area "
+                             "size smaller than the integer limit: (%1 x %2) > %3.");
+            parent->warning(msg.arg(sx).arg(sz).arg(INT_MAX));
+            return;
+        }
+
         //ui->treeWidget->clear();
         ui->treeLocate->setSortingEnabled(false);
         while (ui->treeLocate->topLevelItemCount() > 0)

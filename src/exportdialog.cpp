@@ -51,11 +51,19 @@ struct ExportWorker : QRunnable
         genBiomes(&g, ids, r);
 
         uchar *rgb = new uchar[r.sx * r.sz * 3];
-        enum { BG_NONE, BG_TRANSP, BG_BLACK };
         biomesToImage(rgb, g_biomeColors, ids, r.sx, r.sz, 1, 1);
+
+        if (mt->heightvis >= 0 && mt->dim == DIM_OVERWORLD)
+        {
+            SurfaceNoise sn;
+            initSurfaceNoise(&sn, DIM_OVERWORLD, mt->wi.seed);
+            int stepbits = mt->scale == 1 ? 2 : 0;
+            applyHeightShading(rgb, r, &g, &sn, stepbits, mt->heightvis, true, &mt->stop);
+        }
 
         QImage img(rgb, r.sx, r.sz, 3*r.sx, QImage::Format_RGB888);
 
+        enum { BG_NONE, BG_TRANSP, BG_BLACK };
         if (mt->tilesize > 0 && mt->bgmode != BG_NONE)
         {   // TODO: only generate needed sections
             QColor bg = QColor(Qt::black);
@@ -75,8 +83,8 @@ struct ExportWorker : QRunnable
                 }
             }
         }
-
-        img.save(fnam);
+        if (!mt->stop)
+            img.save(fnam);
         free(ids);
         delete [] rgb;
     }
@@ -143,6 +151,7 @@ ExportDialog::ExportDialog(MainWindow *parent)
     setCombo(ui->comboScale, "export/scaleIdx");
     setCombo(ui->comboTileSize, "export/tileSizeIdx");
     setCombo(ui->comboBackground, "export/bgIdx");
+    setCombo(ui->comboHeightVis, "export/heightvisIdx");
 
     ui->groupTiled->setChecked(settings.value("export/tiled", false).toBool());
     ui->lineEditX1->setText(settings.value("export/x0").toString());
@@ -312,6 +321,7 @@ void ExportDialog::on_buttonBox_clicked(QAbstractButton *button)
         master->h = z1 - z0;
         master->y = y;
         master->tilesize = -1;
+        master->heightvis = ui->comboHeightVis->currentIndex() - 1;
         master->bgmode = 0;
 
         QVector<ExportWorker*> workers;
@@ -394,6 +404,7 @@ void ExportDialog::on_buttonBox_clicked(QAbstractButton *button)
         settings.setValue("export/tiled", ui->groupTiled->isChecked());
         settings.setValue("export/tileSizeIdx", ui->comboTileSize->currentIndex());
         settings.setValue("export/bgIdx", ui->comboBackground->currentIndex());
+        settings.setValue("export/heightvisIdx", ui->comboHeightVis->currentIndex());
 
         QProgressDialog *progress = new QProgressDialog(
             tr("Export biome images..."), tr("Abort"), 0, workers.size(), mainwindow);

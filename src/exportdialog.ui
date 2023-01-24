@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>540</width>
-    <height>460</height>
+    <height>496</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,110 +18,38 @@
     <normaloff>:/icons/logo.png</normaloff>:/icons/logo.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout_3">
-   <item row="7" column="1" colspan="5">
-    <widget class="QGroupBox" name="groupTiled">
-     <property name="title">
-      <string>Split image into tiles</string>
+   <item row="4" column="2" colspan="4">
+    <widget class="QLineEdit" name="linePattern">
+     <property name="text">
+      <string>%S_%x_%z.png</string>
      </property>
-     <property name="alignment">
-      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-     </property>
-     <property name="checkable">
-      <bool>true</bool>
-     </property>
-     <property name="checked">
-      <bool>false</bool>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_2">
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_6">
-        <property name="text">
-         <string>Size of image tiles:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_5">
-        <property name="text">
-         <string>Background color:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1" colspan="3">
-       <widget class="QComboBox" name="comboBackground">
-        <item>
-         <property name="text">
-          <string>Fill background by expanding area</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Transparent</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Black</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="0" column="1" colspan="3">
-       <widget class="QComboBox" name="comboTileSize">
-        <property name="currentIndex">
-         <number>5</number>
-        </property>
-        <item>
-         <property name="text">
-          <string>16x16</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>32x32</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>64x64</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>128x128</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>256x256</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>512x512</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>1024x1024</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>2048x2048</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>4096x4096</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-     </layout>
     </widget>
    </item>
-   <item row="8" column="1" colspan="5">
+   <item row="7" column="4" colspan="2">
+    <widget class="QPushButton" name="buttonFromVisible">
+     <property name="text">
+      <string>From visible</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="1" colspan="5">
+    <widget class="QLabel" name="label_9">
+     <property name="text">
+      <string>%S - seed; %x, %z - tile coordinates</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Export directory:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="1" colspan="5">
     <widget class="QGroupBox" name="groupSummary">
      <property name="title">
       <string>Overview</string>
@@ -200,40 +128,6 @@
      </layout>
     </widget>
    </item>
-   <item row="6" column="4" colspan="2">
-    <widget class="QPushButton" name="buttonFromVisible">
-     <property name="text">
-      <string>From visible</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="2" colspan="4">
-    <widget class="QLineEdit" name="linePattern">
-     <property name="text">
-      <string>%S_%x_%z.png</string>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="1" colspan="5">
-    <widget class="QLabel" name="label_9">
-     <property name="text">
-      <string>%S - seed; %x, %z - tile coordinates</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item row="9" column="3" colspan="3">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
-    </widget>
-   </item>
    <item row="0" column="2" colspan="4">
     <widget class="QComboBox" name="comboSeed">
      <item>
@@ -248,10 +142,19 @@
      </item>
     </widget>
    </item>
-   <item row="2" column="1">
-    <widget class="QLabel" name="label">
+   <item row="3" column="2" colspan="3">
+    <widget class="QLineEdit" name="lineDir"/>
+   </item>
+   <item row="3" column="5">
+    <widget class="QPushButton" name="buttonDirSelect">
+     <property name="maximumSize">
+      <size>
+       <width>26</width>
+       <height>16777215</height>
+      </size>
+     </property>
      <property name="text">
-      <string>Export directory:</string>
+      <string>...</string>
      </property>
     </widget>
    </item>
@@ -262,7 +165,17 @@
      </property>
     </widget>
    </item>
-   <item row="6" column="1" colspan="3">
+   <item row="10" column="3" colspan="3">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="1" colspan="3">
     <layout class="QHBoxLayout" name="layoutArea_2">
      <item>
       <widget class="QLabel" name="labelX1">
@@ -388,6 +301,123 @@
      </item>
     </widget>
    </item>
+   <item row="4" column="1">
+    <widget class="QLabel" name="label_7">
+     <property name="text">
+      <string>File pattern:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="1" colspan="2">
+    <widget class="QLabel" name="label_4">
+     <property name="text">
+      <string>Area in blocks (bounds are included):</string>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="1" colspan="5">
+    <widget class="QGroupBox" name="groupTiled">
+     <property name="title">
+      <string>Split image into tiles</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_6">
+        <property name="text">
+         <string>Size of image tiles:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>Background color:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1" colspan="3">
+       <widget class="QComboBox" name="comboBackground">
+        <item>
+         <property name="text">
+          <string>Fill background by expanding area</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Transparent</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Black</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="0" column="1" colspan="3">
+       <widget class="QComboBox" name="comboTileSize">
+        <property name="currentIndex">
+         <number>5</number>
+        </property>
+        <item>
+         <property name="text">
+          <string>16x16</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>32x32</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>64x64</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>128x128</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>256x256</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>512x512</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>1024x1024</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>2048x2048</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>4096x4096</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
    <item row="1" column="1">
     <widget class="QLabel" name="label_3">
      <property name="text">
@@ -395,34 +425,40 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="2" colspan="3">
-    <widget class="QLineEdit" name="lineDir"/>
-   </item>
-   <item row="2" column="5">
-    <widget class="QPushButton" name="buttonDirSelect">
-     <property name="maximumSize">
-      <size>
-       <width>26</width>
-       <height>16777215</height>
-      </size>
-     </property>
+   <item row="2" column="1">
+    <widget class="QLabel" name="label_13">
      <property name="text">
-      <string>...</string>
+      <string>Heightmap:</string>
      </property>
     </widget>
    </item>
-   <item row="3" column="1">
-    <widget class="QLabel" name="label_7">
-     <property name="text">
-      <string>File pattern:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="1" colspan="2">
-    <widget class="QLabel" name="label_4">
-     <property name="text">
-      <string>Area in blocks (bounds are included):</string>
-     </property>
+   <item row="2" column="2" colspan="4">
+    <widget class="QComboBox" name="comboHeightVis">
+     <item>
+      <property name="text">
+       <string>None</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Grayscale</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Shading</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Contours</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Shading with contours</string>
+      </property>
+     </item>
     </widget>
    </item>
   </layout>

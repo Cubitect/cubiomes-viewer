@@ -97,6 +97,7 @@ private slots:
     void on_actionAddShadow_triggered();
     void on_actionExtGen_triggered();
     void on_actionExportImg_triggered();
+    void on_actionScreenshot_triggered();
 
     void on_tabContainer_currentChanged(int index);
 

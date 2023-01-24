@@ -433,6 +433,7 @@ QToolButton:checked {
     <addaction name="actionStructure_visibility"/>
     <addaction name="actionExportImg"/>
     <addaction name="actionBiome_colors"/>
+    <addaction name="actionScreenshot"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -489,6 +490,7 @@ QToolButton:checked {
     <addaction name="actionParaWeirdness"/>
     <addaction name="separator"/>
     <addaction name="actionHeight"/>
+    <addaction name="actionStructures"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -766,6 +768,25 @@ QToolButton:checked {
    </property>
    <property name="shortcut">
     <string>Alt+Y</string>
+   </property>
+  </action>
+  <action name="actionStructures">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Structure potential (48-bit)</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+S</string>
+   </property>
+  </action>
+  <action name="actionScreenshot">
+   <property name="text">
+    <string>Take screenshot</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
    </property>
   </action>
  </widget>

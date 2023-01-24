@@ -42,10 +42,10 @@ public:
     int x, z, w, h, y; // block area
     int tilesize; // tile coordinates
     int bgmode;
+    int heightvis;
     QVector<ExportWorker*> workers;
 
-private:
-    bool stop;
+    std::atomic_bool stop;
 };
 
 

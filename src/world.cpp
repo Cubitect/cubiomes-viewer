@@ -189,7 +189,7 @@ Quad::~Quad()
 }
 
 void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
-        WorldInfo wi, int dim, int x0, int z0, int x1, int z1)
+        WorldInfo wi, int dim, int x0, int z0, int x1, int z1, bool nogen)
 {
     int si0 = (int)floor(x0 / (qreal)(sconf.regionSize * 16));
     int sj0 = (int)floor(z0 / (qreal)(sconf.regionSize * 16));
@@ -199,8 +199,11 @@ void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
     // TODO: move generator to arguments?
     //       isViableStructurePos would have to be const (due to threading)
     Generator g;
-    setupGenerator(&g, wi.mc, wi.large);
-    applySeed(&g, dim, wi.seed);
+    if (!nogen)
+    {
+        setupGenerator(&g, wi.mc, wi.large);
+        applySeed(&g, dim, wi.seed);
+    }
 
     for (int i = si0; i <= si1; i++)
     {
@@ -213,10 +216,15 @@ void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
 
             if (p.x >= x0 && p.x < x1 && p.z >= z0 && p.z < z1)
             {
+                VarPos vp = VarPos(p, sconf.structType);
+                if (nogen)
+                {
+                    out->push_back(vp);
+                    continue;
+                }
                 int id = isViableStructurePos(sconf.structType, &g, p.x, p.z, 0);
                 if (!id)
                     continue;
-                VarPos vp = VarPos(p, sconf.structType);
                 Piece pieces[1024];
 
                 if (sconf.structType == End_City)
@@ -266,6 +274,119 @@ static qreal cubic_hermite(qreal p[4], qreal u)
     return a + b*u + c*u*u + d*u*u*u;
 }
 
+void applyHeightShading(unsigned char *rgb, Range r,
+        const Generator *g, const SurfaceNoise *sn, int stepbits, int mode,
+        bool bicubic, std::atomic_bool *abort)
+{
+    int bd = bicubic ? 1 : 0; // sampling border
+    int ps = stepbits; // bits in step size
+    int st = (1 << ps) - 1; // step mask
+    // the sampling spans [x-1, x+w+1), reduced to the stepped grid
+    int x = r.x, z = r.z, w = r.sx, h = r.sz;
+    int px = ((x-1) >> ps);
+    int pz = ((z-1) >> ps);
+    int pw = ((x+w+2+st) >> ps) - px + 1;
+    int ph = ((z+h+2+st) >> ps) - pz + 1;
+    if (bd)
+    {   // add border for cubic sampling
+        px -= bd; pz -= bd;
+        pw += 2*bd; ph += 2*bd;
+    }
+    std::vector<qreal> buf(pw * ph);
+    for (int j = 0; j < ph; j++)
+    {
+        for (int i = 0; i < pw; i++)
+        {
+            if (abort && *abort) return;
+            int samplex = (((px + i) << ps)) * r.scale / 4;
+            int samplez = (((pz + j) << ps)) * r.scale / 4;
+            float y = 0;
+            mapApproxHeight(&y, 0, g, sn, samplex, samplez, 1, 1);
+            buf[j*pw+i] = y;
+        }
+    }
+    // interpolate height
+    std::vector<qreal> height((w+2) * (h+2));
+    for (int j = 0; j < h+2; j++)
+    {
+        for (int i = 0; i < w+2; i++)
+        {
+            if (abort && *abort) return;
+            int pi = ((x + i - 1) >> ps) - px - bd;
+            int pj = ((z + j - 1) >> ps) - pz - bd;
+            qreal di = ((x + i - 1) & st) / (qreal)(st + 1);
+            qreal dj = ((z + j - 1) & st) / (qreal)(st + 1);
+            qreal v = 0;
+            if (bicubic)
+            {
+                qreal p[] = {
+                    cubic_hermite(&buf.at((pj+0)*pw + pi), di),
+                    cubic_hermite(&buf.at((pj+1)*pw + pi), di),
+                    cubic_hermite(&buf.at((pj+2)*pw + pi), di),
+                    cubic_hermite(&buf.at((pj+3)*pw + pi), di),
+                };
+                v = cubic_hermite(p, dj);
+            }
+            else // bilinear
+            {
+                qreal v00 = buf.at((pj+0)*pw + pi+0);
+                qreal v01 = buf.at((pj+0)*pw + pi+1);
+                qreal v10 = buf.at((pj+1)*pw + pi+0);
+                qreal v11 = buf.at((pj+1)*pw + pi+1);
+                v = lerp2(di, dj, v00, v01, v10, v11);
+            }
+            height[j*(w+2)+i] = v;
+        }
+    }
+    if (abort && *abort) return;
+    // apply shading based on height changes
+    qreal mul = 0.25 / r.scale;
+    qreal lout = 0.65;
+    qreal lmin = 0.5;
+    qreal lmax = 1.5;
+    qreal ymax = r.scale == 1 ? r.y : r.y << 2;
+    for (int j = 0; j < h; j++)
+    {
+        for (int i = 0; i < w; i++)
+        {
+            int tw = w+2;
+            qreal t01 = height[(j+0)*tw + i+1];
+            qreal t10 = height[(j+1)*tw + i+0];
+            qreal t11 = height[(j+1)*tw + i+1];
+            qreal t12 = height[(j+1)*tw + i+2];
+            qreal t21 = height[(j+2)*tw + i+1];
+            qreal d0 = t01 + t10;
+            qreal d1 = t12 + t21;
+            qreal light = 1.0;
+            uchar *col = rgb + 3*(j*w + i);
+            if (mode == HV_GRAYSCALE)
+            {
+                qreal v = t11;
+                uchar c = (v <= 0) ? 0 : (v > 0xff) ? 0xff : (uchar)(v);
+                col[0] = col[1] = col[2] = c;
+                continue;
+            }
+            if (mode == HV_SHADING || mode == HV_CONTOURS_SHADING)
+                light += (d1 - d0) * mul;
+            if (t11 > ymax) light = lout;
+            if (light < lmin) light = lmin;
+            if (light > lmax) light = lmax;
+            if (mode == HV_CONTOURS || mode == HV_CONTOURS_SHADING)
+            {
+                qreal spacing = 16.0;
+                qreal tmin = std::min({t01, t10, t12, t21});
+                if (floor(tmin / spacing) != floor(t11 / spacing))
+                    light *= 0.5;
+            }
+            for (int k = 0; k < 3; k++)
+            {
+                qreal c = col[k] * light;
+                col[k] = (c <= 0) ? 0 : (c > 0xff) ? 0xff : (uchar)(c);
+            }
+        }
+    }
+}
+
 void Quad::run()
 {
     if (done || *isdel)
@@ -273,6 +394,13 @@ void Quad::run()
 
     if (pixs > 0)
     {
+        if (lopt == LOPT_STRUCTS && dim == DIM_OVERWORLD)
+        {
+            img = new QImage();
+            done = true;
+            return;
+        }
+
         int seam_buf = 0; //pixs / 128;
         int y = (scale > 1) ? wi.y >> 2 : wi.y;
         int x = ti*pixs, z = tj*pixs, w = pixs+seam_buf, h = pixs+seam_buf;
@@ -303,109 +431,8 @@ void Quad::run()
 
             if (lopt == LOPT_HEIGHT_4 && dim == 0)
             {
-                const bool bicubic = false;
-                int bd = bicubic ? 1 : 0; // sampling border
-                int ps = (hd ? 0 : 2); // bits in step size
-                int st = (1 << ps) - 1; // step mask
-                // the sampling spans [x-1, x+w+1), reduced to the stepped grid
-                int px = ((x-1) >> ps);
-                int pz = ((z-1) >> ps);
-                int pw = ((x+w+2+st) >> ps) - px + 1;
-                int ph = ((z+h+2+st) >> ps) - pz + 1;
-                if (bd)
-                {   // add border for cubic sampling
-                    px -= bd; pz -= bd;
-                    pw += 2*bd; ph += 2*bd;
-                }
-                std::vector<qreal> buf(pw * ph);
-                for (int j = 0; j < ph; j++)
-                {
-                    for (int i = 0; i < pw; i++)
-                    {
-                        int samplex = (((px + i) << ps)) * scale / 4;
-                        int samplez = (((pz + j) << ps)) * scale / 4;
-                        float y = 0;
-                        mapApproxHeight(&y, 0, g, sn, samplex, samplez, 1, 1);
-                        buf[j*pw+i] = y;
-                    }
-                }
-                // interpolate height
-                std::vector<qreal> height((w+2) * (h+2));
-                for (int j = 0; j < h+2; j++)
-                {
-                    for (int i = 0; i < w+2; i++)
-                    {
-                        int pi = ((x + i - 1) >> ps) - px - bd;
-                        int pj = ((z + j - 1) >> ps) - pz - bd;
-                        qreal di = ((x + i - 1) & st) / (qreal)(st + 1);
-                        qreal dj = ((z + j - 1) & st) / (qreal)(st + 1);
-                        qreal v = 0;
-                        if (bicubic)
-                        {
-                            qreal p[] = {
-                                cubic_hermite(&buf.at((pj+0)*pw + pi), di),
-                                cubic_hermite(&buf.at((pj+1)*pw + pi), di),
-                                cubic_hermite(&buf.at((pj+2)*pw + pi), di),
-                                cubic_hermite(&buf.at((pj+3)*pw + pi), di),
-                            };
-                            v = cubic_hermite(p, dj);
-                        }
-                        else // bilinear
-                        {
-                            qreal v00 = buf.at((pj+0)*pw + pi+0);
-                            qreal v01 = buf.at((pj+0)*pw + pi+1);
-                            qreal v10 = buf.at((pj+1)*pw + pi+0);
-                            qreal v11 = buf.at((pj+1)*pw + pi+1);
-                            v = lerp2(di, dj, v00, v01, v10, v11);
-                        }
-                        height[j*(w+2)+i] = v;
-                    }
-                }
-                // apply shading based on height changes
-                qreal mul = 0.25 / scale;
-                qreal lout = 0.65;
-                qreal lmin = 0.5;
-                qreal lmax = 1.5;
-                for (int j = 0; j < h; j++)
-                {
-                    for (int i = 0; i < w; i++)
-                    {
-                        int tw = w+2;
-                        qreal t01 = height[(j+0)*tw + i+1];
-                        qreal t10 = height[(j+1)*tw + i+0];
-                        qreal t11 = height[(j+1)*tw + i+1];
-                        qreal t12 = height[(j+1)*tw + i+2];
-                        qreal t21 = height[(j+2)*tw + i+1];
-                        qreal d0 = t01 + t10;
-                        qreal d1 = t12 + t21;
-                        qreal light = 1.0;
-                        uchar *col = rgb + 3*(j*w + i);
-                        if (heightvis == HV_GRAYSCALE)
-                        {
-                            qreal v = t11;
-                            uchar c = (v <= 0) ? 0 : (v > 0xff) ? 0xff : (uchar)(v);
-                            col[0] = col[1] = col[2] = c;
-                            continue;
-                        }
-                        if (heightvis == HV_SHADING || heightvis == HV_CONTOURS_SHADING)
-                            light += (d1 - d0) * mul;
-                        if (t11 > wi.y) light = lout;
-                        if (light < lmin) light = lmin;
-                        if (light > lmax) light = lmax;
-                        if (heightvis == HV_CONTOURS || heightvis == HV_CONTOURS_SHADING)
-                        {
-                            qreal spacing = 16.0;
-                            qreal tmin = std::min({t01, t10, t12, t21});
-                            if (floor(tmin / spacing) != floor(t11 / spacing))
-                                light *= 0.5;
-                        }
-                        for (int k = 0; k < 3; k++)
-                        {
-                            qreal c = col[k] * light;
-                            col[k] = (c <= 0) ? 0 : (c > 0xff) ? 0xff : (uchar)(c);
-                        }
-                    }
-                }
+                int stepbits = (hd ? 0 : 2);
+                applyHeightShading(rgb, r, g, sn, stepbits, heightvis, false, isdel);
             }
         }
         else // climate parameter
@@ -432,7 +459,7 @@ void Quad::run()
             std::vector<VarPos>* st = new std::vector<VarPos>();
             StructureConfig sconf;
             if (getStructureConfig_override(structureType, wi.mc, &sconf))
-                getStructs(st, sconf, wi, dim, x0, z0, x1, z1);
+                getStructs(st, sconf, wi, dim, x0, z0, x1, z1, lopt == LOPT_STRUCTS);
             spos = st;
         }
     }
@@ -480,6 +507,7 @@ void Level::init4map(QWorld *w, int pix, int layerscale)
     case LOPT_HEIGHT_4:
     case LOPT_RIVER_4:
     case LOPT_DEFAULT_4:
+    case LOPT_STRUCTS:
         optlscale = 4;
         break;
     case LOPT_DEFAULT_16:
@@ -545,7 +573,7 @@ void Level::init4struct(QWorld *w, int dim, int blocks, double vis, int sopt)
     this->pixs = -1;
     this->scale = -1;
     this->sopt = sopt;
-    this->lopt = 0;
+    this->lopt = w->layeropt;
     this->vis = vis;
     this->isdel = &w->isdel;
 }
@@ -554,6 +582,8 @@ static float sqdist(int x, int z) { return x*x + z*z; }
 
 void Level::resizeLevel(std::vector<Quad*>& cache, int x, int z, int w, int h)
 {
+    if (!world)
+        return;
     // move the cells from the old grid to the new grid
     // or to the cached queue if they are not inside the new grid
     std::vector<Quad*> grid(w*h);
@@ -1260,7 +1290,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
     }
 
     Pos* sp = spawn; // atomic fetch
-    if (sp && sp != (Pos*)-1 && sshow[D_SPAWN] && dim == 0)
+    if (sp && sp != (Pos*)-1 && sshow[D_SPAWN] && dim == 0 && layeropt != LOPT_STRUCTS)
     {
         qreal x = vw/2.0 + (sp->x - focusx) * blocks2pix;
         qreal y = vh/2.0 + (sp->z - focusz) * blocks2pix;
@@ -1281,7 +1311,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
     }
 
     QAtomicPointer<PosElement> shs = strongholds;
-    if (shs && sshow[D_STRONGHOLD] && dim == 0)
+    if (shs && sshow[D_STRONGHOLD] && dim == 0 && layeropt != LOPT_STRUCTS)
     {
         std::vector<QPainter::PixmapFragment> frags;
         do
@@ -1324,7 +1354,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
             l.update(cachedbiomes, 0, 0, 0, 0);
     }
 
-    if (spawn == NULL)
+    if (spawn == NULL && layeropt != LOPT_STRUCTS)
     {   // start the spawn and stronghold worker thread if this is the first run
         if (sshow[D_SPAWN] || sshow[D_STRONGHOLD] || (showBB && blocks2pix >= 1.0))
         {

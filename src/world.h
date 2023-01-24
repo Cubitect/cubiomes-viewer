@@ -60,6 +60,7 @@ enum {
     LOPT_NOISE_D_4,
     LOPT_NOISE_W_4,
     LOPT_HEIGHT_4,
+    LOPT_STRUCTS,
     LOPT_MAX,
 };
 
@@ -170,7 +171,11 @@ const QPixmap& getMapIcon(int opt, VarPos *variation = 0);
 QIcon getBiomeIcon(int id, bool warn = false);
 
 void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
-        WorldInfo wi, int dim, int x0, int z0, int x1, int z1);
+        WorldInfo wi, int dim, int x0, int z0, int x1, int z1, bool nogen = false);
+
+void applyHeightShading(unsigned char *rgb, Range r,
+        const Generator *g, const SurfaceNoise *sn, int stepbits, int mode,
+        bool bicubic, std::atomic_bool *abort);
 
 struct Scheduled : public QRunnable
 {

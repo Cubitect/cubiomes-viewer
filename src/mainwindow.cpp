@@ -1017,6 +1017,18 @@ void MainWindow::on_actionExportImg_triggered()
     dialog->show();
 }
 
+void MainWindow::on_actionScreenshot_triggered()
+{
+    QString fnam = QFileDialog::getSaveFileName(
+        this, tr("Save screenshot"), prevdir, tr("Images (*.png *.jpg *.ppm)"));
+    if (!fnam.isEmpty())
+    {
+        QPixmap pixmap = getMapView()->grab();
+        QImage img = pixmap.toImage();
+        img.save(fnam);
+    }
+}
+
 void MainWindow::on_tabContainer_currentChanged(int index)
 {
     QSettings settings("cubiomes-viewer", "cubiomes-viewer");
@@ -1053,7 +1065,7 @@ void MainWindow::onAutosaveTimeout()
 
 void MainWindow::onActionMapToggled(int sopt, bool show)
 {
-    if (sopt == D_PORTAL) // overworld porals should also control nether
+    if (sopt == D_PORTAL) // overworld portals should also control nether
         getMapView()->setShow(D_PORTALN, show);
     getMapView()->setShow(sopt, show);
 }
@@ -1110,4 +1122,5 @@ void MainWindow::onStyleChanged(int style)
         qApp->setStyle("");
     }
 }
+
 
