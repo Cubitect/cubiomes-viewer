@@ -123,6 +123,7 @@ public slots:
 
     void onSort(int column, Qt::SortOrder);
     void onSeedSelectionChanged();
+    void on_results_clicked(const QModelIndex &index);
     void on_results_customContextMenuRequested(const QPoint& pos);
 
     void on_buttonSearchHelp_clicked();

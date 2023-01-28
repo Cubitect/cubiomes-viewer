@@ -98,6 +98,7 @@ private slots:
     void on_actionExtGen_triggered();
     void on_actionExportImg_triggered();
     void on_actionScreenshot_triggered();
+    void on_actionDock_triggered();
 
     void on_tabContainer_currentChanged(int index);
 
@@ -114,6 +115,7 @@ private slots:
     void onSearchStatusChanged(bool running);
     void onStyleChanged(int style);
     void onBiomeColorChange();
+    void onDockFloating(bool floating);
 
 public:
     Ui::MainWindow *ui;

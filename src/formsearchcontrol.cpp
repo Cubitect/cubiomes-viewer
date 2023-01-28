@@ -416,6 +416,11 @@ void FormSearchControl::onSeedSelectionChanged()
     }
 }
 
+void FormSearchControl::on_results_clicked(const QModelIndex &)
+{
+    onSeedSelectionChanged();
+}
+
 void FormSearchControl::on_results_customContextMenuRequested(const QPoint &pos)
 {
     QMenu menu(this);
@@ -797,9 +802,12 @@ void FormSearchControl::resultTimeout()
 
 void FormSearchControl::removeCurrent()
 {
-    int row = ui->results->selectionModel()->currentIndex().row();
+    QModelIndex index = ui->results->currentIndex();
+    int row = proxy->mapToSource(index).row();
     if (row >= 0)
+    {
         model->removeRow(row);
+    }
 }
 
 void FormSearchControl::copyResults()
@@ -830,5 +838,3 @@ void FormSearchControl::keyReleaseEvent(QKeyEvent *event)
     }
     QWidget::keyReleaseEvent(event);
 }
-
-

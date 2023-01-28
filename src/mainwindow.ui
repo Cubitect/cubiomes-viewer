@@ -428,12 +428,26 @@ QToolButton:checked {
     <property name="title">
      <string>Map</string>
     </property>
-    <addaction name="actionGo_to"/>
+    <widget class="QMenu" name="menuHistory">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="title">
+      <string>Previous seeds</string>
+     </property>
+     <addaction name="separator"/>
+    </widget>
+    <addaction name="menuHistory"/>
     <addaction name="actionOpenShadow"/>
-    <addaction name="actionStructure_visibility"/>
+    <addaction name="separator"/>
+    <addaction name="actionDock"/>
+    <addaction name="actionGo_to"/>
+    <addaction name="separator"/>
+    <addaction name="actionScreenshot"/>
     <addaction name="actionExportImg"/>
     <addaction name="actionBiome_colors"/>
-    <addaction name="actionScreenshot"/>
+    <addaction name="actionStructure_visibility"/>
+    <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -751,14 +765,6 @@ QToolButton:checked {
     <string>Alt+D</string>
    </property>
   </action>
-  <action name="actionDockable">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Dockable</string>
-   </property>
-  </action>
   <action name="actionHeight">
    <property name="checkable">
     <bool>true</bool>
@@ -787,6 +793,11 @@ QToolButton:checked {
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+S</string>
+   </property>
+  </action>
+  <action name="actionDock">
+   <property name="text">
+    <string>Undock map</string>
    </property>
   </action>
  </widget>

@@ -2,14 +2,6 @@
 <ui version="4.0">
  <class>GotoDialog</class>
  <widget class="QDialog" name="GotoDialog">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>356</width>
-    <height>130</height>
-   </rect>
-  </property>
   <property name="focusPolicy">
    <enum>Qt::StrongFocus</enum>
   </property>
@@ -98,6 +90,13 @@
       </widget>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="checkAnimate">
+     <property name="text">
+      <string>Animate travel</string>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">

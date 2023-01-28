@@ -40,6 +40,12 @@ public:
     void refresh();
     void setSeed(WorldInfo wi, int dim, int layeropt = -1);
     void setView(qreal x, qreal z, qreal scale = 0);
+    void animateView(qreal x, qreal z, qreal scale);
+    qreal x_src, z_src, s_src;
+    qreal x_dst, z_dst, s_dst;
+    qreal s_mul;
+    qreal atime;
+    QElapsedTimer anielapsed;
 
     bool getShow(int stype) { return stype >= 0 && stype < STRUCT_NUM ? sshow[stype] : false; }
     void setShow(int stype, bool v);
@@ -54,6 +60,7 @@ public:
 
 private:
     void settingsToWorld();
+    void runAni();
 
 signals:
 
@@ -93,6 +100,8 @@ private:
 
     bool holding;
     QPoint mstart, mprev;
+    Pos bstart;
+    bool measure;
     int updatecounter;
 
     bool sshow[STRUCT_NUM];

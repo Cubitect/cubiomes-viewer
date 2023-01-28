@@ -46,6 +46,8 @@ MapView::MapView(QWidget *parent)
     , mtime()
     , holding()
     , mstart(),mprev()
+    , bstart()
+    , measure()
     , updatecounter()
     , layeropt(LOPT_DEFAULT_1)
     , config()
@@ -135,6 +137,26 @@ void MapView::setView(qreal x, qreal z, qreal scale)
     update(2);
 }
 
+void MapView::animateView(qreal x_dst, qreal z_dst, qreal s_dst)
+{
+    if (s_dst <= 0)
+        s_dst = 1.0 / blocks2pix;
+    this->x_src = prevx = focusx = getX();
+    this->z_src = prevz = focusz = getZ();
+    this->s_src = 1.0 / blocks2pix;
+    this->x_dst = x_dst;
+    this->z_dst = z_dst;
+    this->s_dst = s_dst;
+    qreal dx = x_dst - x_src;
+    qreal dz = z_dst - z_src;
+    qreal ds = s_dst - s_src;
+    qreal d = sqrt(dx*dx + dz*dz + ds*ds*1024);
+    this->s_mul = d * 1e-3;
+    this->atime = sqrt(d) * 5e7;
+    anielapsed.start();
+    update(2);
+}
+
 void MapView::setShow(int stype, bool v)
 {
     sshow[stype] = v;
@@ -164,14 +186,66 @@ void MapView::settingsToWorld()
     world->showBB = config.showBBoxes;
     world->heightvis = config.heightVis;
     world->gridspacing = config.gridSpacing;
+    world->gridmultiplier = config.gridMultiplier;
     world->memlimit = (uint64_t) config.mapCacheSize * 1024 * 1024;
     world->layeropt = layeropt;
 }
 
+static qreal smoothstep(qreal x)
+{
+    if (x < 0) return 0;
+    if (x > 1) return 1;
+    qreal v = x * x * x * (x * (x * 6 - 15) + 10);
+    return v < 0 ? 0 : v > 1 ? 1 : v;
+}
+
+static qreal smoothstep_integral(qreal x)
+{
+    if (x < 0) return 0;
+    if (x > 1) return 1;
+    qreal x2 = x * x;
+    qreal v = x2 * x2 * (x * (x - 3) + 2.5);
+    return v < 0 ? 0 : v > 1 ? 1 : v;
+}
+
+static void smoothmotion(qreal *pos, qreal *vel, qreal x0, qreal x1, qreal t)
+{
+    // TODO: include the percieved travel distance due to scale changes
+    qreal xm = (x0 + x1) / 2;
+    qreal p, v;
+    if (t < 0.5)
+    {
+        t = 2 * t;
+        v = smoothstep(t);
+        qreal u = 2 * smoothstep_integral(t);
+        p = x0 + (xm - x0) * u;
+    }
+    else
+    {
+        t = 2 * (1 - t);
+        v = smoothstep(t);
+        qreal u = 1 - 2 * smoothstep_integral(t);
+        p = xm + (x1 - xm) * u;
+    }
+    if (vel) *vel = v;
+    if (pos) *pos = p;
+}
+
 qreal MapView::getX()
 {
+    if (anielapsed.isValid())
+    {
+        qreal t = anielapsed.nsecsElapsed() / atime;
+        qreal u, v;
+        smoothmotion(&u, 0, x_src, x_dst, t);
+        smoothmotion(&v, 0, s_src, s_dst, t);
+        blocks2pix = 1.0 / v;
+        return focusx = u;
+    }
+
     qreal dt = frameelapsed.nsecsElapsed() * 1e-9;
     qreal fx = focusx;
+
     if (velx)
     {
         qreal df = 1.0 - exp(-decay*dt);
@@ -188,6 +262,16 @@ qreal MapView::getX()
 qreal MapView::getZ()
 {
     qreal dt = frameelapsed.nsecsElapsed() * 1e-9;
+    if (anielapsed.isValid())
+    {
+        qreal t = anielapsed.nsecsElapsed() / atime;
+        qreal u, v;
+        smoothmotion(&u, 0, z_src, z_dst, t);
+        smoothmotion(&v, 0, s_src, s_dst, t);
+        blocks2pix = 1.0 / v;
+        return focusz = u;
+    }
+
     qreal fz = focusz;
     if (velz)
     {
@@ -228,6 +312,16 @@ void MapView::showContextMenu(const QPoint &pos)
     // this is a contextual temporary menu so shortcuts are only indicated here,
     // but will not function - see keyReleaseEvent() for shortcut implementation
 
+    if (world)
+    {
+        mstart = pos;
+        world->selx = mstart.x();
+        world->selz = mstart.y();
+        world->seldo = true;
+        world->selopt = D_NONE;
+        grab(); // invokes an immediate paint call
+    }
+
     Pos p = getActivePos();
     QString seed   = world ? QString::asprintf("%" PRId64, (int64_t)world->wi.seed) : "";
     QString tp     = QString::asprintf("/tp @p %d ~ %d", p.x, p.z);
@@ -239,7 +333,12 @@ void MapView::showContextMenu(const QPoint &pos)
     menu.addAction(tr("Copy block: ")+coords, [=](){ this->copyText(coords); });
     menu.addAction(tr("Copy chunk: ")+chunk, [=](){ this->copyText(chunk); });
     menu.addAction(tr("Go to coordinates..."), this, &MapView::onGoto, QKeySequence(Qt::CTRL + Qt::Key_G));
+   // menu.addAction(tr("Animation"), this, &MapView::runAni);
     menu.exec(mapToGlobal(pos));
+}
+
+void MapView::runAni()
+{
 }
 
 void MapView::copySeed()
@@ -272,6 +371,17 @@ void MapView::paintEvent(QPaintEvent *)
 
     qreal fx = getX();
     qreal fz = getZ();
+    if (anielapsed.isValid() && anielapsed.nsecsElapsed() > atime)
+    {
+        anielapsed.invalidate();
+        focusx = x_dst;
+        focusz = z_dst;
+        blocks2pix = 1.0 / s_dst;
+    }
+    if (fx < -INT_MAX) { focusx = fx = -INT_MAX; }
+    if (fz < -INT_MAX) { focusz = fz = -INT_MAX; }
+    if (fx > INT_MAX) { focusx = fx = INT_MAX; }
+    if (fz > INT_MAX) { focusz = fz = INT_MAX; }
 
     if (world)
     {
@@ -284,8 +394,29 @@ void MapView::paintEvent(QPaintEvent *)
         overlay->pos = p;
         overlay->bname = world->getBiomeName(p);
 
-        bool active = QThreadPool::globalInstance()->activeThreadCount() > 0;
-        if (active || velx || velz)
+        if (measure)
+        {
+            qreal startx = (bstart.x - fx) * blocks2pix + width() / 2.0;
+            qreal startz = (bstart.z - fz) * blocks2pix + height() / 2.0;
+            QPointF start = {startx, startz};
+            painter.setPen(QPen(QColor(0, 0, 0, 255), 2));
+            painter.drawPoint(start);
+            painter.setPen(QPen(QColor(255, 255, 128, 255), 1));
+            painter.drawLine(start, cur);
+            qreal dx = bstart.x - bx;
+            qreal dz = bstart.z - bz;
+            qreal r = sqrt(dx*dx + dz*dz);
+            QString s = QString::asprintf("r=%g", floor(r));
+            QRect textrec = painter.fontMetrics()
+                    .boundingRect(0, 0, 0, 0, Qt::AlignLeft | Qt::AlignVCenter, s);
+            textrec.translate(cur);
+            painter.fillRect(textrec, QBrush(QColor(0, 0, 0, 128), Qt::SolidPattern));
+            painter.setPen(QPen(QColor(255, 255, 128, 255), 1));
+            painter.drawText(textrec, s);
+        }
+
+        bool active = world->isBusy();
+        if (active || velx || velz || anielapsed.isValid())
             updatecounter = 2;
         if (updatecounter > 0)
         {
@@ -347,6 +478,12 @@ void MapView::mousePressEvent(QMouseEvent *e)
         mtime = 0;
         elapsed1.start();
         frameelapsed.start();
+        if (e->modifiers() & Qt::ShiftModifier)
+        {
+            if (!measure)
+                bstart = overlay->pos;
+            measure = true;
+        }
 
         if (world)
         {
@@ -399,6 +536,8 @@ void MapView::mouseReleaseEvent(QMouseEvent *e)
             velx = velz = 0;
         }
 
+        if (!(e->modifiers() & Qt::ShiftModifier))
+            measure = false;
         holding = false;
         mprev = e->pos();
 
@@ -412,10 +551,10 @@ void MapView::mouseReleaseEvent(QMouseEvent *e)
     }
 }
 
-void MapView::keyReleaseEvent(QKeyEvent *event)
+void MapView::keyReleaseEvent(QKeyEvent *e)
 {
-    if (event->matches(QKeySequence::Copy))
+    if (e->matches(QKeySequence::Copy))
         copySeed();
-    QWidget::keyReleaseEvent(event);
+    QWidget::keyReleaseEvent(e);
 }
 

@@ -43,7 +43,6 @@ ConfigDialog::~ConfigDialog()
 
 void ConfigDialog::initSettings(Config *config)
 {
-    ui->checkDockable->setChecked(config->dockable);
     ui->checkSmooth->setChecked(config->smoothMotion);
     ui->checkBBoxes->setChecked(config->showBBoxes);
     ui->checkRestore->setChecked(config->restoreSession);
@@ -55,6 +54,7 @@ void ConfigDialog::initSettings(Config *config)
     ui->comboHeightVis->setCurrentIndex(config->heightVis);
     ui->lineMatching->setText(QString::number(config->maxMatching));
     ui->lineGridSpacing->setText(config->gridSpacing ? QString::number(config->gridSpacing) : "");
+    ui->comboGridMult->setCurrentText(config->gridMultiplier ? QString::number(config->gridMultiplier) : tr("None"));
     ui->spinCacheSize->setValue(config->mapCacheSize);
     ui->lineSep->setText(config->separator);
     int idx = config->quote == "\'" ? 1 : config->quote== "\"" ? 2 : 0;
@@ -65,7 +65,6 @@ void ConfigDialog::initSettings(Config *config)
 
 Config ConfigDialog::getSettings()
 {
-    conf.dockable = ui->checkDockable->isChecked();
     conf.smoothMotion = ui->checkSmooth->isChecked();
     conf.showBBoxes = ui->checkBBoxes->isChecked();
     conf.restoreSession = ui->checkRestore->isChecked();
@@ -75,6 +74,7 @@ Config ConfigDialog::getSettings()
     conf.heightVis = ui->comboHeightVis->currentIndex();
     conf.maxMatching = ui->lineMatching->text().toInt();
     conf.gridSpacing = ui->lineGridSpacing->text().toInt();
+    conf.gridMultiplier = ui->comboGridMult->currentText().toInt();
     conf.mapCacheSize = ui->spinCacheSize->value();
     conf.separator = ui->lineSep->text();
     int idx = ui->comboQuote->currentIndex();
@@ -199,3 +199,7 @@ void ConfigDialog::on_comboHeightVis_currentIndexChanged(int)
     visModified = true;
 }
 
+void ConfigDialog::on_lineGridSpacing_textChanged(const QString &text)
+{
+    ui->comboGridMult->setEnabled(!text.isEmpty());
+}

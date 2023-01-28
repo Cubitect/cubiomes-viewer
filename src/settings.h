@@ -71,7 +71,6 @@ enum {
 
 struct Config
 {
-    bool dockable;
     bool smoothMotion;
     bool showBBoxes;
     bool restoreSession;
@@ -80,6 +79,7 @@ struct Config
     int uistyle;
     int maxMatching;
     int gridSpacing;
+    int gridMultiplier;
     int mapCacheSize;
     int heightVis;
     QString biomeColorPath;
@@ -90,7 +90,6 @@ struct Config
 
     void reset()
     {
-        dockable = true;
         smoothMotion = true;
         showBBoxes = true;
         restoreSession = true;
@@ -99,6 +98,7 @@ struct Config
         uistyle = STYLE_SYSTEM;
         maxMatching = 65536;
         gridSpacing = 0;
+        gridMultiplier = 0;
         mapCacheSize = 256;
         heightVis = HV_SHADING;
         biomeColorPath = "";

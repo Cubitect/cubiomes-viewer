@@ -53,10 +53,12 @@ MainWindow::MainWindow(QWidget *parent)
 
     dock->setWidget(mapView);
     dock->setFeatures(QDockWidget::DockWidgetFloatable);
+    connect(dock, &QDockWidget::topLevelChanged, this, &MainWindow::onDockFloating);
     QMainWindow *submain = new QMainWindow(this);
     ui->frameMap->layout()->addWidget(submain);
     submain->addDockWidget(Qt::LeftDockWidgetArea, dock);
     mapView->setFocusPolicy(Qt::StrongFocus);
+    setDockable(false);
 
     formCond = new FormConditions(this);
     formGen48 = new FormGen48(this);
@@ -274,9 +276,12 @@ bool MainWindow::getSeed(WorldInfo *wi, bool applyrand)
     }
 
     int v = str2seed(ui->seedEdit->text(), &wi->seed);
-    if (applyrand && v == S_RANDOM)
+    if (v == S_RANDOM)
     {
-        ui->seedEdit->setText(QString::asprintf("%" PRId64, (int64_t)wi->seed));
+        if (applyrand)
+            ui->seedEdit->setText(QString::asprintf("%" PRId64, (int64_t)wi->seed));
+        else
+            ok = false;
     }
 
     wi->large = ui->checkLarge->isChecked();
@@ -302,6 +307,18 @@ bool MainWindow::setSeed(WorldInfo wi, int dim, int layeropt)
         dimactions[2]->setChecked(true);
     else
         dim = getDim();
+
+    bool ok;
+    uint64_t current = ui->seedEdit->text().toLongLong(&ok);
+    if (ok && current != wi.seed)
+    {
+        QList<QAction*> hist = ui->menuHistory->actions();
+        if (hist.size() >= 4)
+            ui->menuHistory->removeAction(hist.back());
+        QAction *last = hist.empty() ? 0 : hist.front();
+        ui->menuHistory->insertAction(last, new QAction(QString::asprintf("%" PRId64, current), this));
+        ui->menuHistory->setEnabled(true);
+    }
 
     ui->checkLarge->setChecked(wi.large);
     int i, n = ui->comboY->count();
@@ -344,7 +361,6 @@ void MainWindow::saveSettings()
     settings.setValue("mainwindow/pos", pos());
     settings.setValue("mainwindow/prevdir", prevdir);
 
-    settings.setValue("config/dockable", config.dockable);
     settings.setValue("config/smoothMotion", config.smoothMotion);
     settings.setValue("config/showBBoxes", config.showBBoxes);
     settings.setValue("config/heightVis", config.heightVis);
@@ -354,6 +370,7 @@ void MainWindow::saveSettings()
     settings.setValue("config/uistyle", config.uistyle);
     settings.setValue("config/maxMatching", config.maxMatching);
     settings.setValue("config/gridSpacing", config.gridSpacing);
+    settings.setValue("config/gridMultiplier", config.gridMultiplier);
     settings.setValue("config/mapCacheSize", config.mapCacheSize);
     settings.setValue("config/biomeColorPath", config.biomeColorPath);
     settings.setValue("config/separator", config.separator);
@@ -408,7 +425,6 @@ void MainWindow::loadSettings()
     move(settings.value("mainwindow/pos", pos()).toPoint());
     prevdir = settings.value("mainwindow/prevdir", pos()).toString();
 
-    config.dockable = settings.value("config/dockable", config.dockable).toBool();
     config.smoothMotion = settings.value("config/smoothMotion", config.smoothMotion).toBool();
     config.showBBoxes = settings.value("config/showBBoxes", config.showBBoxes).toBool();
     config.heightVis = settings.value("config/heightVis", config.heightVis).toInt();
@@ -418,6 +434,7 @@ void MainWindow::loadSettings()
     config.uistyle = settings.value("config/uistyle", config.uistyle).toInt();
     config.maxMatching = settings.value("config/maxMatching", config.maxMatching).toInt();
     config.gridSpacing = settings.value("config/gridSpacing", config.gridSpacing).toInt();
+    config.gridMultiplier = settings.value("config/gridMultiplier", config.gridMultiplier).toInt();
     config.mapCacheSize = settings.value("config/mapCacheSize", config.mapCacheSize).toInt();
     config.biomeColorPath = settings.value("config/biomeColorPath", config.biomeColorPath).toString();
     config.separator = settings.value("config/separator", config.separator).toString();
@@ -438,7 +455,6 @@ void MainWindow::loadSettings()
 
     getMapView()->setConfig(config);
     onStyleChanged(config.uistyle);
-    setDockable(config.dockable);
 
     qreal x = getMapView()->getX();
     qreal z = getMapView()->getZ();
@@ -459,7 +475,7 @@ void MainWindow::loadSettings()
     }
 
     WorldInfo wi;
-    getSeed(&wi, true);
+    getSeed(&wi, false);
     // NOTE: version can be wrong when the mc-enum changes, but the session file should correct it
     wi.mc = settings.value("map/mc", wi.mc).toInt();
     wi.large = settings.value("map/large", wi.large).toBool();
@@ -700,8 +716,9 @@ bool MainWindow::loadProgress(QString fnam, bool keepresults, bool quiet)
 
 void MainWindow::updateMapSeed()
 {
+    bool apply = !ui->seedEdit->text().isEmpty();
     WorldInfo wi;
-    if (getSeed(&wi))
+    if (getSeed(&wi, apply))
         setSeed(wi);
 
     bool state;
@@ -720,6 +737,7 @@ void MainWindow::updateMapSeed()
     ui->actionOpenShadow->setEnabled(wi.mc <= MC_1_17);
 
     emit mapUpdated();
+    update();
 }
 
 void MainWindow::setDockable(bool dockable)
@@ -729,6 +747,7 @@ void MainWindow::setDockable(bool dockable)
         QWidget *title = dock->titleBarWidget();
         dock->setTitleBarWidget(nullptr);
         delete title;
+        //dock->resize(1920, 1080);
     }
     else
     {   // add a dummy widget with a layout to hide the title bar
@@ -761,9 +780,6 @@ void MainWindow::applyConfigChanges(const Config old, const Config conf)
 
     if (!conf.biomeColorPath.isEmpty() || !old.biomeColorPath.isEmpty())
         onBiomeColorChange();
-
-    if (conf.dockable != old.dockable)
-        setDockable(conf.dockable);
 }
 
 void MainWindow::setMCList(bool experimental)
@@ -812,23 +828,19 @@ void MainWindow::on_comboBoxMC_currentIndexChanged(int)
     if (ui->comboBoxMC->count())
     {
         updateMapSeed();
-        update();
     }
 }
 void MainWindow::on_seedEdit_editingFinished()
 {
     updateMapSeed();
-    update();
 }
 void MainWindow::on_checkLarge_toggled()
 {
     updateMapSeed();
-    update();
 }
 void MainWindow::on_comboY_currentIndexChanged(int)
 {
     updateMapSeed();
-    update();
 }
 
 void MainWindow::on_seedEdit_textChanged(const QString &a)
@@ -886,7 +898,6 @@ void MainWindow::on_actionPreferences_triggered()
     {
         getMapView()->deleteWorld();
         updateMapSeed();
-        update();
     }
 }
 
@@ -938,7 +949,6 @@ void MainWindow::on_actionStructure_visibility_triggered()
     saveStructVis(dialog->structvis);
     getMapView()->deleteWorld();
     updateMapSeed();
-    update();
 }
 
 void MainWindow::on_actionBiome_colors_triggered()
@@ -1002,12 +1012,10 @@ void MainWindow::on_actionExtGen_triggered()
     int status = dialog->exec();
     if (status == QDialog::Accepted)
     {
-        g_extgen = dialog->getSettings();
-        // invalidate the map world, forcing an update
+        g_extgen = dialog->getSettings();        // invalidate the map world, forcing an update
         getMapView()->deleteWorld();
         setMCList(g_extgen.experimentalVers);
         updateMapSeed();
-        update();
     }
 }
 
@@ -1026,6 +1034,21 @@ void MainWindow::on_actionScreenshot_triggered()
         QPixmap pixmap = getMapView()->grab();
         QImage img = pixmap.toImage();
         img.save(fnam);
+    }
+}
+
+void MainWindow::on_actionDock_triggered()
+{
+    if (dock->isFloating())
+    {
+        setDockable(false);
+        ui->actionDock->setText(tr("Undock map"));
+    }
+    else
+    {
+        setDockable(true);
+        dock->setFloating(true);
+        ui->actionDock->setText(tr("Redock map"));
     }
 }
 
@@ -1097,8 +1120,10 @@ void MainWindow::onGen48Changed()
 
 void MainWindow::onSelectedSeedChanged(uint64_t seed)
 {
-    ui->seedEdit->setText(QString::asprintf("%" PRId64, (int64_t)seed));
-    on_seedEdit_editingFinished();
+    WorldInfo wi;
+    getSeed(&wi, false);
+    wi.seed = seed;
+    setSeed(wi);
 }
 
 void MainWindow::onSearchStatusChanged(bool running)
@@ -1123,4 +1148,12 @@ void MainWindow::onStyleChanged(int style)
     }
 }
 
+void MainWindow::onDockFloating(bool floating)
+{
+    if (!floating)
+    {
+        setDockable(false);
+        ui->actionDock->setText(tr("Undock map"));
+    }
+}
 

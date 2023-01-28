@@ -190,7 +190,7 @@ struct Scheduled : public QRunnable
 
 struct Quad : public Scheduled
 {
-    Quad(const Level* l, int i, int j);
+    Quad(const Level* l, int64_t i, int64_t j);
     ~Quad();
 
     void run();
@@ -225,7 +225,7 @@ struct Level
     void init4map(QWorld *world, int pix, int layerscale);
     void init4struct(QWorld *world, int dim, int blocks, double vis, int sopt);
 
-    void resizeLevel(std::vector<Quad*>& cache, int x, int z, int w, int h);
+    void resizeLevel(std::vector<Quad*>& cache, int64_t x, int64_t z, int64_t w, int64_t h);
     void update(std::vector<Quad*>& cache, qreal bx0, qreal bz0, qreal bx1, qreal bz1);
 
     QWorld *world;
@@ -286,6 +286,8 @@ public:
     void refreshBiomeColors();
 
     void startWorkers();
+    void waitForIdle();
+    bool isBusy();
     void clear();
     void add(Scheduled *q);
     Scheduled *take(Scheduled *q);
@@ -319,6 +321,7 @@ public:
     bool showBB;
     int heightvis;
     int gridspacing;
+    int gridmultiplier;
 
     // some features such as the world spawn and strongholds will be filled by
     // a designated worker thread once results are done

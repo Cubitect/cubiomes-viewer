@@ -170,7 +170,7 @@ QStringList VarPos::detail() const
 }
 
 
-Quad::Quad(const Level* l, int i, int j)
+Quad::Quad(const Level* l, int64_t i, int64_t j)
     : wi(l->wi),dim(l->dim),g(&l->g),sn(&l->sn),hd(l->hd),scale(l->scale)
     , ti(i),tj(j),blocks(l->blocks),pixs(l->pixs),sopt(l->sopt),lopt(l->lopt)
     , heightvis(l->world->heightvis)
@@ -178,6 +178,12 @@ Quad::Quad(const Level* l, int i, int j)
 {
     isdel = l->isdel;
     setAutoDelete(false);
+    int64_t border = 1024;
+    int64_t x0 = i * blocks - border;
+    int64_t z0 = j * blocks - border;
+    int64_t x1 = (i+1) * blocks + border;
+    int64_t z1 = (j+1) * blocks + border;
+    done = (x0 <= -INT_MAX || x1 >= INT_MAX || z0 <= -INT_MAX || z1 >= INT_MAX);
 }
 
 Quad::~Quad()
@@ -361,6 +367,11 @@ void applyHeightShading(unsigned char *rgb, Range r,
             uchar *col = rgb + 3*(j*w + i);
             if (mode == HV_GRAYSCALE)
             {
+                if (t11 <= -64)
+                {   // sinkhole
+                    col[0] = 0xff; col[1] = col[2] = 0;
+                    continue;
+                }
                 qreal v = t11;
                 uchar c = (v <= 0) ? 0 : (v > 0xff) ? 0xff : (uchar)(v);
                 col[0] = col[1] = col[2] = c;
@@ -580,7 +591,7 @@ void Level::init4struct(QWorld *w, int dim, int blocks, double vis, int sopt)
 
 static float sqdist(int x, int z) { return x*x + z*z; }
 
-void Level::resizeLevel(std::vector<Quad*>& cache, int x, int z, int w, int h)
+void Level::resizeLevel(std::vector<Quad*>& cache, int64_t x, int64_t z, int64_t w, int64_t h)
 {
     if (!world)
         return;
@@ -718,6 +729,7 @@ QWorld::QWorld(WorldInfo wi, int dim, int layeropt)
     , showBB()
     , heightvis(HV_SHADING)
     , gridspacing()
+    , gridmultiplier()
     , spawn()
     , strongholds()
     , qsinfo()
@@ -907,8 +919,7 @@ void QWorld::clear()
     queue = nullptr;
     isdel = true;
     mutex.unlock();
-    for (MapWorker& w : workers)
-        w.wait(-1);
+    waitForIdle();
     isdel = false;
 }
 
@@ -916,6 +927,20 @@ void QWorld::startWorkers()
 {
     for (MapWorker& w : workers)
         w.start();
+}
+
+void QWorld::waitForIdle()
+{
+    for (MapWorker& w : workers)
+        w.wait(-1);
+}
+
+bool QWorld::isBusy()
+{
+    for (MapWorker& w : workers)
+        if (w.isRunning())
+            return true;
+    return false;
 }
 
 void QWorld::add(Scheduled *q)
@@ -1058,22 +1083,13 @@ struct SpawnStronghold : public Scheduled
     }
 };
 
-static bool draw_grid_rec(QPainter& painter, QRect &rec, qreal pix, int x, int z)
+static bool draw_grid_rec(QPainter& painter, QRect &rec, qreal pix, int64_t x, int64_t z)
 {
     painter.setPen(QPen(QColor(0, 0, 0, 96), 1));
     painter.drawRect(rec);
-
-    QFont font = painter.font();
-    if (pix < 100)
-    {
-        if (pix < 50)
-            return false;
-        QFont smallfont = font;
-        smallfont.setPointSize(8);
-        painter.setFont(smallfont);
-    }
-
-    QString s = QString::asprintf("%d,%d", x, z);
+    if (pix <= 63)
+        return false;
+    QString s = QString::asprintf("%" PRId64 ",%" PRId64, x, z);
     QRect textrec = painter.fontMetrics()
             .boundingRect(rec, Qt::AlignLeft | Qt::AlignTop, s);
 
@@ -1081,8 +1097,6 @@ static bool draw_grid_rec(QPainter& painter, QRect &rec, qreal pix, int x, int z
 
     painter.setPen(QColor(255, 255, 255));
     painter.drawText(textrec, s);
-
-    painter.setFont(font);
     return true;
 }
 
@@ -1103,6 +1117,22 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
         if (blocks2pix > imgres)
             break;
     activelv--;
+
+    QFont oldfont = painter.font();
+    QFont smallfont = oldfont;
+    smallfont.setPointSize(8);
+    painter.setFont(smallfont);
+
+    int gridpix = 64, tmp;
+    QString s;
+    s = QString::asprintf("-%lld,%lld", (qlonglong)floor(bx0), (qlonglong)floor(bz0));
+    tmp = painter.fontMetrics().boundingRect(s).width();
+    if (tmp > gridpix)
+        gridpix = tmp;
+    s = QString::asprintf("-%lld,%lld", (qlonglong)ceil(bx1), (qlonglong)ceil(bz1));
+    tmp = painter.fontMetrics().boundingRect(s).width();
+    if (tmp > gridpix)
+        gridpix = tmp;
 
     for (int li = activelv+1; li >= activelv; --li)
     {
@@ -1132,24 +1162,34 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
 
     if (sshow[D_GRID] && gridspacing)
     {
-        long x = floor(bx0 / gridspacing), w = floor(bx1 / gridspacing) - x + 1;
-        long z = floor(bz0 / gridspacing), h = floor(bz1 / gridspacing) - z + 1;
-        qreal ps = gridspacing * blocks2pix;
-
-        if (ps > 50)
+        int64_t gs = gridspacing;
+        while (true)
         {
-            for (int j = 0; j < h; j++)
+            long x = floor(bx0 / gs), w = floor(bx1 / gs) - x + 1;
+            long z = floor(bz0 / gs), h = floor(bz1 / gs) - z + 1;
+            qreal ps = gs * blocks2pix;
+
+            if (ps > gridpix)
             {
-                for (int i = 0; i < w; i++)
+                for (int j = 0; j < h; j++)
                 {
-                    qreal px = vw/2.0 + (x+i) * ps - focusx * blocks2pix;
-                    qreal pz = vh/2.0 + (z+j) * ps - focusz * blocks2pix;
-                    QRect rec(px, pz, ps, ps);
-                    draw_grid_rec(painter, rec, ps, (x+i)*gridspacing, (z+j)*gridspacing);
+                    for (int i = 0; i < w; i++)
+                    {
+                        qreal px = vw/2.0 + (x+i) * ps - focusx * blocks2pix;
+                        qreal pz = vh/2.0 + (z+j) * ps - focusz * blocks2pix;
+                        QRect rec(px, pz, ps, ps);
+                        draw_grid_rec(painter, rec, ps, (x+i)*gs, (z+j)*gs);
+                    }
                 }
+                break;
             }
+            if (gridmultiplier <= 1)
+                break;
+            gs *= gridmultiplier;
         }
     }
+
+    painter.setFont(oldfont);
 
     if (sshow[D_SLIME] && dim == 0 && blocks2pix*16 > 0.5)
     {

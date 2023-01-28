@@ -8,6 +8,7 @@
 #include <QClipboard>
 #include <QMessageBox>
 
+static bool g_animate;
 
 GotoDialog::GotoDialog(MapView *map, qreal x, qreal z, qreal scale)
     : QDialog(map)
@@ -25,6 +26,8 @@ GotoDialog::GotoDialog(MapView *map, qreal x, qreal z, qreal scale)
     ui->lineX->setText(QString::asprintf("%.1f", x));
     ui->lineZ->setText(QString::asprintf("%.1f", z));
     ui->lineScale->setText(QString::asprintf("%.4f", scale));
+
+    ui->checkAnimate->setChecked(g_animate);
 }
 
 GotoDialog::~GotoDialog()
@@ -52,7 +55,11 @@ void GotoDialog::on_buttonBox_clicked(QAbstractButton *button)
         if (scale < scalemin) scale = scalemin;
         if (scale > scalemax) scale = scalemax;
         ui->lineScale->setText(QString::asprintf("%.4f", scale));
-        mapview->setView(x, z, scale);
+        g_animate = ui->checkAnimate->isChecked();
+        if (g_animate)
+            mapview->animateView(x, z, scale);
+        else
+            mapview->setView(x, z, scale);
     }
     else if (b == QDialogButtonBox::Reset)
     {
