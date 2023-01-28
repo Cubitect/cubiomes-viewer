@@ -308,15 +308,21 @@ bool MainWindow::setSeed(WorldInfo wi, int dim, int layeropt)
     else
         dim = getDim();
 
-    bool ok;
-    uint64_t current = ui->seedEdit->text().toLongLong(&ok);
-    if (ok && current != wi.seed)
+    MapView *mapview = getMapView();
+    uint64_t current = mapview->world ? mapview->world->wi.seed : wi.seed;
+    if (current != wi.seed)
     {
         QList<QAction*> hist = ui->menuHistory->actions();
-        if (hist.size() >= 4)
+        if (hist.size() >= 20)
             ui->menuHistory->removeAction(hist.back());
         QAction *last = hist.empty() ? 0 : hist.front();
-        ui->menuHistory->insertAction(last, new QAction(QString::asprintf("%" PRId64, current), this));
+        QString s = QString::asprintf("%" PRId64, current);
+        QAction *act = new QAction(s, this);
+        act->connect(act, &QAction::triggered, [=](){
+            this->ui->seedEdit->setText(s);
+            this->on_seedEdit_editingFinished();
+        });
+        ui->menuHistory->insertAction(last, act);
         ui->menuHistory->setEnabled(true);
     }
 
@@ -443,6 +449,8 @@ void MainWindow::loadSettings()
     if (!config.biomeColorPath.isEmpty())
         onBiomeColorChange();
 
+    ui->seedEdit->setText(settings.value("map/seed").toString());
+
     g_extgen.experimentalVers = settings.value("world/experimentalVers", g_extgen.experimentalVers).toBool();
     g_extgen.estimateTerrain = settings.value("world/estimateTerrain", g_extgen.estimateTerrain).toBool();
     g_extgen.saltOverride = settings.value("world/saltOverride", g_extgen.saltOverride).toBool();
@@ -479,7 +487,6 @@ void MainWindow::loadSettings()
     // NOTE: version can be wrong when the mc-enum changes, but the session file should correct it
     wi.mc = settings.value("map/mc", wi.mc).toInt();
     wi.large = settings.value("map/large", wi.large).toBool();
-    wi.seed = (uint64_t) settings.value("map/seed", QVariant::fromValue((qlonglong)wi.seed)).toLongLong();
     wi.y = settings.value("map/y", 256).toInt();
     int dim = settings.value("map/dim", getDim()).toInt();
     setSeed(wi, dim);
@@ -716,9 +723,8 @@ bool MainWindow::loadProgress(QString fnam, bool keepresults, bool quiet)
 
 void MainWindow::updateMapSeed()
 {
-    bool apply = !ui->seedEdit->text().isEmpty();
     WorldInfo wi;
-    if (getSeed(&wi, apply))
+    if (getSeed(&wi, true))
         setSeed(wi);
 
     bool state;
