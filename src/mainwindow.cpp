@@ -64,6 +64,8 @@ MainWindow::MainWindow(QWidget *parent)
     formGen48 = new FormGen48(this);
     formControl = new FormSearchControl(this);
 
+    ui->menuHistory->clear();
+
     ui->tabContainer->addTab(new TabTriggers(this), tr("Triggers"));
     ui->tabContainer->addTab(new TabBiomes(this), tr("Biomes"));
     ui->tabContainer->addTab(new TabStructures(this), tr("Structures"));
@@ -313,16 +315,26 @@ bool MainWindow::setSeed(WorldInfo wi, int dim, int layeropt)
     if (current != wi.seed)
     {
         QList<QAction*> hist = ui->menuHistory->actions();
-        if (hist.size() >= 20)
+        bool rm = false;
+        for (QAction *act : qAsConst(hist))
+        {
+            if (act->data().toULongLong() == current)
+            {
+                ui->menuHistory->removeAction(act);
+                hist.back()->deleteLater();
+                rm = true;
+            }
+        }
+        if (!rm && hist.size() >= 12)
+        {
             ui->menuHistory->removeAction(hist.back());
-        QAction *last = hist.empty() ? 0 : hist.front();
+            hist.back()->deleteLater();
+        }
         QString s = QString::asprintf("%" PRId64, current);
         QAction *act = new QAction(s, this);
-        act->connect(act, &QAction::triggered, [=](){
-            this->ui->seedEdit->setText(s);
-            this->on_seedEdit_editingFinished();
-        });
-        ui->menuHistory->insertAction(last, act);
+        act->setData(QVariant::fromValue(current));
+        act->connect(act, &QAction::triggered, [=](){ this->onActionHistory(act); });
+        ui->menuHistory->insertAction(hist.empty() ? 0 : hist.first(), act);
         ui->menuHistory->setEnabled(true);
     }
 
@@ -1103,6 +1115,7 @@ void MainWindow::onActionBiomeLayerSelect(bool state, QAction *src, int lopt)
 {
     if (state == false)
         return;
+    src->setChecked(true);
     const QList<QAction*> actions = ui->menuLayer->actions();
     for (QAction *act : actions)
         if (act != src)
@@ -1110,6 +1123,14 @@ void MainWindow::onActionBiomeLayerSelect(bool state, QAction *src, int lopt)
     WorldInfo wi;
     if (getSeed(&wi))
         setSeed(wi, DIM_UNDEF, lopt);
+}
+
+void MainWindow::onActionHistory(QAction *act)
+{
+    uint64_t seed = act->data().toULongLong();
+    onSelectedSeedChanged(seed);
+    ui->menuHistory->removeAction(act);
+    act->deleteLater();
 }
 
 void MainWindow::onConditionsChanged()

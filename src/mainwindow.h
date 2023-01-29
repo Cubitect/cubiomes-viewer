@@ -109,6 +109,7 @@ private slots:
     void onAutosaveTimeout();
     void onActionMapToggled(int sopt, bool a);
     void onActionBiomeLayerSelect(bool state, QAction *src, int lopt);
+    void onActionHistory(QAction *act);
     void onConditionsChanged();
     void onGen48Changed();
     void onSelectedSeedChanged(uint64_t seed);
