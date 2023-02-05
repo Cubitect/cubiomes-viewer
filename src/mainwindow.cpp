@@ -889,9 +889,9 @@ void MainWindow::on_seedEdit_textChanged(const QString &a)
     QString typ = "";
     switch (v)
     {
-    case S_TEXT:    typ = tr("text", "Seed input type"); break;
+    case S_TEXT:    typ = " " + tr("text", "Seed input type"); break;
     case S_NUMERIC: typ = ""; break;
-    case S_RANDOM:  typ = tr("random", "Seed input type"); break;
+    case S_RANDOM:  typ = " " + tr("random", "Seed input type"); break;
     }
     ui->labelSeedType->setText(typ);
 }

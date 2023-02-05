@@ -213,7 +213,7 @@
       <widget class="QLabel" name="labelStatus">
        <property name="font">
         <font>
-         <family>Monospace</family>
+         <family>DejaVu Sans Mono</family>
          <pointsize>9</pointsize>
         </font>
        </property>
@@ -240,7 +240,7 @@
      </property>
      <property name="font">
       <font>
-       <family>Monospace</family>
+       <family>DejaVu Sans Mono</family>
        <pointsize>9</pointsize>
       </font>
      </property>
