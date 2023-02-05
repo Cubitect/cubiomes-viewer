@@ -8,6 +8,7 @@
 #include "biomecolordialog.h"
 #include "structuredialog.h"
 #include "exportdialog.h"
+#include "layerdialog.h"
 #include "tabtriggers.h"
 #include "tabbiomes.h"
 #include "tabstructures.h"
@@ -42,6 +43,7 @@ MainWindow::MainWindow(QWidget *parent)
     , formCond()
     , formGen48()
     , formControl()
+    , lopt()
     , config()
     , prevdir(".")
     , autosaveTimer()
@@ -70,17 +72,38 @@ MainWindow::MainWindow(QWidget *parent)
     ui->tabContainer->addTab(new TabBiomes(this), tr("Biomes"));
     ui->tabContainer->addTab(new TabStructures(this), tr("Structures"));
 
-    QList<QAction*> layeracts = ui->menuLayer->actions();
-    int lopt = LOPT_DEFAULT_1;
-    for (int i = 0; i < layeracts.size(); i++)
+    laction.resize(LOPT_MAX);
+    laction[LOPT_BIOMES] = ui->actionBiomes;
+    laction[LOPT_OCEAN_256] = ui->actionOceanTemp;
+    laction[LOPT_RIVER_4] = ui->actionRiver;
+    laction[LOPT_NOISE_T_4] = ui->actionParaTemperature;
+    laction[LOPT_NOISE_H_4] = ui->actionParaHumidity;
+    laction[LOPT_NOISE_C_4] = ui->actionParaContinentalness;
+    laction[LOPT_NOISE_E_4] = ui->actionParaErosion;
+    laction[LOPT_NOISE_W_4] = ui->actionParaWeirdness;
+    laction[LOPT_NOISE_D_4] = ui->actionParaDepth;
+    laction[LOPT_HEIGHT_4] = ui->actionHeight;
+    laction[LOPT_STRUCTS] = ui->actionStructures;
+    QActionGroup *grp = new QActionGroup(this);
+    for (int i = 0; i < laction.size(); i++)
     {
-        if (layeracts[i]->isSeparator())
-            continue;
-        connect(layeracts[i], &QAction::toggled,
-            [=](bool state) {
-                this->onActionBiomeLayerSelect(state, layeracts[i], lopt);
-            });
-        lopt++;
+        QAction *act = laction[i];
+        if (!act) continue;
+        connect(act, &QAction::toggled, [=](bool) {
+            this->onActionBiomeLayerSelect(i);
+        });
+        act->setActionGroup(grp);
+    }
+    connect(mapView, &MapView::layerChange, this, &MainWindow::onActionBiomeLayerSelect);
+    for (int i = 0; i < 9; i++)
+    {
+        QAction *act = new QAction(this);
+        act->setShortcut(QKeySequence(Qt::ALT+Qt::Key_1+i));
+        act->setEnabled(true);
+        connect(act, &QAction::triggered, [=](){
+            this->onActionBiomeLayerSelect(lopt.mode, i);
+        });
+        addAction(act);
     }
 
     QAction *toorigin = new QAction(QIcon(":/icons/origin.png"), "Goto origin", this);
@@ -292,7 +315,7 @@ bool MainWindow::getSeed(WorldInfo *wi, bool applyrand)
     return ok;
 }
 
-bool MainWindow::setSeed(WorldInfo wi, int dim, int layeropt)
+bool MainWindow::setSeed(WorldInfo wi, int dim)
 {
     const char *mcstr = mc2str(wi.mc);
     if (!mcstr)
@@ -349,7 +372,7 @@ bool MainWindow::setSeed(WorldInfo wi, int dim, int layeropt)
 
     ui->comboBoxMC->setCurrentText(mcstr);
     ui->seedEdit->setText(QString::asprintf("%" PRId64, (int64_t)wi.seed));
-    getMapView()->setSeed(wi, dim, layeropt);
+    getMapView()->setSeed(wi, dim, lopt);
 
     ui->checkLarge->setEnabled(wi.mc >= MC_1_3);
 
@@ -381,7 +404,6 @@ void MainWindow::saveSettings()
 
     settings.setValue("config/smoothMotion", config.smoothMotion);
     settings.setValue("config/showBBoxes", config.showBBoxes);
-    settings.setValue("config/heightVis", config.heightVis);
     settings.setValue("config/restoreSession", config.restoreSession);
     settings.setValue("config/checkForUpdates", config.checkForUpdates);
     settings.setValue("config/autosaveCycle", config.autosaveCycle);
@@ -445,7 +467,6 @@ void MainWindow::loadSettings()
 
     config.smoothMotion = settings.value("config/smoothMotion", config.smoothMotion).toBool();
     config.showBBoxes = settings.value("config/showBBoxes", config.showBBoxes).toBool();
-    config.heightVis = settings.value("config/heightVis", config.heightVis).toInt();
     config.restoreSession = settings.value("config/restoreSession", config.restoreSession).toBool();
     config.checkForUpdates = settings.value("config/checkForUpdates", config.checkForUpdates).toBool();
     config.autosaveCycle = settings.value("config/autosaveCycle", config.autosaveCycle).toInt();
@@ -1030,7 +1051,8 @@ void MainWindow::on_actionExtGen_triggered()
     int status = dialog->exec();
     if (status == QDialog::Accepted)
     {
-        g_extgen = dialog->getSettings();        // invalidate the map world, forcing an update
+        g_extgen = dialog->getSettings();
+        // invalidate the map world, forcing an update
         getMapView()->deleteWorld();
         setMCList(g_extgen.experimentalVers);
         updateMapSeed();
@@ -1070,6 +1092,20 @@ void MainWindow::on_actionDock_triggered()
     }
 }
 
+void MainWindow::on_actionLayerDisplay_triggered()
+{
+    WorldInfo wi;
+    getSeed(&wi, false);
+    LayerDialog *dialog = new LayerDialog(this, wi.mc);
+    dialog->setLayerOptions(lopt);
+    connect(dialog, &LayerDialog::apply, [=](){
+        lopt = dialog->getLayerOptions();
+        laction[lopt.mode]->setChecked(true);
+        updateMapSeed();
+    });
+    dialog->show();
+}
+
 void MainWindow::on_tabContainer_currentChanged(int index)
 {
     QSettings settings("cubiomes-viewer", "cubiomes-viewer");
@@ -1104,6 +1140,14 @@ void MainWindow::onAutosaveTimeout()
     }
 }
 
+void MainWindow::onActionHistory(QAction *act)
+{
+    uint64_t seed = act->data().toULongLong();
+    onSelectedSeedChanged(seed);
+    ui->menuHistory->removeAction(act);
+    act->deleteLater();
+}
+
 void MainWindow::onActionMapToggled(int sopt, bool show)
 {
     if (sopt == D_PORTAL) // overworld portals should also control nether
@@ -1111,26 +1155,18 @@ void MainWindow::onActionMapToggled(int sopt, bool show)
     getMapView()->setShow(sopt, show);
 }
 
-void MainWindow::onActionBiomeLayerSelect(bool state, QAction *src, int lopt)
+void MainWindow::onActionBiomeLayerSelect(int mode, int disp)
 {
-    if (state == false)
-        return;
-    src->setChecked(true);
-    const QList<QAction*> actions = ui->menuLayer->actions();
-    for (QAction *act : actions)
-        if (act != src)
-            act->setChecked(false);
+    if (disp >= 0)
+    {
+        if (!getLayerOptionText(mode, disp))
+            return; // unsupported display mode
+        lopt.disp[mode] = disp;
+    }
+    lopt.mode = mode;
     WorldInfo wi;
-    if (getSeed(&wi))
-        setSeed(wi, DIM_UNDEF, lopt);
-}
-
-void MainWindow::onActionHistory(QAction *act)
-{
-    uint64_t seed = act->data().toULongLong();
-    onSelectedSeedChanged(seed);
-    ui->menuHistory->removeAction(act);
-    act->deleteLater();
+    if (getSeed(&wi, false))
+        setSeed(wi, DIM_UNDEF);
 }
 
 void MainWindow::onConditionsChanged()

@@ -487,11 +487,9 @@ QToolButton:checked {
     <property name="title">
      <string>Layer</string>
     </property>
-    <addaction name="actionDefault_1"/>
-    <addaction name="actionDefault_4"/>
-    <addaction name="actionDefault_16"/>
-    <addaction name="actionDefault_64"/>
-    <addaction name="actionDefault_256"/>
+    <addaction name="actionLayerDisplay"/>
+    <addaction name="separator"/>
+    <addaction name="actionBiomes"/>
     <addaction name="separator"/>
     <addaction name="actionRiver"/>
     <addaction name="actionOceanTemp"/>
@@ -601,7 +599,7 @@ QToolButton:checked {
     <string>Biome colors...</string>
    </property>
   </action>
-  <action name="actionDefault_1">
+  <action name="actionBiomes">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -609,54 +607,10 @@ QToolButton:checked {
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Default 1:1</string>
+    <string>Biome scales (default)</string>
    </property>
    <property name="shortcut">
-    <string>Alt+1</string>
-   </property>
-  </action>
-  <action name="actionDefault_4">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Default 1:4</string>
-   </property>
-   <property name="shortcut">
-    <string>Alt+2</string>
-   </property>
-  </action>
-  <action name="actionDefault_16">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Default 1:16</string>
-   </property>
-   <property name="shortcut">
-    <string>Alt+3</string>
-   </property>
-  </action>
-  <action name="actionDefault_64">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Default 1:64</string>
-   </property>
-   <property name="shortcut">
-    <string>Alt+4</string>
-   </property>
-  </action>
-  <action name="actionDefault_256">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Default 1:256</string>
-   </property>
-   <property name="shortcut">
-    <string>Alt+5</string>
+    <string>Alt+B</string>
    </property>
   </action>
   <action name="actionGo_to">
@@ -675,7 +629,7 @@ QToolButton:checked {
     <string>(1.13 - 1.17) O. Temp. 1:256</string>
    </property>
    <property name="shortcut">
-    <string>Alt+7</string>
+    <string>Alt+O</string>
    </property>
   </action>
   <action name="actionRiver">
@@ -686,7 +640,7 @@ QToolButton:checked {
     <string>(1.13 - 1.17) River Mix 1:4</string>
    </property>
    <property name="shortcut">
-    <string>Alt+6</string>
+    <string>Alt+R</string>
    </property>
   </action>
   <action name="actionExportImg">
@@ -765,17 +719,6 @@ QToolButton:checked {
     <string>Alt+D</string>
    </property>
   </action>
-  <action name="actionHeight">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Approx. surface height</string>
-   </property>
-   <property name="shortcut">
-    <string>Alt+Y</string>
-   </property>
-  </action>
   <action name="actionStructures">
    <property name="checkable">
     <bool>true</bool>
@@ -798,6 +741,22 @@ QToolButton:checked {
   <action name="actionDock">
    <property name="text">
     <string>Undock map</string>
+   </property>
+  </action>
+  <action name="actionHeight">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Approx. surface height</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+Y</string>
+   </property>
+  </action>
+  <action name="actionLayerDisplay">
+   <property name="text">
+    <string>Display options...</string>
    </property>
   </action>
  </widget>

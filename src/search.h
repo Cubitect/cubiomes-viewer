@@ -642,8 +642,8 @@ struct /*__attribute__((packed))*/ Condition
     uint8_t     tol; // legacy specialCnt(4)
     uint8_t     minmax;
     uint8_t     para;
-    uint8_t     pad2[1];
-    uint8_t     pad3[2]; // legacy zero initialized
+    uint8_t     octave;
+    uint8_t     pad2[2]; // legacy zero initialized
     uint16_t    version; // condition data version
     uint64_t    biomeToExcl, biomeToExclM; // exclusion biomes
     int32_t     temps[9];
@@ -698,6 +698,7 @@ struct SearchThreadEnv
     int mc, large;
     uint64_t seed;
     int surfdim;
+    int octaves;
 
     std::map<uint64_t, lua_State*> l_states;
 
@@ -708,6 +709,7 @@ struct SearchThreadEnv
 
     void setSeed(uint64_t seed);
     void init4Dim(int dim);
+    void init4Noise(int nptype, int octaves);
     void prepareSurfaceNoise(int dim);
 };
 

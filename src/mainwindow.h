@@ -52,7 +52,7 @@ public:
     QAction *addMapAction(int sopt, const char *iconpath, QString tip);
 
     bool getSeed(WorldInfo *wi, bool applyrand = true);
-    bool setSeed(WorldInfo wi, int dim = DIM_UNDEF, int layeropt = -1);
+    bool setSeed(WorldInfo wi, int dim = DIM_UNDEF);
     int getDim();
     MapView *getMapView();
 
@@ -99,6 +99,7 @@ private slots:
     void on_actionExportImg_triggered();
     void on_actionScreenshot_triggered();
     void on_actionDock_triggered();
+    void on_actionLayerDisplay_triggered();
 
     void on_tabContainer_currentChanged(int index);
 
@@ -108,8 +109,8 @@ private slots:
     // internal events
     void onAutosaveTimeout();
     void onActionMapToggled(int sopt, bool a);
-    void onActionBiomeLayerSelect(bool state, QAction *src, int lopt);
     void onActionHistory(QAction *act);
+    void onActionBiomeLayerSelect(int lopt, int disp = -1);
     void onConditionsChanged();
     void onGen48Changed();
     void onSelectedSeedChanged(uint64_t seed);
@@ -126,11 +127,13 @@ public:
     FormConditions *formCond;
     FormGen48 *formGen48;
     FormSearchControl *formControl;
+    LayerOpt lopt;
     Config config;
     QString prevdir;
     QTimer autosaveTimer;
     int prevtab;
 
+    QVector<QAction*> laction;
     QVector<QAction*> saction;
     QAction *dimactions[3];
     QActionGroup *dimgroup;

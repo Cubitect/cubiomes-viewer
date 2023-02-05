@@ -173,6 +173,8 @@ private slots:
 
     void on_pushInfoLua_clicked();
 
+    void on_comboClimatePara_currentIndexChanged(int index);
+
 private:
     Ui::ConditionDialog *ui;
     QTextEdit *textDescription;

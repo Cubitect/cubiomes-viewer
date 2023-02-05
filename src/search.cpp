@@ -93,8 +93,7 @@ bool Condition::versionUpgrade()
         hash = 0;
         memset(deps, 0, sizeof(deps));
         memset(pad2, 0, sizeof(pad2));
-        memset(pad3, 0, sizeof(pad3));
-        biomeId = biomeSize = tol = minmax = para = 0;
+        biomeId = biomeSize = tol = minmax = para = octave = 0;
         varflags = varbiome = varstart = 0;
     }
     else if (version == VER_2_3_0)
@@ -183,7 +182,7 @@ QString ConditionTree::set(const QVector<Condition>& cv, int mc)
 }
 
 SearchThreadEnv::SearchThreadEnv()
-    : condtree(),mc(),large(),seed(),surfdim(DIM_UNDEF),l_states()
+    : condtree(),mc(),large(),seed(),surfdim(DIM_UNDEF),octaves(),l_states()
 {
     memset(&g, 0, sizeof(g));
     memset(&sn, 0, sizeof(sn));
@@ -202,6 +201,7 @@ QString SearchThreadEnv::init(int mc, bool large, ConditionTree *condtree)
     this->large = large;
     this->seed = 0;
     this->surfdim = DIM_UNDEF;
+    this->octaves = 0;
     uint32_t flags = 0;
     if (large)
         flags |= LARGE_BIOMES;
@@ -235,20 +235,33 @@ QString SearchThreadEnv::init(int mc, bool large, ConditionTree *condtree)
 void SearchThreadEnv::setSeed(uint64_t seed)
 {
     this->seed = seed;
+    this->octaves = 0;
 }
 
 void SearchThreadEnv::init4Dim(int dim)
 {
-    uint64_t mask = (dim == 0 ? ~0ULL : MASK48);
+    uint64_t mask = (dim == DIM_OVERWORLD ? ~0ULL : MASK48);
     if (dim != g.dim || (seed & mask) != (g.seed & mask))
     {
         applySeed(&g, dim, seed);
-        surfdim = DIM_UNDEF;
+        this->surfdim = DIM_UNDEF;
     }
     else if (g.mc >= MC_1_15 && seed != g.seed)
     {
         g.sha = getVoronoiSHA(seed);
     }
+}
+
+void SearchThreadEnv::init4Noise(int nptype, int octaves)
+{
+    if (octaves <= 0)
+        octaves = INT_MAX;
+    if (g.bn.nptype == nptype && this->octaves >= octaves)
+        return; // already initialized for parameter
+    if (seed == g.seed && g.bn.nptype == -1)
+        return; // fully initialized biome noise
+    setClimateParaSeed(&g.bn, seed, large, nptype, octaves);
+    this->octaves = octaves;
 }
 
 void SearchThreadEnv::prepareSurfaceNoise(int dim)
@@ -1730,7 +1743,7 @@ L_noise_biome:
             int w = rx2 - rx1 + 1;
             int h = rz2 - rz1 + 1;
             double para;
-            env->init4Dim(DIM_OVERWORLD);
+            env->init4Noise(cond->para, cond->octave);
             if (cond->minmax == 0 || cond->minmax == 2)
             {   // min
                 info.value = para = +INFINITY;

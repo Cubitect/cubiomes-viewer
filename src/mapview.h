@@ -38,7 +38,7 @@ public:
 
     void deleteWorld();
     void refresh();
-    void setSeed(WorldInfo wi, int dim, int layeropt = -1);
+    void setSeed(WorldInfo wi, int dim, LayerOpt lopt);
     void setView(qreal x, qreal z, qreal scale = 0);
     void animateView(qreal x, qreal z, qreal scale);
     qreal x_src, z_src, s_src;
@@ -63,6 +63,7 @@ private:
     void runAni();
 
 signals:
+    void layerChange(int mode, int disp);
 
 public slots:
     void mapUpdate();
@@ -105,7 +106,7 @@ private:
     int updatecounter;
 
     bool sshow[STRUCT_NUM];
-    int layeropt;
+    LayerOpt lopt;
     Config config;
 };
 

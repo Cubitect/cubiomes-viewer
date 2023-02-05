@@ -45,25 +45,6 @@ enum {
     STRUCT_NUM
 };
 
-enum {
-    LOPT_DEFAULT_1,
-    LOPT_DEFAULT_4,
-    LOPT_DEFAULT_16,
-    LOPT_DEFAULT_64,
-    LOPT_DEFAULT_256,
-    LOPT_RIVER_4,
-    LOPT_OCEAN_256,
-    LOPT_NOISE_T_4,
-    LOPT_NOISE_H_4,
-    LOPT_NOISE_C_4,
-    LOPT_NOISE_E_4,
-    LOPT_NOISE_D_4,
-    LOPT_NOISE_W_4,
-    LOPT_HEIGHT_4,
-    LOPT_STRUCTS,
-    LOPT_MAX,
-};
-
 inline const char *mapopt2str(int opt)
 {
     switch (opt)
@@ -173,6 +154,12 @@ QIcon getBiomeIcon(int id, bool warn = false);
 void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
         WorldInfo wi, int dim, int x0, int z0, int x1, int z1, bool nogen = false);
 
+enum {
+    HV_GRAYSCALE        = 0,
+    HV_SHADING          = 1,
+    HV_CONTOURS         = 2,
+    HV_CONTOURS_SHADING = 3,
+};
 void applyHeightShading(unsigned char *rgb, Range r,
         const Generator *g, const SurfaceNoise *sn, int stepbits, int mode,
         bool bicubic, std::atomic_bool *abort);
@@ -197,6 +184,7 @@ struct Quad : public Scheduled
 
     WorldInfo wi;
     int dim;
+    LayerOpt lopt;
     const Generator *g;
     const SurfaceNoise *sn;
     int hd;
@@ -205,8 +193,6 @@ struct Quad : public Scheduled
     int blocks;
     int pixs;
     int sopt;
-    int lopt;
-    int heightvis;
 
     int *biomes;
     uchar *rgb;
@@ -227,12 +213,14 @@ struct Level
 
     void resizeLevel(std::vector<Quad*>& cache, int64_t x, int64_t z, int64_t w, int64_t h);
     void update(std::vector<Quad*>& cache, qreal bx0, qreal bz0, qreal bx1, qreal bz1);
+    void setInactive(std::vector<Quad*>& cache);
 
     QWorld *world;
     std::vector<Quad*> cells;
     Generator g;
     SurfaceNoise sn;
     Layer *entry;
+    LayerOpt lopt;
     WorldInfo wi;
     int dim;
     int tx, tz, tw, th;
@@ -241,7 +229,6 @@ struct Level
     int blocks;
     int pixs;
     int sopt;
-    int lopt;
     double vis;
     std::atomic_bool *isdel;
 };
@@ -271,10 +258,10 @@ struct QWorld : public QObject
 {
     Q_OBJECT
 public:
-    QWorld(WorldInfo wi, int dim = 0, int layeropt = LOPT_DEFAULT_1);
+    QWorld(WorldInfo wi, int dim = 0, LayerOpt lopt = LayerOpt());
     virtual ~QWorld();
 
-    void setDim(int dim, int layeropt);
+    void setDim(int dim, LayerOpt lopt);
 
     void cleancache(std::vector<Quad*>& cache, unsigned int maxsize);
 
@@ -299,7 +286,7 @@ signals:
 public:
     WorldInfo wi;
     int dim;
-    int layeropt;
+    LayerOpt lopt;
     Generator g;
     SurfaceNoise sn;
 
@@ -319,7 +306,6 @@ public:
 
     bool sshow[STRUCT_NUM];
     bool showBB;
-    int heightvis;
     int gridspacing;
     int gridmultiplier;
 

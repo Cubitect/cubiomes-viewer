@@ -701,8 +701,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>98</width>
-                   <height>28</height>
+                   <width>60</width>
+                   <height>20</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -1013,8 +1013,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>98</width>
-                   <height>28</height>
+                   <width>60</width>
+                   <height>20</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -1053,13 +1053,6 @@
               <string>Locate climate minimum/maximum</string>
              </property>
              <layout class="QGridLayout" name="gridLayout_24">
-              <item row="1" column="2">
-               <widget class="QLineEdit" name="lineMinMax">
-                <property name="text">
-                 <string>0</string>
-                </property>
-               </widget>
-              </item>
               <item row="0" column="0">
                <widget class="QLabel" name="label_8">
                 <property name="text">
@@ -1067,7 +1060,14 @@
                 </property>
                </widget>
               </item>
-              <item row="1" column="1">
+              <item row="2" column="2">
+               <widget class="QLineEdit" name="lineMinMax">
+                <property name="text">
+                 <string>0</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
                <widget class="QComboBox" name="comboMinMax">
                 <item>
                  <property name="text">
@@ -1091,7 +1091,14 @@
                 </item>
                </widget>
               </item>
-              <item row="2" column="1">
+              <item row="2" column="0">
+               <widget class="QLabel" name="label_9">
+                <property name="text">
+                 <string>Locate value:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
                <spacer name="verticalSpacer_5">
                 <property name="orientation">
                  <enum>Qt::Vertical</enum>
@@ -1107,10 +1114,19 @@
               <item row="0" column="1" colspan="2">
                <widget class="QComboBox" name="comboClimatePara"/>
               </item>
+              <item row="1" column="1" colspan="2">
+               <widget class="QComboBox" name="comboOctaves">
+                <property name="font">
+                 <font>
+                  <family>DejaVu Sans Mono</family>
+                 </font>
+                </property>
+               </widget>
+              </item>
               <item row="1" column="0">
-               <widget class="QLabel" name="label_9">
+               <widget class="QLabel" name="label_12">
                 <property name="text">
-                 <string>Locate value:</string>
+                 <string>Octaves:</string>
                 </property>
                </widget>
               </item>
@@ -1388,8 +1404,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>98</width>
-                   <height>28</height>
+                   <width>60</width>
+                   <height>20</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_3_1">
@@ -1445,8 +1461,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>98</width>
-                   <height>28</height>
+                   <width>60</width>
+                   <height>20</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_3_2">
@@ -1550,8 +1566,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>98</width>
-                   <height>28</height>
+                   <width>60</width>
+                   <height>20</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_3_3">

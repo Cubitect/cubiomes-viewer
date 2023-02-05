@@ -49,7 +49,7 @@ MapView::MapView(QWidget *parent)
     , bstart()
     , measure()
     , updatecounter()
-    , layeropt(LOPT_DEFAULT_1)
+    , lopt()
     , config()
 {
     memset(sshow, 0, sizeof(sshow));
@@ -97,29 +97,28 @@ void MapView::refresh()
         WorldInfo wi = world->wi;
         int dim = world->dim;
         deleteWorld();
-        world = new QWorld(wi, dim, layeropt);
+        world = new QWorld(wi, dim, lopt);
         QObject::connect(world, &QWorld::update, this, &MapView::mapUpdate);
     }
 }
 
-void MapView::setSeed(WorldInfo wi, int dim, int lopt)
+void MapView::setSeed(WorldInfo wi, int dim, LayerOpt lopt)
 {
     prevx = focusx = getX();
     prevz = focusz = getZ();
     velx = velz = 0;
-    if (lopt >= 0)
-        layeropt = lopt;
+    this->lopt = lopt;
 
     if (world == NULL || !wi.equals(world->wi) ||
-        world->layeropt == LOPT_STRUCTS || layeropt == LOPT_STRUCTS)
+        world->lopt.mode == LOPT_STRUCTS || lopt.mode == LOPT_STRUCTS)
     {
         deleteWorld();
-        world = new QWorld(wi, dim, layeropt);
+        world = new QWorld(wi, dim, lopt);
         QObject::connect(world, &QWorld::update, this, &MapView::mapUpdate);
     }
-    else if (world->dim != dim || world->layeropt != layeropt)
+    else if (world->dim != dim || world->lopt.activeDifference(lopt))
     {
-        world->setDim(dim, layeropt);
+        world->setDim(dim, lopt);
     }
     settingsToWorld();
     update(2);
@@ -184,11 +183,10 @@ void MapView::settingsToWorld()
     for (int s = 0; s < STRUCT_NUM; s++)
         world->sshow[s] = sshow[s];
     world->showBB = config.showBBoxes;
-    world->heightvis = config.heightVis;
     world->gridspacing = config.gridSpacing;
     world->gridmultiplier = config.gridMultiplier;
     world->memlimit = (uint64_t) config.mapCacheSize * 1024 * 1024;
-    world->layeropt = layeropt;
+    world->lopt = lopt;
 }
 
 static qreal smoothstep(qreal x)

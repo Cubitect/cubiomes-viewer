@@ -171,9 +171,8 @@ QStringList VarPos::detail() const
 
 
 Quad::Quad(const Level* l, int64_t i, int64_t j)
-    : wi(l->wi),dim(l->dim),g(&l->g),sn(&l->sn),hd(l->hd),scale(l->scale)
-    , ti(i),tj(j),blocks(l->blocks),pixs(l->pixs),sopt(l->sopt),lopt(l->lopt)
-    , heightvis(l->world->heightvis)
+    : wi(l->wi),dim(l->dim),lopt(l->lopt),g(&l->g),sn(&l->sn),hd(l->hd),scale(l->scale)
+    , ti(i),tj(j),blocks(l->blocks),pixs(l->pixs),sopt(l->sopt)
     , biomes(),rgb(),img(),spos()
 {
     isdel = l->isdel;
@@ -368,7 +367,7 @@ void applyHeightShading(unsigned char *rgb, Range r,
             if (mode == HV_GRAYSCALE)
             {
                 if (t11 <= -64)
-                {   // sinkhole
+                {   // sinkhole in 1.19.0 - 1.19.2
                     col[0] = 0xff; col[1] = col[2] = 0;
                     continue;
                 }
@@ -401,11 +400,13 @@ void applyHeightShading(unsigned char *rgb, Range r,
 void Quad::run()
 {
     if (done || *isdel)
+    {
         return;
+    }
 
     if (pixs > 0)
     {
-        if (lopt == LOPT_STRUCTS && dim == DIM_OVERWORLD)
+        if (lopt.mode == LOPT_STRUCTS && dim == DIM_OVERWORLD)
         {
             img = new QImage();
             done = true;
@@ -433,17 +434,17 @@ void Quad::run()
         }
 
         rgb = new uchar[w*h * 3];
-        if (lopt <= LOPT_OCEAN_256 || g->mc < MC_1_18 || dim != 0 || g->bn.nptype < 0)
+        if (lopt.mode <= LOPT_OCEAN_256 || g->mc < MC_1_18 || dim != 0 || g->bn.nptype < 0)
         {
             // sync biomeColors
             g_mutex.lock();
             g_mutex.unlock();
             biomesToImage(rgb, g_biomeColors, biomes, w, h, 1, 1);
 
-            if (lopt == LOPT_HEIGHT_4 && dim == 0)
+            if (lopt.mode == LOPT_HEIGHT_4 && dim == 0)
             {
                 int stepbits = (hd ? 0 : 2);
-                applyHeightShading(rgb, r, g, sn, stepbits, heightvis, false, isdel);
+                applyHeightShading(rgb, r, g, sn, stepbits, lopt.disp[lopt.mode], false, isdel);
             }
         }
         else // climate parameter
@@ -470,7 +471,7 @@ void Quad::run()
             std::vector<VarPos>* st = new std::vector<VarPos>();
             StructureConfig sconf;
             if (getStructureConfig_override(structureType, wi.mc, &sconf))
-                getStructs(st, sconf, wi, dim, x0, z0, x1, z1, lopt == LOPT_STRUCTS);
+                getStructs(st, sconf, wi, dim, x0, z0, x1, z1, lopt.mode == LOPT_STRUCTS);
             spos = st;
         }
     }
@@ -478,10 +479,10 @@ void Quad::run()
 }
 
 Level::Level()
-    : cells(),g(),sn(),entry(),wi(),dim()
+    : cells(),g(),sn(),entry(),lopt(),wi(),dim()
     , tx(),tz(),tw(),th()
     , hd(),scale(),blocks(),pixs()
-    , sopt(),lopt()
+    , sopt()
 {
 }
 
@@ -496,6 +497,7 @@ Level::~Level()
 void Level::init4map(QWorld *w, int pix, int layerscale)
 {
     this->world = w;
+    this->lopt = w->lopt;
     this->wi = w->wi;
     this->dim = w->dim;
 
@@ -507,8 +509,18 @@ void Level::init4map(QWorld *w, int pix, int layerscale)
     blocks = pix * layerscale;
 
     int optlscale = 1;
-    switch (w->layeropt)
+    switch (lopt.mode)
     {
+    case LOPT_BIOMES:
+        if (lopt.disp[lopt.mode] == 1)
+            optlscale = 4;
+        else if (lopt.disp[lopt.mode] == 2)
+            optlscale = 16;
+        else if (lopt.disp[lopt.mode] == 3)
+            optlscale = 64;
+        else if (lopt.disp[lopt.mode] == 4)
+            optlscale = 256;
+        break;
     case LOPT_NOISE_T_4:
     case LOPT_NOISE_H_4:
     case LOPT_NOISE_C_4:
@@ -517,18 +529,10 @@ void Level::init4map(QWorld *w, int pix, int layerscale)
     case LOPT_NOISE_W_4:
     case LOPT_HEIGHT_4:
     case LOPT_RIVER_4:
-    case LOPT_DEFAULT_4:
     case LOPT_STRUCTS:
         optlscale = 4;
         break;
-    case LOPT_DEFAULT_16:
-        optlscale = 16;
-        break;
-    case LOPT_DEFAULT_64:
-        optlscale = 64;
-        break;
     case LOPT_OCEAN_256:
-    case LOPT_DEFAULT_256:
         optlscale = 256;
         break;
     }
@@ -541,12 +545,12 @@ void Level::init4map(QWorld *w, int pix, int layerscale)
             pixs = 1;
     }
 
-    if (w->layeropt == LOPT_RIVER_4 && wi.mc >= MC_1_13 && wi.mc <= MC_1_17)
+    if (lopt.mode == LOPT_RIVER_4 && wi.mc >= MC_1_13 && wi.mc <= MC_1_17)
     {
         setupGenerator(&g, wi.mc, wi.large);
         g.ls.entry_4 = &g.ls.layers[L_RIVER_MIX_4];
     }
-    else if (w->layeropt == LOPT_OCEAN_256 && wi.mc >= MC_1_13 && wi.mc <= MC_1_17)
+    else if (lopt.mode == LOPT_OCEAN_256 && wi.mc >= MC_1_13 && wi.mc <= MC_1_17)
     {
         setupGenerator(&g, wi.mc, wi.large);
         g.ls.entry_256 = &g.ls.layers[L_OCEAN_TEMP_256];
@@ -560,10 +564,9 @@ void Level::init4map(QWorld *w, int pix, int layerscale)
     initSurfaceNoise(&sn, dim, wi.seed);
     this->isdel = &w->isdel;
     sopt = D_NONE;
-    lopt = w->layeropt;
     if (dim == DIM_OVERWORLD && wi.mc >= MC_1_18)
     {
-        switch (w->layeropt)
+        switch (lopt.mode)
         {
         case LOPT_NOISE_T_4: g.bn.nptype = NP_TEMPERATURE; break;
         case LOPT_NOISE_H_4: g.bn.nptype = NP_HUMIDITY; break;
@@ -571,6 +574,11 @@ void Level::init4map(QWorld *w, int pix, int layerscale)
         case LOPT_NOISE_E_4: g.bn.nptype = NP_EROSION; break;
         case LOPT_NOISE_D_4: g.bn.nptype = NP_DEPTH; break;
         case LOPT_NOISE_W_4: g.bn.nptype = NP_WEIRDNESS; break;
+        }
+        if (g.bn.nptype >= 0)
+        {
+            int nmax = lopt.activeDisp();
+            setClimateParaSeed(&g.bn, wi.seed, wi.large, g.bn.nptype, nmax);
         }
     }
 }
@@ -584,7 +592,7 @@ void Level::init4struct(QWorld *w, int dim, int blocks, double vis, int sopt)
     this->pixs = -1;
     this->scale = -1;
     this->sopt = sopt;
-    this->lopt = w->layeropt;
+    this->lopt = w->lopt;
     this->vis = vis;
     this->isdel = &w->isdel;
 }
@@ -595,12 +603,13 @@ void Level::resizeLevel(std::vector<Quad*>& cache, int64_t x, int64_t z, int64_t
 {
     if (!world)
         return;
+
+    world->mutex.lock();
+
     // move the cells from the old grid to the new grid
     // or to the cached queue if they are not inside the new grid
     std::vector<Quad*> grid(w*h);
     std::vector<Quad*> togen;
-
-    world->mutex.lock();
 
     for (Quad *q : cells)
     {
@@ -652,26 +661,25 @@ void Level::resizeLevel(std::vector<Quad*>& cache, int64_t x, int64_t z, int64_t
                 g->prio = sqdist(i-w/2, j-h/2);
                 togen.push_back(g);
             }
-            else if (g->stopped || world->take(g))
+            else if ((g->stopped || world->take(g)) && !g->done)
             {
-                if (!g->done)
-                {
-                    g->stopped = false;
-                    g->prio = sqdist(i-w/2, j-h/2);
-                    if (g->dim != dim)
-                        g->prio += 1000000;
-                    togen.push_back(g);
-                }
+                g->stopped = false;
+                g->prio = sqdist(i-w/2, j-h/2);
+                if (g->dim != dim)
+                    g->prio += 1000000;
+                togen.push_back(g);
             }
         }
     }
 
-    // start the quad processing
-    std::sort(togen.begin(), togen.end(),
-              [](Quad* a, Quad* b) { return a->prio < b->prio; });
-    for (Quad *q : togen)
-        world->add(q);
-    world->startWorkers();
+    if (!togen.empty())
+    {   // start the quad processing
+        std::sort(togen.begin(), togen.end(),
+                  [](Quad* a, Quad* b) { return a->prio < b->prio; });
+        for (Quad *q : togen)
+            world->add(q);
+        world->startWorkers();
+    }
 
     cells.swap(grid);
     tx = x;
@@ -702,6 +710,12 @@ void Level::update(std::vector<Quad*>& cache, qreal bx0, qreal bz0, qreal bx1, q
     }
 }
 
+void Level::setInactive(std::vector<Quad*>& cache)
+{
+    if (th > 0 || tw > 0)
+        resizeLevel(cache, 0, 0, 0, 0);
+}
+
 void MapWorker::run()
 {
     while (Scheduled *q = world->requestQuad())
@@ -712,11 +726,11 @@ void MapWorker::run()
     }
 }
 
-QWorld::QWorld(WorldInfo wi, int dim, int layeropt)
+QWorld::QWorld(WorldInfo wi, int dim, LayerOpt lopt)
     : QObject()
     , wi(wi)
     , dim(dim)
-    , layeropt(layeropt)
+    , lopt(lopt)
     , lvb()
     , lvs()
     , activelv()
@@ -727,7 +741,6 @@ QWorld::QWorld(WorldInfo wi, int dim, int layeropt)
     , queue()
     , workers(QThread::idealThreadCount())
     , showBB()
-    , heightvis(HV_SHADING)
     , gridspacing()
     , gridmultiplier()
     , spawn()
@@ -753,7 +766,7 @@ QWorld::QWorld(WorldInfo wi, int dim, int layeropt)
         QObject::connect(&w, &MapWorker::quadDone, this, &QWorld::update);
     }
 
-    setDim(dim, layeropt);
+    setDim(dim, lopt);
 
     std::map<int, double> svis;
     loadStructVis(svis);
@@ -779,7 +792,6 @@ QWorld::QWorld(WorldInfo wi, int dim, int layeropt)
 QWorld::~QWorld()
 {
     clear();
-
     for (Quad *q : cachedbiomes)
         delete q;
     for (Quad *q : cachedstruct)
@@ -792,34 +804,16 @@ QWorld::~QWorld()
     }
 }
 
-void QWorld::setDim(int dim, int layeropt)
+void QWorld::setDim(int dim, LayerOpt lopt)
 {
     clear();
-    if (this->layeropt != layeropt)
-    {
-        for (Level& l : lvb)
-            l.resizeLevel(cachedbiomes, 0, 0, 0, 0);
+    if (this->lopt.activeDifference(lopt))
         cleancache(cachedbiomes, 0);
-    }
 
     this->dim = dim;
-    this->layeropt = layeropt;
+    this->lopt = lopt;
     applySeed(&g, dim, wi.seed);
     initSurfaceNoise(&sn, DIM_OVERWORLD, g.seed);
-
-    // cache existing quads
-    for (Level& l : lvb)
-    {
-        std::vector<Quad*> todel;
-        for (Quad *q : l.cells)
-        {
-            if (q->done)
-                cachedbiomes.push_back(q);
-            else
-                todel.push_back(q);
-        }
-        l.cells.swap(todel);
-    }
 
     int pixs, lcnt;
     if (g.mc >= MC_1_18 || dim != DIM_OVERWORLD)
@@ -866,23 +860,25 @@ int QWorld::getBiome(Pos p)
 QString QWorld::getBiomeName(Pos p)
 {
     int id = getBiome(p);
-    if (wi.mc >= MC_1_18 && dim == 0 && layeropt >= LOPT_NOISE_T_4 && layeropt <= LOPT_NOISE_W_4)
+    if (wi.mc >= MC_1_18 && dim == 0 && lopt.mode >= LOPT_NOISE_T_4 && lopt.mode <= LOPT_NOISE_W_4)
     {
         QString c;
-        switch (layeropt)
+        switch (lopt.mode)
         {
-            case LOPT_NOISE_T_4: c = "T="; break;
-            case LOPT_NOISE_H_4: c = "H="; break;
-            case LOPT_NOISE_C_4: c = "C="; break;
-            case LOPT_NOISE_E_4: c = "E="; break;
-            case LOPT_NOISE_D_4: c = "D="; break;
-            case LOPT_NOISE_W_4: c = "W="; break;
+            case LOPT_NOISE_T_4: c = "T"; break;
+            case LOPT_NOISE_H_4: c = "H"; break;
+            case LOPT_NOISE_C_4: c = "C"; break;
+            case LOPT_NOISE_E_4: c = "E"; break;
+            case LOPT_NOISE_D_4: c = "D"; break;
+            case LOPT_NOISE_W_4: c = "W"; break;
         }
-        return c + QString::number(id);
+        if (lopt.activeDisp())
+            c += "." + QString::number(lopt.activeDisp());
+        return c + "=" + QString::number(id);
     }
     const char *s = biome2str(wi.mc, id);
     QString ret = s ? s : "";
-    if (layeropt == LOPT_HEIGHT_4 && dim == 0)
+    if (lopt.mode == LOPT_HEIGHT_4 && dim == 0)
     {
         float y;
         int id;
@@ -897,7 +893,7 @@ static void refreshQuadColor(Quad *q)
     QImage *img = q->img;
     if (!img)
         return;
-    if (q->lopt <= LOPT_OCEAN_256 || q->g->mc < MC_1_18 || q->dim != 0 || q->g->bn.nptype < 0)
+    if (q->lopt.mode <= LOPT_OCEAN_256 || q->g->mc < MC_1_18 || q->dim != 0 || q->g->bn.nptype < 0)
         biomesToImage(q->rgb, g_biomeColors, q->biomes, img->width(), img->height(), 1, 1);
 }
 
@@ -921,6 +917,14 @@ void QWorld::clear()
     mutex.unlock();
     waitForIdle();
     isdel = false;
+
+    for (Level& l : lvb)
+        l.setInactive(cachedbiomes);
+    for (Quad *q : cachedbiomes)
+    {
+        if (!q->done)
+            q->stopped = true;
+    }
 }
 
 void QWorld::startWorkers()
@@ -1087,12 +1091,15 @@ static bool draw_grid_rec(QPainter& painter, QRect &rec, qreal pix, int64_t x, i
 {
     painter.setPen(QPen(QColor(0, 0, 0, 96), 1));
     painter.drawRect(rec);
-    if (pix <= 63)
+    if (pix < 50)
         return false;
+
     QString s = QString::asprintf("%" PRId64 ",%" PRId64, x, z);
     QRect textrec = painter.fontMetrics()
             .boundingRect(rec, Qt::AlignLeft | Qt::AlignTop, s);
 
+    if (textrec.width() > pix)
+        return false;
     painter.fillRect(textrec, QBrush(QColor(0, 0, 0, 128), Qt::SolidPattern));
 
     painter.setPen(QColor(255, 255, 255));
@@ -1330,7 +1337,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
     }
 
     Pos* sp = spawn; // atomic fetch
-    if (sp && sp != (Pos*)-1 && sshow[D_SPAWN] && dim == 0 && layeropt != LOPT_STRUCTS)
+    if (sp && sp != (Pos*)-1 && sshow[D_SPAWN] && dim == 0 && lopt.mode != LOPT_STRUCTS)
     {
         qreal x = vw/2.0 + (sp->x - focusx) * blocks2pix;
         qreal y = vh/2.0 + (sp->z - focusz) * blocks2pix;
@@ -1351,7 +1358,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
     }
 
     QAtomicPointer<PosElement> shs = strongholds;
-    if (shs && sshow[D_STRONGHOLD] && dim == 0 && layeropt != LOPT_STRUCTS)
+    if (shs && sshow[D_STRONGHOLD] && dim == 0 && lopt.mode != LOPT_STRUCTS)
     {
         std::vector<QPainter::PixmapFragment> frags;
         do
@@ -1383,7 +1390,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
         if (l.vis <= blocks2pix && sshow[sopt] && dim == l.dim)
             l.update(cachedstruct, bx0, bz0, bx1, bz1);
         else if (l.vis * 4 > blocks2pix)
-            l.update(cachedstruct, 0, 0, 0, 0);
+            l.setInactive(cachedstruct);
     }
     for (int li = lvb.size()-1; li >= 0; --li)
     {
@@ -1391,10 +1398,10 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
         if (li == activelv || li == activelv+1)
             l.update(cachedbiomes, bx0, bz0, bx1, bz1);
         else
-            l.update(cachedbiomes, 0, 0, 0, 0);
+            l.setInactive(cachedbiomes);
     }
 
-    if (spawn == NULL && layeropt != LOPT_STRUCTS)
+    if (spawn == NULL && lopt.mode != LOPT_STRUCTS)
     {   // start the spawn and stronghold worker thread if this is the first run
         if (sshow[D_SPAWN] || sshow[D_STRONGHOLD] || (showBB && blocks2pix >= 1.0))
         {

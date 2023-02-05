@@ -3,6 +3,7 @@
 
 #include "mainwindow.h"
 #include "scripts.h"
+#include "layerdialog.h"
 
 #include <QCheckBox>
 #include <QIntValidator>
@@ -294,6 +295,7 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
     ui->checkRadius->setChecked(false);
     ui->lineBiomeSize->setText("");
     onCheckStartChanged(false);
+    on_comboClimatePara_currentIndexChanged(0);
 
     if (initcond)
     {
@@ -329,6 +331,8 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
         ui->comboMatchBiome->setCurrentIndex(0);
 
         ui->comboClimatePara->setCurrentIndex(ui->comboClimatePara->findData(QVariant::fromValue(cond.para)));
+        on_comboClimatePara_currentIndexChanged(cond.para);
+        ui->comboOctaves->setCurrentIndex(cond.octave);
         ui->comboMinMax->setCurrentIndex(cond.minmax);
         ui->lineMinMax->setText(QString::number(cond.value));
 
@@ -995,6 +999,7 @@ void ConditionDialog::on_buttonOk_clicked()
     {
         c.minmax = ui->comboMinMax->currentIndex();
         c.para = ui->comboClimatePara->currentData().toInt();
+        c.octave = ui->comboOctaves->currentIndex();
         c.value = ui->lineMinMax->text().toFloat();
     }
     if (ui->stackedWidget->currentWidget() == ui->pageTemps)
@@ -1428,5 +1433,20 @@ void ConditionDialog::on_pushInfoLua_clicked()
         "</p></body></html>"
         ));
     mb.exec();
+}
+
+void ConditionDialog::on_comboClimatePara_currentIndexChanged(int)
+{
+    ui->comboOctaves->clear();
+    int loptidx = LOPT_NOISE_PARA + ui->comboClimatePara->currentData().toInt();
+    QStringList items;
+    for (int i = 0; ; i++)
+    {
+        if (const char *s = getLayerOptionText(loptidx, i))
+            items.append(s);
+        else
+            break;
+    }
+    ui->comboOctaves->addItems(items);
 }
 

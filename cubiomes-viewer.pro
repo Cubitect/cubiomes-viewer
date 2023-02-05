@@ -48,7 +48,6 @@ LUAPATH             = $$PWD/lua/src
 
 TARGET = cubiomes-viewer
 
-
 SOURCES += \
         $$LUAPATH/lapi.c \
         $$LUAPATH/lauxlib.c \
@@ -95,6 +94,7 @@ SOURCES += \
         src/gotodialog.cpp \
         src/presetdialog.cpp \
         src/protobasedialog.cpp \
+        src/layerdialog.cpp \
         src/mapview.cpp \
         src/rangedialog.cpp \
         src/rangeslider.cpp \
@@ -156,6 +156,7 @@ HEADERS += \
         src/gotodialog.h \
         src/presetdialog.h \
         src/protobasedialog.h \
+        src/layerdialog.h \
         src/mapview.h \
         src/cutil.h \
         src/rangedialog.h \
@@ -185,6 +186,7 @@ FORMS += \
         src/gotodialog.ui \
         src/presetdialog.ui \
         src/protobasedialog.ui \
+        src/layerdialog.ui \
         src/mainwindow.ui \
         src/rangedialog.ui \
         src/tabbiomes.ui \

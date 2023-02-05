@@ -61,13 +61,45 @@ struct WorldInfo
     }
 };
 
-enum { STYLE_SYSTEM, STYLE_DARK };
+
 enum {
-    HV_GRAYSCALE        = 0,
-    HV_SHADING          = 1,
-    HV_CONTOURS         = 2,
-    HV_CONTOURS_SHADING = 3,
+    LOPT_BIOMES,
+    LOPT_RIVER_4,
+    LOPT_OCEAN_256,
+    LOPT_NOISE_PARA,
+    LOPT_NOISE_T_4 = LOPT_NOISE_PARA,
+    LOPT_NOISE_H_4,
+    LOPT_NOISE_C_4,
+    LOPT_NOISE_E_4,
+    LOPT_NOISE_D_4,
+    LOPT_NOISE_W_4,
+    LOPT_HEIGHT_4,
+    LOPT_STRUCTS,
+    LOPT_MAX,
 };
+
+struct LayerOpt
+{
+    int8_t mode;
+    int8_t disp[LOPT_MAX];
+
+    LayerOpt() { reset(); }
+
+    void reset()
+    {
+        mode = LOPT_BIOMES;
+        memset(disp, 0, sizeof(disp));
+    }
+
+    int activeDisp() const { return disp[mode]; };
+
+    bool activeDifference(const LayerOpt& l) const
+    {
+        return mode != l.mode || disp[l.mode] != l.disp[l.mode];
+    }
+};
+
+enum { STYLE_SYSTEM, STYLE_DARK };
 
 struct Config
 {
@@ -81,7 +113,6 @@ struct Config
     int gridSpacing;
     int gridMultiplier;
     int mapCacheSize;
-    int heightVis;
     QString biomeColorPath;
     QString separator;
     QString quote;
@@ -100,7 +131,6 @@ struct Config
         gridSpacing = 0;
         gridMultiplier = 0;
         mapCacheSize = 256;
-        heightVis = HV_SHADING;
         biomeColorPath = "";
         separator = ";";
         quote = "";

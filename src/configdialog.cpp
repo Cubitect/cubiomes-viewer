@@ -51,7 +51,6 @@ void ConfigDialog::initSettings(Config *config)
     if (config->autosaveCycle)
         ui->spinAutosave->setValue(config->autosaveCycle);
     ui->comboStyle->setCurrentIndex(config->uistyle);
-    ui->comboHeightVis->setCurrentIndex(config->heightVis);
     ui->lineMatching->setText(QString::number(config->maxMatching));
     ui->lineGridSpacing->setText(config->gridSpacing ? QString::number(config->gridSpacing) : "");
     ui->comboGridMult->setCurrentText(config->gridMultiplier ? QString::number(config->gridMultiplier) : tr("None"));
@@ -71,7 +70,6 @@ Config ConfigDialog::getSettings()
     conf.checkForUpdates = ui->checkUpdates->isChecked();
     conf.autosaveCycle = ui->checkAutosave->isChecked() ? ui->spinAutosave->value() : 0;
     conf.uistyle = ui->comboStyle->currentIndex();
-    conf.heightVis = ui->comboHeightVis->currentIndex();
     conf.maxMatching = ui->lineMatching->text().toInt();
     conf.gridSpacing = ui->lineGridSpacing->text().toInt();
     conf.gridMultiplier = ui->comboGridMult->currentText().toInt();
@@ -192,11 +190,6 @@ void ConfigDialog::on_buttonColorHelp_clicked()
             "</p></body></html>"
             );
     QMessageBox::information(this, tr("Help: custom biome colors"), msg, QMessageBox::Ok);
-}
-
-void ConfigDialog::on_comboHeightVis_currentIndexChanged(int)
-{
-    visModified = true;
 }
 
 void ConfigDialog::on_lineGridSpacing_textChanged(const QString &text)

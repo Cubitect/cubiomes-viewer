@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>LayerDialog</class>
+ <widget class="QDialog" name="LayerDialog">
+  <property name="windowTitle">
+   <string>Layer Display Options</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../rc/icons.qrc">
+    <normaloff>:/icons/logo.png</normaloff>:/icons/logo.png</iconset>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_2">
+   <item row="6" column="1">
+    <widget class="QComboBox" name="comboNoiseE"/>
+   </item>
+   <item row="0" column="0">
+    <widget class="QRadioButton" name="radioBiomes">
+     <property name="text">
+      <string>Biome scale:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="1">
+    <widget class="QComboBox" name="comboNoiseH"/>
+   </item>
+   <item row="10" column="0">
+    <widget class="QRadioButton" name="radioHeight">
+     <property name="text">
+      <string>Approx. surface height:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="0">
+    <widget class="QRadioButton" name="radioNoiseE">
+     <property name="text">
+      <string>Erosion octaves:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QRadioButton" name="radioNoiseT">
+     <property name="text">
+      <string>Temperature octaves:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="1">
+    <widget class="QComboBox" name="comboNoiseC"/>
+   </item>
+   <item row="2" column="0">
+    <widget class="QRadioButton" name="radioOcean">
+     <property name="text">
+      <string>Ocean layer</string>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="1">
+    <widget class="QComboBox" name="comboNoiseW"/>
+   </item>
+   <item row="0" column="1">
+    <widget class="QComboBox" name="comboBiomes">
+     <property name="minimumSize">
+      <size>
+       <width>240</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="font">
+      <font>
+       <family>DejaVu Sans Mono</family>
+      </font>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0">
+    <widget class="QRadioButton" name="radioNoiseH">
+     <property name="text">
+      <string>Humidity octaves:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="10" column="1">
+    <widget class="QComboBox" name="comboHeight"/>
+   </item>
+   <item row="5" column="0">
+    <widget class="QRadioButton" name="radioNoiseC">
+     <property name="text">
+      <string>Contnentalness octaves:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QRadioButton" name="radioRiver">
+     <property name="text">
+      <string>River layer</string>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="0">
+    <widget class="QRadioButton" name="radioNoiseW">
+     <property name="text">
+      <string>Weirdness octaves</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QComboBox" name="comboNoiseT"/>
+   </item>
+   <item row="12" column="0" colspan="2">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Apply|QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+   <item row="11" column="0">
+    <widget class="QRadioButton" name="radioStruct">
+     <property name="text">
+      <string>Structure potential</string>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="0">
+    <widget class="QRadioButton" name="radioNoiseD">
+     <property name="text">
+      <string>Depth</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="../rc/icons.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>LayerDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>LayerDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

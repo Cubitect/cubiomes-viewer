@@ -38,8 +38,6 @@ private slots:
 
     void on_buttonColorHelp_clicked();
 
-    void on_comboHeightVis_currentIndexChanged(int index);
-
     void on_lineGridSpacing_textChanged(const QString &arg1);
 
 private:
