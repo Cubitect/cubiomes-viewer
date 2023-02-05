@@ -1562,7 +1562,8 @@ L_qm_any:
     // biome filters reference specific layers
     // MAYBE: options for layers in different versions?
     case F_BIOME:
-        if (env->mc >= MC_1_18) goto L_noise_biome;
+        if (env->mc <= MC_B1_7 || env->mc >= MC_1_18)
+            goto L_noise_biome;
         // fallthrough
     case F_BIOME_4_RIVER:
     case F_BIOME_256_OTEMP:

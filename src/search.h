@@ -276,7 +276,7 @@ static const struct FilterList
         };
 
         list[F_BIOME] = FilterInfo{
-            CAT_BIOMES, 1, 1, 1, 0, L_VORONOI_1, 0, 1, 0, 0, MC_UNDEF, MC_1_17, 0, 1, disp++, // disable for 1.18
+            CAT_BIOMES, 1, 1, 1, 0, L_VORONOI_1, 0, 1, 0, 0, MC_B1_7, MC_1_17, 0, 1, disp++, // disable for 1.18
             ":icons/map.png",
             _("Biomes 1:1"),
             _("Allows only seeds with the included (+) biomes in the specified area and "
@@ -284,28 +284,28 @@ static const struct FilterList
         };
 
         list[F_BIOME_4] = FilterInfo{
-            CAT_BIOMES, 1, 1, 1, 0, 0, 0, 4, 2, 0, MC_UNDEF, MC_NEWEST, 0, 1, disp++,
+            CAT_BIOMES, 1, 1, 1, 0, 0, 0, 4, 2, 0, MC_B1_7, MC_NEWEST, 0, 1, disp++,
             ":icons/map.png",
             _("Biomes 1:4"),
             _("Allows only seeds with the included (+) biomes in the specified area and "
             "discard those that have biomes that are explicitly excluded (-).")
         };
         list[F_BIOME_16] = FilterInfo{
-            CAT_BIOMES, 1, 1, 1, 0, 0, 0, 16, 4, 0, MC_UNDEF, MC_NEWEST, 0, 1, disp++,
+            CAT_BIOMES, 1, 1, 1, 0, 0, 0, 16, 4, 0, MC_B1_7, MC_NEWEST, 0, 1, disp++,
             ":icons/map.png",
             _("Biomes 1:16"),
             _("Allows only seeds with the included (+) biomes in the specified area and "
             "discard those that have biomes that are explicitly excluded (-).")
         };
         list[F_BIOME_64] = FilterInfo{
-            CAT_BIOMES, 1, 1, 1, 0, 0, 0, 64, 6, 0, MC_UNDEF, MC_NEWEST, 0, 1, disp++,
+            CAT_BIOMES, 1, 1, 1, 0, 0, 0, 64, 6, 0, MC_B1_7, MC_NEWEST, 0, 1, disp++,
             ":icons/map.png",
             _("Biomes 1:64"),
             _("Allows only seeds with the included (+) biomes in the specified area and "
             "discard those that have biomes that are explicitly excluded (-).")
         };
         list[F_BIOME_256] = FilterInfo{
-            CAT_BIOMES, 1, 1, 1, 0, 0, 0, 256, 8, 0, MC_UNDEF, MC_NEWEST, 0, 1, disp++,
+            CAT_BIOMES, 1, 1, 1, 0, 0, 0, 256, 8, 0, MC_B1_7, MC_NEWEST, 0, 1, disp++,
             ":icons/map.png",
             _("Biomes 1:256"),
             _("Allows only seeds with the included (+) biomes in the specified area and "
@@ -344,13 +344,13 @@ static const struct FilterList
             _("Finds the location where a climate parameter reaches its minimum or maximum.")
         };
         list[F_BIOME_CENTER] = FilterInfo{
-            CAT_BIOMES, 1, 1, 1, 0, 0, 0, 4, 2, 1, MC_UNDEF, MC_NEWEST, 0, 1, disp++,
+            CAT_BIOMES, 1, 1, 1, 0, 0, 0, 4, 2, 1, MC_B1_7, MC_NEWEST, 0, 1, disp++,
             ":icons/map.png",
             _("Locate biome center 1:4"),
             _("Finds the center position of a given biome.")
         };
         list[F_BIOME_CENTER_256] = FilterInfo{
-            CAT_BIOMES, 1, 1, 1, 0, 0, 0, 256, 8, 1, MC_UNDEF, MC_1_17, 0, 1, disp++,
+            CAT_BIOMES, 1, 1, 1, 0, 0, 0, 256, 8, 1, MC_B1_7, MC_1_17, 0, 1, disp++,
             ":icons/map.png",
             _("Locate biome center 1:256"),
             _("Finds the center position of a given biome. Based on the 1:256 biome layer.")
@@ -419,7 +419,7 @@ static const struct FilterList
         };
 
         list[F_SPAWN] = FilterInfo{
-            CAT_OTHER, 1, 1, 1, 1, 0, 0, 1, 0, 0, MC_UNDEF, MC_NEWEST, 0, 0, disp++,
+            CAT_OTHER, 1, 1, 1, 1, 0, 0, 1, 0, 0, MC_B1_8, MC_NEWEST, 0, 0, disp++,
             ":icons/spawn.png",
             _("Spawn"),
             ""
@@ -432,7 +432,7 @@ static const struct FilterList
             ""
         };
         list[F_HEIGHT] = FilterInfo{
-            CAT_OTHER, 0, 1, 0, 0, 0, 0, 4, 2, 0, MC_UNDEF, MC_NEWEST, 0, 0, disp++,
+            CAT_OTHER, 0, 1, 0, 0, 0, 0, 4, 2, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
             ":icons/height.png",
             _("Surface height"),
             _("Check the approximate surface height at scale 1:4 at a single coordinate.")

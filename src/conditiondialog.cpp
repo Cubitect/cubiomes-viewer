@@ -629,7 +629,7 @@ void ConditionDialog::updateBiomeSelection()
         available.push_back(cold_ocean);
         available.push_back(frozen_ocean);
     }
-    else if (ft.cat == CAT_BIOMES && mc <= MC_1_17)
+    else if (ft.cat == CAT_BIOMES && mc > MC_B1_7 && mc <= MC_1_17)
     {
         int layerId = ft.layer;
         if (layerId == 0)
