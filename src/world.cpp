@@ -1097,9 +1097,14 @@ static bool draw_grid_rec(QPainter& painter, QRect &rec, qreal pix, int64_t x, i
     QString s = QString::asprintf("%" PRId64 ",%" PRId64, x, z);
     QRect textrec = painter.fontMetrics()
             .boundingRect(rec, Qt::AlignLeft | Qt::AlignTop, s);
-
     if (textrec.width() > pix)
-        return false;
+    {
+        s.replace(",", "\n");
+        textrec = painter.fontMetrics()
+                .boundingRect(rec, Qt::AlignLeft | Qt::AlignTop, s);
+        if (textrec.width() > pix)
+            return false;
+    }
     painter.fillRect(textrec, QBrush(QColor(0, 0, 0, 128), Qt::SolidPattern));
 
     painter.setPen(QColor(255, 255, 255));
@@ -1130,16 +1135,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
     smallfont.setPointSize(8);
     painter.setFont(smallfont);
 
-    int gridpix = 64, tmp;
-    QString s;
-    s = QString::asprintf("-%lld,%lld", (qlonglong)floor(bx0), (qlonglong)floor(bz0));
-    tmp = painter.fontMetrics().boundingRect(s).width();
-    if (tmp > gridpix)
-        gridpix = tmp;
-    s = QString::asprintf("-%lld,%lld", (qlonglong)ceil(bx1), (qlonglong)ceil(bz1));
-    tmp = painter.fontMetrics().boundingRect(s).width();
-    if (tmp > gridpix)
-        gridpix = tmp;
+    int gridpix = painter.fontMetrics().boundingRect("-30000000,-30000000").width();
 
     for (int li = activelv+1; li >= activelv; --li)
     {

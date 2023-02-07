@@ -407,7 +407,7 @@ void ExportDialog::on_buttonBox_clicked(QAbstractButton *button)
         settings.setValue("export/heightvisIdx", ui->comboHeightVis->currentIndex());
 
         QProgressDialog *progress = new QProgressDialog(
-            tr("Export biome images..."), tr("Abort"), 0, workers.size(), mainwindow);
+            tr("Exporting biome images..."), tr("Abort"), 0, workers.size(), mainwindow);
         progress->setValue(0);
 
         connect(progress, &QProgressDialog::canceled, master, &ExportThread::cancel);

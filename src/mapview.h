@@ -58,6 +58,8 @@ public:
 
     Pos getActivePos();
 
+    QPixmap screenshot();
+
 private:
     void settingsToWorld();
     void runAni();

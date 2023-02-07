@@ -298,6 +298,14 @@ Pos MapView::getActivePos()
     return p;
 }
 
+QPixmap MapView::screenshot()
+{
+    overlay->setVisible(false);
+    QPixmap img = grab();
+    overlay->setVisible(true);
+    return img;
+}
+
 void MapView::mapUpdate()
 {
     update(1);
@@ -360,6 +368,13 @@ void MapView::onGoto()
     dialog->show();
 }
 
+static bool clampabs(qreal *x, qreal m)
+{
+    if (*x < -m) { *x = -m; return true; }
+    if (*x > +m) { *x = +m; return true; }
+    return false;
+}
+
 void MapView::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
@@ -376,10 +391,8 @@ void MapView::paintEvent(QPaintEvent *)
         focusz = z_dst;
         blocks2pix = 1.0 / s_dst;
     }
-    if (fx < -INT_MAX) { focusx = fx = -INT_MAX; }
-    if (fz < -INT_MAX) { focusz = fz = -INT_MAX; }
-    if (fx > INT_MAX) { focusx = fx = INT_MAX; }
-    if (fz > INT_MAX) { focusz = fz = INT_MAX; }
+    if (clampabs(&fx, INT_MAX-1024)) focusx = fx;
+    if (clampabs(&fz, INT_MAX-1024)) focusz = fz;
 
     if (world)
     {
@@ -388,6 +401,8 @@ void MapView::paintEvent(QPaintEvent *)
         QPoint cur = mapFromGlobal(QCursor::pos());
         qreal bx = (cur.x() -  width()/2.0) / blocks2pix + fx;
         qreal bz = (cur.y() - height()/2.0) / blocks2pix + fz;
+        clampabs(&bx, INT_MAX-1024);
+        clampabs(&bz, INT_MAX-1024);
         Pos p = {(int)bx, (int)bz};
         overlay->pos = p;
         overlay->bname = world->getBiomeName(p);

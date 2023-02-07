@@ -180,17 +180,17 @@ MainWindow::MainWindow(QWidget *parent)
         "</p><p>"
         "Conditions can reference each other to produce relative positional "
         "dependencies (indicated with the ID in square brackets [XY]). "
-        "When a condition passes, it will usually yield a single position that "
-        "its children can reference. An exception to this are structure "
-        "conditions with a required instance count of exactly one. In this "
-        "case, each occurence is checked individually instead. A condition of "
-        "a structure cluster with multiple required instances will yield the "
-        "geometric average position of the occurences."
+        "When a condition passes its check, it usually yields just one location "
+        "that other conditions can reference. An exception to this are structure "
+        "conditions with exactly one required instance. In this case, each found "
+        "structure occurence is examined separately instead. On the other hand, "
+        "a condition that checks for a structure cluster, will average the "
+        "position of all occurences and yield a single position."
         "</p><p>"
         "Standard biome conditions yield the center of the testing area "
-        "since they evaluate the area as a whole. To <b>locate</b> the position "
-        "of a given biome you can use the designated locate filters, or use "
-        "spiral iterator conditions to scan an area with a localized condition."
+        "as they evaluate the area as a whole. To locate the position of a "
+        "given biome you can use the designated <b>locate</b> filters, or use a "
+        "spiral iterator to scan an area with a localized condition."
         "</p></body></html>"
     ));
 
@@ -1071,7 +1071,7 @@ void MainWindow::on_actionScreenshot_triggered()
         this, tr("Save screenshot"), prevdir, tr("Images (*.png *.jpg *.ppm)"));
     if (!fnam.isEmpty())
     {
-        QPixmap pixmap = getMapView()->grab();
+        QPixmap pixmap = getMapView()->screenshot();
         QImage img = pixmap.toImage();
         img.save(fnam);
     }
