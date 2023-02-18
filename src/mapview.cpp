@@ -334,12 +334,14 @@ void MapView::showContextMenu(const QPoint &pos)
     QString tp     = QString::asprintf("/tp @p %d ~ %d", p.x, p.z);
     QString coords = QString::asprintf("%d %d", p.x, p.z);
     QString chunk  = QString::asprintf("%d %d", p.x >> 4, p.z >> 4);
+    QString region = QString::asprintf("%d %d", p.x >> 9, p.z >> 9);
 
-    menu.addAction(tr("Copy seed:  ")+seed, this, &MapView::copySeed, QKeySequence::Copy);
-    menu.addAction(tr("Copy tp:    ")+tp, [=](){ this->copyText(tp); });
-    menu.addAction(tr("Copy block: ")+coords, [=](){ this->copyText(coords); });
-    menu.addAction(tr("Copy chunk: ")+chunk, [=](){ this->copyText(chunk); });
     menu.addAction(tr("Go to coordinates..."), this, &MapView::onGoto, QKeySequence(Qt::CTRL + Qt::Key_G));
+    menu.addAction(tr("Copy seed:   ")+seed, this, &MapView::copySeed, QKeySequence::Copy);
+    menu.addAction(tr("Copy tp:     ")+tp, [=](){ this->copyText(tp); });
+    menu.addAction(tr("Copy block:  ")+coords, [=](){ this->copyText(coords); });
+    menu.addAction(tr("Copy chunk:  ")+chunk, [=](){ this->copyText(chunk); });
+    menu.addAction(tr("Copy region: ")+region, [=](){ this->copyText(region); });
    // menu.addAction(tr("Animation"), this, &MapView::runAni);
     menu.exec(mapToGlobal(pos));
 }
