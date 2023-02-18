@@ -183,7 +183,7 @@ LayerDialog::LayerDialog(QWidget *parent, int mc)
         }
         if (i == LOPT_RIVER_4 || i == LOPT_OCEAN_256)
         {
-            radio[i]->setEnabled(mc <= MC_1_17);
+            radio[i]->setEnabled(mc > MC_1_12 && mc <= MC_1_17);
         }
         if (i == LOPT_NOOCEAN_1)
         {

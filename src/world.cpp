@@ -434,7 +434,7 @@ void Quad::run()
         }
 
         rgb = new uchar[w*h * 3];
-        if (lopt.mode <= LOPT_OCEAN_256 || g->mc < MC_1_18 || dim != 0 || g->bn.nptype < 0)
+        if (g->mc < MC_1_18 || dim != 0 || g->bn.nptype < 0)
         {
             // sync biomeColors
             g_mutex.lock();
@@ -1313,6 +1313,17 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
                         qreal dx = (p.bb1.x - p.bb0.x + 1) * blocks2pix;
                         qreal dy = (p.bb1.z - p.bb0.z + 1) * blocks2pix;
                         painter.drawRect(QRect(px, py, dx, dy));
+
+                        if (vp.type == Fortress && p.type == BRIDGE_SPAWNER)
+                        {
+                            QRectF spawner = QRectF(px, py, blocks2pix, blocks2pix);
+                            spawner.translate((dx - blocks2pix) / 2, (dy - blocks2pix) / 2);
+                            static const Pos sp_off[4] = { {0,-1},{+1,0},{0,+1},{-1,0} };
+                            qreal offx = sp_off[p.rot].x - (p.bb0.x < 0);
+                            qreal offz = sp_off[p.rot].z - (p.bb0.z < 0);
+                            spawner.translate(blocks2pix * offx, blocks2pix * offz);
+                            painter.drawRect(spawner);
+                        }
                     }
                 }
 

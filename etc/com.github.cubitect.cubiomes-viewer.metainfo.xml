@@ -13,23 +13,23 @@
   </description>
 
   <releases>
-    <release version="3.2.0" date="2023-02-18">
+    <release version="3.2.1" date="2023-02-18">
     </release>
   </releases>
 
   <launchable type="desktop-id">com.github.cubitect.cubiomes-viewer.desktop</launchable>
   <screenshots>
     <screenshot type="default">
-      <image type="source">https://raw.githubusercontent.com/Cubitect/cubiomes-viewer/3.2.0/etc/screenshot_maingui-fs8.png</image>
+      <image type="source">https://raw.githubusercontent.com/Cubitect/cubiomes-viewer/3.2.1/etc/screenshot_maingui-fs8.png</image>
     </screenshot>
     <screenshot type="default">
-      <image type="source">https://raw.githubusercontent.com/Cubitect/cubiomes-viewer/3.2.0/etc/screenshot_biomes-fs8.png</image>
+      <image type="source">https://raw.githubusercontent.com/Cubitect/cubiomes-viewer/3.2.1/etc/screenshot_biomes-fs8.png</image>
     </screenshot>
     <screenshot type="default">
-      <image type="source">https://raw.githubusercontent.com/Cubitect/cubiomes-viewer/3.2.0/etc/screenshot_structures-fs8.png</image>
+      <image type="source">https://raw.githubusercontent.com/Cubitect/cubiomes-viewer/3.2.1/etc/screenshot_structures-fs8.png</image>
     </screenshot>
     <screenshot type="default">
-      <image type="source">https://raw.githubusercontent.com/Cubitect/cubiomes-viewer/3.2.0/etc/screenshot_surface-fs8.png</image>
+      <image type="source">https://raw.githubusercontent.com/Cubitect/cubiomes-viewer/3.2.1/etc/screenshot_surface-fs8.png</image>
     </screenshot>
   </screenshots>
 
