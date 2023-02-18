@@ -518,9 +518,6 @@ QToolButton:checked {
     <addaction name="separator"/>
     <addaction name="actionBiomes"/>
     <addaction name="separator"/>
-    <addaction name="actionRiver"/>
-    <addaction name="actionOceanTemp"/>
-    <addaction name="separator"/>
     <addaction name="actionParaTemperature"/>
     <addaction name="actionParaHumidity"/>
     <addaction name="actionParaContinentalness"/>
@@ -528,8 +525,14 @@ QToolButton:checked {
     <addaction name="actionParaDepth"/>
     <addaction name="actionParaWeirdness"/>
     <addaction name="separator"/>
+    <addaction name="actionRiver"/>
+    <addaction name="actionOceanTemp"/>
+    <addaction name="separator"/>
+    <addaction name="actionNoOceans"/>
+    <addaction name="separator"/>
     <addaction name="actionHeight"/>
     <addaction name="actionStructures"/>
+    <addaction name="separator"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -784,6 +787,14 @@ QToolButton:checked {
   <action name="actionLayerDisplay">
    <property name="text">
     <string>Display options...</string>
+   </property>
+  </action>
+  <action name="actionNoOceans">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>(Beta 1.7) No beta oceans</string>
    </property>
   </action>
  </widget>

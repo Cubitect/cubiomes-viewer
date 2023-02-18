@@ -281,7 +281,7 @@ static qreal cubic_hermite(qreal p[4], qreal u)
 
 void applyHeightShading(unsigned char *rgb, Range r,
         const Generator *g, const SurfaceNoise *sn, int stepbits, int mode,
-        bool bicubic, std::atomic_bool *abort)
+        bool bicubic, const std::atomic_bool *abort)
 {
     int bd = bicubic ? 1 : 0; // sampling border
     int ps = stepbits; // bits in step size
@@ -555,6 +555,10 @@ void Level::init4map(QWorld *w, int pix, int layerscale)
         setupGenerator(&g, wi.mc, wi.large);
         g.ls.entry_256 = &g.ls.layers[L_OCEAN_TEMP_256];
     }
+    else if (lopt.mode == LOPT_NOOCEAN_1 && wi.mc <= MC_B1_7)
+    {
+        setupGenerator(&g, wi.mc, NO_BETA_OCEAN);
+    }
     else
     {
         setupGenerator(&g, wi.mc, wi.large | FORCE_OCEAN_VARIANTS);
@@ -723,6 +727,8 @@ void MapWorker::run()
         q->run();
         if (q->done)
             emit quadDone();
+        if (q->autoDelete())
+            delete q; // manual call to run() so delete manually as well
     }
 }
 
@@ -740,6 +746,7 @@ QWorld::QWorld(WorldInfo wi, int dim, LayerOpt lopt)
     , mutex()
     , queue()
     , workers(QThread::idealThreadCount())
+    , threadlimit()
     , showBB()
     , gridspacing()
     , gridmultiplier()
@@ -929,8 +936,11 @@ void QWorld::clear()
 
 void QWorld::startWorkers()
 {
-    for (MapWorker& w : workers)
-        w.start();
+    int n = (int) workers.size();
+    if (threadlimit && threadlimit < n)
+        n = threadlimit;
+    for (int i = 0; i < n; i++)
+        workers[i].start();
 }
 
 void QWorld::waitForIdle()
@@ -1047,8 +1057,11 @@ struct SpawnStronghold : public Scheduled
     QWorld *world;
     WorldInfo wi;
 
-    SpawnStronghold(QWorld *world, WorldInfo wi) :
-        world(world),wi(wi) {}
+    SpawnStronghold(QWorld *world, WorldInfo wi)
+        : Scheduled(), world(world),wi(wi)
+    {
+        setAutoDelete(true);
+    }
 
     void run()
     {
@@ -1135,7 +1148,10 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
     smallfont.setPointSize(8);
     painter.setFont(smallfont);
 
-    int gridpix = painter.fontMetrics().boundingRect("-30000000,-30000000").width();
+    int gridpix = 128;
+    // 128px is approximately the size of:
+    //gridpix = painter.fontMetrics().boundingRect("-30000000,-30000000").width();
+    // and sets the scale changes such that they align with the power of 4 tiles
 
     for (int li = activelv+1; li >= activelv; --li)
     {
@@ -1403,7 +1419,8 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
         {
             spawn = (Pos*) -1;
             mutex.lock();
-            add(new SpawnStronghold(this, wi));
+            SpawnStronghold *work = new SpawnStronghold(this, wi);
+            add(work);
             startWorkers();
             mutex.unlock();
         }

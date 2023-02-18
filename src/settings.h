@@ -64,8 +64,6 @@ struct WorldInfo
 
 enum {
     LOPT_BIOMES,
-    LOPT_RIVER_4,
-    LOPT_OCEAN_256,
     LOPT_NOISE_PARA,
     LOPT_NOISE_T_4 = LOPT_NOISE_PARA,
     LOPT_NOISE_H_4,
@@ -73,6 +71,9 @@ enum {
     LOPT_NOISE_E_4,
     LOPT_NOISE_D_4,
     LOPT_NOISE_W_4,
+    LOPT_RIVER_4,
+    LOPT_OCEAN_256,
+    LOPT_NOOCEAN_1,
     LOPT_HEIGHT_4,
     LOPT_STRUCTS,
     LOPT_MAX,
@@ -113,6 +114,7 @@ struct Config
     int gridSpacing;
     int gridMultiplier;
     int mapCacheSize;
+    int mapThreads;
     QString biomeColorPath;
     QString separator;
     QString quote;
@@ -131,6 +133,7 @@ struct Config
         gridSpacing = 0;
         gridMultiplier = 0;
         mapCacheSize = 256;
+        mapThreads = 0;
         biomeColorPath = "";
         separator = ";";
         quote = "";

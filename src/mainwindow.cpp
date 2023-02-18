@@ -74,16 +74,18 @@ MainWindow::MainWindow(QWidget *parent)
 
     laction.resize(LOPT_MAX);
     laction[LOPT_BIOMES] = ui->actionBiomes;
-    laction[LOPT_OCEAN_256] = ui->actionOceanTemp;
-    laction[LOPT_RIVER_4] = ui->actionRiver;
     laction[LOPT_NOISE_T_4] = ui->actionParaTemperature;
     laction[LOPT_NOISE_H_4] = ui->actionParaHumidity;
     laction[LOPT_NOISE_C_4] = ui->actionParaContinentalness;
     laction[LOPT_NOISE_E_4] = ui->actionParaErosion;
     laction[LOPT_NOISE_W_4] = ui->actionParaWeirdness;
     laction[LOPT_NOISE_D_4] = ui->actionParaDepth;
+    laction[LOPT_RIVER_4] = ui->actionRiver;
+    laction[LOPT_OCEAN_256] = ui->actionOceanTemp;
+    laction[LOPT_NOOCEAN_1] = ui->actionNoOceans;
     laction[LOPT_HEIGHT_4] = ui->actionHeight;
     laction[LOPT_STRUCTS] = ui->actionStructures;
+
     QActionGroup *grp = new QActionGroup(this);
     for (int i = 0; i < laction.size(); i++)
     {
@@ -412,6 +414,7 @@ void MainWindow::saveSettings()
     settings.setValue("config/gridSpacing", config.gridSpacing);
     settings.setValue("config/gridMultiplier", config.gridMultiplier);
     settings.setValue("config/mapCacheSize", config.mapCacheSize);
+    settings.setValue("config/mapThreads", config.mapThreads);
     settings.setValue("config/biomeColorPath", config.biomeColorPath);
     settings.setValue("config/separator", config.separator);
     settings.setValue("config/quote", config.quote);
@@ -475,6 +478,7 @@ void MainWindow::loadSettings()
     config.gridSpacing = settings.value("config/gridSpacing", config.gridSpacing).toInt();
     config.gridMultiplier = settings.value("config/gridMultiplier", config.gridMultiplier).toInt();
     config.mapCacheSize = settings.value("config/mapCacheSize", config.mapCacheSize).toInt();
+    config.mapThreads = settings.value("config/mapThreads", config.mapThreads).toInt();
     config.biomeColorPath = settings.value("config/biomeColorPath", config.biomeColorPath).toString();
     config.separator = settings.value("config/separator", config.separator).toString();
     config.quote = settings.value("config/quote", config.quote).toString();
@@ -761,6 +765,8 @@ void MainWindow::updateMapSeed()
         setSeed(wi);
 
     bool state;
+    state = (wi.mc <= MC_B1_7);
+    ui->actionNoOceans->setEnabled(state);
     state = (wi.mc >= MC_1_13 && wi.mc <= MC_1_17);
     ui->actionRiver->setEnabled(state);
     ui->actionOceanTemp->setEnabled(state);
@@ -833,7 +839,7 @@ void MainWindow::setMCList(bool experimental)
     {
         if (!experimental && mc != wi.mc)
         {
-            if (mc <= MC_1_0 || mc == MC_1_16_1 || mc == MC_1_19_2)
+            if (mc <= MC_1_0 || mc == MC_1_16_1 || mc == MC_1_19_2 || mc == MC_1_20)
                 continue;
         }
         const char *mcs = mc2str(mc);

@@ -432,7 +432,7 @@ static const struct FilterList
             ""
         };
         list[F_HEIGHT] = FilterInfo{
-            CAT_OTHER, 0, 1, 0, 0, 0, 0, 4, 2, 0, MC_1_0, MC_NEWEST, 0, 0, disp++,
+            CAT_OTHER, 0, 1, 0, 0, 0, 0, 4, 2, 0, MC_1_1, MC_NEWEST, 0, 0, disp++,
             ":icons/height.png",
             _("Surface height"),
             _("Check the approximate surface height at scale 1:4 at a single coordinate.")

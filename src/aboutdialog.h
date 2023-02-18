@@ -5,8 +5,8 @@
 #include <QString>
 
 #define VERS_MAJOR 3
-#define VERS_MINOR 1
-#define VERS_PATCH 1   // negative patch number designates a development version
+#define VERS_MINOR 2
+#define VERS_PATCH 0   // negative patch number designates a development version
 
 // returns +1 if newer, -1 if older  and 0 if equal
 inline int cmpVers(int major, int minor, int patch)

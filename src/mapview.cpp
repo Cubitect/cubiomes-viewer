@@ -186,6 +186,7 @@ void MapView::settingsToWorld()
     world->gridspacing = config.gridSpacing;
     world->gridmultiplier = config.gridMultiplier;
     world->memlimit = (uint64_t) config.mapCacheSize * 1024 * 1024;
+    world->threadlimit = config.mapThreads;
     world->lopt = lopt;
 }
 

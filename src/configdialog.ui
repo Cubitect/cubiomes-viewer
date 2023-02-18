@@ -343,6 +343,16 @@ Leave blank for the default behaviour</string>
         </property>
        </widget>
       </item>
+      <item row="7" column="0" colspan="2">
+       <widget class="QLabel" name="label_9">
+        <property name="text">
+         <string>Threads for map:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="2" colspan="3">
+       <widget class="QSpinBox" name="spinThreads"/>
+      </item>
      </layout>
     </widget>
    </item>

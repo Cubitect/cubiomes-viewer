@@ -12,104 +12,77 @@
 #include <QProgressDialog>
 
 
-struct ExportWorker : QRunnable
+void ExportWorker::runWorkItem(const ExportWorkItem& work)
 {
-    ExportThread *mt;
-    uint64_t seed;
-    int tx, tz;
-    QString fnam;
+    const ExportDialog *mt = parent;
+    if (mt->stop)
+        return;
 
-    ExportWorker(ExportThread *master) : mt(master) {}
-    bool init(uint64_t seed, int tx, int tz)
+    Generator g;
+    setupGenerator(&g, mt->wi.mc, mt->wi.large | FORCE_OCEAN_VARIANTS);
+    applySeed(&g, mt->dim, work.seed);
+    Range r = {mt->scale, mt->x, mt->z, mt->w, mt->h, mt->y, 1};
+
+    if (mt->tilesize > 0)
     {
-        this->seed = seed;
-        this->tx = tx;
-        this->tz = tz;
-        fnam = mt->pattern;
-        fnam.replace("%S", QString::number(seed));
-        fnam.replace("%x", QString::number(tx));
-        fnam.replace("%z", QString::number(tz));
-        fnam = mt->dir.filePath(fnam);
-        return QFileInfo::exists(fnam);
+        r.x = work.tx * mt->tilesize;
+        r.z = work.tz * mt->tilesize;
+        r.sx = r.sz = mt->tilesize;
     }
 
-    void run()
+    int *ids = allocCache(&g, r);
+    genBiomes(&g, ids, r);
+
+    uchar *rgb = new uchar[r.sx * r.sz * 3];
+    biomesToImage(rgb, g_biomeColors, ids, r.sx, r.sz, 1, 1);
+
+    if (mt->heightvis >= 0 && mt->dim == DIM_OVERWORLD)
     {
-        Generator g;
-        setupGenerator(&g, mt->wi.mc, mt->wi.large | FORCE_OCEAN_VARIANTS);
-        applySeed(&g, mt->dim, seed);
-        Range r = {mt->scale, mt->x, mt->z, mt->w, mt->h, mt->y, 1};
+        SurfaceNoise sn;
+        initSurfaceNoise(&sn, DIM_OVERWORLD, mt->wi.seed);
+        int stepbits = mt->scale == 1 ? 2 : 0;
+        applyHeightShading(rgb, r, &g, &sn, stepbits, mt->heightvis, true, &mt->stop);
+    }
 
-        if (mt->tilesize > 0)
+    QImage img(rgb, r.sx, r.sz, 3*r.sx, QImage::Format_RGB888);
+
+    enum { BG_NONE, BG_TRANSP, BG_BLACK };
+    if (mt->tilesize > 0 && mt->bgmode != BG_NONE)
+    {   // TODO: only generate needed sections
+        QColor bg = QColor(Qt::black);
+        if (mt->bgmode == BG_TRANSP)
         {
-            r.x = tx * mt->tilesize;
-            r.z = tz * mt->tilesize;
-            r.sx = r.sz = mt->tilesize;
+            bg = QColor(Qt::transparent);
+            img = img.convertToFormat(QImage::Format_RGBA8888, Qt::AutoColor);
         }
-
-        int *ids = allocCache(&g, r);
-        genBiomes(&g, ids, r);
-
-        uchar *rgb = new uchar[r.sx * r.sz * 3];
-        biomesToImage(rgb, g_biomeColors, ids, r.sx, r.sz, 1, 1);
-
-        if (mt->heightvis >= 0 && mt->dim == DIM_OVERWORLD)
+        int zh = mt->z + mt->h;
+        int xw = mt->x + mt->w;
+        for (int j = 0; j < r.sz; j++)
         {
-            SurfaceNoise sn;
-            initSurfaceNoise(&sn, DIM_OVERWORLD, mt->wi.seed);
-            int stepbits = mt->scale == 1 ? 2 : 0;
-            applyHeightShading(rgb, r, &g, &sn, stepbits, mt->heightvis, true, &mt->stop);
-        }
-
-        QImage img(rgb, r.sx, r.sz, 3*r.sx, QImage::Format_RGB888);
-
-        enum { BG_NONE, BG_TRANSP, BG_BLACK };
-        if (mt->tilesize > 0 && mt->bgmode != BG_NONE)
-        {   // TODO: only generate needed sections
-            QColor bg = QColor(Qt::black);
-            if (mt->bgmode == BG_TRANSP)
+            for (int i = 0; i < r.sx; i++)
             {
-                bg = QColor(Qt::transparent);
-                img = img.convertToFormat(QImage::Format_RGBA8888, Qt::AutoColor);
-            }
-            int zh = mt->z + mt->h;
-            int xw = mt->x + mt->w;
-            for (int j = 0; j < r.sz; j++)
-            {
-                for (int i = 0; i < r.sx; i++)
-                {
-                    if (r.z+j < mt->z || r.z+j >= zh || r.x+i < mt->x || r.x+i >= xw)
-                        img.setPixelColor(i, j, bg);
-                }
+                if (r.z+j < mt->z || r.z+j >= zh || r.x+i < mt->x || r.x+i >= xw)
+                    img.setPixelColor(i, j, bg);
             }
         }
-        if (!mt->stop)
-            img.save(fnam);
-        free(ids);
-        delete [] rgb;
     }
-};
-
-ExportThread::~ExportThread()
-{
-    for (ExportWorker* worker : qAsConst(workers))
-        delete worker;
-}
-
-void ExportThread::run()
-{
-    for (ExportWorker *& worker : workers)
+    if (!mt->stop)
     {
-        //pool.start(worker);
-        worker->run();
-        emit workerDone();
-        if (stop)
-            break;
+        img.save(work.fnam);
     }
-    //pool.waitForDone();
-    deleteLater();
+    free(ids);
+    delete [] rgb;
 }
 
+void ExportWorker::run()
+{
+    ExportWorkItem work;
+    while (parent->requestWork(&work))
+    {
+        runWorkItem(work);
+        emit workItemDone();
+    }
+}
 
 static void setCombo(QComboBox *cb, const char *setting)
 {
@@ -123,8 +96,29 @@ ExportDialog::ExportDialog(MainWindow *parent)
     : QDialog(parent)
     , ui(new Ui::ExportDialog)
     , mainwindow(parent)
+    , dir()
+    , pattern()
+    , wi()
+    , dim()
+    , scale()
+    , x(), z(), w(), h(), y()
+    , tilesize()
+    , bgmode()
+    , heightvis()
+    , mutex()
+    , workitems()
+    , workers()
+    , stop()
 {
     ui->setupUi(this);
+
+    for (int i = 0; i < QThread::idealThreadCount(); i++)
+    {
+        ExportWorker *worker = new ExportWorker(this);
+        connect(worker, &ExportWorker::workItemDone, this, &ExportDialog::workItemDone, Qt::QueuedConnection);
+        connect(worker, &ExportWorker::finished, this, &ExportDialog::onWorkerFinished, Qt::QueuedConnection);
+        workers.push_back(worker);
+    }
 
     QIntValidator *intval = new QIntValidator(this);
     ui->lineEditX1->setValidator(intval);
@@ -164,7 +158,53 @@ ExportDialog::ExportDialog(MainWindow *parent)
 
 ExportDialog::~ExportDialog()
 {
+    cancel();
+    for (ExportWorker *worker : qAsConst(workers))
+    {
+        worker->wait();
+        delete worker;
+    }
     delete ui;
+}
+
+bool ExportDialog::initWork(ExportWorkItem *work, uint64_t seed, int tx, int tz)
+{
+    work->seed = seed;
+    work->tx = tx;
+    work->tz = tz;
+    work->fnam = pattern;
+    work->fnam.replace("%S", QString::number(seed));
+    work->fnam.replace("%x", QString::number(tx));
+    work->fnam.replace("%z", QString::number(tz));
+    work->fnam = dir.filePath(work->fnam);
+    return QFileInfo::exists(work->fnam);
+}
+
+bool ExportDialog::requestWork(ExportWorkItem *work)
+{
+    QMutexLocker locker(&mutex);
+    if (workitems.empty())
+        return false;
+    *work = workitems.takeFirst();
+    return true;
+}
+
+void ExportDialog::startWorkers()
+{
+    int threadlimit = mainwindow->config.mapThreads;
+    int n = (int) workers.size();
+    if (threadlimit && threadlimit < n)
+        n = threadlimit;
+    for (int i = 0; i < n; i++)
+        workers[i]->start();
+}
+
+void ExportDialog::onWorkerFinished()
+{
+    for (ExportWorker *worker : qAsConst(workers))
+        if (worker->isRunning())
+            return;
+    emit exportFinished();
 }
 
 void ExportDialog::update()
@@ -256,13 +296,16 @@ void ExportDialog::on_buttonDirSelect_clicked()
     ui->lineDir->setText(dir);
 }
 
-
 void ExportDialog::on_buttonBox_clicked(QAbstractButton *button)
 {
     QDialogButtonBox::StandardButton b = ui->buttonBox->standardButton(button);
 
     if (b == QDialogButtonBox::Ok)
     {
+        for (ExportWorker *worker : qAsConst(workers))
+            if (worker->isRunning())
+                return;
+
         int seedmode = ui->comboSeed->currentIndex();
         QString pattern = ui->linePattern->text();
         bool tiled = ui->groupTiled->isChecked();
@@ -309,22 +352,19 @@ void ExportDialog::on_buttonBox_clicked(QAbstractButton *button)
             return;
         }
 
-        ExportThread *master = new ExportThread(mainwindow);
-        master->dir = QDir(ui->lineDir->text());
-        master->pattern = pattern;
-        master->wi = wi;
-        master->dim = mainwindow->getDim();
-        master->scale = 1 << s;
-        master->x = x0;
-        master->z = z0;
-        master->w = x1 - x0;
-        master->h = z1 - z0;
-        master->y = y;
-        master->tilesize = -1;
-        master->heightvis = ui->comboHeightVis->currentIndex() - 1;
-        master->bgmode = 0;
-
-        QVector<ExportWorker*> workers;
+        this->dir = QDir(ui->lineDir->text());
+        this->pattern = pattern;
+        this->wi = wi;
+        this->dim = mainwindow->getDim();
+        this->scale = 1 << s;
+        this->x = x0;
+        this->z = z0;
+        this->w = x1 - x0;
+        this->h = z1 - z0;
+        this->y = y;
+        this->tilesize = -1;
+        this->heightvis = ui->comboHeightVis->currentIndex() - 1;
+        this->bgmode = 0;
         bool existwarn = false;
 
         if (tiled)
@@ -336,8 +376,8 @@ void ExportDialog::on_buttonBox_clicked(QAbstractButton *button)
             int tx1 = (int) ceil(x1 / (qreal)tilesize);
             int tz1 = (int) ceil(z1 / (qreal)tilesize);
 
-            master->tilesize = tilesize;
-            master->bgmode = bgmode;
+            this->tilesize = tilesize;
+            this->bgmode = bgmode;
 
             for (uint64_t seed : qAsConst(seeds))
             {
@@ -345,9 +385,9 @@ void ExportDialog::on_buttonBox_clicked(QAbstractButton *button)
                 {
                     for (int z = tz0; z < tz1; z++)
                     {
-                        ExportWorker *worker = new ExportWorker(master);
-                        existwarn |= worker->init(seed, x, z);
-                        workers.push_back(worker);
+                        ExportWorkItem work;
+                        existwarn |= initWork(&work, seed, x, z);
+                        workitems.push_back(work);
                     }
                 }
             }
@@ -363,16 +403,15 @@ void ExportDialog::on_buttonBox_clicked(QAbstractButton *button)
                         QMessageBox::Cancel | QMessageBox::Yes);
                 if (button == QMessageBox::Cancel)
                 {
-                    delete master;
                     return;
                 }
             }
 
             for (uint64_t seed : qAsConst(seeds))
             {
-                ExportWorker *worker = new ExportWorker(master);
-                existwarn |= worker->init(seed, 0, 0);
-                workers.push_back(worker);
+                ExportWorkItem work;
+                existwarn |= initWork(&work, seed, 0, 0);
+                workitems.push_back(work);
             }
         }
 
@@ -384,10 +423,6 @@ void ExportDialog::on_buttonBox_clicked(QAbstractButton *button)
                     QMessageBox::Cancel | QMessageBox::Yes);
             if (button == QMessageBox::Cancel)
             {
-                for (ExportWorker *worker : workers)
-                    delete worker;
-                workers.clear();
-                delete master;
                 return;
             }
         }
@@ -407,18 +442,18 @@ void ExportDialog::on_buttonBox_clicked(QAbstractButton *button)
         settings.setValue("export/heightvisIdx", ui->comboHeightVis->currentIndex());
 
         QProgressDialog *progress = new QProgressDialog(
-            tr("Exporting biome images..."), tr("Abort"), 0, workers.size(), mainwindow);
+            tr("Exporting biome images..."), tr("Abort"), 0, workitems.size(), mainwindow);
         progress->setValue(0);
+        progress->setWindowTitle(tr("Export"));
 
-        connect(progress, &QProgressDialog::canceled, master, &ExportThread::cancel);
-        connect(master, &ExportThread::finished, progress, &QProgressDialog::close);
-        connect(master, &ExportThread::workerDone, progress,
+        connect(progress, &QProgressDialog::canceled, this, &ExportDialog::cancel);
+        connect(this, &ExportDialog::exportFinished, progress, &QProgressDialog::close);
+        connect(this, &ExportDialog::workItemDone, progress,
             [=]() { progress->setValue(progress->value() + 1); },
             Qt::QueuedConnection);
 
         progress->show();
-        master->workers = workers;
-        master->start();
+        startWorkers();
     }
 }
 

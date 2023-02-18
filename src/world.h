@@ -162,7 +162,7 @@ enum {
 };
 void applyHeightShading(unsigned char *rgb, Range r,
         const Generator *g, const SurfaceNoise *sn, int stepbits, int mode,
-        bool bicubic, std::atomic_bool *abort);
+        bool bicubic, const std::atomic_bool *abort);
 
 struct Scheduled : public QRunnable
 {
@@ -303,6 +303,7 @@ public:
     QMutex mutex;
     Scheduled *queue;
     std::vector<MapWorker> workers;
+    int threadlimit;
 
     bool sshow[STRUCT_NUM];
     bool showBB;

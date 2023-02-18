@@ -130,16 +130,18 @@ LayerDialog::LayerDialog(QWidget *parent, int mc)
 {
     ui->setupUi(this);
     radio[LOPT_BIOMES] = ui->radioBiomes;
-    radio[LOPT_RIVER_4] = ui->radioRiver;
-    radio[LOPT_OCEAN_256] = ui->radioOcean;
     radio[LOPT_NOISE_T_4] = ui->radioNoiseT;
     radio[LOPT_NOISE_H_4] = ui->radioNoiseH;
     radio[LOPT_NOISE_C_4] = ui->radioNoiseC;
     radio[LOPT_NOISE_E_4] = ui->radioNoiseE;
     radio[LOPT_NOISE_D_4] = ui->radioNoiseD;
     radio[LOPT_NOISE_W_4] = ui->radioNoiseW;
+    radio[LOPT_RIVER_4] = ui->radioRiver;
+    radio[LOPT_OCEAN_256] = ui->radioOcean;
+    radio[LOPT_NOOCEAN_1] = ui->radioNoOcean;
     radio[LOPT_HEIGHT_4] = ui->radioHeight;
     radio[LOPT_STRUCTS] = ui->radioStruct;
+
     combo[LOPT_BIOMES] = ui->comboBiomes;
     combo[LOPT_NOISE_T_4] = ui->comboNoiseT;
     combo[LOPT_NOISE_H_4] = ui->comboNoiseH;
@@ -182,6 +184,10 @@ LayerDialog::LayerDialog(QWidget *parent, int mc)
         if (i == LOPT_RIVER_4 || i == LOPT_OCEAN_256)
         {
             radio[i]->setEnabled(mc <= MC_1_17);
+        }
+        if (i == LOPT_NOOCEAN_1)
+        {
+            radio[i]->setEnabled(mc <= MC_B1_7);
         }
     }
 }

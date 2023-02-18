@@ -31,6 +31,7 @@ ConfigDialog::ConfigDialog(QWidget *parent, Config *config)
     ui->buttonBiomeColor->setFont(*gp_font_mono);
 
     ui->lineMatching->setValidator(new QIntValidator(1, 99999999, ui->lineMatching));
+    ui->spinThreads->setRange(1, QThread::idealThreadCount());
 
     initSettings(config);
     visModified = false;
@@ -55,6 +56,7 @@ void ConfigDialog::initSettings(Config *config)
     ui->lineGridSpacing->setText(config->gridSpacing ? QString::number(config->gridSpacing) : "");
     ui->comboGridMult->setCurrentText(config->gridMultiplier ? QString::number(config->gridMultiplier) : tr("None"));
     ui->spinCacheSize->setValue(config->mapCacheSize);
+    ui->spinThreads->setValue(config->mapThreads ? config->mapThreads : QThread::idealThreadCount());
     ui->lineSep->setText(config->separator);
     int idx = config->quote == "\'" ? 1 : config->quote== "\"" ? 2 : 0;
     ui->comboQuote->setCurrentIndex(idx);
@@ -74,6 +76,7 @@ Config ConfigDialog::getSettings()
     conf.gridSpacing = ui->lineGridSpacing->text().toInt();
     conf.gridMultiplier = ui->comboGridMult->currentText().toInt();
     conf.mapCacheSize = ui->spinCacheSize->value();
+    conf.mapThreads = ui->spinThreads->value();
     conf.separator = ui->lineSep->text();
     int idx = ui->comboQuote->currentIndex();
     conf.quote = idx == 1 ? "\'" : idx == 2 ? "\"" : "";
