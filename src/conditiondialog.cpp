@@ -795,7 +795,7 @@ int ConditionDialog::warnIfBad(Condition cond)
         int h = cond.z2 - cond.z1 + 1;
         if ((unsigned int)(w * h) < cond.count * cond.biomeSize)
         {
-            QString text = tr("Area is too small for the required biome size.");
+            QString text = tr("Area is too small for the required biome size; it must be at least %1 under the current conditions.").arg(cond.count * cond.biomeSize);
             QMessageBox::warning(this, tr("Area Insufficient"), text, QMessageBox::Ok);
             return QMessageBox::Cancel;
         }
