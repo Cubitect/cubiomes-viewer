@@ -15,7 +15,6 @@
 ConfigDialog::ConfigDialog(QWidget *parent, Config *config)
     : QDialog(parent)
     , ui(new Ui::ConfigDialog)
-    , visModified()
 {
     ui->setupUi(this);
 
@@ -33,8 +32,7 @@ ConfigDialog::ConfigDialog(QWidget *parent, Config *config)
     ui->lineMatching->setValidator(new QIntValidator(1, 99999999, ui->lineMatching));
     ui->spinThreads->setRange(1, QThread::idealThreadCount());
 
-    initSettings(config);
-    visModified = false;
+    initConfig(config);
 }
 
 ConfigDialog::~ConfigDialog()
@@ -42,7 +40,7 @@ ConfigDialog::~ConfigDialog()
     delete ui;
 }
 
-void ConfigDialog::initSettings(Config *config)
+void ConfigDialog::initConfig(Config *config)
 {
     ui->checkSmooth->setChecked(config->smoothMotion);
     ui->checkBBoxes->setChecked(config->showBBoxes);
@@ -64,7 +62,7 @@ void ConfigDialog::initSettings(Config *config)
     setBiomeColorPath(config->biomeColorPath);
 }
 
-Config ConfigDialog::getSettings()
+Config ConfigDialog::getConfig()
 {
     conf.smoothMotion = ui->checkSmooth->isChecked();
     conf.showBBoxes = ui->checkBBoxes->isChecked();
@@ -133,10 +131,16 @@ void ConfigDialog::setBiomeColorPath(QString path)
 
 void ConfigDialog::on_buttonBox_clicked(QAbstractButton *button)
 {
-    if (ui->buttonBox->buttonRole(button) == QDialogButtonBox::ResetRole)
+    int role = ui->buttonBox->buttonRole(button);
+    if (role == QDialogButtonBox::ResetRole)
     {
         conf.reset();
-        initSettings(&conf);
+        initConfig(&conf);
+    }
+    else if (role == QDialogButtonBox::AcceptRole || role == QDialogButtonBox::ApplyRole)
+    {
+        getConfig().save();
+        emit updateConfig();
     }
 }
 
@@ -144,7 +148,10 @@ void ConfigDialog::on_buttonBiomeColorEditor_clicked()
 {
     BiomeColorDialog *dialog = new BiomeColorDialog(this, conf.biomeColorPath, -1, DIM_UNDEF);
     if (dialog->exec() == QDialog::Accepted)
-        setBiomeColorPath(dialog->getRc());
+    {
+        QString rc = dialog->getRc();
+        setBiomeColorPath(rc);
+    }
 }
 
 void ConfigDialog::on_buttonBiomeColor_clicked()
@@ -162,11 +169,13 @@ void ConfigDialog::on_buttonBiomeColor_clicked()
 void ConfigDialog::on_buttonStructVisEdit_clicked()
 {
     StructureDialog *dialog = new StructureDialog(this);
-    if (dialog->exec() == QDialog::Accepted)
-    {
-        if ((visModified |= dialog->modified))
-            saveStructVis(dialog->structvis);
-    }
+    connect(dialog, SIGNAL(updateMapConfig()), this, SLOT(onUpdateMapConfig()));
+    dialog->show();
+}
+
+void ConfigDialog::onUpdateMapConfig()
+{
+    emit updateMapConfig();
 }
 
 void ConfigDialog::on_buttonClear_clicked()

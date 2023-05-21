@@ -1,7 +1,7 @@
 #ifndef SEARCH_H
 #define SEARCH_H
 
-#include "settings.h"
+#include "config.h"
 
 #include "lua/src/lua.hpp"
 
@@ -91,6 +91,8 @@ enum
     F_CLIMATE_MINMAX,
     F_HEIGHT,
     F_LUA,
+    F_WELL,
+    F_TRAILS,
     // new filters should be added here at the end to keep some downwards compatibility
     FILTER_MAX,
 };
@@ -535,6 +537,13 @@ static const struct FilterList
             "accordingly.")
         };
 
+        list[F_WELL] = FilterInfo{
+            CAT_STRUCT, 1, 1, 1, 1, 0, Desert_Well, 1, 0, 1, MC_1_13, MC_NEWEST, 0, 0, disp++,
+            ":icons/well.png",
+            _("Desert well"),
+            ""
+        };
+
         list[F_OUTPOST] = FilterInfo{
             CAT_STRUCT, 1, 1, 1, 1, 0, Outpost, 1, 0, 1, MC_1_14, MC_NEWEST, 0, 0, disp++,
             ":icons/outpost.png",
@@ -546,6 +555,13 @@ static const struct FilterList
             CAT_STRUCT, 1, 1, 1, 1, 0, Ancient_City, 1, 0, 1, MC_1_19, MC_NEWEST, 0, 0, disp++,
             ":icons/ancient_city.png",
             _("Ancient city"),
+            ""
+        };
+
+        list[F_TRAILS] = FilterInfo{
+            CAT_STRUCT, 1, 1, 1, 1, 0, Trail_Ruin, 1, 0, 1, MC_1_20, MC_NEWEST, 0, 0, disp++,
+            ":icons/trail.png",
+            _("Trail ruins"),
             ""
         };
 

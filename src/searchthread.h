@@ -2,7 +2,7 @@
 #define SEARCHTHREAD_H
 
 #include "search.h"
-#include "settings.h"
+#include "config.h"
 
 #include <QThread>
 #include <QMutex>
@@ -20,7 +20,7 @@ public:
     SearchMaster(FormSearchControl *parent);
     virtual ~SearchMaster();
 
-    bool set(WorldInfo wi, const SearchConfig& sc, const Gen48Settings& gen48, const Config& config,
+    bool set(WorldInfo wi, const SearchConfig& sc, const Gen48Config& gen48, const Config& config,
             std::vector<uint64_t>& slist, const QVector<Condition>& cv);
 
     void presearch();
@@ -58,7 +58,7 @@ public:
     ConditionTree               condtree;
     int                         itemsize;   // number of seeds per search item
     int                         threadcnt;  // numbr of worker threads
-    Gen48Settings               gen48;      // 48-bit generator settings
+    Gen48Config               gen48;      // 48-bit generator settings
     std::vector<uint64_t>       slist;      // candidate list
     uint64_t                    idx;        // index within candidate list
     uint64_t                    scnt;       // search space size

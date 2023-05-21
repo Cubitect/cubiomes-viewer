@@ -425,7 +425,7 @@ void TabStructures::on_pushStart_clicked()
 
     thread.collect = ui->checkCollect->isChecked();
 
-    for (int sopt = 0; sopt < STRUCT_NUM; sopt++)
+    for (int sopt = 0; sopt < D_STRUCT_NUM; sopt++)
         thread.mapshow[sopt] = ui->radioAll->isChecked() || parent->getMapView()->getShow(sopt);
 
     if (ui->tabWidget->currentWidget() == ui->tabStructures)

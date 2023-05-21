@@ -47,7 +47,7 @@ SearchMaster::~SearchMaster()
 bool SearchMaster::set(
     WorldInfo wi,
     const SearchConfig& sc,
-    const Gen48Settings& gen48,
+    const Gen48Config& gen48,
     const Config& config,
     std::vector<uint64_t>& slist,
     const QVector<Condition>& cv
@@ -235,7 +235,7 @@ bool SearchMaster::set(
 static int check(uint64_t s48, void *data)
 {
     (void) data;
-    const StructureConfig sconf = {0,0,0,0,0};
+    const StructureConfig sconf = {0,0,0,0,0,0};
     return isQuadBaseFeature24(sconf, s48, 7+1, 7+1, 9+1) != 0;
 }
 
@@ -319,7 +319,7 @@ static void genQHBases(QObject *qtobj, int qual, uint64_t salt, std::vector<uint
 }
 
 static bool applyTranspose(std::vector<uint64_t>& slist,
-        const Gen48Settings& gen48, uint64_t bufmax)
+        const Gen48Config& gen48, uint64_t bufmax)
 {
     std::vector<uint64_t> list48;
 

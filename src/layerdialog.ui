@@ -10,84 +10,6 @@
     <normaloff>:/icons/logo.png</normaloff>:/icons/logo.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
-   <item row="5" column="1">
-    <widget class="QComboBox" name="comboNoiseC"/>
-   </item>
-   <item row="6" column="1">
-    <widget class="QComboBox" name="comboNoiseE"/>
-   </item>
-   <item row="13" column="0">
-    <widget class="QRadioButton" name="radioStruct">
-     <property name="text">
-      <string>Structure potential</string>
-     </property>
-    </widget>
-   </item>
-   <item row="8" column="0">
-    <widget class="QRadioButton" name="radioNoiseW">
-     <property name="text">
-      <string>Weirdness octaves</string>
-     </property>
-    </widget>
-   </item>
-   <item row="9" column="0">
-    <widget class="QRadioButton" name="radioRiver">
-     <property name="text">
-      <string>River layer</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="0">
-    <widget class="QRadioButton" name="radioBiomes">
-     <property name="text">
-      <string>Biome scale:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="0">
-    <widget class="QRadioButton" name="radioNoiseH">
-     <property name="text">
-      <string>Humidity octaves:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="0">
-    <widget class="QRadioButton" name="radioNoiseE">
-     <property name="text">
-      <string>Erosion octaves:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="12" column="0">
-    <widget class="QRadioButton" name="radioHeight">
-     <property name="text">
-      <string>Approx. surface height:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="0">
-    <widget class="QRadioButton" name="radioNoiseT">
-     <property name="text">
-      <string>Temperature octaves:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="1">
-    <widget class="QComboBox" name="comboNoiseH"/>
-   </item>
-   <item row="14" column="0" colspan="2">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Apply|QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
-    </widget>
-   </item>
-   <item row="12" column="1">
-    <widget class="QComboBox" name="comboHeight"/>
-   </item>
    <item row="0" column="1">
     <widget class="QComboBox" name="comboBiomes">
      <property name="minimumSize">
@@ -106,20 +28,44 @@
    <item row="8" column="1">
     <widget class="QComboBox" name="comboNoiseW"/>
    </item>
-   <item row="5" column="0">
-    <widget class="QRadioButton" name="radioNoiseC">
+   <item row="7" column="0">
+    <widget class="QRadioButton" name="radioNoiseD">
      <property name="text">
-      <string>Contnentalness octaves:</string>
+      <string>Depth</string>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="0">
+    <widget class="QRadioButton" name="radioNoiseW">
+     <property name="text">
+      <string>Weirdness octaves</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QRadioButton" name="radioBiomes">
+     <property name="text">
+      <string>Biome scale:</string>
      </property>
     </widget>
    </item>
    <item row="3" column="1">
     <widget class="QComboBox" name="comboNoiseT"/>
    </item>
-   <item row="7" column="0">
-    <widget class="QRadioButton" name="radioNoiseD">
+   <item row="16" column="0" colspan="2">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Apply|QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QRadioButton" name="radioNoiseT">
      <property name="text">
-      <string>Depth</string>
+      <string>Temperature octaves:</string>
      </property>
     </widget>
    </item>
@@ -130,10 +76,78 @@
      </property>
     </widget>
    </item>
+   <item row="14" column="1">
+    <widget class="QComboBox" name="comboHeight"/>
+   </item>
+   <item row="14" column="0">
+    <widget class="QRadioButton" name="radioHeight">
+     <property name="text">
+      <string>Approx. surface height:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="1">
+    <widget class="QComboBox" name="comboNoiseH"/>
+   </item>
    <item row="11" column="0">
     <widget class="QRadioButton" name="radioNoOcean">
      <property name="text">
       <string>No beta oceans</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="0">
+    <widget class="QRadioButton" name="radioNoiseC">
+     <property name="text">
+      <string>Contnentalness octaves:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="15" column="0">
+    <widget class="QRadioButton" name="radioStruct">
+     <property name="text">
+      <string>Structure potential</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="0">
+    <widget class="QRadioButton" name="radioNoiseE">
+     <property name="text">
+      <string>Erosion octaves:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="0">
+    <widget class="QRadioButton" name="radioRiver">
+     <property name="text">
+      <string>River layer</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="1">
+    <widget class="QComboBox" name="comboNoiseC"/>
+   </item>
+   <item row="6" column="1">
+    <widget class="QComboBox" name="comboNoiseE"/>
+   </item>
+   <item row="4" column="0">
+    <widget class="QRadioButton" name="radioNoiseH">
+     <property name="text">
+      <string>Humidity octaves:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="12" column="0">
+    <widget class="QRadioButton" name="radioBetaT">
+     <property name="text">
+      <string>Beta temperature</string>
+     </property>
+    </widget>
+   </item>
+   <item row="13" column="0">
+    <widget class="QRadioButton" name="radioBetaH">
+     <property name="text">
+      <string>Beta humidity</string>
      </property>
     </widget>
    </item>

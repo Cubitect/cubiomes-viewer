@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1280</width>
-    <height>800</height>
+    <width>1600</width>
+    <height>900</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -291,8 +291,8 @@ QToolButton {
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>1258</width>
-                 <height>673</height>
+                 <width>1577</width>
+                 <height>773</height>
                 </rect>
                </property>
                <property name="sizePolicy">
@@ -397,6 +397,9 @@ QSplitter {
    <property name="windowTitle">
     <string>Map controls</string>
    </property>
+   <property name="layoutDirection">
+    <enum>Qt::RightToLeft</enum>
+   </property>
    <property name="autoFillBackground">
     <bool>false</bool>
    </property>
@@ -418,13 +421,17 @@ QToolButton:!checked {
 }
 QToolButton:checked {
 	background-color: #8a9dc4;
-}</string>
+}
+</string>
    </property>
    <property name="movable">
     <bool>true</bool>
    </property>
    <property name="allowedAreas">
     <set>Qt::AllToolBarAreas</set>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Vertical</enum>
    </property>
    <property name="iconSize">
     <size>
@@ -447,7 +454,7 @@ QToolButton:checked {
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1280</width>
+     <width>1600</width>
      <height>22</height>
     </rect>
    </property>
@@ -529,6 +536,8 @@ QToolButton:checked {
     <addaction name="actionOceanTemp"/>
     <addaction name="separator"/>
     <addaction name="actionNoOceans"/>
+    <addaction name="actionBetaTemperature"/>
+    <addaction name="actionBetaHumidity"/>
     <addaction name="separator"/>
     <addaction name="actionHeight"/>
     <addaction name="actionStructures"/>
@@ -680,7 +689,7 @@ QToolButton:checked {
   </action>
   <action name="actionStructure_visibility">
    <property name="text">
-    <string>Structure zoom limits...</string>
+    <string>Structure visibility...</string>
    </property>
   </action>
   <action name="actionParaTemperature">
@@ -795,6 +804,22 @@ QToolButton:checked {
    </property>
    <property name="text">
     <string>(Beta 1.7) No beta oceans</string>
+   </property>
+  </action>
+  <action name="actionBetaTemperature">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>(Beta 1.7) Temperature</string>
+   </property>
+  </action>
+  <action name="actionBetaHumidity">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>(Beta 1.7) Humidity</string>
    </property>
   </action>
  </widget>

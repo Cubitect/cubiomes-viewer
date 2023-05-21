@@ -3,7 +3,7 @@
  <class>StructureDialog</class>
  <widget class="QDialog" name="StructureDialog">
   <property name="windowTitle">
-   <string>Structure Zoom Limits</string>
+   <string>Structure Visibility</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../rc/icons.qrc">
@@ -16,7 +16,7 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok|QDialogButtonBox::RestoreDefaults</set>
+      <set>QDialogButtonBox::Apply|QDialogButtonBox::Cancel|QDialogButtonBox::Ok|QDialogButtonBox::RestoreDefaults</set>
      </property>
     </widget>
    </item>

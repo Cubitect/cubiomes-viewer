@@ -2,7 +2,7 @@
 #include "ui_biomecolordialog.h"
 
 #include "cutil.h"
-#include "settings.h"
+#include "config.h"
 
 #include <QPixmap>
 #include <QPainter>

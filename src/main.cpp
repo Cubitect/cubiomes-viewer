@@ -2,6 +2,8 @@
 #include <QApplication>
 #include <QTranslator>
 #include <QFontDatabase>
+#include <QStandardPaths>
+#include <QDir>
 
 #include "world.h"
 
@@ -13,7 +15,7 @@
 unsigned char g_biomeColors[256][3];
 unsigned char g_tempsColors[256][3];
 
-ExtGenSettings g_extgen;
+ExtGenConfig g_extgen;
 
 QFont *gp_font_default;
 QFont *gp_font_mono;
@@ -32,7 +34,7 @@ int getStructureConfig_override(int stype, int mc, StructureConfig *sconf)
     }
     return ok;
 }
-
+#include "QDebug"
 int main(int argc, char *argv[])
 {
     initBiomes();
@@ -40,7 +42,23 @@ int main(int argc, char *argv[])
     initBiomeTypeColors(g_tempsColors);
 
     QApplication app(argc, argv);
-    QCoreApplication::setApplicationName("cubiomes-viewer");
+    QCoreApplication::setApplicationName(APP_STRING);
+
+    for (int i = 1; i < argc; i++)
+    {
+        if (strcmp(argv[i], "--reset-all") == 0)
+        {
+            QSettings settings(APP_STRING, APP_STRING);
+            settings.clear();
+
+            QString path = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+            QDir dir(path);
+            if (dir.exists() && path.contains(APP_STRING))
+            {
+                dir.removeRecursively();
+            }
+        }
+    }
 
     QTranslator translator;
     translator.load("en_US", ":/lang");

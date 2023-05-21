@@ -156,6 +156,24 @@ void MapView::animateView(qreal x_dst, qreal z_dst, qreal s_dst)
     update(2);
 }
 
+void MapView::zoom(qreal factor)
+{
+    qreal zoommin = 1.0 / 2048.0, zoommax = 128.0;
+    if (factor < 1 && blocks2pix < zoommin) return;
+    if (factor > 1 && blocks2pix > zoommax) return;
+    blocks2pix *= factor;
+    if (factor < 1 && blocks2pix < zoommin) blocks2pix = zoommin;
+    if (factor > 1 && blocks2pix > zoommax) blocks2pix = zoommax;
+    update();
+}
+
+bool MapView::getShow(int stype)
+{
+    if (stype < 0 || stype >= D_STRUCT_NUM)
+        return false;
+    return sshow[stype];
+}
+
 void MapView::setShow(int stype, bool v)
 {
     sshow[stype] = v;
@@ -180,7 +198,7 @@ void MapView::settingsToWorld()
 {
     if (!world)
         return;
-    for (int s = 0; s < STRUCT_NUM; s++)
+    for (int s = 0; s < D_STRUCT_NUM; s++)
         world->sshow[s] = sshow[s];
     world->showBB = config.showBBoxes;
     world->gridspacing = config.gridSpacing;
@@ -291,12 +309,11 @@ void MapView::update(int cnt)
     QWidget::update();
 }
 
-Pos MapView::getActivePos()
+VarPos MapView::getActivePos()
 {
-    Pos p = overlay->pos;
     if (world && world->selopt != D_NONE)
-        p = world->selvp.p;
-    return p;
+        return world->selvp;
+    return VarPos(overlay->pos, -1);
 }
 
 QPixmap MapView::screenshot()
@@ -322,22 +339,45 @@ void MapView::showContextMenu(const QPoint &pos)
     if (world)
     {
         mstart = pos;
-        world->selx = mstart.x();
-        world->selz = mstart.y();
-        world->seldo = true;
-        world->selopt = D_NONE;
+        world->setSelectPos(mstart);
         grab(); // invokes an immediate paint call
     }
 
-    Pos p = getActivePos();
+    VarPos vp = getActivePos();
     QString seed   = world ? QString::asprintf("%" PRId64, (int64_t)world->wi.seed) : "";
-    QString tp     = QString::asprintf("/tp @p %d ~ %d", p.x, p.z);
-    QString coords = QString::asprintf("%d %d", p.x, p.z);
-    QString chunk  = QString::asprintf("%d %d", p.x >> 4, p.z >> 4);
-    QString region = QString::asprintf("%d %d", p.x >> 9, p.z >> 9);
+    QString tp     = QString::asprintf("/tp @p %d ~ %d", vp.p.x, vp.p.z);
+    QString coords = QString::asprintf("%d %d", vp.p.x, vp.p.z);
+    QString chunk  = QString::asprintf("%d %d", vp.p.x >> 4, vp.p.z >> 4);
+    QString region = QString::asprintf("%d %d", vp.p.x >> 9, vp.p.z >> 9);
 
     menu.addAction(tr("Go to coordinates..."), this, &MapView::onGoto, QKeySequence(Qt::CTRL + Qt::Key_G));
     menu.addAction(tr("Copy seed:   ")+seed, this, &MapView::copySeed, QKeySequence::Copy);
+
+    if (vp.type != -1)
+    {   // structure has a known size / location
+        int midx, midy, midz;
+        if (vp.pieces.size() > 0)
+        {
+            const Piece& pc = vp.pieces[0];
+            midx = (pc.bb0.x + pc.bb1.x) >> 1;
+            midy = (pc.bb0.y);
+            midz = (pc.bb0.z + pc.bb1.z) >> 1;
+        }
+        else
+        {
+            midx = vp.p.x + vp.v.x + vp.v.sx / 2;
+            midy = vp.v.y;
+            midz = vp.p.z + vp.v.z + vp.v.sz / 2;
+            if (midy >= 320 && world)
+            {
+                midy = world->estimateSurface(Pos{midx, midz}) + 8;
+                if (midy < 63)
+                    midy = 63;
+            }
+        }
+        QString tps = QString::asprintf("/tp @p %d %d %d", midx, midy, midz);
+        menu.addAction(tr("Copy tp:     ")+tps, [=](){ this->copyText(tps); });
+    }
     menu.addAction(tr("Copy tp:     ")+tp, [=](){ this->copyText(tp); });
     menu.addAction(tr("Copy block:  ")+coords, [=](){ this->copyText(coords); });
     menu.addAction(tr("Copy chunk:  ")+chunk, [=](){ this->copyText(chunk); });
@@ -469,16 +509,11 @@ void MapView::resizeEvent(QResizeEvent *e)
     overlay->resize(width(), height());
 }
 
+
 void MapView::wheelEvent(QWheelEvent *e)
 {
-    qreal zoommin = 1.0 / 2048.0, zoommax = 128.0;
     const qreal ang = e->angleDelta().y() / 8; // e->delta() / 8;
-    if (ang < 0 && blocks2pix < zoommin) return;
-    if (ang > 0 && blocks2pix > zoommax) return;
-    blocks2pix *= pow(2, ang/100);
-    if (ang < 0 && blocks2pix < zoommin) blocks2pix = zoommin;
-    if (ang > 0 && blocks2pix > zoommax) blocks2pix = zoommax;
-    update();
+    zoom(pow(2, ang/100));
 }
 
 void MapView::mousePressEvent(QMouseEvent *e)
@@ -503,9 +538,7 @@ void MapView::mousePressEvent(QMouseEvent *e)
 
         if (world)
         {
-            world->selx = mstart.x();
-            world->selz = mstart.y();
-            world->seldo = true;
+            world->setSelectPos(mstart);
             update();
         }
     }
@@ -559,18 +592,45 @@ void MapView::mouseReleaseEvent(QMouseEvent *e)
 
         if (world && e->pos() == mstart)
         {
-            world->selx = mstart.x();
-            world->selz = mstart.y();
-            world->seldo = true;
-            world->selopt = D_NONE;
+            world->setSelectPos(mstart);
         }
     }
 }
 
-void MapView::keyReleaseEvent(QKeyEvent *e)
+void MapView::keyPressEvent(QKeyEvent *e)
 {
     if (e->matches(QKeySequence::Copy))
         copySeed();
-    QWidget::keyReleaseEvent(e);
+    qreal step = 4 / blocks2pix;
+    switch (e->key())
+    {
+    case Qt::Key_0:
+        if (e->modifiers() == 0)
+            setView(0, 0);
+        break;
+    case Qt::Key_Plus:
+        zoom(pow(2, +0.125));
+        break;
+    case Qt::Key_Minus:
+        zoom(pow(2, -0.125));
+        break;
+    case Qt::Key_Up:
+        focusz -= step;
+        update();
+        break;
+    case Qt::Key_Down:
+        focusz += step;
+        update();
+        break;
+    case Qt::Key_Left:
+        focusx -= step;
+        update();
+        break;
+    case Qt::Key_Right:
+        focusx += step;
+        update();
+        break;
+    }
+    QWidget::keyPressEvent(e);
 }
 

@@ -1,7 +1,7 @@
 #include "layerdialog.h"
 #include "ui_layerdialog.h"
 
-#include "settings.h"
+#include "config.h"
 
 
 const char *getLayerOptionText(int mode, int disp)
@@ -139,6 +139,8 @@ LayerDialog::LayerDialog(QWidget *parent, int mc)
     radio[LOPT_RIVER_4] = ui->radioRiver;
     radio[LOPT_OCEAN_256] = ui->radioOcean;
     radio[LOPT_NOOCEAN_1] = ui->radioNoOcean;
+    radio[LOPT_BETA_T_1] = ui->radioBetaT;
+    radio[LOPT_BETA_H_1] = ui->radioBetaH;
     radio[LOPT_HEIGHT_4] = ui->radioHeight;
     radio[LOPT_STRUCTS] = ui->radioStruct;
 
@@ -185,7 +187,7 @@ LayerDialog::LayerDialog(QWidget *parent, int mc)
         {
             radio[i]->setEnabled(mc > MC_1_12 && mc <= MC_1_17);
         }
-        if (i == LOPT_NOOCEAN_1)
+        if (i == LOPT_NOOCEAN_1 || i == LOPT_BETA_T_1 || i == LOPT_BETA_H_1)
         {
             radio[i]->setEnabled(mc <= MC_B1_7);
         }

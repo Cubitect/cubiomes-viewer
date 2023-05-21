@@ -70,25 +70,32 @@ void FormConditions::updateSensitivity()
     {
         ui->buttonRemove->setEnabled(false);
         ui->buttonEdit->setEnabled(false);
-        ui->buttonDisable->setEnabled(false);
     }
     else if (selected.size() == 1)
     {
         ui->buttonRemove->setEnabled(true);
         ui->buttonEdit->setEnabled(true);
-        ui->buttonDisable->setEnabled(true);
-        Condition c = qvariant_cast<Condition>(selected[0]->data(Qt::UserRole));
-        if (c.meta & Condition::DISABLED)
-            ui->buttonDisable->setText(tr("Enable"));
-        else
-            ui->buttonDisable->setText(tr("Disable"));
     }
     else
     {
         ui->buttonRemove->setEnabled(true);
         ui->buttonEdit->setEnabled(false);
-        ui->buttonDisable->setEnabled(false);
     }
+
+    int disabled = 0;
+    for (int i = 0; i < selected.size(); i++)
+    {
+        Condition c = qvariant_cast<Condition>(selected[i]->data(Qt::UserRole));
+        if (c.meta & Condition::DISABLED)
+            disabled++;
+    }
+    if (disabled == 0)
+        ui->buttonDisable->setText(tr("Disable"));
+    else if (disabled == selected.size())
+        ui->buttonDisable->setText(tr("Enable"));
+    else
+        ui->buttonDisable->setText(tr("Toggle"));
+    ui->buttonDisable->setEnabled(!selected.empty());
 }
 
 

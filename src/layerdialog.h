@@ -5,7 +5,7 @@
 #include <QRadioButton>
 #include <QComboBox>
 
-#include "settings.h"
+#include "config.h"
 
 namespace Ui {
 class LayerDialog;

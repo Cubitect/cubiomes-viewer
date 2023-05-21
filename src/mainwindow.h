@@ -115,8 +115,10 @@ private slots:
     void onGen48Changed();
     void onSelectedSeedChanged(uint64_t seed);
     void onSearchStatusChanged(bool running);
-    void onStyleChanged(int style);
+    void onUpdateConfig();
+    void onUpdateMapConfig();
     void onBiomeColorChange();
+    void onStyleChanged(int style);
     void onDockFloating(bool floating);
 
 public:
@@ -129,6 +131,7 @@ public:
     FormSearchControl *formControl;
     LayerOpt lopt;
     Config config;
+    MapConfig mconfig;
     QString prevdir;
     QTimer autosaveTimer;
     int prevtab;

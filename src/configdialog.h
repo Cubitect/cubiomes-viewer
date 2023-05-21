@@ -4,7 +4,7 @@
 #include <QDialog>
 #include <QAbstractButton>
 
-#include "settings.h"
+#include "config.h"
 
 
 namespace Ui {
@@ -20,13 +20,18 @@ public:
     explicit ConfigDialog(QWidget *parent, Config *config);
     ~ConfigDialog();
 
-    void initSettings(Config *config);
-
-    Config getSettings();
+    void initConfig(Config *config);
+    Config getConfig();
 
     void setBiomeColorPath(QString path);
 
+signals:
+    void updateConfig();
+    void updateMapConfig();
+
 private slots:
+    void onUpdateMapConfig();
+
     void on_buttonBox_clicked(QAbstractButton *button);
 
     void on_buttonBiomeColorEditor_clicked();
@@ -43,8 +48,6 @@ private slots:
 private:
     Ui::ConfigDialog *ui;
     Config conf;
-public:
-    bool visModified;
 };
 
 #endif // CONFIGDIALOG_H

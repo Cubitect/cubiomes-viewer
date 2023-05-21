@@ -13,7 +13,7 @@
 
 #include "searchthread.h"
 #include "protobasedialog.h"
-#include "settings.h"
+#include "config.h"
 
 namespace Ui {
 class FormSearchControl;

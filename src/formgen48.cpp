@@ -82,8 +82,8 @@ FormGen48::FormGen48(MainWindow *parent)
     ui->lineList48->setFont(*gp_font_mono);
 
     cond.type = 0;
-    Gen48Settings defaults;
-    setSettings(defaults, true);
+    Gen48Config defaults;
+    setConfig(defaults, true);
 }
 
 FormGen48::~FormGen48()
@@ -150,7 +150,7 @@ bool FormGen48::setList48(QString path, bool quiet)
 
 
 
-void FormGen48::setSettings(const Gen48Settings& gen48, bool quiet)
+void FormGen48::setConfig(const Gen48Config& gen48, bool quiet)
 {
     ui->tabWidget->setCurrentIndex(gen48.mode);
     ui->comboLow20->setCurrentIndex(gen48.qual);
@@ -172,9 +172,9 @@ void FormGen48::setSettings(const Gen48Settings& gen48, bool quiet)
     on_tabWidget_currentChanged(gen48.mode);
 }
 
-Gen48Settings FormGen48::getSettings(bool resolveauto)
+Gen48Config FormGen48::getConfig(bool resolveauto)
 {
-    Gen48Settings s;
+    Gen48Config s;
 
     s.mode = ui->tabWidget->currentIndex();
     s.qual = ui->comboLow20->currentIndex();
@@ -205,7 +205,7 @@ Gen48Settings FormGen48::getSettings(bool resolveauto)
 
 uint64_t FormGen48::estimateSeedCnt()
 {
-    const Gen48Settings& gen48 = getSettings(true);
+    const Gen48Config& gen48 = getConfig(true);
     uint64_t cnt = 0;
     if (gen48.mode == GEN48_QH)
     {

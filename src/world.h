@@ -1,7 +1,7 @@
 #ifndef WORLD_H
 #define WORLD_H
 
-#include "settings.h"
+#include "config.h"
 #include "search.h"
 
 #include <QRunnable>
@@ -10,130 +10,10 @@
 #include <QAtomicPointer>
 #include <QIcon>
 #include <QMutex>
+#include <QThread>
 
 #include "cubiomes/quadbase.h"
 
-
-enum {
-    D_NONE = -1,
-    // generics
-    D_GRID,
-    D_SLIME,
-    // structures
-    D_DESERT,
-    D_JUNGLE,
-    D_IGLOO,
-    D_HUT,
-    D_VILLAGE,
-    D_MANSION,
-    D_MONUMENT,
-    D_RUINS,
-    D_SHIPWRECK,
-    D_TREASURE,
-    D_MINESHAFT,
-    D_OUTPOST,
-    D_ANCIENTCITY,
-    D_PORTAL,
-    D_PORTALN,
-    D_FORTESS,
-    D_BASTION,
-    D_ENDCITY,
-    D_GATEWAY,
-    // non-recurring structures
-    D_SPAWN,
-    D_STRONGHOLD,
-    STRUCT_NUM
-};
-
-inline const char *mapopt2str(int opt)
-{
-    switch (opt)
-    {
-    case D_GRID:        return "grid";
-    case D_SLIME:       return "slime";
-    case D_DESERT:      return "desert";
-    case D_JUNGLE:      return "jungle";
-    case D_IGLOO:       return "igloo";
-    case D_HUT:         return "hut";
-    case D_VILLAGE:     return "village";
-    case D_MANSION:     return "mansion";
-    case D_MONUMENT:    return "monument";
-    case D_RUINS:       return "ruins";
-    case D_SHIPWRECK:   return "shipwreck";
-    case D_TREASURE:    return "treasure";
-    case D_MINESHAFT:   return "mineshaft";
-    case D_OUTPOST:     return "outpost";
-    case D_ANCIENTCITY: return "ancient_city";
-    case D_PORTAL:      return "portal";
-    case D_PORTALN:     return "portaln";
-    case D_SPAWN:       return "spawn";
-    case D_STRONGHOLD:  return "stronghold";
-    case D_FORTESS:     return "fortress";
-    case D_BASTION:     return "bastion";
-    case D_ENDCITY:     return "endcity";
-    case D_GATEWAY:     return "gateway";
-    default:            return "";
-    }
-}
-
-inline int str2mapopt(const char *s)
-{
-    if (!strcmp(s, "grid"))         return D_GRID;
-    if (!strcmp(s, "slime"))        return D_SLIME;
-    if (!strcmp(s, "desert"))       return D_DESERT;
-    if (!strcmp(s, "jungle"))       return D_JUNGLE;
-    if (!strcmp(s, "igloo"))        return D_IGLOO;
-    if (!strcmp(s, "hut"))          return D_HUT;
-    if (!strcmp(s, "village"))      return D_VILLAGE;
-    if (!strcmp(s, "mansion"))      return D_MANSION;
-    if (!strcmp(s, "monument"))     return D_MONUMENT;
-    if (!strcmp(s, "ruins"))        return D_RUINS;
-    if (!strcmp(s, "shipwreck"))    return D_SHIPWRECK;
-    if (!strcmp(s, "treasure"))     return D_TREASURE;
-    if (!strcmp(s, "mineshaft"))    return D_MINESHAFT;
-    if (!strcmp(s, "outpost"))      return D_OUTPOST;
-    if (!strcmp(s, "ancient_city")) return D_ANCIENTCITY;
-    if (!strcmp(s, "portal"))       return D_PORTAL;
-    if (!strcmp(s, "portaln"))      return D_PORTALN;
-    if (!strcmp(s, "spawn"))        return D_SPAWN;
-    if (!strcmp(s, "stronghold"))   return D_STRONGHOLD;
-    if (!strcmp(s, "fortress"))     return D_FORTESS;
-    if (!strcmp(s, "bastion"))      return D_BASTION;
-    if (!strcmp(s, "endcity"))      return D_ENDCITY;
-    if (!strcmp(s, "gateway"))      return D_GATEWAY;
-    return D_NONE;
-}
-
-inline int mapopt2stype(int opt)
-{
-    switch (opt)
-    {
-    case D_DESERT:      return Desert_Pyramid;
-    case D_JUNGLE:      return Jungle_Pyramid;
-    case D_IGLOO:       return Igloo;
-    case D_HUT:         return Swamp_Hut;
-    case D_VILLAGE:     return Village;
-    case D_MANSION:     return Mansion;
-    case D_MONUMENT:    return Monument;
-    case D_RUINS:       return Ocean_Ruin;
-    case D_SHIPWRECK:   return Shipwreck;
-    case D_TREASURE:    return Treasure;
-    case D_MINESHAFT:   return Mineshaft;
-    case D_OUTPOST:     return Outpost;
-    case D_ANCIENTCITY: return Ancient_City;
-    case D_PORTAL:      return Ruined_Portal;
-    case D_PORTALN:     return Ruined_Portal_N;
-    case D_FORTESS:     return Fortress;
-    case D_BASTION:     return Bastion;
-    case D_ENDCITY:     return End_City;
-    case D_GATEWAY:     return End_Gateway;
-    default:
-        return -1;
-    }
-}
-
-void loadStructVis(std::map<int, double>& structvis);
-void saveStructVis(std::map<int, double>& structvis);
 
 struct Level;
 
@@ -267,8 +147,11 @@ public:
 
     void draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz, qreal blocks2pix);
 
+    void setSelectPos(QPoint pos);
+
     int getBiome(Pos p);
     QString getBiomeName(Pos p);
+    int estimateSurface(Pos p);
 
     void refreshBiomeColors();
 
@@ -305,7 +188,7 @@ public:
     std::vector<MapWorker> workers;
     int threadlimit;
 
-    bool sshow[STRUCT_NUM];
+    bool sshow[D_STRUCT_NUM];
     bool showBB;
     int gridspacing;
     int gridmultiplier;

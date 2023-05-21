@@ -12,13 +12,13 @@ QT += core widgets
 
 CHARSET                 = -finput-charset=UTF-8 -fexec-charset=UTF-8
 QMAKE_CFLAGS            = $$CHARSET -fwrapv -DSTRUCT_CONFIG_OVERRIDE=1
-QMAKE_CXXFLAGS          = $$QMAKE_CFLAGS -std=gnu++11
+QMAKE_CXXFLAGS          = $$QMAKE_CFLAGS -std=gnu++11 -Wno-deprecated-copy
 QMAKE_CXXFLAGS_RELEASE  *= -O3
 
 win32: {
     CONFIG += static_gnu
 
-    # thanks to nullprogram for dealing with the Windows UTF-16 nonsense
+    # thank you nullprogram for dealing with the Windows UTF-16 nonsense
     LIBWINSANE          = $$PWD/src/libwinsane
     libwinsane.target   = libwinsane
     libwinsane.output   = $$LIBWINSANE/libwinsane.o
@@ -33,12 +33,15 @@ static_gnu: {
     LIBS += -static -static-libgcc -static-libstdc++
 }
 
-# compile cubiomes
-release: {
-    CUTARGET = release
-} else: { # may need the release target to be disabled: qmake CONFIG-=release
+CONFIG(debug, debug|release): {
     CUTARGET = debug
+    QMAKE_CFLAGS += -fsanitize=undefined
+    LIBS += -lubsan -ldl
+} else {
+    CUTARGET = release
 }
+
+# compile cubiomes
 CUPATH              = $$PWD/cubiomes
 QMAKE_PRE_LINK      += $(MAKE) -C $$CUPATH -f $$CUPATH/makefile CFLAGS=\"$$QMAKE_CFLAGS\" $$CUTARGET
 QMAKE_CLEAN         += $$CUPATH/*.o $$CUPATH/libcubiomes.a
@@ -85,6 +88,7 @@ SOURCES += \
         src/biomecolordialog.cpp \
         src/collapsible.cpp \
         src/conditiondialog.cpp \
+        src/config.cpp \
         src/configdialog.cpp \
         src/extgendialog.cpp \
         src/exportdialog.cpp \
@@ -147,6 +151,7 @@ HEADERS += \
         src/biomecolordialog.h \
         src/collapsible.h \
         src/conditiondialog.h \
+        src/config.h \
         src/configdialog.h \
         src/extgendialog.h \
         src/exportdialog.h \
@@ -169,7 +174,6 @@ HEADERS += \
         src/tabstructures.h \
         src/tabtriggers.h \
         src/mainwindow.h \
-        src/settings.h \
         src/structuredialog.h \
         src/world.h
 

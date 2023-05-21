@@ -11,36 +11,13 @@
 #include <algorithm>
 
 
-void loadStructVis(std::map<int, double>& structvis)
-{
-    QSettings settings("cubiomes-viewer", "cubiomes-viewer");
-
-    for (int opt = D_DESERT; opt < D_SPAWN; opt++)
-    {
-        double defval = 32;
-        const char *name = mapopt2str(opt);
-        double scale = settings.value(QString("structscale/") + name, defval).toDouble();
-        structvis[opt] = scale;
-    }
-}
-
-void saveStructVis(std::map<int, double>& structvis)
-{
-    QSettings settings("cubiomes-viewer", "cubiomes-viewer");
-
-    for (auto it : structvis)
-    {
-        const char *name = mapopt2str(it.first);
-        settings.setValue(QString("structscale/") + name, it.second);
-    }
-}
-
 const QPixmap& getMapIcon(int opt, VarPos *vp)
 {
-    static QPixmap icons[STRUCT_NUM];
+    static QPixmap icons[D_STRUCT_NUM];
     static QPixmap iconzvil;
     static QPixmap icongiant;
     static QPixmap iconship;
+    static QPixmap iconbasement;
     static bool init = false;
 
     if (!init)
@@ -57,8 +34,11 @@ const QPixmap& getMapIcon(int opt, VarPos *vp)
         icons[D_SHIPWRECK]  = QPixmap(":/icons/shipwreck.png");
         icons[D_TREASURE]   = QPixmap(":/icons/treasure.png");
         icons[D_MINESHAFT]  = QPixmap(":/icons/mineshaft.png");
+        icons[D_WELL]       = QPixmap(":/icons/well.png");
+        icons[D_GEODE]      = QPixmap(":/icons/geode.png");
         icons[D_OUTPOST]    = QPixmap(":/icons/outpost.png");
         icons[D_ANCIENTCITY]= QPixmap(":/icons/ancient_city.png");
+        icons[D_TRAIL]      = QPixmap(":/icons/trail.png");
         icons[D_PORTAL]     = QPixmap(":/icons/portal.png");
         icons[D_PORTALN]    = QPixmap(":/icons/portal.png");
         icons[D_SPAWN]      = QPixmap(":/icons/spawn.png");
@@ -70,11 +50,14 @@ const QPixmap& getMapIcon(int opt, VarPos *vp)
         iconzvil            = QPixmap(":/icons/zombie.png");
         icongiant           = QPixmap(":/icons/portal_giant.png");
         iconship            = QPixmap(":/icons/end_ship.png");
+        iconbasement        = QPixmap(":/icons/igloo_basement.png");
     }
     if (!vp)
         return icons[opt];
     if (opt == D_VILLAGE && vp->v.abandoned)
         return iconzvil;
+    if (opt == D_IGLOO && vp->v.basement)
+        return iconbasement;
     if ((opt == D_PORTAL || opt == D_PORTALN) && vp->v.giant)
         return icongiant;
     if (opt == D_ENDCITY)
@@ -165,6 +148,23 @@ QStringList VarPos::detail() const
             sinfo.append(QString::asprintf("spawners=%d", spawner));
         if (wart)
             sinfo.append(QString::asprintf("nether_wart=%d", wart));
+    }
+    else if (type == Igloo)
+    {
+        if (v.basement)
+        {
+            sinfo.append("with_basement");
+            sinfo.append(QString::asprintf("ladders=%d", 4+v.size*3));
+        }
+    }
+    else if (type == Geode)
+    {
+        sinfo.append(QString::asprintf("x=%d", p.x+v.x));
+        sinfo.append(QString::asprintf("y=%d", v.y));
+        sinfo.append(QString::asprintf("z=%d", p.z+v.z));
+        sinfo.append(QString::asprintf("radius=%d", v.size));
+        if (v.cracked)
+            sinfo.append("cracked");
     }
     return sinfo;
 }
@@ -413,9 +413,8 @@ void Quad::run()
             return;
         }
 
-        int seam_buf = 0; //pixs / 128;
         int y = (scale > 1) ? wi.y >> 2 : wi.y;
-        int x = ti*pixs, z = tj*pixs, w = pixs+seam_buf, h = pixs+seam_buf;
+        int x = ti*pixs, z = tj*pixs, w = pixs, h = pixs;
         Range r = {scale, x, z, w, h, y, 1};
         biomes = allocCache(g, r);
         if (!biomes) return;
@@ -434,7 +433,22 @@ void Quad::run()
         }
 
         rgb = new uchar[w*h * 3];
-        if (g->mc < MC_1_18 || dim != 0 || g->bn.nptype < 0)
+        int nptype = -1;
+        if (g->mc >= MC_1_18) nptype = g->bn.nptype;
+        if (g->mc <= MC_B1_7) nptype = g->bnb.nptype;
+        if (dim == 0 && nptype >= 0)
+        {   // climate parameter
+            const int *extremes = getBiomeParaExtremes(g->mc);
+            int cmin = extremes[nptype*2 + 0];
+            int cmax = extremes[nptype*2 + 1];
+            for (int i = 0; i < w*h; i++)
+            {
+                double p = (biomes[i] - cmin) / (double) (cmax - cmin);
+                uchar col = (p <= 0) ? 0 : (p >= 1.0) ? 0xff : (uchar)(0xff * p);
+                rgb[3*i+0] = rgb[3*i+1] = rgb[3*i+2] = col;
+            }
+        }
+        else
         {
             // sync biomeColors
             g_mutex.lock();
@@ -445,18 +459,6 @@ void Quad::run()
             {
                 int stepbits = (hd ? 0 : 2);
                 applyHeightShading(rgb, r, g, sn, stepbits, lopt.disp[lopt.mode], false, isdel);
-            }
-        }
-        else // climate parameter
-        {
-            const int *extremes = getBiomeParaExtremes(g->mc);
-            int cmin = extremes[g->bn.nptype*2 + 0];
-            int cmax = extremes[g->bn.nptype*2 + 1];
-            for (int i = 0; i < w*h; i++)
-            {
-                double p = (biomes[i] - cmin) / (double) (cmax - cmin);
-                uchar col = (p <= 0) ? 0 : (p >= 1.0) ? 0xff : (uchar)(0xff * p);
-                rgb[3*i+0] = rgb[3*i+1] = rgb[3*i+2] = col;
             }
         }
         img = new QImage(rgb, w, h, 3*w, QImage::Format_RGB888);
@@ -568,7 +570,7 @@ void Level::init4map(QWorld *w, int pix, int layerscale)
     initSurfaceNoise(&sn, dim, wi.seed);
     this->isdel = &w->isdel;
     sopt = D_NONE;
-    if (dim == DIM_OVERWORLD && wi.mc >= MC_1_18)
+    if (dim == DIM_OVERWORLD && lopt.isClimate(wi.mc))
     {
         switch (lopt.mode)
         {
@@ -578,11 +580,17 @@ void Level::init4map(QWorld *w, int pix, int layerscale)
         case LOPT_NOISE_E_4: g.bn.nptype = NP_EROSION; break;
         case LOPT_NOISE_D_4: g.bn.nptype = NP_DEPTH; break;
         case LOPT_NOISE_W_4: g.bn.nptype = NP_WEIRDNESS; break;
+        case LOPT_BETA_T_1: g.bnb.nptype = NP_TEMPERATURE; break;
+        case LOPT_BETA_H_1: g.bnb.nptype = NP_HUMIDITY; break;
         }
-        if (g.bn.nptype >= 0)
+        if (wi.mc >= MC_1_18)
         {
             int nmax = lopt.activeDisp();
             setClimateParaSeed(&g.bn, wi.seed, wi.large, g.bn.nptype, nmax);
+        }
+        else if (wi.mc <= MC_B1_7)
+        {
+            g.flags |= NO_BETA_OCEAN;
         }
     }
 }
@@ -775,12 +783,15 @@ QWorld::QWorld(WorldInfo wi, int dim, LayerOpt lopt)
 
     setDim(dim, lopt);
 
-    std::map<int, double> svis;
-    loadStructVis(svis);
+    QSettings settings(APP_STRING, APP_STRING);
+    MapConfig mconfig;
+    mconfig.load(settings);
 
     lvs.resize(D_SPAWN);
     for (int opt = D_DESERT; opt < D_SPAWN; opt++)
     {
+        if (!mconfig.enabled(opt))
+            continue;
         int sdim = 0, qsiz = 512*16;
         switch (opt) {
         case D_PORTALN: sdim = -1; break;
@@ -790,8 +801,8 @@ QWorld::QWorld(WorldInfo wi, int dim, LayerOpt lopt)
         case D_GATEWAY: sdim = +1; break;
         case D_MANSION: qsiz = 1280*16; break;
         }
-        double vis = 1.0 / svis[opt];
-        lvs[opt].init4struct(this, sdim, qsiz, vis, opt);
+        double v = 1.0 / mconfig.scale(opt);
+        lvs[opt].init4struct(this, sdim, qsiz, v, opt);
     }
     memset(sshow, 0, sizeof(sshow));
 }
@@ -843,6 +854,13 @@ void QWorld::setDim(int dim, LayerOpt lopt)
         lvb[i].init4map(this, pixs, scale);
 }
 
+void QWorld::setSelectPos(QPoint pos)
+{
+    selx = pos.x();
+    selz = pos.y();
+    seldo = true;
+    selopt = D_NONE;
+}
 
 int QWorld::getBiome(Pos p)
 {
@@ -867,7 +885,7 @@ int QWorld::getBiome(Pos p)
 QString QWorld::getBiomeName(Pos p)
 {
     int id = getBiome(p);
-    if (wi.mc >= MC_1_18 && dim == 0 && lopt.mode >= LOPT_NOISE_T_4 && lopt.mode <= LOPT_NOISE_W_4)
+    if (dim == 0 && lopt.isClimate(wi.mc))
     {
         QString c;
         switch (lopt.mode)
@@ -878,6 +896,8 @@ QString QWorld::getBiomeName(Pos p)
             case LOPT_NOISE_E_4: c = "E"; break;
             case LOPT_NOISE_D_4: c = "D"; break;
             case LOPT_NOISE_W_4: c = "W"; break;
+            case LOPT_BETA_T_1: c = "T"; break;
+            case LOPT_BETA_H_1: c = "H"; break;
         }
         if (lopt.activeDisp())
             c += "." + QString::number(lopt.activeDisp());
@@ -885,14 +905,18 @@ QString QWorld::getBiomeName(Pos p)
     }
     const char *s = biome2str(wi.mc, id);
     QString ret = s ? s : "";
-    if (lopt.mode == LOPT_HEIGHT_4 && dim == 0)
-    {
-        float y;
-        int id;
-        mapApproxHeight(&y, &id, &g, &sn, p.x>>2, p.z>>2, 1, 1);
-        ret = QString::asprintf("Y~%d ", (int) floor(y)) + ret;
-    }
+    if (lopt.mode == LOPT_HEIGHT_4 && dim == DIM_OVERWORLD)
+        ret = QString::asprintf("Y~%d ", estimateSurface(p)) + ret;
     return ret;
+}
+
+int QWorld::estimateSurface(Pos p)
+{
+    if (dim != DIM_OVERWORLD)
+        return 64;
+    float y = 0;
+    mapApproxHeight(&y, 0, &g, &sn, p.x>>2, p.z>>2, 1, 1);
+    return (int) floor(y);
 }
 
 static void refreshQuadColor(Quad *q)
@@ -1166,8 +1190,6 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
             qreal ps = q->blocks * blocks2pix;
             qreal px = vw/2.0 + (q->ti) * ps - focusx * blocks2pix;
             qreal pz = vh/2.0 + (q->tj) * ps - focusz * blocks2pix;
-            // account for the seam buffer pixels
-            //ps += ((q->pixs / 128) * q->blocks / (qreal)q->pixs) * blocks2pix;
             QRect rec(floor(px),floor(pz), ceil(ps),ceil(ps));
             //QImage img = (*q->img).scaledToWidth(rec.width(), Qt::SmoothTransformation);
             painter.drawImage(rec, *q->img);
@@ -1277,6 +1299,11 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
             continue;
 
         std::map<const QPixmap*, std::vector<QPainter::PixmapFragment>> frags;
+        QImage bufimg = QImage(vw, vh, QImage::Format_Indexed8);
+        bufimg.setColor(0, qRgba(0, 0, 0, 0));
+        bufimg.setColor(1, qRgba(255, 255, 255, 255));
+        bufimg.setColor(2, qRgba(180, 64, 192, 255));
+        bufimg.fill(0);
 
         for (Quad *q : l.cells)
         {
@@ -1304,6 +1331,14 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
                         // center icon on bb
                         x += dx / 2;
                         y += dy / 2;
+                    }
+                    else if (vp.type == Geode)
+                    {
+                        qreal rad = vp.v.size * blocks2pix;
+                        x += vp.v.x * blocks2pix;
+                        y += vp.v.z * blocks2pix;
+                        painter.setPen(QPen(QColor(192, 0, 0, 160), 1));
+                        painter.drawEllipse(QPointF(x, y), rad, rad);
                     }
                     painter.setPen(QPen(QColor(192, 0, 0, 128), 0));
                     for (Piece& p : vp.pieces)
@@ -1334,6 +1369,34 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
                     vp.p.z //+ (vp.v.z + vp.v.sz / 2)
                 };
 
+                if (sopt == D_GEODE)
+                {
+                    int r = 2;
+                    QRectF rec = QRectF(d.x()-r, d.y()-r, 2*r, 2*r);
+                    if (seldo && rec.contains(selx, selz))
+                    {
+                        selopt = sopt;
+                        selvp = vp;
+                    }
+                    if (selopt == sopt && selvp.p.x == spos.x && selvp.p.z == spos.z)
+                    {   // don't draw selected structure
+                        continue;
+                    }
+                    for (int i = -r; i <= r; i++)
+                    {
+                        for (int j = -r; j <= r; j++)
+                        {
+                            int q = i*i + j*j;
+                            if (q > r*r) continue;
+                            int x = floor(d.x() + i);
+                            int z = floor(d.y() + j);
+                            if (bufimg.rect().contains(x, z))
+                                bufimg.setPixel(x, z, q >= 2 ? 1 : 2);
+                        }
+                    }
+                    continue;
+                }
+
                 const QPixmap& icon = getMapIcon(sopt, &vp);
                 QRectF rec = icon.rect();
                 if (seldo)
@@ -1355,6 +1418,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
             }
         }
 
+        painter.drawImage(QPoint(0, 0), bufimg);
         for (auto& it : frags)
             painter.drawPixmapFragments(it.second.data(), it.second.size(), *it.first);
     }
@@ -1448,8 +1512,8 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
         qreal x = vw/2.0 + (selvp.p.x - focusx) * blocks2pix;
         qreal y = vh/2.0 + (selvp.p.z - focusz) * blocks2pix;
         QRect iconrec = icon.rect();
-        qreal w = iconrec.width() * 1.5;
-        qreal h = iconrec.height() * 1.5;
+        qreal w = iconrec.width() * 1.49;
+        qreal h = iconrec.height() * 1.49;
         painter.drawPixmap(x-w/2, y-h/2, w, h, icon);
 
         QFont f = QFont();

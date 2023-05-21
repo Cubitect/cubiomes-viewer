@@ -45,6 +45,7 @@ MainWindow::MainWindow(QWidget *parent)
     , formControl()
     , lopt()
     , config()
+    , mconfig(false)
     , prevdir(".")
     , autosaveTimer()
     , prevtab(-1)
@@ -83,6 +84,8 @@ MainWindow::MainWindow(QWidget *parent)
     laction[LOPT_RIVER_4] = ui->actionRiver;
     laction[LOPT_OCEAN_256] = ui->actionOceanTemp;
     laction[LOPT_NOOCEAN_1] = ui->actionNoOceans;
+    laction[LOPT_BETA_T_1] = ui->actionBetaTemperature;
+    laction[LOPT_BETA_H_1] = ui->actionBetaHumidity;
     laction[LOPT_HEIGHT_4] = ui->actionHeight;
     laction[LOPT_STRUCTS] = ui->actionStructures;
 
@@ -125,9 +128,8 @@ MainWindow::MainWindow(QWidget *parent)
         dimgroup->addAction(dimactions[i]);
     }
     dimactions[0]->setChecked(true);
-    ui->toolBar->addSeparator();
 
-    saction.resize(STRUCT_NUM);
+    saction.resize(D_STRUCT_NUM);
     addMapAction(D_GRID, "grid", tr("Show grid"));
     addMapAction(D_SLIME, "slime", tr("Show slime chunks"));
     addMapAction(D_SPAWN, "spawn", tr("Show world spawn"));
@@ -143,9 +145,12 @@ MainWindow::MainWindow(QWidget *parent)
     addMapAction(D_RUINS, "ruins", tr("Show ocean ruins"));
     addMapAction(D_SHIPWRECK, "shipwreck", tr("Show shipwrecks"));
     addMapAction(D_TREASURE, "treasure", tr("Show buried treasures"));
+    addMapAction(D_WELL, "well", tr("Show desert wells"));
+    addMapAction(D_GEODE, "geode", tr("Show amethyst geodes"));
     addMapAction(D_OUTPOST, "outpost", tr("Show pillager outposts"));
     addMapAction(D_PORTAL, "portal", tr("Show ruined portals"));
     addMapAction(D_ANCIENTCITY, "ancient_city", tr("Show ancient cities"));
+    addMapAction(D_TRAIL, "trail", tr("Show trail ruins"));
     ui->toolBar->addSeparator();
     addMapAction(D_FORTESS, "fortress", tr("Show nether fortresses"));
     addMapAction(D_BASTION, "bastion", tr("Show bastions"));
@@ -198,7 +203,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // 48-bit generator settings are not all that interesting unless we are
     // using them, so start as collapsed if they are on the "Auto" setting.
-    Gen48Settings gen48 = formGen48->getSettings(false);
+    Gen48Config gen48 = formGen48->getConfig(false);
     ui->collapseGen48->init(tr("Seed generator (48-bit)"), formGen48, gen48.mode == GEN48_AUTO);
     connect(formGen48, &FormGen48::changed, this, &MainWindow::onGen48Changed);
     ui->collapseGen48->setInfo(
@@ -297,7 +302,8 @@ bool MainWindow::getSeed(WorldInfo *wi, bool applyrand)
     wi->mc = str2mc(mcs.c_str());
     if (wi->mc < 0)
     {
-        qDebug() << "Unknown MC version: " << mcs.c_str();
+        if (applyrand)
+            qDebug() << "Unknown MC version: " << mcs.c_str();
         wi->mc = MC_NEWEST;
         ok = false;
     }
@@ -363,6 +369,12 @@ bool MainWindow::setSeed(WorldInfo wi, int dim)
         ui->menuHistory->setEnabled(true);
     }
 
+    // temporarily disable UI to prevent recursive setSeed() updates
+    ui->comboBoxMC->setEnabled(false);
+    ui->checkLarge->setEnabled(false);
+    ui->seedEdit->setEnabled(false);
+    ui->comboY->setEnabled(false);
+
     ui->checkLarge->setChecked(wi.large);
     int i, n = ui->comboY->count();
     for (i = 0; i < n; i++)
@@ -376,7 +388,10 @@ bool MainWindow::setSeed(WorldInfo wi, int dim)
     ui->seedEdit->setText(QString::asprintf("%" PRId64, (int64_t)wi.seed));
     getMapView()->setSeed(wi, dim, lopt);
 
+    ui->comboBoxMC->setEnabled(true);
     ui->checkLarge->setEnabled(wi.mc >= MC_1_3);
+    ui->seedEdit->setEnabled(true);
+    ui->comboY->setEnabled(true);
 
     ISaveTab *tab = dynamic_cast<ISaveTab*>(ui->tabContainer->currentWidget());
     if (tab)
@@ -398,50 +413,28 @@ int MainWindow::getDim()
 
 void MainWindow::saveSettings()
 {
-    QSettings settings("cubiomes-viewer", "cubiomes-viewer");
+    QSettings settings(APP_STRING, APP_STRING);
 
     settings.setValue("mainwindow/size", size());
     settings.setValue("mainwindow/pos", pos());
     settings.setValue("mainwindow/prevdir", prevdir);
 
-    settings.setValue("config/smoothMotion", config.smoothMotion);
-    settings.setValue("config/showBBoxes", config.showBBoxes);
-    settings.setValue("config/restoreSession", config.restoreSession);
-    settings.setValue("config/checkForUpdates", config.checkForUpdates);
-    settings.setValue("config/autosaveCycle", config.autosaveCycle);
-    settings.setValue("config/uistyle", config.uistyle);
-    settings.setValue("config/maxMatching", config.maxMatching);
-    settings.setValue("config/gridSpacing", config.gridSpacing);
-    settings.setValue("config/gridMultiplier", config.gridMultiplier);
-    settings.setValue("config/mapCacheSize", config.mapCacheSize);
-    settings.setValue("config/mapThreads", config.mapThreads);
-    settings.setValue("config/biomeColorPath", config.biomeColorPath);
-    settings.setValue("config/separator", config.separator);
-    settings.setValue("config/quote", config.quote);
+    settings.setValue("toolbar/area", toolBarArea(ui->toolBar));
 
-    settings.setValue("world/experimentalVers", g_extgen.experimentalVers);
-    settings.setValue("world/estimateTerrain", g_extgen.estimateTerrain);
-    settings.setValue("world/saltOverride", g_extgen.saltOverride);
-    for (int st = 0; st < FEATURE_NUM; st++)
-    {
-        uint64_t salt = g_extgen.salts[st];
-        if (salt <= MASK48)
-            settings.setValue(QString("world/salt_") + struct2str(st), (qulonglong)salt);
-    }
+    config.save(settings);
+
+    g_extgen.save(settings);
 
     on_tabContainer_currentChanged(-1);
 
     WorldInfo wi;
     getSeed(&wi, false);
-    settings.setValue("map/mc", wi.mc);
-    settings.setValue("map/large", wi.large);
-    settings.setValue("map/seed", (qlonglong)wi.seed);
+    wi.save(settings);
     settings.setValue("map/dim", getDim());
     settings.setValue("map/x", getMapView()->getX());
-    settings.setValue("map/y", wi.y);
     settings.setValue("map/z", getMapView()->getZ());
     settings.setValue("map/scale", getMapView()->getScale());
-    for (int stype = 0; stype < STRUCT_NUM; stype++)
+    for (int stype = 0; stype < D_STRUCT_NUM; stype++)
     {
         QString s = QString("map/show_") + mapopt2str(stype);
         settings.setValue(s, getMapView()->getShow(stype));
@@ -460,7 +453,7 @@ void MainWindow::saveSettings()
 
 void MainWindow::loadSettings()
 {
-    QSettings settings("cubiomes-viewer", "cubiomes-viewer");
+    QSettings settings(APP_STRING, APP_STRING);
 
     getMapView()->deleteWorld();
 
@@ -468,38 +461,14 @@ void MainWindow::loadSettings()
     move(settings.value("mainwindow/pos", pos()).toPoint());
     prevdir = settings.value("mainwindow/prevdir", pos()).toString();
 
-    config.smoothMotion = settings.value("config/smoothMotion", config.smoothMotion).toBool();
-    config.showBBoxes = settings.value("config/showBBoxes", config.showBBoxes).toBool();
-    config.restoreSession = settings.value("config/restoreSession", config.restoreSession).toBool();
-    config.checkForUpdates = settings.value("config/checkForUpdates", config.checkForUpdates).toBool();
-    config.autosaveCycle = settings.value("config/autosaveCycle", config.autosaveCycle).toInt();
-    config.uistyle = settings.value("config/uistyle", config.uistyle).toInt();
-    config.maxMatching = settings.value("config/maxMatching", config.maxMatching).toInt();
-    config.gridSpacing = settings.value("config/gridSpacing", config.gridSpacing).toInt();
-    config.gridMultiplier = settings.value("config/gridMultiplier", config.gridMultiplier).toInt();
-    config.mapCacheSize = settings.value("config/mapCacheSize", config.mapCacheSize).toInt();
-    config.mapThreads = settings.value("config/mapThreads", config.mapThreads).toInt();
-    config.biomeColorPath = settings.value("config/biomeColorPath", config.biomeColorPath).toString();
-    config.separator = settings.value("config/separator", config.separator).toString();
-    config.quote = settings.value("config/quote", config.quote).toString();
-
-    if (!config.biomeColorPath.isEmpty())
-        onBiomeColorChange();
-
-    ui->seedEdit->setText(settings.value("map/seed").toString());
-
-    g_extgen.experimentalVers = settings.value("world/experimentalVers", g_extgen.experimentalVers).toBool();
-    g_extgen.estimateTerrain = settings.value("world/estimateTerrain", g_extgen.estimateTerrain).toBool();
-    g_extgen.saltOverride = settings.value("world/saltOverride", g_extgen.saltOverride).toBool();
-    for (int st = 0; st < FEATURE_NUM; st++)
+    int toolarea = toolBarArea(ui->toolBar);
+    int toolarea_new = settings.value("toolbar/area", toolarea).toInt();
+    if (toolarea != toolarea_new)
     {
-        QVariant v = QVariant::fromValue(~(qulonglong)0);
-        g_extgen.salts[st] = settings.value(QString("world/salt_") + struct2str(st), v).toULongLong();
+        removeToolBar(ui->toolBar);
+        addToolBar((Qt::ToolBarArea) toolarea_new, ui->toolBar);
+        ui->toolBar->show();
     }
-    setMCList(g_extgen.experimentalVers);
-
-    getMapView()->setConfig(config);
-    onStyleChanged(config.uistyle);
 
     qreal x = getMapView()->getX();
     qreal z = getMapView()->getZ();
@@ -509,7 +478,7 @@ void MainWindow::loadSettings()
     scale = settings.value("map/scale", scale).toDouble();
     mapGoto(x, z, scale);
 
-    for (int sopt = 0; sopt < STRUCT_NUM; sopt++)
+    for (int sopt = 0; sopt < D_STRUCT_NUM; sopt++)
     {
         bool show = getMapView()->getShow(sopt);
         QString soptstr = QString("map/show_") + mapopt2str(sopt);
@@ -519,14 +488,18 @@ void MainWindow::loadSettings()
         getMapView()->setShow(sopt, show);
     }
 
+    g_extgen.load(settings);
+    setMCList(g_extgen.experimentalVers);
+
     WorldInfo wi;
-    getSeed(&wi, false);
     // NOTE: version can be wrong when the mc-enum changes, but the session file should correct it
-    wi.mc = settings.value("map/mc", wi.mc).toInt();
-    wi.large = settings.value("map/large", wi.large).toBool();
-    wi.y = settings.value("map/y", 256).toInt();
+    getSeed(&wi, false);
+    wi.load(settings);
     int dim = settings.value("map/dim", getDim()).toInt();
     setSeed(wi, dim);
+
+    onUpdateConfig();
+    onUpdateMapConfig();
 
     if (config.restoreSession)
     {
@@ -536,16 +509,6 @@ void MainWindow::loadSettings()
         {
             loadProgress(path, false, false);
         }
-    }
-
-    if (config.autosaveCycle > 0)
-    {
-        autosaveTimer.setInterval(config.autosaveCycle * 60000);
-        autosaveTimer.start();
-    }
-    else
-    {
-        autosaveTimer.stop();
     }
 }
 
@@ -562,7 +525,7 @@ bool MainWindow::saveProgress(QString fnam, bool quiet)
     }
 
     SearchConfig searchconf = formControl->getSearchConfig();
-    Gen48Settings gen48 = formGen48->getSettings(false);
+    Gen48Config gen48 = formGen48->getConfig(false);
     QVector<Condition> condvec = formCond->getConditions();
     QVector<uint64_t> results = formControl->getResults();
 
@@ -573,36 +536,10 @@ bool MainWindow::saveProgress(QString fnam, bool quiet)
     stream << "#Version:  " << VERS_MAJOR << "." << VERS_MINOR << "." << VERS_PATCH << "\n";
     stream << "#Time:     " << QDateTime::currentDateTime().toString() << "\n";
     // MC version of the session should take priority over the one in the settings
-    stream << "#MC:       " << mc2str(wi.mc) << "\n";
-    stream << "#Large:    " << wi.large << "\n";
+    wi.write(stream);
 
-    stream << "#Search:   " << searchconf.searchtype << "\n";
-    if (!searchconf.slist64path.isEmpty())
-        stream << "#List64:   " << searchconf.slist64path.replace("\n", "") << "\n";
-    stream << "#Progress: " << searchconf.startseed << "\n";
-    stream << "#Threads:  " << searchconf.threads << "\n";
-    stream << "#ResStop:  " << (int)searchconf.stoponres << "\n";
-
-    stream << "#Mode48:   " << gen48.mode << "\n";
-    if (!gen48.slist48path.isEmpty())
-        stream << "#List48:   " << gen48.slist48path.replace("\n", "") << "\n";
-    stream << "#HutQual:  " << gen48.qual << "\n";
-    stream << "#MonArea:  " << gen48.qmarea << "\n";
-    if (gen48.salt != 0)
-        stream << "#Salt:     " << gen48.salt << "\n";
-    if (gen48.listsalt != 0)
-        stream << "#LSalt:    " << gen48.listsalt << "\n";
-    if (gen48.manualarea)
-    {
-        stream << "#Gen48X1:  " << gen48.x1 << "\n";
-        stream << "#Gen48Z1:  " << gen48.z1 << "\n";
-        stream << "#Gen48X2:  " << gen48.x2 << "\n";
-        stream << "#Gen48Z2:  " << gen48.z2 << "\n";
-    }
-    if (searchconf.smin != 0)
-        stream << "#SMin:     " << searchconf.smin << "\n";
-    if (searchconf.smax != ~(uint64_t)0)
-        stream << "#SMax:     " << searchconf.smax << "\n";
+    searchconf.write(stream);
+    gen48.write(stream);
 
     for (Condition &c : condvec)
         stream << "#Cond: " << c.toHex() << "\n";
@@ -626,12 +563,10 @@ bool MainWindow::loadProgress(QString fnam, bool keepresults, bool quiet)
 
     int major = 0, minor = 0, patch = 0;
     SearchConfig searchconf = formControl->getSearchConfig();
-    Gen48Settings gen48 = formGen48->getSettings(false);
+    Gen48Config gen48 = formGen48->getConfig(false);
     QVector<Condition> condvec;
     QVector<uint64_t> seeds;
 
-    char buf[4096];
-    int tmp;
     WorldInfo wi;
     getSeed(&wi, true);
 
@@ -669,35 +604,16 @@ bool MainWindow::loadProgress(QString fnam, bool keepresults, bool quiet)
     {
         lno++;
         line = stream.readLine();
-        QByteArray ba = line.toLocal8Bit();
-        const char *p = ba.data();
 
         if (line.isEmpty()) continue;
         if (line.startsWith("#Time:")) continue;
         if (line.startsWith("#Title:")) continue;
         if (line.startsWith("#Desc:")) continue;
-        else if (sscanf(p, "#MC:       %8[^\n]", buf) == 1)                     { wi.mc = str2mc(buf); if (wi.mc < 0) wi.mc = MC_NEWEST; }
-        else if (sscanf(p, "#Large:    %d", &tmp) == 1)                         { wi.large = tmp; }
-        // SearchConfig
-        else if (sscanf(p, "#Search:   %d", &searchconf.searchtype) == 1)       {}
-        else if (sscanf(p, "#Progress: %" PRId64, &searchconf.startseed) == 1)  {}
-        else if (sscanf(p, "#Threads:  %d", &searchconf.threads) == 1)          {}
-        else if (sscanf(p, "#ResStop:  %d", &tmp) == 1)                         { searchconf.stoponres = tmp; }
-        else if (line.startsWith("#List64:   "))                                { searchconf.slist64path = line.mid(11).trimmed(); }
-        // Gen48Settings
-        else if (sscanf(p, "#Mode48:   %d", &gen48.mode) == 1)                  {}
-        else if (sscanf(p, "#HutQual:  %d", &gen48.qual) == 1)                  {}
-        else if (sscanf(p, "#MonArea:  %d", &gen48.qmarea) == 1)                {}
-        else if (sscanf(p, "#Salt:     %" PRIu64, &gen48.salt) == 1)            {}
-        else if (sscanf(p, "#LSalt:    %" PRIu64, &gen48.listsalt) == 1)        {}
-        else if (sscanf(p, "#Gen48X1:  %d", &gen48.x1) == 1)                    { gen48.manualarea = true; }
-        else if (sscanf(p, "#Gen48Z1:  %d", &gen48.z1) == 1)                    { gen48.manualarea = true; }
-        else if (sscanf(p, "#Gen48X2:  %d", &gen48.x2) == 1)                    { gen48.manualarea = true; }
-        else if (sscanf(p, "#Gen48Z2:  %d", &gen48.z2) == 1)                    { gen48.manualarea = true; }
-        else if (line.startsWith("#List48:   "))                                { gen48.slist48path = line.mid(11).trimmed(); }
-        else if (sscanf(p, "#SMin:     %" PRIu64, &searchconf.smin) == 1)       {}
-        else if (sscanf(p, "#SMax:     %" PRIu64, &searchconf.smax) == 1)       {}
-        else if (line.startsWith("#Cond:"))
+        if (searchconf.read(line)) continue;
+        if (gen48.read(line)) continue;
+        if (wi.read(line)) continue;
+
+        if (line.startsWith("#Cond:"))
         {   // Conditions
             Condition c;
             if (c.readHex(line.mid(6).trimmed()))
@@ -718,8 +634,10 @@ bool MainWindow::loadProgress(QString fnam, bool keepresults, bool quiet)
         }
         else
         {   // Seeds
+            QByteArray ba = line.toLocal8Bit();
+            const char *p = ba.data();
             uint64_t s;
-            if (sscanf(line.toLocal8Bit().data(), "%" PRId64, (int64_t*)&s) == 1)
+            if (sscanf(p, "%" PRId64, (int64_t*)&s) == 1)
             {
                 seeds.push_back(s);
             }
@@ -746,7 +664,7 @@ bool MainWindow::loadProgress(QString fnam, bool keepresults, bool quiet)
         formCond->addItemCondition(item, c);
     }
 
-    formGen48->setSettings(gen48, quiet);
+    formGen48->setConfig(gen48, quiet);
     formGen48->updateCount();
 
     if (!keepresults)
@@ -767,6 +685,8 @@ void MainWindow::updateMapSeed()
     bool state;
     state = (wi.mc <= MC_B1_7);
     ui->actionNoOceans->setEnabled(state);
+    ui->actionBetaTemperature->setEnabled(state);
+    ui->actionBetaHumidity->setEnabled(state);
     state = (wi.mc >= MC_1_13 && wi.mc <= MC_1_17);
     ui->actionRiver->setEnabled(state);
     ui->actionOceanTemp->setEnabled(state);
@@ -839,7 +759,7 @@ void MainWindow::setMCList(bool experimental)
     {
         if (!experimental && mc != wi.mc)
         {
-            if (mc <= MC_1_0 || mc == MC_1_16_1 || mc == MC_1_19_2 || mc == MC_1_20)
+            if (mc <= MC_1_0 || mc == MC_1_16_1 || mc == MC_1_19_2)
                 continue;
         }
         const char *mcs = mc2str(mc);
@@ -847,9 +767,11 @@ void MainWindow::setMCList(bool experimental)
             mclist.append(mcs);
     }
     const QString s = mc2str(wi.mc);
+    ui->comboBoxMC->setEnabled(false);
     ui->comboBoxMC->clear();
     ui->comboBoxMC->addItems(mclist);
     ui->comboBoxMC->setCurrentText(s);
+    ui->comboBoxMC->setEnabled(true);
 }
 
 int MainWindow::warning(QString text, QMessageBox::StandardButtons buttons)
@@ -870,22 +792,23 @@ void MainWindow::setBiomeColorRc(QString rc)
 
 void MainWindow::on_comboBoxMC_currentIndexChanged(int)
 {
-    if (ui->comboBoxMC->count())
-    {
+    if (ui->comboBoxMC->isEnabled() && ui->comboBoxMC->count())
         updateMapSeed();
-    }
 }
 void MainWindow::on_seedEdit_editingFinished()
 {
-    updateMapSeed();
+    if (ui->seedEdit->isEnabled())
+        updateMapSeed();
 }
 void MainWindow::on_checkLarge_toggled()
 {
-    updateMapSeed();
+    if (ui->checkLarge->isEnabled())
+        updateMapSeed();
 }
 void MainWindow::on_comboY_currentIndexChanged(int)
 {
-    updateMapSeed();
+    if (ui->comboY->isEnabled())
+        updateMapSeed();
 }
 
 void MainWindow::on_seedEdit_textChanged(const QString &a)
@@ -934,41 +857,9 @@ void MainWindow::on_actionQuit_triggered()
 void MainWindow::on_actionPreferences_triggered()
 {
     ConfigDialog *dialog = new ConfigDialog(this, &config);
-    int status = dialog->exec();
-    if (status == QDialog::Accepted)
-    {
-        applyConfigChanges(config, dialog->getSettings());
-    }
-    if (dialog->visModified)
-    {
-        getMapView()->deleteWorld();
-        updateMapSeed();
-    }
-}
-
-void MainWindow::onBiomeColorChange()
-{
-    QFile file(config.biomeColorPath);
-    if (!config.biomeColorPath.isEmpty() && file.open(QIODevice::ReadOnly))
-    {
-        char buf[32*1024];
-        qint64 siz = file.read(buf, sizeof(buf)-1);
-        file.close();
-        if (siz >= 0)
-        {
-            buf[siz] = 0;
-            initBiomeColors(g_biomeColors);
-            parseBiomeColors(g_biomeColors, buf);
-        }
-    }
-    else
-    {
-        initBiomeColors(g_biomeColors);
-    }
-    getMapView()->refreshBiomeColors();
-    ISaveTab *tab = dynamic_cast<ISaveTab*>(ui->tabContainer->currentWidget());
-    if (tab)
-        tab->refresh();
+    connect(dialog, SIGNAL(updateConfig()), this, SLOT(onUpdateConfig()));
+    connect(dialog, SIGNAL(updateMapConfig()), this, SLOT(onUpdateMapConfig()));
+    dialog->show();
 }
 
 void MainWindow::on_actionGo_to_triggered()
@@ -989,11 +880,8 @@ void MainWindow::on_actionOpenShadow_triggered()
 void MainWindow::on_actionStructure_visibility_triggered()
 {
     StructureDialog *dialog = new StructureDialog(this);
-    if (dialog->exec() != QDialog::Accepted || !dialog->modified)
-        return;
-    saveStructVis(dialog->structvis);
-    getMapView()->deleteWorld();
-    updateMapSeed();
+    connect(dialog, SIGNAL(updateMapConfig()), this, SLOT(onUpdateMapConfig()));
+    dialog->show();
 }
 
 void MainWindow::on_actionBiome_colors_triggered()
@@ -1114,7 +1002,7 @@ void MainWindow::on_actionLayerDisplay_triggered()
 
 void MainWindow::on_tabContainer_currentChanged(int index)
 {
-    QSettings settings("cubiomes-viewer", "cubiomes-viewer");
+    QSettings settings(APP_STRING, APP_STRING);
     ISaveTab *tabold = dynamic_cast<ISaveTab*>(ui->tabContainer->widget(prevtab));
     ISaveTab *tabnew = dynamic_cast<ISaveTab*>(ui->tabContainer->widget(index));
     if (tabold) tabold->save(settings);
@@ -1198,6 +1086,70 @@ void MainWindow::onSelectedSeedChanged(uint64_t seed)
 void MainWindow::onSearchStatusChanged(bool running)
 {
     formGen48->setEnabled(!running);
+}
+
+void MainWindow::onUpdateConfig()
+{
+    Config old = config;
+    config.load();
+
+    getMapView()->setConfig(config);
+    if (old.uistyle != config.uistyle)
+        onStyleChanged(config.uistyle);
+    if (!old.biomeColorPath.isEmpty() || !config.biomeColorPath.isEmpty())
+        onBiomeColorChange();
+
+    if (config.autosaveCycle)
+    {
+        autosaveTimer.setInterval(config.autosaveCycle * 60000);
+        autosaveTimer.start();
+    }
+    else
+    {
+        autosaveTimer.stop();
+    }
+}
+
+void MainWindow::onUpdateMapConfig()
+{
+    MapConfig old = mconfig;
+    mconfig.load();
+
+    if (!old.equals(mconfig))
+    {
+        for (int opt = D_GRID; opt < D_STRUCT_NUM; opt++)
+        {
+            if (saction[opt] && mconfig.valid(opt))
+                saction[opt]->setVisible(mconfig.enabled(opt));
+        }
+        getMapView()->deleteWorld();
+        updateMapSeed();
+    }
+}
+
+void MainWindow::onBiomeColorChange()
+{
+    QFile file(config.biomeColorPath);
+    if (!config.biomeColorPath.isEmpty() && file.open(QIODevice::ReadOnly))
+    {
+        char buf[32*1024];
+        qint64 siz = file.read(buf, sizeof(buf)-1);
+        file.close();
+        if (siz >= 0)
+        {
+            buf[siz] = 0;
+            initBiomeColors(g_biomeColors);
+            parseBiomeColors(g_biomeColors, buf);
+        }
+    }
+    else
+    {
+        initBiomeColors(g_biomeColors);
+    }
+    getMapView()->refreshBiomeColors();
+    ISaveTab *tab = dynamic_cast<ISaveTab*>(ui->tabContainer->currentWidget());
+    if (tab)
+        tab->refresh();
 }
 
 void MainWindow::onStyleChanged(int style)

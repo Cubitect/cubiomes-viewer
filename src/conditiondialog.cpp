@@ -122,7 +122,7 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
     ui->lineRadius->setValidator(uintval);
 
     ui->lineBiomeSize->setValidator(new QIntValidator(1, INT_MAX, this));
-    ui->lineTollerance->setValidator(new QIntValidator(0, 255, this));
+    ui->lineTolerance->setValidator(new QIntValidator(0, 255, this));
 
     ui->comboY->lineEdit()->setValidator(new QIntValidator(-64, 320, this));
 
@@ -293,7 +293,6 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
     ui->checkSkipRef->setChecked(false);
     ui->radioSquare->setChecked(true);
     ui->checkRadius->setChecked(false);
-    ui->lineBiomeSize->setText("");
     onCheckStartChanged(false);
     on_comboClimatePara_currentIndexChanged(0);
 
@@ -352,7 +351,10 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
             if (ui->comboY->itemText(i).section(' ', 0, 0).toInt() == cond.y)
                 break;
         if (i >= n)
+        {
             ui->comboY->addItem(QString::number(cond.y));
+            ui->comboY2->addItem(QString::number(cond.y));
+        }
         ui->comboY->setCurrentIndex(i);
 
         if (cond.x1 == cond.z1 && cond.x1 == -cond.x2 && cond.x1 == -cond.z2)
@@ -400,8 +402,8 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
             }
         }
 
-        ui->lineBiomeSize->setText(QString::number(cond.biomeSize));
-        ui->lineTollerance->setText(QString::number(cond.tol));
+        ui->lineBiomeSize->setText(QString::number(cond.biomeSize ? cond.biomeSize : 1));
+        ui->lineTolerance->setText(QString::number(cond.tol));
 
         auto totristate = [](uint16_t st, uint16_t msk) {
             return (st & msk) ? (st & Condition::VAR_NOT) ? Qt::Checked : Qt::PartiallyChecked : Qt::Unchecked;
@@ -795,7 +797,10 @@ int ConditionDialog::warnIfBad(Condition cond)
         int h = cond.z2 - cond.z1 + 1;
         if ((unsigned int)(w * h) < cond.count * cond.biomeSize)
         {
-            QString text = tr("Area is too small for the required biome size.");
+            QString text = tr(
+                "The biome locator checks for %1 instances of size %2 each, "
+                "which cannot be satisfied by an area of size %3%4%5 = %6.")
+                .arg(cond.count).arg(cond.biomeSize).arg(w).arg(QChar(0xD7)).arg(h).arg(w * h);
             QMessageBox::warning(this, tr("Area Insufficient"), text, QMessageBox::Ok);
             return QMessageBox::Cancel;
         }
@@ -964,6 +969,8 @@ void ConditionDialog::on_buttonOk_clicked()
     else
         c.rmax = 0;
 
+    c.y = ui->comboY->currentText().section(' ', 0, 0).toInt();
+
     if (ui->stackedWidget->currentWidget() == ui->pageBiomes)
     {
         c.biomeToFind = c.biomeToFindM = 0;
@@ -993,7 +1000,7 @@ void ConditionDialog::on_buttonOk_clicked()
     {
         c.biomeId = ui->comboMatchBiome->currentData().toInt();
         c.biomeSize = ui->lineBiomeSize->text().toInt();
-        c.tol = ui->lineTollerance->text().toInt();
+        c.tol = ui->lineTolerance->text().toInt();
     }
     if (ui->stackedWidget->currentWidget() == ui->pageMinMax)
     {
@@ -1015,8 +1022,6 @@ void ConditionDialog::on_buttonOk_clicked()
                 c.count += cnt;
         }
     }
-
-    c.y = ui->comboY->currentText().section(' ', 0, 0).toInt();
 
     c.flags = 0;
     if (ui->checkApprox->isChecked())
@@ -1449,4 +1454,17 @@ void ConditionDialog::on_comboClimatePara_currentIndexChanged(int)
     }
     ui->comboOctaves->addItems(items);
 }
+
+
+void ConditionDialog::on_comboY_currentTextChanged(const QString &text)
+{
+    if (ui->comboY2->currentText() != text)
+        ui->comboY2->setCurrentText(text);
+}
+void ConditionDialog::on_comboY2_currentTextChanged(const QString &text)
+{
+    if (ui->comboY->currentText() != text)
+        ui->comboY->setCurrentText(text);
+}
+
 

@@ -5,7 +5,7 @@
 
 #include <QGridLayout>
 
-ExtGenDialog::ExtGenDialog(QWidget *parent, ExtGenSettings *extgen)
+ExtGenDialog::ExtGenDialog(QWidget *parent, ExtGenConfig *extgen)
     : QDialog(parent)
     , ui(new Ui::ExtGenDialog)
     , checkSalts{}
@@ -59,7 +59,7 @@ ExtGenDialog::~ExtGenDialog()
     delete ui;
 }
 
-void ExtGenDialog::initSettings(ExtGenSettings *extgen)
+void ExtGenDialog::initSettings(ExtGenConfig *extgen)
 {
     ui->checkExperimental->setChecked(extgen->experimentalVers);
 
@@ -89,7 +89,7 @@ void ExtGenDialog::initSettings(ExtGenSettings *extgen)
     ui->groupSalts->setChecked(extgen->saltOverride);
 }
 
-ExtGenSettings ExtGenDialog::getSettings()
+ExtGenConfig ExtGenDialog::getSettings()
 {
     extgen.experimentalVers = ui->checkExperimental->isChecked();
     extgen.estimateTerrain = ui->checkEstimate->isChecked();

@@ -1,7 +1,7 @@
 #ifndef EXAMPLESDIALOG_H
 #define EXAMPLESDIALOG_H
 
-#include "settings.h"
+#include "config.h"
 #include "formconditions.h"
 
 #include <QDialog>

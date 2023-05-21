@@ -489,7 +489,7 @@
           <number>0</number>
          </property>
          <property name="currentIndex">
-          <number>5</number>
+          <number>2</number>
          </property>
          <widget class="QWidget" name="pageNone">
           <property name="enabled">
@@ -701,8 +701,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>60</width>
-                   <height>20</height>
+                   <width>634</width>
+                   <height>300</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -744,7 +744,28 @@
               <string>Locate boime center</string>
              </property>
              <layout class="QGridLayout" name="gridLayout_19">
-              <item row="3" column="1">
+              <item row="3" column="0">
+               <widget class="QLabel" name="label_4">
+                <property name="text">
+                 <string>Border tolerance:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_6">
+                <property name="text">
+                 <string>Biome:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="2" colspan="2">
+               <widget class="QLineEdit" name="lineBiomeSize">
+                <property name="text">
+                 <string>1</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="1">
                <spacer name="verticalSpacer_4">
                 <property name="orientation">
                  <enum>Qt::Vertical</enum>
@@ -757,17 +778,28 @@
                 </property>
                </spacer>
               </item>
-              <item row="0" column="2" colspan="2">
-               <widget class="QComboBox" name="comboMatchBiome">
-                <property name="editable">
-                 <bool>true</bool>
-                </property>
-                <property name="maxVisibleItems">
-                 <number>20</number>
+              <item row="2" column="0">
+               <widget class="QLabel" name="label_5">
+                <property name="text">
+                 <string>Minimum area:</string>
                 </property>
                </widget>
               </item>
-              <item row="1" column="3">
+              <item row="1" column="0" colspan="2">
+               <widget class="QLabel" name="labelY_2">
+                <property name="text">
+                 <string>Sample at height (Y):</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="2" colspan="2">
+               <widget class="QLineEdit" name="lineTolerance">
+                <property name="text">
+                 <string>0</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="4">
                <widget class="QLabel" name="labelBiomeSize">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
@@ -780,39 +812,79 @@
                 </property>
                </widget>
               </item>
-              <item row="1" column="2">
-               <widget class="QLineEdit" name="lineBiomeSize">
-                <property name="text">
-                 <string>1</string>
+              <item row="0" column="2" colspan="3">
+               <widget class="QComboBox" name="comboMatchBiome">
+                <property name="editable">
+                 <bool>true</bool>
+                </property>
+                <property name="maxVisibleItems">
+                 <number>20</number>
                 </property>
                </widget>
               </item>
-              <item row="1" column="0" colspan="2">
-               <widget class="QLabel" name="label_5">
-                <property name="text">
-                 <string>Minimum area:</string>
+              <item row="1" column="2" colspan="3">
+               <widget class="QComboBox" name="comboY2">
+                <property name="editable">
+                 <bool>true</bool>
                 </property>
-               </widget>
-              </item>
-              <item row="2" column="0">
-               <widget class="QLabel" name="label_4">
-                <property name="text">
-                 <string>Border tollerance:</string>
+                <property name="maxVisibleItems">
+                 <number>12</number>
                 </property>
-               </widget>
-              </item>
-              <item row="0" column="0">
-               <widget class="QLabel" name="label_6">
-                <property name="text">
-                 <string>Biome:</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="2">
-               <widget class="QLineEdit" name="lineTollerance">
-                <property name="text">
-                 <string>0</string>
-                </property>
+                <item>
+                 <property name="text">
+                  <string>256 (Surface)</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>128 (Nether Roof)</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>62 (Sea Level)</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>48</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>32</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>16</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>0</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>-16</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>-32</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>-48</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>-64 (Bedrock)</string>
+                 </property>
+                </item>
                </widget>
               </item>
              </layout>
@@ -1404,8 +1476,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>60</width>
-                   <height>20</height>
+                   <width>634</width>
+                   <height>335</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_3_1">
@@ -1461,8 +1533,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>60</width>
-                   <height>20</height>
+                   <width>634</width>
+                   <height>335</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_3_2">
@@ -1566,8 +1638,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>60</width>
-                   <height>20</height>
+                   <width>634</width>
+                   <height>335</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_3_3">

@@ -6,7 +6,7 @@
 #include <QCheckBox>
 #include <QLineEdit>
 
-#include "settings.h"
+#include "config.h"
 
 
 namespace Ui {
@@ -19,12 +19,12 @@ class ExtGenDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit ExtGenDialog(QWidget *parent, ExtGenSettings *extgen);
+    explicit ExtGenDialog(QWidget *parent, ExtGenConfig *extgen);
     ~ExtGenDialog();
 
-    void initSettings(ExtGenSettings *extgen);
+    void initSettings(ExtGenConfig *extgen);
 
-    ExtGenSettings getSettings();
+    ExtGenConfig getSettings();
 
 private slots:
     void on_buttonBox_clicked(QAbstractButton *button);
@@ -36,7 +36,7 @@ private:
     QCheckBox *checkSalts[FEATURE_NUM];
     QLineEdit *lineSalts[FEATURE_NUM];
 
-    ExtGenSettings extgen;
+    ExtGenConfig extgen;
 };
 
 #endif // EXTGENDIALOG_H

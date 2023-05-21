@@ -29,7 +29,7 @@ public:
     std::atomic_bool stop;
     std::atomic_int idx;
     struct Dat { int x1, z1, x2, z2; } area;
-    bool mapshow[STRUCT_NUM];
+    bool mapshow[D_STRUCT_NUM];
     bool collect;
     bool quad;
 };

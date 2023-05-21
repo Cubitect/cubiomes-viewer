@@ -9,7 +9,7 @@
 #include <QMutex>
 #include <QDir>
 
-#include "settings.h"
+#include "config.h"
 
 namespace Ui {
 class ExportDialog;

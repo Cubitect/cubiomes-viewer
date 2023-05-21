@@ -2,31 +2,36 @@
 #include "ui_structuredialog.h"
 
 #include <QLabel>
+#include <QCheckBox>
 #include <QLineEdit>
 #include <QDoubleValidator>
 #include <QPushButton>
 
-#include "world.h"
 #include "cutil.h"
+#include "world.h"
 
 StructureDialog::StructureDialog(QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::StructureDialog)
+    , mconfig()
     , modified()
 {
     ui->setupUi(this);
     QGridLayout *grid = new QGridLayout(ui->groupVis);
 
-    loadStructVis(structvis);
-
-    grid->addWidget(new QLabel(tr("blocks per pixel")), 0, 2);
+    grid->addWidget(new QLabel(tr("enabled")), 0, 0, 1, 3);
+    grid->addWidget(new QLabel(tr("blocks per pixel")), 0, 3);
 
     int i = 1;
-    for (auto it : structvis)
+    for (int opt = D_DESERT; opt < D_SPAWN; opt++)
     {
-        int opt = it.first;
-        double scale = it.second;
+        if (!mconfig.valid(opt))
+            continue;
         int j = 0;
+
+        QCheckBox *check = new QCheckBox();
+        vui[opt].check = check;
+        grid->addWidget(check, i, j++);
 
         QLabel *icon = new QLabel();
         icon->setPixmap(getMapIcon(opt));
@@ -38,15 +43,13 @@ StructureDialog::StructureDialog(QWidget *parent)
 
         QLineEdit *line = new QLineEdit();
         line->setValidator(new QDoubleValidator(0.125, 256.0, 3, grid));
-        line->setText(QString::number(scale));
-        entries[it.first] = line;
+        vui[opt].line = line;
         grid->addWidget(line, i, j++);
         i++;
     }
 
-    connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &StructureDialog::onAccept);
-    QPushButton *reset = ui->buttonBox->button(QDialogButtonBox::RestoreDefaults);
-    connect(reset, &QPushButton::clicked, this, &StructureDialog::onReset);
+    mconfig.load();
+    refresh();
 }
 
 StructureDialog::~StructureDialog()
@@ -54,23 +57,49 @@ StructureDialog::~StructureDialog()
     delete ui;
 }
 
-void StructureDialog::onAccept()
+void StructureDialog::refresh()
 {
-    for (auto it : entries)
+    for (int opt = D_DESERT; opt < D_SPAWN; opt++)
     {
-        QLineEdit *line = it.second;
-        modified |= line->isModified();
-        bool ok;
-        double scale = line->text().toDouble(&ok);
-        if (ok)
-            structvis[it.first] = scale;
+        if (vui[opt].check)
+            vui[opt].check->setChecked(mconfig.enabled(opt));
+        if (vui[opt].line)
+            vui[opt].line->setText(QString::number(mconfig.scale(opt)));
     }
 }
 
-void StructureDialog::onReset()
+void StructureDialog::on_buttonBox_clicked(QAbstractButton *button)
 {
-    QString scalestr = "32";
-    for (auto it : entries)
-        it.second->setText(scalestr);
-    modified = true;
+    int role = ui->buttonBox->buttonRole(button);
+    if (role == QDialogButtonBox::ResetRole)
+    {
+        mconfig.reset();
+        refresh();
+    }
+    else if (role == QDialogButtonBox::AcceptRole || role == QDialogButtonBox::ApplyRole)
+    {
+        for (int opt = D_DESERT; opt < D_SPAWN; opt++)
+        {
+            MapConfig::Opt *p_opt = &mconfig.opts[opt];
+            if (vui[opt].check)
+            {
+                double enabled = vui[opt].check->isChecked();
+                modified |= p_opt->enabled != enabled;
+                p_opt->enabled = enabled;
+            }
+            if (vui[opt].line)
+            {
+                bool ok;
+                double scale = vui[opt].line->text().toDouble(&ok);
+                if (ok)
+                {
+                    modified |= p_opt->scale != scale;
+                    p_opt->scale = scale;
+                }
+            }
+        }
+        mconfig.save();
+        emit updateMapConfig();
+    }
 }
+

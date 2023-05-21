@@ -175,6 +175,9 @@ private slots:
 
     void on_comboClimatePara_currentIndexChanged(int index);
 
+    void on_comboY_currentTextChanged(const QString &text);
+    void on_comboY2_currentTextChanged(const QString &text);
+
 private:
     Ui::ConditionDialog *ui;
     QTextEdit *textDescription;

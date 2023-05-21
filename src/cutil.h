@@ -24,15 +24,18 @@ inline const char* struct2str(int stype)
     case Monument:          return "monument";
     case Mansion:           return "mansion";
     case Outpost:           return "outpost";
-    case Ruined_Portal:     return "ruined_portal";
-    case Ruined_Portal_N:   return "ruined_portal (nether)";
     case Treasure:          return "treasure";
     case Mineshaft:         return "mineshaft";
+    case Desert_Well:       return "desert_well";
+    case Ruined_Portal:     return "ruined_portal";
+    case Ruined_Portal_N:   return "ruined_portal (nether)";
+    case Geode:             return "amethyst_geode";
+    case Ancient_City:      return "ancient_city";
+    case Trail_Ruin:        return "trail_ruins";
     case Fortress:          return "fortress";
     case Bastion:           return "bastion";
     case End_City:          return "end_city";
     case End_Gateway:       return "end_gateway";
-    case Ancient_City:      return "ancient_city";
     }
     return "?";
 }

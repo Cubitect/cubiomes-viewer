@@ -4,7 +4,7 @@
 #include <QWidget>
 #include <QThread>
 
-#include "settings.h"
+#include "config.h"
 #include "search.h"
 
 namespace Ui {
@@ -22,8 +22,8 @@ public:
     explicit FormGen48(MainWindow *parent);
     ~FormGen48();
 
-    void setSettings(const Gen48Settings& gen48, bool quiet);
-    Gen48Settings getSettings(bool resolveauto = false);
+    void setConfig(const Gen48Config& gen48, bool quiet);
+    Gen48Config getConfig(bool resolveauto = false);
 
     bool setList48(QString path, bool quiet);
     const std::vector<uint64_t>& getList48() { return slist48; }

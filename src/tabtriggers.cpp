@@ -2,7 +2,7 @@
 #include "ui_tabtriggers.h"
 
 #include "cutil.h"
-#include "settings.h"
+#include "config.h"
 
 #include <QElapsedTimer>
 #include <QFileDialog>

@@ -117,7 +117,7 @@ void AnalysisBiomes::runLocate(Generator *g)
     enum { MAX_LOCATE = 4096 };
     Pos pos[MAX_LOCATE];
     int siz[MAX_LOCATE];
-    Range r = {4, dat.x1, dat.z1, dat.x2-dat.x1+1, dat.z2-dat.z1+1, wi.y, 1};
+    Range r = {4, dat.x1, dat.z1, dat.x2-dat.x1+1, dat.z2-dat.z1+1, wi.y>>2, 1};
     int n = getBiomeCenters(
         pos, siz, MAX_LOCATE, g, r, dat.locate, minsize, tolerance,
         (volatile char*)&stop

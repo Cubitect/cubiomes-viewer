@@ -41,13 +41,16 @@ public:
     void setSeed(WorldInfo wi, int dim, LayerOpt lopt);
     void setView(qreal x, qreal z, qreal scale = 0);
     void animateView(qreal x, qreal z, qreal scale);
+    void zoom(qreal factor);
+
+    // animation
     qreal x_src, z_src, s_src;
     qreal x_dst, z_dst, s_dst;
     qreal s_mul;
     qreal atime;
     QElapsedTimer anielapsed;
 
-    bool getShow(int stype) { return stype >= 0 && stype < STRUCT_NUM ? sshow[stype] : false; }
+    bool getShow(int stype);
     void setShow(int stype, bool v);
     void setConfig(const Config& config);
     void refreshBiomeColors();
@@ -56,7 +59,7 @@ public:
 
     void update(int cnt = 1);
 
-    Pos getActivePos();
+    VarPos getActivePos();
 
     QPixmap screenshot();
 
@@ -82,7 +85,7 @@ public slots:
     void mouseMoveEvent(QMouseEvent *) Q_DECL_OVERRIDE;
     void mouseReleaseEvent(QMouseEvent *) Q_DECL_OVERRIDE;
 
-    void keyReleaseEvent(QKeyEvent *) Q_DECL_OVERRIDE;
+    void keyPressEvent(QKeyEvent *) Q_DECL_OVERRIDE;
 
 public:
     QWorld *world;
@@ -107,7 +110,7 @@ private:
     bool measure;
     int updatecounter;
 
-    bool sshow[STRUCT_NUM];
+    bool sshow[D_STRUCT_NUM];
     LayerOpt lopt;
     Config config;
 };
