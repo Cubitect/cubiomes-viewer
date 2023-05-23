@@ -343,15 +343,10 @@ void MapView::showContextMenu(const QPoint &pos)
         grab(); // invokes an immediate paint call
     }
 
-    VarPos vp = getActivePos();
-    QString seed   = world ? QString::asprintf("%" PRId64, (int64_t)world->wi.seed) : "";
-    QString tp     = QString::asprintf("/tp @p %d ~ %d", vp.p.x, vp.p.z);
-    QString coords = QString::asprintf("%d %d", vp.p.x, vp.p.z);
-    QString chunk  = QString::asprintf("%d %d", vp.p.x >> 4, vp.p.z >> 4);
-    QString region = QString::asprintf("%d %d", vp.p.x >> 9, vp.p.z >> 9);
+    struct _cpy_dat { QString txt, cpy; };
+    std::vector<_cpy_dat> cpy_dat;
 
-    menu.addAction(tr("Go to coordinates..."), this, &MapView::onGoto, QKeySequence(Qt::CTRL + Qt::Key_G));
-    menu.addAction(tr("Copy seed:   ")+seed, this, &MapView::copySeed, QKeySequence::Copy);
+    VarPos vp = getActivePos();
 
     if (vp.type != -1)
     {   // structure has a known size / location
@@ -375,14 +370,34 @@ void MapView::showContextMenu(const QPoint &pos)
                     midy = 63;
             }
         }
-        QString tps = QString::asprintf("/tp @p %d %d %d", midx, midy, midz);
-        menu.addAction(tr("Copy tp:     ")+tps, [=](){ this->copyText(tps); });
+        cpy_dat.push_back({ tr("Copy tp:"), QString::asprintf("/tp @p %d %d %d", midx, midy, midz) });
     }
-    menu.addAction(tr("Copy tp:     ")+tp, [=](){ this->copyText(tp); });
-    menu.addAction(tr("Copy block:  ")+coords, [=](){ this->copyText(coords); });
-    menu.addAction(tr("Copy chunk:  ")+chunk, [=](){ this->copyText(chunk); });
-    menu.addAction(tr("Copy region: ")+region, [=](){ this->copyText(region); });
-   // menu.addAction(tr("Animation"), this, &MapView::runAni);
+    cpy_dat.push_back({ tr("Copy tp:"),     QString::asprintf("/tp @p %d ~ %d", vp.p.x, vp.p.z) });
+    cpy_dat.push_back({ tr("Copy coords:"), QString::asprintf("%d %d", vp.p.x, vp.p.z) });
+    cpy_dat.push_back({ tr("Copy chunk:"),  QString::asprintf("%d %d", vp.p.x >> 4, vp.p.z >> 4) });
+    cpy_dat.push_back({ tr("Copy region:"), QString::asprintf("%d %d", vp.p.x >> 9, vp.p.z >> 9) });
+
+    int pad = 0;
+    for (auto& it : cpy_dat)
+    {
+        if (it.txt.length() > pad)
+            pad = it.txt.length();
+    }
+    pad += 1;
+
+
+    menu.addAction(tr("Go to coordinates..."), this, &MapView::onGoto, QKeySequence(Qt::CTRL + Qt::Key_G));
+    if (world)
+    {
+        QString txt = tr("Copy seed:").leftJustified(pad) + QString::asprintf("%" PRId64, (int64_t)world->wi.seed);
+        menu.addAction(txt, this, &MapView::copySeed, QKeySequence::Copy);
+    }
+    for (auto& it : cpy_dat)
+    {
+        QString txt = it.txt.leftJustified(pad) + it.cpy;
+        menu.addAction(txt, [=](){ this->copyText(it.cpy); });
+    }
+    //menu.addAction(tr("Animation"), this, &MapView::runAni);
     menu.exec(mapToGlobal(pos));
 }
 

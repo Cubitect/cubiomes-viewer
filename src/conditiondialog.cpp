@@ -430,7 +430,7 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
         setClimateLimits(climaterange[0], cond.limok, true);
         setClimateLimits(climaterange[1], cond.limex, false);
 
-        ui->comboHeightRange->setCurrentIndex(cond.flags & Condition::FLG_INRANGE ? 0 : 1);
+        ui->comboHeightRange->setCurrentIndex(cond.flags & Condition::FLG_IN_RANGE ? 0 : 1);
     }
 
     on_lineSquare_editingFinished();
@@ -1029,7 +1029,7 @@ void ConditionDialog::on_buttonOk_clicked()
     if (ui->checkMatchAny->isChecked())
         c.flags |= Condition::FLG_MATCH_ANY;
     if (ui->comboHeightRange->currentIndex() == 0)
-        c.flags |= Condition::FLG_INRANGE;
+        c.flags |= Condition::FLG_IN_RANGE;
 
     c.varflags = c.varstart = 0;
     if (ui->checkStartPieces->isChecked())
@@ -1098,10 +1098,11 @@ void ConditionDialog::on_comboBoxCat_currentIndexChanged(int idx)
             continue;
         slot++;
         QVariant vidx = QVariant::fromValue((int)(ft - g_filterinfo.list));
+        QString txt = QApplication::translate("Filter", ft->name);
         if (ft->icon)
-            ui->comboBoxType->insertItem(slot, QIcon(ft->icon), ft->name, vidx);
+            ui->comboBoxType->insertItem(slot, QIcon(ft->icon), txt, vidx);
         else
-            ui->comboBoxType->insertItem(slot, QApplication::translate("Filter", ft->name), vidx);
+            ui->comboBoxType->insertItem(slot, txt, vidx);
 
         if (mc < ft->mcmin || mc > ft->mcmax)
             ui->comboBoxType->setItemData(slot, false, Qt::UserRole-1); // deactivate

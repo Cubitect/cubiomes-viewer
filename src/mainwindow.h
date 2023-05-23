@@ -49,6 +49,8 @@ public:
     virtual ~MainWindow();
     virtual void closeEvent(QCloseEvent *event) override;
 
+    bool loadTranslation(QString lang);
+
     QAction *addMapAction(int sopt, const char *iconpath, QString tip);
 
     bool getSeed(WorldInfo *wi, bool applyrand = true);

@@ -199,9 +199,6 @@ FORMS += \
         src/structuredialog.ui
 
 
-TRANSLATIONS += \
-        rc/lang/en_US.ts
-
 RESOURCES += \
         rc/icons.qrc \
         rc/style.qrc \
@@ -209,7 +206,10 @@ RESOURCES += \
         rc/lang.qrc
 
 
-# ----- translations -----
+# ----- translations (pluralization) -----
+
+TRANSLATIONS += \
+        rc/lang/en_US.ts
 
 translations: {
     # automatically run lupdate for pluralization default translation

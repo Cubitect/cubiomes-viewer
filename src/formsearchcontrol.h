@@ -23,6 +23,8 @@ class MainWindow;
 
 class SeedTableModel : public QAbstractTableModel
 {
+    Q_OBJECT
+
 public:
     explicit SeedTableModel(QObject *parent = nullptr) :
         QAbstractTableModel(parent) {}

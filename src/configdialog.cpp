@@ -9,6 +9,8 @@
 #include <QThread>
 #include <QFileInfo>
 #include <QFileDialog>
+#include <QDirIterator>
+#include <QLocale>
 #include <QMessageBox>
 
 
@@ -31,6 +33,20 @@ ConfigDialog::ConfigDialog(QWidget *parent, Config *config)
 
     ui->lineMatching->setValidator(new QIntValidator(1, 99999999, ui->lineMatching));
     ui->spinThreads->setRange(1, QThread::idealThreadCount());
+
+    QString rclang = ":/lang";
+    QDirIterator it(rclang, QDirIterator::Subdirectories);
+    while (it.hasNext())
+    {
+        QString fnam = it.next();
+        if(!fnam.endsWith(".qm"))
+            continue;
+        QString code = QFileInfo(fnam).baseName();
+        QLocale locale(code);
+        QString text = QLocale::languageToString(locale.language());
+        text += " (" + QLocale::countryToString(locale.country()) + ")";
+        ui->comboLang->addItem(text, code);
+    }
 
     initConfig(config);
 }
@@ -55,6 +71,7 @@ void ConfigDialog::initConfig(Config *config)
     ui->comboGridMult->setCurrentText(config->gridMultiplier ? QString::number(config->gridMultiplier) : tr("None"));
     ui->spinCacheSize->setValue(config->mapCacheSize);
     ui->spinThreads->setValue(config->mapThreads ? config->mapThreads : QThread::idealThreadCount());
+    ui->comboLang->setCurrentIndex(ui->comboLang->findData(config->lang));
     ui->lineSep->setText(config->separator);
     int idx = config->quote == "\'" ? 1 : config->quote== "\"" ? 2 : 0;
     ui->comboQuote->setCurrentIndex(idx);
@@ -75,6 +92,7 @@ Config ConfigDialog::getConfig()
     conf.gridMultiplier = ui->comboGridMult->currentText().toInt();
     conf.mapCacheSize = ui->spinCacheSize->value();
     conf.mapThreads = ui->spinThreads->value();
+    conf.lang = ui->comboLang->currentData().toString();
     conf.separator = ui->lineSep->text();
     int idx = ui->comboQuote->currentIndex();
     conf.quote = idx == 1 ? "\'" : idx == 2 ? "\"" : "";

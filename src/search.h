@@ -134,44 +134,46 @@ static const struct FilterList
             "",
             ""
         };
-
-#define _(S) QT_TRANSLATE_NOOP("Filter", S)
-
         list[F_LOGIC_OR] = FilterInfo{
             CAT_HELPER, 0, 0, 0, 0, 0, 0, 1, 0, 0, MC_UNDEF, MC_NEWEST, DIM_UNDEF, 0, disp++,
             ":icons/helper.png",
-            _("OR logic gate"),
-            _("Evaluates as true when any of the conditions that reference it "
+            QT_TRANSLATE_NOOP("Filter", "OR logic gate"),
+            QT_TRANSLATE_NOOP("Filter",
+            "Evaluates as true when any of the conditions that reference it "
             "(by relative location) are met. When no referencing conditions are "
             "defined, it defaults to true.")
         };
         list[F_LOGIC_NOT] = FilterInfo{
             CAT_HELPER, 0, 0, 0, 0, 0, 0, 1, 0, 0, MC_UNDEF, MC_NEWEST, DIM_UNDEF, 0, disp++,
             ":icons/helper.png",
-            _("NOT logic gate"),
-            _("Evaluates as true when none of the conditions that reference it "
+            QT_TRANSLATE_NOOP("Filter", "NOT logic gate"),
+            QT_TRANSLATE_NOOP("Filter",
+            "Evaluates as true when none of the conditions that reference it "
             "(by relative location) are met. When no referencing conditions are "
             "defined, it defaults to true.")
         };
         list[F_LUA] = FilterInfo{
             CAT_HELPER, 0, 0, 0, 0, 0, 0, 1, 0, 0, MC_UNDEF, MC_NEWEST, DIM_UNDEF, 0, disp++,
             ":icons/helper.png",
-            _("Lua"),
-            _("Define custom conditions using Lua scripts.")
+            QT_TRANSLATE_NOOP("Filter", "Lua"),
+            QT_TRANSLATE_NOOP("Filter",
+            "Define custom conditions using Lua scripts.")
         };
         list[F_SCALE_TO_NETHER] = FilterInfo{
             CAT_HELPER, 0, 0, 0, 0, 0, 0, 1, 0, 0, MC_UNDEF, MC_NEWEST, DIM_UNDEF, 0, disp++,
             ":icons/portal_lit.png",
-            _("Coordinate factor x/8"),
-            _("Divides relative location by 8, from Overworld to Nether.")
+            QT_TRANSLATE_NOOP("Filter", "Coordinate factor x/8"),
+            QT_TRANSLATE_NOOP("Filter",
+            "Divides relative location by 8, from Overworld to Nether.")
         };
         list[F_SCALE_TO_OVERWORLD] = FilterInfo{
             CAT_HELPER, 0, 0, 0, 0, 0, 0, 1, 0, 0, MC_UNDEF, MC_NEWEST, DIM_UNDEF, 0, disp++,
             ":icons/portal_lit.png",
-            _("Coordinate factor x*8"),
-            _("Multiplies relative location by 8, from Nether to Overworld.")
+            QT_TRANSLATE_NOOP("Filter", "Coordinate factor x*8"),
+            QT_TRANSLATE_NOOP("Filter",
+            "Multiplies relative location by 8, from Nether to Overworld.")
         };
-        const char *spiral_desc = _(
+        const char *spiral_desc = QT_TRANSLATE_NOOP("Filter",
             "<html><head/><body>"
             "Spiral iterator conditions can be used to move a testing position across "
             "a given area using a certain step size. Other conditions that refer to it "
@@ -182,59 +184,61 @@ static const struct FilterList
         list[F_SPIRAL_1] = FilterInfo{
             CAT_HELPER, 0, 1, 1, 0, 0, 0, 1, 0, 0, MC_UNDEF, MC_NEWEST, DIM_UNDEF, 0, disp++,
             ":icons/reference.png",
-            _("Spiral iterator 1:1"),
+            QT_TRANSLATE_NOOP("Filter", "Spiral iterator 1:1"),
             spiral_desc
         };
         list[F_SPIRAL_4] = FilterInfo{
             CAT_HELPER, 0, 1, 1, 0, 0, 0, 4, 2, 0, MC_UNDEF, MC_NEWEST, DIM_UNDEF, 0, disp++,
             ":icons/reference.png",
-            _("Spiral iterator 1:4"),
+            QT_TRANSLATE_NOOP("Filter", "Spiral iterator 1:4"),
             spiral_desc
         };
         list[F_SPIRAL_16] = FilterInfo{
             CAT_HELPER, 0, 1, 1, 0, 0, 0, 16, 4, 0, MC_UNDEF, MC_NEWEST, DIM_UNDEF, 0, disp++,
             ":icons/reference.png",
-            _("Spiral iterator 1:16"),
+            QT_TRANSLATE_NOOP("Filter", "Spiral iterator 1:16"),
             spiral_desc
         };
         list[F_SPIRAL_64] = FilterInfo{
             CAT_HELPER, 0, 1, 1, 0, 0, 0, 64, 6, 0, MC_UNDEF, MC_NEWEST, DIM_UNDEF, 0, disp++,
             ":icons/reference.png",
-            _("Spiral iterator 1:64"),
+            QT_TRANSLATE_NOOP("Filter", "Spiral iterator 1:64"),
             spiral_desc
         };
         list[F_SPIRAL_256] = FilterInfo{
             CAT_HELPER, 0, 1, 1, 0, 0, 0, 256, 8, 0, MC_UNDEF, MC_NEWEST, DIM_UNDEF, 0, disp++,
             ":icons/reference.png",
-            _("Spiral iterator 1:256"),
+            QT_TRANSLATE_NOOP("Filter", "Spiral iterator 1:256"),
             spiral_desc
         };
         list[F_SPIRAL_512] = FilterInfo{
             CAT_HELPER, 0, 1, 1, 0, 0, 0, 512, 9, 0, MC_UNDEF, MC_NEWEST, DIM_UNDEF, 0, disp++,
             ":icons/reference.png",
-            _("Spiral iterator 1:512"),
+            QT_TRANSLATE_NOOP("Filter", "Spiral iterator 1:512"),
             spiral_desc
         };
         list[F_SPIRAL_1024] = FilterInfo{
             CAT_HELPER, 0, 1, 1, 0, 0, 0, 1024, 10, 0, MC_UNDEF, MC_NEWEST, DIM_UNDEF, 0, disp++,
             ":icons/reference.png",
-            _("Spiral iterator 1:1024"),
+            QT_TRANSLATE_NOOP("Filter", "Spiral iterator 1:1024"),
             spiral_desc
         };
 
         list[F_QH_IDEAL] = FilterInfo{
             CAT_QUAD, 0, 1, 1, 0, 0, Swamp_Hut, 512, 9, 0, MC_1_4, MC_NEWEST, 0, 0, disp++,
             ":icons/quad.png",
-            _("Quad-hut (ideal)"),
-            _("The lower 48-bits provide potential for four swamp huts in "
+            QT_TRANSLATE_NOOP("Filter", "Quad-hut (ideal)"),
+            QT_TRANSLATE_NOOP("Filter",
+            "The lower 48-bits provide potential for four swamp huts in "
             "spawning range, in one of the best configurations that exist.")
         };
 
         list[F_QH_CLASSIC] = FilterInfo{
             CAT_QUAD, 0, 1, 1, 0, 0, Swamp_Hut, 512, 9, 0, MC_1_4, MC_NEWEST, 0, 0, disp++,
             ":icons/quad.png",
-            _("Quad-hut (classic)"),
-            _("The lower 48-bits provide potential for four swamp huts in "
+            QT_TRANSLATE_NOOP("Filter", "Quad-hut (classic)"),
+            QT_TRANSLATE_NOOP("Filter",
+            "The lower 48-bits provide potential for four swamp huts in "
             "spawning range, in one of the \"classic\" configurations. "
             "(Checks for huts in the nearest 2x2 chunk corners of each "
             "region.)")
@@ -243,8 +247,9 @@ static const struct FilterList
         list[F_QH_NORMAL] = FilterInfo{
             CAT_QUAD, 0, 1, 1, 0, 0, Swamp_Hut, 512, 9, 0, MC_1_4, MC_NEWEST, 0, 0, disp++,
             ":icons/quad.png",
-            _("Quad-hut (normal)"),
-            _("The lower 48-bits provide potential for four swamp huts in "
+            QT_TRANSLATE_NOOP("Filter", "Quad-hut (normal)"),
+            QT_TRANSLATE_NOOP("Filter",
+            "The lower 48-bits provide potential for four swamp huts in "
             "spawning range, such that all of them are within 128 blocks "
             "of a single AFK location, including a vertical tollerance "
             "for a fall damage chute.")
@@ -253,8 +258,9 @@ static const struct FilterList
         list[F_QH_BARELY] = FilterInfo{
             CAT_QUAD, 0, 1, 1, 0, 0, Swamp_Hut, 512, 9, 0, MC_1_4, MC_NEWEST, 0, 0, disp++,
             ":icons/quad.png",
-            _("Quad-hut (barely)"),
-            _("The lower 48-bits provide potential for four swamp huts in "
+            QT_TRANSLATE_NOOP("Filter", "Quad-hut (barely)"),
+            QT_TRANSLATE_NOOP("Filter",
+            "The lower 48-bits provide potential for four swamp huts in "
             "spawning range, in any configuration, such that the bounding "
             "boxes are within 128 blocks of a single AFK location.")
         };
@@ -262,8 +268,9 @@ static const struct FilterList
         list[F_QM_95] = FilterInfo{
             CAT_QUAD, 0, 1, 1, 0, 0, Monument, 512, 9, 0, MC_1_8, MC_NEWEST, 0, 0, disp++,
             ":icons/quad.png",
-            _("Quad-ocean-monument (>95%)"),
-            _("The lower 48-bits provide potential for 95% of the area of "
+            QT_TRANSLATE_NOOP("Filter", "Quad-ocean-monument (>95%)"),
+            QT_TRANSLATE_NOOP("Filter",
+            "The lower 48-bits provide potential for 95% of the area of "
             "four ocean monuments to be within 128 blocks of an AFK "
             "location.")
         };
@@ -271,8 +278,9 @@ static const struct FilterList
         list[F_QM_90] = FilterInfo{
             CAT_QUAD, 0, 1, 1, 0, 0, Monument, 512, 9, 0, MC_1_8, MC_NEWEST, 0, 0, disp++,
             ":icons/quad.png",
-            _("Quad-ocean-monument (>90%)"),
-            _("The lower 48-bits provide potential for 90% of the area of "
+            QT_TRANSLATE_NOOP("Filter", "Quad-ocean-monument (>90%)"),
+            QT_TRANSLATE_NOOP("Filter",
+            "The lower 48-bits provide potential for 90% of the area of "
             "four ocean monuments to be within 128 blocks of an AFK "
             "location.")
         };
@@ -280,45 +288,51 @@ static const struct FilterList
         list[F_BIOME] = FilterInfo{
             CAT_BIOMES, 1, 1, 1, 0, L_VORONOI_1, 0, 1, 0, 0, MC_B1_7, MC_1_17, 0, 1, disp++, // disable for 1.18
             ":icons/map.png",
-            _("Biomes 1:1"),
-            _("Allows only seeds with the included (+) biomes in the specified area and "
+            QT_TRANSLATE_NOOP("Filter", "Biomes 1:1"),
+            QT_TRANSLATE_NOOP("Filter",
+            "Allows only seeds with the included (+) biomes in the specified area and "
             "discard those that have biomes that are explicitly excluded (-).")
         };
 
         list[F_BIOME_4] = FilterInfo{
             CAT_BIOMES, 1, 1, 1, 0, 0, 0, 4, 2, 0, MC_B1_7, MC_NEWEST, 0, 1, disp++,
             ":icons/map.png",
-            _("Biomes 1:4"),
-            _("Allows only seeds with the included (+) biomes in the specified area and "
+            QT_TRANSLATE_NOOP("Filter", "Biomes 1:4"),
+            QT_TRANSLATE_NOOP("Filter",
+            "Allows only seeds with the included (+) biomes in the specified area and "
             "discard those that have biomes that are explicitly excluded (-).")
         };
         list[F_BIOME_16] = FilterInfo{
             CAT_BIOMES, 1, 1, 1, 0, 0, 0, 16, 4, 0, MC_B1_7, MC_NEWEST, 0, 1, disp++,
             ":icons/map.png",
-            _("Biomes 1:16"),
-            _("Allows only seeds with the included (+) biomes in the specified area and "
+            QT_TRANSLATE_NOOP("Filter", "Biomes 1:16"),
+            QT_TRANSLATE_NOOP("Filter",
+            "Allows only seeds with the included (+) biomes in the specified area and "
             "discard those that have biomes that are explicitly excluded (-).")
         };
         list[F_BIOME_64] = FilterInfo{
             CAT_BIOMES, 1, 1, 1, 0, 0, 0, 64, 6, 0, MC_B1_7, MC_NEWEST, 0, 1, disp++,
             ":icons/map.png",
-            _("Biomes 1:64"),
-            _("Allows only seeds with the included (+) biomes in the specified area and "
+            QT_TRANSLATE_NOOP("Filter", "Biomes 1:64"),
+            QT_TRANSLATE_NOOP("Filter",
+            "Allows only seeds with the included (+) biomes in the specified area and "
             "discard those that have biomes that are explicitly excluded (-).")
         };
         list[F_BIOME_256] = FilterInfo{
             CAT_BIOMES, 1, 1, 1, 0, 0, 0, 256, 8, 0, MC_B1_7, MC_NEWEST, 0, 1, disp++,
             ":icons/map.png",
-            _("Biomes 1:256"),
-            _("Allows only seeds with the included (+) biomes in the specified area and "
+            QT_TRANSLATE_NOOP("Filter", "Biomes 1:256"),
+            QT_TRANSLATE_NOOP("Filter",
+            "Allows only seeds with the included (+) biomes in the specified area and "
             "discard those that have biomes that are explicitly excluded (-).")
         };
 
         list[F_BIOME_4_RIVER] = FilterInfo{
             CAT_BIOMES, 1, 1, 1, 0, L_RIVER_MIX_4, 0, 4, 2, 0, MC_1_13, MC_1_17, 0, 0, disp++,
             ":icons/map.png",
-            _("Biomes 1:4 RIVER"),
-            _("Allows only seeds with the included (+) biomes in the specified area and "
+            QT_TRANSLATE_NOOP("Filter", "Biomes 1:4 RIVER"),
+            QT_TRANSLATE_NOOP("Filter",
+            "Allows only seeds with the included (+) biomes in the specified area and "
             "discard those that have biomes that are explicitly excluded (-) "
             "at layer RIVER with scale 1:4. "
             "This layer does not generate ocean variants.")
@@ -326,8 +340,9 @@ static const struct FilterList
         list[F_BIOME_256_OTEMP] = FilterInfo{
             CAT_BIOMES, 0, 1, 1, 0, L_OCEAN_TEMP_256, 0, 256, 8, 0, MC_1_13, MC_1_17, 0, 0, disp++,
             ":icons/map.png",
-            _("Biomes 1:256 O.TEMP"),
-            _("Allows only seeds with the included (+) biomes in the specified area and "
+            QT_TRANSLATE_NOOP("Filter", "Biomes 1:256 O.TEMP"),
+            QT_TRANSLATE_NOOP("Filter",
+            "Allows only seeds with the included (+) biomes in the specified area and "
             "discard those that have biomes that are explicitly excluded (-) "
             "at layer OCEAN TEMPERATURE with scale 1:256. "
             "This generation layer depends only on the lower 48-bits of the seed.")
@@ -335,204 +350,224 @@ static const struct FilterList
         list[F_CLIMATE_NOISE] = FilterInfo{
             CAT_BIOMES, 0, 1, 1, 0, 0, 0, 4, 2, 0, MC_1_18, MC_NEWEST, 0, 0, disp++,
             ":icons/map.png",
-            _("Climate parameters 1:4"),
-            _("Custom limits for the required and allowed climate noise parameters that "
+            QT_TRANSLATE_NOOP("Filter", "Climate parameters 1:4"),
+            QT_TRANSLATE_NOOP("Filter",
+            "Custom limits for the required and allowed climate noise parameters that "
             "the specified area should cover.")
         };
         list[F_CLIMATE_MINMAX] = FilterInfo{
             CAT_BIOMES, 0, 1, 1, 0, 0, 0, 4, 2, 0, MC_1_18, MC_NEWEST, 0, 0, disp++,
             ":icons/map.png",
-            _("Locate climate extreme 1:4"),
-            _("Finds the location where a climate parameter reaches its minimum or maximum.")
+            QT_TRANSLATE_NOOP("Filter", "Locate climate extreme 1:4"),
+            QT_TRANSLATE_NOOP("Filter",
+            "Finds the location where a climate parameter reaches its minimum or maximum.")
         };
         list[F_BIOME_CENTER] = FilterInfo{
             CAT_BIOMES, 1, 1, 1, 0, 0, 0, 4, 2, 1, MC_B1_7, MC_NEWEST, 0, 1, disp++,
             ":icons/map.png",
-            _("Locate biome center 1:4"),
-            _("Finds the center position of a given biome.")
+            QT_TRANSLATE_NOOP("Filter", "Locate biome center 1:4"),
+            QT_TRANSLATE_NOOP("Filter",
+            "Finds the center position of a given biome.")
         };
         list[F_BIOME_CENTER_256] = FilterInfo{
             CAT_BIOMES, 1, 1, 1, 0, 0, 0, 256, 8, 1, MC_B1_7, MC_1_17, 0, 1, disp++,
             ":icons/map.png",
-            _("Locate biome center 1:256"),
-            _("Finds the center position of a given biome. Based on the 1:256 biome layer.")
+            QT_TRANSLATE_NOOP("Filter", "Locate biome center 1:256"),
+            QT_TRANSLATE_NOOP("Filter",
+            "Finds the center position of a given biome. Based on the 1:256 biome layer.")
         };
         list[F_TEMPS] = FilterInfo{
             CAT_BIOMES, 1, 1, 1, 0, 0, 0, 1024, 10, 0, MC_1_7, MC_1_17, 0, 0, disp++,
             ":icons/tempcat.png",
-            _("Temperature categories"),
-            _("Checks that the area has a minimum of all the required temperature categories.")
+            QT_TRANSLATE_NOOP("Filter", "Temperature categories"),
+            QT_TRANSLATE_NOOP("Filter",
+            "Checks that the area has a minimum of all the required temperature categories.")
         };
 
         list[F_BIOME_NETHER_1] = FilterInfo{
             CAT_NETHER, 1, 1, 1, 0, 0, 0, 1, 0, 0, MC_1_16_1, 0, -1, 1, disp++, // disabled
             ":icons/nether.png",
-            _("Nether biomes 1:1 (disabled)"),
-            _("Nether biomes after voronoi scaling to 1:1.")
+            QT_TRANSLATE_NOOP("Filter", "Nether biomes 1:1 (disabled)"),
+            QT_TRANSLATE_NOOP("Filter",
+            "Nether biomes after voronoi scaling to 1:1.")
         };
         list[F_BIOME_NETHER_4] = FilterInfo{
             CAT_NETHER, 0, 1, 1, 0, 0, 0, 4, 2, 0, MC_1_16_1, MC_NEWEST, -1, 0, disp++,
             ":icons/nether.png",
-            _("Nether biomes 1:4"),
-            _("Nether biomes with normal noise sampling at scale 1:4.")
+            QT_TRANSLATE_NOOP("Filter", "Nether biomes 1:4"),
+            QT_TRANSLATE_NOOP("Filter",
+            "Nether biomes with normal noise sampling at scale 1:4.")
         };
         list[F_BIOME_NETHER_16] = FilterInfo{
             CAT_NETHER, 0, 1, 1, 0, 0, 0, 16, 4, 0, MC_1_16_1, MC_NEWEST, -1, 0, disp++,
             ":icons/nether.png",
-            _("Nether biomes 1:16"),
-            _("Nether biomes, but only sampled at scale 1:16.")
+            QT_TRANSLATE_NOOP("Filter", "Nether biomes 1:16"),
+            QT_TRANSLATE_NOOP("Filter",
+            "Nether biomes, but only sampled at scale 1:16.")
         };
         list[F_BIOME_NETHER_64] = FilterInfo{
             CAT_NETHER, 0, 1, 1, 0, 0, 0, 64, 6, 0, MC_1_16_1, MC_NEWEST, -1, 0, disp++,
             ":icons/nether.png",
-            _("Nether biomes 1:64"),
-            _("Nether biomes, but only sampled at scale 1:64.")
+            QT_TRANSLATE_NOOP("Filter", "Nether biomes 1:64"),
+            QT_TRANSLATE_NOOP("Filter",
+            "Nether biomes, but only sampled at scale 1:64.")
         };
         list[F_BIOME_NETHER_256] = FilterInfo{
             CAT_NETHER, 0, 1, 1, 0, 0, 0, 256, 8, 0, MC_1_16_1, MC_NEWEST, -1, 0, disp++,
             ":icons/nether.png",
-            _("Nether biomes 1:256"),
-            _("Nether biomes, but only sampled at scale 1:256.")
+            QT_TRANSLATE_NOOP("Filter", "Nether biomes 1:256"),
+            QT_TRANSLATE_NOOP("Filter",
+            "Nether biomes, but only sampled at scale 1:256.")
         };
 
         list[F_BIOME_END_1] = FilterInfo{
             CAT_END, 1, 1, 1, 0, 0, 0, 1, 0, 0, MC_1_9, 0, +1, 1, disp++, // disabled
             ":icons/the_end.png",
-            _("End biomes 1:1 (disabled)"),
-            _("End biomes after voronoi scaling to 1:1.")
+            QT_TRANSLATE_NOOP("Filter", "End biomes 1:1 (disabled)"),
+            QT_TRANSLATE_NOOP("Filter",
+            "End biomes after voronoi scaling to 1:1.")
         };
         list[F_BIOME_END_4] = FilterInfo{
             CAT_END, 0, 1, 1, 0, 0, 0, 4, 2, 0, MC_1_9, MC_NEWEST, +1, 0, disp++,
             ":icons/the_end.png",
-            _("End biomes 1:4"),
-            _("End biomes sampled at scale 1:4. Note this is just a simple upscale of 1:16.")
+            QT_TRANSLATE_NOOP("Filter", "End biomes 1:4"),
+            QT_TRANSLATE_NOOP("Filter",
+            "End biomes sampled at scale 1:4. Note this is just a simple upscale of 1:16.")
         };
         list[F_BIOME_END_16] = FilterInfo{
             CAT_END, 0, 1, 1, 0, 0, 0, 16, 4, 0, MC_1_9, MC_NEWEST, +1, 0, disp++,
             ":icons/the_end.png",
-            _("End biomes 1:16"),
-            _("End biomes with normal sampling at scale 1:16. ")
+            QT_TRANSLATE_NOOP("Filter", "End biomes 1:16"),
+            QT_TRANSLATE_NOOP("Filter",
+            "End biomes with normal sampling at scale 1:16. ")
         };
         list[F_BIOME_END_64] = FilterInfo{
             CAT_END, 0, 1, 1, 0, 0, 0, 64, 6, 0, MC_1_9, MC_NEWEST, +1, 0, disp++,
             ":icons/the_end.png",
-            _("End biomes 1:64"),
-            _("End biomes with lossy sampling at scale 1:64. ")
+            QT_TRANSLATE_NOOP("Filter", "End biomes 1:64"),
+            QT_TRANSLATE_NOOP("Filter",
+            "End biomes with lossy sampling at scale 1:64. ")
         };
 
         list[F_SPAWN] = FilterInfo{
             CAT_OTHER, 1, 1, 1, 1, 0, 0, 1, 0, 0, MC_B1_8, MC_NEWEST, 0, 0, disp++,
             ":icons/spawn.png",
-            _("Spawn"),
+            QT_TRANSLATE_NOOP("Filter", "Spawn"),
             ""
         };
 
         list[F_SLIME] = FilterInfo{
             CAT_OTHER, 0, 1, 1, 0, 0, 0, 16, 4, 1, MC_UNDEF, MC_NEWEST, 0, 0, disp++,
             ":icons/slime.png",
-            _("Slime chunk"),
+            QT_TRANSLATE_NOOP("Filter", "Slime chunk"),
             ""
         };
         list[F_HEIGHT] = FilterInfo{
             CAT_OTHER, 0, 1, 0, 0, 0, 0, 4, 2, 0, MC_1_1, MC_NEWEST, 0, 0, disp++,
             ":icons/height.png",
-            _("Surface height"),
-            _("Check the approximate surface height at scale 1:4 at a single coordinate.")
+            QT_TRANSLATE_NOOP("Filter", "Surface height"),
+            QT_TRANSLATE_NOOP("Filter",
+            "Check the approximate surface height at scale 1:4 at a single coordinate.")
         };
 
         list[F_FIRST_STRONGHOLD] = FilterInfo{
             CAT_OTHER, 0, 1, 1, 1, 0, 0, 1, 0, 0, MC_B1_8, MC_NEWEST, 0, 0, disp++,
             ":icons/stronghold.png",
-            _("First stronghold"),
-            _("Finds the approxmiate location of the first stronghold "
+            QT_TRANSLATE_NOOP("Filter", "First stronghold"),
+            QT_TRANSLATE_NOOP("Filter",
+            "Finds the approxmiate location of the first stronghold "
             "(+/-112 blocks). Depends only on the 48-bit seed.")
         };
 
         list[F_STRONGHOLD] = FilterInfo{
             CAT_STRUCT, 1, 1, 1, 1, 0, 0, 1, 0, 1, MC_B1_8, MC_NEWEST, 0, 0, disp++,
             ":icons/stronghold.png",
-            _("Stronghold"),
+            QT_TRANSLATE_NOOP("Filter", "Stronghold"),
             ""
         };
 
         list[F_VILLAGE] = FilterInfo{
             CAT_STRUCT, 1, 1, 1, 1, 0, Village, 1, 0, 1, MC_B1_8, MC_NEWEST, 0, 0, disp++,
             ":icons/village.png",
-            _("Village"),
+            QT_TRANSLATE_NOOP("Filter", "Village"),
             ""
         };
 
         list[F_MINESHAFT] = FilterInfo{
             CAT_STRUCT, 1, 1, 1, 0, 0, Mineshaft, 1, 0, 1, MC_B1_8, MC_NEWEST, 0, 0, disp++,
             ":icons/mineshaft.png",
-            _("Abandoned mineshaft"),
+            QT_TRANSLATE_NOOP("Filter", "Abandoned mineshaft"),
             ""
         };
 
         list[F_DESERT] = FilterInfo{
             CAT_STRUCT, 1, 1, 1, 1, 0, Desert_Pyramid, 1, 0, 1, MC_1_3, MC_NEWEST, 0, 0, disp++,
             ":icons/desert.png",
-            _("Desert pyramid"),
-            _("In version 1.18+, desert pyramids depend on surface height and may fail to "
+            QT_TRANSLATE_NOOP("Filter", "Desert pyramid"),
+            QT_TRANSLATE_NOOP("Filter",
+            "In version 1.18+, desert pyramids depend on surface height and may fail to "
             "generate near caves/aquifers, rivers and oceans.")
         };
 
         list[F_JUNGLE] = FilterInfo{
             CAT_STRUCT, 1, 1, 1, 1, 0, Jungle_Temple, 1, 0, 1, MC_1_3, MC_NEWEST, 0, 0, disp++,
             ":icons/jungle.png",
-            _("Jungle temple"),
-            _("In version 1.18+, jungle temples depend on surface height and may fail to "
+            QT_TRANSLATE_NOOP("Filter", "Jungle temple"),
+            QT_TRANSLATE_NOOP("Filter",
+            "In version 1.18+, jungle temples depend on surface height and may fail to "
             "generate near caves/aquifers, rivers and oceans.")
         };
 
         list[F_HUT] = FilterInfo{
             CAT_STRUCT, 1, 1, 1, 1, 0, Swamp_Hut, 1, 0, 1, MC_1_4, MC_NEWEST, 0, 0, disp++,
             ":icons/hut.png",
-            _("Swamp hut"),
+            QT_TRANSLATE_NOOP("Filter", "Swamp hut"),
             ""
         };
 
         list[F_MONUMENT] = FilterInfo{
             CAT_STRUCT, 1, 1, 1, 1, 0, Monument, 1, 0, 1, MC_1_8, MC_NEWEST, 0, 0, disp++,
             ":icons/monument.png",
-            _("Ocean monument"),
+            QT_TRANSLATE_NOOP("Filter", "Ocean monument"),
             ""
         };
 
         list[F_IGLOO] = FilterInfo{
             CAT_STRUCT, 1, 1, 1, 1, 0, Igloo, 1, 0, 1, MC_1_9, MC_NEWEST, 0, 0, disp++,
             ":icons/igloo.png",
-            _("Igloo"),
+            QT_TRANSLATE_NOOP("Filter", "Igloo"),
             ""
         };
 
         list[F_MANSION] = FilterInfo{
             CAT_STRUCT, 1, 1, 1, 1, 0, Mansion, 1, 0, 1, MC_1_11, MC_NEWEST, 0, 0, disp++,
             ":icons/mansion.png",
-            _("Woodland mansion"),
-            _("In version 1.18+, mansions depend on surface height and may fail to "
+            QT_TRANSLATE_NOOP("Filter", "Woodland mansion"),
+            QT_TRANSLATE_NOOP("Filter",
+            "In version 1.18+, mansions depend on surface height and may fail to "
             "generate near caves/aquifers, rivers and oceans.")
         };
 
         list[F_RUINS] = FilterInfo{
             CAT_STRUCT, 1, 1, 1, 1, 0, Ocean_Ruin, 1, 0, 1, MC_1_13, MC_NEWEST, 0, 0, disp++,
             ":icons/ruins.png",
-            _("Ocean ruins"),
+            QT_TRANSLATE_NOOP("Filter", "Ocean ruins"),
             ""
         };
 
         list[F_SHIPWRECK] = FilterInfo{
             CAT_STRUCT, 1, 1, 1, 1, 0, Shipwreck, 1, 0, 1, MC_1_13, MC_NEWEST, 0, 0, disp++,
             ":icons/shipwreck.png",
-            _("Shipwreck"),
+            QT_TRANSLATE_NOOP("Filter", "Shipwreck"),
             ""
         };
 
         list[F_TREASURE] = FilterInfo{
             CAT_STRUCT, 1, 1, 1, 1, 0, Treasure, 1, 0, 1, MC_1_13, MC_NEWEST, 0, 0, disp++,
             ":icons/treasure.png",
-            _("Buried treasure"),
-            _("Buried treasures are always positioned near the center of a chunk "
+            QT_TRANSLATE_NOOP("Filter", "Buried treasure"),
+            QT_TRANSLATE_NOOP("Filter",
+            "Buried treasures are always positioned near the center of a chunk "
             "rather than a chunk boarder. Make sure the testing area is set "
             "accordingly.")
         };
@@ -540,76 +575,74 @@ static const struct FilterList
         list[F_WELL] = FilterInfo{
             CAT_STRUCT, 1, 1, 1, 1, 0, Desert_Well, 1, 0, 1, MC_1_13, MC_NEWEST, 0, 0, disp++,
             ":icons/well.png",
-            _("Desert well"),
+            QT_TRANSLATE_NOOP("Filter", "Desert well"),
             ""
         };
 
         list[F_OUTPOST] = FilterInfo{
             CAT_STRUCT, 1, 1, 1, 1, 0, Outpost, 1, 0, 1, MC_1_14, MC_NEWEST, 0, 0, disp++,
             ":icons/outpost.png",
-            _("Pillager outpost"),
+            QT_TRANSLATE_NOOP("Filter", "Pillager outpost"),
             ""
         };
 
         list[F_ANCIENT_CITY] = FilterInfo{
             CAT_STRUCT, 1, 1, 1, 1, 0, Ancient_City, 1, 0, 1, MC_1_19, MC_NEWEST, 0, 0, disp++,
             ":icons/ancient_city.png",
-            _("Ancient city"),
+            QT_TRANSLATE_NOOP("Filter", "Ancient city"),
             ""
         };
 
         list[F_TRAILS] = FilterInfo{
             CAT_STRUCT, 1, 1, 1, 1, 0, Trail_Ruin, 1, 0, 1, MC_1_20, MC_NEWEST, 0, 0, disp++,
             ":icons/trail.png",
-            _("Trail ruins"),
+            QT_TRANSLATE_NOOP("Filter", "Trail ruins"),
             ""
         };
 
         list[F_PORTAL] = FilterInfo{
             CAT_STRUCT, 0, 1, 1, 1, 0, Ruined_Portal, 1, 0, 1, MC_1_16_1, MC_NEWEST, 0, 0, disp++,
             ":icons/portal.png",
-            _("Ruined portal (overworld)"),
+            QT_TRANSLATE_NOOP("Filter", "Ruined portal (overworld)"),
             ""
         };
 
         list[F_PORTALN] = FilterInfo{
             CAT_STRUCT, 0, 1, 1, 1, 0, Ruined_Portal_N, 1, 0, 1, MC_1_16_1, MC_NEWEST, -1, 0, disp++,
             ":icons/portal.png",
-            _("Ruined portal (nether)"),
+            QT_TRANSLATE_NOOP("Filter", "Ruined portal (nether)"),
             ""
         };
 
         list[F_FORTRESS] = FilterInfo{
             CAT_STRUCT, 0, 1, 1, 1, 0, Fortress, 1, 0, 1, MC_1_0, MC_NEWEST, -1, 0, disp++,
             ":icons/fortress.png",
-            _("Nether fortress"),
+            QT_TRANSLATE_NOOP("Filter", "Nether fortress"),
             ""
         };
 
         list[F_BASTION] = FilterInfo{
             CAT_STRUCT, 0, 1, 1, 1, 0, Bastion, 1, 0, 1, MC_1_16_1, MC_NEWEST, -1, 0, disp++,
             ":icons/bastion.png",
-            _("Bastion remnant"),
+            QT_TRANSLATE_NOOP("Filter", "Bastion remnant"),
             ""
         };
 
         list[F_ENDCITY] = FilterInfo{
             CAT_STRUCT, 0, 1, 1, 1, 0, End_City, 1, 0, 1, MC_1_9, MC_NEWEST, +1, 0, disp++,
             ":icons/endcity.png",
-            _("End city"),
+            QT_TRANSLATE_NOOP("Filter", "End city"),
             ""
         };
 
         list[F_GATEWAY] = FilterInfo{
             CAT_STRUCT, 0, 1, 1, 1, 0, End_Gateway, 1, 0, 1, MC_1_13, MC_NEWEST, +1, 0, disp++,
             ":icons/gateway.png",
-            _("End gateway"),
-            _("Checks only scattered return gateways. Does not include those generated "
+            QT_TRANSLATE_NOOP("Filter", "End gateway"),
+            QT_TRANSLATE_NOOP("Filter",
+            "Checks only scattered return gateways. Does not include those generated "
             "when defeating the dragon.")
         };
-
-#undef _ // translation macro
-
     }
 }
 g_filterinfo;
@@ -632,7 +665,7 @@ struct /*__attribute__((packed))*/ Condition
     enum { // condition flags
         FLG_APPROX      = 0x0001,
         FLG_MATCH_ANY   = 0x0010,
-        FLG_INRANGE     = 0x0020,
+        FLG_IN_RANGE    = 0x0020,
     };
     enum { // variant flags
         VAR_WITH_START  = 0x01, // restrict start piece index and biome

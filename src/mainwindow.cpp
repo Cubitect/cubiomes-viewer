@@ -33,13 +33,15 @@
 #include <QStandardPaths>
 #include <QDebug>
 #include <QFile>
+#include <QTranslator>
+#include <QLibraryInfo>
 
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
-    , dock(new QDockWidget(tr("Map"), this))
-    , mapView(new MapView(this))
+    , ui()
+    , dock()
+    , mapView()
     , formCond()
     , formGen48()
     , formControl()
@@ -52,6 +54,15 @@ MainWindow::MainWindow(QWidget *parent)
     , dimactions{}
     , dimgroup()
 {
+    QSettings settings(APP_STRING, APP_STRING);
+    QString lang = settings.value("config/lang", QLocale().name()).toString();
+    if (!loadTranslation(lang))
+        loadTranslation("en_US");
+
+    ui = new Ui::MainWindow;
+    dock = new QDockWidget(tr("Map"), this);
+    mapView = new MapView(this);
+
     ui->setupUi(this);
 
     dock->setWidget(mapView);
@@ -270,6 +281,22 @@ void MainWindow::closeEvent(QCloseEvent *event)
     QThreadPool::globalInstance()->clear();
     saveSettings();
     QMainWindow::closeEvent(event);
+}
+
+bool MainWindow::loadTranslation(QString lang)
+{
+    static QTranslator rc_translator;
+    static QTranslator qt_translator;
+    if (!rc_translator.load(lang, ":/lang"))
+        return false;
+    QLocale::setDefault(lang);
+    QString qt_locale = "qtbase_" + lang;
+    QString qt_trpath = QLibraryInfo::location(QLibraryInfo::TranslationsPath);
+    if (qt_translator.load(qt_locale, qt_trpath))
+        qApp->installTranslator(&qt_translator);
+    qApp->installTranslator(&rc_translator);
+    config.lang = lang;
+    return true;
 }
 
 QAction *MainWindow::addMapAction(int sopt, const char *iconpath, QString tip)
@@ -1092,6 +1119,12 @@ void MainWindow::onUpdateConfig()
 {
     Config old = config;
     config.load();
+
+    if (old.lang != config.lang)
+    {
+        QString msg = tr("The application will need to be restarted before all changes can take effect.");
+        QMessageBox::information(this, tr("Restart required"), msg);
+    }
 
     getMapView()->setConfig(config);
     if (old.uistyle != config.uistyle)

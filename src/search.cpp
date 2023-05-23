@@ -1849,7 +1849,7 @@ L_noise_biome:
             int ymax = cond->limok[NP_DEPTH][1];
             float y;
             mapApproxHeight(&y, nullptr, &env->g, &env->sn, rx1, rz1, 1, 1);
-            if (cond->flags & Condition::FLG_INRANGE)
+            if (cond->flags & Condition::FLG_IN_RANGE)
                 valid = y >= ymin && y <= ymax;
             else
                 valid = y <= ymin || y >= ymax;

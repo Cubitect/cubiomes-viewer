@@ -2,6 +2,7 @@
 #include "cutil.h"
 
 #include <QThread>
+#include <QCoreApplication>
 
 
 void ExtGenConfig::reset()
@@ -282,6 +283,7 @@ void Config::reset()
     gridMultiplier = 0;
     mapCacheSize = 256;
     mapThreads = 0;
+    lang = "en_US";
     biomeColorPath = "";
     separator = ";";
     quote = "";
@@ -300,6 +302,7 @@ void Config::load(QSettings& settings)
     gridMultiplier = settings.value("config/gridMultiplier", gridMultiplier).toInt();
     mapCacheSize = settings.value("config/mapCacheSize", mapCacheSize).toInt();
     mapThreads = settings.value("config/mapThreads", mapThreads).toInt();
+    lang = settings.value("config/lang", lang).toString();
     biomeColorPath = settings.value("config/biomeColorPath", biomeColorPath).toString();
     separator = settings.value("config/separator", separator).toString();
     quote = settings.value("config/quote", quote).toString();
@@ -318,6 +321,7 @@ void Config::save(QSettings& settings)
     settings.setValue("config/gridMultiplier", gridMultiplier);
     settings.setValue("config/mapCacheSize", mapCacheSize);
     settings.setValue("config/mapThreads", mapThreads);
+    settings.setValue("config/lang", lang);
     settings.setValue("config/biomeColorPath", biomeColorPath);
     settings.setValue("config/separator", separator);
     settings.setValue("config/quote", quote);

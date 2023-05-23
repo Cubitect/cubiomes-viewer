@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include <QApplication>
-#include <QTranslator>
 #include <QFontDatabase>
 #include <QStandardPaths>
 #include <QDir>
@@ -59,10 +58,6 @@ int main(int argc, char *argv[])
             }
         }
     }
-
-    QTranslator translator;
-    translator.load("en_US", ":/lang");
-    app.installTranslator(&translator);
 
     //int fontid = QFontDatabase::addApplicationFont(":/fonts/test.ttf");
     int fontid = QFontDatabase::addApplicationFont(":/fonts/DejaVuSans.ttf");

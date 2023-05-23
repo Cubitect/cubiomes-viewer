@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.0" language="en">
+<TS version="2.1" language="en">
 <context>
     <name>ConfigDialog</name>
     <message numerus="yes">
-        <location filename="../../src/configdialog.cpp" line="111"/>
+        <location filename="../../src/configdialog.cpp" line="137"/>
         <source>[%n biome(s)] %1</source>
         <translation>
             <numerusform>[%n biome] %1</numerusform>
@@ -15,7 +15,7 @@
 <context>
     <name>FormConditions</name>
     <message numerus="yes">
-        <location filename="../../src/formconditions.cpp" line="255"/>
+        <location filename="../../src/formconditions.cpp" line="260"/>
         <source>Cut %n condition(s)</source>
         <translation>
             <numerusform>Cut %n condition</numerusform>
@@ -23,8 +23,8 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/formconditions.cpp" line="260"/>
-        <location filename="../../src/formconditions.cpp" line="278"/>
+        <location filename="../../src/formconditions.cpp" line="265"/>
+        <location filename="../../src/formconditions.cpp" line="283"/>
         <source>Copy %n condition(s)</source>
         <translation>
             <numerusform>Copy %n condition</numerusform>
@@ -32,7 +32,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/formconditions.cpp" line="266"/>
+        <location filename="../../src/formconditions.cpp" line="271"/>
         <source>Paste %n condition(s)</source>
         <translation>
             <numerusform>Paste %n condition</numerusform>
@@ -40,7 +40,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/formconditions.cpp" line="271"/>
+        <location filename="../../src/formconditions.cpp" line="276"/>
         <source>Remove %n condition(s)</source>
         <translation>
             <numerusform>Remove %n condition</numerusform>
@@ -62,7 +62,7 @@
 <context>
     <name>FormSearchControl</name>
     <message numerus="yes">
-        <location filename="../../src/formsearchcontrol.cpp" line="340"/>
+        <location filename="../../src/formsearchcontrol.cpp" line="443"/>
         <source>Paste %n seed(s) from clipboard</source>
         <translation>
             <numerusform>Paste %n seed from clipboard</numerusform>
@@ -71,28 +71,9 @@
     </message>
 </context>
 <context>
-    <name>QuadListDialog</name>
-    <message numerus="yes">
-        <location filename="../../src/quadlistdialog.cpp" line="159"/>
-        <source>%n quad-hut(s)</source>
-        <translation>
-            <numerusform>%n quad-hut</numerusform>
-            <numerusform>%n quad-huts</numerusform>
-        </translation>
-    </message>
-    <message numerus="yes">
-        <location filename="../../src/quadlistdialog.cpp" line="160"/>
-        <source>%n quad-monument(s)</source>
-        <translation>
-            <numerusform>%n quad-monument</numerusform>
-            <numerusform>%n quad-monuments</numerusform>
-        </translation>
-    </message>
-</context>
-<context>
     <name>SearchMaster</name>
     <message numerus="yes">
-        <location filename="../../src/searchthread.cpp" line="156"/>
+        <location filename="../../src/searchthread.cpp" line="165"/>
         <source>Biome condition with ID %1 includes %n biome(s) that do not generate in MC %2.</source>
         <translation>
             <numerusform>Biome condition with ID %1 includes %n biome that does not generate in MC %2.</numerusform>
@@ -100,7 +81,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/searchthread.cpp" line="540"/>
+        <location filename="../../src/searchthread.cpp" line="560"/>
         <source>Failed to stop %n worker thread(s).
 Keep waiting for threads to stop?</source>
         <translation>
