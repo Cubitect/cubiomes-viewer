@@ -5,7 +5,7 @@ seed-finding utilities provided by [cubiomes](https://github.com/Cubitect/cubiom
 and a map viewer for the Minecraft biomes and structure generation.
 
 The tool is designed for high performance and supports Minecraft Java Edition
-main releases up to 1.19.
+main releases up to 1.20.
 
 
 ## Download
@@ -59,7 +59,7 @@ area.
 
 ## Screenshots
 
-Screenshots were taken of Cubiomes-Viewer v3.0.
+Screenshots were taken of Cubiomes-Viewer v3.3.
 
 ![maingui](etc/screenshot_maingui-fs8.png
 "Searching for a quad-hut near a stronghold with a good biome variety")

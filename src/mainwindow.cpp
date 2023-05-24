@@ -304,7 +304,7 @@ QAction *MainWindow::addMapAction(int sopt, const char *iconpath, QString tip)
     QIcon icon;
     QString inam = QString(":icons/") + iconpath;
     QPixmap pix_on = QPixmap(inam + ".png");
-    QPixmap pix_off = QPixmap(inam + ".png");
+    QPixmap pix_off = QPixmap(inam + "_d.png");
     if (pix_on.size().width() > 20)
     {
         pix_on = pix_on.scaledToWidth(20);
