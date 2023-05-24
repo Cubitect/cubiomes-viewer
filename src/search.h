@@ -668,11 +668,12 @@ struct /*__attribute__((packed))*/ Condition
         FLG_IN_RANGE    = 0x0020,
     };
     enum { // variant flags
-        VAR_WITH_START  = 0x01, // restrict start piece index and biome
-        VAR_ABANODONED  = 0x02, // zombie village
-        VAR_ENDSHIP     = 0x04, // end city ship
-        VAR_DENSE_BB    = 0x08, // fortress with a 2x2 arrangement of start/crossings
-        VAR_NOT         = 0x10, // invert flag (e.g. not abandoned)
+        VAR_WITH_START  = 0x0001, // restrict start piece index and biome
+        VAR_ABANODONED  = 0x0002, // zombie village
+        VAR_ENDSHIP     = 0x0004, // end city ship
+        VAR_DENSE_BB    = 0x0008, // fortress with a 2x2 arrangement of start/crossings
+        VAR_NOT         = 0x0010, // invert flag (e.g. not abandoned)
+        VAR_BASEMENT    = 0x0020, // igloo with basement
     };
     int16_t     type;
     uint16_t    meta;

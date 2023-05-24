@@ -95,27 +95,20 @@
      </item>
      <item row="0" column="1">
       <widget class="QPushButton" name="buttonSearchHelp">
-       <property name="maximumSize">
-        <size>
-         <width>14</width>
-         <height>14</height>
-        </size>
-       </property>
        <property name="styleSheet">
-        <string notr="true">border: none;</string>
+        <string notr="true">
+QPushButton {
+	background-color: rgba(255, 255, 255, 0);
+	border: none;
+	image: url(:/icons/info.png);
+	image-position: right;
+}
+QPushButton:hover {
+	image: url(:/icons/info_h.png);
+}</string>
        </property>
        <property name="text">
         <string/>
-       </property>
-       <property name="icon">
-        <iconset resource="../rc/icons.qrc">
-         <normaloff>:/icons/info.png</normaloff>:/icons/info.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>14</width>
-         <height>14</height>
-        </size>
        </property>
       </widget>
      </item>
@@ -128,6 +121,12 @@
      </item>
      <item row="0" column="6">
       <widget class="QSpinBox" name="spinThreads">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="minimum">
         <number>1</number>
        </property>

@@ -665,6 +665,12 @@ static bool isVariantOk(const Condition *c, SearchThreadEnv *e, int stype, int v
         getVariant(&sv, stype, e->mc, e->seed, pos->x, pos->z, varbiome);
         if (!(c->varflags & Condition::VAR_WITH_START)) return true;
     }
+    else if (stype == Igloo)
+    {
+        if (!(c->varflags & Condition::VAR_BASEMENT)) return true;
+        getVariant(&sv, stype, e->mc, e->seed, pos->x, pos->z, -1);
+        return (c->varflags & Condition::VAR_NOT ? !sv.basement : sv.basement);
+    }
     else if (stype == End_City)
     {
         if (!(c->varflags & Condition::VAR_ENDSHIP)) return true;

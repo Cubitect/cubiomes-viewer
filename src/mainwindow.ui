@@ -100,7 +100,7 @@
              <enum>QComboBox::AdjustToMinimumContentsLength</enum>
             </property>
             <property name="minimumContentsLength">
-             <number>6</number>
+             <number>8</number>
             </property>
             <property name="iconSize">
              <size>
@@ -406,14 +406,14 @@ QSplitter {
    <property name="styleSheet">
     <string notr="true">
 QToolBar {
-	border-radius: 5px;
+	border-radius: 0px;
 	padding: 0px;
 	spacing: 0px;
 }
 
 QToolButton {
-	border-radius: 5px;
-	padding: 2px;
+	border-radius: 3px;
+	padding: 0px;
 	border: 0px solid;
 	margin: 0px;
 }
@@ -432,12 +432,6 @@ QToolButton:checked {
    </property>
    <property name="orientation">
     <enum>Qt::Vertical</enum>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>20</width>
-     <height>20</height>
-    </size>
    </property>
    <property name="floatable">
     <bool>true</bool>

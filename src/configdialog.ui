@@ -149,7 +149,7 @@
        <widget class="QPushButton" name="buttonClear">
         <property name="maximumSize">
          <size>
-          <width>20</width>
+          <width>24</width>
           <height>16777215</height>
          </size>
         </property>
@@ -159,24 +159,10 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="0" colspan="2">
-       <widget class="QLabel" name="label">
+      <item row="2" column="0" colspan="2">
+       <widget class="QLabel" name="label_5">
         <property name="text">
-         <string>Maximum structure zoom:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="0" colspan="5">
-       <widget class="QCheckBox" name="checkBBoxes">
-        <property name="text">
-         <string>Outline known bounding boxes</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="0">
-       <widget class="QLabel" name="label_10">
-        <property name="text">
-         <string>Custom grid multiplier:</string>
+         <string>Biome color customization:</string>
         </property>
        </widget>
       </item>
@@ -199,13 +185,46 @@
         </property>
        </widget>
       </item>
-      <item row="10" column="0" colspan="5">
-       <widget class="QCheckBox" name="checkSmooth">
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Simulate inertia for the map view&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <item row="0" column="2" colspan="3">
+       <widget class="QComboBox" name="comboStyle">
+        <property name="iconSize">
+         <size>
+          <width>0</width>
+          <height>16</height>
+         </size>
         </property>
+        <item>
+         <property name="text">
+          <string>System</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Dark</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="5" column="2" colspan="3">
+       <widget class="QLineEdit" name="lineGridSpacing"/>
+      </item>
+      <item row="4" column="0" colspan="2">
+       <widget class="QLabel" name="label">
         <property name="text">
-         <string>Smooth map motion</string>
+         <string>Maximum structure zoom:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2" colspan="3">
+       <widget class="QComboBox" name="comboLang"/>
+      </item>
+      <item row="8" column="2" colspan="3">
+       <widget class="QSpinBox" name="spinThreads"/>
+      </item>
+      <item row="3" column="2" colspan="2">
+       <widget class="QPushButton" name="buttonBiomeColor">
+        <property name="text">
+         <string>[none]</string>
         </property>
        </widget>
       </item>
@@ -241,69 +260,6 @@
         </item>
        </widget>
       </item>
-      <item row="8" column="0" colspan="2">
-       <widget class="QLabel" name="label_9">
-        <property name="text">
-         <string>Threads for map:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2" colspan="3">
-       <widget class="QComboBox" name="comboStyle">
-        <property name="iconSize">
-         <size>
-          <width>0</width>
-          <height>16</height>
-         </size>
-        </property>
-        <item>
-         <property name="text">
-          <string>System</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Dark</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QPushButton" name="buttonColorHelp">
-        <property name="maximumSize">
-         <size>
-          <width>14</width>
-          <height>14</height>
-         </size>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">border: none;</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="../rc/icons.qrc">
-          <normaloff>:/icons/info.png</normaloff>:/icons/info.png</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>14</width>
-          <height>14</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="2" colspan="3">
-       <widget class="QPushButton" name="buttonStructVisEdit">
-        <property name="text">
-         <string>Edit map visibility limits...</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="2" colspan="3">
-       <widget class="QLineEdit" name="lineGridSpacing"/>
-      </item>
       <item row="2" column="2" colspan="3">
        <widget class="QPushButton" name="buttonBiomeColorEditor">
         <property name="text">
@@ -311,10 +267,31 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="2" colspan="2">
-       <widget class="QPushButton" name="buttonBiomeColor">
+      <item row="9" column="0" colspan="5">
+       <widget class="QCheckBox" name="checkBBoxes">
         <property name="text">
-         <string>[none]</string>
+         <string>Outline known bounding boxes</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0" colspan="2">
+       <widget class="QLabel" name="label_10">
+        <property name="text">
+         <string>Custom grid multiplier:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="2">
+       <widget class="QLabel" name="label_11">
+        <property name="text">
+         <string>Language:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="2" colspan="3">
+       <widget class="QPushButton" name="buttonStructVisEdit">
+        <property name="text">
+         <string>Edit map visibility limits...</string>
         </property>
        </widget>
       </item>
@@ -329,22 +306,41 @@ Leave blank for the default behaviour</string>
         </property>
        </widget>
       </item>
-      <item row="8" column="2" colspan="3">
-       <widget class="QSpinBox" name="spinThreads"/>
-      </item>
-      <item row="7" column="0" colspan="2">
-       <widget class="QLabel" name="label_7">
-        <property name="text">
-         <string>Map cache size:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0" colspan="2">
-       <widget class="QLabel" name="label_5">
-        <property name="text">
-         <string>Biome color customization:</string>
-        </property>
-       </widget>
+      <item row="3" column="0" colspan="2">
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="buttonColorHelp">
+          <property name="styleSheet">
+           <string notr="true">
+QPushButton {
+	background-color: rgba(255, 255, 255, 0);
+	border: none;
+	image: url(:/icons/info.png);
+	image-position: right;
+}
+QPushButton:hover {
+	image: url(:/icons/info_h.png);
+}</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item row="0" column="0" colspan="2">
        <widget class="QLabel" name="label_4">
@@ -353,15 +349,29 @@ Leave blank for the default behaviour</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="0" colspan="2">
-       <widget class="QLabel" name="label_11">
+      <item row="10" column="0" colspan="5">
+       <widget class="QCheckBox" name="checkSmooth">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Simulate inertia for the map view&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
         <property name="text">
-         <string>Language:</string>
+         <string>Smooth map motion</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="2" colspan="3">
-       <widget class="QComboBox" name="comboLang"/>
+      <item row="7" column="0" colspan="2">
+       <widget class="QLabel" name="label_7">
+        <property name="text">
+         <string>Map cache size:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="0" colspan="2">
+       <widget class="QLabel" name="label_9">
+        <property name="text">
+         <string>Threads for map:</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

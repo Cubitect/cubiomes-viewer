@@ -184,6 +184,7 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
     ui->scrollNoise->setStyleSheet(tristyle);
     ui->checkAbandoned->setStyleSheet(tristyle);
     ui->checkEndShip->setStyleSheet(tristyle);
+    ui->checkBasement->setStyleSheet(tristyle);
 
     memset(climaterange, 0, sizeof(climaterange));
     memset(climatecomplete, 0, sizeof(climatecomplete));
@@ -412,6 +413,7 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
         ui->checkDenseBB->setChecked(cond.varflags & Condition::VAR_DENSE_BB);
         ui->checkAbandoned->setCheckState(totristate(cond.varflags, Condition::VAR_ABANODONED));
         ui->checkEndShip->setCheckState(totristate(cond.varflags, Condition::VAR_ENDSHIP));
+        ui->checkBasement->setCheckState(totristate(cond.varflags, Condition::VAR_BASEMENT));
         for (VariantCheckBox *cb : qAsConst(variantboxes))
         {
             int idx = cb->sp - g_start_pieces;
@@ -555,6 +557,11 @@ void ConditionDialog::updateMode()
     else if (filterindex == F_ENDCITY)
     {
         ui->stackedWidget->setCurrentWidget(ui->pageEndCity);
+        ui->checkBasement->setEnabled(mc >= MC_1_9);
+    }
+    else if (filterindex == F_IGLOO)
+    {
+        ui->stackedWidget->setCurrentWidget(ui->pageIgloo);
         ui->checkEndShip->setEnabled(mc >= MC_1_9);
     }
     else if (filterindex == F_HEIGHT)
@@ -919,6 +926,18 @@ void ConditionDialog::on_buttonCancel_clicked()
     close();
 }
 
+static uint16_t tristateFlags(QCheckBox *cb, uint16_t flg)
+{
+    uint16_t ret = 0;
+    if (cb->checkState() != Qt::Unchecked)
+    {
+        ret |= flg;
+        if (cb->checkState() == Qt::Checked)
+            ret |= Condition::VAR_NOT;
+    }
+    return ret;
+}
+
 void ConditionDialog::on_buttonOk_clicked()
 {
     on_pushLuaSave_clicked();
@@ -1036,18 +1055,9 @@ void ConditionDialog::on_buttonOk_clicked()
         c.varflags |= Condition::VAR_WITH_START;
     if (ui->checkDenseBB->isChecked())
         c.varflags |= Condition::VAR_DENSE_BB;
-    if (ui->checkAbandoned->checkState() != Qt::Unchecked)
-    {
-        c.varflags |= Condition::VAR_ABANODONED;
-        if (ui->checkAbandoned->checkState() == Qt::Checked)
-            c.varflags |= Condition::VAR_NOT;
-    }
-    if (ui->checkEndShip->checkState() != Qt::Unchecked)
-    {
-        c.varflags |= Condition::VAR_ENDSHIP;
-        if (ui->checkAbandoned->checkState() == Qt::Checked)
-            c.varflags |= Condition::VAR_NOT;
-    }
+    c.varflags |= tristateFlags(ui->checkAbandoned, Condition::VAR_ABANODONED);
+    c.varflags |= tristateFlags(ui->checkEndShip, Condition::VAR_ENDSHIP);
+    c.varflags |= tristateFlags(ui->checkBasement, Condition::VAR_BASEMENT);
 
     for (VariantCheckBox *cb : qAsConst(variantboxes))
     {

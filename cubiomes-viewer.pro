@@ -12,7 +12,7 @@ QT += core widgets
 
 CHARSET                 = -finput-charset=UTF-8 -fexec-charset=UTF-8
 QMAKE_CFLAGS            = $$CHARSET -fwrapv -DSTRUCT_CONFIG_OVERRIDE=1
-QMAKE_CXXFLAGS          = $$QMAKE_CFLAGS -std=gnu++11 -Wno-deprecated-copy
+QMAKE_CXXFLAGS          = $$QMAKE_CFLAGS -std=gnu++11
 QMAKE_CXXFLAGS_RELEASE  *= -O3
 
 win32: {

@@ -4,6 +4,7 @@
         <file>icons/desert_d.png</file>
         <file>icons/igloo.png</file>
         <file>icons/igloo_d.png</file>
+        <file>icons/igloo_basement.png</file>
         <file>icons/jungle.png</file>
         <file>icons/jungle_d.png</file>
         <file>icons/shipwreck.png</file>
@@ -43,6 +44,7 @@
         <file>icons/cancel.png</file>
         <file>icons/clear.png</file>
         <file>icons/info.png</file>
+        <file>icons/info_h.png</file>
         <file>icons/overworld.png</file>
         <file>icons/overworld_d.png</file>
         <file>icons/the_end_d.png</file>
@@ -72,12 +74,11 @@
         <file>icons/check_unchecked.png</file>
         <file>icons/height.png</file>
         <file>icons/trail.png</file>
+        <file>icons/trail_d.png</file>
         <file>icons/missing.png</file>
         <file>icons/well.png</file>
         <file>icons/well_d.png</file>
-        <file>icons/trail_d.png</file>
         <file>icons/geode_d.png</file>
         <file>icons/geode.png</file>
-        <file>icons/igloo_basement.png</file>
     </qresource>
 </RCC>

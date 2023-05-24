@@ -147,7 +147,7 @@ MainWindow::MainWindow(QWidget *parent)
     addMapAction(D_STRONGHOLD, "stronghold", tr("Show strongholds"));
     addMapAction(D_VILLAGE, "village", tr("Show villages"));
     addMapAction(D_MINESHAFT, "mineshaft", tr("Show abandoned mineshafts"));
-    addMapAction(D_DESERT, "desert", tr("Show desert pyramid"));
+    addMapAction(D_DESERT, "desert", tr("Show desert pyramids"));
     addMapAction(D_JUNGLE, "jungle", tr("Show jungle temples"));
     addMapAction(D_HUT, "hut", tr("Show swamp huts"));
     addMapAction(D_MONUMENT, "monument", tr("Show ocean monuments"));
@@ -303,8 +303,15 @@ QAction *MainWindow::addMapAction(int sopt, const char *iconpath, QString tip)
 {
     QIcon icon;
     QString inam = QString(":icons/") + iconpath;
-    icon.addPixmap(QPixmap(inam + ".png"), QIcon::Normal, QIcon::On);
-    icon.addPixmap(QPixmap(inam + "_d.png"), QIcon::Normal, QIcon::Off);
+    QPixmap pix_on = QPixmap(inam + ".png");
+    QPixmap pix_off = QPixmap(inam + ".png");
+    if (pix_on.size().width() > 20)
+    {
+        pix_on = pix_on.scaledToWidth(20);
+        pix_off = pix_off.scaledToWidth(20);
+    }
+    icon.addPixmap(pix_on, QIcon::Normal, QIcon::On);
+    icon.addPixmap(pix_off, QIcon::Normal, QIcon::Off);
     QAction *action = new QAction(icon, tip, this);
     action->setCheckable(true);
     ui->toolBar->addAction(action);

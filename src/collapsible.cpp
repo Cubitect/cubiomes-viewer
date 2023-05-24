@@ -126,12 +126,18 @@ void Collapsible::setCollapsed(bool collapsed)
 
 void Collapsible::setInfo(const QString& title, const QString& text)
 {
-    QPixmap pixmap = QPixmap(":/icons/info.png");
-    QPushButton *button = new QPushButton(pixmap, "", this);
-    button->setStyleSheet("border: none;");
-    button->setIconSize(pixmap.rect().size());
+    QPushButton *button = new QPushButton("", this);
+    button->setStyleSheet(
+      "QPushButton {"
+      "    background-color: rgba(255, 255, 255, 0);"
+      "    border: none;"
+      "    image: url(:/icons/info.png);"
+      "    image-position: right;"
+      "}"
+      "QPushButton:hover {"
+      "    image: url(:/icons/info_h.png);"
+      "}");
     button->setToolTip(tr("Show help"));
-    button->setMaximumSize(14, 14);
 
     connect(button, SIGNAL(clicked()), this, SLOT(showInfo()));
 
