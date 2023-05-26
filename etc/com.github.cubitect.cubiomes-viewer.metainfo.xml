@@ -22,13 +22,13 @@
     <screenshot type="default">
       <image type="source">https://raw.githubusercontent.com/Cubitect/cubiomes-viewer/3.3.0/etc/screenshot_maingui-fs8.png</image>
     </screenshot>
-    <screenshot type="default">
+    <screenshot>
       <image type="source">https://raw.githubusercontent.com/Cubitect/cubiomes-viewer/3.3.0/etc/screenshot_biomes-fs8.png</image>
     </screenshot>
-    <screenshot type="default">
+    <screenshot>
       <image type="source">https://raw.githubusercontent.com/Cubitect/cubiomes-viewer/3.3.0/etc/screenshot_structures-fs8.png</image>
     </screenshot>
-    <screenshot type="default">
+    <screenshot>
       <image type="source">https://raw.githubusercontent.com/Cubitect/cubiomes-viewer/3.3.0/etc/screenshot_surface-fs8.png</image>
     </screenshot>
   </screenshots>
