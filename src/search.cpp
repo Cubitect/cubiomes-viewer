@@ -28,7 +28,7 @@ QString Condition::summary() const
 
     if (type == 0)
     {
-        s += " " + QApplication::translate("Filter", "Conditions");
+        s += " " + QApplication::tr("Filter", "Conditions");
         return s;
     }
 
@@ -45,7 +45,7 @@ QString Condition::summary() const
     }
     else
     {
-        txts = QApplication::translate("Filter", ft.name);
+        txts = QApplication::tr("Filter", ft.name);
         if (type == F_LUA)
         {
             QMap<uint64_t, QString> scripts;

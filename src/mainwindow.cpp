@@ -122,7 +122,7 @@ MainWindow::MainWindow(QWidget *parent)
         addAction(act);
     }
 
-    QAction *toorigin = new QAction(QIcon(":/icons/origin.png"), "Goto origin", this);
+    QAction *toorigin = new QAction(QIcon(":/icons/origin.png"), tr("Goto origin"), this);
     connect(toorigin, &QAction::triggered, [=](){ this->mapGoto(0,0,16); });
     ui->toolBar->addAction(toorigin);
     ui->toolBar->addSeparator();
@@ -243,7 +243,7 @@ MainWindow::MainWindow(QWidget *parent)
         "</p></body></html>"
     ));
 
-    ui->collapseControl->init("Matching seeds", formControl, false);
+    ui->collapseControl->init(tr("Matching seeds"), formControl, false);
     connect(formControl, &FormSearchControl::selectedSeedChanged, this, &MainWindow::onSelectedSeedChanged);
     connect(formControl, &FormSearchControl::searchStatusChanged, this, &MainWindow::onSearchStatusChanged);
     ui->collapseControl->setInfo(
