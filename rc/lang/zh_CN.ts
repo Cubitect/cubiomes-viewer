@@ -631,7 +631,7 @@
     <message>
         <location filename="../../src/conditiondialog.ui" line="1595"/>
         <source>Ruined portal variants</source>
-        <translation>废弃的传送门种类</translation>
+        <translation>废弃传送门种类</translation>
     </message>
     <message>
         <location filename="../../src/conditiondialog.ui" line="1652"/>
@@ -822,12 +822,12 @@ Continue anyway?</source>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The area can be entered via &lt;b&gt;custom&lt;/b&gt; rectangle, that is defined by its two opposing corners, relative to a center point. These bounds are inclusive.&lt;/p&gt;&lt;p&gt;Alternatively, the area can be defined as a &lt;b&gt;centered square&lt;/b&gt; with a certain side length. In this case the area has the bounds: [-X/2, -X/2] on both axes, rounding down and bounds included. For example a centered square with side 3 will go from -2 to 1 for both the X and Z axes.&lt;/p&gt;&lt;p&gt;Important to note is that some filters have a scaling associated with them. This means that the area is not defined in blocks, but on a grid with the given spacing (such as chunks instead of blocks). A scaling of 1:16, for example, means that the aforementioned centered square of side 3 will range from -32 to 31 in block coordinates. (Chunk 1 has blocks 16 to 31.)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
-        <message>
+    <message>
         <location filename="../../src/conditiondialog.cpp" line="1237"/>
         <source>(~%g sq. chunks)</source>
         <translation>(~%g 平方区块)</translation>
     </message>
-        <message>
+    <message>
         <location filename="../../src/conditiondialog.cpp" line="1239"/>
         <source>(%g sq. chunks)</source>
         <translation>(%g 平方区块)</translation>
@@ -1082,10 +1082,12 @@ Leave blank for the default behaviour</source>
         <source>Language:</source>
         <translation>语言:</translation>
     </message>
-    <message>
+    <message numerus="yes">
         <location filename="../../src/configdialog.cpp" line="137"/>
         <source>[%n biome(s)] %1</source>
-        <translation>[%n 个群系] %1</translation>
+        <translation>
+            <numerusform>[%n 个群系] %1</numerusform>
+        </translation>
     </message>
     <message>
         <location filename="../../src/configdialog.cpp" line="179"/>
@@ -2070,26 +2072,34 @@ Continue and overwrite?</source>
         <source>Edit condition</source>
         <translation>编辑条件</translation>
     </message>
-    <message>
+    <message numerus="yes">
         <location filename="../../src/formconditions.cpp" line="260"/>
         <source>Cut %n condition(s)</source>
-        <translation>剪切 %n 个条件</translation>
+        <translation>
+            <numerusform>剪切 %n 个条件</numerusform>
+        </translation>
     </message>
-    <message>
+    <message numerus="yes">
         <location filename="../../src/formconditions.cpp" line="265"/>
         <location filename="../../src/formconditions.cpp" line="283"/>
         <source>Copy %n condition(s)</source>
-        <translation>复制 %n 个条件</translation>
+        <translation>
+            <numerusform>复制 %n 个条件</numerusform>
+        </translation>
     </message>
-    <message>
+    <message numerus="yes">
         <location filename="../../src/formconditions.cpp" line="271"/>
         <source>Paste %n condition(s)</source>
-        <translation>粘贴 %n 个条件</translation>
+        <translation>
+            <numerusform>粘贴 %n 个条件</numerusform>
+        </translation>
     </message>
-    <message>
+    <message numerus="yes">
         <location filename="../../src/formconditions.cpp" line="276"/>
         <source>Remove %n condition(s)</source>
-        <translation>删除 %n 个条件</translation>
+        <translation>
+            <numerusform>删除 %n 个条件</numerusform>
+        </translation>
     </message>
 </context>
 <context>
@@ -2288,10 +2298,12 @@ Applies only to feature-structures of region-size = 32 and chunk-gap = 8, in par
         <source>[no seeds!] %1</source>
         <translation>[没有种子!] %1</translation>
     </message>
-    <message>
+    <message numerus="yes">
         <location filename="../../src/formgen48.cpp" line="144"/>
         <source>[%n seed(s)] %1</source>
-        <translation>[%n 个种子] %1</translation>
+        <translation>
+            <numerusform>[%n 个种子] %1</numerusform>
+        </translation>
     </message>
     <message>
         <location filename="../../src/formgen48.cpp" line="258"/>
@@ -2474,10 +2486,12 @@ Applies only to feature-structures of region-size = 32 and chunk-gap = 8, in par
         <source>Copy list to clipboard</source>
         <translation>复制列表到剪贴板</translation>
     </message>
-    <message>
+    <message numerus="yes">
         <location filename="../../src/formsearchcontrol.cpp" line="443"/>
         <source>Paste %n seed(s) from clipboard</source>
-        <translation>从剪贴板粘贴 %n 个种子</translation>
+        <translation>
+            <numerusform>从剪贴板粘贴 %n 个种子</numerusform>
+        </translation>
     </message>
     <message>
         <location filename="../../src/formsearchcontrol.cpp" line="453"/>
@@ -2761,7 +2775,7 @@ Continue anyway?</source>
     </message>
     <message>
         <location filename="../../src/mainwindow.ui" line="457"/>
-        <location filename="../../src/mainwindow.cpp" line="60"/>
+        <location filename="../../src/mainwindow.cpp" line="63"/>
         <source>Map</source>
         <translation>地图</translation>
     </message>
@@ -3017,8 +3031,8 @@ Continue anyway?</source>
     </message>
     <message>
         <location filename="../../src/mainwindow.ui" line="776"/>
-        <location filename="../../src/mainwindow.cpp" line="1012"/>
-        <location filename="../../src/mainwindow.cpp" line="1216"/>
+        <location filename="../../src/mainwindow.cpp" line="1013"/>
+        <location filename="../../src/mainwindow.cpp" line="1217"/>
         <source>Undock map</source>
         <translation>开启地图小窗</translation>
     </message>
@@ -3053,235 +3067,235 @@ Continue anyway?</source>
         <translation>(Beta 1.7) 湿度分布图</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="80"/>
+        <location filename="../../src/mainwindow.cpp" line="83"/>
         <source>Triggers</source>
         <translation>触发器</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="81"/>
+        <location filename="../../src/mainwindow.cpp" line="84"/>
         <source>Biomes</source>
         <translation>群系</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="82"/>
+        <location filename="../../src/mainwindow.cpp" line="85"/>
         <source>Structures</source>
         <translation>结构</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="122"/>
+        <location filename="../../src/mainwindow.cpp" line="125"/>
         <source>Goto origin</source>
         <translation>前往坐标原点并重置缩放比例</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="127"/>
+        <location filename="../../src/mainwindow.cpp" line="130"/>
         <source>Overworld</source>
         <translation>主世界</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="128"/>
+        <location filename="../../src/mainwindow.cpp" line="131"/>
         <source>Nether</source>
         <translation>下界</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="129"/>
+        <location filename="../../src/mainwindow.cpp" line="132"/>
         <source>End</source>
         <translation>末地</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="141"/>
+        <location filename="../../src/mainwindow.cpp" line="144"/>
         <source>Show grid</source>
         <translation>展示网格</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="142"/>
+        <location filename="../../src/mainwindow.cpp" line="145"/>
         <source>Show slime chunks</source>
         <translation>展示史莱姆区块</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="143"/>
+        <location filename="../../src/mainwindow.cpp" line="146"/>
         <source>Show world spawn</source>
         <translation>展示世界出生点</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="144"/>
+        <location filename="../../src/mainwindow.cpp" line="147"/>
         <source>Show strongholds</source>
         <translation>展示要塞</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="145"/>
+        <location filename="../../src/mainwindow.cpp" line="148"/>
         <source>Show villages</source>
         <translation>展示村庄</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="146"/>
+        <location filename="../../src/mainwindow.cpp" line="149"/>
         <source>Show abandoned mineshafts</source>
         <translation>展示废弃矿井</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="147"/>
+        <location filename="../../src/mainwindow.cpp" line="150"/>
         <source>Show desert pyramids</source>
         <translation>展示沙漠神殿</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="148"/>
+        <location filename="../../src/mainwindow.cpp" line="151"/>
         <source>Show jungle temples</source>
         <translation>展示丛林神庙</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="149"/>
+        <location filename="../../src/mainwindow.cpp" line="152"/>
         <source>Show swamp huts</source>
         <translation>展示沼泽小屋</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="150"/>
+        <location filename="../../src/mainwindow.cpp" line="153"/>
         <source>Show ocean monuments</source>
         <translation>展示海底遗迹</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="151"/>
+        <location filename="../../src/mainwindow.cpp" line="154"/>
         <source>Show igloos</source>
         <translation>展示冰屋</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="152"/>
+        <location filename="../../src/mainwindow.cpp" line="155"/>
         <source>Show woodland mansions</source>
         <translation>展示林地府邸</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="153"/>
+        <location filename="../../src/mainwindow.cpp" line="156"/>
         <source>Show ocean ruins</source>
         <translation>展示海底遗迹</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="154"/>
+        <location filename="../../src/mainwindow.cpp" line="157"/>
         <source>Show shipwrecks</source>
         <translation>展示沉船</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="155"/>
+        <location filename="../../src/mainwindow.cpp" line="158"/>
         <source>Show buried treasures</source>
         <translation>展示宝藏</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="156"/>
+        <location filename="../../src/mainwindow.cpp" line="159"/>
         <source>Show desert wells</source>
         <translation>展示沙漠水井</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="157"/>
+        <location filename="../../src/mainwindow.cpp" line="160"/>
         <source>Show amethyst geodes</source>
         <translation>展示紫晶洞</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="158"/>
+        <location filename="../../src/mainwindow.cpp" line="161"/>
         <source>Show pillager outposts</source>
         <translation>展示掠夺者前哨站</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="159"/>
+        <location filename="../../src/mainwindow.cpp" line="162"/>
         <source>Show ruined portals</source>
         <translation>展示废弃传送门</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="160"/>
+        <location filename="../../src/mainwindow.cpp" line="163"/>
         <source>Show ancient cities</source>
         <translation>展示远古城市</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="161"/>
+        <location filename="../../src/mainwindow.cpp" line="164"/>
         <source>Show trail ruins</source>
         <translation>展示古迹废墟</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="163"/>
+        <location filename="../../src/mainwindow.cpp" line="166"/>
         <source>Show nether fortresses</source>
         <translation>展示下界要塞</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="164"/>
+        <location filename="../../src/mainwindow.cpp" line="167"/>
         <source>Show bastions</source>
         <translation>展示堡垒遗迹</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="166"/>
+        <location filename="../../src/mainwindow.cpp" line="169"/>
         <source>Show end cities</source>
         <translation>展示末地城</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="167"/>
+        <location filename="../../src/mainwindow.cpp" line="170"/>
         <source>Show end gateways</source>
         <translation>展示末地折跃门</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="187"/>
+        <location filename="../../src/mainwindow.cpp" line="190"/>
         <source>Conditions</source>
         <translation>条件</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="190"/>
+        <location filename="../../src/mainwindow.cpp" line="193"/>
         <source>Help: Conditions</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="191"/>
+        <location filename="../../src/mainwindow.cpp" line="194"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The search conditions define the properties by which potential seeds are filtered.&lt;/p&gt;&lt;p&gt;Conditions can reference each other to produce relative positional dependencies (indicated with the ID in square brackets [XY]). When a condition passes its check, it usually yields just one location that other conditions can reference. An exception to this are structure conditions with exactly one required instance. In this case, each found structure occurence is examined separately instead. On the other hand, a condition that checks for a structure cluster, will average the position of all occurences and yield a single position.&lt;/p&gt;&lt;p&gt;Standard biome conditions yield the center of the testing area as they evaluate the area as a whole. To locate the position of a given biome you can use the designated &lt;b&gt;locate&lt;/b&gt; filters, or use a spiral iterator to scan an area with a localized condition.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="215"/>
+        <location filename="../../src/mainwindow.cpp" line="218"/>
         <source>Seed generator (48-bit)</source>
         <translation>种子生成器(低48二进制位)</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="218"/>
+        <location filename="../../src/mainwindow.cpp" line="221"/>
         <source>Help: Seed generator</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="219"/>
+        <location filename="../../src/mainwindow.cpp" line="222"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;For some searches, the 48-bit structure seed candidates can be generated without searching, which can vastly reduce the search space that has to be checked.&lt;/p&gt;&lt;p&gt;The generator mode &lt;b&gt;Auto&lt;/b&gt; is recommended for general use, which automatically selects suitable options based on the conditions list.&lt;/p&gt;&lt;p&gt;The &lt;b&gt;Quad-feature&lt;/b&gt; mode produces candidates for quad&amp;#8209;structures that have a uniform distribution of region&amp;#8209;size=32 and chunk&amp;#8209;gap=8, such as swamp huts.&lt;/p&gt;&lt;p&gt;A perfect &lt;b&gt;Quad-monument&lt;/b&gt; structure constellation does not actually exist, but some extremely rare structure seed bases get close, with over 90&amp;#37; of the area within 128 blocks. The generator uses a precomputed list of these seed bases.&lt;/p&gt;&lt;p&gt;Using a &lt;b&gt;Seed list&lt;/b&gt; you can provide a custom set of 48-bit candidates. Optionally, a salt value can be added and the seeds can be region transposed.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="243"/>
+        <location filename="../../src/mainwindow.cpp" line="246"/>
         <source>Matching seeds</source>
         <translation>符合条件的种子</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="247"/>
+        <location filename="../../src/mainwindow.cpp" line="250"/>
         <source>Help: Matching seeds</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="248"/>
+        <location filename="../../src/mainwindow.cpp" line="251"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The list of seeds acts as a buffer onto which suitable seeds are added when they are found. You can also copy the seed list, or paste seeds into the list. Selecting a seed will open it in the map view.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="556"/>
+        <location filename="../../src/mainwindow.cpp" line="557"/>
         <source>Failed to open file:
 &quot;%1&quot;</source>
         <translation>无法打开以下文件:
 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="593"/>
+        <location filename="../../src/mainwindow.cpp" line="594"/>
         <source>Failed to open progress file:
 &quot;%1&quot;</source>
         <translation>无法打开以下进度文件:
 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="615"/>
-        <location filename="../../src/mainwindow.cpp" line="627"/>
-        <location filename="../../src/mainwindow.cpp" line="660"/>
-        <location filename="../../src/mainwindow.cpp" line="681"/>
-        <location filename="../../src/mainwindow.cpp" line="812"/>
+        <location filename="../../src/mainwindow.cpp" line="616"/>
+        <location filename="../../src/mainwindow.cpp" line="628"/>
+        <location filename="../../src/mainwindow.cpp" line="661"/>
+        <location filename="../../src/mainwindow.cpp" line="682"/>
+        <location filename="../../src/mainwindow.cpp" line="813"/>
         <source>Warning</source>
         <translation>警告</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="616"/>
+        <location filename="../../src/mainwindow.cpp" line="617"/>
         <source>File does not look like a progress file.
 Progress may be incomplete or broken.
 
@@ -3291,7 +3305,7 @@ Continue anyway?</source>
 是否继续?</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="628"/>
+        <location filename="../../src/mainwindow.cpp" line="629"/>
         <source>File was created with a newer version.
 Progress may be incomplete or broken.
 
@@ -3301,7 +3315,7 @@ Continue loading progress anyway?</source>
 是否继续加载?</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="661"/>
+        <location filename="../../src/mainwindow.cpp" line="662"/>
         <source>Condition [%1] at line %2 is not supported.
 
 Continue anyway?</source>
@@ -3310,7 +3324,7 @@ Continue anyway?</source>
 是否继续?</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="682"/>
+        <location filename="../../src/mainwindow.cpp" line="683"/>
         <source>Failed to parse line %1 of progress file:
 %2
 
@@ -3321,57 +3335,57 @@ Continue anyway?</source>
 是否继续?</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="854"/>
+        <location filename="../../src/mainwindow.cpp" line="855"/>
         <source>text</source>
         <comment>Seed input type</comment>
         <translatorcomment>种子导入文件类型</translatorcomment>
         <translation>文本文件</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="856"/>
+        <location filename="../../src/mainwindow.cpp" line="857"/>
         <source>random</source>
         <comment>Seed input type</comment>
         <translatorcomment>种子导入文件类型</translatorcomment>
         <translation>任意文件</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="864"/>
+        <location filename="../../src/mainwindow.cpp" line="865"/>
         <source>Save progress</source>
         <translation>导出进度</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="864"/>
-        <location filename="../../src/mainwindow.cpp" line="876"/>
+        <location filename="../../src/mainwindow.cpp" line="865"/>
+        <location filename="../../src/mainwindow.cpp" line="877"/>
         <source>Text files (*.txt);;Any files (*)</source>
         <translation>文本文件 (*.txt);;任意文件 (*)</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="876"/>
+        <location filename="../../src/mainwindow.cpp" line="877"/>
         <source>Load progress</source>
         <translation>导入进度</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="998"/>
+        <location filename="../../src/mainwindow.cpp" line="999"/>
         <source>Save screenshot</source>
         <translation>保存截图</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="998"/>
+        <location filename="../../src/mainwindow.cpp" line="999"/>
         <source>Images (*.png *.jpg *.ppm)</source>
         <translation>图像文件 (*.png *.jpg *.ppm)</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="1018"/>
+        <location filename="../../src/mainwindow.cpp" line="1019"/>
         <source>Redock map</source>
         <translation>关闭地图小窗</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="1131"/>
+        <location filename="../../src/mainwindow.cpp" line="1132"/>
         <source>The application will need to be restarted before all changes can take effect.</source>
         <translation>Cubiomes Viewer需要重启以应用所有更改</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="1132"/>
+        <location filename="../../src/mainwindow.cpp" line="1133"/>
         <source>Restart required</source>
         <translation>需要重启</translation>
     </message>
@@ -3623,6 +3637,116 @@ Results will be saved to &quot;%1&quot; so subsequent searches will start faster
         <translation>条件 %1:
 </translation>
     </message>
+    <message>
+        <location filename="../../src/cutil.h" line="19"/>
+        <source>desert_pyramid</source>
+        <translation>沙漠神殿</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="20"/>
+        <source>jungle_temple</source>
+        <translation>丛林神殿</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="21"/>
+        <source>swamp_hut</source>
+        <translation>女巫小屋</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="22"/>
+        <source>igloo</source>
+        <translation>冰屋</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="23"/>
+        <source>village</source>
+        <translation>村庄</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="24"/>
+        <source>ocean_ruin</source>
+        <translation>海底遗迹</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="25"/>
+        <source>shipwreck</source>
+        <translation>沉船</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="26"/>
+        <source>monument</source>
+        <translation>海底神殿</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="27"/>
+        <source>mansion</source>
+        <translation>林地府邸</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="28"/>
+        <source>outpost</source>
+        <translation>掠夺者前哨站</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="29"/>
+        <source>treasure</source>
+        <translation>宝藏</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="30"/>
+        <source>mineshaft</source>
+        <translation>废弃矿井</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="31"/>
+        <source>desert_well</source>
+        <translation>沙漠水井</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="32"/>
+        <source>ruined_portal</source>
+        <translation>废弃传送门(主世界)</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="33"/>
+        <source>ruined_portal (nether)</source>
+        <translation>废弃传送门(下界)</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="34"/>
+        <source>amethyst_geode</source>
+        <translation>紫晶洞</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="35"/>
+        <source>ancient_city</source>
+        <translation>远古城市</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="36"/>
+        <source>trail_ruins</source>
+        <translation>古迹废墟</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="37"/>
+        <source>fortress</source>
+        <translation>下界要塞</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="38"/>
+        <source>bastion</source>
+        <translation>堡垒遗迹</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="39"/>
+        <source>end_city</source>
+        <translation>末地城</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="40"/>
+        <source>end_gateway</source>
+        <translation>末地(返程)折跃门</translation>
+    </message>
 </context>
 <context>
     <name>QObject</name>
@@ -3689,6 +3813,171 @@ Results will be saved to &quot;%1&quot; so subsequent searches will start faster
         <location filename="../../src/updater.cpp" line="86"/>
         <source>&lt;p&gt;A new version: &lt;b&gt;%1&lt;/b&gt; is available.&lt;/p&gt;&lt;p&gt;Open the download page in browser?&lt;/p&gt;</source>
         <translation>&lt;p&gt;发现新版本: &lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;&lt;p&gt;是否在浏览器中打开下载连接?&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="58"/>
+        <source>plains_fountain_01</source>
+        <translation>平原-喷泉</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="59"/>
+        <source>plains_meeting_point_1</source>
+        <translation>平原-会合点1</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="60"/>
+        <source>plains_meeting_point_2</source>
+        <translation>平原-会合点2</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="61"/>
+        <source>plains_meeting_point_3</source>
+        <translation>平原-会合点3</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="62"/>
+        <source>desert_meeting_point_1</source>
+        <translation>沙漠-会合点1</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="63"/>
+        <source>desert_meeting_point_2</source>
+        <translation>沙漠-会合点2</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="64"/>
+        <source>desert_meeting_point_3</source>
+        <translation>沙漠-会合点3</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="65"/>
+        <source>savanna_meeting_point_1</source>
+        <translation>稀树草原-会合点1</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="66"/>
+        <source>savanna_meeting_point_2</source>
+        <translation>稀树草原-会合点2</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="67"/>
+        <source>savanna_meeting_point_3</source>
+        <translation>稀树草原-会合点3</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="68"/>
+        <source>savanna_meeting_point_4</source>
+        <translation>稀树草原-会合点4</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="69"/>
+        <source>taiga_meeting_point_1</source>
+        <translation>针叶林-会合点1</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="70"/>
+        <source>taiga_meeting_point_2</source>
+        <translation>针叶林-会合点2</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="71"/>
+        <source>snowy_meeting_point_1</source>
+        <translation>雪原-会合点1</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="72"/>
+        <source>snowy_meeting_point_2</source>
+        <translation>雪原-会合点2</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="73"/>
+        <source>snowy_meeting_point_3</source>
+        <translation>雪原-会合点3</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="74"/>
+        <source>units</source>
+        <translation>居住区</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="75"/>
+        <source>hoglin_stable</source>
+        <translation>疣猪兽棚</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="76"/>
+        <source>treasure</source>
+        <translation>藏宝室</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="77"/>
+        <source>bridge</source>
+        <translation>桥</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="78"/>
+        <source>giant_ruined_portal_1</source>
+        <translation>巨型废弃传送门1</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="79"/>
+        <source>giant_ruined_portal_2</source>
+        <translation>巨型废弃传送门2</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="80"/>
+        <source>giant_ruined_portal_3</source>
+        <translation>巨型废弃传送门3</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="81"/>
+        <source>ruined_portal_1</source>
+        <translation>废弃传送门1</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="82"/>
+        <source>ruined_portal_2</source>
+        <translation>废弃传送门2</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="83"/>
+        <source>ruined_portal_3</source>
+        <translation>废弃传送门3</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="84"/>
+        <source>ruined_portal_4</source>
+        <translation>废弃传送门4</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="85"/>
+        <source>ruined_portal_5</source>
+        <translation>废弃传送门5</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="86"/>
+        <source>ruined_portal_6</source>
+        <translation>废弃传送门6</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="87"/>
+        <source>ruined_portal_7</source>
+        <translation>废弃传送门7</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="88"/>
+        <source>ruined_portal_8</source>
+        <translation>废弃传送门8</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="89"/>
+        <source>ruined_portal_9</source>
+        <translation>废弃传送门9</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="90"/>
+        <source>ruined_portal_10</source>
+        <translation>废弃传送门10</translation>
     </message>
 </context>
 <context>
@@ -3795,10 +4084,12 @@ condition missing or out of order.</source>
         <source>Biome condition with ID %1 specifies no biomes.</source>
         <translation>群系条件 %1 未添加任何具体群系！</translation>
     </message>
-    <message>
+    <message numerus="yes">
         <location filename="../../src/searchthread.cpp" line="165"/>
         <source>Biome condition with ID %1 includes %n biome(s) that do not generate in MC %2.</source>
-        <translation>群系条件 %1 包含了 %n 个MC %2 不会生成的群系！</translation>
+        <translation>
+            <numerusform>群系条件 %1 包含了 %n 个MC %2 不会生成的群系！</numerusform>
+        </translation>
     </message>
     <message>
         <location filename="../../src/searchthread.cpp" line="179"/>
@@ -3827,12 +4118,14 @@ condition missing or out of order.</source>
         <source>Failed to generate protobases.</source>
         <translation>无法成功创建种子集！</translation>
     </message>
-    <message>
+    <message numerus="yes">
         <location filename="../../src/searchthread.cpp" line="560"/>
         <source>Failed to stop %n worker thread(s).
 Keep waiting for threads to stop?</source>
-        <translation>无法停止 %n 个工作线程
-是否继续等待这些线程停止?</translation>
+        <translation>
+            <numerusform>无法停止 %n 个工作线程
+是否继续等待这些线程停止?</numerusform>
+        </translation>
     </message>
 </context>
 <context>

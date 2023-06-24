@@ -826,7 +826,7 @@ Trozdem fortfahren?</translation>
         <source>(~%g sq. chunks)</source>
         <translation>(~%g sq. chunks)</translation>
     </message>
-        <message>
+    <message>
         <location filename="../../src/conditiondialog.cpp" line="1239"/>
         <source>(%g sq. chunks)</source>
         <translation>(%g sq. chunks)</translation>
@@ -2775,7 +2775,7 @@ Trozdem fortfahren?</translation>
     </message>
     <message>
         <location filename="../../src/mainwindow.ui" line="457"/>
-        <location filename="../../src/mainwindow.cpp" line="60"/>
+        <location filename="../../src/mainwindow.cpp" line="63"/>
         <source>Map</source>
         <translation>Karte</translation>
     </message>
@@ -3031,8 +3031,8 @@ Trozdem fortfahren?</translation>
     </message>
     <message>
         <location filename="../../src/mainwindow.ui" line="776"/>
-        <location filename="../../src/mainwindow.cpp" line="1012"/>
-        <location filename="../../src/mainwindow.cpp" line="1216"/>
+        <location filename="../../src/mainwindow.cpp" line="1013"/>
+        <location filename="../../src/mainwindow.cpp" line="1217"/>
         <source>Undock map</source>
         <translation>Karte ausdocken</translation>
     </message>
@@ -3067,235 +3067,235 @@ Trozdem fortfahren?</translation>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="80"/>
+        <location filename="../../src/mainwindow.cpp" line="83"/>
         <source>Triggers</source>
         <translation>Auslösungen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="81"/>
+        <location filename="../../src/mainwindow.cpp" line="84"/>
         <source>Biomes</source>
         <translation>Biome</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="82"/>
+        <location filename="../../src/mainwindow.cpp" line="85"/>
         <source>Structures</source>
         <translation>Strukturen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="122"/>
+        <location filename="../../src/mainwindow.cpp" line="125"/>
         <source>Goto origin</source>
         <translation>Goto origin</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="127"/>
+        <location filename="../../src/mainwindow.cpp" line="130"/>
         <source>Overworld</source>
         <translation>Oberwelt</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="128"/>
+        <location filename="../../src/mainwindow.cpp" line="131"/>
         <source>Nether</source>
         <translation>Nether</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="129"/>
+        <location filename="../../src/mainwindow.cpp" line="132"/>
         <source>End</source>
         <translation>Ende</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="141"/>
+        <location filename="../../src/mainwindow.cpp" line="144"/>
         <source>Show grid</source>
         <translation>Raster anzeigen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="142"/>
+        <location filename="../../src/mainwindow.cpp" line="145"/>
         <source>Show slime chunks</source>
         <translation>Slime chunks anzeigen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="143"/>
+        <location filename="../../src/mainwindow.cpp" line="146"/>
         <source>Show world spawn</source>
         <translation>Spawnpoint anzeigen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="144"/>
+        <location filename="../../src/mainwindow.cpp" line="147"/>
         <source>Show strongholds</source>
         <translation>Festungen anzeigen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="145"/>
+        <location filename="../../src/mainwindow.cpp" line="148"/>
         <source>Show villages</source>
         <translation>Dörfer anzeigen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="146"/>
+        <location filename="../../src/mainwindow.cpp" line="149"/>
         <source>Show abandoned mineshafts</source>
         <translation>Minen anzeigen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="147"/>
+        <location filename="../../src/mainwindow.cpp" line="150"/>
         <source>Show desert pyramids</source>
         <translation>Wüstentempel anzeigen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="148"/>
+        <location filename="../../src/mainwindow.cpp" line="151"/>
         <source>Show jungle temples</source>
         <translation>Dschungeltempel anzeigen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="149"/>
+        <location filename="../../src/mainwindow.cpp" line="152"/>
         <source>Show swamp huts</source>
         <translation>Sumpfhütten anzeigen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="150"/>
+        <location filename="../../src/mainwindow.cpp" line="153"/>
         <source>Show ocean monuments</source>
         <translation>Ozeanmonumente anzeigen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="151"/>
+        <location filename="../../src/mainwindow.cpp" line="154"/>
         <source>Show igloos</source>
         <translation>Iglus anzeigen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="152"/>
+        <location filename="../../src/mainwindow.cpp" line="155"/>
         <source>Show woodland mansions</source>
         <translation>Waldanwesen anzeigen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="153"/>
+        <location filename="../../src/mainwindow.cpp" line="156"/>
         <source>Show ocean ruins</source>
         <translation>Ozeanruinen anzeigen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="154"/>
+        <location filename="../../src/mainwindow.cpp" line="157"/>
         <source>Show shipwrecks</source>
         <translation>Schiffswracks anzeigen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="155"/>
+        <location filename="../../src/mainwindow.cpp" line="158"/>
         <source>Show buried treasures</source>
         <translation>Vergrabene Schätze anzeigen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="156"/>
+        <location filename="../../src/mainwindow.cpp" line="159"/>
         <source>Show desert wells</source>
         <translation>Wüstenbrunnen anzeigen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="157"/>
+        <location filename="../../src/mainwindow.cpp" line="160"/>
         <source>Show amethyst geodes</source>
         <translation>Amethystgeoden anzeigen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="158"/>
+        <location filename="../../src/mainwindow.cpp" line="161"/>
         <source>Show pillager outposts</source>
         <translation>Plünderer-Aßenposten anzeigen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="159"/>
+        <location filename="../../src/mainwindow.cpp" line="162"/>
         <source>Show ruined portals</source>
         <translation>Portalruinen anzeigen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="160"/>
+        <location filename="../../src/mainwindow.cpp" line="163"/>
         <source>Show ancient cities</source>
         <translation>Antike Städte anzeigen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="161"/>
+        <location filename="../../src/mainwindow.cpp" line="164"/>
         <source>Show trail ruins</source>
         <translation>Trail Ruins anzeigen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="163"/>
+        <location filename="../../src/mainwindow.cpp" line="166"/>
         <source>Show nether fortresses</source>
         <translation>Netherfestungen anzeigen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="164"/>
+        <location filename="../../src/mainwindow.cpp" line="167"/>
         <source>Show bastions</source>
         <translation>Basionsruinen anzeigen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="166"/>
+        <location filename="../../src/mainwindow.cpp" line="169"/>
         <source>Show end cities</source>
         <translation>Endsiedlungen anzeigen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="167"/>
+        <location filename="../../src/mainwindow.cpp" line="170"/>
         <source>Show end gateways</source>
         <translation>Endtransitportale anzeigen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="187"/>
+        <location filename="../../src/mainwindow.cpp" line="190"/>
         <source>Conditions</source>
         <translation>Bedingungen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="190"/>
+        <location filename="../../src/mainwindow.cpp" line="193"/>
         <source>Help: Conditions</source>
         <translation>Hilfe: Bedingungen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="191"/>
+        <location filename="../../src/mainwindow.cpp" line="194"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The search conditions define the properties by which potential seeds are filtered.&lt;/p&gt;&lt;p&gt;Conditions can reference each other to produce relative positional dependencies (indicated with the ID in square brackets [XY]). When a condition passes its check, it usually yields just one location that other conditions can reference. An exception to this are structure conditions with exactly one required instance. In this case, each found structure occurence is examined separately instead. On the other hand, a condition that checks for a structure cluster, will average the position of all occurences and yield a single position.&lt;/p&gt;&lt;p&gt;Standard biome conditions yield the center of the testing area as they evaluate the area as a whole. To locate the position of a given biome you can use the designated &lt;b&gt;locate&lt;/b&gt; filters, or use a spiral iterator to scan an area with a localized condition.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="215"/>
+        <location filename="../../src/mainwindow.cpp" line="218"/>
         <source>Seed generator (48-bit)</source>
         <translation>Seedgenerator (48-bit)</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="218"/>
+        <location filename="../../src/mainwindow.cpp" line="221"/>
         <source>Help: Seed generator</source>
         <translation>Hilfe: Seedgenerator</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="219"/>
+        <location filename="../../src/mainwindow.cpp" line="222"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;For some searches, the 48-bit structure seed candidates can be generated without searching, which can vastly reduce the search space that has to be checked.&lt;/p&gt;&lt;p&gt;The generator mode &lt;b&gt;Auto&lt;/b&gt; is recommended for general use, which automatically selects suitable options based on the conditions list.&lt;/p&gt;&lt;p&gt;The &lt;b&gt;Quad-feature&lt;/b&gt; mode produces candidates for quad&amp;#8209;structures that have a uniform distribution of region&amp;#8209;size=32 and chunk&amp;#8209;gap=8, such as swamp huts.&lt;/p&gt;&lt;p&gt;A perfect &lt;b&gt;Quad-monument&lt;/b&gt; structure constellation does not actually exist, but some extremely rare structure seed bases get close, with over 90&amp;#37; of the area within 128 blocks. The generator uses a precomputed list of these seed bases.&lt;/p&gt;&lt;p&gt;Using a &lt;b&gt;Seed list&lt;/b&gt; you can provide a custom set of 48-bit candidates. Optionally, a salt value can be added and the seeds can be region transposed.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="243"/>
+        <location filename="../../src/mainwindow.cpp" line="246"/>
         <source>Matching seeds</source>
         <translation>Matching seeds</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="247"/>
+        <location filename="../../src/mainwindow.cpp" line="250"/>
         <source>Help: Matching seeds</source>
         <translation>Hilfe: Passende Seeds</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="248"/>
+        <location filename="../../src/mainwindow.cpp" line="251"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The list of seeds acts as a buffer onto which suitable seeds are added when they are found. You can also copy the seed list, or paste seeds into the list. Selecting a seed will open it in the map view.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="556"/>
+        <location filename="../../src/mainwindow.cpp" line="557"/>
         <source>Failed to open file:
 &quot;%1&quot;</source>
         <translation>Datei konnte nicht geöffnet werden:
 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="593"/>
+        <location filename="../../src/mainwindow.cpp" line="594"/>
         <source>Failed to open progress file:
 &quot;%1&quot;</source>
         <translation>Vortschrittsdatei konnte nicht geöffnet werden:
 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="615"/>
-        <location filename="../../src/mainwindow.cpp" line="627"/>
-        <location filename="../../src/mainwindow.cpp" line="660"/>
-        <location filename="../../src/mainwindow.cpp" line="681"/>
-        <location filename="../../src/mainwindow.cpp" line="812"/>
+        <location filename="../../src/mainwindow.cpp" line="616"/>
+        <location filename="../../src/mainwindow.cpp" line="628"/>
+        <location filename="../../src/mainwindow.cpp" line="661"/>
+        <location filename="../../src/mainwindow.cpp" line="682"/>
+        <location filename="../../src/mainwindow.cpp" line="813"/>
         <source>Warning</source>
         <translation>Warnung</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="616"/>
+        <location filename="../../src/mainwindow.cpp" line="617"/>
         <source>File does not look like a progress file.
 Progress may be incomplete or broken.
 
@@ -3306,7 +3306,7 @@ Vortschritt kann beschädigt oder unvollständig sein.
 Trozdem vortfahren?</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="628"/>
+        <location filename="../../src/mainwindow.cpp" line="629"/>
         <source>File was created with a newer version.
 Progress may be incomplete or broken.
 
@@ -3317,7 +3317,7 @@ Vortschritt kann beschädigt oder unvollständig sein.
 Trozdem vortfahren?</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="661"/>
+        <location filename="../../src/mainwindow.cpp" line="662"/>
         <source>Condition [%1] at line %2 is not supported.
 
 Continue anyway?</source>
@@ -3326,7 +3326,7 @@ Continue anyway?</source>
 Trozdem fortfahren?</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="682"/>
+        <location filename="../../src/mainwindow.cpp" line="683"/>
         <source>Failed to parse line %1 of progress file:
 %2
 
@@ -3337,57 +3337,57 @@ Continue anyway?</source>
 Trozdem fortfahren?</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="854"/>
+        <location filename="../../src/mainwindow.cpp" line="855"/>
         <source>text</source>
         <comment>Seed input type</comment>
         <translatorcomment>Seed-Eingabetyp</translatorcomment>
         <translation>Text</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="856"/>
+        <location filename="../../src/mainwindow.cpp" line="857"/>
         <source>random</source>
         <comment>Seed input type</comment>
         <translatorcomment>Seed-Eingabetyp</translatorcomment>
         <translation>zufällig</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="864"/>
+        <location filename="../../src/mainwindow.cpp" line="865"/>
         <source>Save progress</source>
         <translation>Vortschritt speichern</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="864"/>
-        <location filename="../../src/mainwindow.cpp" line="876"/>
+        <location filename="../../src/mainwindow.cpp" line="865"/>
+        <location filename="../../src/mainwindow.cpp" line="877"/>
         <source>Text files (*.txt);;Any files (*)</source>
         <translation>Textdateien (*.txt);;Alle Dateien (*)</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="876"/>
+        <location filename="../../src/mainwindow.cpp" line="877"/>
         <source>Load progress</source>
         <translation>Vortschritt laden</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="998"/>
+        <location filename="../../src/mainwindow.cpp" line="999"/>
         <source>Save screenshot</source>
         <translation>Screenshot speichern</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="998"/>
+        <location filename="../../src/mainwindow.cpp" line="999"/>
         <source>Images (*.png *.jpg *.ppm)</source>
         <translation>Bilder (*.png *.jpg *.ppm)</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="1018"/>
+        <location filename="../../src/mainwindow.cpp" line="1019"/>
         <source>Redock map</source>
         <translation>Karte andocken</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="1131"/>
+        <location filename="../../src/mainwindow.cpp" line="1132"/>
         <source>The application will need to be restarted before all changes can take effect.</source>
         <translation>Die Anwendung muss neugestartet werden um alle Änderungen wirksam zu machen.</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="1132"/>
+        <location filename="../../src/mainwindow.cpp" line="1133"/>
         <source>Restart required</source>
         <translation>Neustart erforderlich</translation>
     </message>
@@ -3639,6 +3639,116 @@ Ergebnisse werden in &quot;%1&quot; gespeichert und weitere Suchen werden schnel
 </source>
         <translation>Bedingung %1:</translation>
     </message>
+    <message>
+        <location filename="../../src/cutil.h" line="19"/>
+        <source>desert_pyramid</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="20"/>
+        <source>jungle_temple</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="21"/>
+        <source>swamp_hut</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="22"/>
+        <source>igloo</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="23"/>
+        <source>village</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="24"/>
+        <source>ocean_ruin</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="25"/>
+        <source>shipwreck</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="26"/>
+        <source>monument</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="27"/>
+        <source>mansion</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="28"/>
+        <source>outpost</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="29"/>
+        <source>treasure</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="30"/>
+        <source>mineshaft</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="31"/>
+        <source>desert_well</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="32"/>
+        <source>ruined_portal</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="33"/>
+        <source>ruined_portal (nether)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="34"/>
+        <source>amethyst_geode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="35"/>
+        <source>ancient_city</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="36"/>
+        <source>trail_ruins</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="37"/>
+        <source>fortress</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="38"/>
+        <source>bastion</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="39"/>
+        <source>end_city</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="40"/>
+        <source>end_gateway</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>QObject</name>
@@ -3703,6 +3813,175 @@ Ergebnisse werden in &quot;%1&quot; gespeichert und weitere Suchen werden schnel
         <location filename="../../src/updater.cpp" line="86"/>
         <source>&lt;p&gt;A new version: &lt;b&gt;%1&lt;/b&gt; is available.&lt;/p&gt;&lt;p&gt;Open the download page in browser?&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="76"/>
+        <source>treasure</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="58"/>
+        <source>plains_fountain_01</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="59"/>
+        <source>plains_meeting_point_1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="60"/>
+        <source>plains_meeting_point_2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="61"/>
+        <source>plains_meeting_point_3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="62"/>
+        <source>desert_meeting_point_1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="63"/>
+        <source>desert_meeting_point_2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="64"/>
+        <source>desert_meeting_point_3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="65"/>
+        <source>savanna_meeting_point_1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="66"/>
+        <source>savanna_meeting_point_2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="67"/>
+        <source>savanna_meeting_point_3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="68"/>
+        <source>savanna_meeting_point_4</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="69"/>
+        <source>taiga_meeting_point_1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="70"/>
+        <source>taiga_meeting_point_2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="71"/>
+        <source>snowy_meeting_point_1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="72"/>
+        <source>snowy_meeting_point_2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="73"/>
+        <source>snowy_meeting_point_3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="74"/>
+        <source>units</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="75"/>
+        <source>hoglin_stable</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="77"/>
+        <source>bridge</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="78"/>
+        <source>giant_ruined_portal_1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="79"/>
+        <source>giant_ruined_portal_2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="80"/>
+        <source>giant_ruined_portal_3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="81"/>
+        <source>ruined_portal_1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="82"/>
+        <source>ruined_portal_2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="83"/>
+        <source>ruined_portal_3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="84"/>
+        <source>ruined_portal_4</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="85"/>
+        <source>ruined_portal_5</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="86"/>
+        <source>ruined_portal_6</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="87"/>
+        <source>ruined_portal_7</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="88"/>
+        <source>ruined_portal_8</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="89"/>
+        <source>ruined_portal_9</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="90"/>
+        <source>ruined_portal_10</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Grayscale</source>
+        <translation type="obsolete">Graustufen</translation>
     </message>
 </context>
 <context>

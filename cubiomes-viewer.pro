@@ -209,7 +209,9 @@ RESOURCES += \
 # ----- translations (pluralization) -----
 
 TRANSLATIONS += \
-        rc/lang/en_US.ts
+        rc/lang/en_US.ts \
+        rc/lang/de_DE.ts \
+        rc/lang/zh_CN.ts
 
 translations: {
     # automatically run lupdate for pluralization default translation
