@@ -11,7 +11,7 @@
     <message>
         <location filename="../../src/aboutdialog.ui" line="30"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:16pt; font-weight:600;&quot;&gt;Cubiomes-Viewer _VERSION_&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Built: _DATE_&lt;/p&gt;&lt;p&gt;URL: &lt;a href=&quot;https://github.com/Cubitect/cubiomes-viewer&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;https://github.com/Cubitect/cubiomes-viewer&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p&gt;License: &lt;a href=&quot;https://www.gnu.org/licenses/gpl-3.0.en.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;GPLv3&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;Components and Legal Information&lt;/span&gt;&lt;/p&gt;&lt;p&gt;— Minecraft biome and structure generation from &lt;a href=&quot;https://github.com/Cubitect/cubiomes/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;cubiomes&lt;/span&gt;&lt;/a&gt;, licensed under &lt;a href=&quot;https://mit-license.org/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;MIT&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;— Cross platform GUI toolkit: Qt _QT_MAJOR_._QT_MINOR_, available under &lt;a href=&quot;https://www.qt.io/licensing/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;(L)GPLv3&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;— Dark Qt theme derived from &lt;a href=&quot;https://github.com/ColinDuquesnoy/QDarkStyleSheet&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;QDarkStyleSheet&lt;/span&gt;&lt;/a&gt;, licensed under MIT.&lt;/p&gt;&lt;p&gt;— A copy of the &lt;a href=&quot;https://dejavu-fonts.github.io/License.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;DejaVu Fonts&lt;/span&gt;&lt;/a&gt; is included in this build.&lt;/p&gt;&lt;p&gt;— Biome colors and icons are inspired by &lt;a href=&quot;https://github.com/toolbox4minecraft/amidst&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;Amidst&lt;/span&gt;&lt;/a&gt;, licensed under GPLv3.&lt;/p&gt;&lt;p&gt;— &lt;a href=&quot;https://www.lua.org/license.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;Lua _LUA_VERS_&lt;/span&gt;&lt;/a&gt; is distributed under the terms of the MIT license.&lt;br/&gt;&lt;/p&gt;&lt;p&gt;NOT APPROVED BY OR ASSOCIATED WITH MOJANG.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:16pt; font-weight:600;&quot;&gt;Cubiomes-Viewer _VERSION_&lt;/span&gt;&lt;/p&gt;&lt;p&gt;发布日期: _DATE_&lt;/p&gt;&lt;p&gt;项目地址: &lt;a href=&quot;https://github.com/Cubitect/cubiomes-viewer&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;https://github.com/Cubitect/cubiomes-viewer&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p&gt;许可证: &lt;a href=&quot;https://www.gnu.org/licenses/gpl-3.0.en.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;GPLv3&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;参考和法律信息&lt;/span&gt;&lt;/p&gt;&lt;p&gt;— Minecraft群系和结构生成: &lt;a href=&quot;https://github.com/Cubitect/cubiomes/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;cubiomes&lt;/span&gt;&lt;/a&gt;, 遵照 &lt;a href=&quot;https://mit-license.org/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;MIT&lt;/span&gt;&lt;/a&gt; 许可证进行分发。&lt;/p&gt;&lt;p&gt;— 跨平台GUI工具: Qt _QT_MAJOR_._QT_MINOR_, 遵照 &lt;a href=&quot;https://www.qt.io/licensing/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;(L)GPLv3&lt;/span&gt;&lt;/a&gt; 许可证进行分发。&lt;/p&gt;&lt;p&gt;— 暗色系设计来源于 &lt;a href=&quot;https://github.com/ColinDuquesnoy/QDarkStyleSheet&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;QDarkStyleSheet&lt;/span&gt;&lt;/a&gt;, 遵照MIT许可证进行分发。&lt;/p&gt;&lt;p&gt;— 字体使用: &lt;a href=&quot;https://dejavu-fonts.github.io/License.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;DejaVu Fonts&lt;/span&gt;&lt;/a&gt;。&lt;/p&gt;&lt;p&gt;— 群系颜色与结构图标来自: &lt;a href=&quot;https://github.com/toolbox4minecraft/amidst&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;Amidst&lt;/span&gt;&lt;/a&gt;, 遵照MIT许可证进行分发。&lt;/p&gt;&lt;p&gt;— &lt;a href=&quot;https://www.lua.org/license.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;Lua _LUA_VERS_&lt;/span&gt;&lt;/a&gt; 遵照MIT许可证进行分发。&lt;/p&gt;&lt;p&gt;— 简体中文(中国)译者: &lt;a href=&quot;https://github.com/SunnySlopes&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;SunnySlopes&lt;/span&gt;&lt;/a&gt;。如有翻译建议欢迎来&lt;a href=&quot;https://space.bilibili.com/100377977&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;Bilbili主页&lt;/span&gt;&lt;/a&gt;私信联系我。&lt;/p&gt;&lt;br/&gt;&lt;p&gt;未经MOJANG许可且与其无关。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:16pt; font-weight:600;&quot;&gt;Cubiomes-Viewer _VERSION_&lt;/span&gt;&lt;/p&gt;&lt;p&gt;发布日期: _DATE_&lt;/p&gt;&lt;p&gt;项目地址: &lt;a href=&quot;https://github.com/Cubitect/cubiomes-viewer&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;https://github.com/Cubitect/cubiomes-viewer&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p&gt;许可证: &lt;a href=&quot;https://www.gnu.org/licenses/gpl-3.0.en.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;GPLv3&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;参考和法律信息&lt;/span&gt;&lt;/p&gt;&lt;p&gt;— Minecraft群系和结构生成: &lt;a href=&quot;https://github.com/Cubitect/cubiomes/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;cubiomes&lt;/span&gt;&lt;/a&gt;, 遵照 &lt;a href=&quot;https://mit-license.org/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;MIT&lt;/span&gt;&lt;/a&gt; 许可证进行分发。&lt;/p&gt;&lt;p&gt;— 跨平台GUI工具: Qt _QT_MAJOR_._QT_MINOR_, 遵照 &lt;a href=&quot;https://www.qt.io/licensing/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;(L)GPLv3&lt;/span&gt;&lt;/a&gt; 许可证进行分发。&lt;/p&gt;&lt;p&gt;— 暗色系设计来源于 &lt;a href=&quot;https://github.com/ColinDuquesnoy/QDarkStyleSheet&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;QDarkStyleSheet&lt;/span&gt;&lt;/a&gt;, 遵照MIT许可证进行分发。&lt;/p&gt;&lt;p&gt;— 字体使用: &lt;a href=&quot;https://www.maoken.com/freefonts/5275.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;江城黑体&lt;/span&gt;&lt;/a&gt;(简体中文)、&lt;a href=&quot;https://dejavu-fonts.github.io/License.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;DejaVu Fonts&lt;/span&gt;&lt;/a&gt;(西文)。&lt;/p&gt;&lt;p&gt;— 群系颜色与结构图标来自: &lt;a href=&quot;https://github.com/toolbox4minecraft/amidst&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;Amidst&lt;/span&gt;&lt;/a&gt;, 遵照MIT许可证进行分发。&lt;/p&gt;&lt;p&gt;— &lt;a href=&quot;https://www.lua.org/license.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;Lua _LUA_VERS_&lt;/span&gt;&lt;/a&gt; 遵照MIT许可证进行分发。&lt;/p&gt;&lt;p&gt;— 简体中文(中国)译者: &lt;a href=&quot;https://github.com/SunnySlopes&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;SunnySlopes&lt;/span&gt;&lt;/a&gt;。如有翻译建议欢迎来&lt;a href=&quot;https://space.bilibili.com/100377977&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;Bilbili主页&lt;/span&gt;&lt;/a&gt;私信联系我。&lt;/p&gt;&lt;br/&gt;&lt;p&gt;未经MOJANG许可且与其无关。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
 </context>
 <context>
@@ -3638,114 +3638,348 @@ Results will be saved to &quot;%1&quot; so subsequent searches will start faster
 </translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="19"/>
+        <location filename="../../src/cutil.h" line="18"/>
         <source>desert_pyramid</source>
         <translation>沙漠神殿</translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="20"/>
+        <location filename="../../src/cutil.h" line="19"/>
         <source>jungle_temple</source>
         <translation>丛林神殿</translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="21"/>
+        <location filename="../../src/cutil.h" line="20"/>
         <source>swamp_hut</source>
         <translation>女巫小屋</translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="22"/>
+        <location filename="../../src/cutil.h" line="21"/>
         <source>igloo</source>
         <translation>冰屋</translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="23"/>
+        <location filename="../../src/cutil.h" line="22"/>
         <source>village</source>
         <translation>村庄</translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="24"/>
+        <location filename="../../src/cutil.h" line="23"/>
         <source>ocean_ruin</source>
         <translation>海底遗迹</translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="25"/>
+        <location filename="../../src/cutil.h" line="24"/>
         <source>shipwreck</source>
         <translation>沉船</translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="26"/>
+        <location filename="../../src/cutil.h" line="25"/>
         <source>monument</source>
         <translation>海底神殿</translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="27"/>
+        <location filename="../../src/cutil.h" line="26"/>
         <source>mansion</source>
         <translation>林地府邸</translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="28"/>
+        <location filename="../../src/cutil.h" line="27"/>
         <source>outpost</source>
         <translation>掠夺者前哨站</translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="29"/>
+        <location filename="../../src/cutil.h" line="28"/>
         <source>treasure</source>
         <translation>宝藏</translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="30"/>
+        <location filename="../../src/cutil.h" line="29"/>
         <source>mineshaft</source>
         <translation>废弃矿井</translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="31"/>
+        <location filename="../../src/cutil.h" line="30"/>
         <source>desert_well</source>
         <translation>沙漠水井</translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="32"/>
+        <location filename="../../src/cutil.h" line="31"/>
         <source>ruined_portal</source>
         <translation>废弃传送门(主世界)</translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="33"/>
+        <location filename="../../src/cutil.h" line="32"/>
         <source>ruined_portal (nether)</source>
         <translation>废弃传送门(下界)</translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="34"/>
+        <location filename="../../src/cutil.h" line="33"/>
         <source>amethyst_geode</source>
         <translation>紫晶洞</translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="35"/>
+        <location filename="../../src/cutil.h" line="34"/>
         <source>ancient_city</source>
         <translation>远古城市</translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="36"/>
+        <location filename="../../src/cutil.h" line="35"/>
         <source>trail_ruins</source>
         <translation>古迹废墟</translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="37"/>
+        <location filename="../../src/cutil.h" line="36"/>
         <source>fortress</source>
         <translation>下界要塞</translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="38"/>
+        <location filename="../../src/cutil.h" line="37"/>
         <source>bastion</source>
         <translation>堡垒遗迹</translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="39"/>
+        <location filename="../../src/cutil.h" line="38"/>
         <source>end_city</source>
         <translation>末地城</translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="40"/>
+        <location filename="../../src/cutil.h" line="39"/>
         <source>end_gateway</source>
         <translation>末地(返程)折跃门</translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="45"/>
+        <source>1:1</source>
+        <translation>1:1</translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="46"/>
+        <source>1:4</source>
+        <translation>1:4</translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="47"/>
+        <source>1:16</source>
+        <translation>1:16</translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="48"/>
+        <source>1:64</source>
+        <translation>1:64</translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="49"/>
+        <source>1:256</source>
+        <translation>1:256</translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="54"/>
+        <location filename="../../src/layerdialog.cpp" line="63"/>
+        <location filename="../../src/layerdialog.cpp" line="72"/>
+        <location filename="../../src/layerdialog.cpp" line="91"/>
+        <location filename="../../src/layerdialog.cpp" line="104"/>
+        <source>All</source>
+        <translation>最精确</translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="55"/>
+        <source>+A[0] 1:4096 x0.952381</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="56"/>
+        <source>+B[0] 1:4023 x0.952381</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="57"/>
+        <source>+A[1] 1:1024 x0.158730</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="58"/>
+        <source>+B[1] 1:1005 x0.158730</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="64"/>
+        <source>+A[0] 1:1024 x0.564374</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="65"/>
+        <source>+B[0] 1:1005 x0.564374</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="66"/>
+        <source>+A[1] 1:512  x0.282187</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="67"/>
+        <source>+B[1] 1:502  x0.282187</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="73"/>
+        <source>+A[0] 1:2048 x0.751468</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="74"/>
+        <source>+B[0] 1:2011 x0.751468</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="75"/>
+        <source>+A[1] 1:1024 x0.375734</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="76"/>
+        <source>+B[1] 1:1005 x0.375734</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="77"/>
+        <source>+A[2] 1:512  x0.375734</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="78"/>
+        <source>+B[2] 1:502  x0.375734</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="79"/>
+        <source>+A[3] 1:256  x0.187867</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="80"/>
+        <source>+B[3] 1:251  x0.187867</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="81"/>
+        <source>+A[4] 1:128  x0.093933</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="82"/>
+        <source>+B[4] 1:125  x0.093933</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="83"/>
+        <source>+A[5] 1:64   x0.023483</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="84"/>
+        <source>+B[5] 1:62   x0.023483</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="85"/>
+        <source>+A[6] 1:32   x0.011742</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="86"/>
+        <source>+B[6] 1:31   x0.011742</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="92"/>
+        <source>+A[0] 1:2048 x0.716846</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="93"/>
+        <source>+B[0] 1:2011 x0.716846</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="94"/>
+        <source>+A[1] 1:1024 x0.358423</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="95"/>
+        <source>+B[1] 1:1005 x0.358423</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="96"/>
+        <source>+A[2] 1:256  x0.089606</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="97"/>
+        <source>+B[2] 1:251  x0.089606</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="98"/>
+        <source>+A[3] 1:128  x0.044803</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="99"/>
+        <source>+B[3] 1:125  x0.044803</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="105"/>
+        <source>+A[0] 1:512 x0.634921</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="106"/>
+        <source>+B[0] 1:502 x0.634921</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="107"/>
+        <source>+A[1] 1:256 x0.634921</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="108"/>
+        <source>+B[1] 1:251 x0.634921</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="109"/>
+        <source>+A[2] 1:128 x0.158730</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="110"/>
+        <source>+B[2] 1:125 x0.158730</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="115"/>
+        <source>Grayscale</source>
+        <translation>灰度</translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="116"/>
+        <source>Shaded biome map</source>
+        <translation>阴影</translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="117"/>
+        <source>Contours on biomes</source>
+        <translation>等高线</translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="118"/>
+        <source>Shaded with contours</source>
+        <translation>阴影+等高线</translation>
     </message>
 </context>
 <context>
@@ -3813,171 +4047,6 @@ Results will be saved to &quot;%1&quot; so subsequent searches will start faster
         <location filename="../../src/updater.cpp" line="86"/>
         <source>&lt;p&gt;A new version: &lt;b&gt;%1&lt;/b&gt; is available.&lt;/p&gt;&lt;p&gt;Open the download page in browser?&lt;/p&gt;</source>
         <translation>&lt;p&gt;发现新版本: &lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;&lt;p&gt;是否在浏览器中打开下载连接?&lt;/p&gt;</translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="58"/>
-        <source>plains_fountain_01</source>
-        <translation>平原-喷泉</translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="59"/>
-        <source>plains_meeting_point_1</source>
-        <translation>平原-会合点1</translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="60"/>
-        <source>plains_meeting_point_2</source>
-        <translation>平原-会合点2</translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="61"/>
-        <source>plains_meeting_point_3</source>
-        <translation>平原-会合点3</translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="62"/>
-        <source>desert_meeting_point_1</source>
-        <translation>沙漠-会合点1</translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="63"/>
-        <source>desert_meeting_point_2</source>
-        <translation>沙漠-会合点2</translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="64"/>
-        <source>desert_meeting_point_3</source>
-        <translation>沙漠-会合点3</translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="65"/>
-        <source>savanna_meeting_point_1</source>
-        <translation>稀树草原-会合点1</translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="66"/>
-        <source>savanna_meeting_point_2</source>
-        <translation>稀树草原-会合点2</translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="67"/>
-        <source>savanna_meeting_point_3</source>
-        <translation>稀树草原-会合点3</translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="68"/>
-        <source>savanna_meeting_point_4</source>
-        <translation>稀树草原-会合点4</translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="69"/>
-        <source>taiga_meeting_point_1</source>
-        <translation>针叶林-会合点1</translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="70"/>
-        <source>taiga_meeting_point_2</source>
-        <translation>针叶林-会合点2</translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="71"/>
-        <source>snowy_meeting_point_1</source>
-        <translation>雪原-会合点1</translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="72"/>
-        <source>snowy_meeting_point_2</source>
-        <translation>雪原-会合点2</translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="73"/>
-        <source>snowy_meeting_point_3</source>
-        <translation>雪原-会合点3</translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="74"/>
-        <source>units</source>
-        <translation>居住区</translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="75"/>
-        <source>hoglin_stable</source>
-        <translation>疣猪兽棚</translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="76"/>
-        <source>treasure</source>
-        <translation>藏宝室</translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="77"/>
-        <source>bridge</source>
-        <translation>桥</translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="78"/>
-        <source>giant_ruined_portal_1</source>
-        <translation>巨型废弃传送门1</translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="79"/>
-        <source>giant_ruined_portal_2</source>
-        <translation>巨型废弃传送门2</translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="80"/>
-        <source>giant_ruined_portal_3</source>
-        <translation>巨型废弃传送门3</translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="81"/>
-        <source>ruined_portal_1</source>
-        <translation>废弃传送门1</translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="82"/>
-        <source>ruined_portal_2</source>
-        <translation>废弃传送门2</translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="83"/>
-        <source>ruined_portal_3</source>
-        <translation>废弃传送门3</translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="84"/>
-        <source>ruined_portal_4</source>
-        <translation>废弃传送门4</translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="85"/>
-        <source>ruined_portal_5</source>
-        <translation>废弃传送门5</translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="86"/>
-        <source>ruined_portal_6</source>
-        <translation>废弃传送门6</translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="87"/>
-        <source>ruined_portal_7</source>
-        <translation>废弃传送门7</translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="88"/>
-        <source>ruined_portal_8</source>
-        <translation>废弃传送门8</translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="89"/>
-        <source>ruined_portal_9</source>
-        <translation>废弃传送门9</translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="90"/>
-        <source>ruined_portal_10</source>
-        <translation>废弃传送门10</translation>
     </message>
 </context>
 <context>
@@ -4193,6 +4262,174 @@ Keep waiting for threads to stop?</source>
         <location filename="../../src/structuredialog.cpp" line="23"/>
         <source>blocks per pixel</source>
         <translation>方块/像素</translation>
+    </message>
+</context>
+<context>
+    <name>StructureStartPiece</name>
+    <message>
+        <location filename="../../src/cutil.h" line="57"/>
+        <source>plains_fountain_01</source>
+        <translation>平原-喷泉</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="58"/>
+        <source>plains_meeting_point_1</source>
+        <translation>平原-会合点1</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="59"/>
+        <source>plains_meeting_point_2</source>
+        <translation>平原-会合点2</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="60"/>
+        <source>plains_meeting_point_3</source>
+        <translation>平原-会合点3</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="61"/>
+        <source>desert_meeting_point_1</source>
+        <translation>沙漠-会合点1</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="62"/>
+        <source>desert_meeting_point_2</source>
+        <translation>沙漠-会合点2</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="63"/>
+        <source>desert_meeting_point_3</source>
+        <translation>沙漠-会合点3</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="64"/>
+        <source>savanna_meeting_point_1</source>
+        <translation>稀树草原-会合点1</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="65"/>
+        <source>savanna_meeting_point_2</source>
+        <translation>稀树草原-会合点2</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="66"/>
+        <source>savanna_meeting_point_3</source>
+        <translation>稀树草原-会合点3</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="67"/>
+        <source>savanna_meeting_point_4</source>
+        <translation>稀树草原-会合点4</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="68"/>
+        <source>taiga_meeting_point_1</source>
+        <translation>针叶林-会合点1</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="69"/>
+        <source>taiga_meeting_point_2</source>
+        <translation>针叶林-会合点2</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="70"/>
+        <source>snowy_meeting_point_1</source>
+        <translation>雪原-会合点1</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="71"/>
+        <source>snowy_meeting_point_2</source>
+        <translation>雪原-会合点2</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="72"/>
+        <source>snowy_meeting_point_3</source>
+        <translation>雪原-会合点3</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="73"/>
+        <source>units</source>
+        <translation>居住区</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="74"/>
+        <source>hoglin_stable</source>
+        <translation>疣猪兽棚</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="75"/>
+        <source>treasure</source>
+        <translation>藏宝室</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="76"/>
+        <source>bridge</source>
+        <translation>桥</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="77"/>
+        <source>giant_ruined_portal_1</source>
+        <translation>巨型废弃传送门1</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="78"/>
+        <source>giant_ruined_portal_2</source>
+        <translation>巨型废弃传送门2</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="79"/>
+        <source>giant_ruined_portal_3</source>
+        <translation>巨型废弃传送门3</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="80"/>
+        <source>ruined_portal_1</source>
+        <translation>废弃传送门1</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="81"/>
+        <source>ruined_portal_2</source>
+        <translation>废弃传送门2</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="82"/>
+        <source>ruined_portal_3</source>
+        <translation>废弃传送门3</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="83"/>
+        <source>ruined_portal_4</source>
+        <translation>废弃传送门4</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="84"/>
+        <source>ruined_portal_5</source>
+        <translation>废弃传送门5</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="85"/>
+        <source>ruined_portal_6</source>
+        <translation>废弃传送门6</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="86"/>
+        <source>ruined_portal_7</source>
+        <translation>废弃传送门7</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="87"/>
+        <source>ruined_portal_8</source>
+        <translation>废弃传送门8</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="88"/>
+        <source>ruined_portal_9</source>
+        <translation>废弃传送门9</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="89"/>
+        <source>ruined_portal_10</source>
+        <translation>废弃传送门10</translation>
     </message>
 </context>
 <context>

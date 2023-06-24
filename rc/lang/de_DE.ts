@@ -2653,6 +2653,10 @@ Trozdem fortfahren?</translation>
         <source>Beta humidity</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Grayscale</source>
+        <translation type="obsolete">Graustufen</translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>
@@ -3640,112 +3644,346 @@ Ergebnisse werden in &quot;%1&quot; gespeichert und weitere Suchen werden schnel
         <translation>Bedingung %1:</translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="19"/>
+        <location filename="../../src/layerdialog.cpp" line="45"/>
+        <source>1:1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="46"/>
+        <source>1:4</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="47"/>
+        <source>1:16</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="48"/>
+        <source>1:64</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="49"/>
+        <source>1:256</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="54"/>
+        <location filename="../../src/layerdialog.cpp" line="63"/>
+        <location filename="../../src/layerdialog.cpp" line="72"/>
+        <location filename="../../src/layerdialog.cpp" line="91"/>
+        <location filename="../../src/layerdialog.cpp" line="104"/>
+        <source>All</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="55"/>
+        <source>+A[0] 1:4096 x0.952381</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="56"/>
+        <source>+B[0] 1:4023 x0.952381</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="57"/>
+        <source>+A[1] 1:1024 x0.158730</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="58"/>
+        <source>+B[1] 1:1005 x0.158730</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="64"/>
+        <source>+A[0] 1:1024 x0.564374</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="65"/>
+        <source>+B[0] 1:1005 x0.564374</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="66"/>
+        <source>+A[1] 1:512  x0.282187</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="67"/>
+        <source>+B[1] 1:502  x0.282187</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="73"/>
+        <source>+A[0] 1:2048 x0.751468</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="74"/>
+        <source>+B[0] 1:2011 x0.751468</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="75"/>
+        <source>+A[1] 1:1024 x0.375734</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="76"/>
+        <source>+B[1] 1:1005 x0.375734</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="77"/>
+        <source>+A[2] 1:512  x0.375734</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="78"/>
+        <source>+B[2] 1:502  x0.375734</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="79"/>
+        <source>+A[3] 1:256  x0.187867</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="80"/>
+        <source>+B[3] 1:251  x0.187867</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="81"/>
+        <source>+A[4] 1:128  x0.093933</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="82"/>
+        <source>+B[4] 1:125  x0.093933</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="83"/>
+        <source>+A[5] 1:64   x0.023483</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="84"/>
+        <source>+B[5] 1:62   x0.023483</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="85"/>
+        <source>+A[6] 1:32   x0.011742</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="86"/>
+        <source>+B[6] 1:31   x0.011742</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="92"/>
+        <source>+A[0] 1:2048 x0.716846</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="93"/>
+        <source>+B[0] 1:2011 x0.716846</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="94"/>
+        <source>+A[1] 1:1024 x0.358423</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="95"/>
+        <source>+B[1] 1:1005 x0.358423</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="96"/>
+        <source>+A[2] 1:256  x0.089606</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="97"/>
+        <source>+B[2] 1:251  x0.089606</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="98"/>
+        <source>+A[3] 1:128  x0.044803</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="99"/>
+        <source>+B[3] 1:125  x0.044803</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="105"/>
+        <source>+A[0] 1:512 x0.634921</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="106"/>
+        <source>+B[0] 1:502 x0.634921</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="107"/>
+        <source>+A[1] 1:256 x0.634921</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="108"/>
+        <source>+B[1] 1:251 x0.634921</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="109"/>
+        <source>+A[2] 1:128 x0.158730</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="110"/>
+        <source>+B[2] 1:125 x0.158730</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="115"/>
+        <source>Grayscale</source>
+        <translation type="unfinished">Graustufen</translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="116"/>
+        <source>Shaded biome map</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="117"/>
+        <source>Contours on biomes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/layerdialog.cpp" line="118"/>
+        <source>Shaded with contours</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="18"/>
         <source>desert_pyramid</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="20"/>
+        <location filename="../../src/cutil.h" line="19"/>
         <source>jungle_temple</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="21"/>
+        <location filename="../../src/cutil.h" line="20"/>
         <source>swamp_hut</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="22"/>
+        <location filename="../../src/cutil.h" line="21"/>
         <source>igloo</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="23"/>
+        <location filename="../../src/cutil.h" line="22"/>
         <source>village</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="24"/>
+        <location filename="../../src/cutil.h" line="23"/>
         <source>ocean_ruin</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="25"/>
+        <location filename="../../src/cutil.h" line="24"/>
         <source>shipwreck</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="26"/>
+        <location filename="../../src/cutil.h" line="25"/>
         <source>monument</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="27"/>
+        <location filename="../../src/cutil.h" line="26"/>
         <source>mansion</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="28"/>
+        <location filename="../../src/cutil.h" line="27"/>
         <source>outpost</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="29"/>
+        <location filename="../../src/cutil.h" line="28"/>
         <source>treasure</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="30"/>
+        <location filename="../../src/cutil.h" line="29"/>
         <source>mineshaft</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="31"/>
+        <location filename="../../src/cutil.h" line="30"/>
         <source>desert_well</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="32"/>
+        <location filename="../../src/cutil.h" line="31"/>
         <source>ruined_portal</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="33"/>
+        <location filename="../../src/cutil.h" line="32"/>
         <source>ruined_portal (nether)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="34"/>
+        <location filename="../../src/cutil.h" line="33"/>
         <source>amethyst_geode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="35"/>
+        <location filename="../../src/cutil.h" line="34"/>
         <source>ancient_city</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="36"/>
+        <location filename="../../src/cutil.h" line="35"/>
         <source>trail_ruins</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="37"/>
+        <location filename="../../src/cutil.h" line="36"/>
         <source>fortress</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="38"/>
+        <location filename="../../src/cutil.h" line="37"/>
         <source>bastion</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="39"/>
+        <location filename="../../src/cutil.h" line="38"/>
         <source>end_city</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/cutil.h" line="40"/>
+        <location filename="../../src/cutil.h" line="39"/>
         <source>end_gateway</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3812,171 +4050,6 @@ Ergebnisse werden in &quot;%1&quot; gespeichert und weitere Suchen werden schnel
     <message>
         <location filename="../../src/updater.cpp" line="86"/>
         <source>&lt;p&gt;A new version: &lt;b&gt;%1&lt;/b&gt; is available.&lt;/p&gt;&lt;p&gt;Open the download page in browser?&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="76"/>
-        <source>treasure</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="58"/>
-        <source>plains_fountain_01</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="59"/>
-        <source>plains_meeting_point_1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="60"/>
-        <source>plains_meeting_point_2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="61"/>
-        <source>plains_meeting_point_3</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="62"/>
-        <source>desert_meeting_point_1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="63"/>
-        <source>desert_meeting_point_2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="64"/>
-        <source>desert_meeting_point_3</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="65"/>
-        <source>savanna_meeting_point_1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="66"/>
-        <source>savanna_meeting_point_2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="67"/>
-        <source>savanna_meeting_point_3</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="68"/>
-        <source>savanna_meeting_point_4</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="69"/>
-        <source>taiga_meeting_point_1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="70"/>
-        <source>taiga_meeting_point_2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="71"/>
-        <source>snowy_meeting_point_1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="72"/>
-        <source>snowy_meeting_point_2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="73"/>
-        <source>snowy_meeting_point_3</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="74"/>
-        <source>units</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="75"/>
-        <source>hoglin_stable</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="77"/>
-        <source>bridge</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="78"/>
-        <source>giant_ruined_portal_1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="79"/>
-        <source>giant_ruined_portal_2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="80"/>
-        <source>giant_ruined_portal_3</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="81"/>
-        <source>ruined_portal_1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="82"/>
-        <source>ruined_portal_2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="83"/>
-        <source>ruined_portal_3</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="84"/>
-        <source>ruined_portal_4</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="85"/>
-        <source>ruined_portal_5</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="86"/>
-        <source>ruined_portal_6</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="87"/>
-        <source>ruined_portal_7</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="88"/>
-        <source>ruined_portal_8</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="89"/>
-        <source>ruined_portal_9</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/cutil.h" line="90"/>
-        <source>ruined_portal_10</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4199,6 +4272,174 @@ Weiter auf den Stop der Threads warten?</numerusform>
         <location filename="../../src/structuredialog.cpp" line="23"/>
         <source>blocks per pixel</source>
         <translation>Meter pro Pixel</translation>
+    </message>
+</context>
+<context>
+    <name>StructureStartPiece</name>
+    <message>
+        <location filename="../../src/cutil.h" line="57"/>
+        <source>plains_fountain_01</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="58"/>
+        <source>plains_meeting_point_1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="59"/>
+        <source>plains_meeting_point_2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="60"/>
+        <source>plains_meeting_point_3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="61"/>
+        <source>desert_meeting_point_1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="62"/>
+        <source>desert_meeting_point_2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="63"/>
+        <source>desert_meeting_point_3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="64"/>
+        <source>savanna_meeting_point_1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="65"/>
+        <source>savanna_meeting_point_2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="66"/>
+        <source>savanna_meeting_point_3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="67"/>
+        <source>savanna_meeting_point_4</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="68"/>
+        <source>taiga_meeting_point_1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="69"/>
+        <source>taiga_meeting_point_2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="70"/>
+        <source>snowy_meeting_point_1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="71"/>
+        <source>snowy_meeting_point_2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="72"/>
+        <source>snowy_meeting_point_3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="73"/>
+        <source>units</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="74"/>
+        <source>hoglin_stable</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="75"/>
+        <source>treasure</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="76"/>
+        <source>bridge</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="77"/>
+        <source>giant_ruined_portal_1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="78"/>
+        <source>giant_ruined_portal_2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="79"/>
+        <source>giant_ruined_portal_3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="80"/>
+        <source>ruined_portal_1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="81"/>
+        <source>ruined_portal_2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="82"/>
+        <source>ruined_portal_3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="83"/>
+        <source>ruined_portal_4</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="84"/>
+        <source>ruined_portal_5</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="85"/>
+        <source>ruined_portal_6</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="86"/>
+        <source>ruined_portal_7</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="87"/>
+        <source>ruined_portal_8</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="88"/>
+        <source>ruined_portal_9</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="89"/>
+        <source>ruined_portal_10</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
