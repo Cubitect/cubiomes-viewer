@@ -53,7 +53,7 @@ QString Condition::summary() const
             if (scripts.contains(hash))
                 txts += ": " + QFileInfo(scripts.value(hash)).baseName();
             else
-                txts += ": " + QApplication::tr("[script missing]");
+                txts += ": " + QApplication::translate("Filter", "[script missing]");
         }
     }
 
@@ -218,12 +218,12 @@ QString SearchThreadEnv::init(int mc, bool large, ConditionTree *condtree)
         if (c.type != F_LUA)
             continue;
         if (!scripts.contains(c.hash))
-            return QApplication::tr("missing script for condition %1").arg(c.save);
+            return QApplication::translate("Filter", "missing script for condition %1").arg(c.save);
         QString err;
         lua_State *L = loadScript(scripts.value(c.hash), &err);
         if (!L)
         {
-            QString s = QApplication::tr("Condition %1:\n").arg(c.save);
+            QString s = QApplication::translate("Filter", "Condition %1:\n").arg(c.save);
             s += err;
             return s;
         }

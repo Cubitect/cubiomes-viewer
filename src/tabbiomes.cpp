@@ -821,7 +821,7 @@ void TabBiomes::on_radioFullSample_toggled(bool checked)
 void TabBiomes::on_lineBiomeSize_textChanged(const QString &text)
 {
     double area = text.toInt();
-    ui->labelBiomeSize->setText(QString::asprintf("(%g sq. chunks)", area / 16));
+    ui->labelBiomeSize->setText(QString::asprintf(tr("(%g sq. chunks)").toStdString().c_str(), area / 16));
 }
 
 void TabBiomes::on_treeLocate_itemClicked(QTreeWidgetItem *item, int column)
