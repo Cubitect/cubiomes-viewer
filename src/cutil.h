@@ -3,6 +3,7 @@
 
 #include <QMutex>
 #include <QString>
+#include <QApplication>
 
 #include <random>
 
@@ -14,28 +15,28 @@ inline const char* struct2str(int stype)
 {
     switch (stype)
     {
-    case Desert_Pyramid:    return "desert_pyramid";
-    case Jungle_Temple:     return "jungle_temple";
-    case Swamp_Hut:         return "swamp_hut";
-    case Igloo:             return "igloo";
-    case Village:           return "village";
-    case Ocean_Ruin:        return "ocean_ruin";
-    case Shipwreck:         return "shipwreck";
-    case Monument:          return "monument";
-    case Mansion:           return "mansion";
-    case Outpost:           return "outpost";
-    case Treasure:          return "treasure";
-    case Mineshaft:         return "mineshaft";
-    case Desert_Well:       return "desert_well";
-    case Ruined_Portal:     return "ruined_portal";
-    case Ruined_Portal_N:   return "ruined_portal (nether)";
-    case Geode:             return "amethyst_geode";
-    case Ancient_City:      return "ancient_city";
-    case Trail_Ruin:        return "trail_ruins";
-    case Fortress:          return "fortress";
-    case Bastion:           return "bastion";
-    case End_City:          return "end_city";
-    case End_Gateway:       return "end_gateway";
+    case Desert_Pyramid:    return QApplication::translate("StructureDialog", "desert_pyramid").toUtf8().data();
+    case Jungle_Temple:     return QApplication::translate("StructureDialog", "jungle_temple").toUtf8().data();
+    case Swamp_Hut:         return QApplication::translate("StructureDialog", "swamp_hut").toUtf8().data();
+    case Igloo:             return QApplication::translate("StructureDialog", "igloo").toUtf8().data();
+    case Village:           return QApplication::translate("StructureDialog", "village").toUtf8().data();
+    case Ocean_Ruin:        return QApplication::translate("StructureDialog", "ocean_ruin").toUtf8().data();
+    case Shipwreck:         return QApplication::translate("StructureDialog", "shipwreck").toUtf8().data();
+    case Monument:          return QApplication::translate("StructureDialog", "monument").toUtf8().data();
+    case Mansion:           return QApplication::translate("StructureDialog", "mansion").toUtf8().data();
+    case Outpost:           return QApplication::translate("StructureDialog", "outpost").toUtf8().data();
+    case Treasure:          return QApplication::translate("StructureDialog", "treasure").toUtf8().data();
+    case Mineshaft:         return QApplication::translate("StructureDialog", "mineshaft").toUtf8().data();
+    case Desert_Well:       return QApplication::translate("StructureDialog", "desert_well").toUtf8().data();
+    case Ruined_Portal:     return QApplication::translate("StructureDialog", "ruined_portal").toUtf8().data();
+    case Ruined_Portal_N:   return QApplication::translate("StructureDialog", "ruined_portal (nether)").toUtf8().data();
+    case Geode:             return QApplication::translate("StructureDialog", "amethyst_geode").toUtf8().data();
+    case Ancient_City:      return QApplication::translate("StructureDialog", "ancient_city").toUtf8().data();
+    case Trail_Ruin:        return QApplication::translate("StructureDialog", "trail_ruins").toUtf8().data();
+    case Fortress:          return QApplication::translate("StructureDialog", "fortress").toUtf8().data();
+    case Bastion:           return QApplication::translate("StructureDialog", "bastion").toUtf8().data();
+    case End_City:          return QApplication::translate("StructureDialog", "end_city").toUtf8().data();
+    case End_Gateway:       return QApplication::translate("StructureDialog", "end_gateway").toUtf8().data();
     }
     return "?";
 }

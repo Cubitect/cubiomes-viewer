@@ -696,7 +696,7 @@ void FormSearchControl::searchFinish(bool done)
         ui->progressBar->setValue(10000);
         ui->progressBar->setFormat(tr("Done", "Progressbar when finished"));
     }
-    ui->labelStatus->setText("Idle");
+    ui->labelStatus->setText(tr("Idle"));
     proghist.clear();
     searchLockUi(false);
 }

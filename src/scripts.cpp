@@ -222,7 +222,7 @@ lua_State *loadScript(QString path, QString *err)
         }
         if (lua_getglobal(L, "check") != LUA_TFUNCTION)
         {
-            if (err) *err = QApplication::tr("function check() was not defined");
+            if (err) *err = QApplication::translate("Filter", "function check() was not defined");
             break;
         }
         lua_pop(L, 1);

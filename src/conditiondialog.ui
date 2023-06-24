@@ -725,7 +725,7 @@ QPushButton:hover {
            <item row="0" column="0">
             <widget class="QGroupBox" name="groupBox_5">
              <property name="title">
-              <string>Locate boime center</string>
+              <string>Locate biome center</string>
              </property>
              <layout class="QGridLayout" name="gridLayout_19">
               <item row="3" column="0">
