@@ -3,6 +3,7 @@
 
 #include <QMutex>
 #include <QString>
+#include <QApplication>
 
 #include <random>
 
@@ -14,28 +15,28 @@ inline const char* struct2str(int stype)
 {
     switch (stype)
     {
-    case Desert_Pyramid:    return "desert_pyramid";
-    case Jungle_Temple:     return "jungle_temple";
-    case Swamp_Hut:         return "swamp_hut";
-    case Igloo:             return "igloo";
-    case Village:           return "village";
-    case Ocean_Ruin:        return "ocean_ruin";
-    case Shipwreck:         return "shipwreck";
-    case Monument:          return "monument";
-    case Mansion:           return "mansion";
-    case Outpost:           return "outpost";
-    case Treasure:          return "treasure";
-    case Mineshaft:         return "mineshaft";
-    case Desert_Well:       return "desert_well";
-    case Ruined_Portal:     return "ruined_portal";
-    case Ruined_Portal_N:   return "ruined_portal (nether)";
-    case Geode:             return "amethyst_geode";
-    case Ancient_City:      return "ancient_city";
-    case Trail_Ruin:        return "trail_ruins";
-    case Fortress:          return "fortress";
-    case Bastion:           return "bastion";
-    case End_City:          return "end_city";
-    case End_Gateway:       return "end_gateway";
+    case Desert_Pyramid:    return QApplication::tr("desert_pyramid").toUtf8().data();
+    case Jungle_Temple:     return QApplication::tr("jungle_temple").toUtf8().data();
+    case Swamp_Hut:         return QApplication::tr("swamp_hut").toUtf8().data();
+    case Igloo:             return QApplication::tr("igloo").toUtf8().data();
+    case Village:           return QApplication::tr("village").toUtf8().data();
+    case Ocean_Ruin:        return QApplication::tr("ocean_ruin").toUtf8().data();
+    case Shipwreck:         return QApplication::tr("shipwreck").toUtf8().data();
+    case Monument:          return QApplication::tr("monument").toUtf8().data();
+    case Mansion:           return QApplication::tr("mansion").toUtf8().data();
+    case Outpost:           return QApplication::tr("outpost").toUtf8().data();
+    case Treasure:          return QApplication::tr("treasure").toUtf8().data();
+    case Mineshaft:         return QApplication::tr("mineshaft").toUtf8().data();
+    case Desert_Well:       return QApplication::tr("desert_well").toUtf8().data();
+    case Ruined_Portal:     return QApplication::tr("ruined_portal").toUtf8().data();
+    case Ruined_Portal_N:   return QApplication::tr("ruined_portal (nether)").toUtf8().data();
+    case Geode:             return QApplication::tr("amethyst_geode").toUtf8().data();
+    case Ancient_City:      return QApplication::tr("ancient_city").toUtf8().data();
+    case Trail_Ruin:        return QApplication::tr("trail_ruins").toUtf8().data();
+    case Fortress:          return QApplication::tr("fortress").toUtf8().data();
+    case Bastion:           return QApplication::tr("bastion").toUtf8().data();
+    case End_City:          return QApplication::tr("end_city").toUtf8().data();
+    case End_Gateway:       return QApplication::tr("end_gateway").toUtf8().data();
     }
     return "?";
 }
@@ -53,39 +54,39 @@ struct StartPiece
 static const StartPiece g_start_pieces[] =
 {   // the index is used to encode the start pieces in the condition
     // (and should therefore ideally remain constant across upgrades)
-    {Village, plains, 0, -1, "plains_fountain_01", 0, 0},
-    {Village, plains, 1, -1, "plains_meeting_point_1", 1, 0},
-    {Village, plains, 2, -1, "plains_meeting_point_2", 2, 0},
-    {Village, plains, 3, -1, "plains_meeting_point_3", 3, 0},
-    {Village, desert, 1, -1, "desert_meeting_point_1", 4, 1},
-    {Village, desert, 2, -1, "desert_meeting_point_2", 5, 1},
-    {Village, desert, 3, -1, "desert_meeting_point_3", 6, 1},
-    {Village, savanna, 1, -1, "savanna_meeting_point_1", 0, 1},
-    {Village, savanna, 2, -1, "savanna_meeting_point_2", 1, 1},
-    {Village, savanna, 3, -1, "savanna_meeting_point_3", 2, 1},
-    {Village, savanna, 4, -1, "savanna_meeting_point_4", 3, 1},
-    {Village, taiga, 1, -1, "taiga_meeting_point_1", 7, 0},
-    {Village, taiga, 2, -1, "taiga_meeting_point_2", 8, 0},
-    {Village, snowy_tundra, 1, -1, "snowy_meeting_point_1", 4, 0},
-    {Village, snowy_tundra, 2, -1, "snowy_meeting_point_2", 5, 0},
-    {Village, snowy_tundra, 3, -1, "snowy_meeting_point_3", 6, 0},
-    {Bastion, -1, 0, -1, "units", 0, 0},
-    {Bastion, -1, 1, -1, "hoglin_stable", 1, 0},
-    {Bastion, -1, 2, -1, "treasure", 2, 0},
-    {Bastion, -1, 3, -1, "bridge", 3, 0},
-    {Ruined_Portal, -1, 1, 1, "giant_ruined_portal_1", 0, 1},
-    {Ruined_Portal, -1, 2, 1, "giant_ruined_portal_2", 1, 1},
-    {Ruined_Portal, -1, 3, 1, "giant_ruined_portal_3", 2, 1},
-    {Ruined_Portal, -1, 1, 0, "ruined_portal_1", 0, 0},
-    {Ruined_Portal, -1, 2, 0, "ruined_portal_2", 1, 0},
-    {Ruined_Portal, -1, 3, 0, "ruined_portal_3", 2, 0},
-    {Ruined_Portal, -1, 4, 0, "ruined_portal_4", 3, 0},
-    {Ruined_Portal, -1, 5, 0, "ruined_portal_5", 4, 0},
-    {Ruined_Portal, -1, 6, 0, "ruined_portal_6", 5, 0},
-    {Ruined_Portal, -1, 7, 0, "ruined_portal_7", 6, 0},
-    {Ruined_Portal, -1, 8, 0, "ruined_portal_8", 7, 0},
-    {Ruined_Portal, -1, 9, 0, "ruined_portal_9", 8, 0},
-    {Ruined_Portal, -1, 10, 0, "ruined_portal_10", 9, 0},
+    {Village, plains, 0, -1, QT_TRANSLATE_NOOP("StructureStartPiece", "plains_fountain_01"), 0, 0},
+    {Village, plains, 1, -1, QT_TRANSLATE_NOOP("StructureStartPiece", "plains_meeting_point_1"), 1, 0},
+    {Village, plains, 2, -1, QT_TRANSLATE_NOOP("StructureStartPiece", "plains_meeting_point_2"), 2, 0},
+    {Village, plains, 3, -1, QT_TRANSLATE_NOOP("StructureStartPiece", "plains_meeting_point_3"), 3, 0},
+    {Village, desert, 1, -1, QT_TRANSLATE_NOOP("StructureStartPiece", "desert_meeting_point_1"), 4, 1},
+    {Village, desert, 2, -1, QT_TRANSLATE_NOOP("StructureStartPiece", "desert_meeting_point_2"), 5, 1},
+    {Village, desert, 3, -1, QT_TRANSLATE_NOOP("StructureStartPiece", "desert_meeting_point_3"), 6, 1},
+    {Village, savanna, 1, -1, QT_TRANSLATE_NOOP("StructureStartPiece", "savanna_meeting_point_1"), 0, 1},
+    {Village, savanna, 2, -1, QT_TRANSLATE_NOOP("StructureStartPiece", "savanna_meeting_point_2"), 1, 1},
+    {Village, savanna, 3, -1, QT_TRANSLATE_NOOP("StructureStartPiece", "savanna_meeting_point_3"), 2, 1},
+    {Village, savanna, 4, -1, QT_TRANSLATE_NOOP("StructureStartPiece", "savanna_meeting_point_4"), 3, 1},
+    {Village, taiga, 1, -1, QT_TRANSLATE_NOOP("StructureStartPiece", "taiga_meeting_point_1"), 7, 0},
+    {Village, taiga, 2, -1, QT_TRANSLATE_NOOP("StructureStartPiece", "taiga_meeting_point_2"), 8, 0},
+    {Village, snowy_tundra, 1, -1, QT_TRANSLATE_NOOP("StructureStartPiece", "snowy_meeting_point_1"), 4, 0},
+    {Village, snowy_tundra, 2, -1, QT_TRANSLATE_NOOP("StructureStartPiece", "snowy_meeting_point_2"), 5, 0},
+    {Village, snowy_tundra, 3, -1, QT_TRANSLATE_NOOP("StructureStartPiece", "snowy_meeting_point_3"), 6, 0},
+    {Bastion, -1, 0, -1, QT_TRANSLATE_NOOP("StructureStartPiece", "units"), 0, 0},
+    {Bastion, -1, 1, -1, QT_TRANSLATE_NOOP("StructureStartPiece", "hoglin_stable"), 1, 0},
+    {Bastion, -1, 2, -1, QT_TRANSLATE_NOOP("StructureStartPiece", "treasure"), 2, 0},
+    {Bastion, -1, 3, -1, QT_TRANSLATE_NOOP("StructureStartPiece", "bridge"), 3, 0},
+    {Ruined_Portal, -1, 1, 1, QT_TRANSLATE_NOOP("StructureStartPiece", "giant_ruined_portal_1"), 0, 1},
+    {Ruined_Portal, -1, 2, 1, QT_TRANSLATE_NOOP("StructureStartPiece", "giant_ruined_portal_2"), 1, 1},
+    {Ruined_Portal, -1, 3, 1, QT_TRANSLATE_NOOP("StructureStartPiece", "giant_ruined_portal_3"), 2, 1},
+    {Ruined_Portal, -1, 1, 0, QT_TRANSLATE_NOOP("StructureStartPiece", "ruined_portal_1"), 0, 0},
+    {Ruined_Portal, -1, 2, 0, QT_TRANSLATE_NOOP("StructureStartPiece", "ruined_portal_2"), 1, 0},
+    {Ruined_Portal, -1, 3, 0, QT_TRANSLATE_NOOP("StructureStartPiece", "ruined_portal_3"), 2, 0},
+    {Ruined_Portal, -1, 4, 0, QT_TRANSLATE_NOOP("StructureStartPiece", "ruined_portal_4"), 3, 0},
+    {Ruined_Portal, -1, 5, 0, QT_TRANSLATE_NOOP("StructureStartPiece", "ruined_portal_5"), 4, 0},
+    {Ruined_Portal, -1, 6, 0, QT_TRANSLATE_NOOP("StructureStartPiece", "ruined_portal_6"), 5, 0},
+    {Ruined_Portal, -1, 7, 0, QT_TRANSLATE_NOOP("StructureStartPiece", "ruined_portal_7"), 6, 0},
+    {Ruined_Portal, -1, 8, 0, QT_TRANSLATE_NOOP("StructureStartPiece", "ruined_portal_8"), 7, 0},
+    {Ruined_Portal, -1, 9, 0, QT_TRANSLATE_NOOP("StructureStartPiece", "ruined_portal_9"), 8, 0},
+    {Ruined_Portal, -1, 10, 0, QT_TRANSLATE_NOOP("StructureStartPiece", "ruined_portal_10"), 9, 0},
     {-1,0,0,0,0,0,0}
 };
 

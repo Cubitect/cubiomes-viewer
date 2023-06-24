@@ -85,7 +85,7 @@ bool SearchMaster::set(
 
         if (c.relative && refbuf[c.relative] == 0)
         {
-            QMessageBox::warning(parent, "Warning",
+            QMessageBox::warning(parent, tr("Warning"),
                     tr("Condition with ID %1 has a broken reference position:\n"
                     "condition missing or out of order.").arg(cid));
             return false;

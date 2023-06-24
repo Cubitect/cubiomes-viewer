@@ -83,7 +83,7 @@ void replyFinished(QNetworkReply *reply, bool quiet)
 
     QMessageBox::StandardButton answer = QMessageBox::question(
         NULL, QObject::tr("New Version"),
-        QObject::tr("<p>A new version: <b>%1</b> is aviable.</p><p>Open the download page in browser?</p>").arg(newest),
+        QObject::tr("<p>A new version: <b>%1</b> is available.</p><p>Open the download page in browser?</p>").arg(newest),
         QMessageBox::Yes|QMessageBox::No);
 
     if (answer == QMessageBox::Yes)

@@ -251,7 +251,7 @@ static const struct FilterList
             QT_TRANSLATE_NOOP("Filter",
             "The lower 48-bits provide potential for four swamp huts in "
             "spawning range, such that all of them are within 128 blocks "
-            "of a single AFK location, including a vertical tollerance "
+            "of a single AFK location, including a vertical tolerance "
             "for a fall damage chute.")
         };
 

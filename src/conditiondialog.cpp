@@ -883,10 +883,10 @@ void ConditionDialog::on_buttonAreaInfo_clicked()
         "example a centered square with side 3 will go from -2 to 1 for both "
         "the X and Z axes."
         "</p><p>"
-        "Important to note is that some filters have a scaling associtated with "
+        "Important to note is that some filters have a scaling associated with "
         "them. This means that the area is not defined in blocks, but on a grid "
         "with the given spacing (such as chunks instead of blocks). A scaling "
-        "of 1:16, for example, means that the aformentioned centered square of "
+        "of 1:16, for example, means that the aforementioned centered square of "
         "side 3 will range from -32 to 31 in block coordinates. (Chunk 1 has "
         "blocks 16 to 31.)"
         "</p></body></html>"
@@ -1234,9 +1234,9 @@ void ConditionDialog::on_lineBiomeSize_textChanged(const QString &)
     double area = ui->lineBiomeSize->text().toInt();
     QString s;
     if (filterindex == F_BIOME_CENTER_256)
-        s = QString::asprintf("(~%g sq. chunks)", area * 256);
+        s = QString::asprintf(tr("(~%g sq. chunks)").toStdString().c_str(), area * 256);
     else
-        s = QString::asprintf("(%g sq. chunks)", area / 16.0);
+        s = QString::asprintf(tr("(%g sq. chunks)").toStdString().c_str(), area / 16.0);
     ui->labelBiomeSize->setText(s);
 }
 
