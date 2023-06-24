@@ -18,23 +18,23 @@ void replyFinished(QNetworkReply *reply, bool quiet)
     {
         if (!quiet)
         {
-            QString msg = QObject::tr("Failed to check for updates:\n");
+            QString msg = QObject::translate("UpdaterDialog", "Failed to check for updates:\n");
             switch (reply->error())
             {
             case QNetworkReply::ConnectionRefusedError:
-                msg += QObject::tr("Connection refused.");
+                msg += QObject::translate("UpdaterDialog", "Connection refused.");
                 break;
             case QNetworkReply::HostNotFoundError:
-                msg += QObject::tr("Host not found.");
+                msg += QObject::translate("UpdaterDialog", "Host not found.");
                 break;
             case QNetworkReply::TimeoutError:
-                msg += QObject::tr("Connection timed out.");
+                msg += QObject::translate("UpdaterDialog", "Connection timed out.");
                 break;
             default:
-                msg += QObject::tr("Network error (%1).").arg(reply->error());
+                msg += QObject::translate("UpdaterDialog", "Network error (%1).").arg(reply->error());
                 break;
             }
-            QMessageBox::warning(NULL, QObject::tr("Connection Error"), msg, QMessageBox::Ok);
+            QMessageBox::warning(NULL, QObject::translate("UpdaterDialog", "Connection Error"), msg, QMessageBox::Ok);
         }
         return;
     }
@@ -45,8 +45,8 @@ void replyFinished(QNetworkReply *reply, bool quiet)
     if (jerr.error != QJsonParseError::NoError)
     {
         QMessageBox::warning(
-            NULL, QObject::tr("Json Error"),
-            QObject::tr("Failed to parse Json reply with:\n%1").arg(jerr.errorString()),
+            NULL, QObject::translate("UpdaterDialog", "Json Error"),
+            QObject::translate("UpdaterDialog", "Failed to parse Json reply with:\n%1").arg(jerr.errorString()),
             QMessageBox::Ok);
         return;
     }
@@ -75,15 +75,15 @@ void replyFinished(QNetworkReply *reply, bool quiet)
         if (!quiet)
         {
             QMessageBox::information(
-                NULL, QObject::tr("No Updates"),
-                QObject::tr("You using the latest version of Cubiomes-Viewer."));
+                NULL, QObject::translate("UpdaterDialog", "No Updates"),
+                QObject::translate("UpdaterDialog", "You using the latest version of Cubiomes-Viewer."));
         }
         return;
     }
 
     QMessageBox::StandardButton answer = QMessageBox::question(
-        NULL, QObject::tr("New Version"),
-        QObject::tr("<p>A new version: <b>%1</b> is aviable.</p><p>Open the download page in browser?</p>").arg(newest),
+        NULL, QObject::translate("UpdaterDialog", "New Version"),
+        QObject::translate("UpdaterDialog", "<p>A new version: <b>%1</b> is available.</p><p>Open the download page in browser?</p>").arg(newest),
         QMessageBox::Yes|QMessageBox::No);
 
     if (answer == QMessageBox::Yes)

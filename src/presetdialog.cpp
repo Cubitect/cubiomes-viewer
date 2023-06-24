@@ -246,7 +246,7 @@ void PresetDialog::on_buttonSave_clicked()
     Preset preset;
     preset.title = QInputDialog::getText(
                 this, tr("New Preset"),
-                tr("Preset titel:"), QLineEdit::Normal,
+                tr("Preset title:"), QLineEdit::Normal,
                 QString("Filter#%1").arg(n), &ok);
     if (!ok || preset.title.isEmpty())
         return;
