@@ -4088,6 +4088,116 @@ Weiter auf den Stop der Threads warten?</numerusform>
         <source>blocks per pixel</source>
         <translation>Meter pro Pixel</translation>
     </message>
+    <message>
+        <location filename="../../src/cutil.h" line="18"/>
+        <source>desert_pyramid</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="19"/>
+        <source>jungle_temple</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="20"/>
+        <source>swamp_hut</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="21"/>
+        <source>igloo</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="22"/>
+        <source>village</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="23"/>
+        <source>ocean_ruin</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="24"/>
+        <source>shipwreck</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="25"/>
+        <source>monument</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="26"/>
+        <source>mansion</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="27"/>
+        <source>outpost</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="28"/>
+        <source>treasure</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="29"/>
+        <source>mineshaft</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="30"/>
+        <source>desert_well</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="31"/>
+        <source>ruined_portal</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="32"/>
+        <source>ruined_portal (nether)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="33"/>
+        <source>amethyst_geode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="34"/>
+        <source>ancient_city</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="35"/>
+        <source>trail_ruins</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="36"/>
+        <source>fortress</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="37"/>
+        <source>bastion</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="38"/>
+        <source>end_city</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="39"/>
+        <source>end_gateway</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>TabBiomes</name>

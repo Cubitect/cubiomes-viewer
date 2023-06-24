@@ -4083,6 +4083,116 @@ Keep waiting for threads to stop?</source>
         <source>blocks per pixel</source>
         <translation>方块/像素</translation>
     </message>
+    <message>
+        <location filename="../../src/cutil.h" line="18"/>
+        <source>desert_pyramid</source>
+        <translation>沙漠神殿</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="19"/>
+        <source>jungle_temple</source>
+        <translation>丛林神庙</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="20"/>
+        <source>swamp_hut</source>
+        <translation>女巫小屋</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="21"/>
+        <source>igloo</source>
+        <translation>冰屋</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="22"/>
+        <source>village</source>
+        <translation>村庄</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="23"/>
+        <source>ocean_ruin</source>
+        <translation>海底遗迹</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="24"/>
+        <source>shipwreck</source>
+        <translation>沉船</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="25"/>
+        <source>monument</source>
+        <translation>海底神殿</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="26"/>
+        <source>mansion</source>
+        <translation>林地府邸</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="27"/>
+        <source>outpost</source>
+        <translation>掠夺者前哨站</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="28"/>
+        <source>treasure</source>
+        <translation>宝藏</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="29"/>
+        <source>mineshaft</source>
+        <translation>废弃矿井</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="30"/>
+        <source>desert_well</source>
+        <translation>沙漠水井</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="31"/>
+        <source>ruined_portal</source>
+        <translation>废弃传送门(主世界)</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="32"/>
+        <source>ruined_portal (nether)</source>
+        <translation>废弃传送门(下界)</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="33"/>
+        <source>amethyst_geode</source>
+        <translation>紫晶洞</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="34"/>
+        <source>ancient_city</source>
+        <translation>远古城市</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="35"/>
+        <source>trail_ruins</source>
+        <translation>古迹废墟</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="36"/>
+        <source>fortress</source>
+        <translation>下界要塞</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="37"/>
+        <source>bastion</source>
+        <translation>堡垒遗迹</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="38"/>
+        <source>end_city</source>
+        <translation>末地城</translation>
+    </message>
+    <message>
+        <location filename="../../src/cutil.h" line="39"/>
+        <source>end_gateway</source>
+        <translation>末地(返程)折跃门</translation>
+    </message>
 </context>
 <context>
     <name>TabBiomes</name>
