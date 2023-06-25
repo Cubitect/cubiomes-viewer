@@ -8,46 +8,72 @@
 #include <QMutex>
 #include <QVector>
 #include <QElapsedTimer>
+#include <QTimer>
+#include <QMessageBox>
 
+#include <deque>
 
-class FormSearchControl;
+struct Session
+{
+    void writeHeader(QTextStream& stream);
+    bool save(QWidget *widget, QString fnam, bool quiet);
+    bool load(QWidget *widget, QString fnam, bool quiet);
+
+    WorldInfo wi;
+    SearchConfig sc;
+    Gen48Config gen48;
+    QVector<Condition> cv;
+    std::vector<uint64_t> slist;
+};
+
 struct SearchWorker;
 
 struct SearchMaster : QThread
 {
     Q_OBJECT
 public:
-    SearchMaster(FormSearchControl *parent);
+    SearchMaster(QWidget *parent);
     virtual ~SearchMaster();
 
-    bool set(WorldInfo wi, const SearchConfig& sc, const Gen48Config& gen48, const Config& config,
-            std::vector<uint64_t>& slist, const QVector<Condition>& cv);
+    bool set(QWidget *widget, const Session& s);
 
-    void presearch();
+    void presearch(QObject *qtobj);
 
     virtual void run() override;
     void stop();
 
-    // Determines the lowest seed/prog that is about to be processed.
-    // (This is the point at which you would want to reload a previous search.)
-    bool getProgress(uint64_t *prog, uint64_t *end, uint64_t *seed);
+    // Get search progress:
+    //  status  : progress status summary
+    //  prog    : scheduled progress in search space
+    //  end     : size of search space
+    //  seed    : current seed to be processed
+    // Get the search speed (provided it is called at regular intervals):
+    //  min,max : lower and upper search speed quartiles
+    //  avg     : search speed average
+    bool getProgress(QString *status, uint64_t *prog, uint64_t *end, uint64_t *seed, qreal *min, qreal *avg, qreal *max);
 
     bool requestItem(SearchWorker *item);
 
 public slots:
+    void onWorkerResult(uint64_t seed);
     void onWorkerFinished();
 
 signals:
+    void searchResult(uint64_t seed);
     void searchFinish(bool done);
 
 public:
-    FormSearchControl         * parent;
+    struct TProg { uint64_t ns, prog; };
+
+public:
     std::vector<SearchWorker*>  workers;
 
     QMutex                      mutex;
     std::atomic_bool            abort;
 
-    QElapsedTimer               timer;
+    std::deque<TProg>           proghist;
+    QElapsedTimer               progtimer;
+    QElapsedTimer               itemtimer;
     uint64_t                    count;
 
     SearchThreadEnv             env;
@@ -58,7 +84,7 @@ public:
     ConditionTree               condtree;
     int                         itemsize;   // number of seeds per search item
     int                         threadcnt;  // numbr of worker threads
-    Gen48Config               gen48;      // 48-bit generator settings
+    Gen48Config                 gen48;      // 48-bit generator settings
     std::vector<uint64_t>       slist;      // candidate list
     uint64_t                    idx;        // index within candidate list
     uint64_t                    scnt;       // search space size

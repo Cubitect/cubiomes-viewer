@@ -28,10 +28,10 @@ signals:
 
 public:
     QVector<Condition> conds;
-    QVector<uint64_t> seeds;
+    std::vector<uint64_t> seeds;
     WorldInfo wi;
     std::atomic_bool stop;
-    std::atomic_int idx;
+    std::atomic_long idx;
 };
 
 
@@ -47,6 +47,7 @@ public:
     virtual void load(QSettings& settings) override;
 
 private slots:
+    int warning(QString text, QMessageBox::StandardButtons buttons);
     void onAnalysisItemDone(QTreeWidgetItem *item);
     void onAnalysisFinished();
     void onBufferTimeout();

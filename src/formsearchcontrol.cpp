@@ -4,6 +4,7 @@
 #include "mainwindow.h"
 #include "search.h"
 #include "rangedialog.h"
+#include "message.h"
 
 #include "cubiomes/util.h"
 
@@ -99,9 +100,9 @@ FormSearchControl::FormSearchControl(MainWindow *parent)
     , proxy(new SeedSortProxy(this))
     , protodialog()
     , sthread(this)
-    , stimer()
     , elapsed()
-    , proghist()
+    , stimer()
+    , resultfile()
     , slist64path()
     , slist64fnam()
     , slist64()
@@ -114,17 +115,12 @@ FormSearchControl::FormSearchControl(MainWindow *parent)
     ui->setupUi(this);
     protodialog = new ProtoBaseDialog(this);
 
-    QFont mono = *gp_font_mono;
-    ui->results->setFont(mono);
-    ui->progressBar->setFont(mono);
-    ui->labelStatus->setFont(mono);
-
     proxy->setSourceModel(model);
     ui->results->setModel(proxy);
 
-    ui->results->horizontalHeader()->setFont(mono);
+    ui->results->horizontalHeader()->setFont(ui->results->font());
     ui->results->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-    ui->results->verticalHeader()->setDefaultSectionSize(QFontMetrics(mono).height());
+    ui->results->verticalHeader()->setDefaultSectionSize(QFontMetrics(ui->results->font()).height());
     ui->results->setColumnWidth(SeedTableModel::COL_SEED, 200);
     ui->results->setColumnWidth(SeedTableModel::COL_TOP16, 60);
     ui->results->setColumnWidth(SeedTableModel::COL_HEX48, 120);
@@ -132,9 +128,10 @@ FormSearchControl::FormSearchControl(MainWindow *parent)
     connect(ui->results->horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &FormSearchControl::onSort);
     ui->results->sortByColumn(-1, Qt::AscendingOrder);
 
+    connect(&sthread, &SearchMaster::searchResult, this, &FormSearchControl::searchResult, Qt::QueuedConnection);
     connect(&sthread, &SearchMaster::searchFinish, this, &FormSearchControl::searchFinish, Qt::QueuedConnection);
 
-    connect(&stimer, &QTimer::timeout, this, QOverload<>::of(&FormSearchControl::resultTimeout));
+    connect(&stimer, &QTimer::timeout, this, QOverload<>::of(&FormSearchControl::progressTimeout));
 
     connect(
         ui->results->selectionModel(),
@@ -157,10 +154,10 @@ FormSearchControl::~FormSearchControl()
     delete ui;
 }
 
-QVector<uint64_t> FormSearchControl::getResults()
+std::vector<uint64_t> FormSearchControl::getResults()
 {
     int n = proxy->rowCount();
-    QVector<uint64_t> results = QVector<uint64_t>(n);
+    std::vector<uint64_t> results (n);
     for (int i = 0; i < n; i++)
     {
         results[i] = proxy->data(proxy->index(i, SeedTableModel::COL_SEED), Qt::UserRole).toULongLong();
@@ -229,16 +226,14 @@ bool FormSearchControl::setList64(QString path, bool quiet)
         if (l != NULL)
         {
             slist64.assign(l, l+len);
-            searchProgress(0, len, l[0]);
+            updateSearchProgress(0, len, l[0]);
             free(l);
             return true;
         }
         else if (!quiet)
         {
-            int button = QMessageBox::warning(
-                this, tr("Warning"),
-                tr("Failed to load 64-bit seed list from file:\n\"%1\"").arg(path),
-                QMessageBox::Reset, QMessageBox::Ignore);
+            int button = warn(this, tr("Failed to load 64-bit seed list from file:\n\"%1\"").arg(path),
+                QMessageBox::Reset|QMessageBox::Ignore);
             if (button == QMessageBox::Reset)
             {
                 slist64fnam.clear();
@@ -248,6 +243,12 @@ bool FormSearchControl::setList64(QString path, bool quiet)
         }
     }
     return false;
+}
+
+void FormSearchControl::setResultsPath(QString path)
+{
+    resultfile.close();
+    resultfile.setFileName(path);
 }
 
 void FormSearchControl::searchLockUi(bool lock)
@@ -290,7 +291,7 @@ void FormSearchControl::setSearchMode(int mode)
 
 int FormSearchControl::warning(QString text, QMessageBox::StandardButtons buttons)
 {
-    return QMessageBox::warning(this, tr("Warning"), text, buttons);
+    return warn(this, text, buttons);
 }
 
 void FormSearchControl::openProtobaseMsg(QString path)
@@ -316,46 +317,52 @@ void FormSearchControl::on_buttonStart_clicked()
 {
     if (ui->buttonStart->isChecked())
     {
-        WorldInfo wi;
-        parent->getSeed(&wi);
-        const Config& config = parent->config;
-        QVector<Condition> condvec = parent->formCond->getConditions();
-        SearchConfig sc = getSearchConfig();
+        Session session;
+        parent->getSeed(&session.wi);
+        session.cv = parent->formCond->getConditions();
+        session.sc = getSearchConfig();
         int ok = true;
 
-        if (condvec.empty())
+        if (session.cv.empty())
         {
-            QMessageBox::warning(this, tr("Warning"), tr("Please define some constraints using the \"Add\" button."), QMessageBox::Ok);
+            warn(this, tr("Please define some constraints using the \"Add\" button."));
             ok = false;
         }
-        if (sc.searchtype == SEARCH_LIST && slist64.empty())
+        if (session.sc.searchtype == SEARCH_LIST && slist64.empty())
         {
-            QMessageBox::warning(this, tr("Warning"), tr("No seed list file selected."), QMessageBox::Ok);
+            warn(this, tr("No seed list file selected."));
             ok = false;
         }
         if (sthread.isRunning())
         {
-            QMessageBox::warning(this, tr("Warning"), tr("Search is still running."), QMessageBox::Ok);
+            warn(this, tr("Search is still running."));
             ok = false;
         }
 
         if (ok)
         {
-            Gen48Config gen48 = parent->formGen48->getConfig(true);
+            session.gen48 = parent->formGen48->getConfig(true);
             // the search can either use a full list or a 48-bit list
-            if (sc.searchtype == SEARCH_LIST)
-                slist = slist64;
-            else if (gen48.mode == GEN48_LIST)
-                slist = parent->formGen48->getList48();
+            if (session.sc.searchtype == SEARCH_LIST)
+                session.slist = slist64;
+            else if (session.gen48.mode == GEN48_LIST)
+                session.slist = parent->formGen48->getList48();
             else
-                slist.clear();
+                session.slist.clear();
 
-            ok = sthread.set(wi, sc, gen48, config, slist, condvec);
+            ok = sthread.set(parent, session);
         }
 
         if (ok)
         {
-            ui->lineStart->setText(QString::asprintf("%" PRId64, (int64_t)sc.startseed));
+            if (!resultfile.fileName().isEmpty())
+            {
+                resultfile.close();
+                resultfile.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text);
+                QTextStream stream(&resultfile);
+                session.writeHeader(stream);
+            }
+            ui->lineStart->setText(QString::asprintf("%" PRId64, (int64_t)session.sc.startseed));
             ui->buttonStart->setText(tr("Abort search"));
             ui->buttonStart->setIcon(QIcon(":/icons/cancel.png"));
             searchLockUi(true);
@@ -431,12 +438,17 @@ void FormSearchControl::on_results_customContextMenuRequested(const QPoint &pos)
     QAction *actremove = menu.addAction(QIcon::fromTheme("list-remove"),
         tr("Remove selected seed"), this,
         &FormSearchControl::removeCurrent, QKeySequence::Delete);
-    actremove->setEnabled(!ui->results->selectionModel()->hasSelection());
+    actremove->setEnabled(ui->results->selectionModel()->hasSelection());
 
-    QAction *actcopy = menu.addAction(QIcon::fromTheme("edit-copy"),
-        tr("Copy list to clipboard"), this,
-        &FormSearchControl::copyResults, QKeySequence::Copy);
-    actcopy->setEnabled(ui->results->model()->rowCount() > 0);
+    QAction *actcopyseed = menu.addAction(QIcon::fromTheme("edit-copy"),
+        tr("Copy selected seed"), this,
+        &FormSearchControl::copySeed, QKeySequence::Copy);
+    actcopyseed->setEnabled(ui->results->selectionModel()->hasSelection());
+
+    QAction *actcopylist = menu.addAction(QIcon::fromTheme("edit-copy"),
+        tr("Copy seed list"), this,
+        &FormSearchControl::copyResults, QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_C));
+    actcopylist->setEnabled(ui->results->model()->rowCount() > 0);
 
     int n = pasteList(true);
     QAction *actpaste = menu.addAction(QIcon::fromTheme("edit-paste"),
@@ -489,9 +501,9 @@ int FormSearchControl::pasteList(bool dummy)
 {
     QClipboard *clipboard = QGuiApplication::clipboard();
     QStringList slist = clipboard->text().split('\n');
-    QVector<uint64_t> seeds;
+    std::vector<uint64_t> seeds;
 
-    for (QString s : slist)
+    for (QString s : qAsConst(slist))
     {
         s = s.trimmed();
         if (s.isEmpty())
@@ -532,8 +544,16 @@ void FormSearchControl::onSort(int, Qt::SortOrder)
     }
 }
 
-void FormSearchControl::onSearchResult(uint64_t seed)
+void FormSearchControl::searchResult(uint64_t seed)
 {
+    if (resultfile.isOpen())
+    {
+        char s[32];
+        snprintf(s, sizeof(s), "%" PRId64 "\n", seed);
+        resultfile.write(s);
+        resultfile.flush();
+    }
+
     qbuf.push_back(seed);
     if (ui->checkStop->isChecked())
     {
@@ -564,14 +584,14 @@ void FormSearchControl::onBufferTimeout()
     nextupdate = elapsed.nsecsElapsed() + 1e6 * updt;
 }
 
-int FormSearchControl::searchResultsAdd(QVector<uint64_t> seeds, bool countonly)
+int FormSearchControl::searchResultsAdd(std::vector<uint64_t> seeds, bool countonly)
 {
     const Config& config = parent->config;
     int ns = model->seeds.size();
     int n = ns;
     if (n >= config.maxMatching)
         return 0;
-    if (seeds.size() + n > config.maxMatching)
+    if ((ssize_t)seeds.size() + n > config.maxMatching)
         seeds.resize(config.maxMatching - n);
     if (seeds.empty())
         return 0;
@@ -604,8 +624,7 @@ int FormSearchControl::searchResultsAdd(QVector<uint64_t> seeds, bool countonly)
     if (countonly == false && n >= config.maxMatching)
     {
         sthread.stop();
-        QString msg = tr("Maximum number of results reached (%1).").arg(config.maxMatching);
-        QMessageBox::warning(this, tr("Warning"), msg, QMessageBox::Ok);
+        warn(this, tr("Maximum number of results reached (%1).").arg(config.maxMatching));
     }
 
     int addcnt = n - ns;
@@ -620,8 +639,7 @@ int FormSearchControl::searchResultsAdd(QVector<uint64_t> seeds, bool countonly)
 
 void FormSearchControl::searchProgressReset()
 {
-    uint64_t cnt;
-    cnt = parent->formGen48->estimateSeedCnt();
+    uint64_t cnt = parent->formGen48->estimateSeedCnt();
     if (cnt > MASK48)
         cnt = ~(uint64_t)0;
     else
@@ -655,7 +673,7 @@ void FormSearchControl::searchProgressReset()
     ui->progressBar->setFormat(fmt);
 }
 
-void FormSearchControl::searchProgress(uint64_t prog, uint64_t end, int64_t seed)
+void FormSearchControl::updateSearchProgress(uint64_t prog, uint64_t end, int64_t seed)
 {
     ui->lineStart->setText(QString::asprintf("%" PRId64, seed));
 
@@ -689,112 +707,27 @@ void FormSearchControl::searchProgress(uint64_t prog, uint64_t end, int64_t seed
 void FormSearchControl::searchFinish(bool done)
 {
     stimer.stop();
-    resultTimeout();
+    progressTimeout();
     if (done)
     {
         ui->lineStart->setText(QString::asprintf("%" PRId64, sthread.smax));
         ui->progressBar->setValue(10000);
-        ui->progressBar->setFormat(tr("Done", "Progressbar when finished"));
+        ui->progressBar->setFormat(tr("Done", "Progressbar"));
     }
-    ui->labelStatus->setText(tr("Idle"));
-    proghist.clear();
+    ui->labelStatus->setText(tr("Idle", "Progressbar"));
     searchLockUi(false);
 }
 
-#define SAMPLE_SEC 20
-
-static void estmateSpeed(const std::deque<FormSearchControl::TProg>& hist,
-    double *min, double *avg, double *max)
-{   // We will try to get a decent estimate for the search speed.
-    std::vector<double> samples;
-    samples.reserve(hist.size());
-    auto it_last = hist.begin();
-    auto it = it_last;
-    while (++it != hist.end())
-    {
-        double dp = it_last->prog - it->prog;
-        double dt = 1e-9 * (it_last->ns - it->ns);
-        if (dt > 0)
-            samples.push_back(dp / dt);
-        it_last = it;
-    }
-    std::sort(samples.begin(), samples.end());
-    double speedtot = 0;
-    double weightot = 1e-6;
-    int n = (int) samples.size();
-    int r = (int) (n / SAMPLE_SEC);
-    int has_zeros = 0;
-    for (int i = -r; i <= r; i++)
-    {
-        int j = n/2 + i;
-        if (j < 0 || j >= n)
-            continue;
-        has_zeros += samples[j] == 0;
-        speedtot += samples[j];
-        weightot += 1.0;
-    }
-    if (min) *min = samples[n*1/4]; // lower quartile
-    if (avg) *avg = speedtot / weightot; // median
-    if (max) *max = samples[n*3/4]; // upper quartile
-    if (avg && has_zeros)
-    {   // probably a slow sampling regime, use whole range for estimate
-        speedtot = 0;
-        for (double s : samples)
-            speedtot += s;
-        *avg = speedtot / n;
-    }
-}
-
-static QString getAbbrNum(double x)
-{
-    if (x >= 10e9)
-        return QString::asprintf("%.1fG", x * 1e-9);
-    if (x >= 10e6)
-        return QString::asprintf("%.1fM", x * 1e-6);
-    if (x >= 10e3)
-        return QString::asprintf("%.1fK", x * 1e-3);
-    return QString::asprintf("%.2f", x);
-}
-
-void FormSearchControl::resultTimeout()
+void FormSearchControl::progressTimeout()
 {
     uint64_t prog, end, seed;
-    if (!sthread.getProgress(&prog, &end, &seed))
+    qreal min, avg, max;
+    QString status = tr("Running...", "Progressbar");
+    if (!sthread.getProgress(&status, &prog, &end, &seed, &min, &avg, &max))
         return;
-    searchProgress(prog, end, seed);
 
-    // track the progress over a few seconds so we can estimate the search speed
-    TProg tp = { (uint64_t) elapsed.nsecsElapsed(), prog };
-    proghist.push_front(tp);
-    while (proghist.size() > 1 && proghist.back().ns < tp.ns - SAMPLE_SEC*1e9)
-        proghist.pop_back();
+    updateSearchProgress(prog, end, seed);
 
-    QString status = tr("Running...");
-    if (proghist.size() > 1 && proghist.front().ns > proghist.back().ns)
-    {
-        double min, avg, max;
-        estmateSpeed(proghist, &min, &avg, &max);
-        double remain = ((double)end - prog) / (avg + 1e-6);
-        QString eta;
-        if (remain >= 3600*24*1000)
-            eta = "years";
-        else
-        {
-            int s = (int) remain;
-            if (s > 86400)
-                eta = QString("%1d:%2").arg(s / 86400).arg((s % 86400) / 3600, 2, 10, QLatin1Char('0'));
-            else if (s > 3600)
-                eta = QString("%1h:%2").arg(s / 3600).arg((s % 3600) / 60, 2, 10, QLatin1Char('0'));
-            else
-                eta = QString("%1:%2").arg(s / 60).arg(s % 60, 2, 10, QLatin1Char('0'));
-        }
-        status = tr("seeds/sec: %1 min: %2 max: %3 isize: %4 eta: %5")
-            .arg(getAbbrNum(avg), -8)
-            .arg(getAbbrNum(min), -8)
-            .arg(getAbbrNum(max), -8)
-            .arg(sthread.itemsize, -3)
-            .arg(eta);
-    }
     ui->labelStatus->setText(status);
 
     update();
@@ -807,6 +740,17 @@ void FormSearchControl::removeCurrent()
     if (row >= 0)
     {
         model->removeRow(row);
+    }
+}
+
+void FormSearchControl::copySeed()
+{
+    QModelIndex index = ui->results->currentIndex();
+    if (index.isValid())
+    {
+        uint64_t seed = ui->results->model()->data(index, Qt::UserRole).toULongLong();
+        QClipboard *clipboard = QGuiApplication::clipboard();
+        clipboard->setText(QString::asprintf("%" PRId64, seed));
     }
 }
 
@@ -832,6 +776,8 @@ void FormSearchControl::keyReleaseEvent(QKeyEvent *event)
         if (event->matches(QKeySequence::Delete))
             removeCurrent();
         else if (event->matches(QKeySequence::Copy))
+            copySeed();
+        else if ((event->modifiers() & Qt::CTRL) && (event->modifiers() & Qt::SHIFT) && event->key() == Qt::Key_C)
             copyResults();
         else if (event->matches(QKeySequence::Paste))
             pasteResults();

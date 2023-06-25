@@ -2,6 +2,7 @@
 #include "ui_tabstructures.h"
 
 #include "cutil.h"
+#include "message.h"
 
 #include <QTreeWidgetItem>
 #include <QFileDialog>
@@ -34,7 +35,7 @@ void AnalysisStructures::run()
     Generator g;
     setupGenerator(&g, wi.mc, wi.large);
 
-    for (idx = 0; idx < seeds.size(); idx++)
+    for (idx = 0; idx < (long)seeds.size(); idx++)
     {
         if (stop) break;
         wi.seed = seeds[idx];
@@ -169,7 +170,7 @@ void AnalysisStructures::runStructs(Generator *g)
         return;
     }
     if (stop)
-        seeditem->setText(0, QString::asprintf("%" PRId64, wi.seed) + " " + tr("(incomplete)"));
+        seeditem->setText(0, QString::asprintf("%" PRId64, wi.seed) + " " + "(incomplete)");
     emit itemDone(seeditem);
 }
 
@@ -192,9 +193,9 @@ void AnalysisStructures::runQuads(Generator *g)
     {
         QString label;
         if (qi.typ == Swamp_Hut)
-            label = tr("quad-hut");
+            label = "quad-hut";
         else
-            label = tr("quad-monument");
+            label = "quad-monument";
 
         QTreeWidgetItem *item = new QTreeWidgetItem(seeditem);
 
@@ -363,7 +364,7 @@ void TabStructures::onBufferTimeout()
         ui->treeQuads->setSortingEnabled(true);
         qbufq.clear();
     }
-    QString progress = QString::asprintf(" (%d/%d)", thread.idx.load(), thread.seeds.size());
+    QString progress = QString::asprintf(" (%d/%zu)", thread.idx.load(), thread.seeds.size());
     ui->pushStart->setText(tr("Stop") + progress);
 
     QApplication::processEvents(); // force processing of events so we can time correctly
@@ -411,7 +412,7 @@ void TabStructures::on_pushStart_clicked()
     parent->getSeed(&thread.wi);
     thread.seeds.clear();
     if (ui->comboSeedSource->currentIndex() == 0)
-        thread.seeds.append(thread.wi.seed);
+        thread.seeds.push_back(thread.wi.seed);
     else
         thread.seeds = parent->formControl->getResults();
 
@@ -449,7 +450,7 @@ void TabStructures::on_pushStart_clicked()
 
     ui->pushExport->setEnabled(false);
     ui->pushStart->setChecked(true);
-    QString progress = QString::asprintf(" (0/%d)", thread.seeds.size());
+    QString progress = QString::asprintf(" (0/%zu)", thread.seeds.size());
     ui->pushStart->setText(tr("Stop") + progress);
     thread.start();
 }
@@ -479,7 +480,7 @@ void TabStructures::on_pushExport_clicked()
 
     if (!file.open(QIODevice::WriteOnly))
     {
-        parent->warning(tr("Failed to open file for export:\n\"%1\"").arg(fnam));
+        warn(parent, tr("Failed to open file for export:\n\"%1\"").arg(fnam));
         return;
     }
 

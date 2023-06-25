@@ -39,8 +39,6 @@ FormConditions::FormConditions(QWidget *parent)
 
     qRegisterMetaType< Condition >("Condition");
     qRegisterMetaTypeStreamOperators< Condition >("Condition");
-
-    ui->listConditionsFull->setFont(*gp_font_mono);
 }
 
 FormConditions::~FormConditions()
@@ -52,9 +50,9 @@ QVector<Condition> FormConditions::getConditions() const
 {
     QVector<Condition> conds;
 
-    for (int i = 0, ie = ui->listConditionsFull->count(); i < ie; i++)
+    for (int i = 0, ie = ui->listConditions->count(); i < ie; i++)
     {
-        Condition c = qvariant_cast<Condition>(ui->listConditionsFull->item(i)->data(Qt::UserRole));
+        Condition c = qvariant_cast<Condition>(ui->listConditions->item(i)->data(Qt::UserRole));
         conds.push_back(c);
     }
     return conds;
@@ -64,7 +62,7 @@ void FormConditions::updateSensitivity()
 {
     if (!parent)
         return;
-    QList<QListWidgetItem*> selected = ui->listConditionsFull->selectedItems();
+    QList<QListWidgetItem*> selected = ui->listConditions->selectedItems();
 
     if (selected.size() == 0)
     {
@@ -155,7 +153,7 @@ void FormConditions::setItemCondition(QListWidget *list, QListWidgetItem *item, 
         cond->save = getIndex(cond->save);
     }
 
-    QString s = cond->summary();
+    QString s = cond->summary(&ui->listConditions->font());
 
     const FilterInfo& ft = g_filterinfo.list[cond->type];
     if (ft.cat == CAT_QUAD)
@@ -189,25 +187,25 @@ static void remove_selected(QListWidget *list)
 
 void FormConditions::on_buttonRemoveAll_clicked()
 {
-    ui->listConditionsFull->clear();
+    ui->listConditions->clear();
     emit changed();
 }
 
 void FormConditions::on_buttonRemove_clicked()
 {
-    remove_selected(ui->listConditionsFull);
+    remove_selected(ui->listConditions);
     emit changed();
 }
 
 void FormConditions::on_buttonDisable_clicked()
 {
     emit changed();
-    QList<QListWidgetItem*> selected = ui->listConditionsFull->selectedItems();
+    QList<QListWidgetItem*> selected = ui->listConditions->selectedItems();
     for (QListWidgetItem *item : selected)
     {
         Condition c = qvariant_cast<Condition>(item->data(Qt::UserRole));
         c.meta ^= Condition::DISABLED;
-        item->setText(c.summary());
+        item->setText(c.summary(&font()));
         item->setData(Qt::UserRole, QVariant::fromValue(c));
     }
     updateSensitivity();
@@ -216,7 +214,7 @@ void FormConditions::on_buttonDisable_clicked()
 void FormConditions::on_buttonEdit_clicked()
 {
     QListWidgetItem* edit = 0;
-    QList<QListWidgetItem*> selected = ui->listConditionsFull->selectedItems();
+    QList<QListWidgetItem*> selected = ui->listConditions->selectedItems();
 
     if (!selected.empty())
         edit = lockItem(selected.first());
@@ -236,13 +234,13 @@ void FormConditions::on_buttonAddFilter_clicked()
     dialog->show();
 }
 
-void FormConditions::on_listConditionsFull_customContextMenuRequested(const QPoint &pos)
+void FormConditions::on_listConditions_customContextMenuRequested(const QPoint &pos)
 {
     QMenu menu(this);
     // this is a contextual temporary menu so shortcuts are only indicated here,
     // but will not function - see keyReleaseEvent() for shortcut implementation
 
-    int n = ui->listConditionsFull->selectedItems().size();
+    int n = ui->listConditions->selectedItems().size();
 
     if (parent)
     {
@@ -285,17 +283,17 @@ void FormConditions::on_listConditionsFull_customContextMenuRequested(const QPoi
         actcopy->setEnabled(n > 0);
     }
 
-    menu.exec(ui->listConditionsFull->mapToGlobal(pos));
+    menu.exec(ui->listConditions->mapToGlobal(pos));
 }
 
-void FormConditions::on_listConditionsFull_itemDoubleClicked(QListWidgetItem *item)
+void FormConditions::on_listConditions_itemDoubleClicked(QListWidgetItem *item)
 {
     if (!parent)
         return;
     editCondition(lockItem(item));
 }
 
-void FormConditions::on_listConditionsFull_itemSelectionChanged()
+void FormConditions::on_listConditions_itemSelectionChanged()
 {
     updateSensitivity();
 }
@@ -325,7 +323,7 @@ void FormConditions::conditionsCut()
 void FormConditions::conditionsCopy()
 {
     QString text;
-    QList<QListWidgetItem*> selected = ui->listConditionsFull->selectedItems();
+    QList<QListWidgetItem*> selected = ui->listConditions->selectedItems();
     for (QListWidgetItem *item : selected)
     {
         Condition c = qvariant_cast<Condition>(item->data(Qt::UserRole));
@@ -372,17 +370,17 @@ void FormConditions::addItemCondition(QListWidgetItem *item, Condition cond, int
             item = new QListWidgetItem();
             modified = 1;
         }
-        setItemCondition(ui->listConditionsFull, item, &cond);
+        setItemCondition(ui->listConditions, item, &cond);
     }
     else if (item)
     {
-        setItemCondition(ui->listConditionsFull, item, &cond);
+        setItemCondition(ui->listConditions, item, &cond);
     }
     else
     {
         modified = 1;
         item = new QListWidgetItem();
-        setItemCondition(ui->listConditionsFull, item, &cond);
+        setItemCondition(ui->listConditions, item, &cond);
 
         if (cond.type >= F_QH_IDEAL && cond.type <= F_QH_BARELY)
         {
@@ -396,8 +394,8 @@ void FormConditions::addItemCondition(QListWidgetItem *item, Condition cond, int
             cq.relative = cond.save;
             cq.save = cond.save+1;
             cq.count = 4;
-            QListWidgetItem *item = new QListWidgetItem(ui->listConditionsFull, QListWidgetItem::UserType);
-            setItemCondition(ui->listConditionsFull, item, &cq);
+            QListWidgetItem *item = new QListWidgetItem(ui->listConditions, QListWidgetItem::UserType);
+            setItemCondition(ui->listConditions, item, &cq);
         }
         else if (cond.type == F_QM_90 || cond.type == F_QM_95)
         {
@@ -411,8 +409,8 @@ void FormConditions::addItemCondition(QListWidgetItem *item, Condition cond, int
             cq.relative = cond.save;
             cq.save = cond.save+1;
             cq.count = 4;
-            QListWidgetItem *item = new QListWidgetItem(ui->listConditionsFull, QListWidgetItem::UserType);
-            setItemCondition(ui->listConditionsFull, item, &cq);
+            QListWidgetItem *item = new QListWidgetItem(ui->listConditions, QListWidgetItem::UserType);
+            setItemCondition(ui->listConditions, item, &cq);
         }
     }
 
@@ -420,14 +418,14 @@ void FormConditions::addItemCondition(QListWidgetItem *item, Condition cond, int
         emit changed();
 }
 
-void FormConditions::on_listConditionsFull_indexesMoved(const QModelIndexList &)
+void FormConditions::on_listConditions_indexesMoved(const QModelIndexList &)
 {
     emit changed();
 }
 
 void FormConditions::keyReleaseEvent(QKeyEvent *event)
 {
-    if (ui->listConditionsFull->hasFocus())
+    if (ui->listConditions->hasFocus())
     {
         if (event->matches(QKeySequence::New))
             conditionsAdd();

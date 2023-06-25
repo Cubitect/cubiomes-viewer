@@ -32,10 +32,10 @@ signals:
     void seedItem(QTreeWidgetItem *item);
 
 public:
-    QVector<uint64_t> seeds;
+    std::vector<uint64_t> seeds;
     WorldInfo wi;
     std::atomic_bool stop;
-    std::atomic_int idx;
+    std::atomic_long idx;
     int dims[3];
     struct Dat {
         int x1, z1, x2, z2;

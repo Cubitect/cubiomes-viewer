@@ -1,10 +1,13 @@
 #include "mainwindow.h"
+#include "headless.h"
+
+#include "aboutdialog.h"
+#include "world.h"
+
 #include <QApplication>
 #include <QFontDatabase>
 #include <QStandardPaths>
 #include <QDir>
-
-#include "world.h"
 
 #include "cubiomes/generator.h"
 #include "cubiomes/util.h"
@@ -15,9 +18,6 @@ unsigned char g_biomeColors[256][3];
 unsigned char g_tempsColors[256][3];
 
 ExtGenConfig g_extgen;
-
-QFont *gp_font_default;
-QFont *gp_font_mono;
 
 extern "C"
 int getStructureConfig_override(int stype, int mc, StructureConfig *sconf)
@@ -33,53 +33,97 @@ int getStructureConfig_override(int stype, int mc, StructureConfig *sconf)
     }
     return ok;
 }
-#include "QDebug"
+
+
 int main(int argc, char *argv[])
 {
     initBiomes();
     initBiomeColors(g_biomeColors);
     initBiomeTypeColors(g_tempsColors);
 
-    QApplication app(argc, argv);
     QCoreApplication::setApplicationName(APP_STRING);
+
+    bool version = false;
+    bool nogui = false;
+    bool reset = false;
+    bool usage = false;
+    QString sessionpath;
+    QString resultspath;
 
     for (int i = 1; i < argc; i++)
     {
-        if (strcmp(argv[i], "--reset-all") == 0)
-        {
-            QSettings settings(APP_STRING, APP_STRING);
-            settings.clear();
+        if (strcmp(argv[i], "--version") == 0)
+            version = true;
+        else if (strcmp(argv[i], "--nogui") == 0)
+            nogui = true;
+        else if (strcmp(argv[i], "--reset-all") == 0)
+            reset = true;
+        else if (strncmp(argv[i], "--session=", 10) == 0)
+            sessionpath = argv[i] + 10;
+        else if (strncmp(argv[i], "--session", 9) == 0 && i+1 < argc)
+            sessionpath = argv[++i];
+        else if (strncmp(argv[i], "--out=", 6) == 0)
+            resultspath = argv[i] + 6;
+        else if (strncmp(argv[i], "--out", 5) == 0 && i+1 < argc)
+            resultspath = argv[++i];
+        else
+            usage = true;
+    }
 
-            QString path = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
-            QDir dir(path);
-            if (dir.exists() && path.contains(APP_STRING))
-            {
-                dir.removeRecursively();
-            }
+    if (usage)
+    {
+        const char *msg =
+                "Usage: cubiomes-viewer [options]\n"
+                "Options:\n"
+                "      --help                 Display this help and exit.\n"
+                "      --version              Output version information and exit.\n"
+                "      --nogui                Run in headless search mode.\n"
+                "      --reset-all            Clear settings and remove all session data.\n"
+                "      --session=file         Open this session file.\n"
+                "      --out=file             Write matching seeds to this file while searching.\n"
+                "\n";
+        printf("%s", msg);
+        exit(0);
+    }
+    if (version)
+    {
+        printf("%s %s\n", APP_STRING, getVersStr().toLocal8Bit().data());
+        exit(0);
+    }
+
+    if (reset)
+    {
+        QSettings settings(APP_STRING, APP_STRING);
+        settings.clear();
+
+        QString path = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+        QDir dir(path);
+        if (dir.exists() && path.contains(APP_STRING))
+        {
+            dir.removeRecursively();
         }
     }
 
-    //int fontid = QFontDatabase::addApplicationFont(":/fonts/test.ttf");
-    int fontid = QFontDatabase::addApplicationFont(":/fonts/DejaVuSans.ttf");
-    if (fontid >= 0)
+    if (sessionpath.isEmpty())
     {
-        QFontDatabase::addApplicationFont(":/fonts/DejaVuSans-Bold.ttf");
-        int fontid_mono = QFontDatabase::addApplicationFont(":/fonts/DejaVuSansMono.ttf");
-
-        static QFont font_default = QFontDatabase::applicationFontFamilies(fontid).at(0);
-        font_default.setPointSize(10);
-        static QFont font_mono = QFontDatabase::applicationFontFamilies(fontid_mono).at(0);
-        font_mono.setPointSize(9);
-
-        app.setFont(font_default);
-
-        gp_font_default = &font_default;
-        gp_font_mono = &font_mono;
+        QString path = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+        QDir dir(path);
+        if (!dir.exists())
+            dir.mkpath(".");
+        sessionpath = path + "/session.save";
     }
 
-    MainWindow mw;
-    mw.show();
-    int ret = app.exec();
-
-    return ret;
+    if (nogui)
+    {
+        QCoreApplication app(argc, argv);
+        Headless(sessionpath, resultspath);
+        return app.exec();
+    }
+    else
+    {
+        QApplication app(argc, argv);
+        MainWindow mw(sessionpath, resultspath);
+        mw.show();
+        return app.exec();
+    }
 }

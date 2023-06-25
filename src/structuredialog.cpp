@@ -37,7 +37,7 @@ StructureDialog::StructureDialog(QWidget *parent)
         icon->setPixmap(getMapIcon(opt));
         grid->addWidget(icon, i, j++);
 
-        QString name = struct2str(mapopt2stype(opt));
+        QString name = mapopt2display(opt);
         QLabel *label = new QLabel(name + ":");
         grid->addWidget(label, i, j++);
 

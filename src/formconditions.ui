@@ -30,7 +30,7 @@
     <number>0</number>
    </property>
    <item row="0" column="0" colspan="5">
-    <widget class="QListWidget" name="listConditionsFull">
+    <widget class="QListWidget" name="listConditions">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
        <horstretch>0</horstretch>

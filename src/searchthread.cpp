@@ -2,22 +2,155 @@
 #include "formsearchcontrol.h"
 #include "cutil.h"
 #include "seedtables.h"
+#include "message.h"
+#include "aboutdialog.h"
 
-#include <QMessageBox>
 #include <QEventLoop>
 #include <QApplication>
 #include <QStandardPaths>
 #include <QElapsedTimer>
 #include <QMutex>
 #include <QVector>
+#include <QDateTime>
 
 
-SearchMaster::SearchMaster(FormSearchControl *parent)
+void Session::writeHeader(QTextStream& stream)
+{
+    stream << "#Version:  " << VERS_MAJOR << "." << VERS_MINOR << "." << VERS_PATCH << "\n";
+    stream << "#Time:     " << QDateTime::currentDateTime().toString() << "\n";
+    // MC version of the session should take priority over the one in the settings
+    wi.write(stream);
+
+    sc.write(stream);
+    gen48.write(stream);
+
+    for (Condition &c : cv)
+        stream << "#Cond: " << c.toHex() << "\n";
+}
+
+bool Session::save(QWidget *widget, QString fnam, bool quiet)
+{
+    QFile file(fnam);
+
+    if (!file.open(QIODevice::WriteOnly))
+    {
+        if (!quiet)
+            warn(widget, QApplication::tr("Failed to open file:\n\"%1\"").arg(fnam));
+        return false;
+    }
+
+    QTextStream stream(&file);
+    writeHeader(stream);
+
+    for (uint64_t s : slist)
+        stream << QString::asprintf("%" PRId64 "\n", (int64_t)s);
+
+    return true;
+}
+
+bool Session::load(QWidget *widget, QString fnam, bool quiet)
+{
+    QFile file(fnam);
+
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        if (!quiet)
+            warn(widget, QApplication::tr("Failed to open session file:\n\"%1\"").arg(fnam));
+        return false;
+    }
+
+    int major = 0, minor = 0, patch = 0;
+    QTextStream stream(&file);
+    QString line;
+    line = stream.readLine();
+    int lno = 1;
+
+    if (sscanf(line.toLocal8Bit().data(), "#Version: %d.%d.%d", &major, &minor, &patch) != 3)
+    {
+        if (quiet)
+            return false;
+        QString msg = QApplication::tr("File does not look like a session file.\n"
+                                       "Progress may be incomplete or broken.\n\n"
+                                       "Continue anyway?");
+        int button = warn(widget, msg, QMessageBox::Abort|QMessageBox::Yes);
+        if (button == QMessageBox::Abort)
+            return false;
+    }
+    else if (cmpVers(major, minor, patch) > 0)
+    {
+        if (quiet)
+            return false;
+        QString msg = QApplication::tr("Session file was created with a newer version.\n"
+                                       "Progress may be incomplete or broken.\n\n"
+                                       "Continue loading progress anyway?");
+        int button = warn(widget, msg, QMessageBox::Abort|QMessageBox::Yes);
+        if (button == QMessageBox::Abort)
+            return false;
+    }
+
+    while (stream.status() == QTextStream::Ok && !stream.atEnd())
+    {
+        lno++;
+        line = stream.readLine();
+
+        if (line.isEmpty()) continue;
+        if (line.startsWith("#Time:")) continue;
+        if (line.startsWith("#Title:")) continue;
+        if (line.startsWith("#Desc:")) continue;
+        if (sc.read(line)) continue;
+        if (gen48.read(line)) continue;
+        if (wi.read(line)) continue;
+
+        if (line.startsWith("#Cond:"))
+        {   // Conditions
+            Condition c;
+            if (c.readHex(line.mid(6).trimmed()))
+            {
+                cv.push_back(c);
+            }
+            else
+            {
+                if (quiet)
+                    return false;
+                QString msg = QApplication::tr("Condition [%1] at line %2 is not supported.\n\n"
+                                               "Continue anyway?");
+                int button = warn(widget, msg.arg(c.save).arg(lno), QMessageBox::Abort|QMessageBox::Yes);
+                if (button == QMessageBox::Abort)
+                    return false;
+            }
+        }
+        else
+        {   // Seeds
+            QByteArray ba = line.toLocal8Bit();
+            const char *p = ba.data();
+            uint64_t s;
+            if (sscanf(p, "%" PRId64, (int64_t*)&s) == 1)
+            {
+                slist.push_back(s);
+            }
+            else
+            {
+                if (quiet)
+                    return false;
+                QString msg = QApplication::tr("Failed to parse line %1 of file:\n%2\n\n"
+                                               "Continue anyway?");
+                int button = warn(widget, msg.arg(lno).arg(line), QMessageBox::Abort|QMessageBox::Yes);
+                if (button == QMessageBox::Abort)
+                    return false;
+            }
+        }
+    }
+    return true;
+}
+
+
+SearchMaster::SearchMaster(QWidget *parent)
     : QThread(parent)
-    , parent(parent)
     , mutex()
     , abort()
-    , timer()
+    , proghist()
+    , progtimer()
+    , itemtimer()
     , count()
     , env()
     , searchtype()
@@ -43,39 +176,27 @@ SearchMaster::~SearchMaster()
     stop();
 }
 
-
-bool SearchMaster::set(
-    WorldInfo wi,
-    const SearchConfig& sc,
-    const Gen48Config& gen48,
-    const Config& config,
-    std::vector<uint64_t>& slist,
-    const QVector<Condition>& cv
-    )
+bool SearchMaster::set(QWidget *widget, const Session& s)
 {
-    (void) config;
     char refbuf[100] = {};
     char disabled[100] = {};
 
-    for (const Condition& c : cv)
+    for (const Condition& c : s.cv)
         if (c.meta & Condition::DISABLED)
             disabled[c.save] = 1;
 
-    for (const Condition& c : cv)
+    for (const Condition& c : s.cv)
     {
         char cid[8];
         snprintf(cid, sizeof(cid), "[%02d]", c.save);
         if (c.save < 1 || c.save > 99)
         {
-            QMessageBox::warning(parent, tr("Warning"),
-                tr("Condition with invalid ID %1.").arg(cid));
+            warn(widget, tr("Condition with invalid ID %1.").arg(cid));
             return false;
         }
         if (c.type < 0 || c.type >= FILTER_MAX)
         {
-            QMessageBox::warning(parent, tr("Error"),
-                    tr("Encountered invalid filter type %1 in condition ID %2.")
-                    .arg(c.type).arg(cid));
+            warn(widget, tr("Encountered invalid filter type %1 in condition ID %2.").arg(c.type).arg(cid));
             return false;
         }
         if (disabled[c.save])
@@ -85,39 +206,32 @@ bool SearchMaster::set(
 
         if (c.relative && refbuf[c.relative] == 0)
         {
-            QMessageBox::warning(parent, tr("Warning"),
-                    tr("Condition with ID %1 has a broken reference position:\n"
-                    "condition missing or out of order.").arg(cid));
+            warn(widget, tr("Condition with ID %1 has a broken reference position:\n"
+                            "condition missing or out of order.").arg(cid));
             return false;
         }
         if (++refbuf[c.save] > 1)
         {
-            QMessageBox::warning(parent, tr("Warning"),
-                    tr("More than one condition with ID %1.").arg(cid));
+            warn(widget, tr("More than one condition with ID %1.").arg(cid));
             return false;
         }
         if (c.relative && disabled[c.relative])
         {
-            int button = QMessageBox::information(NULL, tr("Warning"),
-                    tr("Condition %1 has been indirectly disabled by reference.")
-                    .arg(cid), QMessageBox::Abort|QMessageBox::Ignore);
+            int button = info(widget, tr("Condition %1 has been indirectly disabled by reference.").arg(cid),
+                              QMessageBox::Abort|QMessageBox::Ignore);
             if (button == QMessageBox::Abort)
                 return false;
         }
-        if (wi.mc < finfo.mcmin)
+        if (s.wi.mc < finfo.mcmin)
         {
             const char *mcs = mc2str(finfo.mcmin);
-            QMessageBox::warning(parent, tr("Warning"),
-                    tr("Condition %1 requires a minimum Minecraft version of %2.")
-                    .arg(cid, mcs));
+            warn(widget, tr("Condition %1 requires a minimum Minecraft version of %2.").arg(cid, mcs));
             return false;
         }
-        if (wi.mc > finfo.mcmax)
+        if (s.wi.mc > finfo.mcmax)
         {
             const char *mcs = mc2str(finfo.mcmax);
-            QMessageBox::warning(parent, tr("Warning"),
-                    tr("Condition %1 not available for Minecraft versions above %2.")
-                    .arg(cid, mcs));
+            warn(widget, tr("Condition %1 not available for Minecraft versions above %2.").arg(cid, mcs));
             return false;
         }
         if (finfo.cat == CAT_BIOMES &&
@@ -131,41 +245,37 @@ bool SearchMaster::set(
             uint64_t m = c.biomeToFindM;
             if ((c.biomeToExcl & b) || (c.biomeToExclM & m))
             {
-                QMessageBox::warning(parent, tr("Warning"),
-                        tr("Biome condition with ID %1 has contradicting "
-                        "flags for include and exclude.").arg(cid));
+                warn(widget, tr("Biome condition with ID %1 has contradicting flags for include and exclude.").arg(cid));
                 return false;
             }
             if ((b | m | c.biomeToExcl | c.biomeToExclM) == 0)
             {
-                int button = QMessageBox::information(parent, tr("Info"),
-                        tr("Biome condition with ID %1 specifies no biomes.")
-                        .arg(cid), QMessageBox::Abort|QMessageBox::Ignore);
+                int button = info(widget, tr("Biome condition with ID %1 specifies no biomes.").arg(cid),
+                                  QMessageBox::Abort|QMessageBox::Ignore);
                 if (button == QMessageBox::Abort)
                     return false;
             }
 
             int layerId = finfo.layer;
-            if (layerId == 0 && wi.mc <= MC_1_17)
+            if (layerId == 0 && s.wi.mc <= MC_1_17)
             {
                 Generator tmp;
-                setupGenerator(&tmp, wi.mc, 0);
+                setupGenerator(&tmp, s.wi.mc, 0);
                 const Layer *l = getLayerForScale(&tmp, finfo.step);
                 if (l)
                     layerId = l - tmp.ls.layers;
             }
             uint64_t ab, am;
             uint32_t flags = 0;
-            getAvailableBiomes(&ab, &am, layerId, wi.mc, flags);
+            getAvailableBiomes(&ab, &am, layerId, s.wi.mc, flags);
             b ^= (ab & b);
             m ^= (am & m);
             if (b || m)
             {
                 int cnt = __builtin_popcountll(b) + __builtin_popcountll(m);
-                QString msg = tr("Biome condition with ID %1 includes %n "
-                        "biome(s) that do not generate in MC %2.", "", cnt)
-                        .arg(cid, mc2str(wi.mc));
-                QMessageBox::warning(parent, tr("Warning"), msg);
+                QString msg = tr("Biome condition with ID %1 includes %n biome(s) "
+                                 "that do not generate in MC %2.", "", cnt);
+                warn(widget, msg.arg(cid, mc2str(s.wi.mc)));
                 return false;
             }
         }
@@ -175,10 +285,9 @@ bool SearchMaster::set(
             int h = c.z2 - c.z1 + 1;
             if (c.count > w * h)
             {
-                QMessageBox::warning(parent, tr("Warning"),
-                        tr("Temperature category condition with ID %1 has too "
-                        "many restrictions (%2) for the area (%3 x %4).")
-                        .arg(cid).arg(c.count).arg(w).arg(h));
+                QString msg = tr("Temperature category condition with ID %1 has too "
+                                 "many restrictions (%2) for the area (%3 x %4).");
+                warn(widget, msg.arg(cid).arg(c.count).arg(w).arg(h));
                 return false;
             }
         }
@@ -186,46 +295,41 @@ bool SearchMaster::set(
         {
             if (c.count >= 128)
             {
-                QMessageBox::warning(parent, tr("Warning"),
-                        tr("Structure condition %1 checks for too many instances (>= 128).")
-                        .arg(cid));
+                warn(widget, tr("Structure condition %1 checks for too many instances (>= 128).").arg(cid));
                 return false;
             }
         }
         if (c.skipref && c.rmax == 0 && c.x1 == 0 && c.x2 == 0 && c.z1 == 0 && c.z2 == 0)
         {
-            QMessageBox::warning(parent, tr("Warning"),
-                    tr("Condition %1 ignores its only location of size 1.")
-                    .arg(cid));
+            warn(widget, tr("Condition %1 ignores its only location of size 1.").arg(cid));
             return false;
         }
     }
 
-    QString err = condtree.set(cv, wi.mc);
+    QString err = condtree.set(s.cv, s.wi.mc);
     if (err.isEmpty())
     {
-        err = env.init(wi.mc, wi.large, &condtree);
+        err = env.init(s.wi.mc, s.wi.large, &condtree);
     }
     if (!err.isEmpty())
     {
-        QMessageBox::warning(parent, tr("Warning"),
-                tr("Failed to setup search environment:\n%1").arg(err));
+        warn(widget, tr("Failed to setup search environment:\n%1").arg(err));
         return false;
     }
 
-    this->searchtype = sc.searchtype;
-    this->mc = wi.mc;
-    this->large = wi.large;
-    this->itemsize = 1; //config.seedsPerItem;
-    this->threadcnt = sc.threads;
-    this->slist = slist;
-    this->gen48 = gen48;
+    this->searchtype = s.sc.searchtype;
+    this->mc = s.wi.mc;
+    this->large = s.wi.large;
+    this->itemsize = 1;
+    this->threadcnt = s.sc.threads;
+    this->slist = s.slist;
+    this->gen48 = s.gen48;
     this->idx = 0;
     this->scnt = ~(uint64_t)0;
     this->prog = 0;
-    this->seed = sc.startseed;
-    this->smin = sc.smin;
-    this->smax = sc.smax;
+    this->seed = s.sc.startseed;
+    this->smin = s.sc.smin;
+    this->smax = s.sc.smax;
     this->isdone = false;
     this->abort = false;
     return true;
@@ -282,24 +386,30 @@ static void genQHBases(QObject *qtobj, int qual, uint64_t salt, std::vector<uint
 
     if ((qb = loadSavedSeeds(fnam.data(), &qn)) == NULL)
     {
-        printf("Writing quad-protobases to: %s\n", fnam.data());
+        printf("[INFO]: Writing quad-protobases to: %s\n", fnam.data());
         fflush(stdout);
 
-        QMetaObject::invokeMethod(qtobj, "openProtobaseMsg", Qt::QueuedConnection, Q_ARG(QString, path));
+        if (qtobj)
+            QMetaObject::invokeMethod(qtobj, "openProtobaseMsg", Qt::QueuedConnection, Q_ARG(QString, path));
 
         int threads = QThread::idealThreadCount();
         int err = searchAll48(&qb, &qn, fnam.data(), threads, lbset, lbcnt, 20, check, NULL);
 
         if (err)
         {
-            QMetaObject::invokeMethod(
-                    qtobj, "warning", Qt::BlockingQueuedConnection,
-                    Q_ARG(QString, SearchMaster::tr("Failed to generate protobases.")));
+            printf("[WARN]: Failed to generate protobases.\n");
+            if (qtobj)
+            {
+                QMetaObject::invokeMethod(
+                        qtobj, "warning", Qt::BlockingQueuedConnection,
+                        Q_ARG(QString, SearchMaster::tr("Failed to generate protobases.")));
+            }
             return;
         }
         else
         {
-            QMetaObject::invokeMethod(qtobj, "closeProtobaseMsg", Qt::BlockingQueuedConnection);
+            if (qtobj)
+                QMetaObject::invokeMethod(qtobj, "closeProtobaseMsg", Qt::BlockingQueuedConnection);
         }
     }
     else
@@ -355,9 +465,26 @@ static bool applyTranspose(std::vector<uint64_t>& slist,
     return !slist.empty();
 }
 
-void SearchMaster::presearch()
+void SearchMaster::presearch(QObject *qtobj)
 {
     uint64_t sstart = seed;
+
+    if (gen48.mode == GEN48_AUTO)
+    {   // resolve automatic mode
+        for (const Condition& c : qAsConst(condtree.condvec))
+        {
+            if (c.type >= F_QH_IDEAL && c.type <= F_QH_BARELY)
+            {
+                gen48.mode = GEN48_QH;
+                break;
+            }
+            else if (c.type >= F_QM_95 && c.type <= F_QM_90)
+            {
+                gen48.mode = GEN48_QM;
+                break;
+            }
+        }
+    }
 
     if (searchtype != SEARCH_LIST)
     {
@@ -373,7 +500,7 @@ void SearchMaster::presearch()
                 salt = sconf.salt;
             }
             slist.clear();
-            genQHBases(parent, gen48.qual, salt, slist);
+            genQHBases(qtobj, gen48.qual, salt, slist);
         }
         else if (gen48.mode == GEN48_QM)
         {
@@ -494,7 +621,7 @@ void SearchMaster::presearch()
 
 void SearchMaster::run()
 {
-    presearch();
+    presearch(parent());
     stop();
 
     for (int i = 0; i < threadcnt; i++)
@@ -502,7 +629,7 @@ void SearchMaster::run()
         SearchWorker *worker = new SearchWorker(this);
         QObject::connect(
             worker, &SearchWorker::result,
-            parent, &FormSearchControl::onSearchResult,
+            this, &SearchMaster::onWorkerResult,
             Qt::BlockingQueuedConnection);
         QObject::connect(
             worker, &SearchWorker::finished,
@@ -515,7 +642,9 @@ void SearchMaster::run()
     QMutexLocker locker(&mutex);
 
     abort = false;
-    timer.start();
+    proghist.clear();
+    progtimer.start();
+    itemtimer.start();
     count = 0;
 
     for (SearchWorker *worker: workers)
@@ -523,7 +652,6 @@ void SearchMaster::run()
         worker->start();
     }
 }
-
 
 void SearchMaster::stop()
 {
@@ -548,6 +676,8 @@ void SearchMaster::stop()
         }
         if (!running)
             break;
+        if (parent() == nullptr)
+            continue;
         int button = 0;
         Qt::ConnectionType connectiontype = Qt::BlockingQueuedConnection;
         if (QThread::currentThread() == QApplication::instance()->thread())
@@ -555,7 +685,7 @@ void SearchMaster::stop()
             connectiontype = Qt::DirectConnection;
         }
         QMetaObject::invokeMethod(
-                parent, "warning", connectiontype,
+                parent(), "warning", connectiontype,
                 Q_RETURN_ARG(int, button),
                 Q_ARG(QString, tr("Failed to stop %n worker thread(s).\n"
                 "Keep waiting for threads to stop?", "", running)),
@@ -580,7 +710,19 @@ void SearchMaster::stop()
     emit searchFinish(false);
 }
 
-bool SearchMaster::getProgress(uint64_t *prog, uint64_t *end, uint64_t *seed)
+
+static QString getAbbrNum(double x)
+{
+    if (x >= 10e9)
+        return QString::asprintf("%.1fG", x * 1e-9);
+    if (x >= 10e6)
+        return QString::asprintf("%.1fM", x * 1e-6);
+    if (x >= 10e3)
+        return QString::asprintf("%.1fK", x * 1e-3);
+    return QString::asprintf("%.2f", x);
+}
+
+bool SearchMaster::getProgress(QString *status, uint64_t *prog, uint64_t *end, uint64_t *seed, qreal *min, qreal *avg, qreal *max)
 {
     if (!mutex.tryLock(10))
     {
@@ -597,6 +739,7 @@ bool SearchMaster::getProgress(uint64_t *prog, uint64_t *end, uint64_t *seed)
     *prog = this->prog;
     *end  = this->scnt;
     *seed = this->seed;
+    *min = *avg = *max = nan("");
 
     bool valid = false;
     for (SearchWorker *worker: workers)
@@ -608,7 +751,86 @@ bool SearchMaster::getProgress(uint64_t *prog, uint64_t *end, uint64_t *seed)
             valid = true;
         }
     }
+
+    if (isdone)
+    {
+        *prog = this->scnt;
+    }
+
     mutex.unlock();
+
+    // track the progress over a few seconds so we can estimate the search speed
+    enum { SAMPLE_SEC = 20 };
+    if (valid)
+    {
+        TProg tp = { (uint64_t) progtimer.nsecsElapsed(), *prog };
+        proghist.push_front(tp);
+        while (proghist.size() > 1 && proghist.back().ns < tp.ns - SAMPLE_SEC*1e9)
+            proghist.pop_back();
+    }
+
+    if (proghist.size() > 1 && proghist.front().ns > proghist.back().ns)
+    {
+        std::vector<qreal> samples;
+        samples.reserve(proghist.size());
+        auto it_prev = proghist.begin();
+        auto it = it_prev;
+        while (++it != proghist.end())
+        {
+            qreal dp = it_prev->prog - it->prog;
+            qreal dt = 1e-9 * (it_prev->ns - it->ns);
+            if (dt > 0)
+                samples.push_back(dp / dt);
+            it_prev = it;
+        }
+        std::sort(samples.begin(), samples.end());
+        qreal speedtot = 0;
+        qreal weightot = 1e-6;
+        int n = (int) samples.size();
+        int r = (int) (n / SAMPLE_SEC);
+        int has_zeros = 0;
+        for (int i = -r; i <= r; i++)
+        {
+            int j = n/2 + i;
+            if (j < 0 || j >= n)
+                continue;
+            has_zeros += samples[j] == 0;
+            speedtot += samples[j];
+            weightot += 1.0;
+        }
+        *min = samples[n*1/4]; // lower quartile
+        *avg = speedtot / weightot; // median
+        *max = samples[n*3/4]; // upper quartile
+        if (*avg && has_zeros)
+        {   // probably a slow sampling regime, use whole range for estimate
+            speedtot = 0;
+            for (qreal s : samples)
+                speedtot += s;
+            *avg = speedtot / n;
+        }
+    }
+
+    qreal remain = ((qreal)*end - *prog) / (*avg + 1e-6);
+    QString eta;
+    if (remain >= 3600*24*1000)
+        eta = "years";
+    else if (remain > 0)
+    {
+        int s = (int) remain;
+        if (s > 86400)
+            eta = QString("%1d:%2").arg(s / 86400).arg((s % 86400) / 3600, 2, 10, QLatin1Char('0'));
+        else if (s > 3600)
+            eta = QString("%1h:%2").arg(s / 3600).arg((s % 3600) / 60, 2, 10, QLatin1Char('0'));
+        else
+            eta = QString("%1:%2").arg(s / 60).arg(s % 60, 2, 10, QLatin1Char('0'));
+    }
+    *status = QString("seeds/sec: %1 min: %2 max: %3 isize: %4 eta: %5")
+        .arg(getAbbrNum(*avg), -8)
+        .arg(getAbbrNum(*min), -8)
+        .arg(getAbbrNum(*max), -8)
+        .arg(itemsize, -3)
+        .arg(eta);
+
     return valid;
 }
 
@@ -620,7 +842,7 @@ bool SearchMaster::requestItem(SearchWorker *item)
     QMutexLocker locker(&mutex);
 
     // check if we should adjust the item size
-    uint64_t nsec = timer.nsecsElapsed();
+    uint64_t nsec = itemtimer.nsecsElapsed();
     count++;
     if (nsec > 0.1e9)
     {
@@ -628,7 +850,7 @@ bool SearchMaster::requestItem(SearchWorker *item)
             itemsize /= 2;
         if (count > 1e3 && itemsize < 0x10000)
             itemsize *= 2;
-        timer.start();
+        itemtimer.start();
         count = 0;
     }
 
@@ -723,10 +945,16 @@ bool SearchMaster::requestItem(SearchWorker *item)
     return true;
 }
 
+void SearchMaster::onWorkerResult(uint64_t seed)
+{
+    emit searchResult(seed);
+}
 
 void SearchMaster::onWorkerFinished()
 {
     QMutexLocker locker(&mutex);
+    if (workers.empty())
+        return;
     for (SearchWorker *worker : workers)
         if (!worker->isFinished())
             return;

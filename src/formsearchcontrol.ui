@@ -162,6 +162,11 @@ QPushButton:hover {
      </item>
      <item row="3" column="0" colspan="7">
       <widget class="QProgressBar" name="progressBar">
+       <property name="font">
+        <font>
+         <family>Monospace</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Queued progress within search set</string>
        </property>
@@ -212,8 +217,7 @@ QPushButton:hover {
       <widget class="QLabel" name="labelStatus">
        <property name="font">
         <font>
-         <family>DejaVu Sans Mono</family>
-         <pointsize>9</pointsize>
+         <family>Monospace</family>
         </font>
        </property>
        <property name="text">
@@ -239,8 +243,7 @@ QPushButton:hover {
      </property>
      <property name="font">
       <font>
-       <family>DejaVu Sans Mono</family>
-       <pointsize>9</pointsize>
+       <family>Monospace</family>
       </font>
      </property>
      <property name="contextMenuPolicy">

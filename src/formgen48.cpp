@@ -4,12 +4,12 @@
 #include "mainwindow.h"
 #include "search.h"
 #include "seedtables.h"
+#include "message.h"
 
 #include "cubiomes/util.h"
 
 #include <QFileDialog>
 #include <QFileInfo>
-#include <QMessageBox>
 #include <QSpinBox>
 #include <QList>
 
@@ -79,8 +79,6 @@ FormGen48::FormGen48(MainWindow *parent)
     connect(ui->lineSalt, SIGNAL(editingFinished()), SLOT(onChange()));
     connect(ui->lineListSalt, SIGNAL(editingFinished()), SLOT(onChange()));
 
-    ui->lineList48->setFont(*gp_font_mono);
-
     cond.type = 0;
     Gen48Config defaults;
     setConfig(defaults, true);
@@ -114,10 +112,8 @@ bool FormGen48::setList48(QString path, bool quiet)
         }
         else if (!quiet)
         {
-            int button = QMessageBox::warning(
-                    this, tr("Warning"),
-                    tr("Failed to load 48-bit seed list from file:\n\"%1\"").arg(path),
-                    QMessageBox::Reset, QMessageBox::Ignore);
+            int button = warn(this, tr("Failed to load 48-bit seed list from file:\n\"%1\"").arg(path),
+                    QMessageBox::Reset|QMessageBox::Ignore);
             if (button == QMessageBox::Reset)
             {
                 slist48path.clear();
@@ -205,48 +201,7 @@ Gen48Config FormGen48::getConfig(bool resolveauto)
 
 uint64_t FormGen48::estimateSeedCnt()
 {
-    const Gen48Config& gen48 = getConfig(true);
-    uint64_t cnt = 0;
-    if (gen48.mode == GEN48_QH)
-    {
-        switch (gen48.qual)
-        { // simply hardcoded number of seeds in each category
-        case IDEAL_SALTED:    // falltrough
-        case IDEAL:     cnt =  74474; break;
-        case CLASSIC:   cnt = 107959; break;
-        case NORMAL:    cnt = 293716; break;
-        case BARELY:    cnt = 755745; break;
-        default: cnt = 0;
-        }
-    }
-    else if (gen48.mode == GEN48_QM)
-    {
-        cnt = 0;
-        for (int i = 0, n = sizeof(g_qm_90) / sizeof(int64_t); i < n; i++)
-            if (qmonumentQual(g_qm_90[i]) >= gen48.qmarea)
-                cnt++;
-    }
-    else if (gen48.mode == GEN48_LIST)
-    {
-        cnt = this->slist48.size();
-    }
-    else
-    {
-        cnt = MASK48 + 1;
-    }
-
-    if (gen48.mode != GEN48_NONE)
-    {
-        uint64_t w = gen48.x2 - gen48.x1 + 1;
-        uint64_t h = gen48.z2 - gen48.z1 + 1;
-        uint64_t n = w*h * cnt;
-        if (cnt > 0 && n < PRECOMPUTE48_BUFSIZ*sizeof(uint64_t) && n / cnt == w*h)
-            cnt = n;
-        else
-            cnt = MASK48+1;
-    }
-
-    return cnt;
+    return getConfig(true).estimateSeedCnt(slist48.size());
 }
 
 void FormGen48::updateCount()

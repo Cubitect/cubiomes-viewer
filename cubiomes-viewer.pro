@@ -33,17 +33,23 @@ static_gnu: {
     LIBS += -static -static-libgcc -static-libstdc++
 }
 
+gcc {
+    greaterThan(QMAKE_GCC_MAJOR_VERSION, 9): QMAKE_CXXFLAGS += -Wno-deprecated-copy
+}
+
 CONFIG(debug, debug|release): {
     CUTARGET = debug
-    QMAKE_CFLAGS += -fsanitize=undefined
-    LIBS += -lubsan -ldl
+    !win32 {
+        QMAKE_CFLAGS += -fsanitize=undefined
+        LIBS += -lubsan -ldl
+    }
 } else {
     CUTARGET = release
 }
 
 # compile cubiomes
 CUPATH              = $$PWD/cubiomes
-QMAKE_PRE_LINK      += $(MAKE) -C $$CUPATH -f $$CUPATH/makefile CFLAGS=\"$$QMAKE_CFLAGS\" $$CUTARGET
+QMAKE_PRE_LINK      += $(MAKE) -C $$CUPATH -f $$CUPATH/makefile CC=\"$$QMAKE_CC\" CFLAGS=\"$$QMAKE_CFLAGS\" $$CUTARGET
 QMAKE_CLEAN         += $$CUPATH/*.o $$CUPATH/libcubiomes.a
 LIBS                += -lm $$CUPATH/libcubiomes.a
 
@@ -96,6 +102,8 @@ SOURCES += \
         src/formgen48.cpp \
         src/formsearchcontrol.cpp \
         src/gotodialog.cpp \
+        src/headless.cpp \
+        src/message.cpp \
         src/presetdialog.cpp \
         src/protobasedialog.cpp \
         src/layerdialog.cpp \
@@ -159,6 +167,8 @@ HEADERS += \
         src/formgen48.h \
         src/formsearchcontrol.h \
         src/gotodialog.h \
+        src/headless.h \
+        src/message.h \
         src/presetdialog.h \
         src/protobasedialog.h \
         src/layerdialog.h \

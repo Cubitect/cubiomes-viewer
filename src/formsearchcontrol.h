@@ -98,12 +98,14 @@ public:
     explicit FormSearchControl(MainWindow *parent);
     ~FormSearchControl();
 
-    QVector<uint64_t> getResults();
+    std::vector<uint64_t> getResults();
     SearchConfig getSearchConfig();
     bool setSearchConfig(SearchConfig s, bool quiet);
 
     void stopSearch();
     bool setList64(QString path, bool quiet);
+
+    void setResultsPath(QString path);
 
     void searchLockUi(bool lock);
 
@@ -135,20 +137,18 @@ public slots:
     void pasteResults();
     int pasteList(bool dummy);
     void onBufferTimeout();
-    void onSearchResult(uint64_t seed);
-    int searchResultsAdd(QVector<uint64_t> seeds, bool countonly);
+    void searchResult(uint64_t seed);
+    int searchResultsAdd(std::vector<uint64_t> seeds, bool countonly);
     void searchProgressReset();
-    void searchProgress(uint64_t last, uint64_t end, int64_t seed);
+    void updateSearchProgress(uint64_t last, uint64_t end, int64_t seed);
     void searchFinish(bool done);
-    void resultTimeout();
+    void progressTimeout();
     void removeCurrent();
+    void copySeed();
     void copyResults();
 
 protected:
     void keyReleaseEvent(QKeyEvent *event) override;
-
-public: 
-    struct TProg { uint64_t ns, prog; };
 
 private:
     MainWindow *parent;
@@ -157,23 +157,20 @@ private:
     SeedSortProxy *proxy;
     ProtoBaseDialog *protodialog;
     SearchMaster sthread;
-    QTimer stimer;
     QElapsedTimer elapsed;
-    std::deque<TProg> proghist;
+    QTimer stimer;
+    QFile resultfile;
 
     // the seed list option is not stored in a widget but is loaded with the "..." button
     QString slist64path;
     QString slist64fnam; // file name without directory
     std::vector<uint64_t> slist64;
 
-    // buffer for seed candidates while search is running
-    std::vector<uint64_t> slist;
-
     // min and max seeds values
     uint64_t smin, smax;
 
     // found seeds that are waiting to be added to results
-    QVector<uint64_t> qbuf;
+    std::vector<uint64_t> qbuf;
     quint64 nextupdate;
     quint64 updt;
 };

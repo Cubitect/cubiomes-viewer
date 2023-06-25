@@ -4,6 +4,7 @@
 #include "mainwindow.h"
 #include "scripts.h"
 #include "layerdialog.h"
+#include "message.h"
 
 #include <QCheckBox>
 #include <QIntValidator>
@@ -11,7 +12,6 @@
 #include <QPixmap>
 #include <QPainter>
 #include <QPainterPath>
-#include <QMessageBox>
 #include <QScrollBar>
 #include <QSpacerItem>
 #include <QTextStream>
@@ -38,10 +38,10 @@ static QString getTip(int mc, int layer, uint32_t flags, int id)
     QString tip = ConditionDialog::tr("Generates any of:");
     for (int j = 0; j < 64; j++)
         if (mL & (1ULL << j))
-            tip += QString("\n") + biome2str(mc, j);
+            tip += QString("\n") + getBiomeDisplay(mc, j);
     for (int j = 0; j < 64; j++)
         if (mM & (1ULL << j))
-            tip += QString("\n") + biome2str(mc, 128+j);
+            tip += QString("\n") + getBiomeDisplay(mc, 128+j);
     return tip;
 }
 
@@ -65,8 +65,6 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
     const char *p_mcs = mc2str(mc);
     QString mcs = tr("MC %1", "Minecraft version").arg(p_mcs ? p_mcs : "?");
     ui->labelMC->setText(mcs);
-
-    ui->lineSummary->setFont(*gp_font_mono);
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 11, 0)
     ui->textEditLua->setTabStopWidth(QFontMetrics(ui->textEditLua->font()).width(" ") * 4);
@@ -92,7 +90,7 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
             if (c.save == initcond->relative)
                 initindex = ui->comboBoxRelative->count();
         }
-        QString condstr = c.summary().simplified();
+        QString condstr = c.summary(nullptr).simplified();
         ui->comboBoxRelative->addItem(condstr, c.save);
     }
     if (initindex < 0)
@@ -130,10 +128,10 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
 
     for (int i = 0; i < 256; i++)
     {
-        const char *str = biome2str(mc, i);
-        if (!str)
+        QString bname = getBiomeDisplay(mc, i);
+        if (bname.isEmpty())
             continue;
-        QCheckBox *cb = new QCheckBox(str);
+        QCheckBox *cb = new QCheckBox(bname);
         ui->gridLayoutBiomes->addWidget(cb, i % 128, i / 128);
         cb->setTristate(true);
         biomecboxes[i] = cb;
@@ -245,7 +243,7 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
         const int *lim = getBiomeParaLimits(mc, id);
         if (!lim)
             continue;
-        NoiseBiomeIndicator *cb = new NoiseBiomeIndicator(biome2str(mc, id), this);
+        NoiseBiomeIndicator *cb = new NoiseBiomeIndicator(getBiomeDisplay(mc, id), this);
         QString tip = "<pre>";
         for (int j = 0; j < NP_MAX; j++)
         {
@@ -327,7 +325,7 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
         on_comboBoxRelative_activated(initindex);
         ui->textEditLua->document()->setModified(false);
 
-        ui->comboMatchBiome->insertItem(0, biome2str(mc, cond.biomeId), QVariant::fromValue(cond.biomeId));
+        ui->comboMatchBiome->insertItem(0, getBiomeDisplay(mc, cond.biomeId), QVariant::fromValue(cond.biomeId));
         ui->comboMatchBiome->setCurrentIndex(0);
 
         ui->comboClimatePara->setCurrentIndex(ui->comboClimatePara->findData(QVariant::fromValue(cond.para)));
@@ -610,7 +608,7 @@ void ConditionDialog::updateMode()
     ui->lineEditX2->setToolTip(uptip);
     ui->lineEditZ2->setToolTip(uptip);
     ui->buttonOk->setEnabled(filterindex != F_SELECT);
-    textDescription->setText(ft.description);
+    textDescription->setText(QApplication::translate("Filter", ft.description));
 }
 
 void ConditionDialog::updateBiomeSelection()
@@ -668,12 +666,12 @@ void ConditionDialog::updateBiomeSelection()
                     for (int j = 0; j < 64; j++)
                     {
                         if (mL & (1ULL << j))
-                            tip += QString("\n") + biome2str(mc, j);
+                            tip += QString("\n") + getBiomeDisplay(mc, j);
                     }
                     for (int j = 0; j < 64; j++)
                     {
                         if (mM & (1ULL << j))
-                            tip += QString("\n") + biome2str(mc, j+128);
+                            tip += QString("\n") + getBiomeDisplay(mc, j+128);
                     }
                     cb->setToolTip(tip);
                 }
@@ -741,7 +739,7 @@ void ConditionDialog::updateBiomeSelection()
 
         for (int id: available)
         {
-            QString s = biome2str(mc, id);
+            QString s = getBiomeDisplay(mc, id);
             ui->comboMatchBiome->addItem(getBiomeIcon(id), s, QVariant::fromValue(id));
             allowed_matches.append(s);
         }
@@ -754,7 +752,7 @@ void ConditionDialog::updateBiomeSelection()
             }
             else
             {
-                QString s = QString("%1 %2").arg(WARNING_CHAR).arg(biome2str(mc, curid.toInt()));
+                QString s = QString("%1 %2").arg(WARNING_CHAR).arg(getBiomeDisplay(mc, curid.toInt()));
                 ui->comboMatchBiome->insertItem(0, getBiomeIcon(curid.toInt(), true), s, curid);
                 ui->comboMatchBiome->setCurrentIndex(0);
                 allowed_matches.append(s);
@@ -778,7 +776,7 @@ int ConditionDialog::warnIfBad(Condition cond)
         if (ui->checkStartPieces->isEnabled())
         {
             QString text = tr("No allowed start pieces specified. Condition can never be true.");
-            QMessageBox::warning(this, tr("Missing Start Piece"), text, QMessageBox::Ok);
+            warn(this, tr("Missing Start Piece"), text);
             return QMessageBox::Cancel;
         }
     }
@@ -792,8 +790,7 @@ int ConditionDialog::warnIfBad(Condition cond)
                     "The condition contains a climate range which is unbounded "
                     "with the full range required, which can never be satisfied."
                     );
-                QMessageBox::warning(this, tr("Bad Climate Range"), text,
-                    QMessageBox::Ok);
+                warn(this, tr("Bad Climate Range"), text);
                 return QMessageBox::Cancel;
             }
         }
@@ -808,7 +805,7 @@ int ConditionDialog::warnIfBad(Condition cond)
                 "The biome locator checks for %1 instances of size %2 each, "
                 "which cannot be satisfied by an area of size %3%4%5 = %6.")
                 .arg(cond.count).arg(cond.biomeSize).arg(w).arg(QChar(0xD7)).arg(h).arg(w * h);
-            QMessageBox::warning(this, tr("Area Insufficient"), text, QMessageBox::Ok);
+            warn(this, tr("Area Insufficient"), text);
             return QMessageBox::Cancel;
         }
     }
@@ -823,7 +820,7 @@ int ConditionDialog::warnIfBad(Condition cond)
                     (1ULL << (deep_dark-128));
             if ((m & underground) && cond.y > 246)
             {
-                return QMessageBox::warning(this, tr("Bad Surface Height"),
+                return warn(this, tr("Bad Surface Height"),
                     tr("Cave biomes do not generate above Y = 246. "
                     "You should consider lowering the sampling height."
                     "\n\n"
@@ -1234,9 +1231,9 @@ void ConditionDialog::on_lineBiomeSize_textChanged(const QString &)
     double area = ui->lineBiomeSize->text().toInt();
     QString s;
     if (filterindex == F_BIOME_CENTER_256)
-        s = QString::asprintf(tr("(~%g sq. chunks)").toStdString().c_str(), area * 256);
+        s = tr("(~%1 sq. chunks)").arg(area * 256);
     else
-        s = QString::asprintf(tr("(%g sq. chunks)").toStdString().c_str(), area / 16.0);
+        s = tr("(%1 sq. chunks)").arg(area / 16.0);
     ui->labelBiomeSize->setText(s);
 }
 

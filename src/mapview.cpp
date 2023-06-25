@@ -54,8 +54,9 @@ MapView::MapView(QWidget *parent)
 {
     memset(sshow, 0, sizeof(sshow));
 
-    QFont mono = *gp_font_mono;
-    setFont(mono);
+    QFont fmono;
+    fmono.setFamily(QString::fromUtf8("Monospace"));
+    setFont(fmono);
 
     QPalette pal = palette();
     pal.setColor(QPalette::Background, Qt::black);
@@ -68,7 +69,7 @@ MapView::MapView(QWidget *parent)
 
     overlay = new MapOverlay(this);
     overlay->setMouseTracking(true);
-    overlay->setFont(mono);
+    overlay->setFont(font());
 
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
@@ -377,27 +378,35 @@ void MapView::showContextMenu(const QPoint &pos)
     cpy_dat.push_back({ tr("Copy chunk:"),  QString::asprintf("%d %d", vp.p.x >> 4, vp.p.z >> 4) });
     cpy_dat.push_back({ tr("Copy region:"), QString::asprintf("%d %d", vp.p.x >> 9, vp.p.z >> 9) });
 
-    int pad = 0;
+    int wmax = 0;
     for (auto& it : cpy_dat)
     {
-        if (it.txt.length() > pad)
-            pad = it.txt.length();
+        int w = menu.fontMetrics().horizontalAdvance(it.txt + "  ");
+        if (w > wmax)
+            wmax = w;
     }
-    pad += 1;
-
 
     menu.addAction(tr("Go to coordinates..."), this, &MapView::onGoto, QKeySequence(Qt::CTRL + Qt::Key_G));
     if (world)
     {
-        QString txt = tr("Copy seed:").leftJustified(pad) + QString::asprintf("%" PRId64, (int64_t)world->wi.seed);
+        QString txt = tr("Copy seed:");
+        while (menu.fontMetrics().horizontalAdvance(txt + " ") < wmax)
+            txt += " ";
+        txt += QString::asprintf("%" PRId64, (int64_t)world->wi.seed);
         menu.addAction(txt, this, &MapView::copySeed, QKeySequence::Copy);
     }
     for (auto& it : cpy_dat)
     {
-        QString txt = it.txt.leftJustified(pad) + it.cpy;
+        QString txt = it.txt;
+        while (menu.fontMetrics().horizontalAdvance(txt + " ") < wmax)
+            txt += " ";
+        txt += it.cpy;
         menu.addAction(txt, [=](){ this->copyText(it.cpy); });
     }
     //menu.addAction(tr("Animation"), this, &MapView::runAni);
+
+    for (QAction *act : menu.actions())
+        act->setFont(font());
     menu.exec(mapToGlobal(pos));
 }
 
@@ -616,18 +625,17 @@ void MapView::keyPressEvent(QKeyEvent *e)
 {
     if (e->matches(QKeySequence::Copy))
         copySeed();
+    else if (e->matches(QKeySequence::ZoomIn) || e->key() == Qt::Key_Plus)
+        zoom(pow(2, +0.125));
+    else if (e->matches(QKeySequence::ZoomOut) || e->key() == Qt::Key_Minus)
+        zoom(pow(2, -0.125));
+
     qreal step = 4 / blocks2pix;
     switch (e->key())
     {
     case Qt::Key_0:
         if (e->modifiers() == 0)
             setView(0, 0);
-        break;
-    case Qt::Key_Plus:
-        zoom(pow(2, +0.125));
-        break;
-    case Qt::Key_Minus:
-        zoom(pow(2, -0.125));
         break;
     case Qt::Key_Up:
         focusz -= step;

@@ -12,6 +12,9 @@
 
 #define APP_STRING "cubiomes-viewer"
 
+#define PRECOMPUTE48_BUFSIZ ((int64_t)1 << 30)
+
+
 struct ExtGenConfig
 {
     bool experimentalVers;
@@ -113,7 +116,7 @@ enum {
     D_GEODE,
     D_OUTPOST,
     D_ANCIENTCITY,
-    D_TRAIL,
+    D_TRAILS,
     D_PORTAL,
     D_PORTALN,
     D_FORTESS,
@@ -126,6 +129,7 @@ enum {
     D_STRUCT_NUM
 };
 
+QString mapopt2display(int opt);
 const char *mapopt2str(int opt);
 int str2mapopt(const char *s);
 int mapopt2stype(int opt);
@@ -176,6 +180,8 @@ struct Config
     QString biomeColorPath;
     QString separator;
     QString quote;
+    QFont fontNorm;
+    QFont fontMono;
 
     Config() { reset(); }
 
@@ -205,6 +211,8 @@ struct Gen48Config
     void reset();
     bool read(const QString& line);
     void write(QTextStream& stream);
+
+    uint64_t estimateSeedCnt(uint64_t slist48len);
 };
 
 // search type options from combobox

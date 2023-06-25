@@ -23,30 +23,8 @@ const QPixmap& getMapIcon(int opt, VarPos *vp)
     if (!init)
     {
         init = true;
-        icons[D_DESERT]     = QPixmap(":/icons/desert.png");
-        icons[D_JUNGLE]     = QPixmap(":/icons/jungle.png");
-        icons[D_IGLOO]      = QPixmap(":/icons/igloo.png");
-        icons[D_HUT]        = QPixmap(":/icons/hut.png");
-        icons[D_VILLAGE]    = QPixmap(":/icons/village.png");
-        icons[D_MANSION]    = QPixmap(":/icons/mansion.png");
-        icons[D_MONUMENT]   = QPixmap(":/icons/monument.png");
-        icons[D_RUINS]      = QPixmap(":/icons/ruins.png");
-        icons[D_SHIPWRECK]  = QPixmap(":/icons/shipwreck.png");
-        icons[D_TREASURE]   = QPixmap(":/icons/treasure.png");
-        icons[D_MINESHAFT]  = QPixmap(":/icons/mineshaft.png");
-        icons[D_WELL]       = QPixmap(":/icons/well.png");
-        icons[D_GEODE]      = QPixmap(":/icons/geode.png");
-        icons[D_OUTPOST]    = QPixmap(":/icons/outpost.png");
-        icons[D_ANCIENTCITY]= QPixmap(":/icons/ancient_city.png");
-        icons[D_TRAIL]      = QPixmap(":/icons/trail.png");
-        icons[D_PORTAL]     = QPixmap(":/icons/portal.png");
-        icons[D_PORTALN]    = QPixmap(":/icons/portal.png");
-        icons[D_SPAWN]      = QPixmap(":/icons/spawn.png");
-        icons[D_STRONGHOLD] = QPixmap(":/icons/stronghold.png");
-        icons[D_FORTESS]    = QPixmap(":/icons/fortress.png");
-        icons[D_BASTION]    = QPixmap(":/icons/bastion.png");
-        icons[D_ENDCITY]    = QPixmap(":/icons/endcity.png");
-        icons[D_GATEWAY]    = QPixmap(":/icons/gateway.png");
+        for (int sopt = D_DESERT; sopt <= D_STRONGHOLD; sopt++)
+            icons[sopt] = QPixmap(QString(":/icons/") + mapopt2str(sopt) + ".png");
         iconzvil            = QPixmap(":/icons/zombie.png");
         icongiant           = QPixmap(":/icons/portal_giant.png");
         iconship            = QPixmap(":/icons/end_ship.png");
@@ -903,8 +881,7 @@ QString QWorld::getBiomeName(Pos p)
             c += "." + QString::number(lopt.activeDisp());
         return c + "=" + QString::number(id);
     }
-    const char *s = biome2str(wi.mc, id);
-    QString ret = s ? s : "";
+    QString ret = getBiomeDisplay(wi.mc, id);
     if (lopt.mode == LOPT_HEIGHT_4 && dim == DIM_OVERWORLD)
         ret = QString::asprintf("Y~%d ", estimateSurface(p)) + ret;
     return ret;
@@ -1169,7 +1146,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
 
     QFont oldfont = painter.font();
     QFont smallfont = oldfont;
-    smallfont.setPointSize(8);
+    smallfont.setPointSize(oldfont.pointSize() - 2);
     painter.setFont(smallfont);
 
     int gridpix = 128;

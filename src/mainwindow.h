@@ -30,7 +30,6 @@ namespace Ui {
 class MainWindow;
 }
 
-
 struct ISaveTab
 {
     virtual void save(QSettings& settings) = 0;
@@ -45,13 +44,14 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(QString sessionpath, QString resultspath, QWidget *parent = 0);
     virtual ~MainWindow();
     virtual void closeEvent(QCloseEvent *event) override;
 
     bool loadTranslation(QString lang);
 
-    QAction *addMapAction(int sopt, const char *iconpath, QString tip);
+    QAction *addMapAction(int opt);
+    QAction *addMapAction(QString rcbase, QString tip);
 
     bool getSeed(WorldInfo *wi, bool applyrand = true);
     bool setSeed(WorldInfo wi, int dim = DIM_UNDEF);
@@ -61,18 +61,16 @@ public:
 protected:
     void saveSettings();
     void loadSettings();
-    bool saveProgress(QString fnam, bool quiet = false);
-    bool loadProgress(QString fnam, bool keepresults, bool quiet);
+    bool saveSession(QString fnam, bool quiet = false);
+    bool loadSession(QString fnam, bool keepresults, bool quiet);
     void updateMapSeed();
     void setDockable(bool dockable);
-    void applyConfigChanges(const Config old, const Config conf);
     void setMCList(bool experimental);
 
 signals:
     void mapUpdated();
 
 public slots:
-    int warning(QString text, QMessageBox::StandardButtons buttons = QMessageBox::Ok);
     void mapGoto(qreal x, qreal z, qreal scale);
     void setBiomeColorRc(QString rc);
 
@@ -134,6 +132,7 @@ public:
     LayerOpt lopt;
     Config config;
     MapConfig mconfig;
+    QString sessionpath;
     QString prevdir;
     QTimer autosaveTimer;
     int prevtab;

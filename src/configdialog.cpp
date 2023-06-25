@@ -29,8 +29,6 @@ ConfigDialog::ConfigDialog(QWidget *parent, Config *config)
     }
 #endif
 
-    ui->buttonBiomeColor->setFont(*gp_font_mono);
-
     ui->lineMatching->setValidator(new QIntValidator(1, 99999999, ui->lineMatching));
     ui->spinThreads->setRange(1, QThread::idealThreadCount());
 
@@ -75,6 +73,10 @@ void ConfigDialog::initConfig(Config *config)
     ui->lineSep->setText(config->separator);
     int idx = config->quote == "\'" ? 1 : config->quote== "\"" ? 2 : 0;
     ui->comboQuote->setCurrentIndex(idx);
+    ui->fontComboNorm->setCurrentFont(config->fontNorm);
+    ui->fontComboMono->setCurrentFont(config->fontMono);
+    ui->spinFontSizeNorm->setValue(config->fontNorm.pointSize());
+    ui->spinFontSizeMono->setValue(config->fontMono.pointSize());
 
     setBiomeColorPath(config->biomeColorPath);
 }
@@ -96,6 +98,13 @@ Config ConfigDialog::getConfig()
     conf.separator = ui->lineSep->text();
     int idx = ui->comboQuote->currentIndex();
     conf.quote = idx == 1 ? "\'" : idx == 2 ? "\"" : "";
+
+    conf.fontNorm = ui->fontComboNorm->currentFont();
+    conf.fontMono = ui->fontComboMono->currentFont();
+    conf.fontNorm.setPointSize(ui->spinFontSizeNorm->value());
+    conf.fontMono.setPointSize(ui->spinFontSizeMono->value());
+    conf.fontNorm.setStyleHint(QFont::AnyStyle);
+    conf.fontMono.setStyleHint(QFont::Monospace);
 
     if (!conf.maxMatching) conf.maxMatching = 65536;
 

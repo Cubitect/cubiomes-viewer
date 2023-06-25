@@ -1,8 +1,10 @@
 #include "config.h"
 #include "cutil.h"
+#include "seedtables.h"
 
 #include <QThread>
 #include <QCoreApplication>
+#include <QFontDatabase>
 
 
 void ExtGenConfig::reset()
@@ -120,8 +122,41 @@ bool LayerOpt::isClimate(int mc) const
     return mode >= LOPT_NOISE_T_4 && mode <= LOPT_NOISE_W_4;
 }
 
+QString mapopt2display(int opt)
+{
+    switch (opt)
+    {
+    case D_GRID:        return QApplication::translate("Map", "Grid");
+    case D_SLIME:       return QApplication::translate("Map", "Slime Chunks");
+    case D_DESERT:      return QApplication::translate("Map", "Desert Pyramid");
+    case D_JUNGLE:      return QApplication::translate("Map", "Jungle Temple");
+    case D_HUT:         return QApplication::translate("Map", "Swamp Hut");
+    case D_IGLOO:       return QApplication::translate("Map", "Igloo");
+    case D_VILLAGE:     return QApplication::translate("Map", "Village");
+    case D_MANSION:     return QApplication::translate("Map", "Woodland Mansion");
+    case D_MONUMENT:    return QApplication::translate("Map", "Ocean Monument");
+    case D_RUINS:       return QApplication::translate("Map", "Ocean Ruins");
+    case D_SHIPWRECK:   return QApplication::translate("Map", "Shipwreck");
+    case D_TREASURE:    return QApplication::translate("Map", "Buried Treasure");
+    case D_MINESHAFT:   return QApplication::translate("Map", "Mineshaft");
+    case D_WELL:        return QApplication::translate("Map", "Desert Well");
+    case D_GEODE:       return QApplication::translate("Map", "Geode");
+    case D_OUTPOST:     return QApplication::translate("Map", "Pillager Outpost");
+    case D_ANCIENTCITY: return QApplication::translate("Map", "Ancient City");
+    case D_TRAILS:       return QApplication::translate("Map", "Trail Ruins");
+    case D_PORTAL:      return QApplication::translate("Map", "Ruined Portal");
+    case D_PORTALN:     return QApplication::translate("Map", "Ruined Portal (Nether)");
+    case D_SPAWN:       return QApplication::translate("Map", "Spawn");
+    case D_STRONGHOLD:  return QApplication::translate("Map", "Stronghold");
+    case D_FORTESS:     return QApplication::translate("Map", "Nether Fortress");
+    case D_BASTION:     return QApplication::translate("Map", "Bastion Remnant");
+    case D_ENDCITY:     return QApplication::translate("Map", "End City");
+    case D_GATEWAY:     return QApplication::translate("Map", "End Gateway");
+    default: return "";
+    }
+}
 
-const char *mapopt2str(int opt)
+const char *mapopt2str(int opt) // to resource string
 {
     switch (opt)
     {
@@ -142,7 +177,7 @@ const char *mapopt2str(int opt)
     case D_GEODE:       return "geode";
     case D_OUTPOST:     return "outpost";
     case D_ANCIENTCITY: return "ancient_city";
-    case D_TRAIL:       return "trails";
+    case D_TRAILS:      return "trails";
     case D_PORTAL:      return "portal";
     case D_PORTALN:     return "portaln";
     case D_SPAWN:       return "spawn";
@@ -155,7 +190,7 @@ const char *mapopt2str(int opt)
     }
 }
 
-int str2mapopt(const char *s)
+int str2mapopt(const char *s) // from resource string
 {
     if (!strcmp(s, "grid"))         return D_GRID;
     if (!strcmp(s, "slime"))        return D_SLIME;
@@ -174,7 +209,7 @@ int str2mapopt(const char *s)
     if (!strcmp(s, "geode"))        return D_GEODE;
     if (!strcmp(s, "outpost"))      return D_OUTPOST;
     if (!strcmp(s, "ancient_city")) return D_ANCIENTCITY;
-    if (!strcmp(s, "trail"))        return D_TRAIL;
+    if (!strcmp(s, "trails"))       return D_TRAILS;
     if (!strcmp(s, "portal"))       return D_PORTAL;
     if (!strcmp(s, "portaln"))      return D_PORTALN;
     if (!strcmp(s, "spawn"))        return D_SPAWN;
@@ -205,7 +240,7 @@ int mapopt2stype(int opt)
     case D_GEODE:       return Geode;
     case D_OUTPOST:     return Outpost;
     case D_ANCIENTCITY: return Ancient_City;
-    case D_TRAIL:       return Trail_Ruin;
+    case D_TRAILS:      return Trail_Ruin;
     case D_PORTAL:      return Ruined_Portal;
     case D_PORTALN:     return Ruined_Portal_N;
     case D_FORTESS:     return Fortress;
@@ -287,6 +322,14 @@ void Config::reset()
     biomeColorPath = "";
     separator = ";";
     quote = "";
+    fontNorm = QFontDatabase::systemFont(QFontDatabase::GeneralFont);
+    fontMono = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+    //fontNorm.setFamily(QString::fromUtf8("DejaVu Sans"));
+    //fontMono.setFamily(QString::fromUtf8("DejaVu Sans Mono"));
+    fontMono.setStyleHint(QFont::Monospace);
+    fontNorm.setStyleHint(QFont::AnyStyle);
+    fontMono.setPointSize(10);
+    fontNorm.setPointSize(10);
 }
 
 void Config::load(QSettings& settings)
@@ -306,6 +349,8 @@ void Config::load(QSettings& settings)
     biomeColorPath = settings.value("config/biomeColorPath", biomeColorPath).toString();
     separator = settings.value("config/separator", separator).toString();
     quote = settings.value("config/quote", quote).toString();
+    fontNorm = settings.value("config/fontNorm", fontNorm).value<QFont>();
+    fontMono = settings.value("config/fontMono", fontMono).value<QFont>();
 }
 
 void Config::save(QSettings& settings)
@@ -325,6 +370,8 @@ void Config::save(QSettings& settings)
     settings.setValue("config/biomeColorPath", biomeColorPath);
     settings.setValue("config/separator", separator);
     settings.setValue("config/quote", quote);
+    settings.setValue("config/fontNorm", fontNorm);
+    settings.setValue("config/fontMono", fontMono);
 }
 
 void Gen48Config::reset()
@@ -374,6 +421,50 @@ void Gen48Config::write(QTextStream& stream)
         stream << "#Gen48X2:  " << x2 << "\n";
         stream << "#Gen48Z2:  " << z2 << "\n";
     }
+}
+
+uint64_t Gen48Config::estimateSeedCnt(uint64_t slist48len)
+{
+    uint64_t cnt = 0;
+    if (mode == GEN48_QH)
+    {
+        switch (qual)
+        { // simply hardcoded number of seeds in each category
+        case IDEAL_SALTED: // falltrough
+        case IDEAL:     cnt =  74474; break;
+        case CLASSIC:   cnt = 107959; break;
+        case NORMAL:    cnt = 293716; break;
+        case BARELY:    cnt = 755745; break;
+        default: cnt = 0;
+        }
+    }
+    else if (mode == GEN48_QM)
+    {
+        cnt = 0;
+        for (int i = 0, n = sizeof(g_qm_90) / sizeof(int64_t); i < n; i++)
+            if (qmonumentQual(g_qm_90[i]) >= qmarea)
+                cnt++;
+    }
+    else if (mode == GEN48_LIST)
+    {
+        cnt = slist48len;
+    }
+    else
+    {
+        cnt = MASK48 + 1;
+    }
+
+    if (mode != GEN48_NONE)
+    {
+        uint64_t w = x2 - x1 + 1;
+        uint64_t h = z2 - z1 + 1;
+        uint64_t n = w*h * cnt; // div sizeof(uint64_t)
+        if (cnt > 0 && n < PRECOMPUTE48_BUFSIZ * sizeof(uint64_t) && n / cnt == w*h)
+            cnt = n;
+        else
+            cnt = MASK48 + 1;
+    }
+    return cnt;
 }
 
 void SearchConfig::reset()

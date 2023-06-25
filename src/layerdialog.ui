@@ -20,7 +20,7 @@
      </property>
      <property name="font">
       <font>
-       <family>DejaVu Sans Mono</family>
+       <family>Monospace</family>
       </font>
      </property>
     </widget>

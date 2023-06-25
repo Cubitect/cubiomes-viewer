@@ -1,6 +1,7 @@
 #include "tabtriggers.h"
 #include "ui_tabtriggers.h"
 
+#include "message.h"
 #include "cutil.h"
 #include "config.h"
 
@@ -27,8 +28,9 @@ QTreeWidgetItem *setConditionTreeItems(ConditionTree& ctree, int node, int64_t s
     else
     {
         item = new QTreeWidgetItem(parent);
+        QFont font = item->font(1);
         item->setText(0, "-");
-        item->setText(1, c.summary());
+        item->setText(1, c.summary(&font));
 
         if ((p.x == -1 && p.z == -1) || c.type == F_LOGIC_NOT)
             posval = false;
@@ -54,7 +56,7 @@ void AnalysisTriggers::run()
 {
     stop = false;
 
-    for (idx = 0; idx < seeds.size(); idx++)
+    for (idx = 0; idx < (long)seeds.size(); idx++)
     {
         if (stop) break;
         int64_t seed = seeds[idx];
@@ -113,7 +115,7 @@ TabTriggers::TabTriggers(MainWindow *parent)
     ui->treeWidget->setColumnWidth(3, 65);
     ui->treeWidget->setSortingEnabled(false); // sortable triggers are not necessary
 
-    connect(&thread, &AnalysisTriggers::warning, parent, &MainWindow::warning, Qt::BlockingQueuedConnection);
+    connect(&thread, &AnalysisTriggers::warning, this, &TabTriggers::warning, Qt::BlockingQueuedConnection);
     connect(&thread, &AnalysisTriggers::itemDone, this, &TabTriggers::onAnalysisItemDone, Qt::BlockingQueuedConnection);
     connect(&thread, &AnalysisTriggers::finished, this, &TabTriggers::onAnalysisFinished);
 }
@@ -134,6 +136,11 @@ void TabTriggers::load(QSettings& settings)
 {
     int idx = settings.value("analysis/seedsrc", ui->comboSeedSource->currentIndex()).toInt();
     ui->comboSeedSource->setCurrentIndex(idx);
+}
+
+int TabTriggers::warning(QString text, QMessageBox::StandardButtons buttons)
+{
+    return warn(parent, text, buttons);
 }
 
 void TabTriggers::onAnalysisItemDone(QTreeWidgetItem *item)
@@ -165,7 +172,7 @@ void TabTriggers::onBufferTimeout()
         ui->treeWidget->addTopLevelItems(qbuf);
         ui->treeWidget->setUpdatesEnabled(true);
 
-        QString progress = QString::asprintf(" (%d/%d)", thread.idx.load(), thread.seeds.size());
+        QString progress = QString::asprintf(" (%ld/%zu)", thread.idx.load(), thread.seeds.size());
         ui->pushStart->setText(tr("Stop") + progress);
 
         qbuf.clear();
@@ -194,7 +201,7 @@ void TabTriggers::on_pushStart_clicked()
     thread.conds = parent->formCond->getConditions();
     thread.seeds.clear();
     if (ui->comboSeedSource->currentIndex() == 0)
-        thread.seeds.append(thread.wi.seed);
+        thread.seeds.push_back(thread.wi.seed);
     else
         thread.seeds = parent->formControl->getResults();
 
@@ -204,7 +211,7 @@ void TabTriggers::on_pushStart_clicked()
 
     ui->pushExport->setEnabled(false);
     ui->pushStart->setChecked(true);
-    QString progress = QString::asprintf(" (0/%d)", thread.seeds.size());
+    QString progress = QString::asprintf(" (0/%zu)", thread.seeds.size());
     ui->pushStart->setText(tr("Stop") + progress);
     thread.start();
 }
@@ -263,7 +270,7 @@ void TabTriggers::on_pushExport_clicked()
 
     if (!file.open(QIODevice::WriteOnly))
     {
-        parent->warning(tr("Failed to open file for export:\n\"%1\"").arg(fnam));
+        warn(parent, tr("Failed to open file for export:\n\"%1\"").arg(fnam));
         return;
     }
 

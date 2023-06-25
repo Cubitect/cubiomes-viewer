@@ -2,11 +2,11 @@
 #include "ui_gotodialog.h"
 
 #include "mapview.h"
+#include "message.h"
 
 #include <QDoubleValidator>
 #include <QKeyEvent>
 #include <QClipboard>
-#include <QMessageBox>
 
 static bool g_animate;
 
@@ -46,9 +46,8 @@ void GotoDialog::on_buttonBox_clicked(QAbstractButton *button)
         qreal scale = ui->lineScale->text().toDouble();
         if (scale > 4096)
         {
-            int button = QMessageBox::warning(this, tr("Unsafe Scale"),
-                tr("Setting a very large scale may be unsafe.\n"
-                   "Continue anyway?"), QMessageBox::Abort|QMessageBox::Yes);
+            int button = warn(this, tr("Setting a very large scale may be unsafe.\n"
+                                       "Continue anyway?"), QMessageBox::Abort|QMessageBox::Yes);
             if (button == QMessageBox::Abort)
                 return;
         }
@@ -69,7 +68,7 @@ void GotoDialog::on_buttonBox_clicked(QAbstractButton *button)
     }
 }
 
-void GotoDialog::keyReleaseEvent(QKeyEvent *event)
+void GotoDialog::keyPressEvent(QKeyEvent *event)
 {
     if (event->matches(QKeySequence::Paste))
     {

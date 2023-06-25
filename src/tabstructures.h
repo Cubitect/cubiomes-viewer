@@ -24,7 +24,7 @@ signals:
     void quadDone(QTreeWidgetItem *item);
 
 public:
-    QVector<uint64_t> seeds;
+    std::vector<uint64_t> seeds;
     WorldInfo wi;
     std::atomic_bool stop;
     std::atomic_int idx;

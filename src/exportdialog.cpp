@@ -4,6 +4,7 @@
 #include "mainwindow.h"
 #include "mapview.h"
 #include "cutil.h"
+#include "message.h"
 
 #include <QIntValidator>
 #include <QFileDialog>
@@ -86,7 +87,7 @@ void ExportWorker::run()
 
 static void setCombo(QComboBox *cb, const char *setting)
 {
-    QSettings settings("cubiomes-viewer", "cubiomes-viewer");
+    QSettings settings(APP_STRING, APP_STRING);
     int idx = settings.value(setting, cb->currentIndex()).toInt();
     if (idx < cb->count())
         cb->setCurrentIndex(idx);
@@ -136,7 +137,7 @@ ExportDialog::ExportDialog(MainWindow *parent)
     connect(ui->comboTileSize, SIGNAL(activated(int)), this, SLOT(update()));
     connect(ui->groupTiled, SIGNAL(toggled(bool)), this, SLOT(update()));
 
-    QSettings settings("cubiomes-viewer", "cubiomes-viewer");
+    QSettings settings(APP_STRING, APP_STRING);
 
     ui->lineDir->setText(settings.value("export/prevdir", mainwindow->prevdir).toString());
     ui->linePattern->setText(settings.value("export/pattern", "%S_%x_%z.png").toString());
@@ -173,7 +174,7 @@ bool ExportDialog::initWork(ExportWorkItem *work, uint64_t seed, int tx, int tz)
     work->tx = tx;
     work->tz = tz;
     work->fnam = pattern;
-    work->fnam.replace("%S", QString::number(seed));
+    work->fnam.replace("%S", QString::number((int64_t)seed));
     work->fnam.replace("%x", QString::number(tx));
     work->fnam.replace("%z", QString::number(tz));
     work->fnam = dir.filePath(work->fnam);
@@ -213,7 +214,7 @@ void ExportDialog::update()
 
     if (ui->comboSeed->currentIndex() == 1)
     {
-        const QVector<uint64_t>& seeds = mainwindow->formControl->getResults();
+        const std::vector<uint64_t>& seeds = mainwindow->formControl->getResults();
         seedcnt = seeds.size();
     }
 
@@ -313,7 +314,7 @@ void ExportDialog::on_buttonBox_clicked(QAbstractButton *button)
         WorldInfo wi;
         mainwindow->getSeed(&wi, true);
 
-        QVector<uint64_t> seeds;
+        std::vector<uint64_t> seeds;
         if (seedmode == 0)
             seeds.push_back(wi.seed);
         else if (seedmode == 1)
@@ -321,17 +322,15 @@ void ExportDialog::on_buttonBox_clicked(QAbstractButton *button)
 
         if (seeds.size() > 1 && !pattern.contains("%S"))
         {
-            QMessageBox::warning(this, tr("Warning"),
-                    tr("When exporting more than one seed, the file pattern "
-                    "has to include the \"%S\" format specifier for the seed number."));
+            warn(this, tr("When exporting more than one seed, the file pattern has to "
+                          "include the \"%S\" format specifier for the seed number."));
             return;
         }
 
         if (tiled && (!pattern.contains("%x") || !pattern.contains("%z")))
         {
-            QMessageBox::warning(this, tr("Warning"),
-                    tr("Exporting as tiled images requires both the \"%x\" and \"%z\" "
-                    "format specifiers in the file pattern, representing the tile coordinates."));
+            warn(this, tr("Exporting as tiled images requires both the \"%x\" and \"%z\" "
+                          "format specifiers in the file pattern, representing the tile coordinates."));
             return;
         }
 
@@ -348,7 +347,7 @@ void ExportDialog::on_buttonBox_clicked(QAbstractButton *button)
 
         if (x1 <= x0 || z1 <= z0)
         {
-            QMessageBox::warning(this, tr("Warning"), tr("Invalid area."));
+            warn(this, tr("Invalid area."));
             return;
         }
 
@@ -379,7 +378,7 @@ void ExportDialog::on_buttonBox_clicked(QAbstractButton *button)
             this->tilesize = tilesize;
             this->bgmode = bgmode;
 
-            for (uint64_t seed : qAsConst(seeds))
+            for (uint64_t seed : seeds)
             {
                 for (int x = tx0; x < tx1; x++)
                 {
@@ -397,9 +396,7 @@ void ExportDialog::on_buttonBox_clicked(QAbstractButton *button)
             int maxsiz = 0x8000;
             if (x1 - x0 >= maxsiz || z1 - z0 >= maxsiz)
             {
-                int button = QMessageBox::warning(this, tr("Warning"),
-                        tr("Consider tiling very large images into smaller sections.\n"
-                           "Continue?"),
+                int button = warn(this, tr("Consider tiling very large images into smaller sections.\nContinue?"),
                         QMessageBox::Cancel | QMessageBox::Yes);
                 if (button == QMessageBox::Cancel)
                 {
@@ -407,7 +404,7 @@ void ExportDialog::on_buttonBox_clicked(QAbstractButton *button)
                 }
             }
 
-            for (uint64_t seed : qAsConst(seeds))
+            for (uint64_t seed : seeds)
             {
                 ExportWorkItem work;
                 existwarn |= initWork(&work, seed, 0, 0);
@@ -417,9 +414,7 @@ void ExportDialog::on_buttonBox_clicked(QAbstractButton *button)
 
         if (existwarn)
         {
-            int button = QMessageBox::warning(this, tr("Warning"),
-                    tr("One or more of files already exist.\n"
-                       "Continue and overwrite?"),
+            int button = warn(this, tr("One or more of files already exist.\nContinue and overwrite?"),
                     QMessageBox::Cancel | QMessageBox::Yes);
             if (button == QMessageBox::Cancel)
             {
@@ -427,7 +422,7 @@ void ExportDialog::on_buttonBox_clicked(QAbstractButton *button)
             }
         }
 
-        QSettings settings("cubiomes-viewer", "cubiomes-viewer");
+        QSettings settings(APP_STRING, APP_STRING);
         settings.setValue("export/seedIdx", ui->comboSeed->currentIndex());
         settings.setValue("export/prevdir", ui->lineDir->text());
         settings.setValue("export/pattern", ui->linePattern->text());

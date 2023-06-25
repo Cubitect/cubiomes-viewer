@@ -12,12 +12,13 @@
 #include <QApplication>
 #include <QStandardPaths>
 #include <QDir>
+#include <QDebug>
 
 #include <algorithm>
 
 #define MULTIPLY_CHAR QChar(0xD7)
 
-QString Condition::summary() const
+QString Condition::summary(const QFont *font) const
 {
     const FilterInfo& ft = g_filterinfo.list[type];
     QString s;
@@ -32,7 +33,7 @@ QString Condition::summary() const
         return s;
     }
 
-    QString cnts = "";
+    QString cnts;
     if (ft.count)
         cnts += MULTIPLY_CHAR + QString::number(count);
     if (skipref)
@@ -57,8 +58,19 @@ QString Condition::summary() const
         }
     }
 
-    s += QString(" %2%3").arg(txts, -28, ' ').arg(cnts, -4, QChar(' '));
-
+    if (font)
+    {
+        s += " " + txts;
+        QFontMetrics fm(*font);
+        int w = fm.horizontalAdvance(QString("%1").arg("#", 30));
+        while (fm.horizontalAdvance(s + "\t") < w)
+            s += "\t";
+    }
+    else
+    {
+        s += QString(" %1").arg(txts, -25);
+    }
+    s += QString("\t%1").arg(cnts, -3);
     if (relative)
         s += QString::asprintf("[%02d]+", relative);
     else
@@ -273,7 +285,6 @@ void SearchThreadEnv::prepareSurfaceNoise(int dim)
     }
 }
 
-#include <QDebug>
 static
 int testTreeAt(
     Pos                         at,             // relative origin
@@ -573,66 +584,114 @@ int testTreeAt(
 }
 
 
-static const int g_qh_c_n = sizeof(low20QuadHutBarely) / sizeof(uint64_t);
-static QuadInfo qh_constellations[g_qh_c_n];
-
-// initialize global tables
-void _init(void) __attribute__((constructor));
-void _init(void)
+static const QuadInfo *getQHInfo(uint64_t cst)
 {
-    int st = Swamp_Hut;
-    StructureConfig sc;
-    getStructureConfig(st, MC_NEWEST, &sc);
-    sc.salt = 0; // ignore version dependent salt offsets
+    static std::map<uint64_t, QuadInfo> qh_info;
+    static QMutex mutex;
 
-    for (int i = 0; i < g_qh_c_n; i++)
+    mutex.lock();
+    if (qh_info.size() == 0)
     {
-        uint64_t b = low20QuadHutBarely[i];
-        for (uint64_t s = b;; s += 0x100000)
+        StructureConfig sc;
+        getStructureConfig(Swamp_Hut, MC_NEWEST, &sc);
+        sc.salt = 0; // ignore version dependent salt offsets
+
+        for (size_t i = 0, n = sizeof(low20QuadHutBarely) / sizeof(uint64_t); i < n; i++)
         {
-            QuadInfo *qi = &qh_constellations[i];
-            Pos pc;
-            if (scanForQuads(sc, 128, s, low20QuadHutBarely, g_qh_c_n,
-                    20, 0, 0, 0, 1, 1, &pc, 1) < 1)
-                continue;
-            if ( !(qi->rad = isQuadBase(sc, s, 160)) )
-                continue;
+            uint64_t c = low20QuadHutBarely[i];
+            for (uint64_t s = c;; s += 0x100000)
+            {
+                // find a quad-hut for this constellation
+                Pos pc;
+                if (scanForQuads(sc, 128, s, low20QuadHutBarely, n, 20, 0, 0, 0, 1, 1, &pc, 1) < 1)
+                    continue;
+                qreal rad = isQuadBase(sc, s, 160);
+                if (rad == 0)
+                    continue;
 
-            qi->c = b;
-            qi->p[0] = getFeaturePos(sc, s, 0, 0);
-            qi->p[1] = getFeaturePos(sc, s, 0, 1);
-            qi->p[2] = getFeaturePos(sc, s, 1, 0);
-            qi->p[3] = getFeaturePos(sc, s, 1, 1);
-            qi->afk = getOptimalAfk(qi->p, 7,7,9, &qi->spcnt);
-            qi->typ = st;
+                QuadInfo *qi = &qh_info[c];
+                qi->rad = rad;
+                qi->c = c;
+                qi->p[0] = getFeaturePos(sc, s, 0, 0);
+                qi->p[1] = getFeaturePos(sc, s, 0, 1);
+                qi->p[2] = getFeaturePos(sc, s, 1, 0);
+                qi->p[3] = getFeaturePos(sc, s, 1, 1);
+                qi->afk = getOptimalAfk(qi->p, 7,7,9, &qi->spcnt);
+                qi->typ = Swamp_Hut;
 
-            qi->flt = F_QH_BARELY;
-            int j, n;
-            n = sizeof(low20QuadHutNormal) / sizeof(uint64_t);
-            for (j = 0; j < n; j++) {
-                if (low20QuadHutNormal[j] == b) {
-                    qi->flt = F_QH_NORMAL;
-                    break;
+                qi->flt = F_QH_BARELY;
+                int j, m;
+                m = sizeof(low20QuadHutNormal) / sizeof(uint64_t);
+                for (j = 0; j < m; j++) {
+                    if (low20QuadHutNormal[j] == c) {
+                        qi->flt = F_QH_NORMAL;
+                        break;
+                    }
                 }
-            }
-            n = sizeof(low20QuadClassic) / sizeof(uint64_t);
-            for (j = 0; j < n; j++) {
-                if (low20QuadClassic[j] == b) {
-                    qi->flt = F_QH_CLASSIC;
-                    break;
+                m = sizeof(low20QuadClassic) / sizeof(uint64_t);
+                for (j = 0; j < m; j++) {
+                    if (low20QuadClassic[j] == c) {
+                        qi->flt = F_QH_CLASSIC;
+                        break;
+                    }
                 }
-            }
-            n = sizeof(low20QuadIdeal) / sizeof(uint64_t);
-            for (j = 0; j < n; j++) {
-                if (low20QuadIdeal[j] == b) {
-                    qi->flt = F_QH_IDEAL;
-                    break;
+                m = sizeof(low20QuadIdeal) / sizeof(uint64_t);
+                for (j = 0; j < m; j++) {
+                    if (low20QuadIdeal[j] == c) {
+                        qi->flt = F_QH_IDEAL;
+                        break;
+                    }
                 }
+                break;
             }
-            break;
         }
     }
+    mutex.unlock();
+
+    auto it = qh_info.find(cst);
+    if (it == qh_info.end())
+        return nullptr;
+    else
+        return &it->second;
 }
+
+static const QuadInfo *getQMInfo(uint64_t s48)
+{
+    static std::map<uint64_t, QuadInfo> qm_info;
+    static QMutex mutex;
+
+    mutex.lock();
+    if (qm_info.size() == 0)
+    {
+        StructureConfig sc;
+        getStructureConfig(Monument, MC_NEWEST, &sc);
+        sc.salt = 0;
+
+        for (size_t i = 0, n = sizeof(g_qm_90) / sizeof(uint64_t); i < n; i++)
+        {
+            uint64_t s = g_qm_90[i];
+            QuadInfo *qi = &qm_info[s];
+            qi->rad = isQuadBase(sc, s, 160);
+            qi->c = s;
+            qi->p[0] = getLargeStructurePos(sc, s, 0, 0);
+            qi->p[1] = getLargeStructurePos(sc, s, 0, 1);
+            qi->p[2] = getLargeStructurePos(sc, s, 1, 0);
+            qi->p[3] = getLargeStructurePos(sc, s, 1, 1);
+            qi->afk = getOptimalAfk(qi->p, 58,0/*23*/,58, &qi->spcnt);
+            qi->afk.x -= 29;
+            qi->afk.z -= 29;
+            qi->typ = Monument;
+        }
+    }
+    mutex.unlock();
+
+    auto it = qm_info.find(s48);
+    if (it == qm_info.end())
+        return nullptr;
+    else
+        return &it->second;
+}
+
 
 static bool isVariantOk(const Condition *c, SearchThreadEnv *e, int stype, int varbiome, Pos *pos)
 {
@@ -853,7 +912,7 @@ testCondAt(
     int qual, valid;
     int xt, zt;
     int st;
-    int i, j, n, icnt;
+    int i, n, icnt;
     int64_t s, r, rmin, rmax;
     const uint64_t *seeds;
     Pos p[MAX_INSTANCES];
@@ -918,16 +977,7 @@ L_qh_any:
             s = moveStructure(env->seed, -pc.x, -pc.z);
 
             // find the constellation info
-            uint64_t cst = (s + sconf.salt) & 0xfffff;
-            QuadInfo *qi = NULL;
-            for (j = 0; j < g_qh_c_n; j++)
-            {
-                if (qh_constellations[j].c == cst)
-                {
-                    qi = &qh_constellations[j];
-                    break;
-                }
-            }
+            const QuadInfo *qi = getQHInfo((s + sconf.salt) & 0xfffff);
             if (!qi || qi->flt > cond->type)
                 continue;
             // we don't support finding the center of multiple
@@ -969,13 +1019,9 @@ L_qm_any:
             s = moveStructure(env->seed, -rx, -rz);
             if (qmonumentQual(s + sconf.salt) >= qual)
             {
-                getStructurePos(st, env->mc, env->seed, rx+0, rz+0, p+0);
-                getStructurePos(st, env->mc, env->seed, rx+0, rz+1, p+1);
-                getStructurePos(st, env->mc, env->seed, rx+1, rz+0, p+2);
-                getStructurePos(st, env->mc, env->seed, rx+1, rz+1, p+3);
-                pc = getOptimalAfk(p, 58,23,58, 0);
-                pc.x -= 29; // monument is centered
-                pc.z -= 29;
+                const QuadInfo *qi = getQMInfo(s + sconf.salt);
+                pc.x = (rx << 9) + qi->afk.x;
+                pc.z = (rz << 9) + qi->afk.z;
                 cent[icnt] = pc;
                 icnt++;
                 if (imax && icnt >= *imax)

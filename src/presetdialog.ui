@@ -60,7 +60,6 @@
              <property name="font">
               <font>
                <family>Monospace</family>
-               <pointsize>9</pointsize>
               </font>
              </property>
              <property name="alternatingRowColors">
@@ -83,7 +82,6 @@
              <property name="font">
               <font>
                <family>Monospace</family>
-               <pointsize>9</pointsize>
               </font>
              </property>
              <property name="alternatingRowColors">

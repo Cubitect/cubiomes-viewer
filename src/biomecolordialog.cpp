@@ -69,8 +69,8 @@ BiomeColorDialog::BiomeColorDialog(QWidget *parent, QString initrc, int mc, int 
 
     for (int i = 0; i < 256; i++)
     {
-        const char *bname = biome2str(mc, i);
-        if (!bname)
+        QString bname = getBiomeDisplay(mc, i);
+        if (bname.isEmpty() || bname == "?")
             continue;
 
         QColor col;

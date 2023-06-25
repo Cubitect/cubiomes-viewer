@@ -42,80 +42,80 @@ const char *getLayerOptionText(int mode, int disp)
     {
     case LOPT_BIOMES:
         switch (disp) {
-        case 0: return QApplication::translate("LayerDialog", "1:1").toUtf8().data();
-        case 1: return QApplication::translate("LayerDialog", "1:4").toUtf8().data();
-        case 2: return QApplication::translate("LayerDialog", "1:16").toUtf8().data();
-        case 3: return QApplication::translate("LayerDialog", "1:64").toUtf8().data();
-        case 4: return QApplication::translate("LayerDialog", "1:256").toUtf8().data();
+        case 0: return "1:1";
+        case 1: return "1:4";
+        case 2: return "1:16";
+        case 3: return "1:64";
+        case 4: return "1:256";
         default: return nullptr;
         }
     case LOPT_NOISE_T_4:
         switch (disp) {
-        case 0: return QApplication::translate("LayerDialog", "All").toUtf8().data();
-        case 1: return QApplication::translate("LayerDialog", "+A[0] 1:4096 x0.952381").toUtf8().data();
-        case 2: return QApplication::translate("LayerDialog", "+B[0] 1:4023 x0.952381").toUtf8().data();
-        case 3: return QApplication::translate("LayerDialog", "+A[1] 1:1024 x0.158730").toUtf8().data();
-        case 4: return QApplication::translate("LayerDialog", "+B[1] 1:1005 x0.158730").toUtf8().data();
+        case 0: return "All";
+        case 1: return "+A[0] 1:4096 x0.952381";
+        case 2: return "+B[0] 1:4023 x0.952381";
+        case 3: return "+A[1] 1:1024 x0.158730";
+        case 4: return "+B[1] 1:1005 x0.158730";
         default: return nullptr;
         }
     case LOPT_NOISE_H_4:
         switch (disp) {
-        case 0: return QApplication::translate("LayerDialog", "All").toUtf8().data();
-        case 1: return QApplication::translate("LayerDialog", "+A[0] 1:1024 x0.564374").toUtf8().data();
-        case 2: return QApplication::translate("LayerDialog", "+B[0] 1:1005 x0.564374").toUtf8().data();
-        case 3: return QApplication::translate("LayerDialog", "+A[1] 1:512  x0.282187").toUtf8().data();
-        case 4: return QApplication::translate("LayerDialog", "+B[1] 1:502  x0.282187").toUtf8().data();
+        case 0: return "All";
+        case 1: return "+A[0] 1:1024 x0.564374";
+        case 2: return "+B[0] 1:1005 x0.564374";
+        case 3: return "+A[1] 1:512  x0.282187";
+        case 4: return "+B[1] 1:502  x0.282187";
         default: return nullptr;
         }
     case LOPT_NOISE_C_4:
         switch (disp) {
-        case 0: return QApplication::translate("LayerDialog", "All").toUtf8().data();
-        case 1: return QApplication::translate("LayerDialog", "+A[0] 1:2048 x0.751468").toUtf8().data();
-        case 2: return QApplication::translate("LayerDialog", "+B[0] 1:2011 x0.751468").toUtf8().data();
-        case 3: return QApplication::translate("LayerDialog", "+A[1] 1:1024 x0.375734").toUtf8().data();
-        case 4: return QApplication::translate("LayerDialog", "+B[1] 1:1005 x0.375734").toUtf8().data();
-        case 5: return QApplication::translate("LayerDialog", "+A[2] 1:512  x0.375734").toUtf8().data();
-        case 6: return QApplication::translate("LayerDialog", "+B[2] 1:502  x0.375734").toUtf8().data();
-        case 7: return QApplication::translate("LayerDialog", "+A[3] 1:256  x0.187867").toUtf8().data();
-        case 8: return QApplication::translate("LayerDialog", "+B[3] 1:251  x0.187867").toUtf8().data();
-        case 9: return QApplication::translate("LayerDialog", "+A[4] 1:128  x0.093933").toUtf8().data();
-        case 10: return QApplication::translate("LayerDialog", "+B[4] 1:125  x0.093933").toUtf8().data();
-        case 11: return QApplication::translate("LayerDialog", "+A[5] 1:64   x0.023483").toUtf8().data();
-        case 12: return QApplication::translate("LayerDialog", "+B[5] 1:62   x0.023483").toUtf8().data();
-        case 13: return QApplication::translate("LayerDialog", "+A[6] 1:32   x0.011742").toUtf8().data();
-        case 14: return QApplication::translate("LayerDialog", "+B[6] 1:31   x0.011742").toUtf8().data();
+        case 0: return "All";
+        case 1: return "+A[0] 1:2048 x0.751468";
+        case 2: return "+B[0] 1:2011 x0.751468";
+        case 3: return "+A[1] 1:1024 x0.375734";
+        case 4: return "+B[1] 1:1005 x0.375734";
+        case 5: return "+A[2] 1:512  x0.375734";
+        case 6: return "+B[2] 1:502  x0.375734";
+        case 7: return "+A[3] 1:256  x0.187867";
+        case 8: return "+B[3] 1:251  x0.187867";
+        case 9: return "+A[4] 1:128  x0.093933";
+        case 10: return "+B[4] 1:125  x0.093933";
+        case 11: return "+A[5] 1:64   x0.023483";
+        case 12: return "+B[5] 1:62   x0.023483";
+        case 13: return "+A[6] 1:32   x0.011742";
+        case 14: return "+B[6] 1:31   x0.011742";
         default: return nullptr;
         }
     case LOPT_NOISE_E_4:
         switch (disp) {
-        case 0: return QApplication::translate("LayerDialog", "All").toUtf8().data();
-        case 1: return QApplication::translate("LayerDialog", "+A[0] 1:2048 x0.716846").toUtf8().data();
-        case 2: return QApplication::translate("LayerDialog", "+B[0] 1:2011 x0.716846").toUtf8().data();
-        case 3: return QApplication::translate("LayerDialog", "+A[1] 1:1024 x0.358423").toUtf8().data();
-        case 4: return QApplication::translate("LayerDialog", "+B[1] 1:1005 x0.358423").toUtf8().data();
-        case 5: return QApplication::translate("LayerDialog", "+A[2] 1:256  x0.089606").toUtf8().data();
-        case 6: return QApplication::translate("LayerDialog", "+B[2] 1:251  x0.089606").toUtf8().data();
-        case 7: return QApplication::translate("LayerDialog", "+A[3] 1:128  x0.044803").toUtf8().data();
-        case 8: return QApplication::translate("LayerDialog", "+B[3] 1:125  x0.044803").toUtf8().data();
+        case 0: return "All";
+        case 1: return "+A[0] 1:2048 x0.716846";
+        case 2: return "+B[0] 1:2011 x0.716846";
+        case 3: return "+A[1] 1:1024 x0.358423";
+        case 4: return "+B[1] 1:1005 x0.358423";
+        case 5: return "+A[2] 1:256  x0.089606";
+        case 6: return "+B[2] 1:251  x0.089606";
+        case 7: return "+A[3] 1:128  x0.044803";
+        case 8: return "+B[3] 1:125  x0.044803";
         default: return nullptr;
         }
     case LOPT_NOISE_W_4:
         switch (disp) {
-        case 0: return QApplication::translate("LayerDialog", "All").toUtf8().data();
-        case 1: return QApplication::translate("LayerDialog", "+A[0] 1:512 x0.634921").toUtf8().data();
-        case 2: return QApplication::translate("LayerDialog", "+B[0] 1:502 x0.634921").toUtf8().data();
-        case 3: return QApplication::translate("LayerDialog", "+A[1] 1:256 x0.634921").toUtf8().data();
-        case 4: return QApplication::translate("LayerDialog", "+B[1] 1:251 x0.634921").toUtf8().data();
-        case 5: return QApplication::translate("LayerDialog", "+A[2] 1:128 x0.158730").toUtf8().data();
-        case 6: return QApplication::translate("LayerDialog", "+B[2] 1:125 x0.158730").toUtf8().data();
+        case 0: return "All";
+        case 1: return "+A[0] 1:512 x0.634921";
+        case 2: return "+B[0] 1:502 x0.634921";
+        case 3: return "+A[1] 1:256 x0.634921";
+        case 4: return "+B[1] 1:251 x0.634921";
+        case 5: return "+A[2] 1:128 x0.158730";
+        case 6: return "+B[2] 1:125 x0.158730";
         default: return nullptr;
         }
     case LOPT_HEIGHT_4:
         switch (disp) {
-        case 0: return QApplication::translate("LayerDialog", "Grayscale").toUtf8().data();
-        case 1: return QApplication::translate("LayerDialog", "Shaded biome map").toUtf8().data();
-        case 2: return QApplication::translate("LayerDialog", "Contours on biomes").toUtf8().data();
-        case 3: return QApplication::translate("LayerDialog", "Shaded with contours").toUtf8().data();
+        case 0: return QT_TRANSLATE_NOOP("LayerDialog", "Grayscale");
+        case 1: return QT_TRANSLATE_NOOP("LayerDialog", "Shaded biome map");
+        case 2: return QT_TRANSLATE_NOOP("LayerDialog", "Contours on biomes");
+        case 3: return QT_TRANSLATE_NOOP("LayerDialog", "Shaded with contours");
         default: return nullptr;
         }
     default:
@@ -163,7 +163,7 @@ LayerDialog::LayerDialog(QWidget *parent, int mc)
             const char *item = getLayerOptionText(i, j);
             if (!item)
                 break;
-            QString s = QString::asprintf("%-24s", item);
+            QString s = QApplication::translate("LayerDialog", item).leftJustified(24);
             if (j < 9)
                 s += "\tALT+"+QString::number(j+1);
             items.append(s);
@@ -171,13 +171,15 @@ LayerDialog::LayerDialog(QWidget *parent, int mc)
         combo[i]->addItems(items);
     }
 
+    QFont fmono;
+    fmono.setFamily(QString::fromUtf8("Monospace"));
     for (int i = 0; i < LOPT_MAX; i++)
     {
         if (!radio[i])
             continue;
         connect(radio[i], &QRadioButton::toggled, this, &LayerDialog::onRadioChange);
         if (combo[i])
-            combo[i]->setFont(*gp_font_mono);
+            combo[i]->setFont(fmono);
         if (i >= LOPT_NOISE_T_4 && i <= LOPT_NOISE_W_4)
         {
             radio[i]->setEnabled(mc > MC_1_17);

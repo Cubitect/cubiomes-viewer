@@ -10,37 +10,6 @@
 #include "cubiomes/quadbase.h"
 #include "cubiomes/util.h"
 
-
-inline const char* struct2str(int stype)
-{
-    switch (stype)
-    {
-    case Desert_Pyramid:    return QApplication::translate("StructureDialog", "desert_pyramid").toUtf8().data();
-    case Jungle_Temple:     return QApplication::translate("StructureDialog", "jungle_temple").toUtf8().data();
-    case Swamp_Hut:         return QApplication::translate("StructureDialog", "swamp_hut").toUtf8().data();
-    case Igloo:             return QApplication::translate("StructureDialog", "igloo").toUtf8().data();
-    case Village:           return QApplication::translate("StructureDialog", "village").toUtf8().data();
-    case Ocean_Ruin:        return QApplication::translate("StructureDialog", "ocean_ruin").toUtf8().data();
-    case Shipwreck:         return QApplication::translate("StructureDialog", "shipwreck").toUtf8().data();
-    case Monument:          return QApplication::translate("StructureDialog", "monument").toUtf8().data();
-    case Mansion:           return QApplication::translate("StructureDialog", "mansion").toUtf8().data();
-    case Outpost:           return QApplication::translate("StructureDialog", "outpost").toUtf8().data();
-    case Treasure:          return QApplication::translate("StructureDialog", "treasure").toUtf8().data();
-    case Mineshaft:         return QApplication::translate("StructureDialog", "mineshaft").toUtf8().data();
-    case Desert_Well:       return QApplication::translate("StructureDialog", "desert_well").toUtf8().data();
-    case Ruined_Portal:     return QApplication::translate("StructureDialog", "ruined_portal").toUtf8().data();
-    case Ruined_Portal_N:   return QApplication::translate("StructureDialog", "ruined_portal (nether)").toUtf8().data();
-    case Geode:             return QApplication::translate("StructureDialog", "amethyst_geode").toUtf8().data();
-    case Ancient_City:      return QApplication::translate("StructureDialog", "ancient_city").toUtf8().data();
-    case Trail_Ruin:        return QApplication::translate("StructureDialog", "trail_ruins").toUtf8().data();
-    case Fortress:          return QApplication::translate("StructureDialog", "fortress").toUtf8().data();
-    case Bastion:           return QApplication::translate("StructureDialog", "bastion").toUtf8().data();
-    case End_City:          return QApplication::translate("StructureDialog", "end_city").toUtf8().data();
-    case End_Gateway:       return QApplication::translate("StructureDialog", "end_gateway").toUtf8().data();
-    }
-    return "?";
-}
-
 struct StartPiece
 {
     int stype;
@@ -107,6 +76,142 @@ inline QString getStartPieceName(int stype, const StructureVariant *sv)
     return name;
 }
 
+static inline QString getBiomeDisplay(int mc, int id)
+{
+    if (mc >= MC_1_18)
+    {
+        // a bunch of 'new' biomes in 1.18 actually just got renamed
+        // (based on their features and biome id conversion when upgrading)
+        switch (id)
+        {
+        case old_growth_birch_forest:   return QApplication::translate("Biome", "Old Growth Birch Forest");
+        case old_growth_pine_taiga:     return QApplication::translate("Biome", "Old Growth Pine Taiga");
+        case old_growth_spruce_taiga:   return QApplication::translate("Biome", "Old Growth Spruce Taiga");
+        case snowy_plains:              return QApplication::translate("Biome", "Snowy Plains");
+        case sparse_jungle:             return QApplication::translate("Biome", "Sparse Jungle");
+        case stony_shore:               return QApplication::translate("Biome", "Stony Shore");
+        case windswept_hills:           return QApplication::translate("Biome", "Windswept Hills");
+        case windswept_forest:          return QApplication::translate("Biome", "Windswept Forest");
+        case windswept_gravelly_hills:  return QApplication::translate("Biome", "Windswept Gravelly Hills");
+        case windswept_savanna:         return QApplication::translate("Biome", "Windswept Savanna");
+        case wooded_badlands:           return QApplication::translate("Biome", "Wooded Badlands");
+        }
+    }
+
+    switch (id)
+    {
+    case ocean:                         return QApplication::translate("Biome", "Ocean");
+    case plains:                        return QApplication::translate("Biome", "Plains");
+    case desert:                        return QApplication::translate("Biome", "Desert");
+    case mountains:                     return QApplication::translate("Biome", "Mountains");
+    case forest:                        return QApplication::translate("Biome", "Forest");
+    case taiga:                         return QApplication::translate("Biome", "Taiga");
+    case swamp:                         return QApplication::translate("Biome", "Swamp");
+    case river:                         return QApplication::translate("Biome", "River");
+    case nether_wastes:                 return QApplication::translate("Biome", "Nether Wastes");
+    case the_end:                       return QApplication::translate("Biome", "The End");
+    // 10
+    case frozen_ocean:                  return QApplication::translate("Biome", "Frozen Ocean");
+    case frozen_river:                  return QApplication::translate("Biome", "Frozen River");
+    case snowy_tundra:                  return QApplication::translate("Biome", "Snowy Plains");
+    case snowy_mountains:               return QApplication::translate("Biome", "Snowy Mountains");
+    case mushroom_fields:               return QApplication::translate("Biome", "Mushroom Fields");
+    case mushroom_field_shore:          return QApplication::translate("Biome", "Mushroom Field Shore");
+    case beach:                         return QApplication::translate("Biome", "Beach");
+    case desert_hills:                  return QApplication::translate("Biome", "Desert Hills");
+    case wooded_hills:                  return QApplication::translate("Biome", "Wooded Hills");
+    case taiga_hills:                   return QApplication::translate("Biome", "Taiga Hills");
+    // 20
+    case mountain_edge:                 return QApplication::translate("Biome", "Mountain Edge");
+    case jungle:                        return QApplication::translate("Biome", "Jungle");
+    case jungle_hills:                  return QApplication::translate("Biome", "Jungle Hills");
+    case jungle_edge:                   return QApplication::translate("Biome", "Jungle Edge");
+    case deep_ocean:                    return QApplication::translate("Biome", "Deep Ocean");
+    case stone_shore:                   return QApplication::translate("Biome", "Stone Shore");
+    case snowy_beach:                   return QApplication::translate("Biome", "Snowy Beach");
+    case birch_forest:                  return QApplication::translate("Biome", "Birch Forest");
+    case birch_forest_hills:            return QApplication::translate("Biome", "Birch Forest Hills");
+    case dark_forest:                   return QApplication::translate("Biome", "Dark Forest");
+    // 30
+    case snowy_taiga:                   return QApplication::translate("Biome", "Snowy Taiga");
+    case snowy_taiga_hills:             return QApplication::translate("Biome", "Snowy Taiga Hills");
+    case giant_tree_taiga:              return QApplication::translate("Biome", "Giant Tree Taiga");
+    case giant_tree_taiga_hills:        return QApplication::translate("Biome", "Giant Tree Taiga Hills");
+    case wooded_mountains:              return QApplication::translate("Biome", "Wooded Mountains");
+    case savanna:                       return QApplication::translate("Biome", "Savanna");
+    case savanna_plateau:               return QApplication::translate("Biome", "Savanna Plateau");
+    case badlands:                      return QApplication::translate("Biome", "Badlands");
+    case wooded_badlands_plateau:       return QApplication::translate("Biome", "Wooded Badlands Plateau");
+    case badlands_plateau:              return QApplication::translate("Biome", "Badlands Plateau");
+    // 40  --  1.13
+    case small_end_islands:             return QApplication::translate("Biome", "Small End Islands");
+    case end_midlands:                  return QApplication::translate("Biome", "End Midlands");
+    case end_highlands:                 return QApplication::translate("Biome", "End Highlands");
+    case end_barrens:                   return QApplication::translate("Biome", "End Barrens");
+    case warm_ocean:                    return QApplication::translate("Biome", "Warm Ocean");
+    case lukewarm_ocean:                return QApplication::translate("Biome", "Lukewarm Ocean");
+    case cold_ocean:                    return QApplication::translate("Biome", "Cold Ocean");
+    case deep_warm_ocean:               return QApplication::translate("Biome", "Deep Warm Ocean");
+    case deep_lukewarm_ocean:           return QApplication::translate("Biome", "Deep Lukewarm Ocean");
+    case deep_cold_ocean:               return QApplication::translate("Biome", "Deep Cold Ocean");
+    // 50
+    case deep_frozen_ocean:             return QApplication::translate("Biome", "Deep Frozen Ocean");
+    // Alpha 1.2 - Beta 1.7
+    case seasonal_forest:               return QApplication::translate("Biome", "Seasonal Forest");
+    case shrubland:                     return QApplication::translate("Biome", "Shrubland");
+    case rainforest:                    return QApplication::translate("Biome", "Rain Forest");
+
+    case the_void:                      return QApplication::translate("Biome", "The Void");
+
+    // mutated variants
+    case sunflower_plains:              return QApplication::translate("Biome", "Sunflower Plains");
+    case desert_lakes:                  return QApplication::translate("Biome", "Desert Lakes");
+    case gravelly_mountains:            return QApplication::translate("Biome", "Gravelly Mountains");
+    case flower_forest:                 return QApplication::translate("Biome", "Flower Forest");
+    case taiga_mountains:               return QApplication::translate("Biome", "Taiga Mountains");
+    case swamp_hills:                   return QApplication::translate("Biome", "Swamp Hills");
+    case ice_spikes:                    return QApplication::translate("Biome", "Ice Spikes");
+    case modified_jungle:               return QApplication::translate("Biome", "Modified Jungle");
+    case modified_jungle_edge:          return QApplication::translate("Biome", "Modified Jungle Edge");
+    case tall_birch_forest:             return QApplication::translate("Biome", "Tall Birch Forest");
+    case tall_birch_hills:              return QApplication::translate("Biome", "Tall Birch Hills");
+    case dark_forest_hills:             return QApplication::translate("Biome", "Dark Forest Hills");
+    case snowy_taiga_mountains:         return QApplication::translate("Biome", "Snowy Taiga Mountains");
+    case giant_spruce_taiga:            return QApplication::translate("Biome", "Giant Spruce Taiga");
+    case giant_spruce_taiga_hills:      return QApplication::translate("Biome", "Giant Spruce Taiga Hills");
+    case modified_gravelly_mountains:   return QApplication::translate("Biome", "Gravelly Mountains+");
+    case shattered_savanna:             return QApplication::translate("Biome", "Shattered Savanna");
+    case shattered_savanna_plateau:     return QApplication::translate("Biome", "Shattered Savanna Plateau");
+    case eroded_badlands:               return QApplication::translate("Biome", "Eroded Badlands");
+    case modified_wooded_badlands_plateau: return QApplication::translate("Biome", "Modified Wooded Badlands Plateau");
+    case modified_badlands_plateau:     return QApplication::translate("Biome", "Modified Badlands Plateau");
+    // 1.14
+    case bamboo_jungle:                 return QApplication::translate("Biome", "Bamboo Jungle");
+    case bamboo_jungle_hills:           return QApplication::translate("Biome", "Bamboo Jungle Hills");
+    // 1.16
+    case soul_sand_valley:              return QApplication::translate("Biome", "Soul Sand Valley");
+    case crimson_forest:                return QApplication::translate("Biome", "Crimson Forest");
+    case warped_forest:                 return QApplication::translate("Biome", "Warped Forest");
+    case basalt_deltas:                 return QApplication::translate("Biome", "Basalt Deltas");
+    // 1.17
+    case dripstone_caves:               return QApplication::translate("Biome", "Dripstone Caves");
+    case lush_caves:                    return QApplication::translate("Biome", "Lush Caves");
+    // 1.18
+    case meadow:                        return QApplication::translate("Biome", "Meadow");
+    case grove:                         return QApplication::translate("Biome", "Grove");
+    case snowy_slopes:                  return QApplication::translate("Biome", "Snowy Slopes");
+    case stony_peaks:                   return QApplication::translate("Biome", "Stony Peaks");
+    case jagged_peaks:                  return QApplication::translate("Biome", "Jagged Peaks");
+    case frozen_peaks:                  return QApplication::translate("Biome", "Frozen Peaks");
+    // 1.19
+    case deep_dark:                     return QApplication::translate("Biome", "Deep Dark");
+    case mangrove_swamp:                return QApplication::translate("Biome", "Mangrove Swamp");
+    // 1.20
+    case cherry_grove:                  return QApplication::translate("Biome", "Cherry Grove");
+    }
+    const char *name = biome2str(mc, id);
+    return name ? name : "";
+}
 
 // get a random 64-bit integer
 static inline uint64_t getRnd64()

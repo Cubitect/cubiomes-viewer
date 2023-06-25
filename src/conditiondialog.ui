@@ -204,7 +204,7 @@
              <string/>
             </property>
             <property name="maxLength">
-             <number>26</number>
+             <number>25</number>
             </property>
             <property name="placeholderText">
              <string/>
@@ -685,8 +685,8 @@ QPushButton:hover {
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>634</width>
-                   <height>301</height>
+                   <width>98</width>
+                   <height>28</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -1069,8 +1069,8 @@ QPushButton:hover {
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>634</width>
-                   <height>254</height>
+                   <width>98</width>
+                   <height>28</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -1174,7 +1174,7 @@ QPushButton:hover {
                <widget class="QComboBox" name="comboOctaves">
                 <property name="font">
                  <font>
-                  <family>DejaVu Sans Mono</family>
+                  <family>Monospace</family>
                  </font>
                 </property>
                </widget>
@@ -1316,7 +1316,7 @@ QPushButton:hover {
                 <widget class="ScriptEditor" name="textEditLua">
                  <property name="font">
                   <font>
-                   <family>DejaVu Sans Mono</family>
+                   <family>Monospace</family>
                   </font>
                  </property>
                 </widget>
@@ -1344,7 +1344,7 @@ QPushButton:hover {
                 <widget class="QPlainTextEdit" name="textEditLuaOut">
                  <property name="font">
                   <font>
-                   <family>DejaVu Sans Mono</family>
+                   <family>Monospace</family>
                   </font>
                  </property>
                  <property name="readOnly">
@@ -1356,7 +1356,7 @@ QPushButton:hover {
                 <widget class="QLabel" name="labelLuaCall">
                  <property name="font">
                   <font>
-                   <family>DejaVu Sans Mono</family>
+                   <family>Monospace</family>
                   </font>
                  </property>
                  <property name="text">
@@ -1453,8 +1453,8 @@ QPushButton:hover {
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>634</width>
-                   <height>336</height>
+                   <width>98</width>
+                   <height>28</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_3_1">
@@ -1510,8 +1510,8 @@ QPushButton:hover {
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>634</width>
-                   <height>336</height>
+                   <width>98</width>
+                   <height>28</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_3_2">
@@ -1615,8 +1615,8 @@ QPushButton:hover {
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>634</width>
-                   <height>336</height>
+                   <width>98</width>
+                   <height>28</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_3_3">

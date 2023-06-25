@@ -10,8 +10,6 @@
 #include <QMap>
 #include <atomic>
 
-#define PRECOMPUTE48_BUFSIZ ((int64_t)1 << 30)
-
 enum
 {
     CAT_NONE,
@@ -721,7 +719,7 @@ struct /*__attribute__((packed))*/ Condition
     QString toHex() const;
     bool readHex(const QString& hex);
 
-    QString summary() const;
+    QString summary(const QFont *font) const;
 };
 
 static_assert(

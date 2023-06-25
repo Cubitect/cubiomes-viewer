@@ -2,6 +2,7 @@
 #include "ui_tabbiomes.h"
 #include "cutil.h"
 #include "world.h"
+#include "message.h"
 
 #include <QFileDialog>
 #include <QFileInfo>
@@ -18,7 +19,7 @@ void AnalysisBiomes::run()
     Generator g;
     setupGenerator(&g, wi.mc, wi.large);
 
-    for (idx = 0; idx < seeds.size(); idx++)
+    for (idx = 0; idx < (long)seeds.size(); idx++)
     {
         if (stop) break;
         wi.seed = seeds[idx];
@@ -169,7 +170,7 @@ QVariant BiomeTableModel::headerData(int section, Qt::Orientation orientation, i
         if (section < ids.size())
         {
             if (role == Qt::DisplayRole)
-                return QVariant::fromValue(QString(biome2str(cmp.mc, ids[section])));
+                return QVariant::fromValue(QString(getBiomeDisplay(cmp.mc, ids[section])));
             else
                 return QVariant::fromValue(ids[section]);
         }
@@ -338,7 +339,6 @@ TabBiomes::TabBiomes(MainWindow *parent)
     //QHeaderView *header = ui->table->horizontalHeader();
     connect(header, &QHeaderView::sortIndicatorChanged, this, &TabBiomes::onTableSort);
 
-    ui->table->setFont(*gp_font_mono);
     ui->table->setSortingEnabled(true);
 
     ui->treeLocate->setColumnWidth(0, 160);
@@ -363,10 +363,10 @@ TabBiomes::TabBiomes(MainWindow *parent)
 
     for (int id = 0; id < 256; id++)
     {
-        const char *s;
-        if ((s = biome2str(MC_1_17, id)))
+        QString s;
+        if (!(s = getBiomeDisplay(MC_1_17, id)).isEmpty())
             str2biome[s] = id;
-        if ((s = biome2str(MC_NEWEST, id)))
+        if (!(s = getBiomeDisplay(MC_NEWEST, id)).isEmpty())
             str2biome[s] = id;
     }
 
@@ -454,10 +454,10 @@ void TabBiomes::refreshBiomes(int activeid)
     std::sort(ids.begin(), ids.end(), cmp);
     ui->comboBiome->clear();
     for (int i : ids)
-        ui->comboBiome->addItem(getBiomeIcon(i), biome2str(wi.mc, i), QVariant::fromValue(i));
+        ui->comboBiome->addItem(getBiomeIcon(i), getBiomeDisplay(wi.mc, i), QVariant::fromValue(i));
     if (activeid >= 0)
     {
-        int idx = ui->comboBiome->findText(biome2str(wi.mc, activeid));
+        int idx = ui->comboBiome->findText(getBiomeDisplay(wi.mc, activeid));
         ui->comboBiome->setCurrentIndex(idx);
     }
 }
@@ -587,7 +587,7 @@ void TabBiomes::onBufferTimeout()
         qbufl.clear();
     }
 
-    QString progress = QString::asprintf(" (%d/%d)", thread.idx.load(), thread.seeds.size());
+    QString progress = QString::asprintf(" (%ld/%zu)", thread.idx.load(), thread.seeds.size());
     ui->pushStart->setText(tr("Stop") + progress);
 
     QApplication::processEvents(); // force processing of events so we can time correctly
@@ -613,7 +613,7 @@ void TabBiomes::on_pushStart_clicked()
     parent->getSeed(&thread.wi);
     thread.seeds.clear();
     if (ui->comboSeedSource->currentIndex() == 0)
-        thread.seeds.append(thread.wi.seed);
+        thread.seeds.push_back(thread.wi.seed);
     else
         thread.seeds = parent->formControl->getResults();
 
@@ -650,7 +650,7 @@ void TabBiomes::on_pushStart_clicked()
         {
             QString msg = tr("The locate biome feature is limited to an area "
                              "size smaller than the integer limit: (%1 x %2) > %3.");
-            parent->warning(msg.arg(sx).arg(sz).arg(INT_MAX));
+            warn(parent, msg.arg(sx).arg(sz).arg(INT_MAX));
             return;
         }
 
@@ -686,7 +686,7 @@ void TabBiomes::on_pushStart_clicked()
 
     ui->pushExport->setEnabled(false);
     ui->pushStart->setChecked(true);
-    QString progress = QString::asprintf(" (0/%d)", thread.seeds.size());
+    QString progress = QString::asprintf(" (0/%zu)", thread.seeds.size());
     ui->pushStart->setText(tr("Stop") + progress);
     thread.start();
 }
@@ -716,7 +716,7 @@ void TabBiomes::on_pushExport_clicked()
 
     if (!file.open(QIODevice::WriteOnly))
     {
-        parent->warning(tr("Failed to open file for export:\n\"%1\"").arg(fnam));
+        warn(parent, tr("Failed to open file for export:\n\"%1\"").arg(fnam));
         return;
     }
 
@@ -821,7 +821,7 @@ void TabBiomes::on_radioFullSample_toggled(bool checked)
 void TabBiomes::on_lineBiomeSize_textChanged(const QString &text)
 {
     double area = text.toInt();
-    ui->labelBiomeSize->setText(QString::asprintf(tr("(%g sq. chunks)").toStdString().c_str(), area / 16));
+    ui->labelBiomeSize->setText(tr("(%1 sq. chunks)").arg(area / 16));
 }
 
 void TabBiomes::on_treeLocate_itemClicked(QTreeWidgetItem *item, int column)

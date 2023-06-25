@@ -40,9 +40,9 @@ public slots:
     void on_buttonEdit_clicked();
     void on_buttonAddFilter_clicked();
 
-    void on_listConditionsFull_customContextMenuRequested(const QPoint &pos);
-    void on_listConditionsFull_itemDoubleClicked(QListWidgetItem *item);
-    void on_listConditionsFull_itemSelectionChanged();
+    void on_listConditions_customContextMenuRequested(const QPoint &pos);
+    void on_listConditions_itemDoubleClicked(QListWidgetItem *item);
+    void on_listConditions_itemSelectionChanged();
 
     void conditionsAdd();
     void conditionsEdit();
@@ -54,7 +54,7 @@ public slots:
     void addItemCondition(QListWidgetItem *item, Condition cond, int modified = 1);
 
 private slots:
-    void on_listConditionsFull_indexesMoved(const QModelIndexList &indexes);
+    void on_listConditions_indexesMoved(const QModelIndexList &indexes);
 
 protected:
     void keyReleaseEvent(QKeyEvent *event) override;

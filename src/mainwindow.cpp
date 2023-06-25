@@ -12,6 +12,7 @@
 #include "tabtriggers.h"
 #include "tabbiomes.h"
 #include "tabstructures.h"
+#include "message.h"
 
 #if WITH_UPDATER
 #include "updater.h"
@@ -37,7 +38,7 @@
 #include <QLibraryInfo>
 
 
-MainWindow::MainWindow(QWidget *parent)
+MainWindow::MainWindow(QString sessionpath, QString resultspath, QWidget *parent)
     : QMainWindow(parent)
     , ui()
     , dock()
@@ -48,6 +49,7 @@ MainWindow::MainWindow(QWidget *parent)
     , lopt()
     , config()
     , mconfig(false)
+    , sessionpath(sessionpath)
     , prevdir(".")
     , autosaveTimer()
     , prevtab(-1)
@@ -57,7 +59,10 @@ MainWindow::MainWindow(QWidget *parent)
     QSettings settings(APP_STRING, APP_STRING);
     QString lang = settings.value("config/lang", QLocale().name()).toString();
     if (!loadTranslation(lang))
+    {
         loadTranslation("en_US");
+        settings.setValue("config/lang", "en_US");
+    }
 
     ui = new Ui::MainWindow;
     dock = new QDockWidget(tr("Map"), this);
@@ -127,9 +132,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->toolBar->addAction(toorigin);
     ui->toolBar->addSeparator();
 
-    dimactions[0] = addMapAction(-1, "overworld", tr("Overworld"));
-    dimactions[1] = addMapAction(-1, "nether", tr("Nether"));
-    dimactions[2] = addMapAction(-1, "the_end", tr("End"));
+    dimactions[0] = addMapAction(":/icons/overworld", tr("Overworld"));
+    dimactions[1] = addMapAction(":/icons/nether", tr("Nether"));
+    dimactions[2] = addMapAction(":/icons/the_end", tr("End"));
     dimgroup = new QActionGroup(this);
 
     for (int i = 0; i < 3; i++)
@@ -141,33 +146,33 @@ MainWindow::MainWindow(QWidget *parent)
     dimactions[0]->setChecked(true);
 
     saction.resize(D_STRUCT_NUM);
-    addMapAction(D_GRID, "grid", tr("Show grid"));
-    addMapAction(D_SLIME, "slime", tr("Show slime chunks"));
-    addMapAction(D_SPAWN, "spawn", tr("Show world spawn"));
-    addMapAction(D_STRONGHOLD, "stronghold", tr("Show strongholds"));
-    addMapAction(D_VILLAGE, "village", tr("Show villages"));
-    addMapAction(D_MINESHAFT, "mineshaft", tr("Show abandoned mineshafts"));
-    addMapAction(D_DESERT, "desert", tr("Show desert pyramids"));
-    addMapAction(D_JUNGLE, "jungle", tr("Show jungle temples"));
-    addMapAction(D_HUT, "hut", tr("Show swamp huts"));
-    addMapAction(D_MONUMENT, "monument", tr("Show ocean monuments"));
-    addMapAction(D_IGLOO, "igloo", tr("Show igloos"));
-    addMapAction(D_MANSION, "mansion", tr("Show woodland mansions"));
-    addMapAction(D_RUINS, "ruins", tr("Show ocean ruins"));
-    addMapAction(D_SHIPWRECK, "shipwreck", tr("Show shipwrecks"));
-    addMapAction(D_TREASURE, "treasure", tr("Show buried treasures"));
-    addMapAction(D_WELL, "well", tr("Show desert wells"));
-    addMapAction(D_GEODE, "geode", tr("Show amethyst geodes"));
-    addMapAction(D_OUTPOST, "outpost", tr("Show pillager outposts"));
-    addMapAction(D_PORTAL, "portal", tr("Show ruined portals"));
-    addMapAction(D_ANCIENTCITY, "ancient_city", tr("Show ancient cities"));
-    addMapAction(D_TRAIL, "trail", tr("Show trail ruins"));
+    addMapAction(D_GRID);
+    addMapAction(D_SLIME);
+    addMapAction(D_SPAWN);
+    addMapAction(D_STRONGHOLD);
+    addMapAction(D_VILLAGE);
+    addMapAction(D_MINESHAFT);
+    addMapAction(D_DESERT);
+    addMapAction(D_JUNGLE);
+    addMapAction(D_HUT);
+    addMapAction(D_MONUMENT);
+    addMapAction(D_IGLOO);
+    addMapAction(D_MANSION);
+    addMapAction(D_RUINS);
+    addMapAction(D_SHIPWRECK);
+    addMapAction(D_TREASURE);
+    addMapAction(D_WELL);
+    addMapAction(D_GEODE);
+    addMapAction(D_OUTPOST);
+    addMapAction(D_PORTAL);
+    addMapAction(D_ANCIENTCITY);
+    addMapAction(D_TRAILS);
     ui->toolBar->addSeparator();
-    addMapAction(D_FORTESS, "fortress", tr("Show nether fortresses"));
-    addMapAction(D_BASTION, "bastion", tr("Show bastions"));
+    addMapAction(D_FORTESS);
+    addMapAction(D_BASTION);
     ui->toolBar->addSeparator();
-    addMapAction(D_ENDCITY, "endcity", tr("Show end cities"));
-    addMapAction(D_GATEWAY, "gateway", tr("Show end gateways"));
+    addMapAction(D_ENDCITY);
+    addMapAction(D_GATEWAY);
 
     saction[D_GRID]->setChecked(true);
 
@@ -246,6 +251,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->collapseControl->init(tr("Matching seeds"), formControl, false);
     connect(formControl, &FormSearchControl::selectedSeedChanged, this, &MainWindow::onSelectedSeedChanged);
     connect(formControl, &FormSearchControl::searchStatusChanged, this, &MainWindow::onSearchStatusChanged);
+    if (!resultspath.isEmpty())
+        formControl->setResultsPath(resultspath);
     ui->collapseControl->setInfo(
         tr("Help: Matching seeds"),
         tr(
@@ -299,30 +306,33 @@ bool MainWindow::loadTranslation(QString lang)
     return true;
 }
 
-QAction *MainWindow::addMapAction(int sopt, const char *iconpath, QString tip)
+QAction *MainWindow::addMapAction(int opt)
 {
-    QIcon icon;
-    QString inam = QString(":icons/") + iconpath;
-    QPixmap pix_on = QPixmap(inam + ".png");
-    QPixmap pix_off = QPixmap(inam + "_d.png");
+    QString rc = QString(":/icons/") + mapopt2str(opt);
+    QString tip = tr("Show %1").arg(mapopt2display(opt));
+    QAction *action = addMapAction(rc, tip);
+    action->connect(action, &QAction::toggled, [=](bool state){ this->onActionMapToggled(opt, state); });
+    saction[opt] = action;
+    return action;
+}
+
+QAction *MainWindow::addMapAction(QString rcbase, QString tip)
+{
+    QPixmap pix_on = QPixmap(rcbase + ".png");
+    QPixmap pix_off = QPixmap(rcbase + "_d.png");
     if (pix_on.size().width() > 20)
     {
         pix_on = pix_on.scaledToWidth(20);
         pix_off = pix_off.scaledToWidth(20);
     }
+    QIcon icon;
     icon.addPixmap(pix_on, QIcon::Normal, QIcon::On);
     icon.addPixmap(pix_off, QIcon::Normal, QIcon::Off);
     QAction *action = new QAction(icon, tip, this);
     action->setCheckable(true);
     ui->toolBar->addAction(action);
-    if (sopt >= 0)
-    {
-        action->connect(action, &QAction::toggled, [=](bool state){ this->onActionMapToggled(sopt, state); });
-        saction[sopt] = action;
-    }
     return action;
 }
-
 
 MapView* MainWindow::getMapView()
 {
@@ -375,29 +385,24 @@ bool MainWindow::setSeed(WorldInfo wi, int dim)
     else
         dim = getDim();
 
-    MapView *mapview = getMapView();
-    uint64_t current = mapview->world ? mapview->world->wi.seed : wi.seed;
-    if (current != wi.seed)
+    const QList<QAction*> hist = ui->menuHistory->actions();
+
+    if (hist.empty() || hist.front()->data().toULongLong() != wi.seed)
     {
-        QList<QAction*> hist = ui->menuHistory->actions();
-        bool rm = false;
-        for (QAction *act : qAsConst(hist))
+        QAction *rm = nullptr;
+        if (hist.size() >= 16)
+            rm = hist.back();
+        for (QAction *act : hist)
+            if (act->data().toULongLong() == wi.seed)
+                rm = act;
+        if (rm)
         {
-            if (act->data().toULongLong() == current)
-            {
-                ui->menuHistory->removeAction(act);
-                hist.back()->deleteLater();
-                rm = true;
-            }
+            ui->menuHistory->removeAction(rm);
+            rm->deleteLater();
         }
-        if (!rm && hist.size() >= 12)
-        {
-            ui->menuHistory->removeAction(hist.back());
-            hist.back()->deleteLater();
-        }
-        QString s = QString::asprintf("%" PRId64, current);
+        QString s = QString::asprintf("%" PRId64, wi.seed);
         QAction *act = new QAction(s, this);
-        act->setData(QVariant::fromValue(current));
+        act->setData(QVariant::fromValue(wi.seed));
         act->connect(act, &QAction::triggered, [=](){ this->onActionHistory(act); });
         ui->menuHistory->insertAction(hist.empty() ? 0 : hist.first(), act);
         ui->menuHistory->setEnabled(true);
@@ -476,11 +481,7 @@ void MainWindow::saveSettings()
 
     if (config.restoreSession)
     {
-        QString path = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
-        QDir dir(path);
-        if (!dir.exists())
-            dir.mkpath(".");
-        saveProgress(path + "/session.save", true);
+        saveSession(sessionpath, true);
     }
 }
 
@@ -535,176 +536,52 @@ void MainWindow::loadSettings()
     onUpdateConfig();
     onUpdateMapConfig();
 
-    if (config.restoreSession)
+    if (config.restoreSession && QFile::exists(sessionpath))
     {
-        QString path = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
-        path += "/session.save";
-        if (QFile::exists(path))
-        {
-            loadProgress(path, false, false);
-        }
+        loadSession(sessionpath, false, false);
     }
 }
 
 
-bool MainWindow::saveProgress(QString fnam, bool quiet)
+bool MainWindow::saveSession(QString fnam, bool quiet)
 {
-    QFile file(fnam);
+    Session session;
+    session.sc = formControl->getSearchConfig();
+    session.gen48 = formGen48->getConfig(false);
+    session.cv = formCond->getConditions();
+    session.slist = formControl->getResults();
+    getSeed(&session.wi);
 
-    if (!file.open(QIODevice::WriteOnly))
-    {
-        if (!quiet)
-            warning(tr("Failed to open file:\n\"%1\"").arg(fnam));
-        return false;
-    }
-
-    SearchConfig searchconf = formControl->getSearchConfig();
-    Gen48Config gen48 = formGen48->getConfig(false);
-    QVector<Condition> condvec = formCond->getConditions();
-    QVector<uint64_t> results = formControl->getResults();
-
-    WorldInfo wi;
-    getSeed(&wi);
-
-    QTextStream stream(&file);
-    stream << "#Version:  " << VERS_MAJOR << "." << VERS_MINOR << "." << VERS_PATCH << "\n";
-    stream << "#Time:     " << QDateTime::currentDateTime().toString() << "\n";
-    // MC version of the session should take priority over the one in the settings
-    wi.write(stream);
-
-    searchconf.write(stream);
-    gen48.write(stream);
-
-    for (Condition &c : condvec)
-        stream << "#Cond: " << c.toHex() << "\n";
-
-    for (uint64_t s : qAsConst(results))
-        stream << QString::asprintf("%" PRId64 "\n", (int64_t)s);
-
-    return true;
+    return session.save(this, fnam, quiet);
 }
 
-bool MainWindow::loadProgress(QString fnam, bool keepresults, bool quiet)
+bool MainWindow::loadSession(QString fnam, bool keepresults, bool quiet)
 {
-    QFile file(fnam);
+    Session session;
+    // build current session before loading to keep unspecified values the same
+    getSeed(&session.wi);
+    session.sc = formControl->getSearchConfig();
+    session.gen48 = formGen48->getConfig(false);
 
-    if (!file.open(QIODevice::ReadOnly))
-    {
-        if (!quiet)
-            warning(tr("Failed to open progress file:\n\"%1\"").arg(fnam));
+    if (!session.load(this, fnam, quiet))
         return false;
-    }
 
-    int major = 0, minor = 0, patch = 0;
-    SearchConfig searchconf = formControl->getSearchConfig();
-    Gen48Config gen48 = formGen48->getConfig(false);
-    QVector<Condition> condvec;
-    QVector<uint64_t> seeds;
-
-    WorldInfo wi;
-    getSeed(&wi, true);
-
-    QTextStream stream(&file);
-    QString line;
-    line = stream.readLine();
-    int lno = 1;
-
-    if (sscanf(line.toLocal8Bit().data(), "#Version: %d.%d.%d", &major, &minor, &patch) != 3)
-    {
-        if (quiet)
-            return false;
-        int button = QMessageBox::warning(this, tr("Warning"),
-            tr("File does not look like a progress file.\n"
-            "Progress may be incomplete or broken.\n\n"
-            "Continue anyway?"),
-            QMessageBox::Abort|QMessageBox::Yes);
-        if (button == QMessageBox::Abort)
-            return false;
-    }
-    else if (cmpVers(major, minor, patch) > 0)
-    {
-        if (quiet)
-            return false;
-        int button = QMessageBox::warning(this, tr("Warning"),
-            tr("File was created with a newer version.\n"
-            "Progress may be incomplete or broken.\n\n"
-            "Continue loading progress anyway?"),
-            QMessageBox::Abort|QMessageBox::Yes);
-        if (button == QMessageBox::Abort)
-            return false;
-    }
-
-    while (stream.status() == QTextStream::Ok && !stream.atEnd())
-    {
-        lno++;
-        line = stream.readLine();
-
-        if (line.isEmpty()) continue;
-        if (line.startsWith("#Time:")) continue;
-        if (line.startsWith("#Title:")) continue;
-        if (line.startsWith("#Desc:")) continue;
-        if (searchconf.read(line)) continue;
-        if (gen48.read(line)) continue;
-        if (wi.read(line)) continue;
-
-        if (line.startsWith("#Cond:"))
-        {   // Conditions
-            Condition c;
-            if (c.readHex(line.mid(6).trimmed()))
-            {
-                condvec.push_back(c);
-            }
-            else
-            {
-                if (quiet)
-                    return false;
-                int button = QMessageBox::warning(this, tr("Warning"),
-                    tr("Condition [%1] at line %2 is not supported.\n\n"
-                    "Continue anyway?").arg(c.save).arg(lno),
-                    QMessageBox::Abort|QMessageBox::Yes);
-                if (button == QMessageBox::Abort)
-                    return false;
-            }
-        }
-        else
-        {   // Seeds
-            QByteArray ba = line.toLocal8Bit();
-            const char *p = ba.data();
-            uint64_t s;
-            if (sscanf(p, "%" PRId64, (int64_t*)&s) == 1)
-            {
-                seeds.push_back(s);
-            }
-            else
-            {
-                if (quiet)
-                    return false;
-                int button = QMessageBox::warning(this, tr("Warning"),
-                    tr("Failed to parse line %1 of progress file:\n%2\n\n"
-                    "Continue anyway?").arg(lno).arg(line),
-                    QMessageBox::Abort|QMessageBox::Yes);
-                if (button == QMessageBox::Abort)
-                    return false;
-            }
-        }
-    }
-
-    setSeed(wi);
+    setSeed(session.wi);
 
     formCond->on_buttonRemoveAll_clicked();
-    for (Condition &c : condvec)
+    for (Condition &c : session.cv)
     {
         QListWidgetItem *item = new QListWidgetItem();
         formCond->addItemCondition(item, c);
     }
 
-    formGen48->setConfig(gen48, quiet);
+    formGen48->setConfig(session.gen48, quiet);
     formGen48->updateCount();
 
     if (!keepresults)
         formControl->on_buttonClear_clicked();
-    formControl->setSearchConfig(searchconf, quiet);
-    formControl->searchResultsAdd(seeds, false);
+    formControl->setSearchConfig(session.sc, quiet);
+    formControl->searchResultsAdd(session.slist, false);
     formControl->searchProgressReset();
 
     return true;
@@ -760,27 +637,6 @@ void MainWindow::setDockable(bool dockable)
     }
 }
 
-void MainWindow::applyConfigChanges(const Config old, const Config conf)
-{
-    this->config = conf;
-    getMapView()->setConfig(conf);
-    if (old.uistyle != conf.uistyle)
-        onStyleChanged(conf.uistyle);
-
-    if (conf.autosaveCycle)
-    {
-        autosaveTimer.setInterval(conf.autosaveCycle * 60000);
-        autosaveTimer.start();
-    }
-    else
-    {
-        autosaveTimer.stop();
-    }
-
-    if (!conf.biomeColorPath.isEmpty() || !old.biomeColorPath.isEmpty())
-        onBiomeColorChange();
-}
-
 void MainWindow::setMCList(bool experimental)
 {
     WorldInfo wi;
@@ -806,11 +662,6 @@ void MainWindow::setMCList(bool experimental)
     ui->comboBoxMC->addItems(mclist);
     ui->comboBoxMC->setCurrentText(s);
     ui->comboBoxMC->setEnabled(true);
-}
-
-int MainWindow::warning(QString text, QMessageBox::StandardButtons buttons)
-{
-    return QMessageBox::warning(this, tr("Warning"), text, buttons);
 }
 
 void MainWindow::mapGoto(qreal x, qreal z, qreal scale)
@@ -867,7 +718,7 @@ void MainWindow::on_actionSave_triggered()
     {
         QFileInfo finfo(fnam);
         prevdir = finfo.absolutePath();
-        saveProgress(fnam);
+        saveSession(fnam);
     }
 }
 
@@ -879,7 +730,7 @@ void MainWindow::on_actionLoad_triggered()
     {
         QFileInfo finfo(fnam);
         prevdir = finfo.absolutePath();
-        loadProgress(fnam, false, false);
+        loadSession(fnam, false, false);
     }
 }
 
@@ -934,7 +785,7 @@ void MainWindow::on_actionPresetLoad_triggered()
     PresetDialog *dialog = new PresetDialog(this, wi, false);
     dialog->setActiveFilter(formCond->getConditions());
     if (dialog->exec() && !dialog->rc.isEmpty())
-        loadProgress(dialog->rc, true, false);
+        loadSession(dialog->rc, true, false);
 }
 
 void MainWindow::on_actionExamples_triggered()
@@ -944,7 +795,7 @@ void MainWindow::on_actionExamples_triggered()
     PresetDialog *dialog = new PresetDialog(this, wi, true);
     dialog->setActiveFilter(formCond->getConditions());
     if (dialog->exec() && !dialog->rc.isEmpty())
-        loadProgress(dialog->rc, true, false);
+        loadSession(dialog->rc, true, false);
 }
 
 void MainWindow::on_actionAbout_triggered()
@@ -965,8 +816,8 @@ void MainWindow::on_actionPaste_triggered()
 
 void MainWindow::on_actionAddShadow_triggered()
 {
-    const QVector<uint64_t> results = formControl->getResults();
-    QVector<uint64_t> shadows;
+    const std::vector<uint64_t> results = formControl->getResults();
+    std::vector<uint64_t> shadows;
     shadows.reserve(results.size());
     for (uint64_t s : results)
         shadows.push_back( getShadow(s) );
@@ -1059,7 +910,7 @@ void MainWindow::onAutosaveTimeout()
     if (config.autosaveCycle)
     {
         QString path = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
-        saveProgress(path + "/session.save", true);
+        saveSession(path + "/session.save", true);
         //int dispms = 10000;
         //if (saveProgress(path + "/session.save", true))
         //    ui->statusBar->showMessage(tr("Session autosaved"), dispms);
@@ -1072,8 +923,8 @@ void MainWindow::onActionHistory(QAction *act)
 {
     uint64_t seed = act->data().toULongLong();
     onSelectedSeedChanged(seed);
-    ui->menuHistory->removeAction(act);
-    act->deleteLater();
+    //ui->menuHistory->removeAction(act);
+    //act->deleteLater();
 }
 
 void MainWindow::onActionMapToggled(int sopt, bool show)
@@ -1129,8 +980,7 @@ void MainWindow::onUpdateConfig()
 
     if (old.lang != config.lang)
     {
-        QString msg = tr("The application will need to be restarted before all changes can take effect.");
-        QMessageBox::information(this, tr("Restart required"), msg);
+        info(this, tr("The application will need to be restarted before all changes can take effect."));
     }
 
     getMapView()->setConfig(config);
@@ -1138,6 +988,38 @@ void MainWindow::onUpdateConfig()
         onStyleChanged(config.uistyle);
     if (!old.biomeColorPath.isEmpty() || !config.biomeColorPath.isEmpty())
         onBiomeColorChange();
+
+    if (old.fontNorm != config.fontNorm || old.fontMono != config.fontMono)
+    {
+        QFont fnorm = config.fontNorm;
+        QFont fmono = config.fontMono;
+        QFont fbold;
+        if (fnorm.family() == "Monospace") // avoid identification conflict
+            fnorm = QApplication::font();
+        fnorm.setStyleHint(QFont::AnyStyle);
+        fmono.setStyleHint(QFont::Monospace);
+        fmono.setFixedPitch(true);
+
+        fbold = fnorm;
+        fbold.setBold(true);
+
+        QApplication::setFont(fnorm);
+
+        QWidgetList wlist = QApplication::allWidgets();
+        for (QWidget *w : qAsConst(wlist))
+        {
+            const QFont& f = w->font();
+            if (f.styleHint() == QFont::Monospace || f.family() == "Monospace")
+                w->setFont(fmono);
+            else if (f.bold())
+                w->setFont(fbold);
+            else
+                w->setFont(fnorm);
+        }
+        // update cascade
+        for (QWidget *w : qAsConst(wlist))
+            w->update();
+    }
 
     if (config.autosaveCycle)
     {
