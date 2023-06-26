@@ -437,14 +437,14 @@ static const struct FilterList
             ":icons/the_end.png",
             QT_TRANSLATE_NOOP("Filter", "End biomes 1:16"),
             QT_TRANSLATE_NOOP("Filter",
-            "End biomes with normal sampling at scale 1:16. ")
+            "End biomes with normal sampling at scale 1:16.")
         };
         list[F_BIOME_END_64] = FilterInfo{
             CAT_END, 0, 1, 1, 0, 0, 0, 64, 6, 0, MC_1_9, MC_NEWEST, +1, 0, disp++,
             ":icons/the_end.png",
             QT_TRANSLATE_NOOP("Filter", "End biomes 1:64"),
             QT_TRANSLATE_NOOP("Filter",
-            "End biomes with lossy sampling at scale 1:64. ")
+            "End biomes with lossy sampling at scale 1:64.")
         };
 
         list[F_SPAWN] = FilterInfo{
@@ -719,7 +719,7 @@ struct /*__attribute__((packed))*/ Condition
     QString toHex() const;
     bool readHex(const QString& hex);
 
-    QString summary(const QFont *font) const;
+    QString summary(bool aligntab) const;
 };
 
 static_assert(

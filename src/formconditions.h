@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QListWidgetItem>
+#include <QStyledItemDelegate>
 
 #include "searchthread.h"
 
@@ -13,6 +14,17 @@ class FormConditions;
 class MainWindow;
 
 Q_DECLARE_METATYPE(Condition)
+
+class ItemDelegate : public QStyledItemDelegate
+{
+    Q_OBJECT
+
+public:
+    explicit ItemDelegate(QObject *parent = nullptr);
+    virtual ~ItemDelegate();
+
+    virtual void paint(QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+};
 
 class FormConditions : public QWidget
 {

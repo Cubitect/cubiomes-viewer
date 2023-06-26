@@ -173,7 +173,7 @@ Leave blank for the default behaviour</string>
       <item row="2" column="0" colspan="2">
        <widget class="QLabel" name="label_12">
         <property name="text">
-         <string>Font default:</string>
+         <string>Application font:</string>
         </property>
        </widget>
       </item>
@@ -383,7 +383,7 @@ QPushButton:hover {
       <item row="3" column="0" colspan="2">
        <widget class="QLabel" name="label_13">
         <property name="text">
-         <string>Font monospace:</string>
+         <string>Monospace font:</string>
         </property>
        </widget>
       </item>

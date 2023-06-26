@@ -35,6 +35,12 @@ QVariant SeedTableModel::data(const QModelIndex& index, int role) const
             return seeds[index.row()].varTop16;
         return seeds[index.row()].varSeed;
     }
+    else if (role == Qt::TextAlignmentRole)
+    {
+        static QVariant align = QVariant::fromValue((int)Qt::AlignRight | Qt::AlignVCenter);
+        if (index.column() != COL_HEX48)
+            return align;
+    }
     return QVariant::Invalid;
 }
 
@@ -122,7 +128,7 @@ FormSearchControl::FormSearchControl(MainWindow *parent)
     ui->results->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     ui->results->verticalHeader()->setDefaultSectionSize(QFontMetrics(ui->results->font()).height());
     ui->results->setColumnWidth(SeedTableModel::COL_SEED, 200);
-    ui->results->setColumnWidth(SeedTableModel::COL_TOP16, 60);
+    ui->results->setColumnWidth(SeedTableModel::COL_TOP16, 80);
     ui->results->setColumnWidth(SeedTableModel::COL_HEX48, 120);
 
     connect(ui->results->horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &FormSearchControl::onSort);

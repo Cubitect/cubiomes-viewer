@@ -262,7 +262,7 @@ void BiomeHeader::paintSection(QPainter *painter, const QRect& rect, int section
 
     QString s = model()->headerData(section, orientation()).toString();
     painter->setFont(font());
-    QFontMetrics fm(font());
+    QFontMetrics fm = fontMetrics();
     int indicator_height = 0;
     int margin = 2 * style()->pixelMetric(QStyle::PM_HeaderMargin, 0, this);
     QStyleOptionHeader::SortIndicator sortindicator = QStyleOptionHeader::None;
@@ -310,11 +310,10 @@ QSize BiomeHeader::sectionSizeFromContents(int section) const
     if (!model())
         return QSize();
     int margin = 2 * style()->pixelMetric(QStyle::PM_HeaderMargin, 0, this);
-    QFontMetrics fm(font());
+    QFontMetrics fm = fontMetrics();
     int w = fm.boundingRect(model()->headerData(section, orientation()).toString()).width();
     return QSize(fm.height() + 2*margin, w + 2*margin);
 }
-
 
 
 TabBiomes::TabBiomes(MainWindow *parent)
@@ -336,8 +335,8 @@ TabBiomes::TabBiomes(MainWindow *parent)
 
     BiomeHeader *header = new BiomeHeader(ui->table);
     ui->table->setHorizontalHeader(header);
-    //QHeaderView *header = ui->table->horizontalHeader();
     connect(header, &QHeaderView::sortIndicatorChanged, this, &TabBiomes::onTableSort);
+    connect(ui->table->verticalHeader(), &QHeaderView::sectionClicked, this, &TabBiomes::onVHeaderClicked);
 
     ui->table->setSortingEnabled(true);
 
@@ -489,6 +488,19 @@ void TabBiomes::onTableSort(int, Qt::SortOrder)
     }
 }
 
+void TabBiomes::onVHeaderClicked(int row)
+{
+    QVariant dat = proxy->headerData(row, Qt::Vertical, Qt::DisplayRole);
+    if (dat.isValid())
+    {
+        uint64_t seed = qvariant_cast<uint64_t>(dat);
+        WorldInfo wi;
+        parent->getSeed(&wi);
+        wi.seed = seed;
+        parent->setSeed(wi);
+    }
+}
+
 void TabBiomes::onAnalysisSeedDone(uint64_t seed, QVector<uint64_t> idcnt)
 {
     idcnt.push_back(seed);
@@ -538,7 +550,7 @@ void TabBiomes::onBufferTimeout()
 
         QList<uint64_t> new_seeds;
         QSet<int> new_ids;
-        QFontMetrics fm(font());
+        QFontMetrics fm = fontMetrics();
 
         for (int i = 0, n = qbufs.size(); i < n; i++)
         {
@@ -786,16 +798,6 @@ void TabBiomes::on_pushExport_clicked()
     }
 }
 
-void TabBiomes::on_table_doubleClicked(const QModelIndex &index)
-{
-    uint64_t seed = model->seeds[index.column()];
-    int id = model->ids[index.row()];
-    WorldInfo wi;
-    parent->getSeed(&wi);
-    wi.seed = seed;
-    parent->setSeed(wi, getDimension(id));
-}
-
 void TabBiomes::on_buttonFromVisible_clicked()
 {
     MapView *mapview = parent->getMapView();
@@ -859,3 +861,4 @@ void TabBiomes::on_tabWidget_currentChanged(int)
     }
     ui->pushExport->setEnabled(ok);
 }
+

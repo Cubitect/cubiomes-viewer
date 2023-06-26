@@ -143,7 +143,7 @@ QString mapopt2display(int opt)
     case D_GEODE:       return QApplication::translate("Map", "Geode");
     case D_OUTPOST:     return QApplication::translate("Map", "Pillager Outpost");
     case D_ANCIENTCITY: return QApplication::translate("Map", "Ancient City");
-    case D_TRAILS:       return QApplication::translate("Map", "Trail Ruins");
+    case D_TRAILS:      return QApplication::translate("Map", "Trail Ruins");
     case D_PORTAL:      return QApplication::translate("Map", "Ruined Portal");
     case D_PORTALN:     return QApplication::translate("Map", "Ruined Portal (Nether)");
     case D_SPAWN:       return QApplication::translate("Map", "Spawn");

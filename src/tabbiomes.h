@@ -63,9 +63,10 @@ public:
     void insertSeeds(QList<uint64_t>& seeds);
     void reset(int mc);
 
-    QList<int> ids;
-    QList<uint64_t> seeds;
+    QList<int> ids; // biome column (-1 for the biome count)
+    QList<uint64_t> seeds; // seed rows
     QMap<int, QMap<uint64_t, QVariant>> cnt; // cnt[id][seed]
+    QMap<uint64_t, int> bnum; // number of biomes for seed
     IdCmp cmp;
 };
 
@@ -132,6 +133,7 @@ public:
 private slots:
     void onLocateHeaderClick();
     void onTableSort(int column, Qt::SortOrder);
+    void onVHeaderClicked(int row);
     void onAnalysisSeedDone(uint64_t seed, QVector<uint64_t> idcnt);
     void onAnalysisSeedItem(QTreeWidgetItem *item);
     void onAnalysisFinished();
@@ -139,7 +141,6 @@ private slots:
 
     void on_pushStart_clicked();
     void on_pushExport_clicked();
-    void on_table_doubleClicked(const QModelIndex &index);
     void on_buttonFromVisible_clicked();
     void on_radioFullSample_toggled(bool checked);
     void on_lineBiomeSize_textChanged(const QString &arg1);

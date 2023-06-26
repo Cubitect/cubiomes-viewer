@@ -259,7 +259,7 @@ void PresetDialog::on_buttonSave_clicked()
 
 void PresetDialog::on_buttonDelete_clicked()
 {
-    QList<QListWidgetItem*> selected = ui->listFilters->selectedItems();
+    const QList<QListWidgetItem*> selected = ui->listFilters->selectedItems();
     for (QListWidgetItem *item : selected)
     {
         QString filerc = qvariant_cast<QString>(item->data(Qt::UserRole));

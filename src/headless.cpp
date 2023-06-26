@@ -128,7 +128,7 @@ void Headless::start()
 {
     qOut() << "Condition summary:\n";
     for (const Condition& cond : qAsConst(session.cv))
-        qOut() << cond.summary(nullptr) << "\n";
+        qOut() << cond.summary(false) << "\n";
 
     if (sthread.isdone)
     {

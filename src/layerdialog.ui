@@ -38,7 +38,7 @@
    <item row="8" column="0">
     <widget class="QRadioButton" name="radioNoiseW">
      <property name="text">
-      <string>Weirdness octaves</string>
+      <string>Weirdness octaves:</string>
      </property>
     </widget>
    </item>

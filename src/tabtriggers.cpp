@@ -28,9 +28,8 @@ QTreeWidgetItem *setConditionTreeItems(ConditionTree& ctree, int node, int64_t s
     else
     {
         item = new QTreeWidgetItem(parent);
-        QFont font = item->font(1);
         item->setText(0, "-");
-        item->setText(1, c.summary(&font));
+        item->setText(1, c.summary(true));
 
         if ((p.x == -1 && p.z == -1) || c.type == F_LOGIC_NOT)
             posval = false;

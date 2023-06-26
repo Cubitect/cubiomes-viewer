@@ -21,12 +21,49 @@ QDataStream& operator>>(QDataStream& in, Condition& v)
     return in;
 }
 
+
+ItemDelegate::ItemDelegate(QObject *parent)
+    : QStyledItemDelegate(parent)
+{
+}
+
+ItemDelegate::~ItemDelegate()
+{
+}
+
+void ItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+    QStyleOptionViewItem opt = option;
+    initStyleOption(&opt, index);
+
+    const QWidget *widget = option.widget;
+    QStyle *style = widget ? widget->style() : QApplication::style();
+
+    int tabwidth = option.fontMetrics.horizontalAdvance('x') * 32;
+    QRect rect = opt.rect;
+    opt.rect.setWidth(tabwidth);
+
+    const QStringList txts = index.data(Qt::DisplayRole).toString().split('\t');
+    for (int i = 0, n = txts.size(); i < n; i++)
+    {
+        if (i == n-1 || opt.rect.right() > rect.right())
+            opt.rect.setRight(rect.right());
+        opt.text = txts[i];
+        style->drawControl(QStyle::CE_ItemViewItem, &opt, painter, widget);
+        opt.rect.adjust(tabwidth, 0, tabwidth, 0);
+        if (opt.rect.left() >= rect.right())
+            break;
+    }
+}
+
 FormConditions::FormConditions(QWidget *parent)
     : QWidget(parent)
     , parent(dynamic_cast<MainWindow*>(parent))
     , ui(new Ui::FormConditions)
 {
     ui->setupUi(this);
+
+    ui->listConditions->setItemDelegate(new ItemDelegate);
 
     if (!this->parent)
     {
@@ -153,7 +190,7 @@ void FormConditions::setItemCondition(QListWidget *list, QListWidgetItem *item, 
         cond->save = getIndex(cond->save);
     }
 
-    QString s = cond->summary(&ui->listConditions->font());
+    QString s = cond->summary(true);
 
     const FilterInfo& ft = g_filterinfo.list[cond->type];
     if (ft.cat == CAT_QUAD)
@@ -178,7 +215,7 @@ void FormConditions::editCondition(QListWidgetItem *item)
 
 static void remove_selected(QListWidget *list)
 {
-    QList<QListWidgetItem*> selected = list->selectedItems();
+    const QList<QListWidgetItem*> selected = list->selectedItems();
     for (QListWidgetItem *item : selected)
     {
         delete list->takeItem(list->row(item));
@@ -200,12 +237,12 @@ void FormConditions::on_buttonRemove_clicked()
 void FormConditions::on_buttonDisable_clicked()
 {
     emit changed();
-    QList<QListWidgetItem*> selected = ui->listConditions->selectedItems();
+    const QList<QListWidgetItem*> selected = ui->listConditions->selectedItems();
     for (QListWidgetItem *item : selected)
     {
         Condition c = qvariant_cast<Condition>(item->data(Qt::UserRole));
         c.meta ^= Condition::DISABLED;
-        item->setText(c.summary(&font()));
+        item->setText(c.summary(true));
         item->setData(Qt::UserRole, QVariant::fromValue(c));
     }
     updateSensitivity();
@@ -323,7 +360,7 @@ void FormConditions::conditionsCut()
 void FormConditions::conditionsCopy()
 {
     QString text;
-    QList<QListWidgetItem*> selected = ui->listConditions->selectedItems();
+    const QList<QListWidgetItem*> selected = ui->listConditions->selectedItems();
     for (QListWidgetItem *item : selected)
     {
         Condition c = qvariant_cast<Condition>(item->data(Qt::UserRole));
@@ -338,10 +375,10 @@ int FormConditions::conditionsPaste(bool countonly)
     if (!parent)
         return 0;
     QClipboard *clipboard = QGuiApplication::clipboard();
-    QStringList slist = clipboard->text().split('\n');
+    const QStringList slist = clipboard->text().split('\n');
     Condition c;
     int cnt = 0;
-    for (QString s : slist)
+    for (const QString& s : slist)
     {
         if (!c.readHex(s))
             continue;

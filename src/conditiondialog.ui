@@ -204,7 +204,7 @@
              <string/>
             </property>
             <property name="maxLength">
-             <number>25</number>
+             <number>26</number>
             </property>
             <property name="placeholderText">
              <string/>

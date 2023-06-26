@@ -18,7 +18,7 @@
 
 #define MULTIPLY_CHAR QChar(0xD7)
 
-QString Condition::summary(const QFont *font) const
+QString Condition::summary(bool aligntab) const
 {
     const FilterInfo& ft = g_filterinfo.list[type];
     QString s;
@@ -58,19 +58,10 @@ QString Condition::summary(const QFont *font) const
         }
     }
 
-    if (font)
-    {
-        s += " " + txts;
-        QFontMetrics fm(*font);
-        int w = fm.horizontalAdvance(QString("%1").arg("#", 30));
-        while (fm.horizontalAdvance(s + "\t") < w)
-            s += "\t";
-    }
+    if (aligntab)
+        s += QString(" %1\t%2").arg(txts).arg(cnts, -4);
     else
-    {
-        s += QString(" %1").arg(txts, -25);
-    }
-    s += QString("\t%1").arg(cnts, -3);
+        s += QString(" %1%2").arg(txts, -26).arg(cnts, -4);
     if (relative)
         s += QString::asprintf("[%02d]+", relative);
     else

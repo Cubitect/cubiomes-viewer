@@ -90,7 +90,7 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
             if (c.save == initcond->relative)
                 initindex = ui->comboBoxRelative->count();
         }
-        QString condstr = c.summary(nullptr).simplified();
+        QString condstr = c.summary(false).simplified();
         ui->comboBoxRelative->addItem(condstr, c.save);
     }
     if (initindex < 0)
