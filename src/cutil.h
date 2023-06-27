@@ -286,6 +286,10 @@ struct IdCmp
     int dim;
     bool operator() (int id1, int id2)
     {
+        if (id1 == id2) return false;
+        // treat 256 as a special case with high priority
+        if (id1 == 256) return true;
+        if (id2 == 256) return false;
         if (mode == SORT_ID)
             return id1 < id2;
         int v1 = 1, v2 = 1;

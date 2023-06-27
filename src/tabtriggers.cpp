@@ -29,7 +29,7 @@ QTreeWidgetItem *setConditionTreeItems(ConditionTree& ctree, int node, int64_t s
     {
         item = new QTreeWidgetItem(parent);
         item->setText(0, "-");
-        item->setText(1, c.summary(true));
+        item->setText(1, c.summary(false));
 
         if ((p.x == -1 && p.z == -1) || c.type == F_LOGIC_NOT)
             posval = false;

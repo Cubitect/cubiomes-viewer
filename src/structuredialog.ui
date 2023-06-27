@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>StructureDialog</class>
  <widget class="QDialog" name="StructureDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>413</width>
+    <height>86</height>
+   </rect>
+  </property>
   <property name="windowTitle">
    <string>Structure Visibility</string>
   </property>

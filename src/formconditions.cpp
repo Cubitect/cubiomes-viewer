@@ -39,7 +39,7 @@ void ItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem& option, 
     const QWidget *widget = option.widget;
     QStyle *style = widget ? widget->style() : QApplication::style();
 
-    int tabwidth = option.fontMetrics.horizontalAdvance('x') * 32;
+    int tabwidth = option.fontMetrics.horizontalAdvance('#') * 32;
     QRect rect = opt.rect;
     opt.rect.setWidth(tabwidth);
 

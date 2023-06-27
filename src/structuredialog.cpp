@@ -19,11 +19,11 @@ StructureDialog::StructureDialog(QWidget *parent)
     ui->setupUi(this);
     QGridLayout *grid = new QGridLayout(ui->groupVis);
 
-    grid->addWidget(new QLabel(tr("enabled")), 0, 0, 1, 3);
-    grid->addWidget(new QLabel(tr("blocks per pixel")), 0, 3);
+    grid->addWidget(new QLabel(tr("Enabled map options")), 0, 0, 1, 3);
+    grid->addWidget(new QLabel(tr("Maximum visible scale\n(blocks per pixel)")), 0, 3);
 
     int i = 1;
-    for (int opt = D_DESERT; opt < D_SPAWN; opt++)
+    for (int opt = D_GRID; opt < D_SPAWN; opt++)
     {
         if (!mconfig.valid(opt))
             continue;

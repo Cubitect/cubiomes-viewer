@@ -49,9 +49,11 @@ public:
 
 class BiomeTableModel : public QAbstractTableModel
 {
+    Q_OBJECT
 public:
     explicit BiomeTableModel(QObject *parent = nullptr) :
         QAbstractTableModel(parent), cmp(IdCmp::SORT_LEX, -1, DIM_UNDEF) {}
+    virtual ~BiomeTableModel() {}
 
     virtual int rowCount(const QModelIndex&) const override { return seeds.size(); }
     virtual int columnCount(const QModelIndex&) const override { return ids.size(); }
@@ -63,10 +65,9 @@ public:
     void insertSeeds(QList<uint64_t>& seeds);
     void reset(int mc);
 
-    QList<int> ids; // biome column (-1 for the biome count)
+    QList<int> ids; // biome column
     QList<uint64_t> seeds; // seed rows
     QMap<int, QMap<uint64_t, QVariant>> cnt; // cnt[id][seed]
-    QMap<uint64_t, int> bnum; // number of biomes for seed
     IdCmp cmp;
 };
 

@@ -9,6 +9,7 @@
 #include <QTextStream>
 #include <QRegularExpressionValidator>
 #include <QScrollBar>
+#include <QDebug>
 
 #include <unordered_set>
 
@@ -32,7 +33,7 @@ void AnalysisBiomes::run()
 
 void AnalysisBiomes::runStatistics(Generator *g)
 {
-    QVector<uint64_t> idcnt(256);
+    QVector<uint64_t> idcnt(257);
     int w = dat.x2 - dat.x1 + 1;
     int h = dat.z2 - dat.z1 + 1;
     uint64_t n = w * (uint64_t)h;
@@ -62,7 +63,7 @@ void AnalysisBiomes::runStatistics(Generator *g)
             }
         }
         else
-        {
+        {   // generate a biome statistic by sampling
             std::vector<uint64_t> order;
 
             if (dat.samples * 2 >= n)
@@ -108,6 +109,11 @@ void AnalysisBiomes::runStatistics(Generator *g)
         }
     }
 
+    int bcnt = 0;
+    for (uint64_t c : qAsConst(idcnt))
+        bcnt += !!c;
+    idcnt[256] = bcnt;
+
     if (!stop) // discard partially processed seed
         emit seedDone(wi.seed, idcnt);
 }
@@ -147,11 +153,18 @@ void AnalysisBiomes::runLocate(Generator *g)
 
 QVariant BiomeTableModel::data(const QModelIndex& index, int role) const
 {
-    if (role != Qt::DisplayRole || index.row() < 0 || index.column() < 0)
+    if (!index.isValid())
         return QVariant::Invalid;
-    int id = ids[index.column()];
-    uint64_t seed = seeds[index.row()];
-    return cnt[id][seed];
+    static QVariant align = QVariant::fromValue((int)Qt::AlignCenter);
+    if (role == Qt::TextAlignmentRole)
+        return align;
+    if (role == Qt::DisplayRole)
+    {
+        int id = ids[index.column()];
+        uint64_t seed = seeds[index.row()];
+        return cnt[id][seed];
+    }
+    return QVariant::Invalid;
 }
 
 QVariant BiomeTableModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -160,20 +173,29 @@ QVariant BiomeTableModel::headerData(int section, Qt::Orientation orientation, i
         return QVariant::Invalid;
     if (role == Qt::InitialSortOrderRole)
         return QVariant::fromValue(Qt::AscendingOrder);
-    if (role == Qt::DisplayRole && orientation == Qt::Vertical)
+    if (orientation == Qt::Vertical && section < seeds.size())
     {
-        if  (section < seeds.size())
-            return QVariant::fromValue((int64_t)seeds[section]);
+        int64_t seed = seeds[section];
+        if (role == Qt::UserRole || role == Qt::UserRole+1)
+            return QVariant::fromValue(seed); // identifier and export
+        if (role == Qt::DisplayRole)
+            return QVariant::fromValue(QString(" %1 ").arg(seed));
+        static QVariant align = QVariant::fromValue((int)Qt::AlignRight | Qt::AlignVCenter);
+        if (role == Qt::TextAlignmentRole)
+            return align;
     }
-    if (orientation == Qt::Horizontal)
+    if (orientation == Qt::Horizontal && section < ids.size())
     {
-        if (section < ids.size())
-        {
-            if (role == Qt::DisplayRole)
-                return QVariant::fromValue(QString(getBiomeDisplay(cmp.mc, ids[section])));
-            else
-                return QVariant::fromValue(ids[section]);
-        }
+        int id = ids[section];
+        const char *bname = biome2str(cmp.mc, id);
+        if (role == Qt::UserRole)
+            return id; // identifier
+        if (role == Qt::UserRole+1)
+            return bname ? bname : "#"; // export role
+        if (role == Qt::DisplayRole)
+            return id == 256 ? tr("Biomes") : getBiomeDisplay(cmp.mc, id);
+        if (role == Qt::ToolTipRole && bname)
+            return QVariant::fromValue(QString("%1:%2").arg(id).arg(bname));
     }
     return QVariant::Invalid;
 }
@@ -183,12 +205,13 @@ void BiomeTableModel::insertIds(QSet<int>& nids)
     for (int id : qAsConst(nids))
     {
         QList<int>::iterator it = std::lower_bound(ids.begin(), ids.end(), id, cmp);
-        if (it != ids.end() && *it == id)
-            continue;
-        int i = std::distance(ids.begin(), it);
-        beginInsertColumns(QModelIndex(), i, i);
-        ids.insert(i, id);
-        endInsertColumns();
+        if (it == ids.end() || *it != id)
+        {
+            int i = std::distance(ids.begin(), it);
+            beginInsertColumns(QModelIndex(), i, i);
+            ids.insert(i, id);
+            endInsertColumns();
+        }
     }
 }
 
@@ -264,7 +287,7 @@ void BiomeHeader::paintSection(QPainter *painter, const QRect& rect, int section
     painter->setFont(font());
     QFontMetrics fm = fontMetrics();
     int indicator_height = 0;
-    int margin = 2 * style()->pixelMetric(QStyle::PM_HeaderMargin, 0, this);
+    int margin = 2 + 2 * style()->pixelMetric(QStyle::PM_HeaderMargin, 0, this);
     QStyleOptionHeader::SortIndicator sortindicator = QStyleOptionHeader::None;
 
     if (isSortIndicatorShown() && sortIndicatorSection() == section)
@@ -310,9 +333,9 @@ QSize BiomeHeader::sectionSizeFromContents(int section) const
     if (!model())
         return QSize();
     int margin = 2 * style()->pixelMetric(QStyle::PM_HeaderMargin, 0, this);
+    QString s = model()->headerData(section, orientation()).toString();
     QFontMetrics fm = fontMetrics();
-    int w = fm.boundingRect(model()->headerData(section, orientation()).toString()).width();
-    return QSize(fm.height() + 2*margin, w + 2*margin);
+    return QSize(fm.height() + 2*margin, fm.horizontalAdvance(s) + 2*margin);
 }
 
 
@@ -490,10 +513,10 @@ void TabBiomes::onTableSort(int, Qt::SortOrder)
 
 void TabBiomes::onVHeaderClicked(int row)
 {
-    QVariant dat = proxy->headerData(row, Qt::Vertical, Qt::DisplayRole);
+    QVariant dat = proxy->headerData(row, Qt::Vertical, Qt::UserRole);
     if (dat.isValid())
     {
-        uint64_t seed = qvariant_cast<uint64_t>(dat);
+        uint64_t seed = dat.toULongLong();
         WorldInfo wi;
         parent->getSeed(&wi);
         wi.seed = seed;
@@ -544,6 +567,7 @@ void TabBiomes::onBufferTimeout()
         ui->table->setSortingEnabled(false);
         ui->table->setUpdatesEnabled(false);
 
+        // store column widths to track which columns need to widen
         QMap<int, int> colwidth;
         for (int c = 0, n = model->ids.size(); c < n; c++)
             colwidth[model->ids[c]] = ui->table->columnWidth(c);
@@ -566,7 +590,7 @@ void TabBiomes::onBufferTimeout()
                     continue;
                 new_ids.insert(id);
                 model->cnt[id][seed] = QVariant::fromValue(cnt);
-                int w = fm.boundingRect(QString::number(cnt) + "_").width() + 2;
+                int w = fm.horizontalAdvance(QString::number(cnt) + "#");
                 if (w > colwidth[id])
                     colwidth[id] = w;
             }
@@ -751,13 +775,13 @@ void TabBiomes::on_pushExport_clicked()
 
         QStringList header = { tr("seed") };
         for (int col = 0, ncol = proxy->columnCount(); col < ncol; col++)
-            header.append(proxy->headerData(col, Qt::Horizontal).toString());
+            header.append(proxy->headerData(col, Qt::Horizontal, Qt::UserRole+1).toString());
         csvline(stream, qte, sep, header);
 
         for (int row = 0, nrow = proxy->rowCount(); row < nrow; row++)
         {
             QStringList cols;
-            cols.append(proxy->headerData(row, Qt::Vertical).toString());
+            cols.append(proxy->headerData(row, Qt::Vertical, Qt::UserRole+1).toString());
             for (int col = 0, ncol = proxy->columnCount(); col < ncol; col++)
             {
                 QString cntstr = proxy->data(proxy->index(row, col)).toString();

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="de_DE">
+<TS version="2.0" language="de_DE">
 <context>
     <name>AboutDialog</name>
     <message>
@@ -610,6 +610,14 @@
     </message>
 </context>
 <context>
+    <name>BiomeTableModel</name>
+    <message>
+        <location filename="../../src/tabbiomes.cpp" line="196"/>
+        <source>Biomes</source>
+        <translation>Biome</translation>
+    </message>
+</context>
+<context>
     <name>Collapsible</name>
     <message>
         <location filename="../../src/collapsible.cpp" line="140"/>
@@ -1184,32 +1192,32 @@
     <message>
         <location filename="../../src/conditiondialog.cpp" line="191"/>
         <source>Temperature</source>
-        <translation></translation>
+        <translation>Temperatur</translation>
     </message>
     <message>
         <location filename="../../src/conditiondialog.cpp" line="191"/>
         <source>Humidity</source>
-        <translation></translation>
+        <translation>Feuchtigkeit</translation>
     </message>
     <message>
         <location filename="../../src/conditiondialog.cpp" line="191"/>
         <source>Continentalness</source>
-        <translation></translation>
+        <translation>Kontinentalheit</translation>
     </message>
     <message>
         <location filename="../../src/conditiondialog.cpp" line="192"/>
         <source>Erosion</source>
-        <translation></translation>
+        <translation>Erosion</translation>
     </message>
     <message>
         <location filename="../../src/conditiondialog.cpp" line="192"/>
         <source>Depth</source>
-        <translation></translation>
+        <translation>Tiefe</translation>
     </message>
     <message>
         <location filename="../../src/conditiondialog.cpp" line="192"/>
         <source>Weirdness</source>
-        <translation></translation>
+        <translation>Verrücktheit</translation>
     </message>
     <message>
         <location filename="../../src/conditiondialog.cpp" line="214"/>
@@ -1894,12 +1902,12 @@ leer lassen für das Standardverhalten</translation>
     <message>
         <location filename="../../src/exportdialog.ui" line="454"/>
         <source>Contours</source>
-        <translation>Konturen</translation>
+        <translation>Höhenlinien</translation>
     </message>
     <message>
         <location filename="../../src/exportdialog.ui" line="459"/>
         <source>Shading with contours</source>
-        <translation>Shattierung mit Konturen</translation>
+        <translation>Shattierung mit Höhenlinien</translation>
     </message>
     <message>
         <location filename="../../src/exportdialog.cpp" line="246"/>
@@ -1924,7 +1932,7 @@ leer lassen für das Standardverhalten</translation>
     <message>
         <location filename="../../src/exportdialog.cpp" line="263"/>
         <source>The End</source>
-        <translation>Ende</translation>
+        <translation>Das Ende</translation>
     </message>
     <message>
         <location filename="../../src/exportdialog.cpp" line="292"/>
@@ -2495,7 +2503,7 @@ Fortfahren und Überschreiben?</translation>
     <message>
         <location filename="../../src/search.h" line="597"/>
         <source>Trail ruins</source>
-        <translation type="unfinished"></translation>
+        <translation>Trail Ruins</translation>
     </message>
     <message>
         <location filename="../../src/search.h" line="604"/>
@@ -2893,7 +2901,7 @@ Nur für Strukturen mit region-size = 32 und chunk-gap = 8</translation>
     <message>
         <location filename="../../src/formsearchcontrol.ui" line="79"/>
         <source>Stop on results</source>
-        <translation type="unfinished">Automatisch beenden</translation>
+        <translation>Automatisch beenden</translation>
     </message>
     <message>
         <location filename="../../src/formsearchcontrol.ui" line="89"/>
@@ -3089,77 +3097,77 @@ Trozdem fortfahren?</translation>
 <context>
     <name>LayerDialog</name>
     <message>
-        <location filename="../../src/layerdialog.ui" line="14"/>
+        <location filename="../../src/layerdialog.ui" line="6"/>
         <source>Layer Display Options</source>
         <translation>Schichten Darstellungseinstellungen</translation>
     </message>
     <message>
-        <location filename="../../src/layerdialog.ui" line="42"/>
+        <location filename="../../src/layerdialog.ui" line="34"/>
         <source>Depth</source>
         <translation>Tiefe</translation>
     </message>
     <message>
-        <location filename="../../src/layerdialog.ui" line="49"/>
+        <location filename="../../src/layerdialog.ui" line="41"/>
         <source>Weirdness octaves:</source>
         <translation>Verrücktheitsoktaven:</translation>
     </message>
     <message>
-        <location filename="../../src/layerdialog.ui" line="56"/>
+        <location filename="../../src/layerdialog.ui" line="48"/>
         <source>Biome scale:</source>
         <translation>Biommaßstab:</translation>
     </message>
     <message>
-        <location filename="../../src/layerdialog.ui" line="76"/>
+        <location filename="../../src/layerdialog.ui" line="68"/>
         <source>Temperature octaves:</source>
         <translation>Temperaturoktaven:</translation>
     </message>
     <message>
-        <location filename="../../src/layerdialog.ui" line="83"/>
+        <location filename="../../src/layerdialog.ui" line="75"/>
         <source>Ocean layer</source>
         <translation>Ozeanschicht</translation>
     </message>
     <message>
-        <location filename="../../src/layerdialog.ui" line="93"/>
+        <location filename="../../src/layerdialog.ui" line="85"/>
         <source>Approx. surface height:</source>
         <translation>Estimierte Oberflächenhöhe:</translation>
     </message>
     <message>
-        <location filename="../../src/layerdialog.ui" line="103"/>
+        <location filename="../../src/layerdialog.ui" line="95"/>
         <source>No beta oceans</source>
         <translation>Keine Beta-Ozeane</translation>
     </message>
     <message>
-        <location filename="../../src/layerdialog.ui" line="110"/>
+        <location filename="../../src/layerdialog.ui" line="102"/>
         <source>Contnentalness octaves:</source>
         <translation>Konentalheitoktaven:</translation>
     </message>
     <message>
-        <location filename="../../src/layerdialog.ui" line="117"/>
+        <location filename="../../src/layerdialog.ui" line="109"/>
         <source>Structure potential</source>
         <translation>Strukturpotenzial</translation>
     </message>
     <message>
-        <location filename="../../src/layerdialog.ui" line="124"/>
+        <location filename="../../src/layerdialog.ui" line="116"/>
         <source>Erosion octaves:</source>
         <translation>Erosionsoktaven:</translation>
     </message>
     <message>
-        <location filename="../../src/layerdialog.ui" line="131"/>
+        <location filename="../../src/layerdialog.ui" line="123"/>
         <source>River layer</source>
         <translation>Flussschicht</translation>
     </message>
     <message>
-        <location filename="../../src/layerdialog.ui" line="144"/>
+        <location filename="../../src/layerdialog.ui" line="136"/>
         <source>Humidity octaves:</source>
         <translation>Feuchtigkeitsoktaven:</translation>
     </message>
     <message>
-        <location filename="../../src/layerdialog.ui" line="151"/>
+        <location filename="../../src/layerdialog.ui" line="143"/>
         <source>Beta temperature</source>
         <translation>Beta Temperatur</translation>
     </message>
     <message>
-        <location filename="../../src/layerdialog.ui" line="158"/>
+        <location filename="../../src/layerdialog.ui" line="150"/>
         <source>Beta humidity</source>
         <translation>Beta Feuchtigkeit</translation>
     </message>
@@ -3462,7 +3470,7 @@ Trozdem fortfahren?</translation>
     <message>
         <location filename="../../src/mainwindow.ui" line="673"/>
         <source>(1.13 - 1.17) River Mix 1:4</source>
-        <translation>(1.13 - 1.17) River Mix 1:4</translation>
+        <translation>(1.13 - 1.17) Fluss Mix 1:4</translation>
     </message>
     <message>
         <location filename="../../src/mainwindow.ui" line="676"/>
@@ -3482,7 +3490,7 @@ Trozdem fortfahren?</translation>
     <message>
         <location filename="../../src/mainwindow.ui" line="694"/>
         <source>(1.18+) Temperature</source>
-        <translation></translation>
+        <translation>(1.18+) Temperatur</translation>
     </message>
     <message>
         <location filename="../../src/mainwindow.ui" line="697"/>
@@ -3492,7 +3500,7 @@ Trozdem fortfahren?</translation>
     <message>
         <location filename="../../src/mainwindow.ui" line="705"/>
         <source>(1.18+) Humidity</source>
-        <translation></translation>
+        <translation>(1.18+) Feuchtigkeit</translation>
     </message>
     <message>
         <location filename="../../src/mainwindow.ui" line="708"/>
@@ -3502,7 +3510,7 @@ Trozdem fortfahren?</translation>
     <message>
         <location filename="../../src/mainwindow.ui" line="716"/>
         <source>(1.18+) Continentalness</source>
-        <translation></translation>
+        <translation>(1.18+) Kontinentalheit</translation>
     </message>
     <message>
         <location filename="../../src/mainwindow.ui" line="719"/>
@@ -3512,7 +3520,7 @@ Trozdem fortfahren?</translation>
     <message>
         <location filename="../../src/mainwindow.ui" line="727"/>
         <source>(1.18+) Erosion</source>
-        <translation></translation>
+        <translation>(1.18+) Erosion</translation>
     </message>
     <message>
         <location filename="../../src/mainwindow.ui" line="730"/>
@@ -3522,7 +3530,7 @@ Trozdem fortfahren?</translation>
     <message>
         <location filename="../../src/mainwindow.ui" line="738"/>
         <source>(1.18+) Weirdness</source>
-        <translation></translation>
+        <translation>(1.18+) Verrücktheit</translation>
     </message>
     <message>
         <location filename="../../src/mainwindow.ui" line="741"/>
@@ -3532,7 +3540,7 @@ Trozdem fortfahren?</translation>
     <message>
         <location filename="../../src/mainwindow.ui" line="749"/>
         <source>(1.18+) Depth</source>
-        <translation></translation>
+        <translation>(1.18+) Tiefe</translation>
     </message>
     <message>
         <location filename="../../src/mainwindow.ui" line="752"/>
@@ -3589,12 +3597,12 @@ Trozdem fortfahren?</translation>
     <message>
         <location filename="../../src/mainwindow.ui" line="808"/>
         <source>(Beta 1.7) Temperature</source>
-        <translation></translation>
+        <translation>(Beta 1.7) Temperatur</translation>
     </message>
     <message>
         <location filename="../../src/mainwindow.ui" line="816"/>
         <source>(Beta 1.7) Humidity</source>
-        <translation></translation>
+        <translation>(Beta 1.7) Feuchtigkeit</translation>
     </message>
     <message>
         <location filename="../../src/mainwindow.cpp" line="88"/>
@@ -3934,7 +3942,7 @@ Trozdem fortfahren?</translation>
     <message>
         <location filename="../../src/presetdialog.ui" line="147"/>
         <source>Ok</source>
-        <translation>Okay</translation>
+        <translation>OK</translation>
     </message>
     <message>
         <location filename="../../src/presetdialog.ui" line="154"/>
@@ -4434,7 +4442,7 @@ Weiter auf den Stop der Threads warten?</numerusform>
     </message>
     <message>
         <location filename="../../src/tabbiomes.ui" line="46"/>
-        <location filename="../../src/tabbiomes.cpp" line="532"/>
+        <location filename="../../src/tabbiomes.cpp" line="555"/>
         <source>Analyze</source>
         <translation>Analyse</translation>
     </message>
@@ -4534,8 +4542,8 @@ Weiter auf den Stop der Threads warten?</numerusform>
     </message>
     <message>
         <location filename="../../src/tabbiomes.ui" line="261"/>
-        <location filename="../../src/tabbiomes.cpp" line="752"/>
-        <location filename="../../src/tabbiomes.cpp" line="778"/>
+        <location filename="../../src/tabbiomes.cpp" line="776"/>
+        <location filename="../../src/tabbiomes.cpp" line="802"/>
         <source>seed</source>
         <translation>Seed</translation>
     </message>
@@ -4546,13 +4554,13 @@ Weiter auf den Stop der Threads warten?</numerusform>
     </message>
     <message>
         <location filename="../../src/tabbiomes.ui" line="281"/>
-        <location filename="../../src/tabbiomes.cpp" line="778"/>
+        <location filename="../../src/tabbiomes.cpp" line="802"/>
         <source>x</source>
         <translation>X</translation>
     </message>
     <message>
         <location filename="../../src/tabbiomes.ui" line="291"/>
-        <location filename="../../src/tabbiomes.cpp" line="778"/>
+        <location filename="../../src/tabbiomes.cpp" line="802"/>
         <source>z</source>
         <translation>Z</translation>
     </message>
@@ -4617,40 +4625,40 @@ Weiter auf den Stop der Threads warten?</numerusform>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/tabbiomes.cpp" line="603"/>
-        <location filename="../../src/tabbiomes.cpp" line="702"/>
+        <location filename="../../src/tabbiomes.cpp" line="627"/>
+        <location filename="../../src/tabbiomes.cpp" line="726"/>
         <source>Stop</source>
         <translation>Stop</translation>
     </message>
     <message>
-        <location filename="../../src/tabbiomes.cpp" line="663"/>
+        <location filename="../../src/tabbiomes.cpp" line="687"/>
         <source>The locate biome feature is limited to an area size smaller than the integer limit: (%1 x %2) &gt; %3.</source>
         <translation>Die Biom Lokalizierungsfunktion ist beschränkt zu einem Bereich welcher kleiner als das Integerlimit ist: (%1 x %2) &gt; %3.</translation>
     </message>
     <message>
-        <location filename="../../src/tabbiomes.cpp" line="721"/>
+        <location filename="../../src/tabbiomes.cpp" line="745"/>
         <source>Export biome analysis</source>
         <translation>Export der Biomanalyse</translation>
     </message>
     <message>
-        <location filename="../../src/tabbiomes.cpp" line="721"/>
+        <location filename="../../src/tabbiomes.cpp" line="745"/>
         <source>Text files (*.txt *csv);;Any files (*)</source>
         <translation>Textdateien (*.txt *csv);;Alle Dateien (*)</translation>
     </message>
     <message>
-        <location filename="../../src/tabbiomes.cpp" line="731"/>
+        <location filename="../../src/tabbiomes.cpp" line="755"/>
         <source>Failed to open file for export:
 &quot;%1&quot;</source>
         <translation>Exportdatei konnte nicht geöffnet werden:
 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../../src/tabbiomes.cpp" line="778"/>
+        <location filename="../../src/tabbiomes.cpp" line="802"/>
         <source>area</source>
         <translation>Bereich</translation>
     </message>
     <message>
-        <location filename="../../src/tabbiomes.cpp" line="826"/>
+        <location filename="../../src/tabbiomes.cpp" line="850"/>
         <source>(%1 sq. chunks)</source>
         <translation>(%1 Chunks)</translation>
     </message>
