@@ -474,7 +474,7 @@ QToolButton:checked {
     <addaction name="actionScreenshot"/>
     <addaction name="actionExportImg"/>
     <addaction name="actionBiome_colors"/>
-    <addaction name="actionStructure_visibility"/>
+    <addaction name="actionToolbarConfig"/>
     <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
@@ -681,9 +681,9 @@ QToolButton:checked {
     <string>Export biomes as image...</string>
    </property>
   </action>
-  <action name="actionStructure_visibility">
+  <action name="actionToolbarConfig">
    <property name="text">
-    <string>Structure visibility...</string>
+    <string>Map toolbar options...</string>
    </property>
   </action>
   <action name="actionParaTemperature">

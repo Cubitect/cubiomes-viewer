@@ -1,5 +1,5 @@
-#include "structuredialog.h"
-#include "ui_structuredialog.h"
+#include "maptoolsdialog.h"
+#include "ui_maptoolsdialog.h"
 
 #include <QLabel>
 #include <QCheckBox>
@@ -10,41 +10,39 @@
 #include "cutil.h"
 #include "world.h"
 
-StructureDialog::StructureDialog(QWidget *parent)
+MapToolsDialog::MapToolsDialog(QWidget *parent)
     : QDialog(parent)
-    , ui(new Ui::StructureDialog)
+    , ui(new Ui::MapToolsDialog)
     , mconfig()
     , modified()
 {
     ui->setupUi(this);
-    QGridLayout *grid = new QGridLayout(ui->groupVis);
+    QGridLayout *grid = (QGridLayout*) ui->scrollContent->layout();
 
-    grid->addWidget(new QLabel(tr("Enabled map options")), 0, 0, 1, 3);
-    grid->addWidget(new QLabel(tr("Maximum visible scale\n(blocks per pixel)")), 0, 3);
-
-    int i = 1;
-    for (int opt = D_GRID; opt < D_SPAWN; opt++)
+    int i = grid->rowCount();
+    for (int opt = 0; opt < D_STRUCT_NUM; opt++)
     {
-        if (!mconfig.valid(opt))
+        if (opt == D_PORTALN)
             continue;
-        int j = 0;
-
         QCheckBox *check = new QCheckBox();
         vui[opt].check = check;
-        grid->addWidget(check, i, j++);
+        grid->addWidget(check, i, 0);
 
         QLabel *icon = new QLabel();
-        icon->setPixmap(getMapIcon(opt));
-        grid->addWidget(icon, i, j++);
+        icon->setPixmap(QPixmap(QString(":/icons/") + mapopt2str(opt)));
+        grid->addWidget(icon, i, 1);
 
-        QString name = mapopt2display(opt);
-        QLabel *label = new QLabel(name + ":");
-        grid->addWidget(label, i, j++);
+        QLabel *label = new QLabel(mapopt2display(opt));
+        grid->addWidget(label, i, 2);
 
-        QLineEdit *line = new QLineEdit();
-        line->setValidator(new QDoubleValidator(0.125, 256.0, 3, grid));
-        vui[opt].line = line;
-        grid->addWidget(line, i, j++);
+        if (mconfig.hasScale(opt))
+        {
+            label->setText(label->text() + ":");
+            QLineEdit *line = new QLineEdit();
+            line->setValidator(new QDoubleValidator(0.125, 256.0, 3, grid));
+            vui[opt].line = line;
+            grid->addWidget(line, i, 3);
+        }
         i++;
     }
 
@@ -52,23 +50,24 @@ StructureDialog::StructureDialog(QWidget *parent)
     refresh();
 }
 
-StructureDialog::~StructureDialog()
+MapToolsDialog::~MapToolsDialog()
 {
     delete ui;
 }
 
-void StructureDialog::refresh()
+void MapToolsDialog::refresh()
 {
-    for (int opt = D_DESERT; opt < D_SPAWN; opt++)
+    for (int opt = 0; opt < D_STRUCT_NUM; opt++)
     {
         if (vui[opt].check)
             vui[opt].check->setChecked(mconfig.enabled(opt));
         if (vui[opt].line)
             vui[opt].line->setText(QString::number(mconfig.scale(opt)));
     }
+    ui->checkZoom->setChecked(mconfig.zoomEnabled);
 }
 
-void StructureDialog::on_buttonBox_clicked(QAbstractButton *button)
+void MapToolsDialog::on_buttonBox_clicked(QAbstractButton *button)
 {
     int role = ui->buttonBox->buttonRole(button);
     if (role == QDialogButtonBox::ResetRole)
@@ -78,7 +77,7 @@ void StructureDialog::on_buttonBox_clicked(QAbstractButton *button)
     }
     else if (role == QDialogButtonBox::AcceptRole || role == QDialogButtonBox::ApplyRole)
     {
-        for (int opt = D_DESERT; opt < D_SPAWN; opt++)
+        for (int opt = 0; opt < D_STRUCT_NUM; opt++)
         {
             MapConfig::Opt *p_opt = &mconfig.opts[opt];
             if (vui[opt].check)
@@ -98,6 +97,8 @@ void StructureDialog::on_buttonBox_clicked(QAbstractButton *button)
                 }
             }
         }
+        mconfig.opts[D_PORTALN] = mconfig.opts[D_PORTAL];
+        mconfig.zoomEnabled = ui->checkZoom->isChecked();
         mconfig.save();
         emit updateMapConfig();
     }

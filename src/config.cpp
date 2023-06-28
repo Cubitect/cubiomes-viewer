@@ -260,29 +260,46 @@ MapConfig::MapConfig(bool init)
         opts[0].scale = -1;
 }
 
-bool MapConfig::equals(const MapConfig& a) const
+bool MapConfig::hasScale(int opt) const
+{
+    return opt >= D_DESERT && opt <= D_STRONGHOLD;
+}
+
+int MapConfig::getDim(int opt) const
+{
+    if (opt >= D_PORTALN && opt <= D_BASTION) return DIM_NETHER;
+    if (opt >= D_ENDCITY && opt <= D_GATEWAY) return DIM_END;
+    return DIM_OVERWORLD;
+};
+
+int MapConfig::getTileSize(int opt) const
+{
+    if (opt == D_MANSION)
+        return 1280 * 16;
+    return 512 * 16;
+}
+
+bool MapConfig::sameMapOpts(const MapConfig& a) const
 {
     return memcmp(opts, a.opts, sizeof(opts)) == 0;
 }
 
 void MapConfig::reset()
 {
-    for (int i = D_DESERT; i < D_SPAWN; i++)
+    for (int i = 0; i < D_STRUCT_NUM; i++)
     {
-        opts[i].scale = 32;
+        opts[i].scale = hasScale(i) ? 32 : 1;
         opts[i].enabled = true;
-        opts[i].valid = true;
     }
     opts[D_GEODE].scale = 16;
+    zoomEnabled = false;
 }
 
 void MapConfig::load(QSettings& settings)
 {
     reset();
-    for (int opt = D_DESERT; opt < D_SPAWN; opt++)
+    for (int opt = 0; opt < D_STRUCT_NUM; opt++)
     {
-        if (!valid(opt))
-            continue;
         const char *name = mapopt2str(opt);
         double x = scale(opt);
         if (!enabled(opt))
@@ -291,18 +308,21 @@ void MapConfig::load(QSettings& settings)
         opts[opt].scale = fabs(x);
         opts[opt].enabled = x > 0;
     }
+    zoomEnabled = settings.value("structscale/zoom", zoomEnabled).toBool();
 }
 
 void MapConfig::save(QSettings& settings)
 {
-    for (int opt = D_DESERT; opt < D_SPAWN; opt++)
+    for (int opt = 0; opt < D_STRUCT_NUM; opt++)
     {
         const char *name = mapopt2str(opt);
         double x = scale(opt);
+        if (x == 0) x = 1;
         if (!enabled(opt))
             x = -x;
         settings.setValue(QString("structscale/") + name, x);
     }
+    settings.setValue(QString("structscale/zoom"), zoomEnabled);
 }
 
 void Config::reset()

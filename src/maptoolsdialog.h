@@ -1,5 +1,5 @@
-#ifndef STRUCTUREDIALOG_H
-#define STRUCTUREDIALOG_H
+#ifndef MAPTOOLSDIALOG_H
+#define MAPTOOLSDIALOG_H
 
 #include <QDialog>
 #include <QAbstractButton>
@@ -7,19 +7,19 @@
 #include "config.h"
 
 namespace Ui {
-class StructureDialog;
+class MapToolsDialog;
 }
 
 class QCheckBox;
 class QLineEdit;
 
-class StructureDialog : public QDialog
+class MapToolsDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit StructureDialog(QWidget *parent = nullptr);
-    ~StructureDialog();
+    explicit MapToolsDialog(QWidget *parent = nullptr);
+    ~MapToolsDialog();
 
     void refresh();
 
@@ -30,7 +30,7 @@ signals:
     void updateMapConfig();
 
 private:
-    Ui::StructureDialog *ui;
+    Ui::MapToolsDialog *ui;
     struct VisUi
     {
         QCheckBox *check;
@@ -43,4 +43,4 @@ public:
     bool modified;
 };
 
-#endif // STRUCTUREDIALOG_H
+#endif // MAPTOOLSDIALOG_H

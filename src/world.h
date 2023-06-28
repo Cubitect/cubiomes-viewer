@@ -89,7 +89,7 @@ struct Level
     ~Level();
 
     void init4map(QWorld *world, int pix, int layerscale);
-    void init4struct(QWorld *world, int dim, int blocks, double vis, int sopt);
+    void init4struct(QWorld *world, int sopt);
 
     void resizeLevel(std::vector<Quad*>& cache, int64_t x, int64_t z, int64_t w, int64_t h);
     void update(std::vector<Quad*>& cache, qreal bx0, qreal bz0, qreal bx1, qreal bz1);
@@ -169,6 +169,7 @@ signals:
 public:
     WorldInfo wi;
     int dim;
+    MapConfig mconfig;
     LayerOpt lopt;
     Generator g;
     SurfaceNoise sn;

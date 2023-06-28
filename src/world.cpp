@@ -25,6 +25,7 @@ const QPixmap& getMapIcon(int opt, VarPos *vp)
         init = true;
         for (int sopt = D_DESERT; sopt <= D_STRONGHOLD; sopt++)
             icons[sopt] = QPixmap(QString(":/icons/") + mapopt2str(sopt) + ".png");
+        icons[D_PORTALN]    = icons[D_PORTAL];
         iconzvil            = QPixmap(":/icons/zombie.png");
         icongiant           = QPixmap(":/icons/portal_giant.png");
         iconship            = QPixmap(":/icons/end_ship.png");
@@ -573,17 +574,17 @@ void Level::init4map(QWorld *w, int pix, int layerscale)
     }
 }
 
-void Level::init4struct(QWorld *w, int dim, int blocks, double vis, int sopt)
+void Level::init4struct(QWorld *w, int sopt)
 {
     this->world = w;
     this->wi = w->wi;
-    this->dim = dim;
-    this->blocks = blocks;
+    this->dim = w->mconfig.getDim(sopt);
+    this->blocks = w->mconfig.getTileSize(sopt);
     this->pixs = -1;
     this->scale = -1;
     this->sopt = sopt;
     this->lopt = w->lopt;
-    this->vis = vis;
+    this->vis = 1.0 / w->mconfig.scale(sopt);
     this->isdel = &w->isdel;
 }
 
@@ -722,6 +723,7 @@ QWorld::QWorld(WorldInfo wi, int dim, LayerOpt lopt)
     : QObject()
     , wi(wi)
     , dim(dim)
+    , mconfig()
     , lopt(lopt)
     , lvb()
     , lvs()
@@ -762,26 +764,12 @@ QWorld::QWorld(WorldInfo wi, int dim, LayerOpt lopt)
     setDim(dim, lopt);
 
     QSettings settings(APP_STRING, APP_STRING);
-    MapConfig mconfig;
     mconfig.load(settings);
 
     lvs.resize(D_SPAWN);
     for (int opt = D_DESERT; opt < D_SPAWN; opt++)
-    {
-        if (!mconfig.enabled(opt))
-            continue;
-        int sdim = 0, qsiz = 512*16;
-        switch (opt) {
-        case D_PORTALN: sdim = -1; break;
-        case D_FORTESS: sdim = -1; break;
-        case D_BASTION: sdim = -1; break;
-        case D_ENDCITY: sdim = +1; break;
-        case D_GATEWAY: sdim = +1; break;
-        case D_MANSION: qsiz = 1280*16; break;
-        }
-        double v = 1.0 / mconfig.scale(opt);
-        lvs[opt].init4struct(this, sdim, qsiz, v, opt);
-    }
+        if (mconfig.enabled(opt))
+            lvs[opt].init4struct(this, opt);
     memset(sshow, 0, sizeof(sshow));
 }
 

@@ -140,18 +140,20 @@ struct MapConfig
     {
         double scale;
         bool enabled;
-        bool valid;
-        Opt() : scale(),enabled(),valid() {}
+        Opt() : scale(),enabled() {}
     };
     Opt opts[D_STRUCT_NUM];
+    bool zoomEnabled;
 
     MapConfig(bool init = true);
 
     double scale(int opt) const { return opts[opt].scale; }
     bool enabled(int opt) const { return opts[opt].enabled; }
-    bool valid(int opt) const { return (unsigned)opt < D_STRUCT_NUM && opts[opt].valid; }
+    bool hasScale(int opt) const;
+    int getDim(int opt) const;
+    int getTileSize(int opt) const;
 
-    bool equals(const MapConfig& a) const;
+    bool sameMapOpts(const MapConfig& a) const;
 
     void reset();
     void load(QSettings& settings);

@@ -200,7 +200,7 @@ void MapView::settingsToWorld()
     if (!world)
         return;
     for (int s = 0; s < D_STRUCT_NUM; s++)
-        world->sshow[s] = sshow[s];
+        world->sshow[s] = sshow[s] && world->mconfig.enabled(s);
     world->showBB = config.showBBoxes;
     world->gridspacing = config.gridSpacing;
     world->gridmultiplier = config.gridMultiplier;

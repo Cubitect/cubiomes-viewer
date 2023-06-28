@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.0" language="de_DE">
+<TS version="2.1" language="de_DE">
 <context>
     <name>AboutDialog</name>
     <message>
@@ -1394,210 +1394,210 @@ Trozdem fortfahren?</translation>
 <context>
     <name>ConfigDialog</name>
     <message>
-        <location filename="../../src/configdialog.ui" line="14"/>
+        <location filename="../../src/configdialog.ui" line="6"/>
         <source>Preferences</source>
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="24"/>
+        <location filename="../../src/configdialog.ui" line="16"/>
         <source>Session</source>
         <translation>Sitzung</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="30"/>
+        <location filename="../../src/configdialog.ui" line="22"/>
         <source>Restore previous session at launch</source>
         <translation>Vorherige Sitzung beim Start widerherstellen</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="37"/>
+        <location filename="../../src/configdialog.ui" line="29"/>
         <source>Autosave every:</source>
         <translation>Autosave jede:</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="44"/>
+        <location filename="../../src/configdialog.ui" line="36"/>
         <source> min</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="73"/>
+        <location filename="../../src/configdialog.ui" line="65"/>
         <source>Export</source>
         <translation>Export</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="82"/>
+        <location filename="../../src/configdialog.ui" line="74"/>
         <source>CSV cell quotation:</source>
         <translation>CSV Zellen quotieren:</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="89"/>
+        <location filename="../../src/configdialog.ui" line="81"/>
         <source>CSV column separator:</source>
         <translation>CSV Spaltentrennung:</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="97"/>
+        <location filename="../../src/configdialog.ui" line="89"/>
         <source>Where necessary</source>
         <translation>Wenn notwendig</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="102"/>
+        <location filename="../../src/configdialog.ui" line="94"/>
         <source>Single quotes (&apos;)</source>
         <translation>Einfache Anführungszeichen (&apos;)</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="107"/>
+        <location filename="../../src/configdialog.ui" line="99"/>
         <source>Double quotes (&quot;)</source>
         <translation>Anfürungszeichen (&quot;)</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="118"/>
+        <location filename="../../src/configdialog.ui" line="110"/>
         <source>Search</source>
         <translation>Suche</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="124"/>
+        <location filename="../../src/configdialog.ui" line="116"/>
         <source>Maximum number of matching seeds:</source>
         <translation>Maximale Anzahl von Ergebnis Seeds:</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="137"/>
+        <location filename="../../src/configdialog.ui" line="129"/>
         <source>Miscellaneous</source>
         <translation>Anderes</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="143"/>
+        <location filename="../../src/configdialog.ui" line="135"/>
         <source>Check GitHub for updates at startup</source>
         <translation>Prüfe GitHub beim Start nach Updates</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="153"/>
+        <location filename="../../src/configdialog.ui" line="145"/>
         <source>Interface</source>
         <translation>Oberfläche</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="394"/>
+        <location filename="../../src/configdialog.ui" line="386"/>
         <source>Monospace font:</source>
         <translation>Monospacefont:</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="205"/>
+        <location filename="../../src/configdialog.ui" line="197"/>
         <source>Maximum structure zoom:</source>
         <translation>Struktursichtbarkeit:</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="191"/>
+        <location filename="../../src/configdialog.ui" line="183"/>
         <source>Outline known bounding boxes</source>
         <translation>Bekannte Bounding Boxes zeichnen</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="232"/>
+        <location filename="../../src/configdialog.ui" line="224"/>
         <source>Custom grid multiplier:</source>
         <translation>Raster Skalierungsfaktor:</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="263"/>
+        <location filename="../../src/configdialog.ui" line="255"/>
         <source> MB</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="253"/>
+        <location filename="../../src/configdialog.ui" line="245"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Simulate inertia for the map view&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="184"/>
+        <location filename="../../src/configdialog.ui" line="176"/>
         <source>Application font:</source>
         <translation>Anwendungsfont:</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="256"/>
+        <location filename="../../src/configdialog.ui" line="248"/>
         <source>Smooth map motion</source>
         <translation>Gleichmäßige Kartenbewegung</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="286"/>
+        <location filename="../../src/configdialog.ui" line="278"/>
         <location filename="../../src/configdialog.cpp" line="69"/>
         <source>None</source>
         <translation>Keine</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="291"/>
+        <location filename="../../src/configdialog.ui" line="283"/>
         <source>2</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="296"/>
+        <location filename="../../src/configdialog.ui" line="288"/>
         <source>4</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="301"/>
+        <location filename="../../src/configdialog.ui" line="293"/>
         <source>5</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="306"/>
+        <location filename="../../src/configdialog.ui" line="298"/>
         <source>10</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="350"/>
+        <location filename="../../src/configdialog.ui" line="342"/>
         <source>Threads for map:</source>
         <translation>Threads für die Karte:</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="378"/>
+        <location filename="../../src/configdialog.ui" line="370"/>
         <source>System</source>
         <translation>System</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="383"/>
+        <location filename="../../src/configdialog.ui" line="375"/>
         <source>Dark</source>
         <translation>Dunkel</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="239"/>
+        <location filename="../../src/configdialog.ui" line="231"/>
         <source>Edit map visibility limits...</source>
         <translation>Struktursichtbarkeit editieren...</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="225"/>
+        <location filename="../../src/configdialog.ui" line="217"/>
         <source>Edit biome colors...</source>
         <translation>Biomfarben editieren...</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="215"/>
+        <location filename="../../src/configdialog.ui" line="207"/>
         <source>[none]</source>
         <translation>[keine]</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="159"/>
+        <location filename="../../src/configdialog.ui" line="151"/>
         <source>Use a fixed grid in blocks instead of outlining the generated map tiles
 Leave blank for the default behaviour</source>
         <translation>Manueller Rasterabstand, ansonsten wird ein Umriss um jedes Kartensegment gezeichnet
 leer lassen für das Standardverhalten</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="163"/>
+        <location filename="../../src/configdialog.ui" line="155"/>
         <source>Custom grid spacing:</source>
         <translation>Rasterabstand:</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="170"/>
+        <location filename="../../src/configdialog.ui" line="162"/>
         <source>Map cache size:</source>
         <translation>Cache für Karte:</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="198"/>
+        <location filename="../../src/configdialog.ui" line="190"/>
         <source>Biome color customization:</source>
         <translation>Biomfarbendefinition:</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="246"/>
+        <location filename="../../src/configdialog.ui" line="238"/>
         <source>GUI style:</source>
         <translation>GUI Style:</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="177"/>
+        <location filename="../../src/configdialog.ui" line="169"/>
         <source>Language:</source>
         <translation>Sprache:</translation>
     </message>
@@ -3484,8 +3484,8 @@ Trozdem fortfahren?</translation>
     </message>
     <message>
         <location filename="../../src/mainwindow.ui" line="686"/>
-        <source>Structure visibility...</source>
-        <translation>Strukturanzeige...</translation>
+        <source>Map toolbar options...</source>
+        <translation>Kartenwerkzeuge...</translation>
     </message>
     <message>
         <location filename="../../src/mainwindow.ui" line="694"/>
@@ -3569,8 +3569,8 @@ Trozdem fortfahren?</translation>
     </message>
     <message>
         <location filename="../../src/mainwindow.ui" line="776"/>
-        <location filename="../../src/mainwindow.cpp" line="864"/>
-        <location filename="../../src/mainwindow.cpp" line="1099"/>
+        <location filename="../../src/mainwindow.cpp" line="876"/>
+        <location filename="../../src/mainwindow.cpp" line="1113"/>
         <source>Undock map</source>
         <translation>Karte ausdocken</translation>
     </message>
@@ -3625,117 +3625,127 @@ Trozdem fortfahren?</translation>
         <translation>Goto origin</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="135"/>
+        <location filename="../../src/mainwindow.cpp" line="131"/>
+        <source>Zoom In</source>
+        <translation>Vergrößern</translation>
+    </message>
+    <message>
+        <location filename="../../src/mainwindow.cpp" line="132"/>
+        <source>Zoom Out</source>
+        <translation>Verkleinern</translation>
+    </message>
+    <message>
+        <location filename="../../src/mainwindow.cpp" line="142"/>
         <source>Overworld</source>
         <translation>Oberwelt</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="136"/>
+        <location filename="../../src/mainwindow.cpp" line="143"/>
         <source>Nether</source>
         <translation>Nether</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="137"/>
+        <location filename="../../src/mainwindow.cpp" line="144"/>
         <source>End</source>
         <translation>Ende</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="195"/>
+        <location filename="../../src/mainwindow.cpp" line="202"/>
         <source>Conditions</source>
         <translation>Bedingungen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="198"/>
+        <location filename="../../src/mainwindow.cpp" line="205"/>
         <source>Help: Conditions</source>
         <translation>Hilfe: Bedingungen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="199"/>
+        <location filename="../../src/mainwindow.cpp" line="206"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The search conditions define the properties by which potential seeds are filtered.&lt;/p&gt;&lt;p&gt;Conditions can reference each other to produce relative positional dependencies (indicated with the ID in square brackets [XY]). When a condition passes its check, it usually yields just one location that other conditions can reference. An exception to this are structure conditions with exactly one required instance. In this case, each found structure occurence is examined separately instead. On the other hand, a condition that checks for a structure cluster, will average the position of all occurences and yield a single position.&lt;/p&gt;&lt;p&gt;Standard biome conditions yield the center of the testing area as they evaluate the area as a whole. To locate the position of a given biome you can use the designated &lt;b&gt;locate&lt;/b&gt; filters, or use a spiral iterator to scan an area with a localized condition.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="223"/>
+        <location filename="../../src/mainwindow.cpp" line="230"/>
         <source>Seed generator (48-bit)</source>
         <translation>Seedgenerator (48-bit)</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="226"/>
+        <location filename="../../src/mainwindow.cpp" line="233"/>
         <source>Help: Seed generator</source>
         <translation>Hilfe: Seedgenerator</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="227"/>
+        <location filename="../../src/mainwindow.cpp" line="234"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;For some searches, the 48-bit structure seed candidates can be generated without searching, which can vastly reduce the search space that has to be checked.&lt;/p&gt;&lt;p&gt;The generator mode &lt;b&gt;Auto&lt;/b&gt; is recommended for general use, which automatically selects suitable options based on the conditions list.&lt;/p&gt;&lt;p&gt;The &lt;b&gt;Quad-feature&lt;/b&gt; mode produces candidates for quad&amp;#8209;structures that have a uniform distribution of region&amp;#8209;size=32 and chunk&amp;#8209;gap=8, such as swamp huts.&lt;/p&gt;&lt;p&gt;A perfect &lt;b&gt;Quad-monument&lt;/b&gt; structure constellation does not actually exist, but some extremely rare structure seed bases get close, with over 90&amp;#37; of the area within 128 blocks. The generator uses a precomputed list of these seed bases.&lt;/p&gt;&lt;p&gt;Using a &lt;b&gt;Seed list&lt;/b&gt; you can provide a custom set of 48-bit candidates. Optionally, a salt value can be added and the seeds can be region transposed.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="251"/>
+        <location filename="../../src/mainwindow.cpp" line="258"/>
         <source>Matching seeds</source>
         <translation>Passende Seeds</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="257"/>
+        <location filename="../../src/mainwindow.cpp" line="264"/>
         <source>Help: Matching seeds</source>
         <translation>Hilfe: Passende Seeds</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="258"/>
+        <location filename="../../src/mainwindow.cpp" line="265"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The list of seeds acts as a buffer onto which suitable seeds are added when they are found. You can also copy the seed list, or paste seeds into the list. Selecting a seed will open it in the map view.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="312"/>
+        <location filename="../../src/mainwindow.cpp" line="319"/>
         <source>Show %1</source>
         <translation>%1 anzeigen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="706"/>
+        <location filename="../../src/mainwindow.cpp" line="718"/>
         <source>text</source>
         <comment>Seed input type</comment>
         <translatorcomment>Seed-Eingabetyp</translatorcomment>
         <translation>Text</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="708"/>
+        <location filename="../../src/mainwindow.cpp" line="720"/>
         <source>random</source>
         <comment>Seed input type</comment>
         <translatorcomment>Seed-Eingabetyp</translatorcomment>
         <translation>zufällig</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="716"/>
+        <location filename="../../src/mainwindow.cpp" line="728"/>
         <source>Save progress</source>
         <translation>Vortschritt speichern</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="716"/>
         <location filename="../../src/mainwindow.cpp" line="728"/>
+        <location filename="../../src/mainwindow.cpp" line="740"/>
         <source>Text files (*.txt);;Any files (*)</source>
         <translation>Textdateien (*.txt);;Alle Dateien (*)</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="728"/>
+        <location filename="../../src/mainwindow.cpp" line="740"/>
         <source>Load progress</source>
         <translation>Vortschritt laden</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="850"/>
+        <location filename="../../src/mainwindow.cpp" line="862"/>
         <source>Save screenshot</source>
         <translation>Screenshot speichern</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="850"/>
+        <location filename="../../src/mainwindow.cpp" line="862"/>
         <source>Images (*.png *.jpg *.ppm)</source>
         <translation>Bilder (*.png *.jpg *.ppm)</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="870"/>
+        <location filename="../../src/mainwindow.cpp" line="882"/>
         <source>Redock map</source>
         <translation>Karte andocken</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="983"/>
+        <location filename="../../src/mainwindow.cpp" line="995"/>
         <source>The application will need to be restarted before all changes can take effect.</source>
         <translation>Die Anwendung muss neugestartet werden um alle Änderungen wirksam zu machen.</translation>
     </message>
@@ -3871,6 +3881,31 @@ Trozdem fortfahren?</translation>
         <location filename="../../src/config.cpp" line="154"/>
         <source>End Gateway</source>
         <translation>Endtransitportale</translation>
+    </message>
+</context>
+<context>
+    <name>MapToolsDialog</name>
+    <message>
+        <location filename="../../src/maptoolsdialog.ui" line="6"/>
+        <source>Map Toolbar Options</source>
+        <translation>Kartenwerkzeuge</translation>
+    </message>
+    <message>
+        <location filename="../../src/maptoolsdialog.ui" line="43"/>
+        <source>Zoom In/Out</source>
+        <translation>Zoom</translation>
+    </message>
+    <message>
+        <location filename="../../src/maptoolsdialog.ui" line="56"/>
+        <source>Maximum visible scale
+(blocks per pixel)</source>
+        <translation>Maximaler Maßstab
+(Meter pro Pixel)</translation>
+    </message>
+    <message>
+        <location filename="../../src/maptoolsdialog.ui" line="71"/>
+        <source>Enabled tools</source>
+        <translation>Atkive Werkzeuge</translation>
     </message>
 </context>
 <context>
@@ -4393,29 +4428,6 @@ Weiter auf den Stop der Threads warten?</numerusform>
         <location filename="../../src/conditiondialog.h" line="82"/>
         <source>(cluster)</source>
         <translation>(gebündelt)</translation>
-    </message>
-</context>
-<context>
-    <name>StructureDialog</name>
-    <message>
-        <location filename="../../src/structuredialog.ui" line="6"/>
-        <source>Structure Visibility</source>
-        <translation>Struktursichtbarkeit</translation>
-    </message>
-    <message>
-        <location filename="../../src/structuredialog.ui" line="26"/>
-        <source>Maximum scale for structure visibility</source>
-        <translation>Maximaler Maßstab für Struktursichtbarkeit</translation>
-    </message>
-    <message>
-        <location filename="../../src/structuredialog.cpp" line="22"/>
-        <source>enabled</source>
-        <translation>Aktiv</translation>
-    </message>
-    <message>
-        <location filename="../../src/structuredialog.cpp" line="23"/>
-        <source>blocks per pixel</source>
-        <translation>Meter pro Pixel</translation>
     </message>
 </context>
 <context>

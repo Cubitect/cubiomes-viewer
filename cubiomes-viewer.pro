@@ -103,6 +103,7 @@ SOURCES += \
         src/formsearchcontrol.cpp \
         src/gotodialog.cpp \
         src/headless.cpp \
+        src/maptoolsdialog.cpp \
         src/message.cpp \
         src/presetdialog.cpp \
         src/protobasedialog.cpp \
@@ -118,7 +119,6 @@ SOURCES += \
         src/tabtriggers.cpp \
         src/mainwindow.cpp \
         src/main.cpp \
-        src/structuredialog.cpp \
         src/world.cpp
 
 HEADERS += \
@@ -168,6 +168,7 @@ HEADERS += \
         src/formsearchcontrol.h \
         src/gotodialog.h \
         src/headless.h \
+        src/maptoolsdialog.h \
         src/message.h \
         src/presetdialog.h \
         src/protobasedialog.h \
@@ -184,7 +185,6 @@ HEADERS += \
         src/tabstructures.h \
         src/tabtriggers.h \
         src/mainwindow.h \
-        src/structuredialog.h \
         src/world.h
 
 FORMS += \
@@ -198,6 +198,7 @@ FORMS += \
         src/formgen48.ui \
         src/formsearchcontrol.ui \
         src/gotodialog.ui \
+        src/maptoolsdialog.ui \
         src/presetdialog.ui \
         src/protobasedialog.ui \
         src/layerdialog.ui \
@@ -205,8 +206,7 @@ FORMS += \
         src/rangedialog.ui \
         src/tabbiomes.ui \
         src/tabstructures.ui \
-        src/tabtriggers.ui \
-        src/structuredialog.ui
+        src/tabtriggers.ui
 
 
 RESOURCES += \

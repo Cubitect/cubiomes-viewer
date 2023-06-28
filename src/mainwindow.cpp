@@ -6,7 +6,7 @@
 #include "conditiondialog.h"
 #include "extgendialog.h"
 #include "biomecolordialog.h"
-#include "structuredialog.h"
+#include "maptoolsdialog.h"
 #include "exportdialog.h"
 #include "layerdialog.h"
 #include "tabtriggers.h"
@@ -127,9 +127,16 @@ MainWindow::MainWindow(QString sessionpath, QString resultspath, QWidget *parent
         addAction(act);
     }
 
-    QAction *toorigin = new QAction(QIcon(":/icons/origin.png"), tr("Goto origin"), this);
-    connect(toorigin, &QAction::triggered, [=](){ this->mapGoto(0,0,16); });
-    ui->toolBar->addAction(toorigin);
+    acthome = new QAction(QIcon(":/icons/origin.png"), tr("Goto origin"), this);
+    actzoom[0] = new QAction(QIcon(":/icons/zoom_in.png"), tr("Zoom In"), this);
+    actzoom[1] = new QAction(QIcon(":/icons/zoom_out.png"), tr("Zoom Out"), this);
+    connect(acthome, &QAction::triggered, [=](){ this->mapGoto(0,0,16); });
+    connect(actzoom[0], &QAction::triggered, [=](){ this->mapZoom(pow(2.0, +0.5)); });
+    connect(actzoom[1], &QAction::triggered, [=](){ this->mapZoom(pow(2.0, -0.5)); });
+
+    ui->toolBar->addAction(acthome);
+    ui->toolBar->addAction(actzoom[0]);
+    ui->toolBar->addAction(actzoom[1]);
     ui->toolBar->addSeparator();
 
     dimactions[0] = addMapAction(":/icons/overworld", tr("Overworld"));
@@ -669,6 +676,11 @@ void MainWindow::mapGoto(qreal x, qreal z, qreal scale)
     getMapView()->setView(x, z, scale);
 }
 
+void MainWindow::mapZoom(qreal factor)
+{
+    getMapView()->zoom(factor);
+}
+
 void MainWindow::setBiomeColorRc(QString rc)
 {
     config.biomeColorPath = rc;
@@ -762,9 +774,9 @@ void MainWindow::on_actionOpenShadow_triggered()
     }
 }
 
-void MainWindow::on_actionStructure_visibility_triggered()
+void MainWindow::on_actionToolbarConfig_triggered()
 {
-    StructureDialog *dialog = new StructureDialog(this);
+    MapToolsDialog *dialog = new MapToolsDialog(this);
     connect(dialog, SIGNAL(updateMapConfig()), this, SLOT(onUpdateMapConfig()));
     dialog->show();
 }
@@ -1037,16 +1049,18 @@ void MainWindow::onUpdateMapConfig()
     MapConfig old = mconfig;
     mconfig.load();
 
-    if (!old.equals(mconfig))
+    if (!old.sameMapOpts(mconfig))
     {
-        for (int opt = D_GRID; opt < D_STRUCT_NUM; opt++)
+        for (int opt = 0; opt < D_STRUCT_NUM; opt++)
         {
-            if (saction[opt] && mconfig.valid(opt))
-                saction[opt]->setVisible(mconfig.enabled(opt));
+            if (QAction *act = saction[opt])
+                act->setVisible(mconfig.enabled(opt));
         }
         getMapView()->deleteWorld();
         updateMapSeed();
     }
+    actzoom[0]->setVisible(mconfig.zoomEnabled);
+    actzoom[1]->setVisible(mconfig.zoomEnabled);
 }
 
 void MainWindow::onBiomeColorChange()

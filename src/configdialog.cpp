@@ -2,7 +2,7 @@
 #include "ui_configdialog.h"
 
 #include "biomecolordialog.h"
-#include "structuredialog.h"
+#include "maptoolsdialog.h"
 #include "world.h"
 #include "cutil.h"
 
@@ -195,7 +195,7 @@ void ConfigDialog::on_buttonBiomeColor_clicked()
 
 void ConfigDialog::on_buttonStructVisEdit_clicked()
 {
-    StructureDialog *dialog = new StructureDialog(this);
+    MapToolsDialog *dialog = new MapToolsDialog(this);
     connect(dialog, SIGNAL(updateMapConfig()), this, SLOT(onUpdateMapConfig()));
     dialog->show();
 }

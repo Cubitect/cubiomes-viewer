@@ -80,5 +80,8 @@
         <file>icons/well_d.png</file>
         <file>icons/geode_d.png</file>
         <file>icons/geode.png</file>
+        <file>icons/zoom_in.png</file>
+        <file>icons/zoom_out.png</file>
+        <file>icons/zoom.png</file>
     </qresource>
 </RCC>

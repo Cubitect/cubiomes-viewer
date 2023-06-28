@@ -72,6 +72,7 @@ signals:
 
 public slots:
     void mapGoto(qreal x, qreal z, qreal scale);
+    void mapZoom(qreal factor);
     void setBiomeColorRc(QString rc);
 
 private slots:
@@ -87,7 +88,7 @@ private slots:
     void on_actionPreferences_triggered();
     void on_actionGo_to_triggered();
     void on_actionOpenShadow_triggered();
-    void on_actionStructure_visibility_triggered();
+    void on_actionToolbarConfig_triggered();
     void on_actionBiome_colors_triggered();
     void on_actionPresetLoad_triggered();
     void on_actionExamples_triggered();
@@ -139,6 +140,8 @@ public:
 
     QVector<QAction*> laction;
     QVector<QAction*> saction;
+    QAction *acthome;
+    QAction *actzoom[2];
     QAction *dimactions[3];
     QActionGroup *dimgroup;
 };
