@@ -1142,8 +1142,7 @@ L_qm_any:
                     if (st == End_City)
                     {
                         env->prepareSurfaceNoise(DIM_END);
-                        if (!isViableEndCityTerrain(
-                            &env->g.en, &env->sn, pc.x, pc.z))
+                        if (!isViableEndCityTerrain(&env->g, &env->sn, pc.x, pc.z))
                             continue;
                     }
                     if (cond->varflags)

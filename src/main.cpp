@@ -121,7 +121,11 @@ int main(int argc, char *argv[])
     }
     else
     {
+        QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+        QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+
         QApplication app(argc, argv);
+
         MainWindow mw(sessionpath, resultspath);
         mw.show();
         return app.exec();

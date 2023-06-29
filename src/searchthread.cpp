@@ -339,11 +339,11 @@ bool SearchMaster::set(QWidget *widget, const Session& s)
 static int check(uint64_t s48, void *data)
 {
     (void) data;
-    const StructureConfig sconf = {0,0,0,0,0,0};
+    static const StructureConfig sconf = {0,0,0,0,0,0};
     return isQuadBaseFeature24(sconf, s48, 7+1, 7+1, 9+1) != 0;
 }
 
-static void genQHBases(QObject *qtobj, int qual, uint64_t salt, std::vector<uint64_t>& list48)
+static void genQHBases(QObject *qtobj, int qual, uint64_t salt, std::vector<uint64_t>& list48, std::atomic_bool *stop)
 {
     const char *lbstr = NULL;
     const uint64_t *lbset = NULL;
@@ -393,23 +393,18 @@ static void genQHBases(QObject *qtobj, int qual, uint64_t salt, std::vector<uint
             QMetaObject::invokeMethod(qtobj, "openProtobaseMsg", Qt::QueuedConnection, Q_ARG(QString, path));
 
         int threads = QThread::idealThreadCount();
-        int err = searchAll48(&qb, &qn, fnam.data(), threads, lbset, lbcnt, 20, check, NULL);
+        int err = searchAll48(&qb, &qn, fnam.data(), threads, lbset, lbcnt, 20, check, NULL, (volatile char*) stop);
 
         if (err)
         {
             printf("[WARN]: Failed to generate protobases.\n");
-            if (qtobj)
+            if (qtobj && !*stop)
             {
                 QMetaObject::invokeMethod(
                         qtobj, "warning", Qt::BlockingQueuedConnection,
                         Q_ARG(QString, SearchMaster::tr("Failed to generate protobases.")));
             }
             return;
-        }
-        else
-        {
-            if (qtobj)
-                QMetaObject::invokeMethod(qtobj, "closeProtobaseMsg", Qt::BlockingQueuedConnection);
         }
     }
     else
@@ -500,7 +495,7 @@ void SearchMaster::presearch(QObject *qtobj)
                 salt = sconf.salt;
             }
             slist.clear();
-            genQHBases(qtobj, gen48.qual, salt, slist);
+            genQHBases(qtobj, gen48.qual, salt, slist, &abort);
         }
         else if (gen48.mode == GEN48_QM)
         {
@@ -546,6 +541,29 @@ void SearchMaster::presearch(QObject *qtobj)
             scnt = smax = ~(uint64_t)0;
             prog = seed = sstart;
             idx = 0;
+        }
+    }
+
+    if (searchtype == SEARCH_48ONLY)
+    {
+        if (!slist.empty())
+        {   // 48-bit seed list
+            scnt = slist.size();
+            for (idx = 0; idx < scnt; idx++)
+                if (slist[idx] == sstart)
+                    break;
+            if (idx == scnt)
+                idx = 0;
+            seed = slist[idx];
+            smax = slist.back();
+            prog = idx;
+        }
+        else
+        {
+            prog = seed = sstart;
+            scnt = smax = MASK48;
+            if (seed > smax)
+                isdone = true;
         }
     }
 
@@ -621,8 +639,17 @@ void SearchMaster::presearch(QObject *qtobj)
 
 void SearchMaster::run()
 {
-    presearch(parent());
     stop();
+    abort = false;
+    QObject *qtobj = parent();
+    presearch(qtobj);
+    if (qtobj)
+        QMetaObject::invokeMethod(qtobj, "closeProtobaseMsg", Qt::BlockingQueuedConnection);
+    if (abort)
+    {
+        emit searchFinish(false);
+        return;
+    }
 
     for (int i = 0; i < threadcnt; i++)
     {
@@ -641,7 +668,6 @@ void SearchMaster::run()
 
     QMutexLocker locker(&mutex);
 
-    abort = false;
     proghist.clear();
     progtimer.start();
     itemtimer.start();
@@ -871,6 +897,24 @@ bool SearchMaster::requestItem(SearchWorker *item)
             isdone = true;
     }
 
+    if (searchtype == SEARCH_48ONLY)
+    {
+        if (!slist.empty())
+        {
+            if (idx + itemsize > scnt)
+                item->scnt = scnt - idx;
+            idx += itemsize;
+            if (idx >= scnt)
+                isdone = true;
+        }
+        else
+        {
+            seed += itemsize;
+            if (seed > MASK48)
+                isdone = true;
+        }
+    }
+
     if (searchtype == SEARCH_INC)
     {
         if (!slist.empty())
@@ -997,9 +1041,7 @@ void SearchWorker::run()
             {
                 seed = slist[i];
                 env.setSeed(seed);
-                if (testTreeAt(origin, &env, PASS_FULL_64, abort)
-                    == COND_OK
-                )
+                if (testTreeAt(origin, &env, PASS_FULL_64, abort) == COND_OK)
                 {
                     if (!*abort)
                         emit result(seed);
@@ -1007,6 +1049,45 @@ void SearchWorker::run()
             }
             //if (ie == len) // done
             //   break;
+        }
+        break;
+
+    case SEARCH_48ONLY:
+        while (!*abort && master->requestItem(this))
+        {
+            if (slist)
+            {
+                uint64_t ie = idx+scnt < len ? idx+scnt : len;
+                for (uint64_t i = idx; i < ie; i++)
+                {
+                    seed = slist[i];
+                    env.setSeed(seed);
+                    if (testTreeAt(origin, &env, PASS_FULL_48, abort) != COND_FAILED)
+                    {
+                        if (!*abort)
+                            emit result(seed);
+                    }
+                }
+            }
+            else
+            {
+                seed = sstart;
+                for (int i = 0; i < scnt; i++)
+                {
+                    env.setSeed(seed);
+                    if (testTreeAt(origin, &env, PASS_FULL_48, abort) != COND_FAILED)
+                    {
+                        if (!*abort)
+                            emit result(seed);
+                    }
+
+                    if (seed >= MASK48)
+                    {   // done
+                        break;
+                    }
+                    seed++;
+                }
+            }
         }
         break;
 
@@ -1023,9 +1104,7 @@ void SearchWorker::run()
                     seed = (high << 48) | slist[lowidx];
 
                     env.setSeed(seed);
-                    if (testTreeAt(origin, &env, PASS_FULL_64, abort)
-                        == COND_OK
-                    )
+                    if (testTreeAt(origin, &env, PASS_FULL_64, abort) == COND_OK)
                     {
                         if (!*abort)
                             emit result(seed);
@@ -1047,9 +1126,7 @@ void SearchWorker::run()
                 for (int i = 0; i < scnt; i++)
                 {
                     env.setSeed(seed);
-                    if (testTreeAt(origin, &env, PASS_FULL_64, abort)
-                        == COND_OK
-                    )
+                    if (testTreeAt(origin, &env, PASS_FULL_64, abort) == COND_OK)
                     {
                         if (!*abort)
                             emit result(seed);
@@ -1081,9 +1158,7 @@ void SearchWorker::run()
                 low = sstart & MASK48;
 
             env.setSeed(low);
-            if (testTreeAt(origin, &env, PASS_FULL_48, abort)
-                == COND_FAILED
-            )
+            if (testTreeAt(origin, &env, PASS_FULL_48, abort) == COND_FAILED)
             {
                 continue;
             }
@@ -1093,9 +1168,7 @@ void SearchWorker::run()
                 seed = (high << 48) | low;
 
                 env.setSeed(seed);
-                if (testTreeAt(origin, &env, PASS_FULL_64, abort)
-                    == COND_OK
-                )
+                if (testTreeAt(origin, &env, PASS_FULL_64, abort) == COND_OK)
                 {
                     if (!*abort)
                         emit result(seed);

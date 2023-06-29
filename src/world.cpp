@@ -215,7 +215,7 @@ void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
                 {
                     SurfaceNoise sn;
                     initSurfaceNoise(&sn, DIM_END, wi.seed);
-                    id = isViableEndCityTerrain(&g.en, &sn, p.x, p.z);
+                    id = isViableEndCityTerrain(&g, &sn, p.x, p.z);
                     if (!id)
                         continue;
                     int n = getEndCityPieces(pieces, wi.seed, p.x >> 4, p.z >> 4);
@@ -850,6 +850,8 @@ int QWorld::getBiome(Pos p)
 
 QString QWorld::getBiomeName(Pos p)
 {
+    if (dim == 0 && lopt.mode == LOPT_STRUCTS)
+        return "";
     int id = getBiome(p);
     if (dim == 0 && lopt.isClimate(wi.mc))
     {
@@ -1262,6 +1264,11 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
         Level& l = lvs[sopt];
         if (!sshow[sopt] || dim != l.dim || l.vis > blocks2pix)
             continue;
+        if (lopt.mode == LOPT_STRUCTS)
+        {
+            if (sopt == D_GEODE || sopt == D_WELL)
+                continue;
+        }
 
         std::map<const QPixmap*, std::vector<QPainter::PixmapFragment>> frags;
         QImage bufimg = QImage(vw, vh, QImage::Format_Indexed8);

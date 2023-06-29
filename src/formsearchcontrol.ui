@@ -143,21 +143,6 @@ QPushButton:hover {
          <height>16</height>
         </size>
        </property>
-       <item>
-        <property name="text">
-         <string>incremental</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>48-bit family blocks</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>seed list from a file...</string>
-        </property>
-       </item>
       </widget>
      </item>
      <item row="3" column="0" colspan="7">

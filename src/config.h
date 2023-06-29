@@ -37,10 +37,6 @@ extern unsigned char g_tempsColors[256][3];
 // Keep the extended generator settings in global scope.
 extern ExtGenConfig g_extgen;
 
-// global references to the default fonts
-extern QFont *gp_font_default;
-extern QFont *gp_font_mono;
-
 struct WorldInfo
 {
     int mc;
@@ -218,7 +214,7 @@ struct Gen48Config
 };
 
 // search type options from combobox
-enum { SEARCH_INC = 0, SEARCH_BLOCKS = 1, SEARCH_LIST = 2 };
+enum { SEARCH_INC = 0, SEARCH_BLOCKS = 1, SEARCH_LIST = 2, SEARCH_48ONLY = 3 };
 
 struct SearchConfig
 {

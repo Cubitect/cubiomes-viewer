@@ -121,6 +121,11 @@ FormSearchControl::FormSearchControl(MainWindow *parent)
     ui->setupUi(this);
     protodialog = new ProtoBaseDialog(this);
 
+    ui->comboSearchType->addItem(tr("incremental"), SEARCH_INC);
+    ui->comboSearchType->addItem(tr("48-bit only"), SEARCH_48ONLY);
+    ui->comboSearchType->addItem(tr("48-bit family blocks"), SEARCH_BLOCKS);
+    ui->comboSearchType->addItem(tr("seed list from file..."), SEARCH_LIST);
+
     proxy->setSourceModel(model);
     ui->results->setModel(proxy);
 
@@ -174,7 +179,7 @@ std::vector<uint64_t> FormSearchControl::getResults()
 SearchConfig FormSearchControl::getSearchConfig()
 {
     SearchConfig s;
-    s.searchtype = ui->comboSearchType->currentIndex();
+    s.searchtype = ui->comboSearchType->currentData().toInt();
     s.threads = ui->spinThreads->value();
     s.slist64path = slist64path;
     s.startseed = ui->lineStart->text().toLongLong();
@@ -187,9 +192,9 @@ SearchConfig FormSearchControl::getSearchConfig()
 bool FormSearchControl::setSearchConfig(SearchConfig s, bool quiet)
 {
     bool ok = true;
-    if (s.searchtype >= SEARCH_INC && s.searchtype <= SEARCH_LIST)
+    if (s.searchtype >= SEARCH_INC && s.searchtype <= SEARCH_48ONLY)
     {
-        ui->comboSearchType->setCurrentIndex(s.searchtype);
+        ui->comboSearchType->setCurrentIndex(ui->comboSearchType->findData(s.searchtype));
         on_comboSearchType_currentIndexChanged(s.searchtype);
     }
     else
@@ -281,7 +286,7 @@ void FormSearchControl::searchLockUi(bool lock)
 
 void FormSearchControl::setSearchMode(int mode)
 {
-    ui->comboSearchType->setCurrentIndex(mode);
+    ui->comboSearchType->setCurrentIndex(ui->comboSearchType->findData(mode));
     if (mode == SEARCH_LIST)
     {
         on_buttonMore_clicked();
@@ -399,7 +404,7 @@ void FormSearchControl::on_buttonStart_clicked()
 
 void FormSearchControl::on_buttonMore_clicked()
 {
-    int type = ui->comboSearchType->currentIndex();
+    int type = ui->comboSearchType->currentData().toInt();
     if (type == SEARCH_LIST)
     {
         QString fnam = QFileDialog::getOpenFileName(
@@ -476,6 +481,12 @@ void FormSearchControl::on_buttonSearchHelp_clicked()
         "of search is best suited for a non-exhaustive search space and "
         "with strong biome dependencies. You can restrict this type of "
         "search to a value range using the &quot;...&quot; button."
+        "</p><p>"
+        "When searching <b>48-bit only</b>, the search is limited to the seed "
+        "bases and does not yield matching seeds, but rather checks only the "
+        "parts of the conditions can be determined from the lower 48-bits. "
+        "Sessions saved from this search are suitable to be used later with "
+        "the 48-bit generator to look for matching seeds."
         "</p><p>"
         "With <b>48-bit family blocks</b> the search looks for suitable "
         "48-bit seeds first and parallelizes the search through the upper "
@@ -652,7 +663,7 @@ void FormSearchControl::searchProgressReset()
         cnt <<= 16;
 
     QString fmt;
-    int searchtype = ui->comboSearchType->currentIndex();
+    int searchtype = ui->comboSearchType->currentData().toInt();
     if (searchtype == SEARCH_LIST)
     {
         if (!slist64fnam.isEmpty())
@@ -691,7 +702,7 @@ void FormSearchControl::updateSearchProgress(uint64_t prog, uint64_t end, int64_
                     "%" PRIu64 " / %" PRIu64 " (%d.%02d%%)",
                     prog, end, v / 100, v % 100
                     );
-        int searchtype = ui->comboSearchType->currentIndex();
+        int searchtype = ui->comboSearchType->currentData().toInt();
         if (searchtype == SEARCH_LIST)
         {
             if (!slist64fnam.isEmpty())

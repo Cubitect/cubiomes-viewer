@@ -4,6 +4,7 @@
 #include <QMutex>
 #include <QString>
 #include <QApplication>
+#include <QPixmap>
 
 #include <random>
 
@@ -76,7 +77,7 @@ inline QString getStartPieceName(int stype, const StructureVariant *sv)
     return name;
 }
 
-static inline QString getBiomeDisplay(int mc, int id)
+inline QString getBiomeDisplay(int mc, int id)
 {
     if (mc >= MC_1_18)
     {
@@ -211,6 +212,14 @@ static inline QString getBiomeDisplay(int mc, int id)
     }
     const char *name = biome2str(mc, id);
     return name ? name : "";
+}
+
+
+
+inline QPixmap getRc(const QString& rc)
+{
+    QPixmap pixmap(rc);
+    return pixmap;
 }
 
 // get a random 64-bit integer

@@ -178,7 +178,7 @@ static int l_getStructures(lua_State *L)
                 continue; // biomes are not viable
             if (styp == End_City)
             {   // end cities have a dedicated terrain checker
-                if (!isViableEndCityTerrain(&env->g.en, &env->sn, pos.x, pos.z))
+                if (!isViableEndCityTerrain(&env->g, &env->sn, pos.x, pos.z))
                     continue;
             }
             else if (env->mc >= MC_1_18)
