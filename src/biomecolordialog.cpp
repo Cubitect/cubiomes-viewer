@@ -1,14 +1,9 @@
 #include "biomecolordialog.h"
 #include "ui_biomecolordialog.h"
 
-#include "cutil.h"
 #include "config.h"
+#include "util.h"
 
-#include <QPixmap>
-#include <QPainter>
-#include <QPainterPath>
-#include <QPen>
-#include <QIcon>
 #include <QPushButton>
 #include <QColorDialog>
 #include <QInputDialog>
@@ -19,22 +14,6 @@
 
 
 #define DIM_DIVIDER 6
-
-static QIcon getColorIcon(const QColor& col)
-{
-    QPixmap pixmap(14,14);
-    pixmap.fill(QColor(0,0,0,0));
-    QPainter p(&pixmap);
-    p.setRenderHint(QPainter::Antialiasing);
-    QPainterPath path;
-    path.addRoundedRect(QRectF(1, 1, 12, 12), 3, 3);
-    QPen pen(Qt::black, 1);
-    p.setPen(pen);
-
-    p.fillPath(path, col);
-    p.drawPath(path);
-    return QIcon(pixmap);
-}
 
 BiomeColorDialog::BiomeColorDialog(QWidget *parent, QString initrc, int mc, int dim)
     : QDialog(parent)
@@ -53,8 +32,7 @@ BiomeColorDialog::BiomeColorDialog(QWidget *parent, QString initrc, int mc, int 
 
     QPushButton *button;
     ui->gridLayout->setSpacing(2);
-    QPixmap alignicon(14, 14);
-    alignicon.fill(Qt::transparent);
+    QIcon alignicon = getColorIcon(QColor(0,0,0,0));
 
     separator = new QLabel(tr("Currently inactive biomes:"), this);
     separator->setVisible(false);

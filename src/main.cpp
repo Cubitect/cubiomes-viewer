@@ -12,13 +12,6 @@
 #include "cubiomes/generator.h"
 #include "cubiomes/util.h"
 
-/// globals
-
-unsigned char g_biomeColors[256][3];
-unsigned char g_tempsColors[256][3];
-
-ExtGenConfig g_extgen;
-
 extern "C"
 int getStructureConfig_override(int stype, int mc, StructureConfig *sconf)
 {
@@ -121,8 +114,9 @@ int main(int argc, char *argv[])
     }
     else
     {
-        QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-        QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+        QApplication::setAttribute(Qt::AA_EnableHighDpiScaling, true);
+        QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps, true);
+        QApplication::setAttribute(Qt::AA_UseStyleSheetPropagationInWidgetStyles, false);
 
         QApplication app(argc, argv);
 

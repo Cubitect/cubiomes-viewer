@@ -3,7 +3,7 @@
 
 #include "mainwindow.h"
 #include "mapview.h"
-#include "cutil.h"
+#include "util.h"
 #include "message.h"
 
 #include <QIntValidator>

@@ -1,7 +1,7 @@
 #include "extgendialog.h"
 #include "ui_extgendialog.h"
 
-#include "cutil.h"
+#include "util.h"
 
 #include <QGridLayout>
 

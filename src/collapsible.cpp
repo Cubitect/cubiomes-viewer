@@ -18,7 +18,6 @@ Collapsible::Collapsible(QWidget *parent)
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
 
     QFont font = toggleButton->font();
-    //font.setPixelSize(12);
     font.setBold(true);
     toggleButton->setFont(font);
     toggleButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
@@ -137,6 +136,8 @@ void Collapsible::setInfo(const QString& title, const QString& text)
       "QPushButton:hover {"
       "    image: url(:/icons/info_h.png);"
       "}");
+    int fmh = fontMetrics().height();
+    button->setIconSize(QSize(fmh, fmh));
     button->setToolTip(tr("Show help"));
 
     connect(button, SIGNAL(clicked()), this, SLOT(showInfo()));

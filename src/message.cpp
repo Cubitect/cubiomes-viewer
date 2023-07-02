@@ -54,7 +54,10 @@ int message(QWidget *parent, QMessageBox::Icon icon, const QString& title, const
         return term_prompt(title, text, buttons);
 
     // emulate the behaviour of QMessageBox::warning(...), but raise as active window
-    QMessageBox w(icon, title, text, QMessageBox::NoButton, parent);
+    QMessageBox w(parent);
+    w.setWindowTitle(title);
+    w.setText(text);
+    w.setIconPixmap(QMessageBox::standardIcon(icon)); // setIcon() plays a sound on windows
     for (uint mask = QMessageBox::FirstButton; mask <= QMessageBox::LastButton; mask <<= 1)
         if (mask & buttons)
             w.addButton((QMessageBox::StandardButton)mask);

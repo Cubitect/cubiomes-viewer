@@ -7,8 +7,8 @@
 #include <QDoubleValidator>
 #include <QPushButton>
 
-#include "cutil.h"
 #include "world.h"
+#include "util.h"
 
 MapToolsDialog::MapToolsDialog(QWidget *parent)
     : QDialog(parent)

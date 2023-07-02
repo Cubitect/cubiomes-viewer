@@ -12,7 +12,6 @@
 #include <QAction>
 #include <QClipboard>
 #include <QFileDialog>
-#include <QMessageBox>
 #include <QFontMetrics>
 
 
@@ -102,8 +101,8 @@ FormSearchControl::FormSearchControl(MainWindow *parent)
     : QWidget(parent)
     , parent(parent)
     , ui(new Ui::FormSearchControl)
-    , model(new SeedTableModel(this))
-    , proxy(new SeedSortProxy(this))
+    , model()
+    , proxy()
     , protodialog()
     , sthread(this)
     , elapsed()
@@ -126,15 +125,13 @@ FormSearchControl::FormSearchControl(MainWindow *parent)
     ui->comboSearchType->addItem(tr("48-bit family blocks"), SEARCH_BLOCKS);
     ui->comboSearchType->addItem(tr("seed list from file..."), SEARCH_LIST);
 
+    model = new SeedTableModel(ui->results);
+    proxy = new SeedSortProxy(ui->results);
+
     proxy->setSourceModel(model);
     ui->results->setModel(proxy);
 
-    ui->results->horizontalHeader()->setFont(ui->results->font());
     ui->results->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-    ui->results->verticalHeader()->setDefaultSectionSize(QFontMetrics(ui->results->font()).height());
-    ui->results->setColumnWidth(SeedTableModel::COL_SEED, 200);
-    ui->results->setColumnWidth(SeedTableModel::COL_TOP16, 80);
-    ui->results->setColumnWidth(SeedTableModel::COL_HEX48, 120);
 
     connect(ui->results->horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &FormSearchControl::onSort);
     ui->results->sortByColumn(-1, Qt::AscendingOrder);
@@ -163,6 +160,18 @@ FormSearchControl::~FormSearchControl()
     sthread.quit(); // tell the event loop to exit
     sthread.wait(); // wait for search to finish
     delete ui;
+}
+
+bool FormSearchControl::event(QEvent *e)
+{
+    if (e->type() == QEvent::LayoutRequest)
+    {
+        QFontMetrics fm = QFontMetrics(ui->results->font());
+        ui->results->setColumnWidth(SeedTableModel::COL_SEED, fm.horizontalAdvance(QString(24, '#')));
+        ui->results->setColumnWidth(SeedTableModel::COL_TOP16, fm.horizontalAdvance(QString(12, '#')));
+        ui->results->verticalHeader()->setDefaultSectionSize(fm.height());
+    }
+    return QWidget::event(e);
 }
 
 std::vector<uint64_t> FormSearchControl::getResults()

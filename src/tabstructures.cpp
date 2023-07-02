@@ -1,7 +1,7 @@
 #include "tabstructures.h"
 #include "ui_tabstructures.h"
 
-#include "cutil.h"
+#include "util.h"
 #include "message.h"
 
 #include <QTreeWidgetItem>

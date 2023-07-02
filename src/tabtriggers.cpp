@@ -2,7 +2,7 @@
 #include "ui_tabtriggers.h"
 
 #include "message.h"
-#include "cutil.h"
+#include "util.h"
 #include "config.h"
 
 #include <QElapsedTimer>

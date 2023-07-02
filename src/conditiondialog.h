@@ -1,6 +1,11 @@
 #ifndef CONDITIONDIALOG_H
 #define CONDITIONDIALOG_H
 
+#include "search.h"
+#include "formconditions.h"
+#include "rangeslider.h"
+#include "util.h"
+
 #include <QDialog>
 #include <QCheckBox>
 #include <QSpinBox>
@@ -9,17 +14,54 @@
 #include <QTextEdit>
 #include <QMouseEvent>
 #include <QVBoxLayout>
-
-#include "search.h"
-#include "formconditions.h"
-#include "rangeslider.h"
-#include "cutil.h"
+#include <QComboBox>
+#include <QStyledItemDelegate>
+#include <QStandardItemModel>
 
 class MainWindow;
 
 namespace Ui {
 class ConditionDialog;
 }
+
+// QComboBox uses QItemDelegate, which would not support styles
+class ComboBoxDelegate : public QStyledItemDelegate
+{
+    Q_OBJECT
+public:
+    ComboBoxDelegate(QObject *parent, QComboBox *cmb) : QStyledItemDelegate(parent), combo(cmb) {}
+
+    static bool isSeparator(const QModelIndex &index)
+    {
+        return index.data(Qt::AccessibleDescriptionRole).toString() == QString::fromLatin1("separator");
+    }
+
+    virtual void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override
+    {
+        if (!isSeparator(index))
+        {
+            QStyledItemDelegate::paint(painter, option, index);
+            return;
+        }
+        QRect rect = option.rect;
+        if (const QAbstractItemView *view = qobject_cast<const QAbstractItemView*>(option.widget))
+            rect.setWidth(view->viewport()->width());
+        QStyleOption opt;
+        opt.rect = rect;
+        combo->style()->drawPrimitive(QStyle::PE_IndicatorToolBarSeparator, &opt, painter, combo);
+    }
+
+    virtual QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override
+    {
+        if (!isSeparator(index))
+            return QStyledItemDelegate::sizeHint(option, index);
+        int pm = combo->style()->pixelMetric(QStyle::PM_DefaultFrameWidth, nullptr, combo);
+        return QSize(pm, pm + 2);
+    }
+
+private:
+    QComboBox *combo;
+};
 
 class SpinExclude : public QSpinBox
 {
@@ -156,7 +198,7 @@ private slots:
 
     void on_ConditionDialog_finished(int result);
 
-    void on_comboBoxCat_currentIndexChanged(int index);
+    void on_comboBoxCat_currentIndexChanged(int);
 
     void onCheckStartChanged(int state);
     void onClimateLimitChanged();

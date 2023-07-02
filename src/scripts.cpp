@@ -1,7 +1,7 @@
 #include "scripts.h"
 
 #include "search.h"
-#include "cutil.h"
+#include "util.h"
 
 #include <QApplication>
 #include <QStandardPaths>

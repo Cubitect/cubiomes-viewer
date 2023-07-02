@@ -1,66 +1,12 @@
-#ifndef CUTIL_H
-#define CUTIL_H
+#include "util.h"
+#include "config.h"
 
-#include <QMutex>
-#include <QString>
-#include <QApplication>
+#include <QIcon>
 #include <QPixmap>
+#include <QPainter>
+#include <QPainterPath>
 
-#include <random>
-
-#include "cubiomes/quadbase.h"
-#include "cubiomes/util.h"
-
-struct StartPiece
-{
-    int stype;
-    int biome;
-    int start;
-    int giant;
-    const char *name;
-    int row, col; // UI layout
-};
-
-static const StartPiece g_start_pieces[] =
-{   // the index is used to encode the start pieces in the condition
-    // (and should therefore ideally remain constant across upgrades)
-    {Village, plains, 0, -1, "plains_fountain_01", 0, 0},
-    {Village, plains, 1, -1, "plains_meeting_point_1", 1, 0},
-    {Village, plains, 2, -1, "plains_meeting_point_2", 2, 0},
-    {Village, plains, 3, -1, "plains_meeting_point_3", 3, 0},
-    {Village, desert, 1, -1, "desert_meeting_point_1", 4, 1},
-    {Village, desert, 2, -1, "desert_meeting_point_2", 5, 1},
-    {Village, desert, 3, -1, "desert_meeting_point_3", 6, 1},
-    {Village, savanna, 1, -1, "savanna_meeting_point_1", 0, 1},
-    {Village, savanna, 2, -1, "savanna_meeting_point_2", 1, 1},
-    {Village, savanna, 3, -1, "savanna_meeting_point_3", 2, 1},
-    {Village, savanna, 4, -1, "savanna_meeting_point_4", 3, 1},
-    {Village, taiga, 1, -1, "taiga_meeting_point_1", 7, 0},
-    {Village, taiga, 2, -1, "taiga_meeting_point_2", 8, 0},
-    {Village, snowy_tundra, 1, -1, "snowy_meeting_point_1", 4, 0},
-    {Village, snowy_tundra, 2, -1, "snowy_meeting_point_2", 5, 0},
-    {Village, snowy_tundra, 3, -1, "snowy_meeting_point_3", 6, 0},
-    {Bastion, -1, 0, -1, "units", 0, 0},
-    {Bastion, -1, 1, -1, "hoglin_stable", 1, 0},
-    {Bastion, -1, 2, -1, "treasure", 2, 0},
-    {Bastion, -1, 3, -1, "bridge", 3, 0},
-    {Ruined_Portal, -1, 1, 1, "giant_ruined_portal_1", 0, 1},
-    {Ruined_Portal, -1, 2, 1, "giant_ruined_portal_2", 1, 1},
-    {Ruined_Portal, -1, 3, 1, "giant_ruined_portal_3", 2, 1},
-    {Ruined_Portal, -1, 1, 0, "ruined_portal_1", 0, 0},
-    {Ruined_Portal, -1, 2, 0, "ruined_portal_2", 1, 0},
-    {Ruined_Portal, -1, 3, 0, "ruined_portal_3", 2, 0},
-    {Ruined_Portal, -1, 4, 0, "ruined_portal_4", 3, 0},
-    {Ruined_Portal, -1, 5, 0, "ruined_portal_5", 4, 0},
-    {Ruined_Portal, -1, 6, 0, "ruined_portal_6", 5, 0},
-    {Ruined_Portal, -1, 7, 0, "ruined_portal_7", 6, 0},
-    {Ruined_Portal, -1, 8, 0, "ruined_portal_8", 7, 0},
-    {Ruined_Portal, -1, 9, 0, "ruined_portal_9", 8, 0},
-    {Ruined_Portal, -1, 10, 0, "ruined_portal_10", 9, 0},
-    {-1,0,0,0,0,0,0}
-};
-
-inline QString getStartPieceName(int stype, const StructureVariant *sv)
+QString getStartPieceName(int stype, const StructureVariant *sv)
 {
     QString name;
     for (size_t i = 0; ; i++)
@@ -77,7 +23,7 @@ inline QString getStartPieceName(int stype, const StructureVariant *sv)
     return name;
 }
 
-inline QString getBiomeDisplay(int mc, int id)
+QString getBiomeDisplay(int mc, int id)
 {
     if (mc >= MC_1_18)
     {
@@ -214,16 +160,8 @@ inline QString getBiomeDisplay(int mc, int id)
     return name ? name : "";
 }
 
-
-
-inline QPixmap getRc(const QString& rc)
-{
-    QPixmap pixmap(rc);
-    return pixmap;
-}
-
 // get a random 64-bit integer
-static inline uint64_t getRnd64()
+uint64_t getRnd64()
 {
     static QMutex mutex;
     static std::random_device rd;
@@ -250,8 +188,7 @@ static inline uint64_t getRnd64()
     return ret;
 }
 
-enum { S_TEXT, S_NUMERIC, S_RANDOM };
-inline int str2seed(const QString &str, uint64_t *out)
+int str2seed(const QString &str, uint64_t *out)
 {
     if (str.isEmpty())
     {
@@ -277,69 +214,96 @@ inline int str2seed(const QString &str, uint64_t *out)
     return S_TEXT;
 }
 
-struct IdCmp
+bool IdCmp::operator() (int id1, int id2)
 {
-    enum
-    {
-        SORT_ID,
-        SORT_LEX,
-        SORT_DIM,
-    };
+   if (id1 == id2) return false;
+   // treat 256 as a special case with high priority
+   if (id1 == 256) return true;
+   if (id2 == 256) return false;
+   if (mode == SORT_ID)
+       return id1 < id2;
+   int v1 = 1, v2 = 1;
+   if (mc >= 0)
+   {   // biomes not in this version go to the back
+       v1 &= biomeExists(mc, id1);
+       v2 &= biomeExists(mc, id2);
+   }
+   if (dim != DIM_UNDEF)
+   {   // biomes in other dimensions go to the back
+       v1 &= getDimension(id1) == dim;
+       v2 &= getDimension(id2) == dim;
+   }
+   if (v1 ^ v2)
+       return v1;
+   if (mode == SORT_DIM)
+   {
+       int d1 = getDimension(id1);
+       int d2 = getDimension(id2);
+       if (d1 != d2)
+           return (d1==0 ? 0 : d1==-1 ? 1 : 2) < (d2==0 ? 0 : d2==-1 ? 1 : 2);
+   }
+   const char *s1 = biome2str(mc, id1);
+   const char *s2 = biome2str(mc, id2);
+   if (!s1 && !s2) return id1 < id2;
+   if (!s1) return false; // move non-biomes to back
+   if (!s2) return true;
+   return strcmp(s1, s2) < 0;
+}
 
-    IdCmp(int mode, int mc, int dim) : mode(mode),mc(mc),dim(dim)
+bool IdCmp::isPrimary(int id)
+{
+   if (mode == SORT_ID)
+       return true;
+   if (mc >= 0 && !biomeExists(mc, id))
+       return false;
+   if (dim != DIM_UNDEF && getDimension(id) != dim)
+       return false;
+   return true;
+}
+
+
+QPixmap getPix(QString rc, int width)
+{
+    QPixmap pix(":/icons/" + rc + ".png");
+    if (pix.isNull())
+        return pix;
+    int w = pix.width();
+    if (width != w)
     {
+        pix = pix.scaledToWidth(w * 8);
+        if (width)
+            pix = pix.scaledToWidth(width, Qt::SmoothTransformation);
     }
-
-    int mode;
-    int mc;
-    int dim;
-    bool operator() (int id1, int id2)
+    w = pix.width();
+    if (w > pix.height())
     {
-        if (id1 == id2) return false;
-        // treat 256 as a special case with high priority
-        if (id1 == 256) return true;
-        if (id2 == 256) return false;
-        if (mode == SORT_ID)
-            return id1 < id2;
-        int v1 = 1, v2 = 1;
-        if (mc >= 0)
-        {   // biomes not in this version go to the back
-            v1 &= biomeExists(mc, id1);
-            v2 &= biomeExists(mc, id2);
-        }
-        if (dim != DIM_UNDEF)
-        {   // biomes in other dimensions go to the back
-            v1 &= getDimension(id1) == dim;
-            v2 &= getDimension(id2) == dim;
-        }
-        if (v1 ^ v2)
-            return v1;
-        if (mode == SORT_DIM)
-        {
-            int d1 = getDimension(id1);
-            int d2 = getDimension(id2);
-            if (d1 != d2)
-                return (d1==0 ? 0 : d1==-1 ? 1 : 2) < (d2==0 ? 0 : d2==-1 ? 1 : 2);
-        }
-        const char *s1 = biome2str(mc, id1);
-        const char *s2 = biome2str(mc, id2);
-        if (!s1 && !s2) return id1 < id2;
-        if (!s1) return false; // move non-biomes to back
-        if (!s2) return true;
-        return strcmp(s1, s2) < 0;
+        QPixmap p(w, w);
+        p.fill(Qt::transparent);
+        QPainter painter(&p);
+        painter.drawPixmap(0, (w - pix.height()) / 2, pix);
+        pix = p;
     }
+    return pix;
+}
 
-    bool isPrimary(int id)
-    {
-        if (mode == SORT_ID)
-            return true;
-        if (mc >= 0 && !biomeExists(mc, id))
-            return false;
-        if (dim != DIM_UNDEF && getDimension(id) != dim)
-            return false;
-        return true;
-    }
-};
+QIcon getColorIcon(const QColor& col, const QPen& pen)
+{
+    int s = (int) round(g_fontscale * 14);
+    QPixmap pixmap(s, s);
+    pixmap.fill(QColor(0,0,0,0));
+    QPainter p(&pixmap);
+    p.setRenderHint(QPainter::Antialiasing);
+    QPainterPath path;
+    int b = pen.width();
+    path.addRoundedRect(pixmap.rect().adjusted(b, b, -b, -b), 3, 3);
+    p.setPen(pen);
+    p.fillPath(path, col);
+    p.drawPath(path);
+    return QIcon(pixmap);
+}
 
-
-#endif // CUTIL_H
+QIcon getBiomeIcon(int id, bool warn)
+{
+    QColor col(g_biomeColors[id][0], g_biomeColors[id][1], g_biomeColors[id][2]);
+    return getColorIcon(col, warn ? QPen(Qt::red, 2) : QPen(Qt::black, 1));
+}

@@ -98,6 +98,8 @@ public:
     explicit FormSearchControl(MainWindow *parent);
     ~FormSearchControl();
 
+    bool event(QEvent *) Q_DECL_OVERRIDE;
+
     std::vector<uint64_t> getResults();
     SearchConfig getSearchConfig();
     bool setSearchConfig(SearchConfig s, bool quiet);

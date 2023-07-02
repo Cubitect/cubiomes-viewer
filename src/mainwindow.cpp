@@ -13,13 +13,12 @@
 #include "tabbiomes.h"
 #include "tabstructures.h"
 #include "message.h"
+#include "world.h"
+#include "util.h"
 
 #if WITH_UPDATER
 #include "updater.h"
 #endif
-
-#include "world.h"
-#include "cutil.h"
 
 #include <QIntValidator>
 #include <QMetaType>
@@ -36,6 +35,7 @@
 #include <QFile>
 #include <QTranslator>
 #include <QLibraryInfo>
+#include <QFontDatabase>
 
 
 MainWindow::MainWindow(QString sessionpath, QString resultspath, QWidget *parent)
@@ -127,9 +127,9 @@ MainWindow::MainWindow(QString sessionpath, QString resultspath, QWidget *parent
         addAction(act);
     }
 
-    acthome = new QAction(QIcon(":/icons/origin.png"), tr("Goto origin"), this);
-    actzoom[0] = new QAction(QIcon(":/icons/zoom_in.png"), tr("Zoom In"), this);
-    actzoom[1] = new QAction(QIcon(":/icons/zoom_out.png"), tr("Zoom Out"), this);
+    acthome = new QAction(QIcon(getPix("origin")), tr("Goto origin"), this);
+    actzoom[0] = new QAction(QIcon(getPix("zoom_in")), tr("Zoom In"), this);
+    actzoom[1] = new QAction(QIcon(getPix("zoom_out")), tr("Zoom Out"), this);
     connect(acthome, &QAction::triggered, [=](){ this->mapGoto(0,0,16); });
     connect(actzoom[0], &QAction::triggered, [=](){ this->mapZoom(pow(2.0, +0.5)); });
     connect(actzoom[1], &QAction::triggered, [=](){ this->mapZoom(pow(2.0, -0.5)); });
@@ -139,9 +139,9 @@ MainWindow::MainWindow(QString sessionpath, QString resultspath, QWidget *parent
     ui->toolBar->addAction(actzoom[1]);
     ui->toolBar->addSeparator();
 
-    dimactions[0] = addMapAction(":/icons/overworld", tr("Overworld"));
-    dimactions[1] = addMapAction(":/icons/nether", tr("Nether"));
-    dimactions[2] = addMapAction(":/icons/the_end", tr("End"));
+    dimactions[0] = addMapAction("overworld", tr("Overworld"));
+    dimactions[1] = addMapAction("nether", tr("Nether"));
+    dimactions[2] = addMapAction("the_end", tr("End"));
     dimgroup = new QActionGroup(this);
 
     for (int i = 0; i < 3; i++)
@@ -315,9 +315,8 @@ bool MainWindow::loadTranslation(QString lang)
 
 QAction *MainWindow::addMapAction(int opt)
 {
-    QString rc = QString(":/icons/") + mapopt2str(opt);
     QString tip = tr("Show %1").arg(mapopt2display(opt));
-    QAction *action = addMapAction(rc, tip);
+    QAction *action = addMapAction(mapopt2str(opt), tip);
     action->connect(action, &QAction::toggled, [=](bool state){ this->onActionMapToggled(opt, state); });
     saction[opt] = action;
     return action;
@@ -325,16 +324,9 @@ QAction *MainWindow::addMapAction(int opt)
 
 QAction *MainWindow::addMapAction(QString rcbase, QString tip)
 {
-    QPixmap pix_on = QPixmap(rcbase + ".png");
-    QPixmap pix_off = QPixmap(rcbase + "_d.png");
-    if (pix_on.size().width() > 20)
-    {
-        pix_on = pix_on.scaledToWidth(20);
-        pix_off = pix_off.scaledToWidth(20);
-    }
     QIcon icon;
-    icon.addPixmap(pix_on, QIcon::Normal, QIcon::On);
-    icon.addPixmap(pix_off, QIcon::Normal, QIcon::Off);
+    icon.addPixmap(getPix(rcbase), QIcon::Normal, QIcon::On);
+    icon.addPixmap(getPix(rcbase + "_d"), QIcon::Normal, QIcon::Off);
     QAction *action = new QAction(icon, tip, this);
     action->setCheckable(true);
     ui->toolBar->addAction(action);
@@ -995,25 +987,40 @@ void MainWindow::onUpdateConfig()
         info(this, tr("The application will need to be restarted before all changes can take effect."));
     }
 
-    getMapView()->setConfig(config);
-    if (old.uistyle != config.uistyle)
-        onStyleChanged(config.uistyle);
-    if (!old.biomeColorPath.isEmpty() || !config.biomeColorPath.isEmpty())
-        onBiomeColorChange();
+    QFontMetrics fm_ref(QFontDatabase::systemFont(QFontDatabase::GeneralFont));
+    QFontMetrics fm_new(config.fontNorm);
 
+    g_fontscale = fm_new.height() / (qreal) fm_ref.height();
+    g_iconscale = config.iconScale;
+
+    getMapView()->setConfig(config);
+
+    if ((old.uistyle != config.uistyle) ||
+        (old.fontNorm != config.fontNorm) ||
+        (old.iconScale != config.iconScale))
+    {
+        onStyleChanged(config.uistyle);
+        int s = (int) round(g_iconscale * 20);
+        ui->toolBar->setIconSize(QSize(s, s));
+    }
+    if (!old.biomeColorPath.isEmpty() || !config.biomeColorPath.isEmpty())
+    {
+        onBiomeColorChange();
+    }
     if (old.fontNorm != config.fontNorm || old.fontMono != config.fontMono)
     {
         QFont fnorm = config.fontNorm;
         QFont fmono = config.fontMono;
-        QFont fbold;
         if (fnorm.family() == "Monospace") // avoid identification conflict
             fnorm = QApplication::font();
         fnorm.setStyleHint(QFont::AnyStyle);
         fmono.setStyleHint(QFont::Monospace);
         fmono.setFixedPitch(true);
 
-        fbold = fnorm;
-        fbold.setBold(true);
+        QFont fnormb = fnorm;
+        QFont fmonob = fmono;
+        fnormb.setBold(true);
+        fmonob.setBold(true);
 
         QApplication::setFont(fnorm);
 
@@ -1022,15 +1029,20 @@ void MainWindow::onUpdateConfig()
         {
             const QFont& f = w->font();
             if (f.styleHint() == QFont::Monospace || f.family() == "Monospace")
-                w->setFont(fmono);
-            else if (f.bold())
-                w->setFont(fbold);
+                w->setFont(f.bold() ? fmonob : fmono);
             else
-                w->setFont(fnorm);
+                w->setFont(f.bold() ? fnormb : fnorm);
         }
+
+        QSize iconsize = QSize((int)round(14 * g_fontscale), (int)round(14 * g_fontscale));
+
         // update cascade
         for (QWidget *w : qAsConst(wlist))
+        {
+            if (QAbstractButton *b = qobject_cast<QAbstractButton*>(w))
+                b->setIconSize(iconsize);
             w->update();
+        }
     }
 
     if (config.autosaveCycle)
@@ -1090,12 +1102,22 @@ void MainWindow::onBiomeColorChange()
 
 void MainWindow::onStyleChanged(int style)
 {
-    //QCoreApplication::setAttribute(Qt::AA_UseStyleSheetPropagationInWidgetStyles, false);
     if (style == STYLE_DARK)
     {
         QFile file(":dark.qss");
         file.open(QFile::ReadOnly);
         QString st = file.readAll();
+
+        if (g_fontscale && g_fontscale != 1)
+        {
+            QString siz;
+            siz = QString("{ height: %1px; width: %1px; }\n").arg(round(g_fontscale * 14));
+            st += "QCheckBox::indicator" + siz;
+            st += "QGroupBox::indicator" + siz;
+            st += "QRadioButton::indicator" + siz;
+            st += "QMenu::icon" + siz;
+        }
+
         qApp->setStyleSheet(st);
     }
     else

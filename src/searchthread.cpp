@@ -1,6 +1,6 @@
 #include "searchthread.h"
 #include "formsearchcontrol.h"
-#include "cutil.h"
+#include "util.h"
 #include "seedtables.h"
 #include "message.h"
 #include "aboutdialog.h"

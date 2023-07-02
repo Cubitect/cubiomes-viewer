@@ -1,6 +1,6 @@
 #include "mapview.h"
 #include "gotodialog.h"
-#include "cutil.h"
+#include "util.h"
 
 #include <QPainter>
 #include <QThread>

@@ -10,6 +10,7 @@
 
 #include <vector>
 
+
 #define APP_STRING "cubiomes-viewer"
 
 #define PRECOMPUTE48_BUFSIZ ((int64_t)1 << 30)
@@ -34,8 +35,12 @@ struct ExtGenConfig
 extern unsigned char g_biomeColors[256][3];
 extern unsigned char g_tempsColors[256][3];
 
+extern qreal g_fontscale;
+extern qreal g_iconscale;
+
 // Keep the extended generator settings in global scope.
 extern ExtGenConfig g_extgen;
+
 
 struct WorldInfo
 {
@@ -180,6 +185,7 @@ struct Config
     QString quote;
     QFont fontNorm;
     QFont fontMono;
+    qreal iconScale;
 
     Config() { reset(); }
 

@@ -1,10 +1,21 @@
 #include "config.h"
-#include "cutil.h"
+#include "util.h"
 #include "seedtables.h"
 
 #include <QThread>
 #include <QCoreApplication>
 #include <QFontDatabase>
+
+
+/// globals
+
+unsigned char g_biomeColors[256][3];
+unsigned char g_tempsColors[256][3];
+
+ExtGenConfig g_extgen;
+
+qreal g_fontscale = 1;
+qreal g_iconscale = 1;
 
 
 void ExtGenConfig::reset()
@@ -276,6 +287,8 @@ int MapConfig::getTileSize(int opt) const
 {
     if (opt == D_MANSION)
         return 1280 * 16;
+    if (opt == D_GEODE)
+        return 128 * 16;
     return 512 * 16;
 }
 
@@ -350,6 +363,7 @@ void Config::reset()
     fontNorm.setStyleHint(QFont::AnyStyle);
     fontMono.setPointSize(10);
     fontNorm.setPointSize(10);
+    iconScale = 1.0;
 }
 
 void Config::load(QSettings& settings)
@@ -371,6 +385,7 @@ void Config::load(QSettings& settings)
     quote = settings.value("config/quote", quote).toString();
     fontNorm = settings.value("config/fontNorm", fontNorm).value<QFont>();
     fontMono = settings.value("config/fontMono", fontMono).value<QFont>();
+    iconScale = settings.value("config/iconScale", iconScale).toDouble();
 }
 
 void Config::save(QSettings& settings)
@@ -392,6 +407,7 @@ void Config::save(QSettings& settings)
     settings.setValue("config/quote", quote);
     settings.setValue("config/fontNorm", fontNorm);
     settings.setValue("config/fontMono", fontMono);
+    settings.setValue("config/iconScale", iconScale);
 }
 
 void Gen48Config::reset()

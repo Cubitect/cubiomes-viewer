@@ -63,7 +63,7 @@ FormConditions::FormConditions(QWidget *parent)
 {
     ui->setupUi(this);
 
-    ui->listConditions->setItemDelegate(new ItemDelegate);
+    ui->listConditions->setItemDelegate(new ItemDelegate(this));
 
     if (!this->parent)
     {

@@ -413,7 +413,7 @@ QToolBar {
 
 QToolButton {
 	border-radius: 3px;
-	padding: 0px;
+	padding: 1px;
 	border: 0px solid;
 	margin: 0px;
 }

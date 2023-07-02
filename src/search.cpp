@@ -1,7 +1,7 @@
 #include "search.h"
 #include "seedtables.h"
 #include "mainwindow.h"
-#include "cutil.h"
+#include "util.h"
 #include "scripts.h"
 
 #include "cubiomes/quadbase.h"

@@ -119,6 +119,7 @@ SOURCES += \
         src/tabtriggers.cpp \
         src/mainwindow.cpp \
         src/main.cpp \
+        src/util.cpp \
         src/world.cpp
 
 HEADERS += \
@@ -174,7 +175,6 @@ HEADERS += \
         src/protobasedialog.h \
         src/layerdialog.h \
         src/mapview.h \
-        src/cutil.h \
         src/rangedialog.h \
         src/rangeslider.h \
         src/scripts.h \
@@ -185,6 +185,7 @@ HEADERS += \
         src/tabstructures.h \
         src/tabtriggers.h \
         src/mainwindow.h \
+        src/util.h \
         src/world.h
 
 FORMS += \

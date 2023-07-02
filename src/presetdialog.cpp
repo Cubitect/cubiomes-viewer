@@ -1,9 +1,9 @@
 #include "presetdialog.h"
 #include "ui_presetdialog.h"
 
-#include "cutil.h"
 #include "aboutdialog.h"
 #include "mainwindow.h"
+#include "util.h"
 
 #include <QPushButton>
 #include <QListWidgetItem>

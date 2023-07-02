@@ -5,13 +5,11 @@
 #include "scripts.h"
 #include "layerdialog.h"
 #include "message.h"
+#include "config.h"
+#include "util.h"
 
 #include <QCheckBox>
 #include <QIntValidator>
-#include <QColor>
-#include <QPixmap>
-#include <QPainter>
-#include <QPainterPath>
 #include <QScrollBar>
 #include <QSpacerItem>
 #include <QTextStream>
@@ -125,6 +123,25 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
     ui->comboY->lineEdit()->setValidator(new QIntValidator(-64, 320, this));
 
     ui->lineMinMax->setValidator(new QDoubleValidator(-1e6, 1e6, 4, this));
+
+    ui->comboBoxCat->setItemDelegate(new ComboBoxDelegate(this, ui->comboBoxCat));
+    ui->comboBoxType->setItemDelegate(new ComboBoxDelegate(this, ui->comboBoxType));
+
+    //qobject_cast<QListView*>(ui->comboBoxCat->view())->setSpacing(1);
+    //qobject_cast<QListView*>(ui->comboBoxType->view())->setSpacing(1);
+
+    ui->comboBoxCat->addItem(tr("Select category"));
+    ui->comboBoxCat->insertSeparator(1);
+    ui->comboBoxCat->addItem(getPix("helper"), tr("Algorithm helpers"), CAT_HELPER);
+    ui->comboBoxCat->addItem(getPix("quad"), tr("Quad-structure"), CAT_QUAD);
+    ui->comboBoxCat->addItem(getPix("stronghold"), tr("Structures"), CAT_STRUCT);
+    ui->comboBoxCat->addItem(getPix("overworld"), tr("Biomes"), CAT_BIOMES);
+    ui->comboBoxCat->addItem(getPix("nether"), tr("Nether biomes"), CAT_NETHER);
+    ui->comboBoxCat->addItem(getPix("the_end"), tr("End biomes"), CAT_END);
+    ui->comboBoxCat->addItem(getPix("slime"), tr("Other"), CAT_OTHER);
+    int fmh = ui->comboBoxCat->fontMetrics().height() + 8;
+    ui->comboBoxCat->setIconSize(QSize(fmh, fmh));
+    ui->comboBoxType->setIconSize(QSize(fmh, fmh));
 
     for (int i = 0; i < 256; i++)
     {
@@ -310,7 +327,7 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
             ui->comboLua->setCurrentIndex(-1); // force index change
         ui->comboLua->setCurrentIndex(ui->comboLua->findData(QVariant::fromValue(cond.hash)));
 
-        ui->comboBoxCat->setCurrentIndex(ft.cat);
+        ui->comboBoxCat->setCurrentIndex(ui->comboBoxCat->findData(ft.cat));
         for (int i = 0; i < ui->comboBoxType->count(); i++)
         {
             int type = ui->comboBoxType->itemData(i, Qt::UserRole).toInt();
@@ -1080,13 +1097,15 @@ void ConditionDialog::on_ConditionDialog_finished(int result)
     item = 0;
 }
 
-void ConditionDialog::on_comboBoxCat_currentIndexChanged(int idx)
+void ConditionDialog::on_comboBoxCat_currentIndexChanged(int)
 {
-    ui->comboBoxType->setEnabled(idx != CAT_NONE);
+    int cat = ui->comboBoxCat->currentData().toInt();
+    ui->comboBoxType->setEnabled(cat != CAT_NONE);
     ui->comboBoxType->clear();
 
     int slot = 0;
     ui->comboBoxType->insertItem(slot, tr("Select type"), QVariant::fromValue((int)F_SELECT));
+    ui->comboBoxType->insertSeparator(++slot);
 
     const FilterInfo *ft_list[FILTER_MAX] = {};
     const FilterInfo *ft;
@@ -1094,7 +1113,7 @@ void ConditionDialog::on_comboBoxCat_currentIndexChanged(int idx)
     for (int i = 1; i < FILTER_MAX; i++)
     {
         ft = &g_filterinfo.list[i];
-        if (ft->cat == idx)
+        if (ft->cat == cat)
             ft_list[ft->disp] = ft;
     }
 
@@ -1107,7 +1126,7 @@ void ConditionDialog::on_comboBoxCat_currentIndexChanged(int idx)
         QVariant vidx = QVariant::fromValue((int)(ft - g_filterinfo.list));
         QString txt = QApplication::translate("Filter", ft->name);
         if (ft->icon)
-            ui->comboBoxType->insertItem(slot, QIcon(ft->icon), txt, vidx);
+            ui->comboBoxType->insertItem(slot, getPix(ft->icon), txt, vidx);
         else
             ui->comboBoxType->insertItem(slot, txt, vidx);
 

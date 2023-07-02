@@ -1,7 +1,6 @@
 #include "world.h"
-#include "mapview.h" // for translations
-
-#include "cutil.h"
+#include "mapview.h"
+#include "util.h"
 
 #include <QThreadPool>
 #include <QSettings>
@@ -18,19 +17,22 @@ const QPixmap& getMapIcon(int opt, VarPos *vp)
     static QPixmap icongiant;
     static QPixmap iconship;
     static QPixmap iconbasement;
-    static bool init = false;
+    static QMutex mutex;
 
-    if (!init)
+    mutex.lock();
+    int w = (int) round(g_iconscale * 20);
+    if (icons[D_DESERT].width() != w)
     {
-        init = true;
         for (int sopt = D_DESERT; sopt <= D_STRONGHOLD; sopt++)
-            icons[sopt] = QPixmap(QString(":/icons/") + mapopt2str(sopt) + ".png");
-        icons[D_PORTALN]    = icons[D_PORTAL];
-        iconzvil            = QPixmap(":/icons/zombie.png");
-        icongiant           = QPixmap(":/icons/portal_giant.png");
-        iconship            = QPixmap(":/icons/end_ship.png");
-        iconbasement        = QPixmap(":/icons/igloo_basement.png");
+            icons[sopt] = getPix(mapopt2str(sopt), w);
+        icons[D_PORTALN] = icons[D_PORTAL];
+        iconzvil         = getPix("zombie", w);
+        icongiant        = getPix("portal_giant", w);
+        iconship         = getPix("end_ship", w);
+        iconbasement     = getPix("igloo_basement", w);
     }
+    mutex.unlock();
+
     if (!vp)
         return icons[opt];
     if (opt == D_VILLAGE && vp->v.abandoned)
@@ -46,22 +48,6 @@ const QPixmap& getMapIcon(int opt, VarPos *vp)
                 return iconship;
     }
     return icons[opt];
-}
-
-QIcon getBiomeIcon(int id, bool warn)
-{
-    static QPixmap pixmap(14, 14);
-    pixmap.fill(QColor(0,0,0,0));
-    QPainter p(&pixmap);
-    p.setRenderHint(QPainter::Antialiasing);
-    QPainterPath path;
-    int b = warn ? 2 : 1;
-    path.addRoundedRect(pixmap.rect().adjusted(b, b, -b, -b), 3, 3);
-    p.setPen(QPen(warn ? Qt::red : Qt::black, b));
-    QColor col(g_biomeColors[id][0], g_biomeColors[id][1], g_biomeColors[id][2]);
-    p.fillPath(path, col);
-    p.drawPath(path);
-    return QIcon(pixmap);
 }
 
 QStringList VarPos::detail() const
@@ -1273,7 +1259,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
         std::map<const QPixmap*, std::vector<QPainter::PixmapFragment>> frags;
         QImage bufimg = QImage(vw, vh, QImage::Format_Indexed8);
         bufimg.setColor(0, qRgba(0, 0, 0, 0));
-        bufimg.setColor(1, qRgba(255, 255, 255, 255));
+        bufimg.setColor(1, qRgba(255, 255, 255, 96));
         bufimg.setColor(2, qRgba(180, 64, 192, 255));
         bufimg.fill(0);
 
@@ -1287,10 +1273,16 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
                 qreal x = vw/2.0 + (vp.p.x - focusx) * blocks2pix;
                 qreal y = vh/2.0 + (vp.p.z - focusz) * blocks2pix;
 
-                if (x < 0 || x >= vw || y < 0 || y >= vh)
-                    continue;
+                const QPixmap& icon = getMapIcon(sopt, &vp);
+                QRectF rec = icon.rect();
 
-                if (showBB && blocks2pix > 1.0)
+                if (x < -rec.width()  || x >= vw+rec.width() ||
+                    y < -rec.height() || y >= vh+rec.width())
+                {
+                    continue;
+                }
+
+                if (showBB && blocks2pix > 0.5)
                 {
                     if (vp.v.sx && vp.v.sz)
                     {   // draw bounding box and move icon to its center
@@ -1369,8 +1361,6 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
                     continue;
                 }
 
-                const QPixmap& icon = getMapIcon(sopt, &vp);
-                QRectF rec = icon.rect();
                 if (seldo)
                 {   // check for structure selection
                     QRectF r = rec;

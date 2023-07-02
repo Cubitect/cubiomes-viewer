@@ -4,7 +4,7 @@
 #include "biomecolordialog.h"
 #include "maptoolsdialog.h"
 #include "world.h"
-#include "cutil.h"
+#include "util.h"
 
 #include <QThread>
 #include <QFileInfo>
@@ -31,6 +31,7 @@ ConfigDialog::ConfigDialog(QWidget *parent, Config *config)
 
     ui->lineMatching->setValidator(new QIntValidator(1, 99999999, ui->lineMatching));
     ui->spinThreads->setRange(1, QThread::idealThreadCount());
+    ui->lineIconScale->setValidator(new QDoubleValidator(1.0/8, 16.0, 3, ui->lineIconScale));
 
     QString rclang = ":/lang";
     QDirIterator it(rclang, QDirIterator::Subdirectories);
@@ -77,6 +78,7 @@ void ConfigDialog::initConfig(Config *config)
     ui->fontComboMono->setCurrentFont(config->fontMono);
     ui->spinFontSizeNorm->setValue(config->fontNorm.pointSize());
     ui->spinFontSizeMono->setValue(config->fontMono.pointSize());
+    ui->lineIconScale->setText(QString::number(config->iconScale));
 
     setBiomeColorPath(config->biomeColorPath);
 }
@@ -105,6 +107,8 @@ Config ConfigDialog::getConfig()
     conf.fontMono.setPointSize(ui->spinFontSizeMono->value());
     conf.fontNorm.setStyleHint(QFont::AnyStyle);
     conf.fontMono.setStyleHint(QFont::Monospace);
+
+    conf.iconScale = ui->lineIconScale->text().toDouble();
 
     if (!conf.maxMatching) conf.maxMatching = 65536;
 

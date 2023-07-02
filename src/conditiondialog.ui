@@ -38,74 +38,6 @@
        <property name="sizeAdjustPolicy">
         <enum>QComboBox::AdjustToMinimumContentsLengthWithIcon</enum>
        </property>
-       <item>
-        <property name="text">
-         <string>Select category</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Algorithm helpers</string>
-        </property>
-        <property name="icon">
-         <iconset resource="../rc/icons.qrc">
-          <normaloff>:/icons/helper.png</normaloff>:/icons/helper.png</iconset>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Quad-structure</string>
-        </property>
-        <property name="icon">
-         <iconset resource="../rc/icons.qrc">
-          <normaloff>:/icons/quad.png</normaloff>:/icons/quad.png</iconset>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Structures</string>
-        </property>
-        <property name="icon">
-         <iconset resource="../rc/icons.qrc">
-          <normaloff>:/icons/stronghold.png</normaloff>:/icons/stronghold.png</iconset>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Biomes</string>
-        </property>
-        <property name="icon">
-         <iconset resource="../rc/icons.qrc">
-          <normaloff>:/icons/overworld.png</normaloff>:/icons/overworld.png</iconset>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Nether biomes</string>
-        </property>
-        <property name="icon">
-         <iconset resource="../rc/icons.qrc">
-          <normaloff>:/icons/nether.png</normaloff>:/icons/nether.png</iconset>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>End biomes</string>
-        </property>
-        <property name="icon">
-         <iconset resource="../rc/icons.qrc">
-          <normaloff>:/icons/the_end.png</normaloff>:/icons/the_end.png</iconset>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Others</string>
-        </property>
-        <property name="icon">
-         <iconset resource="../rc/icons.qrc">
-          <normaloff>:/icons/slime.png</normaloff>:/icons/slime.png</iconset>
-        </property>
-       </item>
       </widget>
      </item>
      <item row="0" column="4">
@@ -1069,8 +1001,8 @@ QPushButton:hover {
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>634</width>
-                   <height>257</height>
+                   <width>60</width>
+                   <height>20</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_5">

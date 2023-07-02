@@ -10,7 +10,7 @@
 #include "mainwindow.h"
 #include "search.h"
 #include "world.h"
-#include "cutil.h"
+#include "util.h"
 
 namespace Ui {
 class TabBiomes;
