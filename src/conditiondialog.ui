@@ -2,14 +2,6 @@
 <ui version="4.0">
  <class>ConditionDialog</class>
  <widget class="QDialog" name="ConditionDialog">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>680</width>
-    <height>800</height>
-   </rect>
-  </property>
   <property name="windowTitle">
    <string>Condition Editor</string>
   </property>
@@ -20,15 +12,14 @@
   <layout class="QGridLayout" name="gridLayout_3">
    <item row="0" column="0">
     <layout class="QGridLayout" name="gridLayout_2">
-     <item row="0" column="0">
-      <widget class="QLabel" name="labelMC">
-       <property name="text">
-        <string>MC: 1.X</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="3">
+     <item row="0" column="4">
       <widget class="QComboBox" name="comboBoxCat">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>2</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="minimumSize">
         <size>
          <width>160</width>
@@ -40,16 +31,16 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="4">
+     <item row="0" column="5">
       <widget class="QComboBox" name="comboBoxType">
        <property name="enabled">
         <bool>false</bool>
        </property>
-       <property name="minimumSize">
-        <size>
-         <width>260</width>
-         <height>0</height>
-        </size>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>3</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
        <property name="maxVisibleItems">
         <number>20</number>
@@ -64,7 +55,14 @@
        </item>
       </widget>
      </item>
-     <item row="0" column="1">
+     <item row="0" column="0">
+      <widget class="QLabel" name="labelMC">
+       <property name="text">
+        <string>MC: 1.X</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
       <widget class="QLabel" name="labelFilterType">
        <property name="text">
         <string>Condition type:</string>
@@ -73,6 +71,19 @@
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
+     </item>
+     <item row="0" column="1">
+      <spacer name="horizontalSpacer_4">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
    </item>
@@ -87,19 +98,6 @@
        <property name="horizontalSpacing">
         <number>0</number>
        </property>
-       <item row="0" column="2">
-        <spacer name="horizontalSpacer_4">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
        <item row="0" column="0" rowspan="2" colspan="2">
         <widget class="QGroupBox" name="groupBoxGeneral">
          <property name="title">
@@ -127,6 +125,12 @@
           </item>
           <item row="0" column="1">
            <widget class="QLineEdit" name="lineSummary">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="font">
              <font>
               <family>Monospace</family>
@@ -168,157 +172,16 @@
        </item>
        <item row="2" column="0" rowspan="2" colspan="2">
         <widget class="QGroupBox" name="groupBoxPosition">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="title">
           <string>Location</string>
          </property>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="5" column="0">
-           <widget class="QRadioButton" name="radioCustom">
-            <property name="text">
-             <string>Custom:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0" colspan="3">
-           <widget class="QRadioButton" name="radioSquare">
-            <property name="text">
-             <string>Within centred square of side:</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="1" colspan="5">
-           <layout class="QHBoxLayout" name="horizontalLayout">
-            <item>
-             <widget class="QLabel" name="labelX1">
-              <property name="toolTip">
-               <string>Lower bound (inclusive)</string>
-              </property>
-              <property name="text">
-               <string>X&lt;sub&gt;1&lt;/sub&gt;:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="lineEditX1">
-              <property name="toolTip">
-               <string>Lower bound (inclusive)</string>
-              </property>
-              <property name="text">
-               <string>0</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="labelZ1">
-              <property name="toolTip">
-               <string>Lower bound (inclusive)</string>
-              </property>
-              <property name="text">
-               <string>Z&lt;sub&gt;1&lt;/sub&gt;:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="lineEditZ1">
-              <property name="toolTip">
-               <string>Lower bound (inclusive)</string>
-              </property>
-              <property name="text">
-               <string>0</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
-             <widget class="QLabel" name="labelX2">
-              <property name="toolTip">
-               <string>Upper bound (inclusive)</string>
-              </property>
-              <property name="text">
-               <string>X&lt;sub&gt;2&lt;/sub&gt;:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="lineEditX2">
-              <property name="toolTip">
-               <string>Upper bound (inclusive)</string>
-              </property>
-              <property name="text">
-               <string>0</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="labelZ2">
-              <property name="toolTip">
-               <string>Upper bound (inclusive)</string>
-              </property>
-              <property name="text">
-               <string>Z&lt;sub&gt;2&lt;/sub&gt;:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="lineEditZ2">
-              <property name="toolTip">
-               <string>Upper bound (inclusive)</string>
-              </property>
-              <property name="text">
-               <string>0</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item row="6" column="3" colspan="3">
-           <widget class="QComboBox" name="comboBoxRelative">
-            <property name="sizeAdjustPolicy">
-             <enum>QComboBox::AdjustToContentsOnFirstShow</enum>
-            </property>
-            <item>
-             <property name="text">
-              <string>World origin</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-          <item row="0" column="0" colspan="3">
-           <widget class="QLabel" name="labelSpinBox">
-            <property name="text">
-             <string>Instances within area:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0" colspan="3">
-           <widget class="QCheckBox" name="checkRadius">
-            <property name="text">
-             <string>Within radial distance: </string>
-            </property>
-           </widget>
-          </item>
-          <item row="6" column="0" colspan="3">
-           <widget class="QLabel" name="labelRelative">
-            <property name="text">
-             <string>Location is relative to:</string>
-            </property>
-           </widget>
-          </item>
           <item row="3" column="3">
            <widget class="QPushButton" name="buttonAreaInfo">
             <property name="sizePolicy">
@@ -341,6 +204,49 @@ QPushButton:hover {
             </property>
             <property name="text">
              <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0" colspan="3">
+           <widget class="QLabel" name="labelRelative">
+            <property name="text">
+             <string>Location is relative to:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0" colspan="3">
+           <widget class="QCheckBox" name="checkRadius">
+            <property name="text">
+             <string>Within radial distance: </string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="3" colspan="3">
+           <widget class="QComboBox" name="comboBoxRelative">
+            <property name="sizeAdjustPolicy">
+             <enum>QComboBox::AdjustToContentsOnFirstShow</enum>
+            </property>
+            <item>
+             <property name="text">
+              <string>World origin</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="3" column="0" colspan="3">
+           <widget class="QRadioButton" name="radioSquare">
+            <property name="text">
+             <string>Within centred square of side:</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0" colspan="3">
+           <widget class="QLabel" name="labelSpinBox">
+            <property name="text">
+             <string>Instances within area:</string>
             </property>
            </widget>
           </item>
@@ -368,6 +274,13 @@ QPushButton:hover {
             </property>
            </widget>
           </item>
+          <item row="5" column="0">
+           <widget class="QRadioButton" name="radioCustom">
+            <property name="text">
+             <string>Custom:</string>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="4">
            <widget class="SpinInstances" name="spinBox">
             <property name="sizePolicy">
@@ -390,22 +303,110 @@ QPushButton:hover {
             </property>
            </widget>
           </item>
+          <item row="5" column="1" colspan="5">
+           <layout class="QHBoxLayout" name="horizontalLayout">
+            <item>
+             <widget class="QLabel" name="labelX1">
+              <property name="toolTip">
+               <string>Lower bound (inclusive)</string>
+              </property>
+              <property name="text">
+               <string>X&lt;sub&gt;1&lt;/sub&gt;:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="CoordEdit" name="lineEditX1">
+              <property name="toolTip">
+               <string>Lower bound (inclusive)</string>
+              </property>
+              <property name="text">
+               <string>0</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="labelZ1">
+              <property name="toolTip">
+               <string>Lower bound (inclusive)</string>
+              </property>
+              <property name="text">
+               <string>Z&lt;sub&gt;1&lt;/sub&gt;:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="CoordEdit" name="lineEditZ1">
+              <property name="toolTip">
+               <string>Lower bound (inclusive)</string>
+              </property>
+              <property name="text">
+               <string>0</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_13">
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="labelX2">
+              <property name="toolTip">
+               <string>Upper bound (inclusive)</string>
+              </property>
+              <property name="text">
+               <string>X&lt;sub&gt;2&lt;/sub&gt;:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="CoordEdit" name="lineEditX2">
+              <property name="toolTip">
+               <string>Upper bound (inclusive)</string>
+              </property>
+              <property name="text">
+               <string>0</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="labelZ2">
+              <property name="toolTip">
+               <string>Upper bound (inclusive)</string>
+              </property>
+              <property name="text">
+               <string>Z&lt;sub&gt;2&lt;/sub&gt;:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="CoordEdit" name="lineEditZ2">
+              <property name="toolTip">
+               <string>Upper bound (inclusive)</string>
+              </property>
+              <property name="text">
+               <string>0</string>
+              </property>
+              <property name="maxLength">
+               <number>9</number>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
          </layout>
         </widget>
        </item>
        <item row="4" column="0" colspan="2">
         <widget class="QStackedWidget" name="stackedWidget">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
          <property name="lineWidth">
           <number>0</number>
          </property>
          <property name="currentIndex">
-          <number>5</number>
+          <number>4</number>
          </property>
          <widget class="QWidget" name="pageNone">
           <property name="enabled">
@@ -504,8 +505,8 @@ QPushButton:hover {
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
-                  <width>126</width>
-                  <height>20</height>
+                  <width>0</width>
+                  <height>0</height>
                  </size>
                 </property>
                </spacer>
@@ -613,14 +614,6 @@ QPushButton:hover {
                  <bool>true</bool>
                 </property>
                 <widget class="QWidget" name="scrollBiomesContent">
-                 <property name="geometry">
-                  <rect>
-                   <x>0</x>
-                   <y>0</y>
-                   <width>60</width>
-                   <height>20</height>
-                  </rect>
-                 </property>
                  <layout class="QVBoxLayout" name="verticalLayout_6">
                   <property name="sizeConstraint">
                    <enum>QLayout::SetMinAndMaxSize</enum>
@@ -997,13 +990,11 @@ QPushButton:hover {
                  <bool>true</bool>
                 </property>
                 <widget class="QWidget" name="scrollNoiseContent">
-                 <property name="geometry">
-                  <rect>
-                   <x>0</x>
-                   <y>0</y>
-                   <width>60</width>
-                   <height>20</height>
-                  </rect>
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_5">
                   <property name="sizeConstraint">
@@ -1381,14 +1372,6 @@ QPushButton:hover {
                  <bool>true</bool>
                 </property>
                 <widget class="QWidget" name="scrollVillagePiecesContents">
-                 <property name="geometry">
-                  <rect>
-                   <x>0</x>
-                   <y>0</y>
-                   <width>60</width>
-                   <height>20</height>
-                  </rect>
-                 </property>
                  <layout class="QVBoxLayout" name="verticalLayout_3_1">
                   <item>
                    <layout class="QGridLayout" name="gridVillagePieces"/>
@@ -1438,14 +1421,6 @@ QPushButton:hover {
                  <bool>true</bool>
                 </property>
                 <widget class="QWidget" name="scrollBastionPiecesContents">
-                 <property name="geometry">
-                  <rect>
-                   <x>0</x>
-                   <y>0</y>
-                   <width>60</width>
-                   <height>20</height>
-                  </rect>
-                 </property>
                  <layout class="QVBoxLayout" name="verticalLayout_3_2">
                   <item>
                    <layout class="QGridLayout" name="gridBastionPieces"/>
@@ -1543,14 +1518,6 @@ QPushButton:hover {
                  <bool>true</bool>
                 </property>
                 <widget class="QWidget" name="scrollPortalPiecesContents">
-                 <property name="geometry">
-                  <rect>
-                   <x>0</x>
-                   <y>0</y>
-                   <width>60</width>
-                   <height>20</height>
-                  </rect>
-                 </property>
                  <layout class="QVBoxLayout" name="verticalLayout_3_3">
                   <item>
                    <layout class="QGridLayout" name="gridPortalPieces"/>
@@ -1726,6 +1693,11 @@ QPushButton:hover {
    <class>ScriptEditor</class>
    <extends>QPlainTextEdit</extends>
    <header>src/scripts.h</header>
+  </customwidget>
+  <customwidget>
+   <class>CoordEdit</class>
+   <extends>QLineEdit</extends>
+   <header>src/conditiondialog.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

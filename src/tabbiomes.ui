@@ -2,14 +2,6 @@
 <ui version="4.0">
  <class>TabBiomes</class>
  <widget class="QWidget" name="TabBiomes">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>571</width>
-    <height>469</height>
-   </rect>
-  </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
@@ -87,7 +79,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="lineX1">
+        <widget class="CoordEdit" name="lineX1">
          <property name="toolTip">
           <string>Lower bound (inclusive)</string>
          </property>
@@ -107,7 +99,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="lineZ1">
+        <widget class="CoordEdit" name="lineZ1">
          <property name="toolTip">
           <string>Lower bound (inclusive)</string>
          </property>
@@ -117,17 +109,11 @@
         </widget>
        </item>
        <item>
-        <spacer name="horizontalSpacer">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>    </string>
          </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
+        </widget>
        </item>
        <item>
         <widget class="QLabel" name="labelX2">
@@ -140,7 +126,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="lineX2">
+        <widget class="CoordEdit" name="lineX2">
          <property name="toolTip">
           <string>Upper bound (inclusive)</string>
          </property>
@@ -160,7 +146,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="lineZ2">
+        <widget class="CoordEdit" name="lineZ2">
          <property name="toolTip">
           <string>Upper bound (inclusive)</string>
          </property>
@@ -434,6 +420,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CoordEdit</class>
+   <extends>QLineEdit</extends>
+   <header>src/conditiondialog.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

@@ -2,14 +2,6 @@
 <ui version="4.0">
  <class>BiomeColorDialog</class>
  <widget class="QDialog" name="BiomeColorDialog">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>580</width>
-    <height>600</height>
-   </rect>
-  </property>
   <property name="windowTitle">
    <string>Biome Color Editor</string>
   </property>
@@ -55,18 +47,13 @@
    </item>
    <item row="1" column="0" colspan="3">
     <widget class="QScrollArea" name="scrollArea">
+     <property name="verticalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOn</enum>
+     </property>
      <property name="widgetResizable">
       <bool>true</bool>
      </property>
      <widget class="QWidget" name="scrollAreaWidgetContents">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>562</width>
-        <height>521</height>
-       </rect>
-      </property>
       <property name="styleSheet">
        <string notr="true">text-align: left; padding: 2px;</string>
       </property>

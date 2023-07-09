@@ -57,6 +57,8 @@ PresetDialog::PresetDialog(QWidget *parent, WorldInfo wi, bool showEamples)
     , ui(new Ui::PresetDialog)
 {
     ui->setupUi(this);
+    resize(fontMetrics().horizontalAdvance('x') * 128, fontMetrics().height() * 32);
+
     ui->labelMC->setText(tr("MC ") + mc2str(wi.mc));
     connect(ui->buttonOk, &QPushButton::clicked, this, &QDialog::accept);
     connect(ui->buttonCancel, &QPushButton::clicked, this, &QDialog::reject);

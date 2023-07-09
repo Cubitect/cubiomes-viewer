@@ -63,6 +63,22 @@ private:
     QComboBox *combo;
 };
 
+// QLineEdit defaults to a style hint width 17 characters, which is too long for coordinates
+class CoordEdit : public QLineEdit
+{
+    Q_OBJECT
+public:
+    CoordEdit(QWidget *parent = nullptr) : QLineEdit(parent) {}
+
+    virtual QSize sizeHint() const override
+    {
+        QSize size = QLineEdit::minimumSizeHint();
+        QFontMetrics fm(font());
+        size.setWidth(size.width() + fm.horizontalAdvance("-30000000"));
+        return size;
+    }
+};
+
 class SpinExclude : public QSpinBox
 {
     Q_OBJECT
@@ -162,7 +178,7 @@ public:
     explicit ConditionDialog(FormConditions *parent, Config *config, int mc, QListWidgetItem *item = 0, Condition *initcond = 0);
     virtual ~ConditionDialog();
 
-    void addVariant(QString name, int biome, int variant);
+    void addTempCat(int temp, QString name);
     void updateMode();
     void updateBiomeSelection();
     int warnIfBad(Condition cond);

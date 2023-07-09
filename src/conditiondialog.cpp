@@ -20,14 +20,6 @@
 #include <QInputDialog>
 #include <QFontMetricsF>
 
-#define SETUP_TEMPCAT_SPINBOX(B) do {\
-        tempsboxes[B] = new SpinExclude();\
-        QLabel *l = new QLabel(#B);\
-        ui->gridLayoutTemps->addWidget(tempsboxes[B], (B) % Special, (B) / Special * 2 + 0);\
-        ui->gridLayoutTemps->addWidget(l, (B) % Special, (B) / Special * 2 + 1);\
-        if (mc > MC_1_6 && mc <= MC_1_17) \
-            l->setToolTip(getTip(mc, L_SPECIAL_1024, 0, (B) % Special + ((B)>=Special?256:0) ));\
-    } while (0)
 
 static QString getTip(int mc, int layer, uint32_t flags, int id)
 {
@@ -70,12 +62,17 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
     ui->textEditLua->setTabStopDistance(QFontMetricsF(ui->textEditLua->font()).horizontalAdvance(" ") * 4);
 #endif
 
+    ui->lineSummary->setMinimumWidth(
+                ui->lineSummary->minimumSizeHint().width() +
+                QFontMetrics(ui->lineSummary->font()).horizontalAdvance('#') * 26
+                );
+
     // prevent bold font of group box title getting inherited
-    QFont dfont = font();
-    dfont.setBold(false);
-    const QList<QWidget*> children = ui->groupBoxPosition->findChildren<QWidget*>(QString(), Qt::FindDirectChildrenOnly);
-    for (QWidget *w : children)
-        w->setFont(dfont);
+    //QFont dfont = font();
+    //dfont.setBold(false);
+    //const QList<QWidget*> children = ui->groupBoxPosition->findChildren<QWidget*>(QString(), Qt::FindDirectChildrenOnly);
+    //for (QWidget *w : children)
+    //    w->setFont(dfont);
 
     int initindex = -1;
     const QVector<Condition> existing = parent->getConditions();
@@ -159,14 +156,14 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
 
     memset(tempsboxes, 0, sizeof(tempsboxes));
 
-    SETUP_TEMPCAT_SPINBOX(Oceanic);
-    SETUP_TEMPCAT_SPINBOX(Warm);
-    SETUP_TEMPCAT_SPINBOX(Lush);
-    SETUP_TEMPCAT_SPINBOX(Cold);
-    SETUP_TEMPCAT_SPINBOX(Freezing);
-    SETUP_TEMPCAT_SPINBOX(Special+Warm);
-    SETUP_TEMPCAT_SPINBOX(Special+Lush);
-    SETUP_TEMPCAT_SPINBOX(Special+Cold);
+    addTempCat(Oceanic, tr("Oceanic"));
+    addTempCat(Warm, tr("Warm"));
+    addTempCat(Lush, tr("Lush"));
+    addTempCat(Cold, tr("Cold"));
+    addTempCat(Freezing, tr("Freezing"));
+    addTempCat(Special+Warm, tr("Special Warm"));
+    addTempCat(Special+Lush, tr("Special Lush"));
+    addTempCat(Special+Cold, tr("Special Cold"));
 
     for (const StartPiece *sp = g_start_pieces; sp->stype >= 0; sp++)
     {
@@ -461,6 +458,18 @@ ConditionDialog::~ConditionDialog()
     if (item)
         delete item;
     delete ui;
+}
+
+void ConditionDialog::addTempCat(int temp, QString name)
+{
+    tempsboxes[temp] = new SpinExclude();
+    QLabel *l = new QLabel(name);
+    int c = temp / Special;
+    int r = temp % Special;
+    ui->gridLayoutTemps->addWidget(tempsboxes[temp], r, c * 2 + 0);
+    ui->gridLayoutTemps->addWidget(l, r, c * 2 + 1);
+    if (mc > MC_1_6 && mc <= MC_1_17)
+        l->setToolTip(getTip(mc, L_SPECIAL_1024, 0, r + (temp >= Special ? 256 : 0)));
 }
 
 void ConditionDialog::updateMode()

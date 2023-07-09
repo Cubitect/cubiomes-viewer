@@ -2,14 +2,6 @@
 <ui version="4.0">
  <class>FormGen48</class>
  <widget class="QWidget" name="FormGen48">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>435</width>
-    <height>188</height>
-   </rect>
-  </property>
   <property name="sizePolicy">
    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
     <horstretch>0</horstretch>
@@ -226,12 +218,6 @@ Applies only to feature-structures of region-size = 32 and chunk-gap = 8, in par
           </item>
           <item row="0" column="2">
            <widget class="QPushButton" name="buttonBrowse">
-            <property name="maximumSize">
-             <size>
-              <width>24</width>
-              <height>16777215</height>
-             </size>
-            </property>
             <property name="text">
              <string>...</string>
             </property>
@@ -330,12 +316,12 @@ Applies only to feature-structures of region-size = 32 and chunk-gap = 8, in par
            <string>Lower bound (inclusive)</string>
           </property>
           <property name="text">
-           <string>X&lt;sub&gt;1&lt;/sub&gt;=</string>
+           <string>X&lt;sub&gt;1&lt;/sub&gt;:</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEditX1">
+         <widget class="CoordEdit" name="lineEditX1">
           <property name="toolTip">
            <string>Lower bound (inclusive)</string>
           </property>
@@ -350,12 +336,12 @@ Applies only to feature-structures of region-size = 32 and chunk-gap = 8, in par
            <string>Lower bound (inclusive)</string>
           </property>
           <property name="text">
-           <string>Z&lt;sub&gt;1&lt;/sub&gt;=</string>
+           <string>Z&lt;sub&gt;1&lt;/sub&gt;:</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEditZ1">
+         <widget class="CoordEdit" name="lineEditZ1">
           <property name="toolTip">
            <string>Lower bound (inclusive)</string>
           </property>
@@ -365,17 +351,11 @@ Applies only to feature-structures of region-size = 32 and chunk-gap = 8, in par
          </widget>
         </item>
         <item>
-         <spacer name="horizontalSpacer">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>    </string>
           </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
+         </widget>
         </item>
         <item>
          <widget class="QLabel" name="labelX2">
@@ -383,12 +363,12 @@ Applies only to feature-structures of region-size = 32 and chunk-gap = 8, in par
            <string>Upper bound (inclusive)</string>
           </property>
           <property name="text">
-           <string>X&lt;sub&gt;2&lt;/sub&gt;=</string>
+           <string>X&lt;sub&gt;2&lt;/sub&gt;:</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEditX2">
+         <widget class="CoordEdit" name="lineEditX2">
           <property name="toolTip">
            <string>Upper bound (inclusive)</string>
           </property>
@@ -403,12 +383,12 @@ Applies only to feature-structures of region-size = 32 and chunk-gap = 8, in par
            <string>Upper bound (inclusive)</string>
           </property>
           <property name="text">
-           <string>Z&lt;sub&gt;2&lt;/sub&gt;=</string>
+           <string>Z&lt;sub&gt;2&lt;/sub&gt;:</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEditZ2">
+         <widget class="CoordEdit" name="lineEditZ2">
           <property name="toolTip">
            <string>Upper bound (inclusive)</string>
           </property>
@@ -457,6 +437,13 @@ Applies only to feature-structures of region-size = 32 and chunk-gap = 8, in par
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CoordEdit</class>
+   <extends>QLineEdit</extends>
+   <header>src/conditiondialog.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

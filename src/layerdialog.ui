@@ -12,6 +12,12 @@
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="0" column="1">
     <widget class="QComboBox" name="comboBiomes">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="minimumSize">
       <size>
        <width>240</width>
@@ -23,10 +29,23 @@
        <family>Monospace</family>
       </font>
      </property>
+     <property name="iconSize">
+      <size>
+       <width>0</width>
+       <height>16</height>
+      </size>
+     </property>
     </widget>
    </item>
    <item row="8" column="1">
-    <widget class="QComboBox" name="comboNoiseW"/>
+    <widget class="QComboBox" name="comboNoiseW">
+     <property name="iconSize">
+      <size>
+       <width>0</width>
+       <height>16</height>
+      </size>
+     </property>
+    </widget>
    </item>
    <item row="7" column="0">
     <widget class="QRadioButton" name="radioNoiseD">
@@ -50,7 +69,14 @@
     </widget>
    </item>
    <item row="3" column="1">
-    <widget class="QComboBox" name="comboNoiseT"/>
+    <widget class="QComboBox" name="comboNoiseT">
+     <property name="iconSize">
+      <size>
+       <width>0</width>
+       <height>16</height>
+      </size>
+     </property>
+    </widget>
    </item>
    <item row="16" column="0" colspan="2">
     <widget class="QDialogButtonBox" name="buttonBox">
@@ -77,7 +103,14 @@
     </widget>
    </item>
    <item row="14" column="1">
-    <widget class="QComboBox" name="comboHeight"/>
+    <widget class="QComboBox" name="comboHeight">
+     <property name="iconSize">
+      <size>
+       <width>0</width>
+       <height>16</height>
+      </size>
+     </property>
+    </widget>
    </item>
    <item row="14" column="0">
     <widget class="QRadioButton" name="radioHeight">
@@ -87,7 +120,14 @@
     </widget>
    </item>
    <item row="4" column="1">
-    <widget class="QComboBox" name="comboNoiseH"/>
+    <widget class="QComboBox" name="comboNoiseH">
+     <property name="iconSize">
+      <size>
+       <width>0</width>
+       <height>16</height>
+      </size>
+     </property>
+    </widget>
    </item>
    <item row="11" column="0">
     <widget class="QRadioButton" name="radioNoOcean">
@@ -125,10 +165,24 @@
     </widget>
    </item>
    <item row="5" column="1">
-    <widget class="QComboBox" name="comboNoiseC"/>
+    <widget class="QComboBox" name="comboNoiseC">
+     <property name="iconSize">
+      <size>
+       <width>0</width>
+       <height>16</height>
+      </size>
+     </property>
+    </widget>
    </item>
    <item row="6" column="1">
-    <widget class="QComboBox" name="comboNoiseE"/>
+    <widget class="QComboBox" name="comboNoiseE">
+     <property name="iconSize">
+      <size>
+       <width>0</width>
+       <height>16</height>
+      </size>
+     </property>
+    </widget>
    </item>
    <item row="4" column="0">
     <widget class="QRadioButton" name="radioNoiseH">

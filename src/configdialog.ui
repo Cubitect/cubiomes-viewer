@@ -9,207 +9,183 @@
    <iconset resource="../rc/icons.qrc">
     <normaloff>:/icons/logo.png</normaloff>:/icons/logo.png</iconset>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <item row="2" column="0">
-    <widget class="QGroupBox" name="groupSession">
-     <property name="title">
-      <string>Session</string>
+  <layout class="QGridLayout" name="gridLayout_8">
+   <item row="0" column="0">
+    <widget class="QScrollArea" name="scrollArea">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
      </property>
-     <layout class="QGridLayout" name="gridLayout_4">
-      <item row="0" column="0" rowspan="2" colspan="2">
-       <widget class="QCheckBox" name="checkRestore">
-        <property name="text">
-         <string>Restore previous session at launch</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QCheckBox" name="checkAutosave">
-        <property name="text">
-         <string>Autosave every:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QSpinBox" name="spinAutosave">
-        <property name="suffix">
-         <string> min</string>
-        </property>
-        <property name="minimum">
-         <number>1</number>
-        </property>
-        <property name="maximum">
-         <number>120</number>
-        </property>
-        <property name="value">
-         <number>10</number>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="5" column="0" colspan="2">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+     <property name="horizontalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOff</enum>
      </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Apply|QDialogButtonBox::Cancel|QDialogButtonBox::Ok|QDialogButtonBox::RestoreDefaults</set>
+     <property name="widgetResizable">
+      <bool>true</bool>
      </property>
-    </widget>
-   </item>
-   <item row="3" column="0">
-    <widget class="QGroupBox" name="groupBox">
-     <property name="title">
-      <string>Export</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_6">
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="lineSep"/>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_8">
-        <property name="text">
-         <string>CSV cell quotation:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>CSV column separator:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QComboBox" name="comboQuote">
-        <item>
-         <property name="text">
-          <string>Where necessary</string>
+     <widget class="QWidget" name="scrollAreaWidgetContents">
+      <layout class="QGridLayout" name="gridLayout">
+       <item row="1" column="0">
+        <widget class="QGroupBox" name="groupBox_2">
+         <property name="title">
+          <string>Map View</string>
          </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Single quotes (')</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Double quotes (&quot;)</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="QGroupBox" name="groupSearch">
-     <property name="title">
-      <string>Search</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_3">
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_3">
-        <property name="text">
-         <string>Maximum number of matching seeds:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="lineMatching"/>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="4" column="0">
-    <widget class="QGroupBox" name="groupMisc">
-     <property name="title">
-      <string>Miscellaneous</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_5">
-      <item row="0" column="0">
-       <widget class="QCheckBox" name="checkUpdates">
-        <property name="text">
-         <string>Check GitHub for updates at startup</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="0" column="0" colspan="2">
-    <widget class="QGroupBox" name="groupInterface">
-     <property name="title">
-      <string>Interface</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_2">
-      <item row="3" column="0" colspan="2">
-       <widget class="QLabel" name="label_13">
-        <property name="text">
-         <string>Monospace font:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="2" colspan="3">
-       <widget class="QComboBox" name="comboGridMult">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <item>
-         <property name="text">
-          <string>None</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>2</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>4</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>5</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>10</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="11" column="0" colspan="2">
-       <widget class="QLabel" name="label_9">
-        <property name="text">
-         <string>Threads for map:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="0" colspan="2">
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <item>
-         <spacer name="horizontalSpacer">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QPushButton" name="buttonColorHelp">
-          <property name="styleSheet">
-           <string notr="true">
+         <layout class="QGridLayout" name="gridLayout_7">
+          <item row="5" column="0">
+           <widget class="QLabel" name="label_10">
+            <property name="text">
+             <string>Custom grid multiplier:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0">
+           <widget class="QLabel" name="label_7">
+            <property name="text">
+             <string>Map cache size:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="2">
+           <widget class="QPushButton" name="buttonClear">
+            <property name="icon">
+             <iconset resource="../rc/icons.qrc">
+              <normaloff>:/icons/clear.png</normaloff>:/icons/clear.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="0">
+           <widget class="QLabel" name="label_9">
+            <property name="text">
+             <string>Threads for map:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1" colspan="2">
+           <widget class="QLineEdit" name="lineIconScale"/>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_6">
+            <property name="toolTip">
+             <string>Use a fixed grid in blocks instead of outlining the generated map tiles
+Leave blank for the default behaviour</string>
+            </property>
+            <property name="text">
+             <string>Custom grid spacing:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_5">
+            <property name="text">
+             <string>Biome color customization:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_14">
+            <property name="text">
+             <string>Icon scale:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="1" colspan="2">
+           <widget class="QSpinBox" name="spinThreads"/>
+          </item>
+          <item row="2" column="1" colspan="2">
+           <widget class="QPushButton" name="buttonBiomeColorEditor">
+            <property name="text">
+             <string>Edit biome colors...</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1" colspan="2">
+           <widget class="QComboBox" name="comboGridMult">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>0</width>
+              <height>16</height>
+             </size>
+            </property>
+            <item>
+             <property name="text">
+              <string>None</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>2</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>4</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>5</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>10</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="9" column="0" colspan="3">
+           <widget class="QCheckBox" name="checkSmooth">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Simulate inertia for the map view&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Smooth map motion</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QPushButton" name="buttonBiomeColor">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>[none]</string>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="0" colspan="3">
+           <widget class="QCheckBox" name="checkBBoxes">
+            <property name="text">
+             <string>Outline known bounding boxes</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout">
+            <item>
+             <spacer name="horizontalSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QPushButton" name="buttonColorHelp">
+              <property name="styleSheet">
+               <string notr="true">
 QPushButton {
 	background-color: rgba(255, 255, 255, 0);
 	border: none;
@@ -219,224 +195,283 @@ QPushButton {
 QPushButton:hover {
 	image: url(:/icons/info_h.png);
 }</string>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="5" column="0" colspan="2">
-       <widget class="QLabel" name="label_5">
-        <property name="text">
-         <string>Biome color customization:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="3" colspan="2">
-       <widget class="QSpinBox" name="spinFontSizeMono">
-        <property name="minimum">
-         <number>1</number>
-        </property>
-        <property name="value">
-         <number>10</number>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="4">
-       <widget class="QPushButton" name="buttonClear">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="icon">
-         <iconset resource="../rc/icons.qrc">
-          <normaloff>:/icons/clear.png</normaloff>:/icons/clear.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item row="12" column="0" colspan="5">
-       <widget class="QCheckBox" name="checkBBoxes">
-        <property name="text">
-         <string>Outline known bounding boxes</string>
-        </property>
-       </widget>
-      </item>
-      <item row="10" column="2" colspan="3">
-       <widget class="QSpinBox" name="spinCacheSize">
-        <property name="suffix">
-         <string> MB</string>
-        </property>
-        <property name="minimum">
-         <number>16</number>
-        </property>
-        <property name="maximum">
-         <number>8192</number>
-        </property>
-        <property name="singleStep">
-         <number>16</number>
-        </property>
-        <property name="value">
-         <number>256</number>
-        </property>
-       </widget>
-      </item>
-      <item row="11" column="2" colspan="3">
-       <widget class="QSpinBox" name="spinThreads"/>
-      </item>
-      <item row="6" column="2" colspan="2">
-       <widget class="QPushButton" name="buttonBiomeColor">
-        <property name="text">
-         <string>[none]</string>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="0" colspan="2">
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>Maximum structure zoom:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2" colspan="3">
-       <widget class="QComboBox" name="comboLang"/>
-      </item>
-      <item row="7" column="2" colspan="3">
-       <widget class="QPushButton" name="buttonStructVisEdit">
-        <property name="text">
-         <string>Edit map visibility limits...</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="2">
-       <widget class="QFontComboBox" name="fontComboMono">
-        <property name="font">
-         <font>
-          <family>Monospace</family>
-         </font>
-        </property>
-        <property name="fontFilters">
-         <set>QFontComboBox::MonospacedFonts</set>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="0" colspan="2">
-       <widget class="QLabel" name="label_6">
-        <property name="toolTip">
-         <string>Use a fixed grid in blocks instead of outlining the generated map tiles
-Leave blank for the default behaviour</string>
-        </property>
-        <property name="text">
-         <string>Custom grid spacing:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="2">
-       <widget class="QFontComboBox" name="fontComboNorm">
-        <property name="fontFilters">
-         <set>QFontComboBox::ScalableFonts</set>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="3" colspan="2">
-       <widget class="QSpinBox" name="spinFontSizeNorm">
-        <property name="minimum">
-         <number>2</number>
-        </property>
-        <property name="value">
-         <number>10</number>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0" colspan="2">
-       <widget class="QLabel" name="label_11">
-        <property name="text">
-         <string>Language:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0" colspan="2">
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>GUI style:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2" colspan="3">
-       <widget class="QComboBox" name="comboStyle">
-        <property name="iconSize">
-         <size>
-          <width>0</width>
-          <height>16</height>
-         </size>
-        </property>
-        <item>
-         <property name="text">
-          <string>System</string>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Tools and structure zoom:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1" colspan="2">
+           <widget class="QLineEdit" name="lineGridSpacing"/>
+          </item>
+          <item row="6" column="1" colspan="2">
+           <widget class="QSpinBox" name="spinCacheSize">
+            <property name="suffix">
+             <string> MB</string>
+            </property>
+            <property name="minimum">
+             <number>16</number>
+            </property>
+            <property name="maximum">
+             <number>8192</number>
+            </property>
+            <property name="singleStep">
+             <number>16</number>
+            </property>
+            <property name="value">
+             <number>256</number>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1" colspan="2">
+           <widget class="QPushButton" name="buttonStructVisEdit">
+            <property name="text">
+             <string>Edit map tools...</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QGroupBox" name="groupInterface">
+         <property name="title">
+          <string>Interface</string>
          </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Dark</string>
+         <layout class="QGridLayout" name="gridLayout_2">
+          <item row="3" column="0" colspan="2">
+           <widget class="QLabel" name="label_13">
+            <property name="text">
+             <string>Monospace font:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="2">
+           <widget class="QFontComboBox" name="fontComboMono">
+            <property name="font">
+             <font>
+              <family>Monospace</family>
+             </font>
+            </property>
+            <property name="fontFilters">
+             <set>QFontComboBox::MonospacedFonts</set>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2" colspan="3">
+           <widget class="QComboBox" name="comboStyle">
+            <property name="iconSize">
+             <size>
+              <width>0</width>
+              <height>16</height>
+             </size>
+            </property>
+            <item>
+             <property name="text">
+              <string>System</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Dark</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="1" column="0" colspan="2">
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>GUI style:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QFontComboBox" name="fontComboNorm">
+            <property name="fontFilters">
+             <set>QFontComboBox::ScalableFonts</set>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2" colspan="3">
+           <widget class="QComboBox" name="comboLang"/>
+          </item>
+          <item row="2" column="0" colspan="2">
+           <widget class="QLabel" name="label_12">
+            <property name="text">
+             <string>Application font:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0" colspan="2">
+           <widget class="QLabel" name="label_11">
+            <property name="text">
+             <string>Language:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="3" colspan="2">
+           <widget class="QSpinBox" name="spinFontSizeNorm">
+            <property name="minimum">
+             <number>2</number>
+            </property>
+            <property name="value">
+             <number>10</number>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="3" colspan="2">
+           <widget class="QSpinBox" name="spinFontSizeMono">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="value">
+             <number>10</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QGroupBox" name="groupBox">
+         <property name="title">
+          <string>Export</string>
          </property>
-        </item>
-       </widget>
-      </item>
-      <item row="8" column="2" colspan="3">
-       <widget class="QLineEdit" name="lineGridSpacing"/>
-      </item>
-      <item row="13" column="0" colspan="5">
-       <widget class="QCheckBox" name="checkSmooth">
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Simulate inertia for the map view&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="text">
-         <string>Smooth map motion</string>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="0" colspan="2">
-       <widget class="QLabel" name="label_10">
-        <property name="text">
-         <string>Custom grid multiplier:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0" colspan="2">
-       <widget class="QLabel" name="label_12">
-        <property name="text">
-         <string>Application font:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="2" colspan="3">
-       <widget class="QPushButton" name="buttonBiomeColorEditor">
-        <property name="text">
-         <string>Edit biome colors...</string>
-        </property>
-       </widget>
-      </item>
-      <item row="10" column="0" colspan="2">
-       <widget class="QLabel" name="label_7">
-        <property name="text">
-         <string>Map cache size:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0" colspan="2">
-       <widget class="QLabel" name="label_14">
-        <property name="text">
-         <string>Icon scale:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="2" colspan="3">
-       <widget class="QLineEdit" name="lineIconScale"/>
-      </item>
-     </layout>
+         <layout class="QGridLayout" name="gridLayout_6">
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="lineSep"/>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_8">
+            <property name="text">
+             <string>CSV cell quotation:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QComboBox" name="comboQuote">
+            <item>
+             <property name="text">
+              <string>Where necessary</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Single quotes (')</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Double quotes (&quot;)</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>CSV column separator:</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QGroupBox" name="groupSearch">
+         <property name="title">
+          <string>Search</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_3">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>Maximum number of matching seeds:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="lineMatching"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QGroupBox" name="groupSession">
+         <property name="title">
+          <string>Session</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_4">
+          <item row="0" column="0" rowspan="2" colspan="2">
+           <widget class="QCheckBox" name="checkRestore">
+            <property name="text">
+             <string>Restore previous session at launch</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QCheckBox" name="checkAutosave">
+            <property name="text">
+             <string>Autosave every:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QSpinBox" name="spinAutosave">
+            <property name="suffix">
+             <string> min</string>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>120</number>
+            </property>
+            <property name="value">
+             <number>10</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QGroupBox" name="groupMisc">
+         <property name="title">
+          <string>Miscellaneous</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_5">
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="checkUpdates">
+            <property name="text">
+             <string>Check GitHub for updates at startup</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Apply|QDialogButtonBox::Cancel|QDialogButtonBox::Ok|QDialogButtonBox::RestoreDefaults</set>
+     </property>
     </widget>
    </item>
   </layout>

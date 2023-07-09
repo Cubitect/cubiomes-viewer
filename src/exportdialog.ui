@@ -2,14 +2,6 @@
 <ui version="4.0">
  <class>ExportDialog</class>
  <widget class="QDialog" name="ExportDialog">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>540</width>
-    <height>496</height>
-   </rect>
-  </property>
   <property name="windowTitle">
    <string>Biome Image Export</string>
   </property>
@@ -188,7 +180,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="lineEditX1">
+      <widget class="CoordEdit" name="lineEditX1">
        <property name="toolTip">
         <string>Lower bound (inclusive)</string>
        </property>
@@ -208,7 +200,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="lineEditZ1">
+      <widget class="CoordEdit" name="lineEditZ1">
        <property name="toolTip">
         <string>Lower bound (inclusive)</string>
        </property>
@@ -218,17 +210,11 @@
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer_2">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+      <widget class="QLabel" name="label_14">
+       <property name="text">
+        <string>     </string>
        </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
+      </widget>
      </item>
      <item>
       <widget class="QLabel" name="labelX2">
@@ -241,7 +227,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="lineEditX2">
+      <widget class="CoordEdit" name="lineEditX2">
        <property name="toolTip">
         <string>Upper bound (inclusive)</string>
        </property>
@@ -261,7 +247,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="lineEditZ2">
+      <widget class="CoordEdit" name="lineEditZ2">
        <property name="toolTip">
         <string>Upper bound (inclusive)</string>
        </property>
@@ -463,6 +449,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CoordEdit</class>
+   <extends>QLineEdit</extends>
+   <header>src/conditiondialog.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../rc/icons.qrc"/>
  </resources>

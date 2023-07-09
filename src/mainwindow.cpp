@@ -69,6 +69,7 @@ MainWindow::MainWindow(QString sessionpath, QString resultspath, QWidget *parent
     mapView = new MapView(this);
 
     ui->setupUi(this);
+    resize(1600, 900);
 
     dock->setWidget(mapView);
     dock->setFeatures(QDockWidget::DockWidgetFloatable);
@@ -453,6 +454,7 @@ void MainWindow::saveSettings()
 {
     QSettings settings(APP_STRING, APP_STRING);
 
+    settings.setValue("mainwindow/maximized", isMaximized());
     settings.setValue("mainwindow/size", size());
     settings.setValue("mainwindow/pos", pos());
     settings.setValue("mainwindow/prevdir", prevdir);
@@ -491,9 +493,13 @@ void MainWindow::loadSettings()
 
     getMapView()->deleteWorld();
 
-    resize(settings.value("mainwindow/size", size()).toSize());
-    move(settings.value("mainwindow/pos", pos()).toPoint());
-    prevdir = settings.value("mainwindow/prevdir", pos()).toString();
+    if (settings.value("mainwindow/maximized", isMaximized()).toBool()) {
+        showMaximized();
+    } else {
+        resize(settings.value("mainwindow/size", size()).toSize());
+        move(settings.value("mainwindow/pos", pos()).toPoint());
+    }
+    prevdir = settings.value("mainwindow/prevdir", prevdir).toString();
 
     int toolarea = toolBarArea(ui->toolBar);
     int toolarea_new = settings.value("toolbar/area", toolarea).toInt();

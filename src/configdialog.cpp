@@ -47,7 +47,20 @@ ConfigDialog::ConfigDialog(QWidget *parent, Config *config)
         ui->comboLang->addItem(text, code);
     }
 
+    int fmh = fontMetrics().height();
+    ui->buttonClear->setIconSize(QSize(fmh, fmh));
+
     initConfig(config);
+
+    QSize size = sizeHint();
+    int hsa = ui->scrollArea->sizeHint().height();
+    int hsc = ui->scrollAreaWidgetContents->sizeHint().height();
+    int hpa = parent->size().height();
+    int h = size.height();
+    h += hsc - hsa;
+    if (h > hpa) h = hpa;
+    size.setHeight(h);
+    resize(size);
 }
 
 ConfigDialog::~ConfigDialog()
@@ -69,7 +82,7 @@ void ConfigDialog::initConfig(Config *config)
     ui->lineGridSpacing->setText(config->gridSpacing ? QString::number(config->gridSpacing) : "");
     ui->comboGridMult->setCurrentText(config->gridMultiplier ? QString::number(config->gridMultiplier) : tr("None"));
     ui->spinCacheSize->setValue(config->mapCacheSize);
-    ui->spinThreads->setValue(config->mapThreads ? config->mapThreads : QThread::idealThreadCount());
+    ui->spinThreads->setValue(config->mapThreads ? config->mapThreads : (QThread::idealThreadCount() + 1) / 2);
     ui->comboLang->setCurrentIndex(ui->comboLang->findData(config->lang));
     ui->lineSep->setText(config->separator);
     int idx = config->quote == "\'" ? 1 : config->quote== "\"" ? 2 : 0;

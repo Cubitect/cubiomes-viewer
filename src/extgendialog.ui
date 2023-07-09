@@ -2,14 +2,6 @@
 <ui version="4.0">
  <class>ExtGenDialog</class>
  <widget class="QDialog" name="ExtGenDialog">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>383</width>
-    <height>144</height>
-   </rect>
-  </property>
   <property name="windowTitle">
    <string>World Settings</string>
   </property>
