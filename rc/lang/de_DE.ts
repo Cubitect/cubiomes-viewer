@@ -4196,12 +4196,12 @@ gespeichert und weitere Suchen werden schneller starten.</translation>
 <context>
     <name>QApplication</name>
     <message>
-        <location filename="../../src/message.cpp" line="78"/>
+        <location filename="../../src/message.cpp" line="84"/>
         <source>Warning</source>
         <translation>Warnung</translation>
     </message>
     <message>
-        <location filename="../../src/message.cpp" line="83"/>
+        <location filename="../../src/message.cpp" line="89"/>
         <source>Information</source>
         <translation>Information</translation>
     </message>
@@ -4314,13 +4314,28 @@ Trozdem fortfahren?</translation>
     </message>
     <message>
         <location filename="../../src/message.cpp" line="28"/>
+        <source>Restore Defaults</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/message.cpp" line="30"/>
         <source>Save</source>
         <translation>Speichern</translation>
     </message>
     <message>
-        <location filename="../../src/message.cpp" line="30"/>
+        <location filename="../../src/message.cpp" line="32"/>
         <source>Discard</source>
         <translation>Verwerfen</translation>
+    </message>
+    <message>
+        <location filename="../../src/message.cpp" line="34"/>
+        <source>Apply</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/message.cpp" line="36"/>
+        <source>Close</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
