@@ -1031,7 +1031,7 @@
     <message>
         <location filename="../../src/conditiondialog.ui" line="1108"/>
         <source>Generate up to octave:</source>
-        <translation>使用噪声模式:</translation>
+        <translation>使用噪声等级:</translation>
     </message>
     <message>
         <location filename="../../src/conditiondialog.ui" line="1134"/>
@@ -3164,7 +3164,7 @@ Continue anyway?</source>
     <message>
         <location filename="../../src/layerdialog.ui" line="60"/>
         <source>Weirdness octaves:</source>
-        <translation>(1.18+) 稀有度分布图 噪声:</translation>
+        <translation>(1.18+) 稀有度分布图 噪声等级:</translation>
     </message>
     <message>
         <location filename="../../src/layerdialog.ui" line="67"/>
@@ -3174,7 +3174,7 @@ Continue anyway?</source>
     <message>
         <location filename="../../src/layerdialog.ui" line="94"/>
         <source>Temperature octaves:</source>
-        <translation>(1.18+) 温度分布图 噪声:</translation>
+        <translation>(1.18+) 温度分布图 噪声等级:</translation>
     </message>
     <message>
         <location filename="../../src/layerdialog.ui" line="101"/>
@@ -3194,7 +3194,7 @@ Continue anyway?</source>
     <message>
         <location filename="../../src/layerdialog.ui" line="142"/>
         <source>Contnentalness octaves:</source>
-        <translation>(1.18+) 海陆分布图 噪声:</translation>
+        <translation>(1.18+) 海陆分布图 噪声等级:</translation>
     </message>
     <message>
         <location filename="../../src/layerdialog.ui" line="149"/>
@@ -3204,7 +3204,7 @@ Continue anyway?</source>
     <message>
         <location filename="../../src/layerdialog.ui" line="156"/>
         <source>Erosion octaves:</source>
-        <translation>(1.18+) 侵蚀度分布图 噪声:</translation>
+        <translation>(1.18+) 侵蚀度分布图 噪声等级:</translation>
     </message>
     <message>
         <location filename="../../src/layerdialog.ui" line="163"/>
@@ -3214,7 +3214,7 @@ Continue anyway?</source>
     <message>
         <location filename="../../src/layerdialog.ui" line="190"/>
         <source>Humidity octaves:</source>
-        <translation>(1.18+) 湿度分布图 噪声:</translation>
+        <translation>(1.18+) 湿度分布图 噪声等级:</translation>
     </message>
     <message>
         <location filename="../../src/layerdialog.ui" line="197"/>
@@ -3707,7 +3707,7 @@ Continue anyway?</source>
     <message>
         <location filename="../../src/mainwindow.cpp" line="319"/>
         <source>Show %1</source>
-        <translation>展示 %1</translation>
+        <translation>显示 %1</translation>
     </message>
     <message>
         <location filename="../../src/mainwindow.cpp" line="203"/>
@@ -3910,7 +3910,7 @@ Continue anyway?</source>
     <message>
         <location filename="../../src/config.cpp" line="160"/>
         <source>Spawn</source>
-        <translation>世界出生点</translation>
+        <translation>出生点</translation>
     </message>
     <message>
         <location filename="../../src/config.cpp" line="161"/>
