@@ -1,5 +1,5 @@
-#ifndef CUTIL_H
-#define CUTIL_H
+#ifndef UTIL_H
+#define UTIL_H
 
 #include <QMutex>
 #include <QString>
@@ -92,6 +92,4 @@ QIcon getColorIcon(const QColor& col, const QPen& pen = QPen(Qt::black, 1));
 QIcon getBiomeIcon(int id, bool warn);
 
 
-
-
-#endif // CUTIL_H
+#endif // UTIL_H

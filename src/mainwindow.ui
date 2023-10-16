@@ -445,12 +445,10 @@ QToolButton:checked {
     <addaction name="actionOpenShadow"/>
     <addaction name="separator"/>
     <addaction name="actionDock"/>
-    <addaction name="actionGo_to"/>
+    <addaction name="actionGoto"/>
     <addaction name="separator"/>
     <addaction name="actionScreenshot"/>
     <addaction name="actionExportImg"/>
-    <addaction name="actionBiome_colors"/>
-    <addaction name="actionToolbarConfig"/>
     <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
@@ -485,6 +483,8 @@ QToolButton:checked {
     <addaction name="actionAddShadow"/>
     <addaction name="separator"/>
     <addaction name="actionExtGen"/>
+    <addaction name="actionBiomeColors"/>
+    <addaction name="actionToolbarConfig"/>
     <addaction name="actionPreferences"/>
    </widget>
    <widget class="QMenu" name="menuLayer">
@@ -570,7 +570,7 @@ QToolButton:checked {
   </action>
   <action name="actionPreferences">
    <property name="text">
-    <string>Preferences...</string>
+    <string>Edit preferences...</string>
    </property>
   </action>
   <action name="actionQuit">
@@ -603,9 +603,9 @@ QToolButton:checked {
     <string>Load filter preset...</string>
    </property>
   </action>
-  <action name="actionBiome_colors">
+  <action name="actionBiomeColors">
    <property name="text">
-    <string>Biome colors...</string>
+    <string>Edit biome colors...</string>
    </property>
   </action>
   <action name="actionBiomes">
@@ -622,7 +622,7 @@ QToolButton:checked {
     <string>Alt+B</string>
    </property>
   </action>
-  <action name="actionGo_to">
+  <action name="actionGoto">
    <property name="text">
     <string>Go to...</string>
    </property>
@@ -659,7 +659,7 @@ QToolButton:checked {
   </action>
   <action name="actionToolbarConfig">
    <property name="text">
-    <string>Map toolbar options...</string>
+    <string>Edit map tools...</string>
    </property>
   </action>
   <action name="actionParaTemperature">

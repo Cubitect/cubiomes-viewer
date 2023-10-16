@@ -8,10 +8,8 @@
 
 #include <QThread>
 #include <QFileInfo>
-#include <QFileDialog>
 #include <QDirIterator>
 #include <QLocale>
-#include <QMessageBox>
 
 
 ConfigDialog::ConfigDialog(QWidget *parent, Config *config)
@@ -47,9 +45,6 @@ ConfigDialog::ConfigDialog(QWidget *parent, Config *config)
         ui->comboLang->addItem(text, code);
     }
 
-    int fmh = fontMetrics().height();
-    ui->buttonClear->setIconSize(QSize(fmh, fmh));
-
     initConfig(config);
 
     QSize size = sizeHint();
@@ -57,7 +52,7 @@ ConfigDialog::ConfigDialog(QWidget *parent, Config *config)
     int hsc = ui->scrollAreaWidgetContents->sizeHint().height();
     int hpa = parent->size().height();
     int h = size.height();
-    h += hsc - hsa;
+    h += hsc - hsa + layout()->margin();
     if (h > hpa) h = hpa;
     size.setHeight(h);
     resize(size);
@@ -92,8 +87,6 @@ void ConfigDialog::initConfig(Config *config)
     ui->spinFontSizeNorm->setValue(config->fontNorm.pointSize());
     ui->spinFontSizeMono->setValue(config->fontMono.pointSize());
     ui->lineIconScale->setText(QString::number(config->iconScale));
-
-    setBiomeColorPath(config->biomeColorPath);
 }
 
 Config ConfigDialog::getConfig()
@@ -128,49 +121,9 @@ Config ConfigDialog::getConfig()
     return conf;
 }
 
-void ConfigDialog::setBiomeColorPath(QString path)
+void ConfigDialog::onUpdateMapConfig()
 {
-    unsigned char cols[256][3];
-    initBiomeColors(cols);
-    QPalette pal = this->palette();
-
-    conf.biomeColorPath = path;
-
-    if (path.isEmpty())
-    {
-        ui->buttonBiomeColor->setText("...");
-    }
-    else
-    {
-        QFileInfo finfo(path);
-        QFile file(path);
-        int n = -1;
-
-        if (file.open(QIODevice::ReadOnly))
-        {
-            char buf[32*1024];
-            qint64 siz = file.read(buf, sizeof(buf)-1);
-            file.close();
-            if (siz >= 0)
-            {
-                buf[siz] = 0;
-                n = parseBiomeColors(cols, buf);
-            }
-        }
-
-        if (n >= 0)
-        {
-            QString txt = tr("[%n biome(s)] %1", "", n).arg(finfo.baseName());
-            ui->buttonBiomeColor->setText(txt);
-        }
-        else
-        {
-            ui->buttonBiomeColor->setText(finfo.baseName());
-            pal.setColor(QPalette::ButtonText, QColor(Qt::red));
-        }
-    }
-
-    ui->buttonBiomeColor->setPalette(pal);
+    emit updateMapConfig();
 }
 
 void ConfigDialog::on_buttonBox_clicked(QAbstractButton *button)
@@ -188,67 +141,8 @@ void ConfigDialog::on_buttonBox_clicked(QAbstractButton *button)
     }
 }
 
-void ConfigDialog::on_buttonBiomeColorEditor_clicked()
-{
-    BiomeColorDialog *dialog = new BiomeColorDialog(this, conf.biomeColorPath, -1, DIM_UNDEF);
-    if (dialog->exec() == QDialog::Accepted)
-    {
-        QString rc = dialog->getRc();
-        setBiomeColorPath(rc);
-    }
-}
-
-void ConfigDialog::on_buttonBiomeColor_clicked()
-{
-    QFileInfo finfo(conf.biomeColorPath);
-    QString fnam = QFileDialog::getOpenFileName(
-        this, tr("Load biome color map"), finfo.absolutePath(), tr("Text files (*.txt);;Any files (*)"));
-    if (!fnam.isNull())
-    {
-        conf.biomeColorPath = fnam;
-        setBiomeColorPath(fnam);
-    }
-}
-
-void ConfigDialog::on_buttonStructVisEdit_clicked()
-{
-    MapToolsDialog *dialog = new MapToolsDialog(this);
-    connect(dialog, SIGNAL(updateMapConfig()), this, SLOT(onUpdateMapConfig()));
-    dialog->show();
-}
-
-void ConfigDialog::onUpdateMapConfig()
-{
-    emit updateMapConfig();
-}
-
-void ConfigDialog::on_buttonClear_clicked()
-{
-    conf.biomeColorPath.clear();
-    setBiomeColorPath("");
-}
-
-void ConfigDialog::on_buttonColorHelp_clicked()
-{
-    QString msg = tr(
-            "<html><head/><body><p>"
-            "<b>Custom biome colors</b> should be defined in an ASCII text file, "
-            "with one biome-color mapping per line. Each mapping should consist "
-            "of a biome ID or biome resource name followed by a color that can be "
-            "written as a hex code (prefixed with # or 0x) or as an RGB triplet. "
-            "Special characters are ignored."
-            "</p><p>"
-            "<b>Examples:</b>"
-            "</p><p>"
-            "sunflower_plains:&nbsp;#FFFF00"
-            "</p><p>"
-            "128&nbsp;[255&nbsp;255&nbsp;0]"
-            "</p></body></html>"
-            );
-    QMessageBox::information(this, tr("Help: custom biome colors"), msg, QMessageBox::Ok);
-}
-
 void ConfigDialog::on_lineGridSpacing_textChanged(const QString &text)
 {
     ui->comboGridMult->setEnabled(!text.isEmpty());
 }
+

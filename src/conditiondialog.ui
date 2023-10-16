@@ -20,12 +20,6 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <property name="minimumSize">
-        <size>
-         <width>160</width>
-         <height>0</height>
-        </size>
-       </property>
        <property name="sizeAdjustPolicy">
         <enum>QComboBox::AdjustToMinimumContentsLengthWithIcon</enum>
        </property>
@@ -104,18 +98,6 @@
           <string>General</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_9">
-          <property name="leftMargin">
-           <number>4</number>
-          </property>
-          <property name="topMargin">
-           <number>4</number>
-          </property>
-          <property name="rightMargin">
-           <number>4</number>
-          </property>
-          <property name="bottomMargin">
-           <number>4</number>
-          </property>
           <item row="0" column="5">
            <widget class="QCheckBox" name="checkEnabled">
             <property name="text">
@@ -182,128 +164,7 @@
           <string>Location</string>
          </property>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="3" column="3">
-           <widget class="QPushButton" name="buttonAreaInfo">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">
-QPushButton {
-	background-color: rgba(255, 255, 255, 0);
-	border: none;
-	image: url(:/icons/info.png);
-	image-position: right;
-}
-QPushButton:hover {
-	image: url(:/icons/info_h.png);
-}</string>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item row="6" column="0" colspan="3">
-           <widget class="QLabel" name="labelRelative">
-            <property name="text">
-             <string>Location is relative to:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0" colspan="3">
-           <widget class="QCheckBox" name="checkRadius">
-            <property name="text">
-             <string>Within radial distance: </string>
-            </property>
-           </widget>
-          </item>
-          <item row="6" column="3" colspan="3">
-           <widget class="QComboBox" name="comboBoxRelative">
-            <property name="sizeAdjustPolicy">
-             <enum>QComboBox::AdjustToContentsOnFirstShow</enum>
-            </property>
-            <item>
-             <property name="text">
-              <string>World origin</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-          <item row="3" column="0" colspan="3">
-           <widget class="QRadioButton" name="radioSquare">
-            <property name="text">
-             <string>Within centred square of side:</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0" colspan="3">
-           <widget class="QLabel" name="labelSpinBox">
-            <property name="text">
-             <string>Instances within area:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="5">
-           <widget class="QCheckBox" name="checkSkipRef">
-            <property name="toolTip">
-             <string>Skip instances at exactly the relative reference location</string>
-            </property>
-            <property name="text">
-             <string>Ignore reference</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="4" colspan="2">
-           <widget class="QLineEdit" name="lineSquare">
-            <property name="text">
-             <string>0</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="4" colspan="2">
-           <widget class="QLineEdit" name="lineRadius">
-            <property name="text">
-             <string>0</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="0">
-           <widget class="QRadioButton" name="radioCustom">
-            <property name="text">
-             <string>Custom:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="4">
-           <widget class="SpinInstances" name="spinBox">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="specialValueText">
-             <string>0 (exclude)</string>
-            </property>
-            <property name="minimum">
-             <number>0</number>
-            </property>
-            <property name="maximum">
-             <number>99</number>
-            </property>
-            <property name="value">
-             <number>1</number>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="1" colspan="5">
+          <item row="5" column="1" colspan="6">
            <layout class="QHBoxLayout" name="horizontalLayout">
             <item>
              <widget class="QLabel" name="labelX1">
@@ -397,6 +258,127 @@ QPushButton:hover {
             </item>
            </layout>
           </item>
+          <item row="0" column="6">
+           <widget class="QCheckBox" name="checkSkipRef">
+            <property name="toolTip">
+             <string>Skip instances at exactly the relative reference location</string>
+            </property>
+            <property name="text">
+             <string>Ignore reference</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="5" colspan="2">
+           <widget class="QLineEdit" name="lineSquare">
+            <property name="text">
+             <string>0</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="5" colspan="2">
+           <widget class="QLineEdit" name="lineRadius">
+            <property name="text">
+             <string>0</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QRadioButton" name="radioCustom">
+            <property name="text">
+             <string>Custom:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0" colspan="3">
+           <widget class="QLabel" name="labelRelative">
+            <property name="text">
+             <string>Location is relative to:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="4">
+           <widget class="QPushButton" name="buttonAreaInfo">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">
+QPushButton {
+	background-color: rgba(255, 255, 255, 0);
+	border: none;
+	image: url(:/icons/info.png);
+	image-position: right;
+}
+QPushButton:hover {
+	image: url(:/icons/info_h.png);
+}</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="5">
+           <widget class="SpinInstances" name="spinBox">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="specialValueText">
+             <string>0 (exclude)</string>
+            </property>
+            <property name="minimum">
+             <number>0</number>
+            </property>
+            <property name="maximum">
+             <number>99</number>
+            </property>
+            <property name="value">
+             <number>1</number>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="3" colspan="4">
+           <widget class="QComboBox" name="comboBoxRelative">
+            <property name="sizeAdjustPolicy">
+             <enum>QComboBox::AdjustToContentsOnFirstShow</enum>
+            </property>
+            <item>
+             <property name="text">
+              <string>World origin</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="3" column="0" colspan="4">
+           <widget class="QRadioButton" name="radioSquare">
+            <property name="text">
+             <string>Within centred square of side:</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0" colspan="4">
+           <widget class="QCheckBox" name="checkRadius">
+            <property name="text">
+             <string>Within radial distance:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0" colspan="4">
+           <widget class="QLabel" name="labelSpinBox">
+            <property name="text">
+             <string>Instances within area:</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -406,7 +388,7 @@ QPushButton:hover {
           <number>0</number>
          </property>
          <property name="currentIndex">
-          <number>4</number>
+          <number>5</number>
          </property>
          <widget class="QWidget" name="pageNone">
           <property name="enabled">
@@ -1032,6 +1014,13 @@ QPushButton:hover {
               <string>Locate climate minimum/maximum</string>
              </property>
              <layout class="QGridLayout" name="gridLayout_24">
+              <item row="3" column="0">
+               <widget class="QLabel" name="label_9">
+                <property name="text">
+                 <string>If value is in range:</string>
+                </property>
+               </widget>
+              </item>
               <item row="0" column="0">
                <widget class="QLabel" name="label_8">
                 <property name="text">
@@ -1039,45 +1028,46 @@ QPushButton:hover {
                 </property>
                </widget>
               </item>
-              <item row="2" column="2">
-               <widget class="QLineEdit" name="lineMinMax">
-                <property name="text">
-                 <string>0</string>
+              <item row="1" column="1" colspan="3">
+               <widget class="QComboBox" name="comboOctaves">
+                <property name="font">
+                 <font>
+                  <family>Monospace</family>
+                 </font>
                 </property>
                </widget>
               </item>
-              <item row="2" column="1">
-               <widget class="QComboBox" name="comboMinMax">
-                <item>
-                 <property name="text">
-                  <string>Minimum	 &lt;=</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Maximum	 &gt;=</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Minimum	 &gt;=</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Maximum	 &lt;=</string>
-                 </property>
-                </item>
-               </widget>
-              </item>
-              <item row="2" column="0">
-               <widget class="QLabel" name="label_9">
+              <item row="3" column="2">
+               <widget class="QLabel" name="label_14">
                 <property name="text">
-                 <string>Locate value:</string>
+                 <string>-</string>
                 </property>
                </widget>
               </item>
               <item row="3" column="1">
+               <widget class="QLineEdit" name="lineMin">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Lower bound (inclusive)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="placeholderText">
+                 <string>-Infinity</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="3">
+               <widget class="QLineEdit" name="lineMax">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Upper bound (inclusive)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="placeholderText">
+                 <string>+Infinity</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1" colspan="3">
+               <widget class="QComboBox" name="comboClimatePara"/>
+              </item>
+              <item row="5" column="1">
                <spacer name="verticalSpacer_5">
                 <property name="orientation">
                  <enum>Qt::Vertical</enum>
@@ -1090,22 +1080,31 @@ QPushButton:hover {
                 </property>
                </spacer>
               </item>
-              <item row="0" column="1" colspan="2">
-               <widget class="QComboBox" name="comboClimatePara"/>
-              </item>
-              <item row="1" column="1" colspan="2">
-               <widget class="QComboBox" name="comboOctaves">
-                <property name="font">
-                 <font>
-                  <family>Monospace</family>
-                 </font>
-                </property>
-               </widget>
-              </item>
               <item row="1" column="0">
                <widget class="QLabel" name="label_12">
                 <property name="text">
                  <string>Generate up to octave:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1" colspan="3">
+               <widget class="QComboBox" name="comboMinMax">
+                <item>
+                 <property name="text">
+                  <string>Minimum</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Maximum</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="label_15">
+                <property name="text">
+                 <string>Yield position of:</string>
                 </property>
                </widget>
               </item>

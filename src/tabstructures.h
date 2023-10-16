@@ -42,6 +42,8 @@ public:
     explicit TabStructures(MainWindow *parent = nullptr);
     ~TabStructures();
 
+    virtual bool event(QEvent *e) override;
+
     virtual void save(QSettings& settings) override;
     virtual void load(QSettings& settings) override;
 

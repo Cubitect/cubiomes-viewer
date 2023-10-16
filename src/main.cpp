@@ -27,7 +27,6 @@ int getStructureConfig_override(int stype, int mc, StructureConfig *sconf)
     return ok;
 }
 
-
 int main(int argc, char *argv[])
 {
     initBiomes();

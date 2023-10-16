@@ -655,7 +655,8 @@ struct /*__attribute__((packed))*/ Condition
         VER_LEGACY      = 0,
         VER_2_3_0       = 1,
         VER_2_4_0       = 2,
-        VER_CURRENT     = VER_2_4_0,
+        VER_3_4_0       = 3,
+        VER_CURRENT     = VER_3_4_0,
     };
     enum { // meta flags
         DISABLED        = 0x0001,
@@ -672,6 +673,13 @@ struct /*__attribute__((packed))*/ Condition
         VAR_DENSE_BB    = 0x0008, // fortress with a 2x2 arrangement of start/crossings
         VAR_NOT         = 0x0010, // invert flag (e.g. not abandoned)
         VAR_BASEMENT    = 0x0020, // igloo with basement
+    };
+    enum { // min/max
+        // legacy 0:min<= 1:max>= 2:min>= 3:max<=
+        E_LOCATE_MIN    = 0x10,
+        E_LOCATE_MAX    = 0x20,
+        E_TEST_LOWER    = 0x40,
+        E_TEST_UPPER    = 0x80,
     };
     int16_t     type;
     uint16_t    meta;
@@ -704,7 +712,8 @@ struct /*__attribute__((packed))*/ Condition
     uint64_t    varstart;
     int32_t     limok[NP_MAX][2];
     int32_t     limex[NP_MAX][2];
-    float       value;
+    float       vmin;
+    float       vmax;
 
     // generated members - initialized when the search is started
     uint8_t     generated_start[0]; // address dummy
@@ -723,7 +732,7 @@ struct /*__attribute__((packed))*/ Condition
 };
 
 static_assert(
-    offsetof(Condition, generated_start) == 308,
+    offsetof(Condition, generated_start) == 312,
     "Layout of Condition has changed!"
 );
 

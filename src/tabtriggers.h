@@ -43,6 +43,8 @@ public:
     explicit TabTriggers(MainWindow *parent);
     ~TabTriggers();
 
+    virtual bool event(QEvent *e) override;
+
     virtual void save(QSettings& settings) override;
     virtual void load(QSettings& settings) override;
 

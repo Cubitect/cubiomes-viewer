@@ -119,7 +119,8 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
 
     ui->comboY->lineEdit()->setValidator(new QIntValidator(-64, 320, this));
 
-    ui->lineMinMax->setValidator(new QDoubleValidator(-1e6, 1e6, 4, this));
+    ui->lineMin->setValidator(new QDoubleValidator(-1e6, 1e6, 4, this));
+    ui->lineMax->setValidator(new QDoubleValidator(-1e6, 1e6, 4, this));
 
     ui->comboBoxCat->setItemDelegate(new ComboBoxDelegate(this, ui->comboBoxCat));
     ui->comboBoxType->setItemDelegate(new ComboBoxDelegate(this, ui->comboBoxType));
@@ -345,8 +346,9 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
         ui->comboClimatePara->setCurrentIndex(ui->comboClimatePara->findData(QVariant::fromValue(cond.para)));
         on_comboClimatePara_currentIndexChanged(cond.para);
         ui->comboOctaves->setCurrentIndex(cond.octave);
-        ui->comboMinMax->setCurrentIndex(cond.minmax);
-        ui->lineMinMax->setText(QString::number(cond.value));
+        ui->comboMinMax->setCurrentIndex((cond.minmax & Condition::E_LOCATE_MAX) ? 1 : 0);
+        ui->lineMin->setText((cond.minmax & Condition::E_TEST_LOWER) ? QString::number(cond.vmin) : "");
+        ui->lineMax->setText((cond.minmax & Condition::E_TEST_UPPER) ? QString::number(cond.vmax) : "");
 
         updateMode();
 
@@ -451,6 +453,8 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
 
     onClimateLimitChanged();
     updateMode();
+
+    resize(sizeHint());
 }
 
 ConditionDialog::~ConditionDialog()
@@ -1046,10 +1050,17 @@ void ConditionDialog::on_buttonOk_clicked()
     }
     if (ui->stackedWidget->currentWidget() == ui->pageMinMax)
     {
-        c.minmax = ui->comboMinMax->currentIndex();
         c.para = ui->comboClimatePara->currentData().toInt();
         c.octave = ui->comboOctaves->currentIndex();
-        c.value = ui->lineMinMax->text().toFloat();
+        c.minmax = ui->comboMinMax->currentIndex() == 0 ?
+                    Condition::E_LOCATE_MIN : Condition::E_LOCATE_MAX;
+        bool ok1, ok2;
+        c.vmin = ui->lineMin->text().toFloat(&ok1);
+        if (ok1) c.minmax |= Condition::E_TEST_LOWER;
+        c.vmax = ui->lineMax->text().toFloat(&ok2);
+        if (ok2) c.minmax |= Condition::E_TEST_UPPER;
+        if (ok1 && ok2 && c.vmin > c.vmax)
+            std::swap(c.vmin, c.vmax);
     }
     if (ui->stackedWidget->currentWidget() == ui->pageTemps)
     {

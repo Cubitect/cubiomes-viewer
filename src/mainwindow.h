@@ -86,10 +86,10 @@ private slots:
     void on_actionLoad_triggered();
     void on_actionQuit_triggered();
     void on_actionPreferences_triggered();
-    void on_actionGo_to_triggered();
+    void on_actionGoto_triggered();
     void on_actionOpenShadow_triggered();
     void on_actionToolbarConfig_triggered();
-    void on_actionBiome_colors_triggered();
+    void on_actionBiomeColors_triggered();
     void on_actionPresetLoad_triggered();
     void on_actionExamples_triggered();
     void on_actionAbout_triggered();

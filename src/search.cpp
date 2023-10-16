@@ -103,6 +103,29 @@ bool Condition::versionUpgrade()
     {
         varflags = varbiome = varstart = 0;
     }
+    else if (version == VER_2_4_0)
+    {
+        if (vmin != 0)
+        {
+            switch (minmax)
+            {
+            case 0: // min(<=) -> min <= x
+                minmax = E_LOCATE_MIN | E_TEST_UPPER;
+                std::swap(vmin, vmax);
+                break;
+            case 1: // max(>=) -> x <= max
+                minmax = E_LOCATE_MAX | E_TEST_LOWER;
+                break;
+            case 2: // min(>=) -> x <= min
+                minmax = E_LOCATE_MIN | E_TEST_LOWER;
+                break;
+            case 3: // max(<=) -> max <= x
+                minmax = E_LOCATE_MAX | E_TEST_UPPER;
+                std::swap(vmin, vmax);
+                break;
+            }
+        }
+    }
     version = VER_CURRENT;
     return true;
 }
@@ -851,32 +874,26 @@ static int f_confine(void *data, int x, int z, double p)
 
 struct track_minmax_t
 {
-    Pos pos;
-    double value;
+    Pos posmin, posmax;
+    double vmin, vmax;
 };
-static int f_track_min(void *data, int x, int z, double p)
+static int f_track_minmax(void *data, int x, int z, double p)
 {
     track_minmax_t *info = (track_minmax_t *) data;
-    if (p < info->value)
+    if (p < info->vmin)
     {
-        info->pos.x = x;
-        info->pos.z = z;
-        info->value = p;
+        info->posmin.x = x;
+        info->posmin.z = z;
+        info->vmin = p;
+    }
+    if (p > info->vmax)
+    {
+        info->posmax.x = x;
+        info->posmax.z = z;
+        info->vmax = p;
     }
     return 0;
 }
-static int f_track_max(void *data, int x, int z, double p)
-{
-    track_minmax_t *info = (track_minmax_t *) data;
-    if (p > info->value)
-    {
-        info->pos.x = x;
-        info->pos.z = z;
-        info->value = p;
-    }
-    return 0;
-}
-
 
 /* Tests if a condition is satisfied with 'at' as origin for a search pass.
  * If sufficiently satisfied (check return value) then:
@@ -1784,33 +1801,30 @@ L_noise_biome:
         if (pass != PASS_FULL_64)
             return COND_MAYBE_POS_INVAL;
         {
-            track_minmax_t info = {at, 0};
+            track_minmax_t info = {at, at, +INFINITY, -INFINITY};
             int w = rx2 - rx1 + 1;
             int h = rz2 - rz1 + 1;
-            double para;
             env->init4Noise(cond->para, cond->octave);
-            if (cond->minmax == 0 || cond->minmax == 2)
-            {   // min
-                info.value = para = +INFINITY;
-                getParaRange(&env->g.bn.climate[cond->para], &para, 0,
-                        rx1, rz1, w, h, &info, f_track_min);
-                if (cond->minmax == 0 && para > cond->value)
-                    return COND_FAILED;
-                if (cond->minmax == 2 && para < cond->value)
-                    return COND_FAILED;
+            double para[2] = {+INFINITY, -INFINITY};
+            double *p_min = (cond->minmax & Condition::E_LOCATE_MIN) ? para+0 : nullptr;
+            double *p_max = (cond->minmax & Condition::E_LOCATE_MAX) ? para+1 : nullptr;
+            getParaRange(&env->g.bn.climate[cond->para], p_min, p_max,
+                    rx1, rz1, w, h, &info, f_track_minmax);
+            if ((cond->minmax & Condition::E_TEST_LOWER) && para[0] > cond->vmin)
+                return COND_FAILED;
+            if ((cond->minmax & Condition::E_TEST_UPPER) && para[1] < cond->vmax)
+                return COND_FAILED;
+            *cent = at;
+            if (cond->minmax & Condition::E_LOCATE_MIN)
+            {
+                cent->x = info.posmin.x << 2;
+                cent->z = info.posmin.z << 2;
             }
-            else
-            {   // max
-                info.value = para = -INFINITY;
-                getParaRange(&env->g.bn.climate[cond->para], 0, &para,
-                        rx1, rz1, w, h, &info, f_track_max);
-                if (cond->minmax == 1 && para < cond->value)
-                    return COND_FAILED;
-                if (cond->minmax == 3 && para > cond->value)
-                    return COND_FAILED;
+            else if (cond->minmax & Condition::E_LOCATE_MAX)
+            {
+                cent->x = info.posmax.x << 2;
+                cent->z = info.posmax.z << 2;
             }
-            cent->x = info.pos.x << 2;
-            cent->z = info.pos.z << 2;
             return COND_OK;
         }
 

@@ -264,6 +264,12 @@ bool IdCmp::isPrimary(int id)
 
 QPixmap getPix(QString rc, int width)
 {
+    if (rc.isEmpty() && width)
+    {
+        QPixmap p(width, width);
+        p.fill(Qt::transparent);
+        return p;
+    }
     QPixmap pix(":/icons/" + rc + ".png");
     if (pix.isNull())
         return pix;

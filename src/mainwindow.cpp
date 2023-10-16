@@ -184,7 +184,7 @@ MainWindow::MainWindow(QString sessionpath, QString resultspath, QWidget *parent
 
     saction[D_GRID]->setChecked(true);
 
-    ui->splitterMap->setSizes(QList<int>({6000, 10000}));
+    ui->splitterMap->setSizes(QList<int>({6500, 10000}));
     ui->splitterSearch->setSizes(QList<int>({1000, 1000, 2000}));
 
     qRegisterMetaType< int64_t >("int64_t");
@@ -723,7 +723,7 @@ void MainWindow::on_seedEdit_textChanged(const QString &a)
 void MainWindow::on_actionSave_triggered()
 {
     QString fnam = QFileDialog::getSaveFileName(
-        this, tr("Save progress"), prevdir, tr("Text files (*.txt);;Any files (*)"));
+        this, tr("Save progress"), prevdir, tr("Session files (*.session *.txt);;Any files (*)"));
     if (!fnam.isEmpty())
     {
         QFileInfo finfo(fnam);
@@ -735,7 +735,7 @@ void MainWindow::on_actionSave_triggered()
 void MainWindow::on_actionLoad_triggered()
 {
     QString fnam = QFileDialog::getOpenFileName(
-        this, tr("Load progress"), prevdir, tr("Text files (*.txt);;Any files (*)"));
+        this, tr("Load progress"), prevdir, tr("Session files (*.session *.txt);;Any files (*)"));
     if (!fnam.isEmpty())
     {
         QFileInfo finfo(fnam);
@@ -757,7 +757,7 @@ void MainWindow::on_actionPreferences_triggered()
     dialog->show();
 }
 
-void MainWindow::on_actionGo_to_triggered()
+void MainWindow::on_actionGoto_triggered()
 {
     getMapView()->onGoto();
 }
@@ -779,7 +779,7 @@ void MainWindow::on_actionToolbarConfig_triggered()
     dialog->show();
 }
 
-void MainWindow::on_actionBiome_colors_triggered()
+void MainWindow::on_actionBiomeColors_triggered()
 {
     WorldInfo wi;
     getSeed(&wi);
@@ -1122,6 +1122,7 @@ void MainWindow::onStyleChanged(int style)
             st += "QGroupBox::indicator" + siz;
             st += "QRadioButton::indicator" + siz;
             st += "QMenu::icon" + siz;
+            //st += "QComboBox { margin: 20px; border: 1px solid red; }\n";
         }
 
         qApp->setStyleSheet(st);

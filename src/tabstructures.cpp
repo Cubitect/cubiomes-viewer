@@ -230,10 +230,6 @@ TabStructures::TabStructures(MainWindow *parent)
 {
     ui->setupUi(this);
 
-    ui->treeStructs->setColumnWidth(C_STRUCT, 160);
-    ui->treeStructs->setColumnWidth(C_COUNT, 50);
-    ui->treeStructs->setColumnWidth(C_X, 65);
-    ui->treeStructs->setColumnWidth(C_Z, 65);
     ui->treeStructs->sortByColumn(-1, Qt::AscendingOrder);
     connect(ui->treeStructs->header(), &QHeaderView::sectionClicked, this, [=](){ onHeaderClick(ui->treeStructs); } );
 
@@ -254,6 +250,28 @@ TabStructures::~TabStructures()
     thread.stop = true;
     thread.wait(500);
     delete ui;
+}
+
+bool TabStructures::event(QEvent *e)
+{
+    if (e->type() == QEvent::LayoutRequest)
+    {
+        QFontMetrics fm = QFontMetrics(ui->treeStructs->font());
+        ui->treeStructs->setColumnWidth(0, fm.horizontalAdvance('#') * 23);
+        ui->treeStructs->setColumnWidth(1, fm.horizontalAdvance('#') * 17);
+        ui->treeStructs->setColumnWidth(2, fm.horizontalAdvance('#') * 6);
+        ui->treeStructs->setColumnWidth(3, fm.horizontalAdvance('#') * 7);
+        ui->treeStructs->setColumnWidth(4, fm.horizontalAdvance('#') * 7);
+
+        ui->treeQuads->setColumnWidth(0, fm.horizontalAdvance('#') * 23);
+        ui->treeQuads->setColumnWidth(1, fm.horizontalAdvance("_quad-monument"));
+        ui->treeQuads->setColumnWidth(2, fm.horizontalAdvance('#') * 10);
+        ui->treeQuads->setColumnWidth(3, fm.horizontalAdvance('#') * 10);
+        ui->treeQuads->setColumnWidth(4, fm.horizontalAdvance('#') * 10);
+        ui->treeQuads->setColumnWidth(5, fm.horizontalAdvance("_123.123"));
+        ui->treeQuads->setColumnWidth(6, fm.horizontalAdvance('#') * 14);
+    }
+    return QWidget::event(e);
 }
 
 void TabStructures::save(QSettings& settings)

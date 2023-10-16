@@ -26,6 +26,52 @@
    </property>
    <item row="1" column="0">
     <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="1">
+      <widget class="QPushButton" name="buttonSearchHelp">
+       <property name="styleSheet">
+        <string notr="true">
+QPushButton {
+	background-color: rgba(255, 255, 255, 0);
+	border: none;
+	image: url(:/icons/info.png);
+	image-position: right;
+}
+QPushButton:hover {
+	image: url(:/icons/info_h.png);
+}</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="label">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;searching algorithm&lt;/p&gt;&lt;p&gt;incremental: best for non-exhaustive biome searches&lt;/p&gt;&lt;p&gt;48-bit family blocks: best for searches with strong structure restrictions&lt;/p&gt;&lt;p&gt;seed list from file...: load and search through a pre-computed list of seed&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="text">
+        <string>Search:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="6">
+      <widget class="QSpinBox" name="spinThreads">
+       <property name="minimum">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <number>1024</number>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="5">
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Threads:</string>
+       </property>
+      </widget>
+     </item>
      <item row="0" column="4">
       <widget class="QPushButton" name="buttonMore">
        <property name="enabled">
@@ -36,34 +82,19 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label_2">
-       <property name="text">
-        <string>Seed:</string>
+     <item row="0" column="2" colspan="2">
+      <widget class="QComboBox" name="comboSearchType">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>1</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
-      </widget>
-     </item>
-     <item row="3" column="0" colspan="7">
-      <widget class="QProgressBar" name="progressBar">
-       <property name="font">
-        <font>
-         <family>Monospace</family>
-        </font>
-       </property>
-       <property name="toolTip">
-        <string>Queued progress within search set</string>
-       </property>
-       <property name="layoutDirection">
-        <enum>Qt::LeftToRight</enum>
-       </property>
-       <property name="maximum">
-        <number>10000</number>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-       <property name="format">
-        <string>0</string>
+       <property name="iconSize">
+        <size>
+         <width>0</width>
+         <height>16</height>
+        </size>
        </property>
       </widget>
      </item>
@@ -76,6 +107,13 @@
        </property>
        <property name="text">
         <string>Idle</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Seed:</string>
        </property>
       </widget>
      </item>
@@ -108,76 +146,44 @@
        </item>
       </layout>
      </item>
-     <item row="0" column="1">
-      <widget class="QPushButton" name="buttonSearchHelp">
-       <property name="styleSheet">
-        <string notr="true">
-QPushButton {
-	background-color: rgba(255, 255, 255, 0);
-	border: none;
-	image: url(:/icons/info.png);
-	image-position: right;
-}
-QPushButton:hover {
-	image: url(:/icons/info_h.png);
-}</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="5">
-      <widget class="QLabel" name="label_3">
-       <property name="text">
-        <string>Threads:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label">
-       <property name="toolTip">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;searching algorithm&lt;/p&gt;&lt;p&gt;incremental: best for non-exhaustive biome searches&lt;/p&gt;&lt;p&gt;48-bit family blocks: best for searches with strong structure restrictions&lt;/p&gt;&lt;p&gt;seed list from file...: load and search through a pre-computed list of seed&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-       <property name="text">
-        <string>Search:</string>
-       </property>
-      </widget>
-     </item>
      <item row="1" column="2" colspan="2">
       <widget class="QLineEdit" name="lineStart">
-       <property name="text">
-        <string>0</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="6">
-      <widget class="QSpinBox" name="spinThreads">
-       <property name="minimum">
-        <number>1</number>
-       </property>
-       <property name="maximum">
-        <number>1024</number>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="2" colspan="2">
-      <widget class="QComboBox" name="comboSearchType">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
          <horstretch>1</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <property name="iconSize">
-        <size>
-         <width>0</width>
-         <height>16</height>
-        </size>
+       <property name="text">
+        <string>0</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="4" colspan="3">
+     <item row="3" column="0" colspan="7">
+      <widget class="QProgressBar" name="progressBar">
+       <property name="font">
+        <font>
+         <family>Monospace</family>
+        </font>
+       </property>
+       <property name="toolTip">
+        <string>Queued progress within search set</string>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::LeftToRight</enum>
+       </property>
+       <property name="maximum">
+        <number>10000</number>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="format">
+        <string>0</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="5" colspan="2">
       <widget class="QCheckBox" name="checkStop">
        <property name="toolTip">
         <string>stop as soon as the next set of matching seeds is found</string>

@@ -363,8 +363,6 @@ TabBiomes::TabBiomes(MainWindow *parent)
 
     ui->table->setSortingEnabled(true);
 
-    ui->treeLocate->setColumnWidth(0, 160);
-    ui->treeLocate->setColumnWidth(1, 120);
     ui->treeLocate->sortByColumn(-1, Qt::DescendingOrder);
     ui->treeLocate->setSortingEnabled(true);
     connect(ui->treeLocate->header(), &QHeaderView::sectionClicked, this, &TabBiomes::onLocateHeaderClick);
@@ -404,6 +402,19 @@ TabBiomes::~TabBiomes()
     thread.stop = true;
     thread.wait(500);
     delete ui;
+}
+
+bool TabBiomes::event(QEvent *e)
+{
+    if (e->type() == QEvent::LayoutRequest)
+    {
+        QFontMetrics fm = QFontMetrics(ui->treeLocate->font());
+        ui->treeLocate->setColumnWidth(0, fm.horizontalAdvance('#') * 24);
+        ui->treeLocate->setColumnWidth(1, fm.horizontalAdvance('#') * 16);
+        ui->treeLocate->setColumnWidth(2, fm.horizontalAdvance('#') * 9);
+        ui->treeLocate->setColumnWidth(3, fm.horizontalAdvance('#') * 9);
+    }
+    return QWidget::event(e);
 }
 
 void TabBiomes::save(QSettings& settings)

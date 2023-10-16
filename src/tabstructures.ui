@@ -101,6 +101,11 @@
        </item>
        <item row="1" column="0">
         <widget class="QTreeWidget" name="treeStructs">
+         <property name="font">
+          <font>
+           <family>Monospace</family>
+          </font>
+         </property>
          <property name="editTriggers">
           <set>QAbstractItemView::NoEditTriggers</set>
          </property>
@@ -271,7 +276,7 @@
        <item>
         <widget class="QLabel" name="label_2">
          <property name="text">
-          <string>    </string>
+          <string/>
          </property>
         </widget>
        </item>

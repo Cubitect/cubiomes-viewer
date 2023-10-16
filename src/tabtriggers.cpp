@@ -109,9 +109,6 @@ TabTriggers::TabTriggers(MainWindow *parent)
     , updt(20)
 {
     ui->setupUi(this);
-    ui->treeWidget->setColumnWidth(1, 280);
-    ui->treeWidget->setColumnWidth(2, 65);
-    ui->treeWidget->setColumnWidth(3, 65);
     ui->treeWidget->setSortingEnabled(false); // sortable triggers are not necessary
 
     connect(&thread, &AnalysisTriggers::warning, this, &TabTriggers::warning, Qt::BlockingQueuedConnection);
@@ -124,6 +121,19 @@ TabTriggers::~TabTriggers()
     thread.stop = true;
     thread.wait(500);
     delete ui;
+}
+
+bool TabTriggers::event(QEvent *e)
+{
+    if (e->type() == QEvent::LayoutRequest)
+    {
+        QFontMetrics fm = QFontMetrics(ui->treeWidget->font());
+        ui->treeWidget->setColumnWidth(0, fm.horizontalAdvance('#') * 24);
+        ui->treeWidget->setColumnWidth(1, fm.horizontalAdvance('#') * 30);
+        ui->treeWidget->setColumnWidth(2, fm.horizontalAdvance('#') * 9);
+        ui->treeWidget->setColumnWidth(3, fm.horizontalAdvance('#') * 9);
+    }
+    return QWidget::event(e);
 }
 
 void TabTriggers::save(QSettings& settings)

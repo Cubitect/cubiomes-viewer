@@ -37,7 +37,7 @@ Build instructions can be found in the [buildguide](buildguide.md).
 
 The tool features a map viewer that outlines the biomes of the Overworld,
 Nether and End dimensions, with a wide zoom range and with toggles for each
-supported structure type. The active Minecraft version and seed can be changed
+supported structure type. The active game version and seed can be changed
 on the fly while a matching seeds list stores a working buffer of seeds for
 examination.
 
@@ -59,7 +59,7 @@ area.
 
 ## Screenshots
 
-Screenshots were taken of Cubiomes-Viewer v3.3.
+Screenshots were taken of Cubiomes-Viewer v3.4.
 
 ![maingui](etc/screenshot_maingui-fs8.png
 "Searching for a quad-hut near a stronghold with a good biome variety")
@@ -73,6 +73,7 @@ Screenshots were taken of Cubiomes-Viewer v3.3.
 ![surface](etc/screenshot_surface-fs8.png
 "Overlay with an approximation of the surface height")
 
+
 ## Known issues
 
 Desert Pyramids, Jungle Temples and, to a lesser extent, Woodland Mansions can
@@ -82,5 +83,20 @@ expect some inaccurate results.
 
 The World Spawn point for pre-1.18 versions can sometimes be off because it
 depends on the presence of a grass block, that cubiomes cannot test for.
+
+
+## Legal information
+
+The main code is under the GPLv3, see [LICENSE](LICENSE), while other
+components are released under their respective author licenses:
+
+- Biome and structure generation from cubiomes, licensed under MIT.
+- Cross platform [Qt](https://www.qt.io/licensing) GUI toolkit, available under (L)GPLv3.
+- Dark Qt theme derived from [QDarkStyleSheet](https://github.com/ColinDuquesnoy/QDarkStyleSheet), licensed under MIT.
+- Biome colors and icons are inspired by [Amidst](https://github.com/toolbox4minecraft/amidst), licensed under GPLv3.
+- [Lua](https://www.lua.org/license.html) is distributed under the terms of the MIT license.
+
+NOT AN OFFICIAL MINECRAFT PRODUCT.
+NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.
 
 

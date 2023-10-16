@@ -38,25 +38,30 @@ public:
 
     virtual void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override
     {
-        if (!isSeparator(index))
+        if (isSeparator(index))
+        {
+            QStyleOptionViewItem opt = option;
+            if (const QAbstractItemView *view = qobject_cast<const QAbstractItemView*>(option.widget))
+                opt.rect.setWidth(view->viewport()->width());
+            combo->style()->drawPrimitive(QStyle::PE_IndicatorToolBarSeparator, &opt, painter, combo);
+        }
+        else
         {
             QStyledItemDelegate::paint(painter, option, index);
-            return;
         }
-        QRect rect = option.rect;
-        if (const QAbstractItemView *view = qobject_cast<const QAbstractItemView*>(option.widget))
-            rect.setWidth(view->viewport()->width());
-        QStyleOption opt;
-        opt.rect = rect;
-        combo->style()->drawPrimitive(QStyle::PE_IndicatorToolBarSeparator, &opt, painter, combo);
     }
 
     virtual QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override
     {
-        if (!isSeparator(index))
-            return QStyledItemDelegate::sizeHint(option, index);
-        int pm = combo->style()->pixelMetric(QStyle::PM_DefaultFrameWidth, nullptr, combo);
-        return QSize(pm, pm + 2);
+        if (isSeparator(index))
+        {
+            int pm = combo->style()->pixelMetric(QStyle::PM_DefaultFrameWidth, nullptr, combo) + 4;
+            return QSize(pm, pm);
+        }
+        QSize size = QStyledItemDelegate::sizeHint(option, index);
+        if (size.height() < combo->iconSize().height() + 1)
+            size.setHeight(combo->iconSize().height() + 1);
+        return size;
     }
 
 private:

@@ -51,9 +51,9 @@ CONFIG(debug, debug|release): {
 CUPATH              = $$PWD/cubiomes
 QMAKE_PRE_LINK      += $(MAKE) -C $$CUPATH -f $$CUPATH/makefile CC=\"$$QMAKE_CC\" CFLAGS=\"$$QMAKE_CFLAGS\" $$CUTARGET
 QMAKE_CLEAN         += $$CUPATH/*.o $$CUPATH/libcubiomes.a
-LIBS                += -lm $$CUPATH/libcubiomes.a
+LIBS                += $$CUPATH/libcubiomes.a -lm
 
-LUAPATH             = $$PWD/lua/src
+LUAPATH = $$PWD/lua/src
 
 TARGET = cubiomes-viewer
 
@@ -209,13 +209,11 @@ FORMS += \
         src/tabstructures.ui \
         src/tabtriggers.ui
 
-
 RESOURCES += \
         rc/icons.qrc \
         rc/style.qrc \
         rc/examples.qrc \
         rc/lang.qrc
-
 
 # ----- translations (pluralization) -----
 
@@ -223,24 +221,6 @@ TRANSLATIONS += \
         rc/lang/en_US.ts \
         rc/lang/de_DE.ts \
         rc/lang/zh_CN.ts
-
-translations: {
-    # automatically run lupdate for pluralization default translation
-    THIS_FILE           = cubiomes-viewer.pro
-    lupdate.input       = THIS_FILE
-    lupdate.output      = output.dummy.1 # removed by clean
-    lupdate.commands    = $$[QT_INSTALL_BINS]/lupdate -pluralonly -noobsolete ${QMAKE_FILE_IN}
-    lupdate.CONFIG     += no_link target_predeps
-
-    lrelease.input      = TRANSLATIONS
-    lrelease.output     = output.dummy.2 # removed by clean
-    lrelease.commands   = $$[QT_INSTALL_BINS]/lrelease ${QMAKE_FILE_IN} \
-                            -qm ${QMAKE_FILE_PATH}/${QMAKE_FILE_IN_BASE}.qm
-    lrelease.CONFIG    += no_link target_predeps
-
-    QMAKE_EXTRA_COMPILERS += lupdate lrelease
-    #CONFIG += lrelease embed_translations # does this do anything?
-}
 
 
 # enable network features with: qmake CONFIG+=with_network
@@ -250,6 +230,5 @@ with_network: {
     SOURCES += src/updater.cpp
     HEADERS += src/updater.h
 }
-
 
 
