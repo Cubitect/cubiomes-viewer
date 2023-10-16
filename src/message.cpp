@@ -24,10 +24,16 @@ int term_prompt(const QString& title, const QString& text, QMessageBox::Standard
         opts.push_back(std::make_pair(QApplication::translate("QPlatformTheme", "Ignore"), QMessageBox::Ignore));
     if (buttons & QMessageBox::Reset)
         opts.push_back(std::make_pair(QApplication::translate("QPlatformTheme", "Reset"), QMessageBox::Reset));
+    if (buttons & QMessageBox::RestoreDefaults)
+        opts.push_back(std::make_pair(QApplication::translate("QPlatformTheme", "Restore Defaults"), QMessageBox::RestoreDefaults));
     if (buttons & QMessageBox::Save)
         opts.push_back(std::make_pair(QApplication::translate("QPlatformTheme", "Save"), QMessageBox::Save));
     if (buttons & QMessageBox::Discard)
         opts.push_back(std::make_pair(QApplication::translate("QPlatformTheme", "Discard"), QMessageBox::Discard));
+    if (buttons & QMessageBox::Apply)
+        opts.push_back(std::make_pair(QApplication::translate("QPlatformTheme", "Apply"), QMessageBox::Apply));
+    if (buttons & QMessageBox::Close)
+        opts.push_back(std::make_pair(QApplication::translate("QPlatformTheme", "Close"), QMessageBox::Close));
     if (opts.size() <= 1)
         return buttons;
     for (size_t i = 0; i < opts.size(); i++)
