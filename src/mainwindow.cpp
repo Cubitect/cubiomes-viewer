@@ -128,7 +128,7 @@ MainWindow::MainWindow(QString sessionpath, QString resultspath, QWidget *parent
         addAction(act);
     }
 
-    acthome = new QAction(QIcon(getPix("origin")), tr("Goto origin"), this);
+    acthome = new QAction(QIcon(getPix("origin")), tr("Go to Origin"), this);
     actzoom[0] = new QAction(QIcon(getPix("zoom_in")), tr("Zoom In"), this);
     actzoom[1] = new QAction(QIcon(getPix("zoom_out")), tr("Zoom Out"), this);
     connect(acthome, &QAction::triggered, [=](){ this->mapGoto(0,0,16); });

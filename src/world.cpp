@@ -161,10 +161,10 @@ Quad::~Quad()
 void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
         WorldInfo wi, int dim, int x0, int z0, int x1, int z1, bool nogen)
 {
-    int si0 = (int)floor(x0 / (qreal)(sconf.regionSize * 16));
-    int sj0 = (int)floor(z0 / (qreal)(sconf.regionSize * 16));
-    int si1 = (int)floor((x1-1) / (qreal)(sconf.regionSize * 16));
-    int sj1 = (int)floor((z1-1) / (qreal)(sconf.regionSize * 16));
+    int si0 = floordiv(x0, sconf.regionSize * 16);
+    int sj0 = floordiv(z0, sconf.regionSize * 16);
+    int si1 = floordiv((x1-1), sconf.regionSize * 16);
+    int sj1 = floordiv((z1-1), sconf.regionSize * 16);
 
     // TODO: move generator to arguments?
     //       isViableStructurePos would have to be const (due to threading)

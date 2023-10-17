@@ -1101,10 +1101,10 @@ L_qm_any:
         }
         else
         {
-            rx1 = (x1 / (sconf.regionSize << 4)) - (x1 < 0);
-            rz1 = (z1 / (sconf.regionSize << 4)) - (z1 < 0);
-            rx2 = (x2 / (sconf.regionSize << 4)) - (x2 < 0);
-            rz2 = (z2 / (sconf.regionSize << 4)) - (z2 < 0);
+            rx1 = floordiv(x1, sconf.regionSize << 4);
+            rz1 = floordiv(z1, sconf.regionSize << 4);
+            rx2 = floordiv(x2, sconf.regionSize << 4);
+            rz2 = floordiv(z2, sconf.regionSize << 4);
         }
 
         cent->x = xt = 0;
