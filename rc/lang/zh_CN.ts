@@ -10,8 +10,8 @@
     </message>
     <message>
         <location filename="../../src/aboutdialog.ui" line="22"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:16pt; font-weight:600;&quot;&gt;Cubiomes-Viewer _VERSION_&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Built: _DATE_&lt;/p&gt;&lt;p&gt;URL: &lt;a href=&quot;https://github.com/Cubitect/cubiomes-viewer&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;https://github.com/Cubitect/cubiomes-viewer&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p&gt;License: &lt;a href=&quot;https://www.gnu.org/licenses/gpl-3.0.en.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;GPLv3&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;Components and Legal Information&lt;/span&gt;&lt;/p&gt;&lt;p&gt;— Minecraft biome and structure generation from &lt;a href=&quot;https://github.com/Cubitect/cubiomes/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;cubiomes&lt;/span&gt;&lt;/a&gt;, licensed under &lt;a href=&quot;https://mit-license.org/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;MIT&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;— Cross platform GUI toolkit: Qt _QT_MAJOR_._QT_MINOR_, available under &lt;a href=&quot;https://www.qt.io/licensing/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;(L)GPLv3&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;— Dark Qt theme derived from &lt;a href=&quot;https://github.com/ColinDuquesnoy/QDarkStyleSheet&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;QDarkStyleSheet&lt;/span&gt;&lt;/a&gt;, licensed under MIT.&lt;/p&gt;&lt;p&gt;— Biome colors and icons are inspired by &lt;a href=&quot;https://github.com/toolbox4minecraft/amidst&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;Amidst&lt;/span&gt;&lt;/a&gt;, licensed under GPLv3.&lt;/p&gt;&lt;p&gt;— &lt;a href=&quot;https://www.lua.org/license.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;Lua _LUA_VERS_&lt;/span&gt;&lt;/a&gt; is distributed under the terms of the MIT license.&lt;br/&gt;&lt;/p&gt;&lt;p&gt;NOT APPROVED BY OR ASSOCIATED WITH MOJANG.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:16pt; font-weight:600;&quot;&gt;Cubiomes-Viewer _VERSION_&lt;/span&gt;&lt;/p&gt;&lt;p&gt;发布日期: _DATE_&lt;/p&gt;&lt;p&gt;项目地址: &lt;a href=&quot;https://github.com/Cubitect/cubiomes-viewer&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;https://github.com/Cubitect/cubiomes-viewer&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p&gt;许可证: &lt;a href=&quot;https://www.gnu.org/licenses/gpl-3.0.en.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;GPLv3&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;参考和法律信息&lt;/span&gt;&lt;/p&gt;&lt;p&gt;— Minecraft群系和结构生成: &lt;a href=&quot;https://github.com/Cubitect/cubiomes/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;cubiomes&lt;/span&gt;&lt;/a&gt;, 遵照 &lt;a href=&quot;https://mit-license.org/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;MIT&lt;/span&gt;&lt;/a&gt; 许可证进行分发。&lt;/p&gt;&lt;p&gt;— 跨平台GUI工具: Qt _QT_MAJOR_._QT_MINOR_, 遵照 &lt;a href=&quot;https://www.qt.io/licensing/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;(L)GPLv3&lt;/span&gt;&lt;/a&gt; 许可证进行分发。&lt;/p&gt;&lt;p&gt;— 暗色系设计来源于 &lt;a href=&quot;https://github.com/ColinDuquesnoy/QDarkStyleSheet&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;QDarkStyleSheet&lt;/span&gt;&lt;/a&gt;, 遵照MIT许可证进行分发。&lt;/p&gt;&lt;p&gt;— 群系颜色与结构图标来自: &lt;a href=&quot;https://github.com/toolbox4minecraft/amidst&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;Amidst&lt;/span&gt;&lt;/a&gt;, 遵照MIT许可证进行分发。&lt;/p&gt;&lt;p&gt;— &lt;a href=&quot;https://www.lua.org/license.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;Lua _LUA_VERS_&lt;/span&gt;&lt;/a&gt; 遵照MIT许可证进行分发。&lt;/p&gt;&lt;p&gt;— 简体中文(中国)译者: &lt;a href=&quot;https://github.com/SunnySlopes&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;SunnySlopes&lt;/span&gt;&lt;/a&gt;。如有翻译建议欢迎来&lt;a href=&quot;https://space.bilibili.com/100377977&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;Bilbili主页&lt;/span&gt;&lt;/a&gt;私信联系我。&lt;/p&gt;&lt;br/&gt;&lt;p&gt;未经MOJANG许可且与其无关。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:16pt; font-weight:600;&quot;&gt;Cubiomes-Viewer _VERSION_&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Built: _DATE_&lt;/p&gt;&lt;p&gt;URL: &lt;a href=&quot;https://github.com/Cubitect/cubiomes-viewer&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;https://github.com/Cubitect/cubiomes-viewer&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p&gt;License: &lt;a href=&quot;https://www.gnu.org/licenses/gpl-3.0.en.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;GPLv3&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;Components and Legal Information&lt;/span&gt;&lt;/p&gt;&lt;p&gt;— Biome and structure generation from &lt;a href=&quot;https://github.com/Cubitect/cubiomes/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;cubiomes&lt;/span&gt;&lt;/a&gt;, licensed under &lt;a href=&quot;https://mit-license.org/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;MIT&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;— Cross platform GUI toolkit: Qt _QT_MAJOR_._QT_MINOR_, available under &lt;a href=&quot;https://www.qt.io/licensing/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;(L)GPLv3&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;— Dark Qt theme derived from &lt;a href=&quot;https://github.com/ColinDuquesnoy/QDarkStyleSheet&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;QDarkStyleSheet&lt;/span&gt;&lt;/a&gt;, licensed under MIT.&lt;/p&gt;&lt;p&gt;— Biome colors and icons are inspired by &lt;a href=&quot;https://github.com/toolbox4minecraft/amidst&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;Amidst&lt;/span&gt;&lt;/a&gt;, licensed under GPLv3.&lt;/p&gt;&lt;p&gt;— &lt;a href=&quot;https://www.lua.org/license.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;Lua _LUA_VERS_&lt;/span&gt;&lt;/a&gt; is distributed under the terms of the MIT license.&lt;br/&gt;&lt;/p&gt;&lt;p&gt;NOT AN OFFICIAL MINECRAFT PRODUCT.&lt;/p&gt;&lt;p&gt;NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:16pt; font-weight:600;&quot;&gt;Cubiomes-Viewer _VERSION_&lt;/span&gt;&lt;/p&gt;&lt;p&gt;发布日期: _DATE_&lt;/p&gt;&lt;p&gt;项目地址: &lt;a href=&quot;https://github.com/Cubitect/cubiomes-viewer&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;https://github.com/Cubitect/cubiomes-viewer&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p&gt;许可证: &lt;a href=&quot;https://www.gnu.org/licenses/gpl-3.0.en.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;GPLv3&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;参考和法律信息&lt;/span&gt;&lt;/p&gt;&lt;p&gt;— Minecraft群系和结构生成: &lt;a href=&quot;https://github.com/Cubitect/cubiomes/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;cubiomes&lt;/span&gt;&lt;/a&gt;, 遵照 &lt;a href=&quot;https://mit-license.org/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;MIT&lt;/span&gt;&lt;/a&gt; 许可证进行分发。&lt;/p&gt;&lt;p&gt;— 跨平台GUI工具: Qt _QT_MAJOR_._QT_MINOR_, 遵照 &lt;a href=&quot;https://www.qt.io/licensing/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;(L)GPLv3&lt;/span&gt;&lt;/a&gt; 许可证进行分发。&lt;/p&gt;&lt;p&gt;— 暗色系设计来源于 &lt;a href=&quot;https://github.com/ColinDuquesnoy/QDarkStyleSheet&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;QDarkStyleSheet&lt;/span&gt;&lt;/a&gt;, 遵照MIT许可证进行分发。&lt;/p&gt;&lt;p&gt;— 群系颜色与结构图标来自: &lt;a href=&quot;https://github.com/toolbox4minecraft/amidst&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;Amidst&lt;/span&gt;&lt;/a&gt;, 遵照MIT许可证进行分发。&lt;/p&gt;&lt;p&gt;— &lt;a href=&quot;https://www.lua.org/license.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;Lua _LUA_VERS_&lt;/span&gt;&lt;/a&gt; 遵照MIT许可证进行分发。&lt;/p&gt;&lt;p&gt;— 简体中文(中国)译者: &lt;a href=&quot;https://github.com/SunnySlopes&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;SunnySlopes&lt;/span&gt;&lt;/a&gt;。如有翻译建议欢迎来&lt;a href=&quot;https://space.bilibili.com/100377977&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0057ae;&quot;&gt;Bilbili主页&lt;/span&gt;&lt;/a&gt;私信联系我。&lt;/p&gt;&lt;br/&gt;&lt;p&gt;本软件非MOJANG官方软件。&lt;/p&gt;&lt;br/&gt;&lt;p&gt;未经MOJANG或微软许可且与其无关。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
 </context>
 <context>
@@ -549,64 +549,115 @@
         <translation>群系颜色编辑器</translation>
     </message>
     <message>
-        <location filename="../../src/biomecolordialog.ui" line="19"/>
+        <location filename="../../src/biomecolordialog.ui" line="68"/>
         <source>Biome color map:</source>
         <translation>群系颜色图:</translation>
     </message>
     <message>
-        <location filename="../../src/biomecolordialog.ui" line="28"/>
+        <location filename="../../src/biomecolordialog.ui" line="38"/>
         <source>Save as...</source>
         <translation>保存...</translation>
     </message>
     <message>
-        <location filename="../../src/biomecolordialog.ui" line="35"/>
+        <location filename="../../src/biomecolordialog.ui" line="45"/>
+        <source>Export...</source>
+        <translation>导出...</translation>
+    </message>
+    <message>
+        <location filename="../../src/biomecolordialog.ui" line="52"/>
         <source>Remove</source>
         <translation>删除</translation>
     </message>
     <message>
-        <location filename="../../src/biomecolordialog.ui" line="42"/>
+        <location filename="../../src/biomecolordialog.ui" line="59"/>
         <source>Ok</source>
         <translation>确定</translation>
     </message>
     <message>
-        <location filename="../../src/biomecolordialog.cpp" line="36"/>
+        <location filename="../../src/biomecolordialog.cpp" line="41"/>
         <source>Currently inactive biomes:</source>
         <translation>当前不可用群系:</translation>
     </message>
     <message>
-        <location filename="../../src/biomecolordialog.cpp" line="39"/>
+        <location filename="../../src/biomecolordialog.cpp" line="44"/>
+        <source>Import...</source>
+        <translation>导入...</translation>
+    </message>
+    <message>
+        <location filename="../../src/biomecolordialog.cpp" line="48"/>
         <source>All to default</source>
         <translation>全部激活</translation>
     </message>
     <message>
-        <location filename="../../src/biomecolordialog.cpp" line="43"/>
+        <location filename="../../src/biomecolordialog.cpp" line="52"/>
         <source>All to dimmed</source>
         <translation>全部取消激活</translation>
     </message>
     <message>
-        <location filename="../../src/biomecolordialog.cpp" line="60"/>
+        <location filename="../../src/biomecolordialog.cpp" line="69"/>
         <source>Default reset</source>
         <translation>重置激活状态</translation>
     </message>
     <message>
-        <location filename="../../src/biomecolordialog.cpp" line="65"/>
+        <location filename="../../src/biomecolordialog.cpp" line="74"/>
         <source>Dimmed reset</source>
         <translation>重置未激活状态</translation>
     </message>
     <message>
-        <location filename="../../src/biomecolordialog.cpp" line="88"/>
+        <location filename="../../src/biomecolordialog.cpp" line="98"/>
         <source>[default]</source>
         <translation>[默认]</translation>
     </message>
     <message>
-        <location filename="../../src/biomecolordialog.cpp" line="283"/>
+        <location filename="../../src/biomecolordialog.cpp" line="302"/>
         <source>Save biome colors as...</source>
         <translation>将群系颜色另存为...</translation>
     </message>
     <message>
-        <location filename="../../src/biomecolordialog.cpp" line="284"/>
+        <location filename="../../src/biomecolordialog.cpp" line="303"/>
         <source>Biome colors:</source>
         <translation>群系颜色:</translation>
+    </message>
+    <message>
+        <location filename="../../src/biomecolordialog.cpp" line="317"/>
+        <source>Export biome color map</source>
+        <translation>导出群系颜色设置</translation>
+    </message>
+    <message>
+        <location filename="../../src/biomecolordialog.cpp" line="317"/>
+        <location filename="../../src/biomecolordialog.cpp" line="359"/>
+        <source>Color map files (*.colormap *.txt);;Any files (*)</source>
+        <translation>群系颜色定义文件 (*.colormap *.txt);;任意文件 (*)</translation>
+    </message>
+    <message>
+        <location filename="../../src/biomecolordialog.cpp" line="323"/>
+        <source>Failed open file for writing.</source>
+        <translation>无法打开或写入文件！</translation>
+    </message>
+    <message>
+        <location filename="../../src/biomecolordialog.cpp" line="359"/>
+        <source>Load biome color map</source>
+        <translation>导入群系颜色设置</translation>
+    </message>
+    <message>
+        <location filename="../../src/biomecolordialog.cpp" line="365"/>
+        <source>No biome colors found.</source>
+        <translation>未找到群系颜色定义项</translation>
+    </message>
+    <message>
+        <location filename="../../src/biomecolordialog.cpp" line="368"/>
+        <source>Replaced %1 biome colors.</source>
+        <translation>替换了 %1 种群系的颜色！</translation>
+    </message>
+    <message>
+        <location filename="../../src/biomecolordialog.cpp" line="375"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Custom biome colors&lt;/b&gt; should be defined in an ASCII text file, with one biome-color mapping per line. Each mapping should consist of a biome ID or biome resource name followed by a color that can be written as a hex code (prefixed with # or 0x) or as an RGB triplet. Special characters are ignored.&lt;/p&gt;&lt;p&gt;&lt;b&gt;Examples:&lt;/b&gt;&lt;/p&gt;&lt;p&gt;sunflower_plains:&amp;nbsp;#FFFF00&lt;/p&gt;&lt;p&gt;128&amp;nbsp;[255&amp;nbsp;255&amp;nbsp;0]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/biomecolordialog.cpp" line="390"/>
+        <source>Help: custom biome colors</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -633,543 +684,562 @@
         <translation>条件编辑器</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="61"/>
+        <location filename="../../src/conditiondialog.ui" line="55"/>
         <source>MC: 1.X</source>
         <translation>MC版本: 1.X</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="130"/>
+        <location filename="../../src/conditiondialog.cpp" line="131"/>
         <source>Select category</source>
         <translation>选择目录</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="132"/>
+        <location filename="../../src/conditiondialog.cpp" line="133"/>
         <source>Algorithm helpers</source>
         <translation>算法辅助</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="133"/>
+        <location filename="../../src/conditiondialog.cpp" line="134"/>
         <source>Quad-structure</source>
         <translation>四联结构</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="134"/>
+        <location filename="../../src/conditiondialog.cpp" line="135"/>
         <source>Structures</source>
         <translation>普通结构</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="478"/>
-        <location filename="../../src/conditiondialog.cpp" line="135"/>
+        <location filename="../../src/conditiondialog.ui" line="460"/>
+        <location filename="../../src/conditiondialog.cpp" line="136"/>
         <source>Biomes</source>
         <translation>主世界群系</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="136"/>
+        <location filename="../../src/conditiondialog.cpp" line="137"/>
         <source>Nether biomes</source>
         <translation>下界群系</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="137"/>
+        <location filename="../../src/conditiondialog.cpp" line="138"/>
         <source>End biomes</source>
         <translation>末地群系</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="53"/>
-        <location filename="../../src/conditiondialog.cpp" line="1116"/>
+        <location filename="../../src/conditiondialog.ui" line="47"/>
+        <location filename="../../src/conditiondialog.cpp" line="1127"/>
         <source>Select type</source>
         <translation>选择种类</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="68"/>
+        <location filename="../../src/conditiondialog.ui" line="62"/>
         <source>Condition type:</source>
         <translation>条件类型:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="104"/>
+        <location filename="../../src/conditiondialog.ui" line="98"/>
         <source>General</source>
         <translation>-</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="122"/>
+        <location filename="../../src/conditiondialog.ui" line="104"/>
         <source>Condition enabled</source>
         <translation>条件启用</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="166"/>
+        <location filename="../../src/conditiondialog.ui" line="148"/>
         <source>Label:</source>
         <translation>标签:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="182"/>
-        <location filename="../../src/conditiondialog.cpp" line="621"/>
+        <location filename="../../src/conditiondialog.ui" line="164"/>
+        <location filename="../../src/conditiondialog.cpp" line="625"/>
         <source>Location</source>
         <translation>范围</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="220"/>
-        <source>Within radial distance: </source>
-        <translation>半径: </translation>
-    </message>
-    <message>
-        <location filename="../../src/conditiondialog.ui" line="311"/>
-        <location filename="../../src/conditiondialog.ui" line="321"/>
-        <location filename="../../src/conditiondialog.ui" line="331"/>
-        <location filename="../../src/conditiondialog.ui" line="341"/>
-        <location filename="../../src/conditiondialog.cpp" line="623"/>
+        <location filename="../../src/conditiondialog.ui" line="172"/>
+        <location filename="../../src/conditiondialog.ui" line="182"/>
+        <location filename="../../src/conditiondialog.ui" line="192"/>
+        <location filename="../../src/conditiondialog.ui" line="202"/>
+        <location filename="../../src/conditiondialog.cpp" line="627"/>
         <source>Lower bound (inclusive)</source>
         <translation>最小值(含)</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="314"/>
+        <location filename="../../src/conditiondialog.ui" line="175"/>
         <source>X&lt;sub&gt;1&lt;/sub&gt;:</source>
         <translation>X&lt;sub&gt;1&lt;/sub&gt;:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="266"/>
-        <location filename="../../src/conditiondialog.ui" line="273"/>
-        <location filename="../../src/conditiondialog.ui" line="324"/>
-        <location filename="../../src/conditiondialog.ui" line="344"/>
-        <location filename="../../src/conditiondialog.ui" line="371"/>
-        <location filename="../../src/conditiondialog.ui" line="391"/>
-        <location filename="../../src/conditiondialog.ui" line="561"/>
-        <location filename="../../src/conditiondialog.ui" line="707"/>
-        <location filename="../../src/conditiondialog.ui" line="774"/>
-        <location filename="../../src/conditiondialog.ui" line="1045"/>
+        <location filename="../../src/conditiondialog.ui" line="185"/>
+        <location filename="../../src/conditiondialog.ui" line="205"/>
+        <location filename="../../src/conditiondialog.ui" line="232"/>
+        <location filename="../../src/conditiondialog.ui" line="252"/>
+        <location filename="../../src/conditiondialog.ui" line="274"/>
+        <location filename="../../src/conditiondialog.ui" line="281"/>
+        <location filename="../../src/conditiondialog.ui" line="543"/>
+        <location filename="../../src/conditiondialog.ui" line="689"/>
+        <location filename="../../src/conditiondialog.ui" line="756"/>
         <source>0</source>
         <translation>0</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="334"/>
+        <location filename="../../src/conditiondialog.ui" line="195"/>
         <source>Z&lt;sub&gt;1&lt;/sub&gt;:</source>
         <translation>Z&lt;sub&gt;1&lt;/sub&gt;:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="358"/>
-        <location filename="../../src/conditiondialog.ui" line="368"/>
-        <location filename="../../src/conditiondialog.ui" line="378"/>
-        <location filename="../../src/conditiondialog.ui" line="388"/>
-        <location filename="../../src/conditiondialog.cpp" line="624"/>
+        <location filename="../../src/conditiondialog.ui" line="219"/>
+        <location filename="../../src/conditiondialog.ui" line="229"/>
+        <location filename="../../src/conditiondialog.ui" line="239"/>
+        <location filename="../../src/conditiondialog.ui" line="249"/>
+        <location filename="../../src/conditiondialog.cpp" line="628"/>
         <source>Upper bound (inclusive)</source>
         <translation>最大值(含)</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="361"/>
+        <location filename="../../src/conditiondialog.ui" line="222"/>
         <source>X&lt;sub&gt;2&lt;/sub&gt;:</source>
         <translation>X&lt;sub&gt;2&lt;/sub&gt;:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="381"/>
+        <location filename="../../src/conditiondialog.ui" line="242"/>
         <source>Z&lt;sub&gt;2&lt;/sub&gt;:</source>
         <translation>Z&lt;sub&gt;2&lt;/sub&gt;:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="239"/>
+        <location filename="../../src/conditiondialog.ui" line="361"/>
         <source>Within centred square of side:</source>
         <translation>正方形范围边长:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="280"/>
+        <location filename="../../src/conditiondialog.ui" line="288"/>
         <source>Custom:</source>
         <translation>自定义正方形范围:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="213"/>
+        <location filename="../../src/conditiondialog.ui" line="295"/>
         <source>Location is relative to:</source>
         <translation>位置相对于:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="231"/>
+        <location filename="../../src/conditiondialog.ui" line="353"/>
         <source>World origin</source>
         <translation>世界原点</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="249"/>
+        <location filename="../../src/conditiondialog.ui" line="378"/>
         <source>Instances within area:</source>
         <translation>范围内包含的结构数量:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="293"/>
+        <location filename="../../src/conditiondialog.ui" line="333"/>
         <source>0 (exclude)</source>
         <translation>0 (不含)</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="256"/>
+        <location filename="../../src/conditiondialog.ui" line="264"/>
         <source>Skip instances at exactly the relative reference location</source>
         <translation>忽略刚好满足条件的结构</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="259"/>
+        <location filename="../../src/conditiondialog.ui" line="267"/>
         <source>Ignore reference</source>
         <translation>忽略参考</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="434"/>
+        <location filename="../../src/conditiondialog.ui" line="371"/>
+        <source>Within radial distance:</source>
+        <translation>半径:</translation>
+    </message>
+    <message>
+        <location filename="../../src/conditiondialog.ui" line="416"/>
         <source>Details</source>
         <translation>详细信息</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="440"/>
+        <location filename="../../src/conditiondialog.ui" line="422"/>
         <source>None</source>
         <translation>无</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="484"/>
+        <location filename="../../src/conditiondialog.ui" line="466"/>
         <source>Enables optimizations that trade some accuracy for speed</source>
         <translation>牺牲精度换取速度</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="487"/>
+        <location filename="../../src/conditiondialog.ui" line="469"/>
         <source>Approximate</source>
         <translation>大致搜索</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="494"/>
+        <location filename="../../src/conditiondialog.ui" line="476"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p style=&quot;white-space:pre&quot;&gt;Satisfied if &lt;span style=&quot; font-weight:600;&quot;&gt;any&lt;/span&gt; of the checked biomes are present&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p style=&quot;white-space:pre&quot;&gt;选区内包含下列&lt;span style=&quot; font-weight:600;&quot;&gt;任一&lt;/span&gt;勾选的群系即可满足条件&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="497"/>
+        <location filename="../../src/conditiondialog.ui" line="479"/>
         <source>Match any</source>
         <translation>包含任一群系</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="517"/>
-        <location filename="../../src/conditiondialog.ui" line="700"/>
+        <location filename="../../src/conditiondialog.ui" line="499"/>
+        <location filename="../../src/conditiondialog.ui" line="682"/>
         <source>Sample at height (Y):</source>
         <translation>采样高度(Y):</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="531"/>
-        <location filename="../../src/conditiondialog.ui" line="744"/>
+        <location filename="../../src/conditiondialog.ui" line="513"/>
+        <location filename="../../src/conditiondialog.ui" line="726"/>
         <source>256 (Surface)</source>
         <translation>256 (地表)</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="536"/>
-        <location filename="../../src/conditiondialog.ui" line="749"/>
+        <location filename="../../src/conditiondialog.ui" line="518"/>
+        <location filename="../../src/conditiondialog.ui" line="731"/>
         <source>128 (Nether Roof)</source>
         <translation>128 (下界基岩顶)</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="541"/>
-        <location filename="../../src/conditiondialog.ui" line="754"/>
+        <location filename="../../src/conditiondialog.ui" line="523"/>
+        <location filename="../../src/conditiondialog.ui" line="736"/>
         <source>62 (Sea Level)</source>
         <translation>62 (海平面)</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="546"/>
-        <location filename="../../src/conditiondialog.ui" line="759"/>
+        <location filename="../../src/conditiondialog.ui" line="528"/>
+        <location filename="../../src/conditiondialog.ui" line="741"/>
         <source>48</source>
         <translation>48</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="551"/>
-        <location filename="../../src/conditiondialog.ui" line="764"/>
+        <location filename="../../src/conditiondialog.ui" line="533"/>
+        <location filename="../../src/conditiondialog.ui" line="746"/>
         <source>32</source>
         <translation>32</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="556"/>
-        <location filename="../../src/conditiondialog.ui" line="769"/>
+        <location filename="../../src/conditiondialog.ui" line="538"/>
+        <location filename="../../src/conditiondialog.ui" line="751"/>
         <source>16</source>
         <translation>16</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="566"/>
-        <location filename="../../src/conditiondialog.ui" line="779"/>
+        <location filename="../../src/conditiondialog.ui" line="548"/>
+        <location filename="../../src/conditiondialog.ui" line="761"/>
         <source>-16</source>
         <translation>-16</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="571"/>
-        <location filename="../../src/conditiondialog.ui" line="784"/>
+        <location filename="../../src/conditiondialog.ui" line="553"/>
+        <location filename="../../src/conditiondialog.ui" line="766"/>
         <source>-32</source>
         <translation>-32</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="576"/>
-        <location filename="../../src/conditiondialog.ui" line="789"/>
+        <location filename="../../src/conditiondialog.ui" line="558"/>
+        <location filename="../../src/conditiondialog.ui" line="771"/>
         <source>-48</source>
         <translation>-48</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="581"/>
-        <location filename="../../src/conditiondialog.ui" line="794"/>
+        <location filename="../../src/conditiondialog.ui" line="563"/>
+        <location filename="../../src/conditiondialog.ui" line="776"/>
         <source>-64 (Bedrock)</source>
         <translation>-64 (主世界基岩层)</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="591"/>
+        <location filename="../../src/conditiondialog.ui" line="573"/>
         <source>uncheck all</source>
         <translation>取消勾选全部群系</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="598"/>
+        <location filename="../../src/conditiondialog.ui" line="580"/>
         <source>include all</source>
         <translation>包含所有群系</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="605"/>
+        <location filename="../../src/conditiondialog.ui" line="587"/>
         <source>exclude all</source>
         <translation>排除所有群系</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="653"/>
+        <location filename="../../src/conditiondialog.ui" line="635"/>
         <source>Locate biome center</source>
         <translation>定位群系中心</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="659"/>
+        <location filename="../../src/conditiondialog.ui" line="641"/>
         <source>Border tolerance:</source>
         <translation>边界容错:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="666"/>
+        <location filename="../../src/conditiondialog.ui" line="648"/>
         <source>Biome:</source>
         <translation>群系:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="673"/>
+        <location filename="../../src/conditiondialog.ui" line="655"/>
         <source>1</source>
         <translation>1</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="693"/>
+        <location filename="../../src/conditiondialog.ui" line="675"/>
         <source>Minimum area:</source>
         <translation>最小面积:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="720"/>
+        <location filename="../../src/conditiondialog.ui" line="702"/>
         <source>(? sq. chunks)</source>
         <translation>(? 平方区块)</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="824"/>
+        <location filename="../../src/conditiondialog.ui" line="806"/>
         <source>Temperature categories</source>
         <translation>温度类别</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="830"/>
+        <location filename="../../src/conditiondialog.ui" line="812"/>
         <source>Select how many entries of each temperature category are required.</source>
         <translation>选择每个温度类别需要包含的群系数量</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="875"/>
+        <location filename="../../src/conditiondialog.ui" line="857"/>
         <source>Climate parameters</source>
         <translation>群系气候参数</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="881"/>
+        <location filename="../../src/conditiondialog.ui" line="863"/>
         <source>Select the minimum required and maximum allowed climate parameters:</source>
         <translation>选择以下群系气候参数的最小值和最大值:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="890"/>
+        <location filename="../../src/conditiondialog.ui" line="872"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The climate has to enter the required range&lt;/p&gt;&lt;p&gt;With the &lt;span style=&quot; font-style:italic;&quot;&gt;complete&lt;/span&gt; modifier, the entire range must be covered&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>参数必须在范围内且必须包含全部区间</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="893"/>
+        <location filename="../../src/conditiondialog.ui" line="875"/>
         <source>Required:</source>
         <translation>需要包含的群系条件:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="921"/>
+        <location filename="../../src/conditiondialog.ui" line="903"/>
         <source>Climate</source>
         <translation>气候条件</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="949"/>
+        <location filename="../../src/conditiondialog.ui" line="931"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The climate must remain inside the confinement range&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>参数必须在范围内</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="952"/>
+        <location filename="../../src/conditiondialog.ui" line="934"/>
         <source>Confined:</source>
         <translation>需要排除的群系条件:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="983"/>
+        <location filename="../../src/conditiondialog.ui" line="965"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Resulting biomes (&lt;span style=&quot; font-weight:600;&quot;&gt;at least one&lt;/span&gt; with &lt;img src=&quot;:/icons/check_include.png&quot;/&gt;, &lt;span style=&quot; font-weight:600;&quot;&gt;any&lt;/span&gt; with &lt;img src=&quot;:/icons/check_unchecked.png&quot;/&gt;, &lt;span style=&quot; font-weight:600;&quot;&gt;none&lt;/span&gt; with &lt;img src=&quot;:/icons/check_exclude.png&quot;/&gt;):&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;筛选群系(&lt;span style=&quot; font-weight:600;&quot;&gt;包含&lt;/span&gt;&lt;img src=&quot;:/icons/check_include.png&quot;/&gt;, &lt;span style=&quot; font-weight:600;&quot;&gt;无限制&lt;/span&gt;&lt;img src=&quot;:/icons/check_unchecked.png&quot;/&gt;, &lt;span style=&quot; font-weight:600;&quot;&gt;不含&lt;/span&gt;&lt;img src=&quot;:/icons/check_exclude.png&quot;/&gt;):&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1032"/>
+        <location filename="../../src/conditiondialog.ui" line="1014"/>
         <source>Locate climate minimum/maximum</source>
         <translation>定位气候参数的极值</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1038"/>
+        <location filename="../../src/conditiondialog.ui" line="1020"/>
+        <source>If value is in range:</source>
+        <translation>取值区间:</translation>
+    </message>
+    <message>
+        <location filename="../../src/conditiondialog.ui" line="1027"/>
         <source>Climate parameter: </source>
         <translation>气候参数: </translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1053"/>
-        <source>Minimum	 &lt;=</source>
-        <translation>最小值&lt;=</translation>
+        <location filename="../../src/conditiondialog.ui" line="1043"/>
+        <source>-</source>
+        <translation>-</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1058"/>
-        <source>Maximum	 &gt;=</source>
-        <translation>最大值&gt;=</translation>
+        <location filename="../../src/conditiondialog.ui" line="1050"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Lower bound (inclusive)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>最小值(含)</translation>
+    </message>
+    <message>
+        <location filename="../../src/conditiondialog.ui" line="1053"/>
+        <source>-Infinity</source>
+        <translation>无下限</translation>
+    </message>
+    <message>
+        <location filename="../../src/conditiondialog.ui" line="1060"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Upper bound (inclusive)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>最大值(含)</translation>
     </message>
     <message>
         <location filename="../../src/conditiondialog.ui" line="1063"/>
-        <source>Minimum	 &gt;=</source>
-        <translation>最小值&gt;=</translation>
+        <source>+Infinity</source>
+        <translation>无上限</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1068"/>
-        <source>Maximum	 &lt;=</source>
-        <translation>最大值&lt;=</translation>
-    </message>
-    <message>
-        <location filename="../../src/conditiondialog.ui" line="1076"/>
-        <source>Locate value:</source>
-        <translation>条件:</translation>
-    </message>
-    <message>
-        <location filename="../../src/conditiondialog.ui" line="1108"/>
+        <location filename="../../src/conditiondialog.ui" line="1086"/>
         <source>Generate up to octave:</source>
         <translation>使用噪声等级:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1134"/>
+        <location filename="../../src/conditiondialog.ui" line="1094"/>
+        <source>Minimum</source>
+        <translation>最小值</translation>
+    </message>
+    <message>
+        <location filename="../../src/conditiondialog.ui" line="1099"/>
+        <source>Maximum</source>
+        <translation>最大值</translation>
+    </message>
+    <message>
+        <location filename="../../src/conditiondialog.ui" line="1107"/>
+        <source>Yield position of:</source>
+        <translation>极值类型:</translation>
+    </message>
+    <message>
+        <location filename="../../src/conditiondialog.ui" line="1133"/>
         <source>Approximate surface height</source>
         <translation>地表大致高度</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1140"/>
+        <location filename="../../src/conditiondialog.ui" line="1139"/>
         <source>Height (Y-level)</source>
         <translation>高度(Y)</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1148"/>
+        <location filename="../../src/conditiondialog.ui" line="1147"/>
         <source>Inside range:</source>
         <translation>边界点内侧范围:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1153"/>
+        <location filename="../../src/conditiondialog.ui" line="1152"/>
         <source>Outside range:</source>
         <translation>边界点外侧范围:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1202"/>
+        <location filename="../../src/conditiondialog.ui" line="1201"/>
         <source>Edit</source>
         <translation>编辑脚本</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1220"/>
+        <location filename="../../src/conditiondialog.ui" line="1219"/>
         <source>Save as...</source>
         <translation>另存为...</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1227"/>
+        <location filename="../../src/conditiondialog.ui" line="1226"/>
         <source>Examples...</source>
         <translation>示例...</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1234"/>
+        <location filename="../../src/conditiondialog.ui" line="1233"/>
         <source>Save</source>
         <translation>保存</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1251"/>
+        <location filename="../../src/conditiondialog.ui" line="1250"/>
         <source>Errors</source>
         <translation>错误</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1297"/>
+        <location filename="../../src/conditiondialog.ui" line="1296"/>
         <source>Lua script:</source>
         <translation>Lua 脚本:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1304"/>
+        <location filename="../../src/conditiondialog.ui" line="1303"/>
         <source>Open directory...</source>
         <translation>打开文件...</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1346"/>
+        <location filename="../../src/conditiondialog.ui" line="1345"/>
         <source>Village variants</source>
         <translation>村庄变种</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1352"/>
-        <location filename="../../src/conditiondialog.ui" line="1411"/>
-        <location filename="../../src/conditiondialog.ui" line="1508"/>
+        <location filename="../../src/conditiondialog.ui" line="1351"/>
+        <location filename="../../src/conditiondialog.ui" line="1410"/>
+        <location filename="../../src/conditiondialog.ui" line="1507"/>
         <source>Allow only structures that start with one of the selected pieces</source>
         <translation>筛选结构种类</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1355"/>
-        <location filename="../../src/conditiondialog.ui" line="1414"/>
-        <location filename="../../src/conditiondialog.ui" line="1511"/>
+        <location filename="../../src/conditiondialog.ui" line="1354"/>
+        <location filename="../../src/conditiondialog.ui" line="1413"/>
+        <location filename="../../src/conditiondialog.ui" line="1510"/>
         <source>Filter starting piece</source>
         <translation>选择种类</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1362"/>
+        <location filename="../../src/conditiondialog.ui" line="1361"/>
         <source>Abandoned</source>
         <translation>废弃村庄</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1405"/>
+        <location filename="../../src/conditiondialog.ui" line="1404"/>
         <source>Bastion variants</source>
         <translation>选择堡垒遗迹类型</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1454"/>
+        <location filename="../../src/conditiondialog.ui" line="1453"/>
         <source>Fortress pieces</source>
         <translation>下界要塞结构</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1460"/>
+        <location filename="../../src/conditiondialog.ui" line="1459"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Maximum continuous square bounding box&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>2×2排布的十字路口结构</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1463"/>
+        <location filename="../../src/conditiondialog.ui" line="1462"/>
         <source>With 2x2 arrangement of bridge crossings or start piece</source>
         <translation>包含四联十字路口</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1502"/>
+        <location filename="../../src/conditiondialog.ui" line="1501"/>
         <source>Ruined portal variants</source>
         <translation>废弃传送门种类</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1551"/>
+        <location filename="../../src/conditiondialog.ui" line="1550"/>
         <source>End city variants</source>
         <translation>末地城种类</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1557"/>
+        <location filename="../../src/conditiondialog.ui" line="1556"/>
         <source>End ship</source>
         <translation>包含末地船</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1599"/>
+        <location filename="../../src/conditiondialog.ui" line="1598"/>
         <source>Igloo variants</source>
         <translation>冰屋种类</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1605"/>
+        <location filename="../../src/conditiondialog.ui" line="1604"/>
         <source>Basement</source>
         <translation>包含地下室</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1654"/>
+        <location filename="../../src/conditiondialog.ui" line="1653"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1665"/>
+        <location filename="../../src/conditiondialog.ui" line="1664"/>
         <source>Ok</source>
         <translation>确认</translation>
     </message>
     <message>
         <location filename="../../src/conditiondialog.cpp" line="28"/>
-        <location filename="../../src/conditiondialog.cpp" line="691"/>
+        <location filename="../../src/conditiondialog.cpp" line="695"/>
         <source>Generates any of:</source>
         <translation>生成以下任意一个:</translation>
     </message>
@@ -1186,174 +1256,174 @@
         <translation>MC版本 %1</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="138"/>
+        <location filename="../../src/conditiondialog.cpp" line="139"/>
         <source>Other</source>
         <translation>其他</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="159"/>
+        <location filename="../../src/conditiondialog.cpp" line="160"/>
         <source>Oceanic</source>
         <translation>海洋类</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="160"/>
+        <location filename="../../src/conditiondialog.cpp" line="161"/>
         <source>Warm</source>
         <translation>温带类</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="161"/>
+        <location filename="../../src/conditiondialog.cpp" line="162"/>
         <source>Lush</source>
         <translation>繁茂类</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="162"/>
+        <location filename="../../src/conditiondialog.cpp" line="163"/>
         <source>Cold</source>
         <translation>寒冷类</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="163"/>
+        <location filename="../../src/conditiondialog.cpp" line="164"/>
         <source>Freezing</source>
         <translation>冰冻类</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="164"/>
+        <location filename="../../src/conditiondialog.cpp" line="165"/>
         <source>Special Warm</source>
         <translation>特殊温带类</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="165"/>
+        <location filename="../../src/conditiondialog.cpp" line="166"/>
         <source>Special Lush</source>
         <translation>特殊繁茂类</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="166"/>
+        <location filename="../../src/conditiondialog.cpp" line="167"/>
         <source>Special Cold</source>
         <translation>特殊寒冷类</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="205"/>
+        <location filename="../../src/conditiondialog.cpp" line="206"/>
         <source>Temperature</source>
         <translation>温度</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="205"/>
+        <location filename="../../src/conditiondialog.cpp" line="206"/>
         <source>Humidity</source>
         <translation>湿度</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="205"/>
+        <location filename="../../src/conditiondialog.cpp" line="206"/>
         <source>Continentalness</source>
         <translation>海陆分布</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="206"/>
+        <location filename="../../src/conditiondialog.cpp" line="207"/>
         <source>Erosion</source>
         <translation>侵蚀度</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="206"/>
+        <location filename="../../src/conditiondialog.cpp" line="207"/>
         <source>Depth</source>
         <translation>高度/深度</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="206"/>
+        <location filename="../../src/conditiondialog.cpp" line="207"/>
         <source>Weirdness</source>
         <translation>稀有程度</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="228"/>
         <location filename="../../src/conditiondialog.cpp" line="229"/>
+        <location filename="../../src/conditiondialog.cpp" line="230"/>
         <source>-Inf</source>
         <translation>无下限</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="228"/>
         <location filename="../../src/conditiondialog.cpp" line="229"/>
+        <location filename="../../src/conditiondialog.cpp" line="230"/>
         <source>+Inf</source>
         <translation>无上限</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="238"/>
+        <location filename="../../src/conditiondialog.cpp" line="239"/>
         <source>Require full range instead of intersection</source>
         <translation>全范围而非交叉</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="268"/>
+        <location filename="../../src/conditiondialog.cpp" line="269"/>
         <source>  -Inf</source>
         <translation>  无下限</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="270"/>
+        <location filename="../../src/conditiondialog.cpp" line="271"/>
         <source>  +Inf</source>
         <translation>  无上限</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="322"/>
+        <location filename="../../src/conditiondialog.cpp" line="323"/>
         <source>[script not found]</source>
         <translation>[未找到脚本]</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="614"/>
+        <location filename="../../src/conditiondialog.cpp" line="618"/>
         <source>Location (coordinates are multiplied by %1)</source>
         <translation>范围(坐标 %1)</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="615"/>
+        <location filename="../../src/conditiondialog.cpp" line="619"/>
         <source>From floor(-x/2)%1 to floor(x/2)%1 on both axes (inclusive)</source>
         <translation>X、Z坐标从 floor(-x/2)%1 (含)到 floor(x/2)%1 (含)</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="616"/>
+        <location filename="../../src/conditiondialog.cpp" line="620"/>
         <source>Lower bound %1 (inclusive)</source>
         <translation>最小值 %1 (含)</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="617"/>
+        <location filename="../../src/conditiondialog.cpp" line="621"/>
         <source>Upper bound %1 (inclusive)</source>
         <translation>最大值 %1 (含)</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="622"/>
+        <location filename="../../src/conditiondialog.cpp" line="626"/>
         <source>From floor(-x/2) to floor(x/2) on both axes (inclusive)</source>
         <translation>X、Z坐标从 floor(-x/2) (含)到 floor(x/2) (含)</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="804"/>
+        <location filename="../../src/conditiondialog.cpp" line="808"/>
         <source>No allowed start pieces specified. Condition can never be true.</source>
         <translation>该结构不会生成该子类别, 该条件将无法满足！</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="805"/>
+        <location filename="../../src/conditiondialog.cpp" line="809"/>
         <source>Missing Start Piece</source>
         <translation>错误的子类别</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="815"/>
+        <location filename="../../src/conditiondialog.cpp" line="819"/>
         <source>The condition contains a climate range which is unbounded with the full range required, which can never be satisfied.</source>
         <translation>该条件包含了越界的气候条件范围, 该条件将无法满足！</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="819"/>
+        <location filename="../../src/conditiondialog.cpp" line="823"/>
         <source>Bad Climate Range</source>
         <translation>错误的气候条件范围</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="830"/>
+        <location filename="../../src/conditiondialog.cpp" line="834"/>
         <source>The biome locator checks for %1 instances of size %2 each, which cannot be satisfied by an area of size %3%4%5 = %6.</source>
         <translation>划定区域太小, 无法满足给定的群系要求！群系定位器包含 %1 个条件, 每个条件的最小面积为 %2 , 故面积为 %3%4%5 = %6 的区域无法满足条件！</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="834"/>
+        <location filename="../../src/conditiondialog.cpp" line="838"/>
         <source>Area Insufficient</source>
         <translation>区域不够大</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="849"/>
+        <location filename="../../src/conditiondialog.cpp" line="853"/>
         <source>Bad Surface Height</source>
         <translation>采样高度过高</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="850"/>
+        <location filename="../../src/conditiondialog.cpp" line="854"/>
         <source>Cave biomes do not generate above Y = 246. You should consider lowering the sampling height.
 
 Continue anyway?</source>
@@ -1362,72 +1432,72 @@ Continue anyway?</source>
 是否继续?</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="896"/>
+        <location filename="../../src/conditiondialog.cpp" line="900"/>
         <source>Help: area entry</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="897"/>
+        <location filename="../../src/conditiondialog.cpp" line="901"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The area can be entered via &lt;b&gt;custom&lt;/b&gt; rectangle, that is defined by its two opposing corners, relative to a center point. These bounds are inclusive.&lt;/p&gt;&lt;p&gt;Alternatively, the area can be defined as a &lt;b&gt;centered square&lt;/b&gt; with a certain side length. In this case the area has the bounds: [-X/2, -X/2] on both axes, rounding down and bounds included. For example a centered square with side 3 will go from -2 to 1 for both the X and Z axes.&lt;/p&gt;&lt;p&gt;Important to note is that some filters have a scaling associated with them. This means that the area is not defined in blocks, but on a grid with the given spacing (such as chunks instead of blocks). A scaling of 1:16, for example, means that the aforementioned centered square of side 3 will range from -32 to 31 in block coordinates. (Chunk 1 has blocks 16 to 31.)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="1262"/>
+        <location filename="../../src/conditiondialog.cpp" line="1273"/>
         <source>(~%1 sq. chunks)</source>
         <translation>(~%1 平方区块)</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="1264"/>
+        <location filename="../../src/conditiondialog.cpp" line="1275"/>
         <source>(%1 sq. chunks)</source>
         <translation>(%1 平方区块)</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="1272"/>
+        <location filename="../../src/conditiondialog.cpp" line="1283"/>
         <source>Unsaved changes</source>
         <translation>更改未保存</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="1273"/>
+        <location filename="../../src/conditiondialog.cpp" line="1284"/>
         <source>Discard unsaved changes?</source>
         <translation>确认丢弃所有未保存的更改?</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="1343"/>
+        <location filename="../../src/conditiondialog.cpp" line="1354"/>
         <source>Save lua script</source>
         <translation>保存Lua脚本</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="1343"/>
+        <location filename="../../src/conditiondialog.cpp" line="1354"/>
         <source>Lua script (*.lua)</source>
         <translation>Lua脚本 (*.lua)</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="1369"/>
+        <location filename="../../src/conditiondialog.cpp" line="1380"/>
         <source>Empty check functions</source>
         <translation>检查函数为空</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="1370"/>
+        <location filename="../../src/conditiondialog.cpp" line="1381"/>
         <source>Village along the way from A to B</source>
         <translation>从A到B沿路上的村庄</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="1412"/>
+        <location filename="../../src/conditiondialog.cpp" line="1423"/>
         <source>Lua examples</source>
         <translation>Lua 脚本示例</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="1413"/>
+        <location filename="../../src/conditiondialog.cpp" line="1424"/>
         <source>Replace editor content with example:</source>
         <translation>将编辑器内容替换为示例</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="1437"/>
+        <location filename="../../src/conditiondialog.cpp" line="1448"/>
         <source>Help: Lua script</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="1438"/>
+        <location filename="../../src/conditiondialog.cpp" line="1449"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Lua scripts allow the user to write custom filters. A valid Lua filtering script has to define a&lt;/p&gt;&lt;p&gt;&lt;b&gt;check(seed, at, deps)&lt;/b&gt;&lt;/p&gt;&lt;p&gt;function, that evaluates when a seed satisfies the condition. It should return a &lt;b&gt;x, z&lt;/b&gt; value pair that is the block position for other conditions to reference as the relative location. If the condition fails, the function can return &lt;b&gt;nil&lt;/b&gt; instead.&lt;/p&gt;&lt;p&gt;The arguments of &lt;b&gt;check()&lt;/b&gt; are in order:&lt;/p&gt;&lt;p&gt;&lt;dl&gt;&lt;dt&gt;&lt;b&gt;seed&lt;/b&gt;&lt;dd&gt;the current world seed&lt;dt&gt;&lt;b&gt;at&lt;/b&gt; = {x, z}&lt;dd&gt;the relative location of the parent condition&lt;dt&gt;&lt;b&gt;deps&lt;/b&gt; = [..]{x, z, id, parent}&lt;dd&gt;a list of tables with information on the dependent conditions (i.e. those later in the conditions list)&lt;/dl&gt;&lt;/p&gt;&lt;p&gt;Optionally, the script can also define a &lt;b&gt;check48()&lt;/b&gt; function, with a similar prototype, that tests whether a given 48-bit seed base is worth investigating further.&lt;/p&gt;&lt;p&gt;A few global symbols are predefined. These include the biome ID and structure type enums from cubiomes, which means they can be referred to by their names (such as &lt;b&gt;flower_forest&lt;/b&gt; or &lt;b&gt;Village&lt;/b&gt;). Furthermore, the following functions are available:&lt;/p&gt;&lt;p&gt;&lt;dl&gt;&lt;dt&gt;&lt;b&gt;getBiomeAt(x, z)&lt;/b&gt;&lt;dt&gt;&lt;b&gt;getBiomeAt(x, y, z)&lt;/b&gt;&lt;dd&gt;returns the overworld biome at the given block coordinates&lt;/p&gt;&lt;p&gt;&lt;dt&gt;&lt;b&gt;getStructures(type, x1, z1, x2, z2)&lt;/b&gt;&lt;dd&gt;returns a list of &lt;b&gt;{x, z}&lt;/b&gt; structure positions for the specified structure &lt;b&gt;type&lt;/b&gt; within the area spanning the block positions &lt;b&gt;x1, z1&lt;/b&gt; to &lt;b&gt;x2, z2&lt;/b&gt;, or &lt;b&gt;nil&lt;/b&gt; upon failure&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1440,243 +1510,191 @@ Continue anyway?</source>
         <translation>偏好设置</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="411"/>
+        <location filename="../../src/configdialog.ui" line="195"/>
         <source>Session</source>
         <translation>会话</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="417"/>
+        <location filename="../../src/configdialog.ui" line="201"/>
         <source>Restore previous session at launch</source>
         <translation>启动时自动加载上一次的进度</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="424"/>
+        <location filename="../../src/configdialog.ui" line="208"/>
         <source>Autosave every:</source>
         <translation>自动保存时间间隔:</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="431"/>
+        <location filename="../../src/configdialog.ui" line="215"/>
         <source> min</source>
         <translation> 分钟</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="347"/>
+        <location filename="../../src/configdialog.ui" line="131"/>
         <source>Export</source>
         <translation>导出</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="356"/>
+        <location filename="../../src/configdialog.ui" line="140"/>
         <source>CSV cell quotation:</source>
         <translation>CSV引用方式:</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="382"/>
+        <location filename="../../src/configdialog.ui" line="166"/>
         <source>CSV column separator:</source>
         <translation>CSV列分隔符:</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="364"/>
+        <location filename="../../src/configdialog.ui" line="148"/>
         <source>Where necessary</source>
         <translation>根据需要</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="32"/>
+        <location filename="../../src/configdialog.ui" line="250"/>
         <source>Map View</source>
         <translation>地图相关</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="88"/>
+        <location filename="../../src/configdialog.ui" line="364"/>
         <source>Icon scale:</source>
         <translation>图标大小:</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="209"/>
-        <source>Tools and structure zoom:</source>
-        <translation>工具和结构缩放:</translation>
-    </message>
-    <message>
-        <location filename="../../src/configdialog.ui" line="238"/>
-        <source>Edit map tools...</source>
-        <translation>编辑地图工具</translation>
-    </message>
-    <message>
-        <location filename="../../src/configdialog.ui" line="254"/>
+        <location filename="../../src/configdialog.ui" line="38"/>
         <source>Monospace font:</source>
         <translation>等宽字体:</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="310"/>
+        <location filename="../../src/configdialog.ui" line="94"/>
         <source>Application font:</source>
         <translation>默认字体:</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="369"/>
+        <location filename="../../src/configdialog.ui" line="153"/>
         <source>Single quotes (&apos;)</source>
         <translation>单引号(&apos;)</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="374"/>
+        <location filename="../../src/configdialog.ui" line="158"/>
         <source>Double quotes (&quot;)</source>
         <translation>双引号(&quot;)</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="392"/>
+        <location filename="../../src/configdialog.ui" line="176"/>
         <source>Search</source>
         <translation>搜索</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="398"/>
+        <location filename="../../src/configdialog.ui" line="185"/>
         <source>Maximum number of matching seeds:</source>
         <translation>最大保留结果数:</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="450"/>
+        <location filename="../../src/configdialog.ui" line="234"/>
         <source>Miscellaneous</source>
         <translation>杂项</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="456"/>
+        <location filename="../../src/configdialog.ui" line="240"/>
         <source>Check GitHub for updates at startup</source>
         <translation>启动时访问GitHub检查更新</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="248"/>
+        <location filename="../../src/configdialog.ui" line="32"/>
         <source>Interface</source>
         <translation>交互界面</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="166"/>
+        <location filename="../../src/configdialog.ui" line="272"/>
         <source>Outline known bounding boxes</source>
         <translation>显示可见的结构外围</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="38"/>
+        <location filename="../../src/configdialog.ui" line="300"/>
         <source>Custom grid multiplier:</source>
         <translation>自定义网格乘数:</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="219"/>
+        <location filename="../../src/configdialog.ui" line="345"/>
         <source> MB</source>
         <translation> MB</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="143"/>
+        <location filename="../../src/configdialog.ui" line="259"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Simulate inertia for the map view&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>模拟地图移动惯性</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="146"/>
+        <location filename="../../src/configdialog.ui" line="262"/>
         <source>Smooth map motion</source>
         <translation>地图移动惯性</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="115"/>
-        <location filename="../../src/configdialog.cpp" line="83"/>
+        <location filename="../../src/configdialog.ui" line="317"/>
+        <location filename="../../src/configdialog.cpp" line="78"/>
         <source>None</source>
         <translation>固定</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="120"/>
+        <location filename="../../src/configdialog.ui" line="322"/>
         <source>2</source>
         <translation>2</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="125"/>
+        <location filename="../../src/configdialog.ui" line="327"/>
         <source>4</source>
         <translation>4</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="130"/>
+        <location filename="../../src/configdialog.ui" line="332"/>
         <source>5</source>
         <translation>5</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="135"/>
+        <location filename="../../src/configdialog.ui" line="337"/>
         <source>10</source>
         <translation>10</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="60"/>
+        <location filename="../../src/configdialog.ui" line="371"/>
         <source>Threads for map:</source>
         <translation>渲染地图最大可用线程数:</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="280"/>
+        <location filename="../../src/configdialog.ui" line="64"/>
         <source>System</source>
         <translation>默认</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="285"/>
+        <location filename="../../src/configdialog.ui" line="69"/>
         <source>Dark</source>
         <translation>暗色</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="98"/>
-        <source>Edit biome colors...</source>
-        <translation>编辑...</translation>
-    </message>
-    <message>
-        <location filename="../../src/configdialog.ui" line="159"/>
-        <source>[none]</source>
-        <translation>导入文件</translation>
-    </message>
-    <message>
-        <location filename="../../src/configdialog.ui" line="70"/>
+        <location filename="../../src/configdialog.ui" line="289"/>
         <source>Use a fixed grid in blocks instead of outlining the generated map tiles
 Leave blank for the default behaviour</source>
         <translation>使用固定的网格宽度, 留空代表默认</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="74"/>
+        <location filename="../../src/configdialog.ui" line="293"/>
         <source>Custom grid spacing:</source>
         <translation>自定义网格密度:</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="45"/>
+        <location filename="../../src/configdialog.ui" line="282"/>
         <source>Map cache size:</source>
         <translation>地图缓存大小:</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="81"/>
-        <source>Biome color customization:</source>
-        <translation>自定义群系颜色:</translation>
-    </message>
-    <message>
-        <location filename="../../src/configdialog.ui" line="293"/>
+        <location filename="../../src/configdialog.ui" line="77"/>
         <source>GUI style:</source>
         <translation>界面风格:</translation>
     </message>
     <message>
-        <location filename="../../src/configdialog.ui" line="317"/>
+        <location filename="../../src/configdialog.ui" line="101"/>
         <source>Language:</source>
         <translation>语言:</translation>
-    </message>
-    <message numerus="yes">
-        <location filename="../../src/configdialog.cpp" line="163"/>
-        <source>[%n biome(s)] %1</source>
-        <translation>
-            <numerusform>[%n 个群系] %1</numerusform>
-        </translation>
-    </message>
-    <message>
-        <location filename="../../src/configdialog.cpp" line="205"/>
-        <source>Load biome color map</source>
-        <translation>导入群系颜色设置</translation>
-    </message>
-    <message>
-        <location filename="../../src/configdialog.cpp" line="205"/>
-        <source>Text files (*.txt);;Any files (*)</source>
-        <translation>文本文件 (*.txt);;任意文件 (*)</translation>
-    </message>
-    <message>
-        <location filename="../../src/configdialog.cpp" line="233"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Custom biome colors&lt;/b&gt; should be defined in an ASCII text file, with one biome-color mapping per line. Each mapping should consist of a biome ID or biome resource name followed by a color that can be written as a hex code (prefixed with # or 0x) or as an RGB triplet. Special characters are ignored.&lt;/p&gt;&lt;p&gt;&lt;b&gt;Examples:&lt;/b&gt;&lt;/p&gt;&lt;p&gt;sunflower_plains:&amp;nbsp;#FFFF00&lt;/p&gt;&lt;p&gt;128&amp;nbsp;[255&amp;nbsp;255&amp;nbsp;0]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/configdialog.cpp" line="248"/>
-        <source>Help: custom biome colors</source>
-        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2069,12 +2087,12 @@ Continue and overwrite?</source>
         <translation>[脚本缺失]</translation>
     </message>
     <message>
-        <location filename="../../src/search.cpp" line="224"/>
+        <location filename="../../src/search.cpp" line="247"/>
         <source>missing script for condition %1</source>
         <translation>条件 %1 没有脚本！</translation>
     </message>
     <message>
-        <location filename="../../src/search.cpp" line="229"/>
+        <location filename="../../src/search.cpp" line="252"/>
         <source>Condition %1:
 </source>
         <translation>条件 %1:
@@ -2928,43 +2946,43 @@ Applies only to feature-structures of region-size = 32 and chunk-gap = 8, in par
         <translation>符合条件的种子</translation>
     </message>
     <message>
-        <location filename="../../src/formsearchcontrol.ui" line="35"/>
+        <location filename="../../src/formsearchcontrol.ui" line="81"/>
         <source>...</source>
         <translation>...</translation>
     </message>
     <message>
-        <location filename="../../src/formsearchcontrol.ui" line="66"/>
-        <location filename="../../src/formsearchcontrol.ui" line="150"/>
+        <location filename="../../src/formsearchcontrol.ui" line="158"/>
+        <location filename="../../src/formsearchcontrol.ui" line="182"/>
         <source>0</source>
         <translation>未开始</translation>
     </message>
     <message>
-        <location filename="../../src/formsearchcontrol.ui" line="133"/>
+        <location filename="../../src/formsearchcontrol.ui" line="71"/>
         <source>Threads:</source>
         <translation>线程数:</translation>
     </message>
     <message>
-        <location filename="../../src/formsearchcontrol.ui" line="183"/>
+        <location filename="../../src/formsearchcontrol.ui" line="189"/>
         <source>stop as soon as the next set of matching seeds is found</source>
         <translation>找到结果立即停止</translation>
     </message>
     <message>
-        <location filename="../../src/formsearchcontrol.ui" line="186"/>
+        <location filename="../../src/formsearchcontrol.ui" line="192"/>
         <source>Stop on results</source>
         <translation>找到结果立即停止</translation>
     </message>
     <message>
-        <location filename="../../src/formsearchcontrol.ui" line="140"/>
+        <location filename="../../src/formsearchcontrol.ui" line="51"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;searching algorithm&lt;/p&gt;&lt;p&gt;incremental: best for non-exhaustive biome searches&lt;/p&gt;&lt;p&gt;48-bit family blocks: best for searches with strong structure restrictions&lt;/p&gt;&lt;p&gt;seed list from file...: load and search through a pre-computed list of seed&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;搜索方法说明&lt;/p&gt;&lt;p&gt;递增: 适用于简单群系搜索&lt;/p&gt;&lt;p&gt;48位种子集: 适用于复杂结构搜索&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/formsearchcontrol.ui" line="143"/>
+        <location filename="../../src/formsearchcontrol.ui" line="54"/>
         <source>Search:</source>
         <translation>搜索方式:</translation>
     </message>
     <message>
-        <location filename="../../src/formsearchcontrol.ui" line="42"/>
+        <location filename="../../src/formsearchcontrol.ui" line="116"/>
         <source>Seed:</source>
         <translation>当前种子:</translation>
     </message>
@@ -2984,24 +3002,24 @@ Applies only to feature-structures of region-size = 32 and chunk-gap = 8, in par
         <translation>基于低48位(二进制)的种子集</translation>
     </message>
     <message>
-        <location filename="../../src/formsearchcontrol.ui" line="54"/>
+        <location filename="../../src/formsearchcontrol.ui" line="170"/>
         <source>Queued progress within search set</source>
         <translation>本次搜索中排队的进程</translation>
     </message>
     <message>
-        <location filename="../../src/formsearchcontrol.ui" line="87"/>
+        <location filename="../../src/formsearchcontrol.ui" line="125"/>
         <source>Clear results</source>
         <translation>清空结果</translation>
     </message>
     <message>
-        <location filename="../../src/formsearchcontrol.ui" line="98"/>
+        <location filename="../../src/formsearchcontrol.ui" line="136"/>
         <location filename="../../src/formsearchcontrol.cpp" line="284"/>
         <location filename="../../src/formsearchcontrol.cpp" line="402"/>
         <source>Start search</source>
         <translation>开始搜索</translation>
     </message>
     <message>
-        <location filename="../../src/formsearchcontrol.ui" line="78"/>
+        <location filename="../../src/formsearchcontrol.ui" line="109"/>
         <source>Idle</source>
         <translation>空闲</translation>
     </message>
@@ -3378,17 +3396,17 @@ Continue anyway?</source>
         <translation>上一个种子</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="458"/>
+        <location filename="../../src/mainwindow.ui" line="456"/>
         <source>Help</source>
         <translation>帮助</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="466"/>
+        <location filename="../../src/mainwindow.ui" line="464"/>
         <source>File</source>
         <translation>文件</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="480"/>
+        <location filename="../../src/mainwindow.ui" line="478"/>
         <source>Edit</source>
         <translation>编辑</translation>
     </message>
@@ -3454,8 +3472,18 @@ Continue anyway?</source>
     </message>
     <message>
         <location filename="../../src/mainwindow.ui" line="573"/>
-        <source>Preferences...</source>
-        <translation>偏好...</translation>
+        <source>Edit preferences...</source>
+        <translation>修改偏好...</translation>
+    </message>
+    <message>
+        <location filename="../../src/mainwindow.ui" line="608"/>
+        <source>Edit biome colors...</source>
+        <translation>修改群系颜色...</translation>
+    </message>
+    <message>
+        <location filename="../../src/mainwindow.ui" line="662"/>
+        <source>Edit map tools...</source>
+        <translation>地图工具选项...</translation>
     </message>
     <message>
         <location filename="../../src/mainwindow.ui" line="578"/>
@@ -3486,11 +3514,6 @@ Continue anyway?</source>
         <location filename="../../src/mainwindow.ui" line="603"/>
         <source>Load filter preset...</source>
         <translation>加载筛选条件...</translation>
-    </message>
-    <message>
-        <location filename="../../src/mainwindow.ui" line="608"/>
-        <source>Biome colors...</source>
-        <translation>群系颜色...</translation>
     </message>
     <message>
         <location filename="../../src/mainwindow.ui" line="619"/>
@@ -3536,11 +3559,6 @@ Continue anyway?</source>
         <location filename="../../src/mainwindow.ui" line="657"/>
         <source>Export biomes as image...</source>
         <translation>将群系图导出为图片...</translation>
-    </message>
-    <message>
-        <location filename="../../src/mainwindow.ui" line="662"/>
-        <source>Map toolbar options...</source>
-        <translation>地图工具选项...</translation>
     </message>
     <message>
         <location filename="../../src/mainwindow.ui" line="670"/>
@@ -3625,7 +3643,7 @@ Continue anyway?</source>
     <message>
         <location filename="../../src/mainwindow.ui" line="752"/>
         <location filename="../../src/mainwindow.cpp" line="874"/>
-        <location filename="../../src/mainwindow.cpp" line="1141"/>
+        <location filename="../../src/mainwindow.cpp" line="1142"/>
         <source>Undock map</source>
         <translation>开启地图小窗</translation>
     </message>
@@ -3675,11 +3693,6 @@ Continue anyway?</source>
         <translation>结构</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="131"/>
-        <source>Goto origin</source>
-        <translation>前往坐标原点并重置缩放比例</translation>
-    </message>
-    <message>
         <location filename="../../src/mainwindow.cpp" line="132"/>
         <source>Zoom In</source>
         <translation>放大</translation>
@@ -3713,6 +3726,11 @@ Continue anyway?</source>
         <location filename="../../src/mainwindow.cpp" line="203"/>
         <source>Conditions</source>
         <translation>条件</translation>
+    </message>
+    <message>
+        <location filename="../../src/mainwindow.cpp" line="131"/>
+        <source>Go to Origin</source>
+        <translation>前往坐标原点并重置缩放比例</translation>
     </message>
     <message>
         <location filename="../../src/mainwindow.cpp" line="206"/>
@@ -3776,8 +3794,8 @@ Continue anyway?</source>
     <message>
         <location filename="../../src/mainwindow.cpp" line="726"/>
         <location filename="../../src/mainwindow.cpp" line="738"/>
-        <source>Text files (*.txt);;Any files (*)</source>
-        <translation>文本文件 (*.txt);;任意文件 (*)</translation>
+        <source>Session files (*.session *.txt);;Any files (*)</source>
+        <translation>会话文件 (*.session *.txt);;任意文件 (*)</translation>
     </message>
     <message>
         <location filename="../../src/mainwindow.cpp" line="738"/>
@@ -4477,12 +4495,12 @@ Keep waiting for threads to stop?</source>
 <context>
     <name>SpinExclude</name>
     <message>
-        <location filename="../../src/conditiondialog.h" line="101"/>
+        <location filename="../../src/conditiondialog.h" line="106"/>
         <source>(ignore)</source>
         <translation>(忽略)</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.h" line="103"/>
+        <location filename="../../src/conditiondialog.h" line="108"/>
         <source>(exclude)</source>
         <translation>(不含)</translation>
     </message>
@@ -4490,12 +4508,12 @@ Keep waiting for threads to stop?</source>
 <context>
     <name>SpinInstances</name>
     <message>
-        <location filename="../../src/conditiondialog.h" line="138"/>
+        <location filename="../../src/conditiondialog.h" line="143"/>
         <source>(exclude)</source>
         <translation>(不含)</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.h" line="140"/>
+        <location filename="../../src/conditiondialog.h" line="145"/>
         <source>(cluster)</source>
         <translation>(多联)</translation>
     </message>
@@ -4524,7 +4542,7 @@ Keep waiting for threads to stop?</source>
     </message>
     <message>
         <location filename="../../src/tabbiomes.ui" line="38"/>
-        <location filename="../../src/tabbiomes.cpp" line="555"/>
+        <location filename="../../src/tabbiomes.cpp" line="566"/>
         <source>Analyze</source>
         <translation>统计</translation>
     </message>
@@ -4624,8 +4642,8 @@ Keep waiting for threads to stop?</source>
     </message>
     <message>
         <location filename="../../src/tabbiomes.ui" line="247"/>
-        <location filename="../../src/tabbiomes.cpp" line="776"/>
-        <location filename="../../src/tabbiomes.cpp" line="802"/>
+        <location filename="../../src/tabbiomes.cpp" line="787"/>
+        <location filename="../../src/tabbiomes.cpp" line="813"/>
         <source>seed</source>
         <translation>种子</translation>
     </message>
@@ -4636,13 +4654,13 @@ Keep waiting for threads to stop?</source>
     </message>
     <message>
         <location filename="../../src/tabbiomes.ui" line="267"/>
-        <location filename="../../src/tabbiomes.cpp" line="802"/>
+        <location filename="../../src/tabbiomes.cpp" line="813"/>
         <source>x</source>
         <translation>X</translation>
     </message>
     <message>
         <location filename="../../src/tabbiomes.ui" line="277"/>
-        <location filename="../../src/tabbiomes.cpp" line="802"/>
+        <location filename="../../src/tabbiomes.cpp" line="813"/>
         <source>z</source>
         <translation>Z</translation>
     </message>
@@ -4707,40 +4725,40 @@ Keep waiting for threads to stop?</source>
         <translation>10000</translation>
     </message>
     <message>
-        <location filename="../../src/tabbiomes.cpp" line="627"/>
-        <location filename="../../src/tabbiomes.cpp" line="726"/>
+        <location filename="../../src/tabbiomes.cpp" line="638"/>
+        <location filename="../../src/tabbiomes.cpp" line="737"/>
         <source>Stop</source>
         <translation>停止</translation>
     </message>
     <message>
-        <location filename="../../src/tabbiomes.cpp" line="687"/>
+        <location filename="../../src/tabbiomes.cpp" line="698"/>
         <source>The locate biome feature is limited to an area size smaller than the integer limit: (%1 x %2) &gt; %3.</source>
         <translation>群系定位器指定的范围面积过小: (%1 × %2) &gt; %3</translation>
     </message>
     <message>
-        <location filename="../../src/tabbiomes.cpp" line="745"/>
+        <location filename="../../src/tabbiomes.cpp" line="756"/>
         <source>Export biome analysis</source>
         <translation>导出群系统计结果</translation>
     </message>
     <message>
-        <location filename="../../src/tabbiomes.cpp" line="745"/>
+        <location filename="../../src/tabbiomes.cpp" line="756"/>
         <source>Text files (*.txt *csv);;Any files (*)</source>
         <translation>文本文件 (*.txt *csv);;任意文件 (*)</translation>
     </message>
     <message>
-        <location filename="../../src/tabbiomes.cpp" line="755"/>
+        <location filename="../../src/tabbiomes.cpp" line="766"/>
         <source>Failed to open file for export:
 &quot;%1&quot;</source>
         <translation>无法打开以下导出文件:
 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../../src/tabbiomes.cpp" line="802"/>
+        <location filename="../../src/tabbiomes.cpp" line="813"/>
         <source>area</source>
         <translation>区域</translation>
     </message>
     <message>
-        <location filename="../../src/tabbiomes.cpp" line="850"/>
+        <location filename="../../src/tabbiomes.cpp" line="861"/>
         <source>(%1 sq. chunks)</source>
         <translation>(%1 平方区块)</translation>
     </message>
@@ -4779,7 +4797,7 @@ Keep waiting for threads to stop?</source>
     </message>
     <message>
         <location filename="../../src/tabstructures.ui" line="58"/>
-        <location filename="../../src/tabstructures.cpp" line="338"/>
+        <location filename="../../src/tabstructures.cpp" line="356"/>
         <source>Analyze</source>
         <translation>统计</translation>
     </message>
@@ -4804,143 +4822,143 @@ Keep waiting for threads to stop?</source>
         <translation>展示所有结构</translation>
     </message>
     <message>
-        <location filename="../../src/tabstructures.ui" line="118"/>
-        <location filename="../../src/tabstructures.ui" line="188"/>
-        <location filename="../../src/tabstructures.cpp" line="503"/>
-        <location filename="../../src/tabstructures.cpp" line="544"/>
-        <location filename="../../src/tabstructures.cpp" line="570"/>
+        <location filename="../../src/tabstructures.ui" line="123"/>
+        <location filename="../../src/tabstructures.ui" line="193"/>
+        <location filename="../../src/tabstructures.cpp" line="521"/>
+        <location filename="../../src/tabstructures.cpp" line="562"/>
+        <location filename="../../src/tabstructures.cpp" line="588"/>
         <source>seed</source>
         <translation>种子</translation>
     </message>
     <message>
-        <location filename="../../src/tabstructures.ui" line="123"/>
-        <location filename="../../src/tabstructures.cpp" line="503"/>
+        <location filename="../../src/tabstructures.ui" line="128"/>
+        <location filename="../../src/tabstructures.cpp" line="521"/>
         <source>structure</source>
         <translation>结构</translation>
     </message>
     <message>
-        <location filename="../../src/tabstructures.ui" line="128"/>
+        <location filename="../../src/tabstructures.ui" line="133"/>
         <source>count</source>
         <translation>总数</translation>
     </message>
     <message>
-        <location filename="../../src/tabstructures.ui" line="133"/>
-        <location filename="../../src/tabstructures.ui" line="203"/>
-        <location filename="../../src/tabstructures.cpp" line="503"/>
-        <location filename="../../src/tabstructures.cpp" line="570"/>
+        <location filename="../../src/tabstructures.ui" line="138"/>
+        <location filename="../../src/tabstructures.ui" line="208"/>
+        <location filename="../../src/tabstructures.cpp" line="521"/>
+        <location filename="../../src/tabstructures.cpp" line="588"/>
         <source>x</source>
         <translation>X</translation>
     </message>
     <message>
-        <location filename="../../src/tabstructures.ui" line="138"/>
-        <location filename="../../src/tabstructures.ui" line="208"/>
-        <location filename="../../src/tabstructures.cpp" line="503"/>
-        <location filename="../../src/tabstructures.cpp" line="570"/>
+        <location filename="../../src/tabstructures.ui" line="143"/>
+        <location filename="../../src/tabstructures.ui" line="213"/>
+        <location filename="../../src/tabstructures.cpp" line="521"/>
+        <location filename="../../src/tabstructures.cpp" line="588"/>
         <source>z</source>
         <translation>Z</translation>
     </message>
     <message>
-        <location filename="../../src/tabstructures.ui" line="143"/>
-        <location filename="../../src/tabstructures.cpp" line="503"/>
+        <location filename="../../src/tabstructures.ui" line="148"/>
+        <location filename="../../src/tabstructures.cpp" line="521"/>
         <source>details</source>
         <translation>详细信息</translation>
     </message>
     <message>
-        <location filename="../../src/tabstructures.ui" line="152"/>
+        <location filename="../../src/tabstructures.ui" line="157"/>
         <source>Quad-Structures</source>
         <translation>四联结构</translation>
     </message>
     <message>
-        <location filename="../../src/tabstructures.ui" line="193"/>
-        <location filename="../../src/tabstructures.cpp" line="570"/>
+        <location filename="../../src/tabstructures.ui" line="198"/>
+        <location filename="../../src/tabstructures.cpp" line="588"/>
         <source>type</source>
         <translation>种类</translation>
     </message>
     <message>
-        <location filename="../../src/tabstructures.ui" line="198"/>
-        <location filename="../../src/tabstructures.cpp" line="570"/>
+        <location filename="../../src/tabstructures.ui" line="203"/>
+        <location filename="../../src/tabstructures.cpp" line="588"/>
         <source>distance</source>
         <translation>距离</translation>
     </message>
     <message>
-        <location filename="../../src/tabstructures.ui" line="213"/>
-        <location filename="../../src/tabstructures.cpp" line="570"/>
+        <location filename="../../src/tabstructures.ui" line="218"/>
+        <location filename="../../src/tabstructures.cpp" line="588"/>
         <source>radius</source>
         <translation>半径</translation>
     </message>
     <message>
-        <location filename="../../src/tabstructures.ui" line="218"/>
-        <location filename="../../src/tabstructures.cpp" line="570"/>
+        <location filename="../../src/tabstructures.ui" line="223"/>
+        <location filename="../../src/tabstructures.cpp" line="588"/>
         <source>spawn area</source>
         <translation>有效刷怪面积</translation>
     </message>
     <message>
-        <location filename="../../src/tabstructures.ui" line="234"/>
-        <location filename="../../src/tabstructures.ui" line="244"/>
-        <location filename="../../src/tabstructures.ui" line="254"/>
-        <location filename="../../src/tabstructures.ui" line="264"/>
+        <location filename="../../src/tabstructures.ui" line="239"/>
+        <location filename="../../src/tabstructures.ui" line="249"/>
+        <location filename="../../src/tabstructures.ui" line="259"/>
+        <location filename="../../src/tabstructures.ui" line="269"/>
         <source>Lower bound (inclusive)</source>
         <translation>最小值(含)</translation>
     </message>
     <message>
-        <location filename="../../src/tabstructures.ui" line="237"/>
+        <location filename="../../src/tabstructures.ui" line="242"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;X&lt;span style=&quot; vertical-align:sub;&quot;&gt;1&lt;/span&gt;:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>X&lt;sub&gt;1&lt;/sub&gt;:</translation>
     </message>
     <message>
-        <location filename="../../src/tabstructures.ui" line="247"/>
-        <location filename="../../src/tabstructures.ui" line="267"/>
-        <location filename="../../src/tabstructures.ui" line="294"/>
-        <location filename="../../src/tabstructures.ui" line="314"/>
+        <location filename="../../src/tabstructures.ui" line="252"/>
+        <location filename="../../src/tabstructures.ui" line="272"/>
+        <location filename="../../src/tabstructures.ui" line="299"/>
+        <location filename="../../src/tabstructures.ui" line="319"/>
         <source>0</source>
         <translation>0</translation>
     </message>
     <message>
-        <location filename="../../src/tabstructures.ui" line="257"/>
+        <location filename="../../src/tabstructures.ui" line="262"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Z&lt;span style=&quot; vertical-align:sub;&quot;&gt;1&lt;/span&gt;:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>Z&lt;sub&gt;1&lt;/sub&gt;:</translation>
     </message>
     <message>
-        <location filename="../../src/tabstructures.ui" line="281"/>
-        <location filename="../../src/tabstructures.ui" line="291"/>
-        <location filename="../../src/tabstructures.ui" line="301"/>
-        <location filename="../../src/tabstructures.ui" line="311"/>
+        <location filename="../../src/tabstructures.ui" line="286"/>
+        <location filename="../../src/tabstructures.ui" line="296"/>
+        <location filename="../../src/tabstructures.ui" line="306"/>
+        <location filename="../../src/tabstructures.ui" line="316"/>
         <source>Upper bound (inclusive)</source>
         <translation>最大值(含)</translation>
     </message>
     <message>
-        <location filename="../../src/tabstructures.ui" line="284"/>
+        <location filename="../../src/tabstructures.ui" line="289"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;X&lt;span style=&quot; vertical-align:sub;&quot;&gt;2&lt;/span&gt;:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>X&lt;sub&gt;2&lt;/sub&gt;:</translation>
     </message>
     <message>
-        <location filename="../../src/tabstructures.ui" line="304"/>
+        <location filename="../../src/tabstructures.ui" line="309"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Z&lt;span style=&quot; vertical-align:sub;&quot;&gt;2&lt;/span&gt;:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>Z&lt;sub&gt;2&lt;/sub&gt;:</translation>
     </message>
     <message>
-        <location filename="../../src/tabstructures.ui" line="323"/>
+        <location filename="../../src/tabstructures.ui" line="328"/>
         <source>From visible</source>
         <translation>使用可见范围</translation>
     </message>
     <message>
-        <location filename="../../src/tabstructures.cpp" line="368"/>
-        <location filename="../../src/tabstructures.cpp" line="454"/>
+        <location filename="../../src/tabstructures.cpp" line="386"/>
+        <location filename="../../src/tabstructures.cpp" line="472"/>
         <source>Stop</source>
         <translation>停止</translation>
     </message>
     <message>
-        <location filename="../../src/tabstructures.cpp" line="473"/>
+        <location filename="../../src/tabstructures.cpp" line="491"/>
         <source>Export structure analysis</source>
         <translation>导出结构统计结果</translation>
     </message>
     <message>
-        <location filename="../../src/tabstructures.cpp" line="473"/>
+        <location filename="../../src/tabstructures.cpp" line="491"/>
         <source>Text files (*.txt *csv);;Any files (*)</source>
         <translation>文本文件 (*.txt *csv);;任意文件 (*)</translation>
     </message>
     <message>
-        <location filename="../../src/tabstructures.cpp" line="483"/>
+        <location filename="../../src/tabstructures.cpp" line="501"/>
         <source>Failed to open file for export:
 &quot;%1&quot;</source>
         <translation>无法打开以下导出文件:
@@ -4961,25 +4979,25 @@ Keep waiting for threads to stop?</source>
     </message>
     <message>
         <location filename="../../src/tabtriggers.ui" line="43"/>
-        <location filename="../../src/tabtriggers.cpp" line="283"/>
+        <location filename="../../src/tabtriggers.cpp" line="293"/>
         <source>seed</source>
         <translation>种子</translation>
     </message>
     <message>
         <location filename="../../src/tabtriggers.ui" line="53"/>
-        <location filename="../../src/tabtriggers.cpp" line="283"/>
+        <location filename="../../src/tabtriggers.cpp" line="293"/>
         <source>condition</source>
         <translation>条件</translation>
     </message>
     <message>
         <location filename="../../src/tabtriggers.ui" line="63"/>
-        <location filename="../../src/tabtriggers.cpp" line="283"/>
+        <location filename="../../src/tabtriggers.cpp" line="293"/>
         <source>x</source>
         <translation>X</translation>
     </message>
     <message>
         <location filename="../../src/tabtriggers.ui" line="73"/>
-        <location filename="../../src/tabtriggers.cpp" line="283"/>
+        <location filename="../../src/tabtriggers.cpp" line="293"/>
         <source>z</source>
         <translation>Z</translation>
     </message>
@@ -5010,28 +5028,28 @@ Keep waiting for threads to stop?</source>
     </message>
     <message>
         <location filename="../../src/tabtriggers.ui" line="132"/>
-        <location filename="../../src/tabtriggers.cpp" line="161"/>
+        <location filename="../../src/tabtriggers.cpp" line="171"/>
         <source>Analyze</source>
         <translation>统计</translation>
     </message>
     <message>
-        <location filename="../../src/tabtriggers.cpp" line="175"/>
-        <location filename="../../src/tabtriggers.cpp" line="214"/>
+        <location filename="../../src/tabtriggers.cpp" line="185"/>
+        <location filename="../../src/tabtriggers.cpp" line="224"/>
         <source>Stop</source>
         <translation>停止</translation>
     </message>
     <message>
-        <location filename="../../src/tabtriggers.cpp" line="262"/>
+        <location filename="../../src/tabtriggers.cpp" line="272"/>
         <source>Export trigger analysis</source>
         <translation>导出触发器统计结果</translation>
     </message>
     <message>
-        <location filename="../../src/tabtriggers.cpp" line="262"/>
+        <location filename="../../src/tabtriggers.cpp" line="272"/>
         <source>Text files (*.txt *csv);;Any files (*)</source>
         <translation>文本文件 (*.txt *csv);;任意文件 (*)</translation>
     </message>
     <message>
-        <location filename="../../src/tabtriggers.cpp" line="272"/>
+        <location filename="../../src/tabtriggers.cpp" line="282"/>
         <source>Failed to open file for export:
 &quot;%1&quot;</source>
         <translation>无法打开以下导出文件:
