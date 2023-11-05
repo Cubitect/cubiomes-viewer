@@ -27,7 +27,10 @@ BiomeColorDialog::BiomeColorDialog(MainWindow *parent, QString initrc, int mc, i
     , modified()
 {
     ui->setupUi(this);
-    ui->buttonOk->setIcon(style()->standardIcon(QStyle::SP_DialogOkButton));
+    connect(ui->buttonRemove, &QPushButton::clicked, this, &BiomeColorDialog::onRemove);
+    connect(ui->buttonSaveAs, &QPushButton::clicked, this, &BiomeColorDialog::onSaveAs);
+    connect(ui->buttonExport, &QPushButton::clicked, this, &BiomeColorDialog::onExport);
+    connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &BiomeColorDialog::onAccept);
 
     memcpy(colors, g_biomeColors, sizeof(colors));
     memset(buttons, 0, sizeof(buttons));
@@ -35,11 +38,12 @@ BiomeColorDialog::BiomeColorDialog(MainWindow *parent, QString initrc, int mc, i
     unsigned char coldefault[256][3];
     initBiomeColors(coldefault);
 
-    QPushButton *button;
     ui->gridLayout->setSpacing(2);
 
     separator = new QLabel(tr("Currently inactive biomes:"), this);
     separator->setVisible(false);
+
+    QPushButton *button;
 
     button = new QPushButton(getColorIcon(QColor(0,0,0,0), QPen(Qt::transparent)), tr("Import..."), this);
     connect(button, &QPushButton::clicked, this, &BiomeColorDialog::onImport);
@@ -277,7 +281,7 @@ void BiomeColorDialog::on_comboColormaps_currentIndexChanged(int index)
     if (modified)
     {
         if (activerc.isEmpty())
-            on_buttonSaveAs_clicked();
+            onSaveAs();
         else
             saveColormap(activerc, "");
     }
@@ -286,7 +290,7 @@ void BiomeColorDialog::on_comboColormaps_currentIndexChanged(int index)
     loadColormap(activerc, true);
 }
 
-void BiomeColorDialog::on_buttonSaveAs_clicked()
+void BiomeColorDialog::onSaveAs()
 {
     QString rc;
     int n;
@@ -310,7 +314,7 @@ void BiomeColorDialog::on_buttonSaveAs_clicked()
     activerc = rc;
 }
 
-void BiomeColorDialog::on_buttonExport_clicked()
+void BiomeColorDialog::onExport()
 {
     QFileInfo finfo(mainwindow->prevdir);
     QString fnam = QFileDialog::getSaveFileName(
@@ -333,7 +337,7 @@ void BiomeColorDialog::on_buttonExport_clicked()
     }
 }
 
-void BiomeColorDialog::on_buttonRemove_clicked()
+void BiomeColorDialog::onRemove()
 {
     QString rc = qvariant_cast<QString>(ui->comboColormaps->currentData());
     if (!rc.isEmpty())
@@ -345,7 +349,7 @@ void BiomeColorDialog::on_buttonRemove_clicked()
     }
 }
 
-void BiomeColorDialog::on_buttonOk_clicked()
+void BiomeColorDialog::onAccept()
 {
     on_comboColormaps_currentIndexChanged(ui->comboColormaps->currentIndex());
     emit yieldBiomeColorRc(activerc);

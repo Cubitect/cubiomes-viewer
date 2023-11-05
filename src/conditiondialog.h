@@ -188,6 +188,9 @@ public:
     void updateBiomeSelection();
     int warnIfBad(Condition cond);
 
+    void onReject();
+    void onAccept();
+
     void getClimateLimits(int limok[6][2], int limex[6][2]);
     void getClimateLimits(LabeledRange *ranges[6], int limits[6][2]);
     void setClimateLimits(LabeledRange *ranges[6], int limits[6][2], bool complete);
@@ -212,10 +215,6 @@ private slots:
 
     void on_lineSquare_editingFinished();
     //void on_lineRadius_editingFinished();
-
-    void on_buttonCancel_clicked();
-
-    void on_buttonOk_clicked();
 
     void on_ConditionDialog_finished(int result);
 

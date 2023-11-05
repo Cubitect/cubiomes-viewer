@@ -7,6 +7,13 @@
 static
 int term_prompt(const QString& title, const QString& text, QMessageBox::StandardButtons buttons)
 {
+    // translations for QGnomeTheme as they may override QPlatformThemes
+    QApplication::translate("QGnomeTheme", "&OK");
+    QApplication::translate("QGnomeTheme", "&Save");
+    QApplication::translate("QGnomeTheme", "&Cancel");
+    QApplication::translate("QGnomeTheme", "&Close");
+    QApplication::translate("QGnomeTheme", "Close without Saving");
+
     QTextStream out (stdout);
     out << QString("[%1]\n%2\n---\n").arg(title).arg(text);
     std::vector<std::pair<QString, int>> opts;

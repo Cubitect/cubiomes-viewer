@@ -48,6 +48,9 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
     memset(&cond, 0, sizeof(cond));
     ui->setupUi(this);
 
+    connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &ConditionDialog::onAccept);
+    connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &ConditionDialog::onReject);
+
     textDescription = new QTextEdit(this);
     textDescription->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
     ui->collapseDescription->init(tr("Description/Notes"), textDescription, true);
@@ -637,7 +640,7 @@ void ConditionDialog::updateMode()
     ui->lineEditZ1->setToolTip(lowtip);
     ui->lineEditX2->setToolTip(uptip);
     ui->lineEditZ2->setToolTip(uptip);
-    ui->buttonOk->setEnabled(filterindex != F_SELECT);
+    ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(filterindex != F_SELECT);
     textDescription->setText(QApplication::translate("Filter", ft.description));
 }
 
@@ -862,97 +865,6 @@ int ConditionDialog::warnIfBad(Condition cond)
     return QMessageBox::Ok;
 }
 
-void ConditionDialog::on_comboBoxType_activated(int)
-{
-    updateMode();
-}
-
-void ConditionDialog::on_comboBoxRelative_activated(int)
-{
-    QPalette pal;
-    if (ui->comboBoxRelative->currentText().contains(WARNING_CHAR))
-        pal.setColor(QPalette::Normal, QPalette::Button, QColor(255,0,0,127));
-    ui->comboBoxRelative->setPalette(pal);
-}
-
-void ConditionDialog::on_buttonUncheck_clicked()
-{
-    for (const auto& it : biomecboxes)
-        it.second->setCheckState(Qt::Unchecked);
-}
-
-void ConditionDialog::on_buttonInclude_clicked()
-{
-    for (const auto& it : biomecboxes)
-        it.second->setCheckState(it.second->isEnabled() ? Qt::PartiallyChecked : Qt::Unchecked);
-}
-
-void ConditionDialog::on_buttonExclude_clicked()
-{
-    for (const auto& it : biomecboxes)
-        it.second->setCheckState(it.second->isEnabled() ? Qt::Checked : Qt::Unchecked);
-}
-
-void ConditionDialog::on_buttonAreaInfo_clicked()
-{
-    QMessageBox mb(this);
-    mb.setIcon(QMessageBox::Information);
-    mb.setWindowTitle(tr("Help: area entry"));
-    mb.setText(tr(
-        "<html><head/><body><p>"
-        "The area can be entered via <b>custom</b> rectangle, that is defined "
-        "by its two opposing corners, relative to a center point. These bounds "
-        "are inclusive."
-        "</p><p>"
-        "Alternatively, the area can be defined as a <b>centered square</b> "
-        "with a certain side length. In this case the area has the bounds: "
-        "[-X/2, -X/2] on both axes, rounding down and bounds included. For "
-        "example a centered square with side 3 will go from -2 to 1 for both "
-        "the X and Z axes."
-        "</p><p>"
-        "Important to note is that some filters have a scaling associated with "
-        "them. This means that the area is not defined in blocks, but on a grid "
-        "with the given spacing (such as chunks instead of blocks). A scaling "
-        "of 1:16, for example, means that the aforementioned centered square of "
-        "side 3 will range from -32 to 31 in block coordinates. (Chunk 1 has "
-        "blocks 16 to 31.)"
-        "</p></body></html>"
-        ));
-    mb.exec();
-}
-
-void ConditionDialog::on_checkRadius_toggled(bool)
-{
-    updateMode();
-}
-
-void ConditionDialog::on_radioSquare_toggled(bool)
-{
-    updateMode();
-}
-
-void ConditionDialog::on_radioCustom_toggled(bool)
-{
-    updateMode();
-}
-
-void ConditionDialog::on_lineSquare_editingFinished()
-{
-    int v = ui->lineSquare->text().toInt();
-    int area = (v+1) * (v+1);
-    for (int i = 0; i < 9; i++)
-    {
-        if (tempsboxes[i])
-            tempsboxes[i]->setMaximum(area);
-    }
-}
-
-void ConditionDialog::on_buttonCancel_clicked()
-{
-    on_comboLua_currentIndexChanged(-1);
-    close();
-}
-
 static uint16_t tristateFlags(QCheckBox *cb, uint16_t flg)
 {
     uint16_t ret = 0;
@@ -965,7 +877,14 @@ static uint16_t tristateFlags(QCheckBox *cb, uint16_t flg)
     return ret;
 }
 
-void ConditionDialog::on_buttonOk_clicked()
+
+void ConditionDialog::onReject()
+{
+    on_comboLua_currentIndexChanged(-1);
+    close();
+}
+
+void ConditionDialog::onAccept()
 {
     on_pushLuaSave_clicked();
 
@@ -1108,6 +1027,91 @@ void ConditionDialog::on_buttonOk_clicked()
     emit setCond(item, cond, 1);
     item = 0;
     close();
+}
+
+void ConditionDialog::on_comboBoxType_activated(int)
+{
+    updateMode();
+}
+
+void ConditionDialog::on_comboBoxRelative_activated(int)
+{
+    QPalette pal;
+    if (ui->comboBoxRelative->currentText().contains(WARNING_CHAR))
+        pal.setColor(QPalette::Normal, QPalette::Button, QColor(255,0,0,127));
+    ui->comboBoxRelative->setPalette(pal);
+}
+
+void ConditionDialog::on_buttonUncheck_clicked()
+{
+    for (const auto& it : biomecboxes)
+        it.second->setCheckState(Qt::Unchecked);
+}
+
+void ConditionDialog::on_buttonInclude_clicked()
+{
+    for (const auto& it : biomecboxes)
+        it.second->setCheckState(it.second->isEnabled() ? Qt::PartiallyChecked : Qt::Unchecked);
+}
+
+void ConditionDialog::on_buttonExclude_clicked()
+{
+    for (const auto& it : biomecboxes)
+        it.second->setCheckState(it.second->isEnabled() ? Qt::Checked : Qt::Unchecked);
+}
+
+void ConditionDialog::on_buttonAreaInfo_clicked()
+{
+    QMessageBox mb(this);
+    mb.setIcon(QMessageBox::Information);
+    mb.setWindowTitle(tr("Help: area entry"));
+    mb.setText(tr(
+        "<html><head/><body><p>"
+        "The area can be entered via <b>custom</b> rectangle, that is defined "
+        "by its two opposing corners, relative to a center point. These bounds "
+        "are inclusive."
+        "</p><p>"
+        "Alternatively, the area can be defined as a <b>centered square</b> "
+        "with a certain side length. In this case the area has the bounds: "
+        "[-X/2, -X/2] on both axes, rounding down and bounds included. For "
+        "example a centered square with side 3 will go from -2 to 1 for both "
+        "the X and Z axes."
+        "</p><p>"
+        "Important to note is that some filters have a scaling associated with "
+        "them. This means that the area is not defined in blocks, but on a grid "
+        "with the given spacing (such as chunks instead of blocks). A scaling "
+        "of 1:16, for example, means that the aforementioned centered square of "
+        "side 3 will range from -32 to 31 in block coordinates. (Chunk 1 has "
+        "blocks 16 to 31.)"
+        "</p></body></html>"
+        ));
+    mb.exec();
+}
+
+void ConditionDialog::on_checkRadius_toggled(bool)
+{
+    updateMode();
+}
+
+void ConditionDialog::on_radioSquare_toggled(bool)
+{
+    updateMode();
+}
+
+void ConditionDialog::on_radioCustom_toggled(bool)
+{
+    updateMode();
+}
+
+void ConditionDialog::on_lineSquare_editingFinished()
+{
+    int v = ui->lineSquare->text().toInt();
+    int area = (v+1) * (v+1);
+    for (int i = 0; i < 9; i++)
+    {
+        if (tempsboxes[i])
+            tempsboxes[i]->setMaximum(area);
+    }
 }
 
 void ConditionDialog::on_ConditionDialog_finished(int result)

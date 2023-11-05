@@ -60,8 +60,8 @@ PresetDialog::PresetDialog(QWidget *parent, WorldInfo wi, bool showEamples)
     resize(fontMetrics().horizontalAdvance('x') * 128, fontMetrics().height() * 32);
 
     ui->labelMC->setText(tr("MC ") + mc2str(wi.mc));
-    connect(ui->buttonOk, &QPushButton::clicked, this, &QDialog::accept);
-    connect(ui->buttonCancel, &QPushButton::clicked, this, &QDialog::reject);
+    connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
+    connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
 
     if (showEamples)
         ui->tabWidget->setCurrentWidget(ui->tabExamples);
@@ -203,13 +203,13 @@ void PresetDialog::updateSelection()
         ui->formCond->on_buttonRemoveAll_clicked();
         for (Condition& c : presets[rc].condvec)
             ui->formCond->addItemCondition(new QListWidgetItem(), c);
-        ui->buttonOk->setEnabled(true);
+        ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
     }
     else
     {
         ui->textDesc->clear();
         ui->formCond->on_buttonRemoveAll_clicked();
-        ui->buttonOk->setEnabled(false);
+        ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
     }
 }
 

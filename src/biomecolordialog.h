@@ -33,16 +33,15 @@ public slots:
 private slots:
     void on_comboColormaps_currentIndexChanged(int index);
 
-    void on_buttonSaveAs_clicked();
-    void on_buttonRemove_clicked();
-    void on_buttonOk_clicked();
-
+    void onSaveAs();
+    void onExport();
+    void onRemove();
+    void onAccept();
     void onImport();
     void onColorHelp();
     void onAllToDefault();
     void onAllToDimmed();
 
-    void on_buttonExport_clicked();
 
 private:
     Ui::BiomeColorDialog *ui;
