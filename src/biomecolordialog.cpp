@@ -365,7 +365,7 @@ void BiomeColorDialog::onImport()
             warn(this, tr("No biome colors found."));
             return;
         }
-        info(this, tr("Replaced %1 biome colors.").arg(n));
+        info(this, tr("Replaced %n biome color(s).", "", n));
         modified = true;
     }
 }
