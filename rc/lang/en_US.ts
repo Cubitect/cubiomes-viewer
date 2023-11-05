@@ -2,13 +2,13 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="en">
 <context>
-    <name>ConfigDialog</name>
+    <name>BiomeColorDialog</name>
     <message numerus="yes">
-        <location filename="../../src/configdialog.cpp" line="146"/>
-        <source>[%n biome(s)] %1</source>
+        <location filename="../../src/biomecolordialog.cpp" line="372"/>
+        <source>Replaced %n biome color(s).</source>
         <translation>
-            <numerusform>[%n biome] %1</numerusform>
-            <numerusform>[%n biomes] %1</numerusform>
+            <numerusform>Replaced %n biome color.</numerusform>
+            <numerusform>Replaced %n biome colors.</numerusform>
         </translation>
     </message>
 </context>
@@ -62,7 +62,7 @@
 <context>
     <name>FormSearchControl</name>
     <message numerus="yes">
-        <location filename="../../src/formsearchcontrol.cpp" line="461"/>
+        <location filename="../../src/formsearchcontrol.cpp" line="475"/>
         <source>Paste %n seed(s) from clipboard</source>
         <translation>
             <numerusform>Paste %n seed from clipboard</numerusform>
@@ -81,7 +81,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/searchthread.cpp" line="690"/>
+        <location filename="../../src/searchthread.cpp" line="716"/>
         <source>Failed to stop %n worker thread(s).
 Keep waiting for threads to stop?</source>
         <translation>
