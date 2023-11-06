@@ -549,10 +549,6 @@
         <translation>群系颜色编辑器</translation>
     </message>
     <message>
-        <source>OK</source>
-        <translation type="obsolete">确定</translation>
-    </message>
-    <message>
         <location filename="../../src/biomecolordialog.ui" line="68"/>
         <source>Biome color map:</source>
         <translation>群系颜色图:</translation>
@@ -571,10 +567,6 @@
         <location filename="../../src/biomecolordialog.ui" line="52"/>
         <source>Remove</source>
         <translation>删除</translation>
-    </message>
-    <message>
-        <source>Ok</source>
-        <translation type="vanished">确定</translation>
     </message>
     <message>
         <location filename="../../src/biomecolordialog.cpp" line="43"/>
@@ -650,13 +642,9 @@
     <message numerus="yes">
         <location filename="../../src/biomecolordialog.cpp" line="372"/>
         <source>Replaced %n biome color(s).</source>
-        <translation type="unfinished">
+        <translation>
             <numerusform>替换了 %n 种群系的颜色！</numerusform>
         </translation>
-    </message>
-    <message>
-        <source>Replaced %1 biome colors.</source>
-        <translation type="vanished">替换了 %1 种群系的颜色！</translation>
     </message>
     <message>
         <location filename="../../src/biomecolordialog.cpp" line="379"/>
@@ -1235,18 +1223,6 @@
         <location filename="../../src/conditiondialog.ui" line="1604"/>
         <source>Basement</source>
         <translation>包含地下室</translation>
-    </message>
-    <message>
-        <source>Cancel</source>
-        <translation type="vanished">取消</translation>
-    </message>
-    <message>
-        <source>OK</source>
-        <translation type="obsolete">确认</translation>
-    </message>
-    <message>
-        <source>Ok</source>
-        <translation type="vanished">确认</translation>
     </message>
     <message>
         <location filename="../../src/conditiondialog.cpp" line="28"/>
@@ -4059,18 +4035,6 @@ Continue anyway?</source>
         <translation>MC版本: 1.X</translation>
     </message>
     <message>
-        <source>OK</source>
-        <translation type="obsolete">保存</translation>
-    </message>
-    <message>
-        <source>Ok</source>
-        <translation type="vanished">保存</translation>
-    </message>
-    <message>
-        <source>Cancel</source>
-        <translation type="vanished">取消</translation>
-    </message>
-    <message>
         <location filename="../../src/presetdialog.cpp" line="62"/>
         <source>MC </source>
         <translation>MC </translation>
@@ -4294,27 +4258,27 @@ Continue anyway?</source>
     <message>
         <location filename="../../src/message.cpp" line="11"/>
         <source>&amp;OK</source>
-        <translation type="unfinished">确认</translation>
+        <translation>&amp;确认</translation>
     </message>
     <message>
         <location filename="../../src/message.cpp" line="12"/>
         <source>&amp;Save</source>
-        <translation type="unfinished">保存</translation>
+        <translation>&amp;保存</translation>
     </message>
     <message>
         <location filename="../../src/message.cpp" line="13"/>
         <source>&amp;Cancel</source>
-        <translation type="unfinished">取消</translation>
+        <translation>&amp;取消</translation>
     </message>
     <message>
         <location filename="../../src/message.cpp" line="14"/>
         <source>&amp;Close</source>
-        <translation type="unfinished">关闭</translation>
+        <translation>&amp;关闭</translation>
     </message>
     <message>
         <location filename="../../src/message.cpp" line="15"/>
         <source>Close without Saving</source>
-        <translation type="unfinished"></translation>
+        <translation>关闭但不保存</translation>
     </message>
 </context>
 <context>
