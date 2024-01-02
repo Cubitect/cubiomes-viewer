@@ -288,8 +288,8 @@ void FormSearchControl::searchLockUi(bool lock)
         ui->buttonStart->setEnabled(true);
         ui->comboSearchType->setEnabled(true);
         ui->spinThreads->setEnabled(true);
-        int st = ui->comboSearchType->currentIndex();
-        ui->buttonMore->setEnabled(st == SEARCH_INC || st == SEARCH_LIST);
+        int type = ui->comboSearchType->currentData().toInt();
+        ui->buttonMore->setEnabled(type == SEARCH_INC || type == SEARCH_LIST);
     }
     emit searchStatusChanged(lock);
 }
@@ -513,9 +513,10 @@ void FormSearchControl::on_buttonSearchHelp_clicked()
     mb.exec();
 }
 
-void FormSearchControl::on_comboSearchType_currentIndexChanged(int index)
+void FormSearchControl::on_comboSearchType_currentIndexChanged(int)
 {
-    ui->buttonMore->setEnabled(index == SEARCH_INC || index == SEARCH_LIST);
+    int type = ui->comboSearchType->currentData().toInt();
+    ui->buttonMore->setEnabled(type == SEARCH_INC || type == SEARCH_LIST);
     searchProgressReset();
 }
 
