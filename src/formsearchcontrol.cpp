@@ -229,6 +229,7 @@ void FormSearchControl::stopSearch()
     sthread.stop();
     //sthread.quit(); // tell the event loop to exit
     //sthread.wait(); // wait for search to finish
+    onBufferTimeout();
 }
 
 bool FormSearchControl::setList64(QString path, bool quiet)
@@ -649,7 +650,7 @@ int FormSearchControl::searchResultsAdd(std::vector<uint64_t> seeds, bool counto
     }
     if (countonly == false && n >= config.maxMatching)
     {
-        sthread.stop();
+        stopSearch();
         warn(this, tr("Maximum number of results reached (%1).").arg(config.maxMatching));
     }
 
@@ -733,6 +734,7 @@ void FormSearchControl::updateSearchProgress(uint64_t prog, uint64_t end, int64_
 void FormSearchControl::searchFinish(bool done)
 {
     stimer.stop();
+    onBufferTimeout();
     progressTimeout();
     if (done)
     {

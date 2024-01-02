@@ -105,7 +105,7 @@ bool Condition::versionUpgrade()
     }
     else if (version == VER_2_4_0)
     {
-        if (vmin != 0)
+        if (type == F_CLIMATE_MINMAX)
         {
             switch (minmax)
             {
@@ -1810,9 +1810,14 @@ L_noise_biome:
             double *p_max = (cond->minmax & Condition::E_LOCATE_MAX) ? para+1 : nullptr;
             getParaRange(&env->g.bn.climate[cond->para], p_min, p_max,
                     rx1, rz1, w, h, &info, f_track_minmax);
-            if ((cond->minmax & Condition::E_TEST_LOWER) && para[0] > cond->vmin)
+            double v;
+            double vmin = cond->minmax & Condition::E_TEST_LOWER ? cond->vmin : -INFINITY;
+            double vmax = cond->minmax & Condition::E_TEST_UPPER ? cond->vmax : +INFINITY;
+            v = p_min ? info.vmin : info.vmax;
+            if (v < vmin)
                 return COND_FAILED;
-            if ((cond->minmax & Condition::E_TEST_UPPER) && para[1] < cond->vmax)
+            v = p_max ? info.vmax : info.vmin;
+            if (v > vmax)
                 return COND_FAILED;
             *cent = at;
             if (cond->minmax & Condition::E_LOCATE_MIN)
