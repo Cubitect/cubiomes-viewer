@@ -19,6 +19,7 @@
 #include <QStandardItemModel>
 
 class MainWindow;
+class MapView;
 
 namespace Ui {
 class ConditionDialog;
@@ -180,7 +181,7 @@ class ConditionDialog : public QDialog
 
 public:
 
-    explicit ConditionDialog(FormConditions *parent, Config *config, int mc, QListWidgetItem *item = 0, Condition *initcond = 0);
+    explicit ConditionDialog(FormConditions *parent, MapView *mapview, Config *config, WorldInfo wi, QListWidgetItem *item = 0, Condition *initcond = 0);
     virtual ~ConditionDialog();
 
     void addTempCat(int temp, QString name);
@@ -199,15 +200,16 @@ signals:
     void setCond(QListWidgetItem *item, Condition cond, int modified);
 
 private slots:
-    void on_comboBoxType_activated(int);
+    void on_comboType_activated(int);
 
-    void on_comboBoxRelative_activated(int);
+    void on_comboRelative_activated(int);
 
     void on_buttonUncheck_clicked();
     void on_buttonInclude_clicked();
     void on_buttonExclude_clicked();
 
     void on_buttonAreaInfo_clicked();
+    void on_buttonFromVisible_clicked();
 
     void on_checkRadius_toggled(bool checked);
     void on_radioSquare_toggled(bool checked);
@@ -218,7 +220,7 @@ private slots:
 
     void on_ConditionDialog_finished(int result);
 
-    void on_comboBoxCat_currentIndexChanged(int);
+    void on_comboCat_currentIndexChanged(int);
 
     void onCheckStartChanged(int state);
     void onClimateLimitChanged();
@@ -236,6 +238,7 @@ private slots:
     void on_pushInfoLua_clicked();
 
     void on_comboClimatePara_currentIndexChanged(int index);
+    void on_comboOctaves_currentIndexChanged(int index);
 
     void on_comboY_currentTextChanged(const QString &text);
     void on_comboY2_currentTextChanged(const QString &text);
@@ -255,10 +258,11 @@ private:
     uint64_t luahash;
 
 public:
+    MapView *mapview;
     Config *config;
     QListWidgetItem *item;
     Condition cond;
-    int mc;
+    WorldInfo wi;
 };
 
 #endif // CONDITIONDIALOG_H

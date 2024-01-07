@@ -32,6 +32,10 @@ win32: {
 static_gnu: {
     LIBS += -static -static-libgcc -static-libstdc++
 }
+sanitizer: {
+    QMAKE_CFLAGS += -fsanitize=undefined
+    LIBS += -lubsan -ldl
+}
 
 gcc {
     greaterThan(QMAKE_GCC_MAJOR_VERSION, 9): QMAKE_CXXFLAGS += -Wno-deprecated-copy
@@ -39,10 +43,6 @@ gcc {
 
 CONFIG(debug, debug|release): {
     CUTARGET = debug
-    !win32 {
-        QMAKE_CFLAGS += -fsanitize=undefined
-        LIBS += -lubsan -ldl
-    }
 } else {
     CUTARGET = release
 }
@@ -115,6 +115,7 @@ SOURCES += \
         src/search.cpp \
         src/searchthread.cpp \
         src/tabbiomes.cpp \
+        src/tablocations.cpp \
         src/tabstructures.cpp \
         src/tabtriggers.cpp \
         src/mainwindow.cpp \
@@ -182,6 +183,7 @@ HEADERS += \
         src/searchthread.h \
         src/seedtables.h \
         src/tabbiomes.h \
+        src/tablocations.h \
         src/tabstructures.h \
         src/tabtriggers.h \
         src/mainwindow.h \
@@ -206,6 +208,7 @@ FORMS += \
         src/mainwindow.ui \
         src/rangedialog.ui \
         src/tabbiomes.ui \
+        src/tablocations.ui \
         src/tabstructures.ui \
         src/tabtriggers.ui
 

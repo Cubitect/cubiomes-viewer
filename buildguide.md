@@ -1,7 +1,7 @@
 # Cubiomes Viewer Build Instructions
 
 Cubiomes Viewer is a Qt5 application and requires:
-* Qt5.9 or newer (Qt6 is not supported) and a
+* Qt5.9 or newer (Qt6 might work, but isn't currently supported) and a
 * GNU C++ compiler (GCC or Clang).
 
 The cubiomes library is included as a submodule to this repository.

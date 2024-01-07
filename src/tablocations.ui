@@ -1,19 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>TabTriggers</class>
- <widget class="QWidget" name="TabTriggers">
+ <class>TabLocations</class>
+ <widget class="QWidget" name="TabLocations">
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="1" column="0">
-    <widget class="QLabel" name="label">
+   <item row="3" column="0">
+    <widget class="QLabel" name="label_4">
      <property name="text">
-      <string>Seed(s):</string>
+      <string>Centered on:</string>
      </property>
     </widget>
    </item>
-   <item row="5" column="0" colspan="2">
+   <item row="0" column="0">
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>Sampling strategy:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QLabel" name="label_5">
+     <property name="text">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;X:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1" colspan="4">
+    <widget class="QLineEdit" name="lineA">
+     <property name="text">
+      <string>512</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1" colspan="4">
+    <widget class="QComboBox" name="comboSampling">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="4">
+    <widget class="QLineEdit" name="lineZ"/>
+   </item>
+   <item row="7" column="0" colspan="5">
     <widget class="QTreeWidget" name="treeWidget">
      <property name="font">
       <font>
@@ -38,16 +72,6 @@
      <attribute name="headerDefaultSectionSize">
       <number>100</number>
      </attribute>
-     <column>
-      <property name="text">
-       <string>seed</string>
-      </property>
-      <property name="font">
-       <font>
-        <family>Monospace</family>
-       </font>
-      </property>
-     </column>
      <column>
       <property name="text">
        <string>condition</string>
@@ -78,36 +102,17 @@
        </font>
       </property>
      </column>
-    </widget>
-   </item>
-   <item row="0" column="0" colspan="2">
-    <widget class="QLabel" name="labelDescription">
-     <property name="text">
-      <string>Examine how the conditions are evaluated.</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="1">
-    <widget class="QComboBox" name="comboSeedSource">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <item>
+     <column>
       <property name="text">
-       <string>Current seed</string>
+       <string>distance</string>
       </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>From matching seeds list</string>
-      </property>
-     </item>
+     </column>
     </widget>
    </item>
-   <item row="6" column="0" colspan="2">
+   <item row="3" column="2">
+    <widget class="QLineEdit" name="lineX"/>
+   </item>
+   <item row="8" column="0" colspan="5">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QPushButton" name="pushExport">
@@ -134,6 +139,34 @@
       </widget>
      </item>
     </layout>
+   </item>
+   <item row="3" column="3">
+    <widget class="QLabel" name="label_6">
+     <property name="text">
+      <string>Z:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Spread (α):</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1" colspan="4">
+    <widget class="QLineEdit" name="lineN">
+     <property name="text">
+      <string>1000</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="label_3">
+     <property name="text">
+      <string>Number of samples:</string>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

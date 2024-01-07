@@ -10,6 +10,7 @@
 #include "exportdialog.h"
 #include "layerdialog.h"
 #include "tabtriggers.h"
+#include "tablocations.h"
 #include "tabbiomes.h"
 #include "tabstructures.h"
 #include "message.h"
@@ -52,7 +53,8 @@ MainWindow::MainWindow(QString sessionpath, QString resultspath, QWidget *parent
     , sessionpath(sessionpath)
     , prevdir(".")
     , autosaveTimer()
-    , prevtab(-1)
+    , tabidx(-1)
+    , tabsearch(-1)
     , dimactions{}
     , dimgroup()
 {
@@ -86,7 +88,8 @@ MainWindow::MainWindow(QString sessionpath, QString resultspath, QWidget *parent
 
     ui->menuHistory->clear();
 
-    ui->tabContainer->addTab(new TabTriggers(this), tr("Triggers"));
+    ui->tabContainerSearch->addTab(new TabTriggers(this), tr("Triggers"));
+    ui->tabContainerSearch->addTab(new TabLocations(this), tr("Locations"));
     ui->tabContainer->addTab(new TabBiomes(this), tr("Biomes"));
     ui->tabContainer->addTab(new TabStructures(this), tr("Structures"));
 
@@ -185,7 +188,8 @@ MainWindow::MainWindow(QString sessionpath, QString resultspath, QWidget *parent
     saction[D_GRID]->setChecked(true);
 
     ui->splitterMap->setSizes(QList<int>({6500, 10000}));
-    ui->splitterSearch->setSizes(QList<int>({1000, 1000, 2000}));
+    ui->splitterSearch->setSizes(QList<int>({1000, 3000}));
+    ui->splitterSeeds->setSizes(QList<int>({500, 2500}));
 
     qRegisterMetaType< int64_t >("int64_t");
     qRegisterMetaType< uint64_t >("uint64_t");
@@ -202,6 +206,7 @@ MainWindow::MainWindow(QString sessionpath, QString resultspath, QWidget *parent
 
     ui->collapseConstraints->init(tr("Conditions"), formCond, false);
     connect(formCond, &FormConditions::changed, this, &MainWindow::onConditionsChanged);
+    connect(formCond, &FormConditions::selectionUpdate, this, &MainWindow::onConditionsSelect);
     ui->collapseConstraints->setInfo(
         tr("Help: Conditions"),
         tr(
@@ -304,7 +309,7 @@ bool MainWindow::loadTranslation(QString lang)
     static QTranslator qt_translator;
     if (!rc_translator.load(lang, ":/lang"))
         return false;
-    QLocale::setDefault(lang);
+    QLocale::setDefault(QLocale(lang));
     QString qt_locale = "qtbase_" + lang;
     QString qt_trpath = QLibraryInfo::location(QLibraryInfo::TranslationsPath);
     if (qt_translator.load(qt_locale, qt_trpath))
@@ -432,8 +437,9 @@ bool MainWindow::setSeed(WorldInfo wi, int dim)
     ui->seedEdit->setEnabled(true);
     ui->comboY->setEnabled(true);
 
-    ISaveTab *tab = dynamic_cast<ISaveTab*>(ui->tabContainer->currentWidget());
-    if (tab)
+    if (ISaveTab *tab = dynamic_cast<ISaveTab*>(ui->tabContainer->currentWidget()))
+        tab->refresh();
+    if (ISaveTab *tab = dynamic_cast<ISaveTab*>(ui->tabContainerSearch->currentWidget()))
         tab->refresh();
     return true;
 }
@@ -466,6 +472,7 @@ void MainWindow::saveSettings()
     g_extgen.save(settings);
 
     on_tabContainer_currentChanged(-1);
+    on_tabContainerSearch_currentChanged(-1);
 
     WorldInfo wi;
     getSeed(&wi, false);
@@ -497,7 +504,7 @@ void MainWindow::loadSettings()
         showMaximized();
     } else {
         resize(settings.value("mainwindow/size", size()).toSize());
-        move(settings.value("mainwindow/pos", pos()).toPoint());
+        //move(settings.value("mainwindow/pos", pos()).toPoint());
     }
     prevdir = settings.value("mainwindow/prevdir", prevdir).toString();
 
@@ -635,7 +642,7 @@ void MainWindow::setDockable(bool dockable)
         // and avoid a warning about negative size widget
         QWidget *title = new QWidget(this);
         QHBoxLayout *l = new QHBoxLayout(title);
-        l->setMargin(0);
+        l->setContentsMargins(0, 0, 0, 0);
         title->setLayout(l);
         dock->setTitleBarWidget(title);
         dock->setFloating(false);
@@ -885,7 +892,7 @@ void MainWindow::on_actionLayerDisplay_triggered()
 {
     WorldInfo wi;
     getSeed(&wi, false);
-    LayerDialog *dialog = new LayerDialog(this, wi.mc);
+    LayerDialog *dialog = new LayerDialog(this, wi);
     dialog->setLayerOptions(lopt);
     connect(dialog, &LayerDialog::apply, [=](){
         lopt = dialog->getLayerOptions();
@@ -895,14 +902,24 @@ void MainWindow::on_actionLayerDisplay_triggered()
     dialog->show();
 }
 
-void MainWindow::on_tabContainer_currentChanged(int index)
+static int tab_switch(QTabWidget *tabs, int idxprev, int idxnext)
 {
     QSettings settings(APP_STRING, APP_STRING);
-    ISaveTab *tabold = dynamic_cast<ISaveTab*>(ui->tabContainer->widget(prevtab));
-    ISaveTab *tabnew = dynamic_cast<ISaveTab*>(ui->tabContainer->widget(index));
+    ISaveTab *tabold = dynamic_cast<ISaveTab*>(tabs->widget(idxprev));
+    ISaveTab *tabnew = dynamic_cast<ISaveTab*>(tabs->widget(idxnext));
     if (tabold) tabold->save(settings);
     if (tabnew) tabnew->load(settings);
-    prevtab = index;
+    return idxnext;
+}
+
+void MainWindow::on_tabContainer_currentChanged(int index)
+{
+    tabidx = tab_switch(ui->tabContainer, tabidx, index);
+}
+
+void MainWindow::on_tabContainerSearch_currentChanged(int index)
+{
+    tabsearch = tab_switch(ui->tabContainerSearch, tabsearch, index);
 }
 
 void MainWindow::on_actionSearch_seed_list_triggered()
@@ -946,22 +963,53 @@ void MainWindow::onActionMapToggled(int sopt, bool show)
 
 void MainWindow::onActionBiomeLayerSelect(int mode, int disp)
 {
+    WorldInfo wi;
+    getSeed(&wi, false);
+    lopt.mode = mode;
     if (disp >= 0)
     {
-        if (!getLayerOptionText(mode, disp))
+        if (!getLayerOptionInfo(nullptr, mode, disp, wi))
             return; // unsupported display mode
         lopt.disp[mode] = disp;
     }
-    lopt.mode = mode;
-    WorldInfo wi;
-    if (getSeed(&wi, false))
-        setSeed(wi, DIM_UNDEF);
+    setSeed(wi, DIM_UNDEF);
 }
 
 void MainWindow::onConditionsChanged()
 {
     QVector<Condition> conds = formCond->getConditions();
     formGen48->updateAutoConditions(conds);
+}
+
+void MainWindow::onConditionsSelect(const QVector<Condition>& selection)
+{
+    std::vector<Shape> shapes;
+    for (const Condition& c : selection)
+    {
+        if (c.meta & Condition::DISABLED)
+            continue;
+        if (c.relative)
+            continue;
+        const FilterInfo& ft = g_filterinfo.list[c.type];
+
+        Shape s;
+        s.dim = ft.dim;
+        if (c.rmax)
+        {
+            s.type = Shape::CIRCLE;
+            s.p1 = s.p2 = Pos{0,0};
+            s.r = c.rmax - 1;
+        }
+        else
+        {
+            s.type = Shape::RECT;
+            s.p1 = Pos{c.x1, c.z1};
+            s.p2 = Pos{c.x2+1, c.z2+1};
+            s.r = 0;
+        }
+        shapes.push_back(s);
+    }
+    getMapView()->setShapes(shapes);
 }
 
 void MainWindow::onGen48Changed()

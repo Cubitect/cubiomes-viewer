@@ -44,6 +44,7 @@ public:
 
 signals:
     void changed();
+    void selectionUpdate(const QVector<Condition>& selected);
 
 public slots:
     void on_buttonRemoveAll_clicked();

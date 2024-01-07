@@ -121,6 +121,14 @@ struct PosElement
     Pos p;
 };
 
+struct Shape
+{
+    enum { RECT, LINE, CIRCLE } type;
+    int dim;
+    int r;
+    Pos p1, p2;
+};
+
 class MapWorker : public QThread
 {
     Q_OBJECT
@@ -205,6 +213,9 @@ public:
     // slime overlay
     QImage slimeimg;
     long slimex, slimez;
+
+    // shapes to overlay
+    std::vector<Shape> shapes;
 
     // structure selection from mouse position
     bool seldo;

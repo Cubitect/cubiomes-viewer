@@ -8,6 +8,7 @@
 #include <QPlainTextEdit>
 #include <QMutex>
 #include <QSyntaxHighlighter>
+#include <QRegularExpression>
 
 #include "cubiomes/finders.h"
 
@@ -60,7 +61,7 @@ int runCheckScript(
 
 struct Rule
 {
-    QRegExp pattern;
+    QRegularExpression pattern;
     QTextCharFormat format;
     bool overlay;
     Rule() : pattern(),format(),overlay() {}
@@ -69,7 +70,7 @@ struct Rule
 };
 struct BlockRule
 {
-    QRegExp start, end;
+    QRegularExpression start, end;
     QTextCharFormat format;
     BlockRule() : start(), end(), format() {}
     BlockRule(const QString& s, const QString& e, const QTextCharFormat& f)

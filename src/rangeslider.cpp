@@ -207,7 +207,7 @@ LabeledRange::LabeledRange(QWidget *parent, int vmin, int vmax)
     l->addWidget(minlabel);
     l->addWidget(slider);
     l->addWidget(maxlabel);
-    l->setMargin(0);
+    l->setContentsMargins(0, 0, 0, 0);
     setLayout(l);
 
     connect(slider, SIGNAL(valueChanged(int)), this, SLOT(rangeChanged(void)));

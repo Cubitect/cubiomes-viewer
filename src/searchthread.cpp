@@ -261,7 +261,7 @@ bool SearchMaster::set(QWidget *widget, const Session& s)
             {
                 Generator tmp;
                 setupGenerator(&tmp, s.wi.mc, 0);
-                const Layer *l = getLayerForScale(&tmp, finfo.step);
+                const Layer *l = getLayerForScale(&tmp, finfo.grid);
                 if (l)
                     layerId = l - tmp.ls.layers;
             }
@@ -281,12 +281,12 @@ bool SearchMaster::set(QWidget *widget, const Session& s)
         }
         if (c.type == F_TEMPS)
         {
-            int w = c.x2 - c.x1 + 1;
-            int h = c.z2 - c.z1 + 1;
+            int w = (c.x2 >> 10) - (c.x1 >> 10) + 1;
+            int h = (c.z2 >> 10) - (c.z1 >> 10) + 1;
             if (c.count > w * h)
             {
                 QString msg = tr("Temperature category condition with ID %1 has too "
-                                 "many restrictions (%2) for the area (%3 x %4).");
+                                 "many restrictions (%2) for the area (%3 x %4 @ scale 1:1024).");
                 warn(widget, msg.arg(cid).arg(c.count).arg(w).arg(h));
                 return false;
             }
@@ -733,6 +733,7 @@ void SearchMaster::stop()
         }
     }
     workers.clear();
+
     emit searchFinish(false);
 }
 

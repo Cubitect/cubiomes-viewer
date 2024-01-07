@@ -167,7 +167,7 @@ QPushButton:hover {
         </font>
        </property>
        <property name="toolTip">
-        <string>Queued progress within search set</string>
+        <string>Queued progress within the search set</string>
        </property>
        <property name="layoutDirection">
         <enum>Qt::LeftToRight</enum>

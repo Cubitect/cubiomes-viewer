@@ -103,6 +103,7 @@ private slots:
     void on_actionLayerDisplay_triggered();
 
     void on_tabContainer_currentChanged(int index);
+    void on_tabContainerSearch_currentChanged(int index);
 
     void on_actionSearch_seed_list_triggered();
     void on_actionSearch_full_seed_space_triggered();
@@ -113,6 +114,7 @@ private slots:
     void onActionHistory(QAction *act);
     void onActionBiomeLayerSelect(int lopt, int disp = -1);
     void onConditionsChanged();
+    void onConditionsSelect(const QVector<Condition>& selection);
     void onGen48Changed();
     void onSelectedSeedChanged(uint64_t seed);
     void onSearchStatusChanged(bool running);
@@ -136,7 +138,8 @@ public:
     QString sessionpath;
     QString prevdir;
     QTimer autosaveTimer;
-    int prevtab;
+    int tabidx;
+    int tabsearch;
 
     QVector<QAction*> laction;
     QVector<QAction*> saction;

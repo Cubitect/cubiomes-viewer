@@ -13,7 +13,7 @@
    <item row="0" column="0">
     <layout class="QGridLayout" name="gridLayout_2">
      <item row="0" column="4">
-      <widget class="QComboBox" name="comboBoxCat">
+      <widget class="QComboBox" name="comboCat">
        <property name="sizePolicy">
         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
          <horstretch>2</horstretch>
@@ -26,7 +26,7 @@
       </widget>
      </item>
      <item row="0" column="5">
-      <widget class="QComboBox" name="comboBoxType">
+      <widget class="QComboBox" name="comboType">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -256,6 +256,13 @@
               </property>
              </widget>
             </item>
+            <item>
+             <widget class="QPushButton" name="buttonFromVisible">
+              <property name="text">
+               <string>From visible</string>
+              </property>
+             </widget>
+            </item>
            </layout>
           </item>
           <item row="0" column="6">
@@ -344,7 +351,7 @@ QPushButton:hover {
            </widget>
           </item>
           <item row="6" column="3" colspan="4">
-           <widget class="QComboBox" name="comboBoxRelative">
+           <widget class="QComboBox" name="comboRelative">
             <property name="sizeAdjustPolicy">
              <enum>QComboBox::AdjustToContentsOnFirstShow</enum>
             </property>
@@ -388,7 +395,7 @@ QPushButton:hover {
           <number>0</number>
          </property>
          <property name="currentIndex">
-          <number>5</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="pageNone">
           <property name="enabled">
@@ -460,47 +467,7 @@ QPushButton:hover {
               <string>Biomes</string>
              </property>
              <layout class="QGridLayout" name="gridLayout_13">
-              <item row="0" column="0">
-               <widget class="QCheckBox" name="checkApprox">
-                <property name="toolTip">
-                 <string>Enables optimizations that trade some accuracy for speed</string>
-                </property>
-                <property name="text">
-                 <string>Approximate</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <widget class="QCheckBox" name="checkMatchAny">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p style=&quot;white-space:pre&quot;&gt;Satisfied if &lt;span style=&quot; font-weight:600;&quot;&gt;any&lt;/span&gt; of the checked biomes are present&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="text">
-                 <string>Match any</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="2">
-               <spacer name="horizontalSpacer_3">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>0</width>
-                  <height>0</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item row="0" column="3">
-               <widget class="QLabel" name="labelY">
-                <property name="text">
-                 <string>Sample at height (Y):</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="4">
+              <item row="0" column="5">
                <widget class="QComboBox" name="comboY">
                 <property name="editable">
                  <bool>true</bool>
@@ -565,7 +532,24 @@ QPushButton:hover {
                 </item>
                </widget>
               </item>
-              <item row="1" column="0" colspan="5">
+              <item row="3" column="0" colspan="6">
+               <widget class="QScrollArea" name="scrollBiomes">
+                <property name="widgetResizable">
+                 <bool>true</bool>
+                </property>
+                <widget class="QWidget" name="scrollBiomesContent">
+                 <layout class="QVBoxLayout" name="verticalLayout_6">
+                  <property name="sizeConstraint">
+                   <enum>QLayout::SetMinAndMaxSize</enum>
+                  </property>
+                  <item>
+                   <layout class="QGridLayout" name="gridLayoutBiomes"/>
+                  </item>
+                 </layout>
+                </widget>
+               </widget>
+              </item>
+              <item row="2" column="0" colspan="6">
                <layout class="QHBoxLayout" name="horizontalLayout_4">
                 <item>
                  <widget class="QPushButton" name="buttonUncheck">
@@ -590,21 +574,128 @@ QPushButton:hover {
                 </item>
                </layout>
               </item>
-              <item row="2" column="0" colspan="5">
-               <widget class="QScrollArea" name="scrollBiomes">
-                <property name="widgetResizable">
-                 <bool>true</bool>
+              <item row="0" column="3">
+               <spacer name="horizontalSpacer_3">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
                 </property>
-                <widget class="QWidget" name="scrollBiomesContent">
-                 <layout class="QVBoxLayout" name="verticalLayout_6">
-                  <property name="sizeConstraint">
-                   <enum>QLayout::SetMinAndMaxSize</enum>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>0</width>
+                  <height>0</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item row="0" column="0" rowspan="2" colspan="2">
+               <widget class="QStackedWidget" name="stackedBiome">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="currentIndex">
+                 <number>0</number>
+                </property>
+                <widget class="QWidget" name="pageBiomeOpt">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <layout class="QGridLayout" name="gridLayout_30">
+                  <property name="leftMargin">
+                   <number>0</number>
                   </property>
-                  <item>
-                   <layout class="QGridLayout" name="gridLayoutBiomes"/>
+                  <property name="topMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="rightMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="bottomMargin">
+                   <number>0</number>
+                  </property>
+                  <item row="1" column="0">
+                   <widget class="QCheckBox" name="checkMatchAny">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p style=&quot;white-space:pre&quot;&gt;Satisfied if &lt;span style=&quot; font-weight:600;&quot;&gt;any&lt;/span&gt; of the checked biomes are present&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="text">
+                     <string>Match any</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="0">
+                   <widget class="QCheckBox" name="checkApprox">
+                    <property name="toolTip">
+                     <string>Enables optimizations that trade some accuracy for speed</string>
+                    </property>
+                    <property name="text">
+                     <string>Approximate</string>
+                    </property>
+                   </widget>
                   </item>
                  </layout>
                 </widget>
+                <widget class="QWidget" name="pageBiomeOptSample">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <layout class="QGridLayout" name="gridLayout_31">
+                  <property name="leftMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="topMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="rightMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="bottomMargin">
+                   <number>0</number>
+                  </property>
+                  <item row="0" column="0">
+                   <widget class="QLabel" name="label_17">
+                    <property name="text">
+                     <string>Coverage (%):</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="0">
+                   <widget class="QLabel" name="label_18">
+                    <property name="text">
+                     <string>Confidence (%):</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="4">
+                   <widget class="QCheckBox" name="checkSamplePos">
+                    <property name="text">
+                     <string>Yield positions</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="1">
+                   <widget class="QLineEdit" name="lineCoverage"/>
+                  </item>
+                  <item row="1" column="1">
+                   <widget class="QLineEdit" name="lineConfidence"/>
+                  </item>
+                 </layout>
+                </widget>
+               </widget>
+              </item>
+              <item row="0" column="4">
+               <widget class="QLabel" name="labelY">
+                <property name="text">
+                 <string>Sample at height (Y):</string>
+                </property>
                </widget>
               </item>
              </layout>
@@ -1325,6 +1416,58 @@ QPushButton:hover {
            </item>
           </layout>
          </widget>
+         <widget class="QWidget" name="pageSpiral">
+          <layout class="QGridLayout" name="gridLayout_28">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item row="0" column="0">
+            <widget class="QGroupBox" name="groupBoxSpiral">
+             <property name="title">
+              <string>Spiral iterator</string>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_29">
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_16">
+                <property name="text">
+                 <string>Step size:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLineEdit" name="lineSpiralStep">
+                <property name="text">
+                 <string>512</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <spacer name="verticalSpacer_8">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
          <widget class="QWidget" name="pageVillage">
           <layout class="QGridLayout" name="gridLayoutVillage">
            <property name="leftMargin">
@@ -1669,14 +1812,14 @@ QPushButton:hover {
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>comboBoxCat</tabstop>
-  <tabstop>comboBoxType</tabstop>
+  <tabstop>comboCat</tabstop>
+  <tabstop>comboType</tabstop>
   <tabstop>spinBox</tabstop>
   <tabstop>lineEditX1</tabstop>
   <tabstop>lineEditZ1</tabstop>
   <tabstop>lineEditX2</tabstop>
   <tabstop>lineEditZ2</tabstop>
-  <tabstop>comboBoxRelative</tabstop>
+  <tabstop>comboRelative</tabstop>
   <tabstop>stackedWidget</tabstop>
  </tabstops>
  <resources>

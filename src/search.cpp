@@ -34,7 +34,7 @@ QString Condition::summary(bool aligntab) const
     }
 
     QString cnts;
-    if (ft.count)
+    if (ft.branch == FilterInfo::BR_CLUST)
         cnts += MULTIPLY_CHAR + QString::number(count);
     if (skipref)
         cnts += "*";
@@ -73,10 +73,10 @@ QString Condition::summary(bool aligntab) const
     }
     else
     {
-        if (ft.coord)
-            s += QString::asprintf("(%d,%d)", x1*ft.step, z1*ft.step);
-        if (ft.area)
-            s += QString::asprintf(",(%d,%d)", (x2+1)*ft.step-1, (z2+1)*ft.step-1);
+        if (ft.loc & FilterInfo::LOC_1)
+            s += QString::asprintf("(%d,%d)", x1, z1);
+        if (ft.loc & FilterInfo::LOC_2)
+            s += QString::asprintf(",(%d,%d)", x2, z2);
     }
     return s;
 }
@@ -95,15 +95,13 @@ bool Condition::versionUpgrade()
         memset(pad1, 0, sizeof(pad1));
         hash = 0;
         memset(deps, 0, sizeof(deps));
-        memset(pad2, 0, sizeof(pad2));
-        biomeId = biomeSize = tol = minmax = para = octave = 0;
-        varflags = varbiome = varstart = 0;
+        biomeId = biomeSize = tol = minmax = para = octave = step = 0;
     }
-    else if (version == VER_2_3_0)
+    if (version < VER_2_4_0)
     {
         varflags = varbiome = varstart = 0;
     }
-    else if (version == VER_2_4_0)
+    if (version < VER_3_4_0)
     {
         if (type == F_CLIMATE_MINMAX)
         {
@@ -126,6 +124,28 @@ bool Condition::versionUpgrade()
             }
         }
     }
+    if (version < VER_4_0_0)
+    {
+        const FilterInfo& ft = g_filterinfo.list[type];
+        if (ft.grid > 1)
+        {
+            x1 = x1 * ft.grid;
+            z1 = z1 * ft.grid;
+            x2 = (x2+1) * ft.grid - 1;
+            z2 = (z2+1) * ft.grid - 1;
+        }
+        switch (type)
+        {
+        case F_SPIRAL:      step = 1;    break;
+        case F_SPIRAL_4:    step = 4;    type = F_SPIRAL; break;
+        case F_SPIRAL_16:   step = 16;   type = F_SPIRAL; break;
+        case F_SPIRAL_64:   step = 64;   type = F_SPIRAL; break;
+        case F_SPIRAL_256:  step = 256;  type = F_SPIRAL; break;
+        case F_SPIRAL_512:  step = 512;  type = F_SPIRAL; break;
+        case F_SPIRAL_1024: step = 1024; type = F_SPIRAL; break;
+        }
+    }
+
     version = VER_CURRENT;
     return true;
 }
@@ -312,66 +332,96 @@ int testTreeAt(
     ConditionTree *tree = env->condtree;
     Condition& c = tree->condvec[node];
     const std::vector<char>& branches = tree->references[c.save];
-    int st;
+    int st, br;
     int rx1, rz1, rx2, rz2;
-    int sref;
     Pos pos;
     Pos inst[MAX_INSTANCES];
-    const FilterInfo *finfo;
 
     switch (c.type)
     {
-    case F_SPIRAL_1:     sref = 0;  goto L_ref_pow2;
-    case F_SPIRAL_4:     sref = 2;  goto L_ref_pow2;
-    case F_SPIRAL_16:    sref = 4;  goto L_ref_pow2;
-    case F_SPIRAL_64:    sref = 6;  goto L_ref_pow2;
-    case F_SPIRAL_256:   sref = 8;  goto L_ref_pow2;
-    case F_SPIRAL_512:   sref = 9;  goto L_ref_pow2;
-    case F_SPIRAL_1024:  sref = 10; goto L_ref_pow2;
-    L_ref_pow2:
-        rx1 = ((c.x1 << sref) + at.x) >> sref;
-        rz1 = ((c.z1 << sref) + at.z) >> sref;
-        rx2 = ((c.x2 << sref) + at.x) >> sref;
-        rz2 = ((c.z2 << sref) + at.z) >> sref;
+    case F_SPIRAL:
+
         st = COND_FAILED;
         {   // run a spiral iterator over the rectangle
-            int x = (rx1 + rx2) >> 1;
-            int z = (rz1 + rz2) >> 1;
+            int step = c.step ? c.step : 512;
+            int rmax, x1, z1, x2, z2;
+            if (c.rmax > 0)
+            {
+                rmax = c.rmax - 1;
+                x1 = at.x - rmax;
+                z1 = at.z - rmax;
+                x2 = at.x + rmax;
+                z2 = at.z + rmax;
+                rmax = rmax * rmax + 1;
+            }
+            else
+            {
+                rmax = 0;
+                x1 = c.x1 + at.x;
+                z1 = c.z1 + at.z;
+                x2 = c.x2 + at.x;
+                z2 = c.z2 + at.z;
+            }
+
+            rx1 = floordiv(x1, step);
+            rz1 = floordiv(z1, step);
+            rx2 = floordiv(x2, step);
+            rz2 = floordiv(z2, step);
+
+            int rx = (rx1 + rx2) >> 1;
+            int rz = (rz1 + rz2) >> 1;
             int i = 0, dl = 1;
             int dx = 1, dz = 0;
             while (true)
             {
-                bool inx = (x >= rx1 && x <= rx2);
-                bool inz = (z >= rz1 && z <= rz2);
+                bool inx = (rx >= rx1 && rx <= rx2);
+                bool inz = (rz >= rz1 && rz <= rz2);
                 if (!inx && !inz)
                     break;
                 if (inx && inz)
                 {
-                    pos.x = (x << sref);
-                    pos.z = (z << sref);
-                    // children are combined via AND
-                    int sta = COND_OK;
-                    for (int b : branches)
+                    pos.x = rx * step;
+                    pos.z = rz * step;
+
+                    bool inr = true;
+                    if (rmax)
                     {
-                        int stb = testTreeAt(pos, env, pass, abort, path, b);
-                        if (*abort)
-                            return COND_FAILED;
-                        if (stb < sta)
-                            sta = stb;
-                        if (sta == COND_FAILED)
-                            break;
+                        int dx = pos.x - at.x;
+                        int dz = pos.z - at.z;
+                        int64_t rsq = dx*(int64_t)dx + dz*(int64_t)dz;
+                        inr = (rsq < rmax);
                     }
-                    if (sta == COND_MAYBE_POS_VALID )
-                        sta = COND_MAYBE_POS_INVAL; // position moves => invalidate
-                    if (sta > st)
-                        st = sta;
-                    if (path && st >= COND_MAYBE_POS_VALID)
-                        path[c.save] = pos;
-                    if (st == COND_OK)
-                        return COND_OK;
+                    else if (pos.x < x1 || pos.x > x2 || pos.z < z1 || pos.z > z2)
+                    {
+                        inr = false;
+                    }
+
+                    if (inr)
+                    {
+                        // children are combined via AND
+                        int sta = COND_OK;
+                        for (int b : branches)
+                        {
+                            int stb = testTreeAt(pos, env, pass, abort, path, b);
+                            if (*abort)
+                                return COND_FAILED;
+                            if (stb < sta)
+                                sta = stb;
+                            if (sta == COND_FAILED)
+                                break;
+                        }
+                        if (sta == COND_MAYBE_POS_VALID )
+                            sta = COND_MAYBE_POS_INVAL; // position moves => invalidate
+                        if (sta > st)
+                            st = sta;
+                        if (path && st >= COND_MAYBE_POS_VALID)
+                            path[c.save] = pos;
+                        if (st == COND_OK)
+                            return COND_OK;
+                    }
                 }
-                x += dx;
-                z += dz;
+                rx += dx;
+                rz += dz;
                 if (++i == dl)
                 {
                     i = 0;
@@ -412,7 +462,7 @@ int testTreeAt(
         return st;
 
 
-    case F_LOGIC_OR:
+    case F_LOGIC_OR: //qDebug() << at.x << at.z; return COND_FAILED;
         if (branches.empty())
         {
             if (path)
@@ -499,18 +549,48 @@ int testTreeAt(
             {
                 if (icnt == 1)
                     path[c.save] = *inst;
+                else if (icnt > 1 && st == COND_OK)
+                    path[c.save] = *inst;
                 else
                     path[c.save].x = path[c.save].z = -1;
             }
             return st;
         }
-        finfo = g_filterinfo.list + c.type;
-        if (c.count == 1 && (finfo->count || finfo->cat == CAT_QUAD))
-        {   // condition has exactly one required instance so we can check each
-            // of the found instances individually, i.e. this branch splits the
-            // instances into independent subbranches (combined via OR)
-            // quad conditions are also processed here since we want to
-            // examine all instances without support for averaging
+
+        br = g_filterinfo.list[c.type].branch;
+
+        if (br == FilterInfo::BR_NONE || (br == FilterInfo::BR_CLUST && c.count != 1))
+        {   // this condition cannot branch, position of multiple instances
+            // will be averaged to a center point
+            if (c.type == 0)
+            {   // this is the root condition
+                st = COND_OK;
+                pos = at;
+            }
+            else
+            {
+                st = testCondAt(at, env, pass, abort, inst, NULL, &c);
+                if (st == COND_FAILED || st == COND_MAYBE_POS_INVAL)
+                    return st;
+                pos = inst[0]; // center point of instances
+            }
+            for (char b : branches)
+            {
+                if (st == COND_FAILED)
+                    break;
+                int sta = testTreeAt(pos, env, pass, abort, path, b);
+                if (*abort)
+                    return COND_FAILED;
+                if (sta < st)
+                    st = sta;
+            }
+            if (path && st >= COND_MAYBE_POS_VALID)
+                path[c.save] = pos;
+            return st;
+        }
+        else
+        {   // check each instance individually, splitting the instances into
+            // independent subbranches that are combined via OR
             int icnt = MAX_INSTANCES;
             st = testCondAt(at, env, pass, abort, inst, &icnt, &c);
             if (st == COND_FAILED || st == COND_MAYBE_POS_INVAL)
@@ -546,35 +626,6 @@ int testTreeAt(
                 st = sta;
             if (path && st >= COND_MAYBE_POS_VALID)
                 path[c.save] = inst[iok];
-            return st;
-        }
-        else
-        {   // this condition cannot branch, position of multiple instances
-            // will be averaged to a center point
-            if (c.type == 0)
-            {   // this is the root condition
-                st = COND_OK;
-                pos = at;
-            }
-            else
-            {
-                st = testCondAt(at, env, pass, abort, inst, NULL, &c);
-                if (st == COND_FAILED || st == COND_MAYBE_POS_INVAL)
-                    return st;
-                pos = inst[0]; // center point of instances
-            }
-            for (char b : branches)
-            {
-                if (st == COND_FAILED)
-                    break;
-                int sta = testTreeAt(pos, env, pass, abort, path, b);
-                if (*abort)
-                    return COND_FAILED;
-                if (sta < st)
-                    st = sta;
-            }
-            if (path && st >= COND_MAYBE_POS_VALID)
-                path[c.save] = pos;
             return st;
         }
     }
@@ -895,6 +946,59 @@ static int f_track_minmax(void *data, int x, int z, double p)
     return 0;
 }
 
+
+struct sample_boime_t
+{
+    Condition *cond;
+    Pos at;
+    int rmaxsq;
+    int n;
+    int64_t xsum;
+    int64_t zsum;
+    Pos *cent;
+    int *imax;
+    std::atomic_bool *stop;
+};
+
+static int f_biome_sampler(Generator *g, int scale, int x, int y, int z, void *data)
+{
+    sample_boime_t *info = (sample_boime_t*) data;
+    if (info->stop && *info->stop)
+        return -2;
+    if (info->rmaxsq)
+    {
+        int dx = x - info->at.x;
+        int dz = z - info->at.z;
+        int64_t rsq = dx*(int64_t)dx + dz*(int64_t)dz;
+        if (rsq >= info->rmaxsq)
+            return -1;
+    }
+
+    int id = getBiomeAt(g, scale, x, y, z);
+    uint64_t incl = 0, excl = 0;
+    if (id < 128) {
+        incl = info->cond->biomeToFind & (1ULL << id);
+        excl = info->cond->biomeToExcl & (1ULL << id);
+    } else {
+        incl = info->cond->biomeToFindM & (1ULL << (id-128));
+        excl = info->cond->biomeToExclM & (1ULL << (id-128));
+    }
+    if (incl != 0)
+    {
+        if (info->imax && info->n < *info->imax)
+            info->cent[info->n] = Pos{x, z};
+        info->xsum += x;
+        info->zsum += z;
+        info->n++;
+        return 1;
+    }
+    if (excl != 0)
+    {
+        return 0;
+    }
+    return 0;
+}
+
 /* Tests if a condition is satisfied with 'at' as origin for a search pass.
  * If sufficiently satisfied (check return value) then:
  * when 'imax' is NULL, the center position is written to 'cent[0]'
@@ -933,9 +1037,26 @@ testCondAt(
             return COND_FAILED;
     }
 
+    if (cond->rmax > 0)
+    {
+        rmax = cond->rmax - 1;
+        x1 = at.x - rmax;
+        z1 = at.z - rmax;
+        x2 = at.x + rmax;
+        z2 = at.z + rmax;
+    }
+    else
+    {
+        rmax = 0;
+        x1 = cond->x1 + at.x;
+        z1 = cond->z1 + at.z;
+        x2 = cond->x2 + at.x;
+        z2 = cond->z2 + at.z;
+    }
+
     switch (cond->type)
     {
-    case F_SPIRAL_1:
+    case F_SPIRAL:
     case F_SPIRAL_4:
     case F_SPIRAL_16:
     case F_SPIRAL_64:
@@ -968,10 +1089,10 @@ testCondAt(
         n = sizeof(low20QuadHutBarely) / sizeof(uint64_t);
 
 L_qh_any:
-        rx1 = ((cond->x1 << 9) + at.x) >> 9;
-        rz1 = ((cond->z1 << 9) + at.z) >> 9;
-        rx2 = ((cond->x2 << 9) + at.x) >> 9;
-        rz2 = ((cond->z2 << 9) + at.z) >> 9;
+        rx1 = x1 >> 9;
+        rz1 = z1 >> 9;
+        rx2 = x2 >> 9;
+        rz2 = z2 >> 9;
 
         n = scanForQuads(
                 sconf, 128, (env->seed) & MASK48, seeds, n, 20, sconf.salt,
@@ -1009,10 +1130,10 @@ L_qh_any:
     case F_QM_90:   qual = 58*58*4 * 90 / 100;
 L_qm_any:
 
-        rx1 = ((cond->x1 << 9) + at.x) >> 9;
-        rz1 = ((cond->z1 << 9) + at.z) >> 9;
-        rx2 = ((cond->x2 << 9) + at.x) >> 9;
-        rz2 = ((cond->z2 << 9) + at.z) >> 9;
+        rx1 = x1 >> 9;
+        rz1 = z1 >> 9;
+        rx2 = x2 >> 9;
+        rz2 = z2 >> 9;
         // we don't really need to check for more than one instance here
         n = scanForQuads(
                 sconf, 160, (env->seed) & MASK48, g_qm_90,
@@ -1067,23 +1188,6 @@ L_qm_any:
 
     case F_ENDCITY:
     case F_GATEWAY:
-
-        if (cond->rmax > 0)
-        {
-            rmax = (cond->rmax-1) * (cond->rmax-1) + 1;
-            x1 = at.x - cond->rmax;
-            z1 = at.z - cond->rmax;
-            x2 = at.x + cond->rmax;
-            z2 = at.z + cond->rmax;
-        }
-        else
-        {
-            rmax = 0;
-            x1 = cond->x1 + at.x;
-            z1 = cond->z1 + at.z;
-            x2 = cond->x2 + at.x;
-            z2 = cond->z2 + at.z;
-        }
 
         if (sconf.regionSize == 32)
         {
@@ -1239,41 +1343,12 @@ L_qm_any:
 
     case F_MINESHAFT:
 
-        if (cond->rmax > 0)
-        {
-            rmax = (cond->rmax-1) * (cond->rmax-1) + 1;
-            x1 = at.x - cond->rmax;
-            z1 = at.z - cond->rmax;
-            x2 = at.x + cond->rmax;
-            z2 = at.z + cond->rmax;
-        }
-        else
-        {
-            rmax = 0;
-            x1 = cond->x1 + at.x;
-            z1 = cond->z1 + at.z;
-            x2 = cond->x2 + at.x;
-            z2 = cond->z2 + at.z;
-        }
         rx1 = x1 >> 4;
         rz1 = z1 >> 4;
         rx2 = x2 >> 4;
         rz2 = z2 >> 4;
 
-        if (cond->count <= 0)
-        {   // exclusion
-            icnt = getMineshafts(env->mc, env->seed, rx1, rz1, rx2, rz2, cent, 1);
-            if (icnt == 1 && cond->skipref && cent->x == at.x && cent->z == at.z)
-                icnt = 0;
-            cent->x = (x1 + x2) >> 1;
-            cent->z = (z1 + z2) >> 1;
-            if (icnt == 0)
-            {
-                if (imax) *imax = 1;
-                return COND_OK;
-            }
-        }
-        else if (imax)
+        if (imax && cond->count > 0)
         {   // just check there are at least *inst (== cond->count) instances
             *imax = icnt =
                 getMineshafts(env->mc, env->seed, rx1, rz1, rx2, rz2, cent, *imax);
@@ -1328,7 +1403,17 @@ L_qm_any:
                 zt += p[i].z;
                 j++;
             }
-            if (j >= cond->count)
+            if (cond->count <= 0)
+            {
+                cent->x = (x1 + x2) >> 1;
+                cent->z = (z1 + z2) >> 1;
+                if (j == 0)
+                {
+                    if (imax) *imax = 1;
+                    return COND_OK;
+                }
+            }
+            else if (j >= cond->count)
             {
                 cent->x = xt / j;
                 cent->z = zt / j;
@@ -1344,22 +1429,6 @@ L_qm_any:
         if (pass != PASS_FULL_64)
             return COND_MAYBE_POS_INVAL;
 
-        if (cond->rmax > 0)
-        {
-            rmax = (cond->rmax-1) * (cond->rmax-1) + 1;
-            x1 = at.x - cond->rmax;
-            z1 = at.z - cond->rmax;
-            x2 = at.x + cond->rmax;
-            z2 = at.z + cond->rmax;
-        }
-        else
-        {
-            rmax = 0;
-            x1 = cond->x1 + at.x;
-            z1 = cond->z1 + at.z;
-            x2 = cond->x2 + at.x;
-            z2 = cond->z2 + at.z;
-        }
         if (*abort) return COND_FAILED;
         env->init4Dim(DIM_OVERWORLD);
         pc = getSpawn(&env->g);
@@ -1398,10 +1467,6 @@ L_qm_any:
         }
         else
         {
-            x1 = cond->x1 + at.x;
-            z1 = cond->z1 + at.z;
-            x2 = cond->x2 + at.x;
-            z2 = cond->z2 + at.z;
             if (pc.x < x1 || pc.x > x2 || pc.z < z1 || pc.z > z2)
                 return COND_FAILED;
         }
@@ -1564,10 +1629,10 @@ L_qm_any:
 
     case F_SLIME:
 
-        rx1 = ((cond->x1 << 4) + at.x) >> 4;
-        rz1 = ((cond->z1 << 4) + at.z) >> 4;
-        rx2 = ((cond->x2 << 4) + at.x) >> 4;
-        rz2 = ((cond->z2 << 4) + at.z) >> 4;
+        rx1 = x1 >> 4;
+        rz1 = z1 >> 4;
+        rx2 = x2 >> 4;
+        rz2 = z2 >> 4;
 
         icnt = 0;
         xt = zt = 0;
@@ -1602,8 +1667,8 @@ L_qm_any:
         }
         if (cond->count == 0)
         {   // exclusion filter
-            cent->x = (rx1 + rx2) << 3;
-            cent->z = (rz1 + rz2) << 3;
+            cent->x = (x1 + x2) >> 1;
+            cent->z = (z1 + z2) >> 1;
             if (imax) *imax = 1;
             return COND_OK;
         }
@@ -1613,11 +1678,63 @@ L_qm_any:
         }
         else if (icnt)
         {
-            cent->x = (xt << 4) / icnt;
-            cent->z = (zt << 4) / icnt;
+            cent->x = (xt << 4) / icnt + 8;
+            cent->z = (zt << 4) / icnt + 8;
         }
         if (icnt >= cond->count)
             return COND_OK;
+        return COND_FAILED;
+
+
+    case F_BIOME_SAMPLE:
+
+        if (pass != PASS_FULL_64)
+            return COND_MAYBE_POS_INVAL;
+        if (cond->confidence <= 0 || cond->confidence >= 1)
+            return COND_FAILED;
+        if (cond->converage <= 0 || cond->converage > 1)
+            return COND_FAILED;
+        s = finfo.pow2;
+        rx1 = x1 >> s;
+        rz1 = z1 >> s;
+        rx2 = x2 >> s;
+        rz2 = z2 >> s;
+        {
+            int w = rx2 - rx1 + 1;
+            int h = rz2 - rz1 + 1;
+            Range r = {1<<s, rx1, rz1, w, h, s == 0 ? cond->y : cond->y >> 2, 1};
+            env->init4Dim(DIM_OVERWORLD);
+            sample_boime_t sample;
+            sample.cond = cond;
+            sample.at = at;
+            sample.n = 0;
+            sample.xsum = 0;
+            sample.zsum = 0;
+            sample.imax = imax;
+            sample.cent = cent;
+            sample.stop = abort;
+
+            uint64_t rng;
+            setSeed(&rng, env->seed);
+
+            int ok = monteCarloBiomes(
+                        &env->g, r, &rng, cond->converage, cond->confidence,
+                        &f_biome_sampler, &sample);
+            if (imax)
+            {
+                *imax = sample.n;
+            }
+            else if (sample.n)
+            {
+                cent->x = sample.xsum / sample.n + 2;
+                cent->z = sample.zsum / sample.n + 2;
+            }
+            else
+            {
+                *cent = at;
+            }
+            return ok == 1 ? COND_OK : COND_FAILED;
+        }
         return COND_FAILED;
 
     // biome filters reference specific layers
@@ -1632,12 +1749,12 @@ L_qm_any:
         if (env->mc >= MC_1_18)
             return COND_FAILED;
         s = finfo.pow2;
-        rx1 = ((cond->x1 << s) + at.x) >> s;
-        rz1 = ((cond->z1 << s) + at.z) >> s;
-        rx2 = ((cond->x2 << s) + at.x) >> s;
-        rz2 = ((cond->z2 << s) + at.z) >> s;
-        cent->x = ((rx1 + rx2) << s) >> 1;
-        cent->z = ((rz1 + rz2) << s) >> 1;
+        rx1 = x1 >> s;
+        rz1 = z1 >> s;
+        rx2 = x2 >> s;
+        rz2 = z2 >> s;
+        cent->x = (x1 + x2) >> 1;
+        cent->z = (z1 + z2) >> 1;
         if (pass == PASS_FAST_48)
             return COND_MAYBE_POS_VALID;
         if (pass == PASS_FULL_48)
@@ -1663,12 +1780,12 @@ L_qm_any:
     case F_TEMPS:
         if (env->mc >= MC_1_18)
             return COND_FAILED;
-        rx1 = ((cond->x1 << 10) + at.x) >> 10;
-        rz1 = ((cond->z1 << 10) + at.z) >> 10;
-        rx2 = ((cond->x2 << 10) + at.x) >> 10;
-        rz2 = ((cond->z2 << 10) + at.z) >> 10;
-        cent->x = ((rx1 + rx2) << 10) >> 1;
-        cent->z = ((rz1 + rz2) << 10) >> 1;
+        rx1 = x1 >> 10;
+        rz1 = z1 >> 10;
+        rx2 = x2 >> 10;
+        rz2 = z2 >> 10;
+        cent->x = (x1 + x2) >> 1;
+        cent->z = (z1 + z2) >> 1;
         if (pass != PASS_FULL_64)
             return COND_MAYBE_POS_VALID;
         env->init4Dim(DIM_OVERWORLD);
@@ -1692,12 +1809,12 @@ L_qm_any:
 
 L_noise_biome:
         s = finfo.pow2;
-        rx1 = ((cond->x1 << s) + at.x) >> s;
-        rz1 = ((cond->z1 << s) + at.z) >> s;
-        rx2 = ((cond->x2 << s) + at.x) >> s;
-        rz2 = ((cond->z2 << s) + at.z) >> s;
-        cent->x = ((rx1 + rx2) << s) >> 1;
-        cent->z = ((rz1 + rz2) << s) >> 1;
+        rx1 = x1 >> s;
+        rz1 = z1 >> s;
+        rx2 = x2 >> s;
+        rz2 = z2 >> s;
+        cent->x = (x1 + x2) >> 1;
+        cent->z = (z1 + z2) >> 1;
         if (pass == PASS_FAST_48)
             return COND_MAYBE_POS_VALID;
         // the Nether and End require only the 48-bit seed
@@ -1720,13 +1837,13 @@ L_noise_biome:
         if (pass == PASS_FULL_64)
         {
             s = finfo.pow2;
-            rx1 = ((cond->x1 << s) + at.x) >> s;
-            rz1 = ((cond->z1 << s) + at.z) >> s;
-            rx2 = ((cond->x2 << s) + at.x) >> s;
-            rz2 = ((cond->z2 << s) + at.z) >> s;
+            rx1 = x1 >> s;
+            rz1 = z1 >> s;
+            rx2 = x2 >> s;
+            rz2 = z2 >> s;
             int w = rx2 - rx1 + 1;
             int h = rz2 - rz1 + 1;
-            Range r = {finfo.step, rx1, rz1, w, h, cond->y >> 2, 1};
+            Range r = {1<<s, rx1, rz1, w, h, cond->y >> 2, 1};
             env->init4Dim(DIM_OVERWORLD);
 
             if (cond->count == 0)
@@ -1737,8 +1854,8 @@ L_noise_biome:
                 );
                 if (icnt == 0)
                 {
-                    cent->x = (rx1 + rx2) << 1;
-                    cent->z = (rz1 + rz2) << 1;
+                    cent->x = (x1 + x2) >> 1;
+                    cent->z = (z1 + z2) >> 1;
                     if (imax) *imax = 1;
                     return COND_OK;
                 }
@@ -1782,8 +1899,8 @@ L_noise_biome:
                 }
                 if (j >= cond->count)
                 {
-                    cent->x = xt / j;
-                    cent->z = zt / j;
+                    cent->x = xt / j + (1 << s) / 2;
+                    cent->z = zt / j + (1 << s) / 2;
                     return COND_OK;
                 }
             }
@@ -1794,10 +1911,10 @@ L_noise_biome:
     case F_CLIMATE_MINMAX:
         if (env->mc < MC_1_18 || cond->para >= NP_MAX)
             return COND_FAILED;
-        rx1 = ((cond->x1 << 2) + at.x) >> 2;
-        rz1 = ((cond->z1 << 2) + at.z) >> 2;
-        rx2 = ((cond->x2 << 2) + at.x) >> 2;
-        rz2 = ((cond->z2 << 2) + at.z) >> 2;
+        rx1 = x1 >> 2;
+        rz1 = z1 >> 2;
+        rx2 = x2 >> 2;
+        rz2 = z2 >> 2;
         if (pass != PASS_FULL_64)
             return COND_MAYBE_POS_INVAL;
         {
@@ -1836,12 +1953,12 @@ L_noise_biome:
     case F_CLIMATE_NOISE:
         if (env->mc < MC_1_18)
             return COND_FAILED;
-        rx1 = ((cond->x1 << 2) + at.x) >> 2;
-        rz1 = ((cond->z1 << 2) + at.z) >> 2;
-        rx2 = ((cond->x2 << 2) + at.x) >> 2;
-        rz2 = ((cond->z2 << 2) + at.z) >> 2;
-        cent->x = ((rx1 + rx2) << 2) >> 1;
-        cent->z = ((rz1 + rz2) << 2) >> 1;
+        rx1 = x1 >> 2;
+        rz1 = z1 >> 2;
+        rx2 = x2 >> 2;
+        rz2 = z2 >> 2;
+        cent->x = (x1 + x2) >> 1;
+        cent->z = (z1 + z2) >> 1;
         if (pass != PASS_FULL_64)
             return COND_MAYBE_POS_VALID;
         {
@@ -1897,10 +2014,10 @@ L_noise_biome:
 
 
     case F_HEIGHT:
-        rx1 = ((cond->x1 << 2) + at.x) >> 2;
-        rz1 = ((cond->z1 << 2) + at.z) >> 2;
-        cent->x = rx1 << 2;
-        cent->z = rz1 << 2;
+        rx1 = x1 >> 2;
+        rz1 = z1 >> 2;
+        cent->x = x1;
+        cent->z = z1;
         if (pass != PASS_FULL_64)
             return COND_MAYBE_POS_VALID;
         env->init4Dim(DIM_OVERWORLD);
@@ -2009,6 +2126,7 @@ void findQuadStructs(int styp, Generator *g, QVector<QuadInfo> *out)
 
     delete[] qlist;
 }
+
 
 
 

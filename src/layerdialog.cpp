@@ -5,125 +5,96 @@
 
 #include <QApplication>
 
-const char *getLayerOptionText(int mode, int disp)
+bool getLayerOptionInfo(LayerOptInfo *info, int mode, int disp, WorldInfo wi)
 {
-    /*
-    Para 0:
-      4096   0.952381
-      1024   0.158730
-    Para 1:
-      1024   0.564374
-       512   0.282187
-    Para 2:
-      2048   0.751468
-      1024   0.375734
-       512   0.375734
-       256   0.187867
-       128   0.093933
-        64   0.023483
-        32   0.011742
-        16   0.005871
-         8   0.002935
-    Para 3:
-      2048   0.716846
-      1024   0.358423
-       256   0.089606
-       128   0.044803
-    Para 4:
-        32   0.666667
-        16   0.333333
-         8   0.166667
-    Para 5:
-       512   0.634921
-       256   0.634921
-       128   0.158730
-    */
+    QString txt;
+    QString tip;
+    int nptype = -1;
+
     switch (mode)
     {
     case LOPT_BIOMES:
-        switch (disp) {
-        case 0: return "1:1";
-        case 1: return "1:4";
-        case 2: return "1:16";
-        case 3: return "1:64";
-        case 4: return "1:256";
-        default: return nullptr;
-        }
-    case LOPT_NOISE_T_4:
-        switch (disp) {
-        case 0: return "All";
-        case 1: return "+A[0] 1:4096 x0.952381";
-        case 2: return "+B[0] 1:4023 x0.952381";
-        case 3: return "+A[1] 1:1024 x0.158730";
-        case 4: return "+B[1] 1:1005 x0.158730";
-        default: return nullptr;
-        }
-    case LOPT_NOISE_H_4:
-        switch (disp) {
-        case 0: return "All";
-        case 1: return "+A[0] 1:1024 x0.564374";
-        case 2: return "+B[0] 1:1005 x0.564374";
-        case 3: return "+A[1] 1:512  x0.282187";
-        case 4: return "+B[1] 1:502  x0.282187";
-        default: return nullptr;
-        }
-    case LOPT_NOISE_C_4:
-        switch (disp) {
-        case 0: return "All";
-        case 1: return "+A[0] 1:2048 x0.751468";
-        case 2: return "+B[0] 1:2011 x0.751468";
-        case 3: return "+A[1] 1:1024 x0.375734";
-        case 4: return "+B[1] 1:1005 x0.375734";
-        case 5: return "+A[2] 1:512  x0.375734";
-        case 6: return "+B[2] 1:502  x0.375734";
-        case 7: return "+A[3] 1:256  x0.187867";
-        case 8: return "+B[3] 1:251  x0.187867";
-        case 9: return "+A[4] 1:128  x0.093933";
-        case 10: return "+B[4] 1:125  x0.093933";
-        case 11: return "+A[5] 1:64   x0.023483";
-        case 12: return "+B[5] 1:62   x0.023483";
-        case 13: return "+A[6] 1:32   x0.011742";
-        case 14: return "+B[6] 1:31   x0.011742";
-        default: return nullptr;
-        }
-    case LOPT_NOISE_E_4:
-        switch (disp) {
-        case 0: return "All";
-        case 1: return "+A[0] 1:2048 x0.716846";
-        case 2: return "+B[0] 1:2011 x0.716846";
-        case 3: return "+A[1] 1:1024 x0.358423";
-        case 4: return "+B[1] 1:1005 x0.358423";
-        case 5: return "+A[2] 1:256  x0.089606";
-        case 6: return "+B[2] 1:251  x0.089606";
-        case 7: return "+A[3] 1:128  x0.044803";
-        case 8: return "+B[3] 1:125  x0.044803";
-        default: return nullptr;
-        }
-    case LOPT_NOISE_W_4:
-        switch (disp) {
-        case 0: return "All";
-        case 1: return "+A[0] 1:512 x0.634921";
-        case 2: return "+B[0] 1:502 x0.634921";
-        case 3: return "+A[1] 1:256 x0.634921";
-        case 4: return "+B[1] 1:251 x0.634921";
-        case 5: return "+A[2] 1:128 x0.158730";
-        case 6: return "+B[2] 1:125 x0.158730";
-        default: return nullptr;
-        }
+        if (disp == 0) txt = "1:1";
+        if (disp == 1) txt = "1:4";
+        if (disp == 2) txt = "1:16";
+        if (disp == 3) txt = "1:64";
+        if (disp == 4) txt = "1:256";
+        break;
     case LOPT_HEIGHT_4:
-        switch (disp) {
-        case 0: return QT_TRANSLATE_NOOP("LayerDialog", "Grayscale");
-        case 1: return QT_TRANSLATE_NOOP("LayerDialog", "Shaded biome map");
-        case 2: return QT_TRANSLATE_NOOP("LayerDialog", "Contours on biomes");
-        case 3: return QT_TRANSLATE_NOOP("LayerDialog", "Shaded with contours");
-        default: return nullptr;
-        }
-    default:
-        return nullptr;
+        if (disp == 0) txt = QApplication::translate("LayerDialog", "Grayscale");
+        if (disp == 1) txt = QApplication::translate("LayerDialog", "Shaded biome map");
+        if (disp == 2) txt = QApplication::translate("LayerDialog", "Contours on biomes");
+        if (disp == 3) txt = QApplication::translate("LayerDialog", "Shaded with contours");
+        break;
+    case LOPT_NOISE_T_4: nptype = NP_TEMPERATURE; break;
+    case LOPT_NOISE_H_4: nptype = NP_HUMIDITY; break;
+    case LOPT_NOISE_C_4: nptype = NP_CONTINENTALNESS; break;
+    case LOPT_NOISE_E_4: nptype = NP_EROSION; break;
+    case LOPT_NOISE_W_4: nptype = NP_WEIRDNESS; break;
     }
+
+    if (nptype != -1 && disp >= 0)
+    {
+        BiomeNoise bn;
+        initBiomeNoise(&bn, wi.mc);
+        setBiomeSeed(&bn, wi.seed, wi.large);
+
+        DoublePerlinNoise *dpn = bn.climate + nptype;
+        PerlinNoise *oct[2] = { dpn->octA.octaves, dpn->octB.octaves };
+        int noct = dpn->octA.octcnt;
+        int idx = noct-1;
+        int ab = 1;
+        if (disp > 0)
+        {
+            idx = (disp - 1) / 2;
+            ab  = (disp - 1) % 2;
+            if (idx >= noct)
+                return false;
+        }
+
+        double ampsum = 0, amptot = 0;
+        for (int i = 0; i < noct; i++)
+        {
+            for (int j = 0; j <= 1; j++)
+            {
+                double a = oct[j][i].amplitude;
+                amptot += a;
+                if (i < idx || (idx == i && j <= ab))
+                    ampsum += a;
+            }
+        }
+        amptot *= dpn->amplitude;
+        ampsum *= dpn->amplitude;
+
+        double f = 337.0 / 331.0;
+        PerlinNoise *pn = &oct[ab][idx];
+        double a = pn->amplitude * dpn->amplitude;
+        double l = pn->lacunarity * (ab == 0 ? 1.0 : f);
+
+        if (disp == 0)
+        {
+            txt += QString("%1..            x%2").arg(QChar(0x03A3)).arg(amptot, 0, 'f', 6);
+            tip += QApplication::translate("LayerDialog", "All octaves");
+        }
+        else
+        {
+            txt += QString("%1..").arg(QChar(0x03A3));
+            txt += QString::asprintf("%d%c  1:%-5.0f x%.6f", idx, ab?'B':'A', 1.0/l, a);
+            tip += QApplication::translate("LayerDialog", "Contribution of the %n most significant octaves out of %1 total.", "", disp).arg(2*noct);
+        }
+        tip += "\n" + QApplication::translate("LayerDialog", "Total contribution: %1 = %2%").arg(ampsum).arg(100 * ampsum / amptot, 0, 'f', 1);
+        tip += "\n" + QApplication::translate("LayerDialog", "Octave amplitude: %1").arg(a);
+        tip += "\n" + QApplication::translate("LayerDialog", "Octave lacunarity: %1 = 1/%2").arg(l).arg(1.0/l);
+    }
+
+    if (info) {
+        info->summary = txt;
+        info->tooltip = tip;
+    }
+    return !txt.isEmpty();
 }
 
-LayerDialog::LayerDialog(QWidget *parent, int mc)
+LayerDialog::LayerDialog(QWidget *parent, WorldInfo wi)
   : QDialog(parent)
   , ui(new Ui::LayerDialog)
   , radio{}
@@ -157,18 +128,21 @@ LayerDialog::LayerDialog(QWidget *parent, int mc)
     {
         if (!combo[i])
             continue;
-        QStringList items;
         for (int j = 0; ; j++)
         {
-            const char *item = getLayerOptionText(i, j);
-            if (!item)
+            LayerOptInfo info;
+            if (!getLayerOptionInfo(&info, i, j, wi))
                 break;
-            QString s = QApplication::translate("LayerDialog", item).leftJustified(24);
+            QString s = info.summary.leftJustified(24);
             if (j < 9)
                 s += "\tALT+"+QString::number(j+1);
-            items.append(s);
+            combo[i]->addItem(s);
+            combo[i]->setItemData(combo[i]->count()-1, info.tooltip, Qt::ToolTipRole);
         }
-        combo[i]->addItems(items);
+        connect(combo[i], QOverload<int>::of(&QComboBox::currentIndexChanged), [=](int){
+            this->onComboChange(combo[i]);
+        });
+        onComboChange(combo[i]);
     }
 
     QFont fmono;
@@ -182,17 +156,17 @@ LayerDialog::LayerDialog(QWidget *parent, int mc)
             combo[i]->setFont(fmono);
         if (i >= LOPT_NOISE_T_4 && i <= LOPT_NOISE_W_4)
         {
-            radio[i]->setEnabled(mc > MC_1_17);
+            radio[i]->setEnabled(wi.mc > MC_1_17);
             if (combo[i])
-                combo[i]->setEnabled(mc > MC_1_17);
+                combo[i]->setEnabled(wi.mc > MC_1_17);
         }
         if (i == LOPT_RIVER_4 || i == LOPT_OCEAN_256)
         {
-            radio[i]->setEnabled(mc > MC_1_12 && mc <= MC_1_17);
+            radio[i]->setEnabled(wi.mc > MC_1_12 && wi.mc <= MC_1_17);
         }
         if (i == LOPT_NOOCEAN_1 || i == LOPT_BETA_T_1 || i == LOPT_BETA_H_1)
         {
-            radio[i]->setEnabled(mc <= MC_B1_7);
+            radio[i]->setEnabled(wi.mc <= MC_B1_7);
         }
     }
 }
@@ -233,6 +207,11 @@ void LayerDialog::onRadioChange()
         if (radio[i] && combo[i])
             combo[i]->setEnabled(radio[i]->isChecked());
     }
+}
+
+void LayerDialog::onComboChange(QComboBox *combo)
+{
+    combo->setToolTip(combo->currentData(Qt::ToolTipRole).toString());
 }
 
 void LayerDialog::on_buttonBox_clicked(QAbstractButton *button)

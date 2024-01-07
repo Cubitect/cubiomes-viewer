@@ -1224,6 +1224,8 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
         painter.drawImage(rec, slimeimg);
     }
 
+    // draw bounding boxes and shapes
+    painter.setPen(QPen(QColor(192, 0, 0, 160), 1));
 
     if (showBB && blocks2pix >= 1.0 && qsinfo && dim == 0)
     {
@@ -1237,11 +1239,33 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
             qreal x = vw/2.0 + (qi.afk.x - focusx) * blocks2pix;
             qreal y = vh/2.0 + (qi.afk.z - focusz) * blocks2pix;
             qreal r = 128.0 * blocks2pix;
-            painter.setPen(QPen(QColor(192, 0, 0, 160), 1));
             painter.drawEllipse(QRectF(x-r, y-r, 2*r, 2*r));
             r = 16;
             painter.drawLine(QPointF(x-r,y), QPointF(x+r,y));
             painter.drawLine(QPointF(x,y-r), QPointF(x,y+r));
+        }
+    }
+
+    for (Shape& s : shapes)
+    {
+        if (s.dim != dim)
+            continue;
+        qreal x1 = vw/2.0 + (s.p1.x - focusx) * blocks2pix;
+        qreal y1 = vh/2.0 + (s.p1.z - focusz) * blocks2pix;
+        qreal x2 = vw/2.0 + (s.p2.x - focusx) * blocks2pix;
+        qreal y2 = vh/2.0 + (s.p2.z - focusz) * blocks2pix;
+        qreal r = s.r * blocks2pix;
+        switch (s.type)
+        {
+        case Shape::RECT:
+            painter.drawRect(QRectF(x1, y1, x2-x1, y2-y1));
+            break;
+        case Shape::LINE:
+            painter.drawLine(QLineF(x1, y1, x2, y2));
+            break;
+        case Shape::CIRCLE:
+            painter.drawEllipse(QPointF(x1, y1), r, r);
+            break;
         }
     }
 

@@ -11,14 +11,20 @@ namespace Ui {
 class LayerDialog;
 }
 
-const char *getLayerOptionText(int mode, int disp);
+struct LayerOptInfo
+{
+    QString summary;
+    QString tooltip;
+};
+
+bool getLayerOptionInfo(LayerOptInfo *info, int mode, int disp, WorldInfo wi);
 
 class LayerDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit LayerDialog(QWidget *parent, int mc);
+    explicit LayerDialog(QWidget *parent, WorldInfo mc);
     ~LayerDialog();
 
     void setLayerOptions(LayerOpt lopts);
@@ -29,6 +35,7 @@ signals:
 
 public slots:
     void onRadioChange();
+    void onComboChange(QComboBox *combo);
 
 private slots:
     void on_buttonBox_clicked(QAbstractButton *button);

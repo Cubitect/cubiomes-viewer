@@ -72,7 +72,7 @@ void getScripts(QMap<uint64_t, QString>& scripts)
     QDirIterator it(dir, QDirIterator::NoIteratorFlags);
     while (it.hasNext())
     {
-        QFileInfo f = it.next();
+        QFileInfo f = QFileInfo(it.next());
         if (f.suffix() != "lua")
             continue;
         uint64_t hash = getScriptHash(f);
@@ -436,19 +436,32 @@ BlockRule *LuaHighlighter::nextBlockRule(const QString& text, int *pos, int *nex
 {
     BlockRule *rule = nullptr;
     int min = INT_MAX;
+    int end = 0;
     for (int i = 0, n = blockrules.size(); i < n; i++)
     {
+#if 1
+        QRegularExpressionMatch m = blockrules[i].start.match(text, *pos);
+        if (m.hasMatch() && m.capturedStart() < min)
+        {
+            rule = &blockrules[i];
+            min = m.capturedStart();
+            end = m.capturedEnd();
+        }
+    }
+#else
         int s = blockrules[i].start.indexIn(text, *pos);
         if (s >= 0 && s < min)
         {
             rule = &blockrules[i];
             min = s;
+            end = s + rule->start.matchedLength();
         }
     }
+#endif
     if (rule)
     {
         *pos = min;
-        *next = min + rule->start.matchedLength();
+        *next = end;
     }
     return rule;
 }
@@ -467,6 +480,21 @@ void LuaHighlighter::highlightBlock(const QString& text)
 
     while (rule)
     {
+#if 1
+        QRegularExpressionMatch m = rule->end.match(text, match);
+        if (m.hasMatch())
+        {
+            markFormated(&line, start, line.length() - start, rule->format);
+            break;
+        }
+        else
+        {
+            int end = m.capturedEnd();
+            markFormated(&line, start, end - start, rule->format);
+            start = end;
+            rule = nextBlockRule(line, &start, &match);
+        }
+#else
         int end = rule->end.indexIn(text, match);
         if (end == -1)
         {
@@ -480,6 +508,7 @@ void LuaHighlighter::highlightBlock(const QString& text)
             start = end;
             rule = nextBlockRule(line, &start, &match);
         }
+#endif
     }
     if (rule)
         setCurrentBlockState(rule - &blockrules[0]);
@@ -489,6 +518,14 @@ void LuaHighlighter::highlightBlock(const QString& text)
     for (const Rule &rule : qAsConst(rules))
     {
         const QString *l = rule.overlay ? &text : &line;
+#if 1
+        QRegularExpressionMatch m = rule.pattern.match(*l);
+        while (m.hasMatch())
+        {
+            setFormat(m.capturedStart(), m.capturedLength(), rule.format);
+            m = rule.pattern.match(*l, m.capturedEnd());
+        }
+#else
         QRegExp expression(rule.pattern);
         int index = expression.indexIn(*l);
         while (index >= 0)
@@ -497,6 +534,7 @@ void LuaHighlighter::highlightBlock(const QString& text)
             setFormat(index, length, rule.format);
             index = expression.indexIn(*l, index + length);
         }
+#endif
     }
 }
 
@@ -633,7 +671,7 @@ void ScriptEditor::keyPressEvent(QKeyEvent *event)
         {
             const QString text = document()->toPlainText();
             const QChar linebreak = QChar(0x2029);
-            QString ws = linebreak + QStringRef(&text, start, end-start).toString();
+            QString ws = linebreak + text.mid(start, end-start);
             cursor.beginEditBlock();
             cursor.insertText(ws);
             cursor.endEditBlock();

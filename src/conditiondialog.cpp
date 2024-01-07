@@ -21,29 +21,16 @@
 #include <QFontMetricsF>
 
 
-static QString getTip(int mc, int layer, uint32_t flags, int id)
-{
-    uint64_t mL = 0, mM = 0;
-    genPotential(&mL, &mM, layer, mc, flags, id);
-    QString tip = ConditionDialog::tr("Generates any of:");
-    for (int j = 0; j < 64; j++)
-        if (mL & (1ULL << j))
-            tip += QString("\n") + getBiomeDisplay(mc, j);
-    for (int j = 0; j < 64; j++)
-        if (mM & (1ULL << j))
-            tip += QString("\n") + getBiomeDisplay(mc, 128+j);
-    return tip;
-}
-
 #define WARNING_CHAR QChar(0x26A0)
 
-ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcversion, QListWidgetItem *item, Condition *initcond)
+ConditionDialog::ConditionDialog(FormConditions *parent, MapView *mapview, Config *config, WorldInfo wi, QListWidgetItem *item, Condition *initcond)
     : QDialog(parent, Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint)
     , ui(new Ui::ConditionDialog)
     , luahash()
+    , mapview(mapview)
     , config(config)
     , item(item)
-    , mc(mcversion)
+    , wi(wi)
 {
     memset(&cond, 0, sizeof(cond));
     ui->setupUi(this);
@@ -55,7 +42,7 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
     textDescription->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
     ui->collapseDescription->init(tr("Description/Notes"), textDescription, true);
 
-    const char *p_mcs = mc2str(mc);
+    const char *p_mcs = mc2str(wi.mc);
     QString mcs = tr("MC %1", "Minecraft version").arg(p_mcs ? p_mcs : "?");
     ui->labelMC->setText(mcs);
 
@@ -86,20 +73,20 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
             if (c.save == initcond->save)
                 continue;
             if (c.save == initcond->relative)
-                initindex = ui->comboBoxRelative->count();
+                initindex = ui->comboRelative->count();
         }
         QString condstr = c.summary(false).simplified();
-        ui->comboBoxRelative->addItem(condstr, c.save);
+        ui->comboRelative->addItem(condstr, c.save);
     }
     if (initindex < 0)
     {
         if (initcond && initcond->relative > 0)
         {
-            initindex = ui->comboBoxRelative->count();
+            initindex = ui->comboRelative->count();
             QString condstr = QString("[%1] %2 broken reference")
                 .arg(initcond->relative, 2, 10, QChar('0'))
                 .arg(WARNING_CHAR);
-            ui->comboBoxRelative->addItem(condstr, initcond->relative);
+            ui->comboRelative->addItem(condstr, initcond->relative);
         }
         else
         {
@@ -117,6 +104,8 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
     ui->lineSquare->setValidator(uintval);
     ui->lineRadius->setValidator(uintval);
 
+    ui->lineSpiralStep->setValidator(new QIntValidator(1, 0xffff, this));
+
     ui->lineBiomeSize->setValidator(new QIntValidator(1, INT_MAX, this));
     ui->lineTolerance->setValidator(new QIntValidator(0, 255, this));
 
@@ -125,28 +114,31 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
     ui->lineMin->setValidator(new QDoubleValidator(-1e6, 1e6, 4, this));
     ui->lineMax->setValidator(new QDoubleValidator(-1e6, 1e6, 4, this));
 
-    ui->comboBoxCat->setItemDelegate(new ComboBoxDelegate(this, ui->comboBoxCat));
-    ui->comboBoxType->setItemDelegate(new ComboBoxDelegate(this, ui->comboBoxType));
+    ui->lineCoverage->setValidator(new QDoubleValidator(0.0001, 100.0000, 4, this));
+    ui->lineConfidence->setValidator(new QDoubleValidator(0.0001, 99.9999, 4, this));
 
-    //qobject_cast<QListView*>(ui->comboBoxCat->view())->setSpacing(1);
-    //qobject_cast<QListView*>(ui->comboBoxType->view())->setSpacing(1);
+    ui->comboCat->setItemDelegate(new ComboBoxDelegate(this, ui->comboCat));
+    ui->comboType->setItemDelegate(new ComboBoxDelegate(this, ui->comboType));
 
-    ui->comboBoxCat->addItem(tr("Select category"));
-    ui->comboBoxCat->insertSeparator(1);
-    ui->comboBoxCat->addItem(getPix("helper"), tr("Algorithm helpers"), CAT_HELPER);
-    ui->comboBoxCat->addItem(getPix("quad"), tr("Quad-structure"), CAT_QUAD);
-    ui->comboBoxCat->addItem(getPix("stronghold"), tr("Structures"), CAT_STRUCT);
-    ui->comboBoxCat->addItem(getPix("overworld"), tr("Biomes"), CAT_BIOMES);
-    ui->comboBoxCat->addItem(getPix("nether"), tr("Nether biomes"), CAT_NETHER);
-    ui->comboBoxCat->addItem(getPix("the_end"), tr("End biomes"), CAT_END);
-    ui->comboBoxCat->addItem(getPix("slime"), tr("Other"), CAT_OTHER);
-    int fmh = ui->comboBoxCat->fontMetrics().height() + 8;
-    ui->comboBoxCat->setIconSize(QSize(fmh, fmh));
-    ui->comboBoxType->setIconSize(QSize(fmh, fmh));
+    //qobject_cast<QListView*>(ui->comboCat->view())->setSpacing(1);
+    //qobject_cast<QListView*>(ui->comboType->view())->setSpacing(1);
+
+    ui->comboCat->addItem(tr("Select category"));
+    ui->comboCat->insertSeparator(1);
+    ui->comboCat->addItem(getPix("helper"), tr("Algorithm helpers"), CAT_HELPER);
+    ui->comboCat->addItem(getPix("quad"), tr("Quad-structure"), CAT_QUAD);
+    ui->comboCat->addItem(getPix("stronghold"), tr("Structures"), CAT_STRUCT);
+    ui->comboCat->addItem(getPix("overworld"), tr("Biomes"), CAT_BIOMES);
+    ui->comboCat->addItem(getPix("nether"), tr("Nether biomes"), CAT_NETHER);
+    ui->comboCat->addItem(getPix("the_end"), tr("End biomes"), CAT_END);
+    ui->comboCat->addItem(getPix("slime"), tr("Other"), CAT_OTHER);
+    int fmh = ui->comboCat->fontMetrics().height() + 8;
+    ui->comboCat->setIconSize(QSize(fmh, fmh));
+    ui->comboType->setIconSize(QSize(fmh, fmh));
 
     for (int i = 0; i < 256; i++)
     {
-        QString bname = getBiomeDisplay(mc, i);
+        QString bname = getBiomeDisplay(wi.mc, i);
         if (bname.isEmpty())
             continue;
         QCheckBox *cb = new QCheckBox(bname);
@@ -214,7 +206,7 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
         if (i == NP_DEPTH)
         {
             LabeledRange *lr;
-            if (mc <= MC_1_17)
+            if (wi.mc <= MC_1_17)
                 lr = new LabeledRange(this, 0, 256);
             else
                 lr = new LabeledRange(this, -64, 320);
@@ -253,15 +245,15 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
     std::vector<int> ids;
     for (int id = 0; id < 256; id++)
         ids.push_back(id);
-    IdCmp cmp(IdCmp::SORT_LEX, mc, DIM_UNDEF);
+    IdCmp cmp(IdCmp::SORT_LEX, wi.mc, DIM_UNDEF);
     std::sort(ids.begin(), ids.end(), cmp);
 
     for (int id : ids)
     {
-        const int *lim = getBiomeParaLimits(mc, id);
+        const int *lim = getBiomeParaLimits(wi.mc, id);
         if (!lim)
             continue;
-        NoiseBiomeIndicator *cb = new NoiseBiomeIndicator(getBiomeDisplay(mc, id), this);
+        NoiseBiomeIndicator *cb = new NoiseBiomeIndicator(getBiomeDisplay(wi.mc, id), this);
         QString tip = "<pre>";
         for (int j = 0; j < NP_MAX; j++)
         {
@@ -310,6 +302,8 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
     ui->checkSkipRef->setChecked(false);
     ui->radioSquare->setChecked(true);
     ui->checkRadius->setChecked(false);
+    ui->lineCoverage->setText("100");
+    ui->lineConfidence->setText("95");
     onCheckStartChanged(false);
     on_comboClimatePara_currentIndexChanged(0);
 
@@ -328,22 +322,25 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
             ui->comboLua->setCurrentIndex(-1); // force index change
         ui->comboLua->setCurrentIndex(ui->comboLua->findData(QVariant::fromValue(cond.hash)));
 
-        ui->comboBoxCat->setCurrentIndex(ui->comboBoxCat->findData(ft.cat));
-        for (int i = 0; i < ui->comboBoxType->count(); i++)
+        ui->comboCat->setCurrentIndex(ui->comboCat->findData(ft.cat));
+        for (int i = 0; i < ui->comboType->count(); i++)
         {
-            int type = ui->comboBoxType->itemData(i, Qt::UserRole).toInt();
+            int type = ui->comboType->itemData(i, Qt::UserRole).toInt();
             if (type == cond.type)
             {
-                ui->comboBoxType->setCurrentIndex(i);
+                ui->comboType->setCurrentIndex(i);
                 break;
             }
         }
 
-        ui->comboBoxRelative->setCurrentIndex(initindex);
-        on_comboBoxRelative_activated(initindex);
+        ui->comboRelative->setCurrentIndex(initindex);
+        on_comboRelative_activated(initindex);
         ui->textEditLua->document()->setModified(false);
 
-        ui->comboMatchBiome->insertItem(0, getBiomeDisplay(mc, cond.biomeId), QVariant::fromValue(cond.biomeId));
+        if (cond.step)
+            ui->lineSpiralStep->setText(QString::number(cond.step));
+
+        ui->comboMatchBiome->insertItem(0, getBiomeDisplay(wi.mc, cond.biomeId), QVariant::fromValue(cond.biomeId));
         ui->comboMatchBiome->setCurrentIndex(0);
 
         ui->comboClimatePara->setCurrentIndex(ui->comboClimatePara->findData(QVariant::fromValue(cond.para)));
@@ -364,6 +361,10 @@ ConditionDialog::ConditionDialog(FormConditions *parent, Config *config, int mcv
 
         ui->checkApprox->setChecked(cond.flags & Condition::FLG_APPROX);
         ui->checkMatchAny->setChecked(cond.flags & Condition::FLG_MATCH_ANY);
+        ui->lineCoverage->setText(QString::number(cond.converage ? cond.converage * 100 : 100));
+        ui->lineConfidence->setText(QString::number(cond.confidence ? cond.confidence * 100 : 95));
+        ui->checkSamplePos->setChecked(cond.count == 1);
+
         int i, n = ui->comboY->count();
         for (i = 0; i < n; i++)
             if (ui->comboY->itemText(i).section(' ', 0, 0).toInt() == cond.y)
@@ -475,26 +476,40 @@ void ConditionDialog::addTempCat(int temp, QString name)
     int r = temp % Special;
     ui->gridLayoutTemps->addWidget(tempsboxes[temp], r, c * 2 + 0);
     ui->gridLayoutTemps->addWidget(l, r, c * 2 + 1);
-    if (mc > MC_1_6 && mc <= MC_1_17)
-        l->setToolTip(getTip(mc, L_SPECIAL_1024, 0, r + (temp >= Special ? 256 : 0)));
+    if (wi.mc > MC_1_6 && wi.mc <= MC_1_17)
+    {
+        uint64_t mL = 0, mM = 0;
+        genPotential(&mL, &mM, L_SPECIAL_1024, wi.mc, 0, r + (temp >= Special ? 256 : 0));
+        QString tip = ConditionDialog::tr("Generates any of:");
+        for (int j = 0; j < 64; j++)
+            if (mL & (1ULL << j))
+                tip += QString("\n") + getBiomeDisplay(wi.mc, j);
+        for (int j = 0; j < 64; j++)
+            if (mM & (1ULL << j))
+                tip += QString("\n") + getBiomeDisplay(wi.mc, 128+j);
+        l->setToolTip(tip);
+    }
 }
 
 void ConditionDialog::updateMode()
 {
-    int filterindex = ui->comboBoxType->currentData().toInt();
+    int filterindex = ui->comboType->currentData().toInt();
     const FilterInfo &ft = g_filterinfo.list[filterindex];
 
     ui->lineSummary->setPlaceholderText(QApplication::translate("Filter", ft.name));
 
     QPalette pal;
-    if (mc < ft.mcmin || mc > ft.mcmax)
+    if (wi.mc < ft.mcmin || wi.mc > ft.mcmax)
         pal.setColor(QPalette::Normal, QPalette::Button, QColor(255,0,0,127));
-    ui->comboBoxType->setPalette(pal);
+    ui->comboType->setPalette(pal);
 
     ui->groupBoxGeneral->setEnabled(filterindex != F_SELECT);
     ui->groupBoxPosition->setEnabled(filterindex != F_SELECT);
 
-    ui->checkRadius->setEnabled(ft.rmax);
+    ui->checkRadius->setEnabled(ft.loc & FilterInfo::LOC_R);
+
+    bool p1 = ft.loc & FilterInfo::LOC_1;
+    bool p2 = ft.loc & FilterInfo::LOC_2;
 
     if (ui->checkRadius->isEnabled() && ui->checkRadius->isChecked())
     {
@@ -516,28 +531,44 @@ void ConditionDialog::updateMode()
     }
     else
     {
-        bool custom = ui->radioCustom->isChecked();
-
         ui->lineRadius->setEnabled(false);
 
-        ui->radioSquare->setEnabled(ft.area);
-        ui->radioCustom->setEnabled(ft.area);
+        ui->radioSquare->setEnabled(p2);
+        ui->radioCustom->setEnabled(p2);
 
-        ui->lineSquare->setEnabled(!custom && ft.area);
-
-        ui->labelX1->setEnabled(ft.coord && (custom || !ft.area));
-        ui->labelZ1->setEnabled(ft.coord && (custom || !ft.area));
-        ui->labelX2->setEnabled(custom && ft.area);
-        ui->labelZ2->setEnabled(custom && ft.area);
-        ui->lineEditX1->setEnabled(ft.coord && (custom || !ft.area));
-        ui->lineEditZ1->setEnabled(ft.coord && (custom || !ft.area));
-        ui->lineEditX2->setEnabled(custom && ft.area);
-        ui->lineEditZ2->setEnabled(custom && ft.area);
+        if (ui->radioCustom->isChecked())
+        {
+            ui->lineSquare->setEnabled(false);
+            ui->labelX1->setEnabled(p1);
+            ui->labelZ1->setEnabled(p1);
+            ui->labelX2->setEnabled(p2);
+            ui->labelZ2->setEnabled(p2);
+            ui->lineEditX1->setEnabled(p1);
+            ui->lineEditZ1->setEnabled(p1);
+            ui->lineEditX2->setEnabled(p2);
+            ui->lineEditZ2->setEnabled(p2);
+        }
+        else
+        {
+            ui->lineSquare->setEnabled(p2);
+            ui->labelX1->setEnabled(p1 && !p2);
+            ui->labelZ1->setEnabled(p1 && !p2);
+            ui->labelX2->setEnabled(false);
+            ui->labelZ2->setEnabled(false);
+            ui->lineEditX1->setEnabled(p1 && !p2);
+            ui->lineEditZ1->setEnabled(p1 && !p2);
+            ui->lineEditX2->setEnabled(false);
+            ui->lineEditZ2->setEnabled(false);
+        }
     }
 
-    ui->labelSpinBox->setEnabled(ft.count);
-    ui->spinBox->setEnabled(ft.count);
-    ui->checkSkipRef->setEnabled(ft.count);
+    ui->buttonFromVisible->setEnabled(mapview && p2 && ui->comboRelative->currentIndex() == 0);
+
+    bool cnt = ft.branch == FilterInfo::BR_CLUST;
+
+    ui->labelSpinBox->setEnabled(cnt);
+    ui->spinBox->setEnabled(cnt);
+    ui->checkSkipRef->setEnabled(cnt);
 
     ui->labelY->setEnabled(ft.hasy);
     ui->comboY->setEnabled(ft.hasy);
@@ -561,14 +592,18 @@ void ConditionDialog::updateMode()
     else if (ft.cat == CAT_BIOMES || ft.cat == CAT_NETHER || ft.cat == CAT_END)
     {
         ui->stackedWidget->setCurrentWidget(ui->pageBiomes);
-        ui->checkApprox->setEnabled(mc <= MC_1_17 || ft.step == 4);
+        ui->checkApprox->setEnabled(wi.mc <= MC_1_17 || ft.grid == 4);
         ui->checkMatchAny->setEnabled(true);
+        if (filterindex == F_BIOME_SAMPLE)
+            ui->stackedBiome->setCurrentWidget(ui->pageBiomeOptSample);
+        else
+            ui->stackedBiome->setCurrentWidget(ui->pageBiomeOpt);
     }
     else if (filterindex == F_VILLAGE)
     {
         ui->stackedWidget->setCurrentWidget(ui->pageVillage);
-        ui->checkStartPieces->setEnabled(mc >= MC_1_14);
-        ui->checkAbandoned->setEnabled(filterindex == F_VILLAGE && mc >= MC_1_10);
+        ui->checkStartPieces->setEnabled(wi.mc >= MC_1_14);
+        ui->checkAbandoned->setEnabled(filterindex == F_VILLAGE && wi.mc >= MC_1_10);
     }
     else if (filterindex == F_FORTRESS)
     {
@@ -578,22 +613,22 @@ void ConditionDialog::updateMode()
     else if (filterindex == F_BASTION)
     {
         ui->stackedWidget->setCurrentWidget(ui->pageBastion);
-        ui->checkStartBastion->setEnabled(mc >= MC_1_16_1);
+        ui->checkStartBastion->setEnabled(wi.mc >= MC_1_16_1);
     }
     else if (filterindex == F_PORTAL || filterindex == F_PORTALN)
     {
         ui->stackedWidget->setCurrentWidget(ui->pagePortal);
-        ui->checkStartPortal->setEnabled(mc >= MC_1_16_1);
+        ui->checkStartPortal->setEnabled(wi.mc >= MC_1_16_1);
     }
     else if (filterindex == F_ENDCITY)
     {
         ui->stackedWidget->setCurrentWidget(ui->pageEndCity);
-        ui->checkBasement->setEnabled(mc >= MC_1_9);
+        ui->checkBasement->setEnabled(wi.mc >= MC_1_9);
     }
     else if (filterindex == F_IGLOO)
     {
         ui->stackedWidget->setCurrentWidget(ui->pageIgloo);
-        ui->checkEndShip->setEnabled(mc >= MC_1_9);
+        ui->checkEndShip->setEnabled(wi.mc >= MC_1_9);
     }
     else if (filterindex == F_HEIGHT)
     {
@@ -603,6 +638,10 @@ void ConditionDialog::updateMode()
     {
         ui->stackedWidget->setCurrentWidget(ui->pageLua);
     }
+    else if (filterindex == F_SPIRAL)
+    {
+        ui->stackedWidget->setCurrentWidget(ui->pageSpiral);
+    }
     else
     {
         ui->stackedWidget->setCurrentWidget(ui->pageNone);
@@ -610,26 +649,14 @@ void ConditionDialog::updateMode()
 
     updateBiomeSelection();
 
-    QString loc = "";
-    QString areatip = "";
-    QString lowtip = "";
-    QString uptip = "";
+    QString loc = tr("Location");
+    QString areatip = tr("From floor(-x/2) to floor(x/2) on both axes (inclusive)");
+    QString lowtip = tr("Lower bound (inclusive)");
+    QString uptip = tr("Upper bound (inclusive)");
 
-    if (ft.step > 1)
-    {
-        QString multxt = QString("%1%2").arg(QChar(0xD7)).arg(ft.step);
-        loc = tr("Location (coordinates are multiplied by %1)").arg(multxt);
-        areatip = tr("From floor(-x/2)%1 to floor(x/2)%1 on both axes (inclusive)").arg(multxt);
-        lowtip = tr("Lower bound %1 (inclusive)").arg(multxt);
-        uptip = tr("Upper bound %1 (inclusive)").arg(multxt);
-    }
-    else
-    {
-        loc = tr("Location");
-        areatip = tr("From floor(-x/2) to floor(x/2) on both axes (inclusive)");
-        lowtip = tr("Lower bound (inclusive)");
-        uptip = tr("Upper bound (inclusive)");
-    }
+    if (ft.grid > 1)
+        loc += " " + tr("(sampled on a grid of scale 1:%1)").arg(ft.grid);
+
     ui->groupBoxPosition->setTitle(loc);
     ui->radioSquare->setToolTip(areatip);
     ui->labelX1->setToolTip(lowtip);
@@ -646,7 +673,7 @@ void ConditionDialog::updateMode()
 
 void ConditionDialog::updateBiomeSelection()
 {
-    int filterindex = ui->comboBoxType->currentData().toInt();
+    int filterindex = ui->comboType->currentData().toInt();
     const FilterInfo &ft = g_filterinfo.list[filterindex];
 
     // clear tool tips
@@ -669,14 +696,14 @@ void ConditionDialog::updateBiomeSelection()
         available.push_back(cold_ocean);
         available.push_back(frozen_ocean);
     }
-    else if (ft.cat == CAT_BIOMES && mc > MC_B1_7 && mc <= MC_1_17)
+    else if (ft.cat == CAT_BIOMES && wi.mc > MC_B1_7 && wi.mc <= MC_1_17)
     {
         int layerId = ft.layer;
         if (layerId == 0)
         {
             Generator tmp;
-            setupGenerator(&tmp, mc, 0);
-            const Layer *l = getLayerForScale(&tmp, ft.step);
+            setupGenerator(&tmp, wi.mc, 0);
+            const Layer *l = getLayerForScale(&tmp, ft.grid);
             if (l)
                 layerId = l - tmp.ls.layers;
         }
@@ -688,7 +715,7 @@ void ConditionDialog::updateBiomeSelection()
             QCheckBox *cb = it.second;
             uint64_t mL = 0, mM = 0;
             uint32_t flags = 0;
-            genPotential(&mL, &mM, layerId, mc, flags, it.first);
+            genPotential(&mL, &mM, layerId, wi.mc, flags, it.first);
 
             if (mL || mM)
             {
@@ -699,12 +726,12 @@ void ConditionDialog::updateBiomeSelection()
                     for (int j = 0; j < 64; j++)
                     {
                         if (mL & (1ULL << j))
-                            tip += QString("\n") + getBiomeDisplay(mc, j);
+                            tip += QString("\n") + getBiomeDisplay(wi.mc, j);
                     }
                     for (int j = 0; j < 64; j++)
                     {
                         if (mM & (1ULL << j))
-                            tip += QString("\n") + getBiomeDisplay(mc, j+128);
+                            tip += QString("\n") + getBiomeDisplay(wi.mc, j+128);
                     }
                     cb->setToolTip(tip);
                 }
@@ -719,12 +746,12 @@ void ConditionDialog::updateBiomeSelection()
     {
         for (const auto& it : biomecboxes)
         {
-            if (isOverworld(mc, it.first))
+            if (isOverworld(wi.mc, it.first))
                 available.push_back(it.first);
         }
     }
 
-    IdCmp cmp = {IdCmp::SORT_LEX, mc, DIM_UNDEF};
+    IdCmp cmp = {IdCmp::SORT_LEX, wi.mc, DIM_UNDEF};
     std::sort(available.begin(), available.end(), cmp);
 
     if (ui->stackedWidget->currentWidget() == ui->pageBiomes)
@@ -772,7 +799,7 @@ void ConditionDialog::updateBiomeSelection()
 
         for (int id: available)
         {
-            QString s = getBiomeDisplay(mc, id);
+            QString s = getBiomeDisplay(wi.mc, id);
             ui->comboMatchBiome->addItem(getBiomeIcon(id), s, QVariant::fromValue(id));
             allowed_matches.append(s);
         }
@@ -785,7 +812,7 @@ void ConditionDialog::updateBiomeSelection()
             }
             else
             {
-                QString s = QString("%1 %2").arg(WARNING_CHAR).arg(getBiomeDisplay(mc, curid.toInt()));
+                QString s = QString("%1 %2").arg(WARNING_CHAR).arg(getBiomeDisplay(wi.mc, curid.toInt()));
                 ui->comboMatchBiome->insertItem(0, getBiomeIcon(curid.toInt(), true), s, curid);
                 ui->comboMatchBiome->setCurrentIndex(0);
                 allowed_matches.append(s);
@@ -830,21 +857,25 @@ int ConditionDialog::warnIfBad(Condition cond)
     }
     else if (cond.type == F_BIOME_CENTER || cond.type == F_BIOME_CENTER_256)
     {
-        int w = cond.x2 - cond.x1 + 1;
-        int h = cond.z2 - cond.z1 + 1;
+        int s = ft.pow2;
+        int w = (cond.x2 >> s) - (cond.x1 >> s) + 1;
+        int h = (cond.z2 >> s) - (cond.z1 >> s) + 1;
         if ((unsigned int)(w * h) < cond.count * cond.biomeSize)
         {
             QString text = tr(
-                "The biome locator checks for %1 instances of size %2 each, "
-                "which cannot be satisfied by an area of size %3%4%5 = %6.")
-                .arg(cond.count).arg(cond.biomeSize).arg(w).arg(QChar(0xD7)).arg(h).arg(w * h);
+                "The biome locator checks for %n instance(s), each of size %1, "
+                "which cannot be satisfied by an area of size\n"
+                "%2%3%4 = %5 < %6 @ scale 1:%7.", "", cond.count)
+                    .arg(cond.biomeSize)
+                    .arg(w).arg(QChar(0xD7)).arg(h).arg(w*h)
+                    .arg(cond.count * cond.biomeSize).arg(1<<s);
             warn(this, tr("Area Insufficient"), text);
             return QMessageBox::Cancel;
         }
     }
     else if (ft.cat == CAT_BIOMES)
     {
-        if (mc >= MC_1_18)
+        if (wi.mc >= MC_1_18)
         {
             uint64_t m = cond.biomeToFindM;
             uint64_t underground =
@@ -890,8 +921,8 @@ void ConditionDialog::onAccept()
 
     Condition c = cond;
     c.version = Condition::VER_CURRENT;
-    c.type = ui->comboBoxType->currentData().toInt();
-    c.relative = ui->comboBoxRelative->currentData().toInt();
+    c.type = ui->comboType->currentData().toInt();
+    c.relative = ui->comboRelative->currentData().toInt();
     c.count = ui->spinBox->value();
     c.skipref = ui->checkSkipRef->isChecked();
 
@@ -923,18 +954,20 @@ void ConditionDialog::onAccept()
         c.z2 = ui->lineEditZ2->text().toInt();
     }
 
-    if (ft.area)
+    if (ft.loc & FilterInfo::LOC_2)
     {
         if (c.x1 > c.x2) std::swap(c.x1, c.x2);
         if (c.z1 > c.z2) std::swap(c.z1, c.z2);
     }
 
-    if (ui->checkRadius->isChecked())
+    if (ui->checkRadius->isEnabled() && ui->checkRadius->isChecked())
         c.rmax = ui->lineRadius->text().toInt() + 1;
     else
         c.rmax = 0;
 
     c.y = ui->comboY->currentText().section(' ', 0, 0).toInt();
+
+    c.step = ui->lineSpiralStep->text().toUShort();
 
     if (ui->stackedWidget->currentWidget() == ui->pageBiomes)
     {
@@ -959,7 +992,9 @@ void ConditionDialog::onAccept()
                 }
             }
         }
-        c.count = 0;
+        c.count = ui->checkSamplePos->isChecked() ? 1 : 0;
+        c.converage = ui->lineCoverage->text().toFloat() / 100.0;
+        c.confidence = ui->lineConfidence->text().toFloat() / 100.0;
     }
     if (ui->stackedWidget->currentWidget() == ui->pageBiomeCenter)
     {
@@ -1029,17 +1064,18 @@ void ConditionDialog::onAccept()
     close();
 }
 
-void ConditionDialog::on_comboBoxType_activated(int)
+void ConditionDialog::on_comboType_activated(int)
 {
     updateMode();
 }
 
-void ConditionDialog::on_comboBoxRelative_activated(int)
+void ConditionDialog::on_comboRelative_activated(int)
 {
     QPalette pal;
-    if (ui->comboBoxRelative->currentText().contains(WARNING_CHAR))
+    if (ui->comboRelative->currentText().contains(WARNING_CHAR))
         pal.setColor(QPalette::Normal, QPalette::Button, QColor(255,0,0,127));
-    ui->comboBoxRelative->setPalette(pal);
+    ui->comboRelative->setPalette(pal);
+    updateMode();
 }
 
 void ConditionDialog::on_buttonUncheck_clicked()
@@ -1073,19 +1109,32 @@ void ConditionDialog::on_buttonAreaInfo_clicked()
         "</p><p>"
         "Alternatively, the area can be defined as a <b>centered square</b> "
         "with a certain side length. In this case the area has the bounds: "
-        "[-X/2, -X/2] on both axes, rounding down and bounds included. For "
+        "[-X/2, +X/2] on both axes, rounding down and bounds included. For "
         "example a centered square with side 3 will go from -2 to 1 for both "
         "the X and Z axes."
         "</p><p>"
         "Important to note is that some filters have a scaling associated with "
-        "them. This means that the area is not defined in blocks, but on a grid "
-        "with the given spacing (such as chunks instead of blocks). A scaling "
-        "of 1:16, for example, means that the aforementioned centered square of "
-        "side 3 will range from -32 to 31 in block coordinates. (Chunk 1 has "
-        "blocks 16 to 31.)"
+        "them. This means the condition only checks on a grid with that spacing. "
+        "An area with a range from -21 to 21 at scale 1:16 may effectively be "
+        "expanded to -32 to 31, and get sampled at -32, -16, 0 and 16."
         "</p></body></html>"
         ));
     mb.exec();
+}
+
+void ConditionDialog::on_buttonFromVisible_clicked()
+{
+    if (!mapview)
+        return;
+    int x1, z1, x2, z2;
+    mapview->getVisible(&x1, &z1, &x2, &z2);
+    ui->lineEditX1->setText(QString::number(x1));
+    ui->lineEditZ1->setText(QString::number(z1));
+    ui->lineEditX2->setText(QString::number(x2));
+    ui->lineEditZ2->setText(QString::number(z2));
+    ui->checkRadius->setChecked(false);
+    ui->radioCustom->setChecked(true);
+    updateMode();
 }
 
 void ConditionDialog::on_checkRadius_toggled(bool)
@@ -1121,15 +1170,15 @@ void ConditionDialog::on_ConditionDialog_finished(int result)
     item = 0;
 }
 
-void ConditionDialog::on_comboBoxCat_currentIndexChanged(int)
+void ConditionDialog::on_comboCat_currentIndexChanged(int)
 {
-    int cat = ui->comboBoxCat->currentData().toInt();
-    ui->comboBoxType->setEnabled(cat != CAT_NONE);
-    ui->comboBoxType->clear();
+    int cat = ui->comboCat->currentData().toInt();
+    ui->comboType->setEnabled(cat != CAT_NONE);
+    ui->comboType->clear();
 
     int slot = 0;
-    ui->comboBoxType->insertItem(slot, tr("Select type"), QVariant::fromValue((int)F_SELECT));
-    ui->comboBoxType->insertSeparator(++slot);
+    ui->comboType->insertItem(slot, tr("Select type"), QVariant::fromValue((int)F_SELECT));
+    ui->comboType->insertSeparator(++slot);
 
     const FilterInfo *ft_list[FILTER_MAX] = {};
     const FilterInfo *ft;
@@ -1150,16 +1199,16 @@ void ConditionDialog::on_comboBoxCat_currentIndexChanged(int)
         QVariant vidx = QVariant::fromValue((int)(ft - g_filterinfo.list));
         QString txt = QApplication::translate("Filter", ft->name);
         if (ft->icon)
-            ui->comboBoxType->insertItem(slot, getPix(ft->icon), txt, vidx);
+            ui->comboType->insertItem(slot, getPix(ft->icon), txt, vidx);
         else
-            ui->comboBoxType->insertItem(slot, txt, vidx);
+            ui->comboType->insertItem(slot, txt, vidx);
 
-        if (mc < ft->mcmin || mc > ft->mcmax)
-            ui->comboBoxType->setItemData(slot, false, Qt::UserRole-1); // deactivate
+        if (wi.mc < ft->mcmin || wi.mc > ft->mcmax)
+            ui->comboType->setItemData(slot, false, Qt::UserRole-1); // deactivate
         if (ft == g_filterinfo.list + F_FORTRESS)
-            ui->comboBoxType->insertSeparator(slot++);
+            ui->comboType->insertSeparator(slot++);
         if (ft == g_filterinfo.list + F_ENDCITY)
-            ui->comboBoxType->insertSeparator(slot++);
+            ui->comboType->insertSeparator(slot++);
     }
 
     updateMode();
@@ -1253,8 +1302,8 @@ void ConditionDialog::onClimateLimitChanged()
 
     getClimateLimits(limok, limex);
 
-    getPossibleBiomesForLimits(ok, mc, limok);
-    getPossibleBiomesForLimits(ex, mc, limex);
+    getPossibleBiomesForLimits(ok, wi.mc, limok);
+    getPossibleBiomesForLimits(ex, wi.mc, limex);
 
     for (auto& it : noisebiomes)
     {
@@ -1270,7 +1319,7 @@ void ConditionDialog::onClimateLimitChanged()
 
 void ConditionDialog::on_lineBiomeSize_textChanged(const QString &)
 {
-    int filterindex = ui->comboBoxType->currentData().toInt();
+    int filterindex = ui->comboType->currentData().toInt();
     double area = ui->lineBiomeSize->text().toInt();
     QString s;
     if (filterindex == F_BIOME_CENTER_256)
@@ -1368,7 +1417,7 @@ void ConditionDialog::on_pushLuaSaveAs_clicked()
     stream.flush();
     file.close();
     ui->textEditLua->document()->setModified(false);
-    uint64_t hash = getScriptHash(fnam);
+    uint64_t hash = getScriptHash(QFileInfo(fnam));
     ui->comboLua->addItem(QFileInfo(fnam).baseName(), QVariant::fromValue(hash));
     ui->comboLua->setCurrentIndex(ui->comboLua->count() - 1);
 }
@@ -1495,17 +1544,21 @@ void ConditionDialog::on_comboClimatePara_currentIndexChanged(int)
 {
     ui->comboOctaves->clear();
     int loptidx = LOPT_NOISE_PARA + ui->comboClimatePara->currentData().toInt();
-    QStringList items;
     for (int i = 0; ; i++)
     {
-        if (const char *s = getLayerOptionText(loptidx, i))
-            items.append(s);
-        else
+        LayerOptInfo info;
+        if (!getLayerOptionInfo(&info, loptidx, i, wi))
             break;
+        ui->comboOctaves->addItem(info.summary);
+        ui->comboOctaves->setItemData(ui->comboOctaves->count()-1, info.tooltip, Qt::ToolTipRole);
     }
-    ui->comboOctaves->addItems(items);
+    on_comboOctaves_currentIndexChanged(0);
 }
 
+void ConditionDialog::on_comboOctaves_currentIndexChanged(int)
+{
+    ui->comboOctaves->setToolTip(ui->comboOctaves->currentData(Qt::ToolTipRole).toString());
+}
 
 void ConditionDialog::on_comboY_currentTextChanged(const QString &text)
 {

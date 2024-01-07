@@ -52,7 +52,9 @@ ConfigDialog::ConfigDialog(QWidget *parent, Config *config)
     int hsc = ui->scrollAreaWidgetContents->sizeHint().height();
     int hpa = parent->size().height();
     int h = size.height();
-    h += hsc - hsa + layout()->margin();
+    int m1, m2;
+    layout()->getContentsMargins(0, &m1, 0, &m2);
+    h += hsc - hsa + m1 + m2;
     if (h > hpa) h = hpa;
     size.setHeight(h);
     resize(size);

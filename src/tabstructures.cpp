@@ -607,17 +607,14 @@ void TabStructures::on_pushExport_clicked()
 void TabStructures::on_buttonFromVisible_clicked()
 {
     MapView *mapview = parent->getMapView();
-    qreal uiw = mapview->width() * mapview->getScale();
-    qreal uih = mapview->height() * mapview->getScale();
-    int bx0 = (int) floor(mapview->getX() - uiw/2);
-    int bz0 = (int) floor(mapview->getZ() - uih/2);
-    int bx1 = (int) ceil(mapview->getX() + uiw/2);
-    int bz1 = (int) ceil(mapview->getZ() + uih/2);
 
-    ui->lineX1->setText( QString::number(bx0) );
-    ui->lineZ1->setText( QString::number(bz0) );
-    ui->lineX2->setText( QString::number(bx1) );
-    ui->lineZ2->setText( QString::number(bz1) );
+    int x1, z1, x2, z2;
+    mapview->getVisible(&x1, &z1, &x2, &z2);
+
+    ui->lineX1->setText( QString::number(x1) );
+    ui->lineZ1->setText( QString::number(z1) );
+    ui->lineX2->setText( QString::number(x2) );
+    ui->lineZ2->setText( QString::number(z2) );
 }
 
 void TabStructures::on_tabWidget_currentChanged(int)

@@ -160,30 +160,24 @@ QString getBiomeDisplay(int mc, int id)
     return name ? name : "";
 }
 
+RandGen::RandGen()
+{
+    std::random_device rd;
+    if (rd.entropy())
+        mt = std::mt19937_64(rd());
+    else
+        mt = std::mt19937_64(time(0));
+}
+
 // get a random 64-bit integer
 uint64_t getRnd64()
 {
     static QMutex mutex;
-    static std::random_device rd;
-    static std::mt19937_64 mt(rd());
-    static uint64_t x = (uint64_t) time(0);
+    static RandGen rng;
     uint64_t ret = 0;
     mutex.lock();
-    if (rd.entropy())
-    {
-        std::uniform_int_distribution<int64_t> d;
-        ret = d(mt);
-    }
-    else
-    {
-        const uint64_t c = 0xd6e8feb86659fd93ULL;
-        x ^= x >> 32;
-        x *= c;
-        x ^= x >> 32;
-        x *= c;
-        x ^= x >> 32;
-        ret = x;
-    }
+    std::uniform_int_distribution<uint64_t> d;
+    ret = d(rng.mt);
     mutex.unlock();
     return ret;
 }

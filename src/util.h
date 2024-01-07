@@ -64,6 +64,12 @@ QString getStartPieceName(int stype, const StructureVariant *sv);
 
 QString getBiomeDisplay(int mc, int id);
 
+struct RandGen
+{
+    RandGen();
+    std::mt19937_64 mt;
+};
+
 // get a random 64-bit integer
 uint64_t getRnd64();
 

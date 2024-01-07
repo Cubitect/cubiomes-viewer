@@ -487,21 +487,21 @@ void FormSearchControl::on_buttonSearchHelp_clicked()
     mb.setText(tr(
         "<html><head/><body><p>"
         "The <b>incremental</b> search checks seeds in numerical order, "
-        "save for grouping into work items for parallelization. This type "
-        "of search is best suited for a non-exhaustive search space and "
-        "with strong biome dependencies. You can restrict this type of "
-        "search to a value range using the &quot;...&quot; button."
+        "except for grouping seeds into work items for parallelization. "
+        "This is the recommended option for general searches. You can "
+        "restrict this type of search to a value range using the "
+        "&quot;...&quot; button."
         "</p><p>"
-        "When searching <b>48-bit only</b>, the search is limited to the seed "
-        "bases and does not yield matching seeds, but rather checks only the "
-        "parts of the conditions can be determined from the lower 48-bits. "
-        "Sessions saved from this search are suitable to be used later with "
-        "the 48-bit generator to look for matching seeds."
+        "When using <b>48-bit only</b>, the search checks partial seeds and "
+        "will not test the full conditions. Instead it yields seed bases "
+        "that may satify the conditions without knowing the upper 16-bit of "
+        "the seed. A session file saved from this search is suitable to be used "
+        "later with the 48-bit generator to look for matching seeds."
         "</p><p>"
         "With <b>48-bit family blocks</b> the search looks for suitable "
         "48-bit seeds first and parallelizes the search through the upper "
-        "16-bits. This search type is best suited for exhaustive searches and "
-        "those with very restrictive structure requirements."
+        "16-bits. This search type can be a better match for exhaustive searches "
+        "and those with very restrictive structure requirements."
         "</p><p>"
         "Load a <b>seed list from a file</b> to search through an "
         "existing set of seeds. The seeds should be in decimal ASCII text, "
@@ -585,7 +585,7 @@ void FormSearchControl::searchResult(uint64_t seed)
     qbuf.push_back(seed);
     if (ui->checkStop->isChecked())
     {
-        onBufferTimeout();
+        stopSearch();
         return;
     }
 

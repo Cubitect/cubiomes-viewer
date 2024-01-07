@@ -35,6 +35,7 @@ public:
     qreal getX();
     qreal getZ();
     qreal getScale() const { return 1.0 / blocks2pix; }
+    void getVisible(int *x0, int *z0, int *x1, int *z1);
 
     void deleteWorld();
     void refresh();
@@ -53,6 +54,7 @@ public:
     bool getShow(int stype);
     void setShow(int stype, bool v);
     void setConfig(const Config& config);
+    void setShapes(const std::vector<Shape>& shapes);
     void refreshBiomeColors();
 
     void timeout();
@@ -109,6 +111,8 @@ private:
     Pos bstart;
     bool measure;
     int updatecounter;
+
+    std::vector<Shape> shapes;
 
     bool sshow[D_STRUCT_NUM];
     LayerOpt lopt;

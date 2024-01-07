@@ -59,7 +59,7 @@ MapView::MapView(QWidget *parent)
     setFont(fmono);
 
     QPalette pal = palette();
-    pal.setColor(QPalette::Background, Qt::black);
+    pal.setColor(QPalette::Dark, Qt::black);
     setAutoFillBackground(true);
     setPalette(pal);
 
@@ -189,6 +189,13 @@ void MapView::setConfig(const Config& c)
     update(2);
 }
 
+void MapView::setShapes(const std::vector<Shape>& s)
+{
+    shapes = s;
+    settingsToWorld();
+    update(1);
+}
+
 void MapView::refreshBiomeColors()
 {
     if (world)
@@ -207,6 +214,7 @@ void MapView::settingsToWorld()
     world->memlimit = (uint64_t) config.mapCacheSize * 1024 * 1024;
     world->threadlimit = config.mapThreads;
     world->lopt = lopt;
+    world->shapes = shapes;
 }
 
 static qreal smoothstep(qreal x)
@@ -302,6 +310,27 @@ qreal MapView::getZ()
         }
     }
     return fz;
+}
+
+static qreal clampimax(qreal x, bool *ok = nullptr)
+{
+    const double imax = INT_MAX - 1024.0;
+    if (x < -imax) x = -imax;
+    if (x > +imax) x = +imax;
+    if (ok) *ok = (x > -imax && x < +imax);
+    return x;
+}
+
+void MapView::getVisible(int *x0, int *z0, int *x1, int *z1)
+{
+    qreal x = getX();
+    qreal z = getZ();
+    qreal uiw = width() / blocks2pix;
+    qreal uih = height() / blocks2pix;
+    if (x0) *x0 = (int) clampimax( floor(x - uiw/2) );
+    if (z0) *z0 = (int) clampimax( floor(z - uih/2) );
+    if (x1) *x1 = (int) clampimax( ceil(x + uiw/2) );
+    if (z1) *z1 = (int) clampimax( ceil(z + uih/2) );
 }
 
 void MapView::update(int cnt)
@@ -435,19 +464,12 @@ void MapView::onGoto()
     dialog->show();
 }
 
-static bool clampabs(qreal *x, qreal m)
-{
-    if (*x < -m) { *x = -m; return true; }
-    if (*x > +m) { *x = +m; return true; }
-    return false;
-}
-
 void MapView::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
     painter.setRenderHint(QPainter::Antialiasing);
-    painter.setRenderHint(QPainter::HighQualityAntialiasing);
+    //painter.setRenderHint(QPainter::HighQualityAntialiasing);
 
     qreal fx = getX();
     qreal fz = getZ();
@@ -458,8 +480,11 @@ void MapView::paintEvent(QPaintEvent *)
         focusz = z_dst;
         blocks2pix = 1.0 / s_dst;
     }
-    if (clampabs(&fx, INT_MAX-1024)) focusx = fx;
-    if (clampabs(&fz, INT_MAX-1024)) focusz = fz;
+    bool ok;
+    fx = clampimax(fx, &ok);
+    if (!ok) focusx = fx;
+    fz = clampimax(fz, &ok);
+    if (!ok) focusz = fz;
 
     if (world)
     {
@@ -468,9 +493,7 @@ void MapView::paintEvent(QPaintEvent *)
         QPoint cur = mapFromGlobal(QCursor::pos());
         qreal bx = (cur.x() -  width()/2.0) / blocks2pix + fx;
         qreal bz = (cur.y() - height()/2.0) / blocks2pix + fz;
-        clampabs(&bx, INT_MAX-1024);
-        clampabs(&bz, INT_MAX-1024);
-        Pos p = {(int)bx, (int)bz};
+        Pos p = {(int)clampimax(bx), (int)clampimax(bz)};
         overlay->pos = p;
         overlay->bname = world->getBiomeName(p);
 

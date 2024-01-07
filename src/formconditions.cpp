@@ -75,7 +75,7 @@ FormConditions::FormConditions(QWidget *parent)
     }
 
     qRegisterMetaType< Condition >("Condition");
-    qRegisterMetaTypeStreamOperators< Condition >("Condition");
+//    qRegisterMetaTypeStreamOperators< Condition >("Condition");
 }
 
 FormConditions::~FormConditions()
@@ -117,10 +117,12 @@ void FormConditions::updateSensitivity()
         ui->buttonEdit->setEnabled(false);
     }
 
+    QVector<Condition> selcond;
     int disabled = 0;
     for (int i = 0; i < selected.size(); i++)
     {
         Condition c = qvariant_cast<Condition>(selected[i]->data(Qt::UserRole));
+        selcond.append(c);
         if (c.meta & Condition::DISABLED)
             disabled++;
     }
@@ -131,6 +133,8 @@ void FormConditions::updateSensitivity()
     else
         ui->buttonDisable->setText(tr("Toggle"));
     ui->buttonDisable->setEnabled(!selected.empty());
+
+    emit selectionUpdate(selcond);
 }
 
 
@@ -207,7 +211,7 @@ void FormConditions::editCondition(QListWidgetItem *item)
         return;
     WorldInfo wi;
     parent->getSeed(&wi);
-    ConditionDialog *dialog = new ConditionDialog(this, &parent->config, wi.mc, item, (Condition*)item->data(Qt::UserRole).data());
+    ConditionDialog *dialog = new ConditionDialog(this, parent->getMapView(), &parent->config, wi, item, (Condition*)item->data(Qt::UserRole).data());
     QObject::connect(dialog, SIGNAL(setCond(QListWidgetItem*,Condition,int)), this, SLOT(addItemCondition(QListWidgetItem*,Condition,int)), Qt::QueuedConnection);
     dialog->show();
 }
@@ -266,7 +270,7 @@ void FormConditions::on_buttonAddFilter_clicked()
         return;
     WorldInfo wi;
     parent->getSeed(&wi);
-    ConditionDialog *dialog = new ConditionDialog(this, &parent->config, wi.mc);
+    ConditionDialog *dialog = new ConditionDialog(this, parent->getMapView(), &parent->config, wi);
     QObject::connect(dialog, SIGNAL(setCond(QListWidgetItem*,Condition,int)), this, SLOT(addItemCondition(QListWidgetItem*,Condition)), Qt::QueuedConnection);
     dialog->show();
 }

@@ -8,6 +8,7 @@
 #include <QElapsedTimer>
 #include <QAbstractTableModel>
 #include <QSortFilterProxyModel>
+#include <QFile>
 
 #include <deque>
 

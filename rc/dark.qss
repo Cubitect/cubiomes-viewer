@@ -2116,7 +2116,7 @@ https://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qsplitter
 
 --------------------------------------------------------------------------- */
 QSplitter {
-  background-color: #455364;
+  background-color: #19232D; /*#455364;*/
   spacing: 0px;
   padding: 0px;
   margin: 0px;

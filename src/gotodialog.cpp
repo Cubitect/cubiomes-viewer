@@ -74,7 +74,7 @@ void GotoDialog::keyPressEvent(QKeyEvent *event)
     {
         QClipboard *clipboard = QGuiApplication::clipboard();
         QString s = clipboard->text().trimmed();
-        QStringList xz = s.split(QRegExp("[, ]+"));
+        QStringList xz = s.split(QRegularExpression("[, ]+"));
         if (xz.count() == 2)
         {
             ui->lineX->setText(xz[0]);

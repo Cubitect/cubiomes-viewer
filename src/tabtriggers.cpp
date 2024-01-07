@@ -136,15 +136,12 @@ bool TabTriggers::event(QEvent *e)
     return QWidget::event(e);
 }
 
-void TabTriggers::save(QSettings& settings)
+void TabTriggers::save(QSettings&)
 {
-    settings.setValue("analysis/seedsrc", ui->comboSeedSource->currentIndex());
 }
 
-void TabTriggers::load(QSettings& settings)
+void TabTriggers::load(QSettings&)
 {
-    int idx = settings.value("analysis/seedsrc", ui->comboSeedSource->currentIndex()).toInt();
-    ui->comboSeedSource->setCurrentIndex(idx);
 }
 
 int TabTriggers::warning(QString text, QMessageBox::StandardButtons buttons)
@@ -251,7 +248,14 @@ void TabTriggers::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
 
 void TabTriggers::on_pushExpand_clicked()
 {
-    ui->treeWidget->expandAll();
+    bool expand = false;
+    for (QTreeWidgetItemIterator it(ui->treeWidget); *it; ++it)
+        if (!(*it)->isExpanded())
+            expand = true;
+    if (expand)
+        ui->treeWidget->expandAll();
+    else
+        ui->treeWidget->collapseAll();
 }
 
 static

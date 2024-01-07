@@ -9,11 +9,11 @@
   <name>Cubiomes Viewer</name>
   <summary>An efficient Minecraft seed finder and map viewer.</summary>
   <description>
-    <p>Cubiomes Viewer offers highly customizable seed-finding utilities and a map viewer for the biome and structure generation of Minecraft Java Edition for the main releases up to 1.19.</p>
+    <p>Cubiomes Viewer offers highly customizable seed-finding utilities and a map viewer for the biome and structure generation of Minecraft Java Edition for the main releases up to 1.21.</p>
   </description>
 
   <releases>
-    <release version="3.4.2" date="2024-01-02">
+    <release version="4.0.dev0" date="2024-01.??">
     </release>
   </releases>
 
