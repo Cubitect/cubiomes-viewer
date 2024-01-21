@@ -75,7 +75,9 @@ FormConditions::FormConditions(QWidget *parent)
     }
 
     qRegisterMetaType< Condition >("Condition");
-//    qRegisterMetaTypeStreamOperators< Condition >("Condition");
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    qRegisterMetaTypeStreamOperators< Condition >("Condition");
+#endif
 }
 
 FormConditions::~FormConditions()
@@ -156,6 +158,10 @@ int FormConditions::getIndex(int idx) const
     return 0;
 }
 
+void FormConditions::clearSelection()
+{
+    ui->listConditions->clearSelection();
+}
 
 QListWidgetItem *FormConditions::lockItem(QListWidgetItem *item)
 {
@@ -425,13 +431,13 @@ void FormConditions::addItemCondition(QListWidgetItem *item, Condition cond, int
 
         if (cond.type >= F_QH_IDEAL && cond.type <= F_QH_BARELY)
         {
-            Condition cq = cond;
+            Condition cq;
+            memset(&cq, 0, sizeof(cq));
             cq.type = F_HUT;
             //cq.x1 = -128; cq.z1 = -128;
             //cq.x2 = +128; cq.z2 = +128;
             // use 256 to avoid confusion when this restriction is removed
-            cq.x1 = -256; cq.z1 = -256;
-            cq.x2 = +256; cq.z2 = +256;
+            cq.rmax = 256;
             cq.relative = cond.save;
             cq.save = cond.save+1;
             cq.count = 4;
@@ -440,13 +446,13 @@ void FormConditions::addItemCondition(QListWidgetItem *item, Condition cond, int
         }
         else if (cond.type == F_QM_90 || cond.type == F_QM_95)
         {
-            Condition cq = cond;
+            Condition cq;
+            memset(&cq, 0, sizeof(cq));
             cq.type = F_MONUMENT;
             //cq.x1 = -160; cq.z1 = -160;
             //cq.x2 = +160; cq.z2 = +160;
             // use 256 to avoid confusion when this restriction is removed
-            cq.x1 = -256; cq.z1 = -256;
-            cq.x2 = +256; cq.z2 = +256;
+            cq.rmax = 256;
             cq.relative = cond.save;
             cq.save = cond.save+1;
             cq.count = 4;

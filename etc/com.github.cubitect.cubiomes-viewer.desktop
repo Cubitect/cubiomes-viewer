@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
 Name=Cubiomes Viewer
-Comment=An efficient graphical Minecraft seed finder and map viewer
+Comment=Minecraft seed finder and map viewer
 Exec=cubiomes-viewer
 Icon=com.github.cubitect.cubiomes-viewer
 Terminal=false

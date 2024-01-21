@@ -618,7 +618,17 @@ QPushButton:hover {
                   <property name="bottomMargin">
                    <number>0</number>
                   </property>
-                  <item row="1" column="0">
+                  <item row="2" column="1">
+                   <widget class="QCheckBox" name="checkApprox">
+                    <property name="toolTip">
+                     <string>Enables optimizations that trade some accuracy for speed</string>
+                    </property>
+                    <property name="text">
+                     <string>Approximate</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="0">
                    <widget class="QCheckBox" name="checkMatchAny">
                     <property name="toolTip">
                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p style=&quot;white-space:pre&quot;&gt;Satisfied if &lt;span style=&quot; font-weight:600;&quot;&gt;any&lt;/span&gt; of the checked biomes are present&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -628,13 +638,13 @@ QPushButton:hover {
                     </property>
                    </widget>
                   </item>
-                  <item row="2" column="0">
-                   <widget class="QCheckBox" name="checkApprox">
-                    <property name="toolTip">
-                     <string>Enables optimizations that trade some accuracy for speed</string>
-                    </property>
+                  <item row="0" column="1">
+                   <widget class="QComboBox" name="comboScale"/>
+                  </item>
+                  <item row="0" column="0">
+                   <widget class="QLabel" name="label_19">
                     <property name="text">
-                     <string>Approximate</string>
+                     <string>Biome scale:</string>
                     </property>
                    </widget>
                   </item>

@@ -1,0 +1,63 @@
+name: Windows Release
+
+on:
+  push:
+    branches:
+      - 'main'
+    tags:
+      - 'v*'
+
+defaults:
+  run:
+    shell: cmd
+
+env:
+  PROG:         cubiomes-viewer
+  SOURCE_DIR:   ${{github.workspace}}
+
+jobs:
+  build:
+    runs-on: windows-2019
+
+    steps:
+      - name: (1) Checkout repo
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: (2) Get all tags for correct version determination
+        working-directory: ${{env.SOURCE_DIR}}
+        run:  |
+              git fetch --all --tags -f
+
+      - name: (3) Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          aqtversion:   '==3.1.*'
+          version:      '5.15.2'
+          host:         'windows'
+          target:       'desktop'
+          arch:         'win64_mingw81'
+          archives:     'x86_64 qtbase qttools'
+          cache:        true
+          setup-python: false
+
+      - name: (4) Build
+        working-directory: ${{env.SOURCE_DIR}}
+        run:  |
+              qmake CONFIG+=release ${{env.SOURCE_DIR}}
+              mingw32-make
+              
+      - name: (5) Deploy
+        working-directory: ${{env.SOURCE_DIR}}
+        run:  |
+              mkdir ${{env.PROG}}
+              copy ${{env.SOURCE_DIR}}\release\${{env.PROG}}.exe ${{env.PROG}}
+              windeployqt --dir ${{env.PROG}} ${{env.SOURCE_DIR}}\release\${{env.PROG}}.exe --compiler-runtime --no-translations --no-system-d3d-compiler --no-opengl-sw --no-angle
+
+      - name: (6) Save build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{env.PROG}}-${{github.ref_name}}-win
+          path: ${{env.SOURCE_DIR}}\${{env.PROG}}
+

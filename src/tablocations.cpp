@@ -10,12 +10,13 @@
 #include <QTextStream>
 #include <QFileInfo>
 #include <QIntValidator>
+#include <QDebug>
 
 #include <vector>
 #include <algorithm>
 #include <random>
 
-#define SAMPLES_MAX 9999999
+#define SAMPLES_MAX 99999999
 
 static
 QTreeWidgetItem *setConditionTreeItems(ConditionTree& ctree, int node, int64_t seed, Pos cpos[], QTreeWidgetItem* parent, bool posval)
@@ -32,7 +33,10 @@ QTreeWidgetItem *setConditionTreeItems(ConditionTree& ctree, int node, int64_t s
     else
     {
         item = new QTreeWidgetItem(parent);
-        item->setText(0, c.summary(false));
+
+        QString summary = c.summary(false);
+        item->setText(0, summary.mid(1, 2));
+        item->setText(1, summary.mid(5));
 
         if ((p.x == -1 && p.z == -1) || c.type == F_LOGIC_NOT)
             posval = false;
@@ -40,12 +44,13 @@ QTreeWidgetItem *setConditionTreeItems(ConditionTree& ctree, int node, int64_t s
         {
             const FilterInfo& finfo = g_filterinfo.list[c.type];
             double dist = sqrt((double)p.x*p.x + (double)p.z*p.z);
-            item->setText(1, QString::number(p.x));
-            item->setText(2, QString::number(p.z));
-            item->setText(3, QString::asprintf("%.0f", dist));
+            item->setText(2, QString::number(p.x));
+            item->setText(3, QString::number(p.z));
+            item->setText(4, QString::asprintf("%.0f", dist));
             item->setData(0, Qt::UserRole+0, QVariant::fromValue(seed));
             item->setData(0, Qt::UserRole+1, QVariant::fromValue(finfo.dim));
             item->setData(0, Qt::UserRole+2, QVariant::fromValue(p));
+            item->setData(0, Qt::UserRole+3, QVariant::fromValue(node));
         }
     }
     if (!branches.empty())
@@ -62,8 +67,6 @@ QString AnalysisLocations::set(WorldInfo wi, const QVector<Condition>& conds)
     QString err = condtree.set(conds, wi.mc);
     if (err.isEmpty())
         err = env.init(wi.mc, wi.large, &condtree);
-    if (!err.isEmpty())
-        env.setSeed(wi.seed);
     return err;
 }
 
@@ -71,31 +74,38 @@ void AnalysisLocations::run()
 {
     stop = false;
 
-    for (idx = 0; idx < (long)pos.size(); idx++)
+    for (sidx = 0; sidx < (long)seeds.size(); sidx++, pidx = 0) // update sidx and pidx together
     {
-        if (stop) break;
+        uint64_t seed = seeds[sidx.load()];
+        env.setSeed(seed);
 
-        Pos at = pos[idx.load()];
-        Pos cpos[MAX_INSTANCES] = {};
-        if (testTreeAt(at, &env, PASS_FULL_64, &stop, cpos)
-            != COND_OK)
+        for (; pidx < (long)pos.size(); pidx++)
         {
-            continue;
+            if (stop) return;
+
+            Pos at = pos[pidx.load()];
+            Pos cpos[MAX_INSTANCES] = {};
+            if (testTreeAt(at, &env, PASS_FULL_64, &stop, cpos)
+                != COND_OK)
+            {
+                continue;
+            }
+
+            double dist = sqrt((double)at.x*at.x + (double)at.z*at.z);
+
+            QTreeWidgetItem *item = new QTreeWidgetItem();
+            item->setText(0, tr("at"));
+            item->setText(1, QString::asprintf("%" PRId64, seed));
+            item->setText(2, QString::number(at.x));
+            item->setText(3, QString::number(at.z));
+            item->setText(4, QString::asprintf("%.0f", dist));
+            item->setData(0, Qt::UserRole+0, QVariant::fromValue(seed));
+            item->setData(0, Qt::UserRole+1, QVariant::Invalid);
+            item->setData(0, Qt::UserRole+2, QVariant::fromValue(at));
+
+            setConditionTreeItems(condtree, 0, seed, cpos, item, true);
+            emit itemDone(item);
         }
-
-        double dist = sqrt((double)at.x*at.x + (double)at.z*at.z);
-
-        QTreeWidgetItem *item = new QTreeWidgetItem();
-        item->setText(0, tr("origin"));
-        item->setText(1, QString::number(at.x));
-        item->setText(2, QString::number(at.z));
-        item->setText(3, QString::asprintf("%.0f", dist));
-        item->setData(0, Qt::UserRole+0, QVariant::fromValue(env.seed));
-        item->setData(0, Qt::UserRole+1, QVariant::Invalid);
-        item->setData(0, Qt::UserRole+2, QVariant::fromValue(at));
-
-        setConditionTreeItems(condtree, 0, env.seed, cpos, item, true);
-        emit itemDone(item);
     }
 }
 
@@ -144,16 +154,18 @@ bool TabLocations::event(QEvent *e)
     if (e->type() == QEvent::LayoutRequest)
     {
         QFontMetrics fm = QFontMetrics(ui->treeWidget->font());
-        ui->treeWidget->setColumnWidth(0, fm.horizontalAdvance('#') * 32);
-        ui->treeWidget->setColumnWidth(1, fm.horizontalAdvance('#') * 9);
+        ui->treeWidget->setColumnWidth(0, fm.horizontalAdvance('#') * 9);
+        ui->treeWidget->setColumnWidth(1, fm.horizontalAdvance('#') * 36);
         ui->treeWidget->setColumnWidth(2, fm.horizontalAdvance('#') * 9);
         ui->treeWidget->setColumnWidth(3, fm.horizontalAdvance('#') * 9);
+        ui->treeWidget->setColumnWidth(4, fm.horizontalAdvance('#') * 9);
     }
     return QWidget::event(e);
 }
 
 void TabLocations::save(QSettings& settings)
 {
+    settings.setValue("analysis/seedsrc_loc", ui->comboSeedSource->currentIndex());
     settings.setValue("analysis/samplemode", ui->comboSampling->currentData().toInt());
     settings.setValue("analysis/samplecnt", ui->lineN->text().toInt());
     settings.setValue("analysis/samplesep", ui->lineA->text().toInt());
@@ -172,9 +184,11 @@ void TabLocations::load(QSettings& settings)
     loadLine(&settings, ui->lineA, "analysis/samplesep");
     loadLine(&settings, ui->lineX, "analysis/offx");
     loadLine(&settings, ui->lineZ, "analysis/offz");
-    QVariant mode = settings.value("analysis/samplemode", ui->comboSampling->currentData());
+    QVariant mode;
+    mode = settings.value("analysis/samplemode", ui->comboSampling->currentData());
     ui->comboSampling->setCurrentIndex(ui->comboSampling->findData(mode));
-
+    mode = settings.value("analysis/seedsrc_loc", ui->comboSeedSource->currentIndex());
+    ui->comboSeedSource->setCurrentIndex(mode.toInt());
     maxresults = settings.value("config/maxMatching", maxresults).toInt();
 }
 
@@ -206,6 +220,7 @@ void TabLocations::onAnalysisFinished()
     ui->pushExport->setEnabled(ui->treeWidget->topLevelItemCount() > 0);
     ui->pushStart->setChecked(false);
     ui->pushStart->setText(tr("Analyze"));
+    ui->labelStatus->setText(tr("Idle"));
 }
 
 void TabLocations::onBufferTimeout()
@@ -231,8 +246,10 @@ void TabLocations::onBufferTimeout()
 
 void TabLocations::onProgressTimeout()
 {
-    QString progress = QString::asprintf(" (%ld/%zu)", thread.idx.load(), thread.pos.size());
-    ui->pushStart->setText(tr("Stop") + progress);
+    size_t total = thread.seeds.size() * thread.pos.size();
+    size_t progress = thread.sidx.load() * thread.pos.size() + thread.pidx.load();
+    double perc = 100.0 * progress / total;
+    ui->labelStatus->setText(QString::asprintf("%zu / %zu (%.1f%%)", progress, total, perc));
 }
 
 void TabLocations::on_pushStart_clicked()
@@ -265,36 +282,75 @@ void TabLocations::on_pushStart_clicked()
     QString err = thread.set(wi, conds);
     if (!err.isEmpty())
     {
-        emit warning(err, QMessageBox::Ok);
+        warning(err, QMessageBox::Ok);
         return;
     }
 
+    thread.sidx = thread.pidx = 0;
+
+    thread.seeds.clear();
+    if (ui->comboSeedSource->currentIndex() == 0)
+        thread.seeds.push_back(thread.wi.seed);
+    else
+        thread.seeds = parent->formControl->getResults();
+
     if (mode == SMODE_RADIAL_GRID)
     {
+        QElapsedTimer t; t.start();
         struct P {
             int x, z;
-            uint64_t rsq;
+            float rsq;
             bool operator< (const P& x) const { return rsq < x.rsq; }
         };
         std::vector<P> v;
-        uint64_t rsqmax = (uint64_t) ceil(n / M_PI);
-        int64_t r = (int64_t) sqrt(rsqmax);
+        float rsqmax = n / M_PI;
+        int r = (int) sqrt(rsqmax);
 
-        for (int64_t x = -r; x <= r; x++)
+        v.reserve((size_t)r * (r + 1) / 2);
+
+        for (int x = 1; x <= r; x++)
         {
-            for (int64_t z = -r; z <= r; z++)
+            float x_sq = (float) x * x;
+            for (int z = 0; z <= x; z++)
             {
-                uint64_t rsq = (uint64_t)(x * x + z * z);
+                float rsq = x_sq + (float) z * z;
                 if (rsq <= rsqmax)
-                    v.push_back(P{(int)x, (int)z, rsq});
+                    v.push_back(P{x, z, rsq});
             }
         }
-        std::sort(v.begin(), v.end());
-        for (uint64_t i = 0; i < n && i < v.size(); i++)
+        std::stable_sort(v.begin(), v.end());
+        thread.pos.push_back(Pos{0,0});
+
+        for (uint64_t i = 0; i < v.size(); i++)
         {
-            Pos p = { a*v[i].x + x0, a*v[i].z + z0};
-            thread.pos.push_back(p);
+            int x = a * v[i].x;
+            int z = a * v[i].z;
+
+            if (z == 0 || x == z)
+            {
+                thread.pos.push_back(Pos{ x0+x, z0+z });
+                thread.pos.push_back(Pos{ x0-z, z0+x });
+                thread.pos.push_back(Pos{ x0-x, z0-z });
+                thread.pos.push_back(Pos{ x0+z, z0-x });
+            }
+            else
+            {
+                thread.pos.push_back(Pos{ x0+x, z0+z });
+                thread.pos.push_back(Pos{ x0+z, z0+x });
+                thread.pos.push_back(Pos{ x0-z, z0+x });
+                thread.pos.push_back(Pos{ x0-x, z0+z });
+                thread.pos.push_back(Pos{ x0-x, z0-z });
+                thread.pos.push_back(Pos{ x0-z, z0-x });
+                thread.pos.push_back(Pos{ x0+z, z0-x });
+                thread.pos.push_back(Pos{ x0+x, z0-z });
+            }
+            if (thread.pos.size() >= n)
+            {
+                thread.pos.resize(n);
+                break;
+            }
         }
+        qDebug() << thread.pos.size() << ":" << thread.pos.back().x << thread.pos.back().z << " t=" << t.elapsed();
     }
     else if (mode == SMODE_SQUARE_SPIRAL)
     {
@@ -339,10 +395,10 @@ void TabLocations::on_pushStart_clicked()
 
     ui->pushExport->setEnabled(false);
     ui->pushStart->setChecked(true);
-    QString progress = QString::asprintf(" (0/%zu)", thread.pos.size());
-    ui->pushStart->setText(tr("Stop") + progress);
-    timer.start(250);
+    ui->pushStart->setText(tr("Stop"));
+    onProgressTimeout();
     thread.start();
+    timer.start(250);
 }
 
 void TabLocations::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
@@ -350,23 +406,64 @@ void TabLocations::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
     (void) column;
     QVariant dat;
     dat = item->data(0, Qt::UserRole+0);
-    if (dat.isValid())
+    if (!dat.isValid())
+        return;
+
+    uint64_t seed = qvariant_cast<uint64_t>(dat);
+    dat = item->data(0, Qt::UserRole+1);
+    int dim = dat.isValid() ? dat.toInt() : DIM_UNDEF;
+
+    QVariant at = item->data(0, Qt::UserRole+2);
+
+    std::vector<Shape> shapes;
+    const QVector<Condition>& conds = thread.condtree.condvec;
+    int node = item->data(0, Qt::UserRole+3).toInt();
+
+    if (node >= 0 || node < conds.size())
     {
-        uint64_t seed = qvariant_cast<uint64_t>(dat);
-        dat = item->data(0, Qt::UserRole+1);
-        int dim = dat.isValid() ? dat.toInt() : DIM_UNDEF;
-        WorldInfo wi;
-        parent->getSeed(&wi);
-        wi.seed = seed;
-        parent->setSeed(wi, dim);
+        const Condition& c = conds[node];
+        const FilterInfo& ft = g_filterinfo.list[c.type];
+        Shape s;
+        s.dim = ft.dim;
+        if (c.rmax)
+        {
+            s.type = Shape::CIRCLE;
+            s.p1 = s.p2 = Pos{0,0};
+            s.r = c.rmax - 1;
+        }
+        else
+        {
+            s.type = Shape::RECT;
+            s.p1 = Pos{c.x1, c.z1};
+            s.p2 = Pos{c.x2+1, c.z2+1};
+            s.r = 0;
+        }
+        if (QTreeWidgetItem *conditem = item->parent())
+        {
+            Pos pos = qvariant_cast<Pos>(conditem->data(0, Qt::UserRole+2));
+            s.p1.x += pos.x;
+            s.p1.z += pos.z;
+            s.p2.x += pos.x;
+            s.p2.z += pos.z;
+        }
+        shapes.push_back(s);
     }
 
-    dat = item->data(0, Qt::UserRole+2);
-    if (dat.isValid())
+    WorldInfo wi;
+    parent->getSeed(&wi, false);
+    if (wi.seed != seed || dim != DIM_UNDEF)
     {
-        Pos p = qvariant_cast<Pos>(dat);
+        wi.seed = seed;
+        parent->getMapView()->deleteWorld();
+    }
+    if (at.isValid())
+    {
+        Pos p = qvariant_cast<Pos>(at);
         parent->getMapView()->setView(p.x+0.5, p.z+0.5);
     }
+    parent->setSeed(wi, dim);
+    parent->formCond->clearSelection();
+    parent->getMapView()->setShapes(shapes);
 }
 
 void TabLocations::on_pushExpand_clicked()
@@ -417,7 +514,7 @@ void TabLocations::on_pushExport_clicked()
     stream << "Sep=" + sep + "\n";
     sep = qte + sep + qte;
 
-    QStringList header = { tr("condition"), tr("x"), tr("z") };
+    QStringList header = { tr("id"), tr("seed/condition"), tr("x"), tr("z"), tr("distance") };
     csvline(stream, qte, sep, header);
 
     QTreeWidgetItemIterator it(ui->treeWidget);

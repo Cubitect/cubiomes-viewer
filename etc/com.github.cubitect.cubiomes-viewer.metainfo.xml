@@ -7,13 +7,26 @@
 
   <developer_name>Cubitect</developer_name>
   <name>Cubiomes Viewer</name>
-  <summary>An efficient Minecraft seed finder and map viewer.</summary>
+  <summary>Minecraft seed finder and map viewer</summary>
   <description>
-    <p>Cubiomes Viewer offers highly customizable seed-finding utilities and a map viewer for the biome and structure generation of Minecraft Java Edition for the main releases up to 1.21.</p>
+    <p>Cubiomes Viewer offers highly customizable seed-finding utilities and a map viewer for the biome and structure generation of Minecraft Java Edition for the main releases up to 1.20.</p>
   </description>
 
   <releases>
-    <release version="4.0.dev0" date="2024-01.??">
+    <release version="4.0.0" date="2024-01-??">
+      <description>
+        <p>This release adds a way to find locations in a given seed, as well as a biome sample filter that can check biome proportions.</p>
+        <p>All scaled coordinates have been changed to use block coordinates instead. Scaled iterators now have scaling option.</p>
+        <p>Changes:</p>
+        <ul>
+          <li>Added Locations tab to look for position in the current seed</li>
+          <li>Added biome samples filter to check biome proportions</li>
+          <li>Added outline display for the area of selected conditions</li>
+          <li>Added "from-visible" to conditions editor</li>
+          <li>Added headless mode to search seeds without a GUI using --nogui</li>
+          <li>Removed Triggers tab, since the Locations tab replaces the functionality</li>
+        </ul>
+      </description>
     </release>
   </releases>
 

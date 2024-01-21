@@ -343,6 +343,7 @@ void Config::reset()
     smoothMotion = true;
     showBBoxes = true;
     restoreSession = true;
+    restoreWindow = false;
     checkForUpdates = false;
     autosaveCycle = 10;
     uistyle = STYLE_SYSTEM;
@@ -371,6 +372,7 @@ void Config::load(QSettings& settings)
     smoothMotion = settings.value("config/smoothMotion", smoothMotion).toBool();
     showBBoxes = settings.value("config/showBBoxes", showBBoxes).toBool();
     restoreSession = settings.value("config/restoreSession", restoreSession).toBool();
+    restoreWindow = settings.value("config/restoreWindow", restoreWindow).toBool();
     checkForUpdates = settings.value("config/checkForUpdates", checkForUpdates).toBool();
     autosaveCycle = settings.value("config/autosaveCycle", autosaveCycle).toInt();
     uistyle = settings.value("config/uistyle", uistyle).toInt();
@@ -393,6 +395,7 @@ void Config::save(QSettings& settings)
     settings.setValue("config/smoothMotion", smoothMotion);
     settings.setValue("config/showBBoxes", showBBoxes);
     settings.setValue("config/restoreSession", restoreSession);
+    settings.setValue("config/restoreWindow", restoreWindow);
     settings.setValue("config/checkForUpdates", checkForUpdates);
     settings.setValue("config/autosaveCycle", autosaveCycle);
     settings.setValue("config/uistyle", uistyle);

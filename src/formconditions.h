@@ -38,6 +38,8 @@ public:
     void updateSensitivity();
     int getIndex(int idx) const;
 
+    void clearSelection();
+
     QListWidgetItem *lockItem(QListWidgetItem *item);
     void setItemCondition(QListWidget *list, QListWidgetItem *item, Condition *cond);
     void editCondition(QListWidgetItem *item);

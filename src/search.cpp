@@ -985,7 +985,7 @@ static int f_biome_sampler(Generator *g, int scale, int x, int y, int z, void *d
     }
     if (incl != 0)
     {
-        if (info->imax && info->n < *info->imax)
+        if (info->imax && info->n < MAX_INSTANCES)
             info->cent[info->n] = Pos{x, z};
         info->xsum += x;
         info->zsum += z;
@@ -1044,6 +1044,7 @@ testCondAt(
         z1 = at.z - rmax;
         x2 = at.x + rmax;
         z2 = at.z + rmax;
+        rmax = rmax * rmax + 1;
     }
     else
     {
@@ -1109,12 +1110,28 @@ L_qh_any:
             const QuadInfo *qi = getQHInfo((s + sconf.salt) & 0xfffff);
             if (!qi || qi->flt > cond->type)
                 continue;
+
+            pc.x = (pc.x << 9) + qi->afk.x;
+            pc.z = (pc.z << 9) + qi->afk.z;
+
+            if (cond->skipref && pc.x == at.x && pc.z == at.z)
+                continue;
+            if (rmax)
+            {
+                int dx = pc.x - at.x;
+                int dz = pc.z - at.z;
+                int64_t rsq = dx*(int64_t)dx + dz*(int64_t)dz;
+                if (rsq >= rmax)
+                    continue;
+            }
+            else if (pc.x < x1 || pc.x > x2 || pc.z < z1 || pc.z > z2)
+            {
+                continue;
+            }
             // we don't support finding the center of multiple
             // quad huts, instead we just return the first one
             // (unless we are looking for all instances)
-            cent[icnt].x = (pc.x << 9) + qi->afk.x;
-            cent[icnt].z = (pc.z << 9) + qi->afk.z;
-            icnt++;
+            cent[icnt++] = pc;
             if (imax && icnt >= *imax)
                 return COND_OK;
             if (imax == NULL)
@@ -1146,18 +1163,32 @@ L_qm_any:
         {
             rx = p[i].x; rz = p[i].z;
             s = moveStructure(env->seed, -rx, -rz);
-            if (qmonumentQual(s + sconf.salt) >= qual)
+            if (qmonumentQual(s + sconf.salt) < qual)
+                continue;
+            const QuadInfo *qi = getQMInfo(s + sconf.salt);
+            pc.x = (rx << 9) + qi->afk.x;
+            pc.z = (rz << 9) + qi->afk.z;
+
+            if (cond->skipref && pc.x == at.x && pc.z == at.z)
+                continue;
+            if (rmax)
             {
-                const QuadInfo *qi = getQMInfo(s + sconf.salt);
-                pc.x = (rx << 9) + qi->afk.x;
-                pc.z = (rz << 9) + qi->afk.z;
-                cent[icnt] = pc;
-                icnt++;
-                if (imax && icnt >= *imax)
-                    return COND_OK;
-                if (imax == NULL)
-                    break;
+                int dx = pc.x - at.x;
+                int dz = pc.z - at.z;
+                int64_t rsq = dx*(int64_t)dx + dz*(int64_t)dz;
+                if (rsq >= rmax)
+                    continue;
             }
+            else if (pc.x < x1 || pc.x > x2 || pc.z < z1 || pc.z > z2)
+            {
+                continue;
+            }
+
+            cent[icnt++] = pc;
+            if (imax && icnt >= *imax)
+                return COND_OK;
+            if (imax == NULL)
+                break;
         }
         if (imax)
             *imax = icnt;
@@ -1407,16 +1438,15 @@ L_qm_any:
             {
                 cent->x = (x1 + x2) >> 1;
                 cent->z = (z1 + z2) >> 1;
+                if (imax) *imax = 1;
                 if (j == 0)
-                {
-                    if (imax) *imax = 1;
                     return COND_OK;
-                }
             }
             else if (j >= cond->count)
             {
                 cent->x = xt / j;
                 cent->z = zt / j;
+                if (imax) *imax = 1;
                 return COND_OK;
             }
         }
@@ -1448,6 +1478,7 @@ L_qm_any:
         if (cond->skipref && pc.x == at.x && pc.z == at.z)
             return COND_FAILED;
         *cent = pc;
+        if (imax) *imax = 1;
         return COND_OK;
 
 
@@ -1455,14 +1486,14 @@ L_qm_any:
         {
             StrongholdIter sh;
             *cent = pc = initFirstStronghold(&sh, env->mc, env->seed);
+            if (imax) *imax = 1;
         }
         if (cond->rmax > 0)
         {
-            uint64_t rsqmax = (cond->rmax-1) * (cond->rmax-1);
             int dx = pc.x - at.x;
             int dz = pc.z - at.z;
-            uint64_t rsq = dx*(int64_t)dx + dz*(int64_t)dz;
-            if (rsq > rsqmax)
+            int64_t rsq = dx*(int64_t)dx + dz*(int64_t)dz;
+            if (rsq > rmax)
                 return COND_FAILED;
         }
         else
@@ -1720,7 +1751,7 @@ L_qm_any:
             int ok = monteCarloBiomes(
                         &env->g, r, &rng, cond->converage, cond->confidence,
                         &f_biome_sampler, &sample);
-            if (imax)
+            if (imax && cond->count == 1)
             {
                 *imax = sample.n;
             }
@@ -1728,10 +1759,12 @@ L_qm_any:
             {
                 cent->x = sample.xsum / sample.n + 2;
                 cent->z = sample.zsum / sample.n + 2;
+                if (imax) *imax = 1;
             }
             else
             {
                 *cent = at;
+                if (imax) *imax = 1;
             }
             return ok == 1 ? COND_OK : COND_FAILED;
         }
@@ -1755,6 +1788,7 @@ L_qm_any:
         rz2 = z2 >> s;
         cent->x = (x1 + x2) >> 1;
         cent->z = (z1 + z2) >> 1;
+        if (imax) *imax = 1;
         if (pass == PASS_FAST_48)
             return COND_MAYBE_POS_VALID;
         if (pass == PASS_FULL_48)
@@ -1786,6 +1820,7 @@ L_qm_any:
         rz2 = z2 >> 10;
         cent->x = (x1 + x2) >> 1;
         cent->z = (z1 + z2) >> 1;
+        if (imax) *imax = 1;
         if (pass != PASS_FULL_64)
             return COND_MAYBE_POS_VALID;
         env->init4Dim(DIM_OVERWORLD);
@@ -1815,6 +1850,7 @@ L_noise_biome:
         rz2 = z2 >> s;
         cent->x = (x1 + x2) >> 1;
         cent->z = (z1 + z2) >> 1;
+        if (imax) *imax = 1;
         if (pass == PASS_FAST_48)
             return COND_MAYBE_POS_VALID;
         // the Nether and End require only the 48-bit seed
@@ -1937,6 +1973,7 @@ L_noise_biome:
             if (v > vmax)
                 return COND_FAILED;
             *cent = at;
+            if (imax) *imax = 1;
             if (cond->minmax & Condition::E_LOCATE_MIN)
             {
                 cent->x = info.posmin.x << 2;
@@ -1959,6 +1996,7 @@ L_noise_biome:
         rz2 = z2 >> 2;
         cent->x = (x1 + x2) >> 1;
         cent->z = (z1 + z2) >> 1;
+        if (imax) *imax = 1;
         if (pass != PASS_FULL_64)
             return COND_MAYBE_POS_VALID;
         {
@@ -2018,6 +2056,7 @@ L_noise_biome:
         rz1 = z1 >> 2;
         cent->x = x1;
         cent->z = z1;
+        if (imax) *imax = 1;
         if (pass != PASS_FULL_64)
             return COND_MAYBE_POS_VALID;
         env->init4Dim(DIM_OVERWORLD);

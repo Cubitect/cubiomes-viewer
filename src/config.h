@@ -171,6 +171,7 @@ struct Config
     bool smoothMotion;
     bool showBBoxes;
     bool restoreSession;
+    bool restoreWindow;
     bool checkForUpdates;
     int autosaveCycle;
     int uistyle;

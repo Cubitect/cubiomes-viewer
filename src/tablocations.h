@@ -18,7 +18,7 @@ class AnalysisLocations : public QThread
     Q_OBJECT
 public:
     explicit AnalysisLocations(QObject *parent = nullptr)
-        : QThread(parent), wi(),stop(),idx() {}
+        : QThread(parent), wi(),stop(),sidx(),pidx() {}
 
     QString set(WorldInfo wi, const QVector<Condition>& conds);
 
@@ -32,9 +32,11 @@ public:
     WorldInfo wi;
     ConditionTree condtree;
     SearchThreadEnv env;
+    std::vector<uint64_t> seeds;
     std::vector<Pos> pos;
     std::atomic_bool stop;
-    std::atomic_long idx;
+    std::atomic_long sidx;
+    std::atomic_long pidx;
 };
 
 class TabLocations : public QWidget, public ISaveTab

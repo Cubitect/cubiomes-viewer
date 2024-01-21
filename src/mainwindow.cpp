@@ -88,7 +88,7 @@ MainWindow::MainWindow(QString sessionpath, QString resultspath, QWidget *parent
 
     ui->menuHistory->clear();
 
-    ui->tabContainerSearch->addTab(new TabTriggers(this), tr("Triggers"));
+    //ui->tabContainerSearch->addTab(new TabTriggers(this), tr("Triggers"));
     ui->tabContainerSearch->addTab(new TabLocations(this), tr("Locations"));
     ui->tabContainer->addTab(new TabBiomes(this), tr("Biomes"));
     ui->tabContainer->addTab(new TabStructures(this), tr("Structures"));
@@ -500,11 +500,13 @@ void MainWindow::loadSettings()
 
     getMapView()->deleteWorld();
 
+    onUpdateConfig();
+
     if (settings.value("mainwindow/maximized", isMaximized()).toBool()) {
         showMaximized();
-    } else {
+    } else if (config.restoreWindow) {
         resize(settings.value("mainwindow/size", size()).toSize());
-        //move(settings.value("mainwindow/pos", pos()).toPoint());
+        move(settings.value("mainwindow/pos", pos()).toPoint());
     }
     prevdir = settings.value("mainwindow/prevdir", prevdir).toString();
 
@@ -543,10 +545,9 @@ void MainWindow::loadSettings()
     getSeed(&wi, false);
     wi.load(settings);
     int dim = settings.value("map/dim", getDim()).toInt();
-    setSeed(wi, dim);
 
-    onUpdateConfig();
     onUpdateMapConfig();
+    setSeed(wi, dim);
 
     if (config.restoreSession && QFile::exists(sessionpath))
     {
@@ -1122,8 +1123,11 @@ void MainWindow::onUpdateMapConfig()
             if (QAction *act = saction[opt])
                 act->setVisible(mconfig.enabled(opt));
         }
-        getMapView()->deleteWorld();
-        updateMapSeed();
+        if (getMapView()->world)
+        {
+            getMapView()->deleteWorld();
+            updateMapSeed();
+        }
     }
     actzoom[0]->setVisible(mconfig.zoomEnabled);
     actzoom[1]->setVisible(mconfig.zoomEnabled);

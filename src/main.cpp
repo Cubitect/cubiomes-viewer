@@ -108,7 +108,11 @@ int main(int argc, char *argv[])
     if (nogui)
     {
         QCoreApplication app(argc, argv);
-        Headless(sessionpath, resultspath);
+        Headless headless(sessionpath, resultspath, &app);
+
+        QObject::connect(&headless, SIGNAL(finished()), &app, SLOT(quit()));
+        QTimer::singleShot(0, &headless, SLOT(run()));
+
         return app.exec();
     }
     else

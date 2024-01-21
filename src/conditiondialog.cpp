@@ -698,6 +698,9 @@ void ConditionDialog::updateBiomeSelection()
     }
     else if (ft.cat == CAT_BIOMES && wi.mc > MC_B1_7 && wi.mc <= MC_1_17)
     {
+        //int scale = ui->comboScale->currentData().toInt();
+        //ui->comboScale->addItem(tr(""));
+
         int layerId = ft.layer;
         if (layerId == 0)
         {
@@ -992,6 +995,7 @@ void ConditionDialog::onAccept()
                 }
             }
         }
+        c.step = ui->comboScale->currentData().toInt();
         c.count = ui->checkSamplePos->isChecked() ? 1 : 0;
         c.converage = ui->lineCoverage->text().toFloat() / 100.0;
         c.confidence = ui->lineConfidence->text().toFloat() / 100.0;

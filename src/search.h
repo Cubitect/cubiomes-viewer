@@ -198,7 +198,7 @@ static const struct FilterList : private FilterInfo
         };
 
         list[F_QH_IDEAL] = FilterInfo{
-            CAT_QUAD, 0, LOC_REC, 0, Swamp_Hut, 512, 9, BR_FIRST, MC_1_4, MC_NEWEST, 0, 0, disp++,
+            CAT_QUAD, 0, LOC_RAD, 0, Swamp_Hut, 512, 9, BR_FIRST, MC_1_4, MC_NEWEST, 0, 0, disp++,
             "quad",
             QT_TRANSLATE_NOOP("Filter", "Quad-hut (ideal)"),
             QT_TRANSLATE_NOOP("Filter",
@@ -207,7 +207,7 @@ static const struct FilterList : private FilterInfo
         };
 
         list[F_QH_CLASSIC] = FilterInfo{
-            CAT_QUAD, 0, LOC_REC, 0, Swamp_Hut, 512, 9, BR_FIRST, MC_1_4, MC_NEWEST, 0, 0, disp++,
+            CAT_QUAD, 0, LOC_RAD, 0, Swamp_Hut, 512, 9, BR_FIRST, MC_1_4, MC_NEWEST, 0, 0, disp++,
             "quad",
             QT_TRANSLATE_NOOP("Filter", "Quad-hut (classic)"),
             QT_TRANSLATE_NOOP("Filter",
@@ -218,7 +218,7 @@ static const struct FilterList : private FilterInfo
         };
 
         list[F_QH_NORMAL] = FilterInfo{
-            CAT_QUAD, 0, LOC_REC, 0, Swamp_Hut, 512, 9, BR_FIRST, MC_1_4, MC_NEWEST, 0, 0, disp++,
+            CAT_QUAD, 0, LOC_RAD, 0, Swamp_Hut, 512, 9, BR_FIRST, MC_1_4, MC_NEWEST, 0, 0, disp++,
             "quad",
             QT_TRANSLATE_NOOP("Filter", "Quad-hut (normal)"),
             QT_TRANSLATE_NOOP("Filter",
@@ -229,7 +229,7 @@ static const struct FilterList : private FilterInfo
         };
 
         list[F_QH_BARELY] = FilterInfo{
-            CAT_QUAD, 0, LOC_REC, 0, Swamp_Hut, 512, 9, BR_FIRST, MC_1_4, MC_NEWEST, 0, 0, disp++,
+            CAT_QUAD, 0, LOC_RAD, 0, Swamp_Hut, 512, 9, BR_FIRST, MC_1_4, MC_NEWEST, 0, 0, disp++,
             "quad",
             QT_TRANSLATE_NOOP("Filter", "Quad-hut (barely)"),
             QT_TRANSLATE_NOOP("Filter",
@@ -239,7 +239,7 @@ static const struct FilterList : private FilterInfo
         };
 
         list[F_QM_95] = FilterInfo{
-            CAT_QUAD, 0, LOC_REC, 0, Monument, 512, 9, BR_FIRST, MC_1_8, MC_NEWEST, 0, 0, disp++,
+            CAT_QUAD, 0, LOC_RAD, 0, Monument, 512, 9, BR_FIRST, MC_1_8, MC_NEWEST, 0, 0, disp++,
             "quad",
             QT_TRANSLATE_NOOP("Filter", "Quad-ocean-monument (>95%)"),
             QT_TRANSLATE_NOOP("Filter",
@@ -249,7 +249,7 @@ static const struct FilterList : private FilterInfo
         };
 
         list[F_QM_90] = FilterInfo{
-            CAT_QUAD, 0, LOC_REC, 0, Monument, 512, 9, BR_FIRST, MC_1_8, MC_NEWEST, 0, 0, disp++,
+            CAT_QUAD, 0, LOC_RAD, 0, Monument, 512, 9, BR_FIRST, MC_1_8, MC_NEWEST, 0, 0, disp++,
             "quad",
             QT_TRANSLATE_NOOP("Filter", "Quad-ocean-monument (>90%)"),
             QT_TRANSLATE_NOOP("Filter",
@@ -268,9 +268,9 @@ static const struct FilterList : private FilterInfo
         };
 
         list[F_BIOME] = FilterInfo{
-            CAT_BIOMES, 1, LOC_REC, L_VORONOI_1, 0, 1, 0, BR_NONE, MC_B1_7, MC_1_17, 0, 1, disp++, // disable for 1.18
+            CAT_BIOMES, 1, LOC_REC, L_VORONOI_1, 0, 1, 0, BR_NONE, MC_B1_7, MC_NEWEST, 0, 1, disp++,
             "map",
-            QT_TRANSLATE_NOOP("Filter", "Biomes 1:1"),
+            QT_TRANSLATE_NOOP("Filter", "Biome scaled"),
             QT_TRANSLATE_NOOP("Filter",
             "Allows only seeds with the included (+) biomes in the specified area and "
             "discard those that have biomes that are explicitly excluded (-).")

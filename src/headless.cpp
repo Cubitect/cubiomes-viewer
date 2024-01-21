@@ -36,15 +36,14 @@ static QTextStream& qOut()
     return out;
 }
 
-Headless::Headless(QString sessionpath, QString resultspath)
-    : QObject(nullptr)
+Headless::Headless(QString sessionpath, QString resultspath, QObject *parent)
+    : QThread(parent)
     , sthread(nullptr)
     , sessionpath(sessionpath)
     , resultfile(resultspath)
     , resultstream(stdout)
 {
     sthread.isdone = true;
-    QTimer::singleShot(0, this, SLOT(start()));
 
     QSettings settings(APP_STRING, APP_STRING);
     g_extgen.load(settings);
@@ -124,7 +123,7 @@ bool Headless::loadSession(QString sessionpath)
     return true;
 }
 
-void Headless::start()
+void Headless::run()
 {
     qOut() << "Condition summary:\n";
     for (const Condition& cond : qAsConst(session.cv))
@@ -172,7 +171,7 @@ void Headless::searchFinish(bool done)
         qOut() << "Search done!\n";
     qOut() << "Stopping event loop.\n";
     qOut().flush();
-    QApplication::quit();
+    emit finished();
 }
 
 

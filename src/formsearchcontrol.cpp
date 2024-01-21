@@ -585,7 +585,8 @@ void FormSearchControl::searchResult(uint64_t seed)
     qbuf.push_back(seed);
     if (ui->checkStop->isChecked())
     {
-        stopSearch();
+        searchResultsAdd(qbuf, false);
+        qbuf.clear();
         return;
     }
 
@@ -657,7 +658,7 @@ int FormSearchControl::searchResultsAdd(std::vector<uint64_t> seeds, bool counto
 
     int addcnt = n - ns;
     if (ui->checkStop->isChecked() && addcnt)
-        sthread.abort = true;
+        stopSearch();
 
     if (addcnt)
         emit resultsAdded(addcnt);

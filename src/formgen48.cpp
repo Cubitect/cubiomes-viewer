@@ -271,10 +271,26 @@ void FormGen48::updateAutoUi()
             }
             else
             {
-                ui->lineEditX1->setText(QString::number(cond.x1));
-                ui->lineEditZ1->setText(QString::number(cond.z1));
-                ui->lineEditX2->setText(QString::number(cond.x2));
-                ui->lineEditZ2->setText(QString::number(cond.z2));
+                int x1, z1, x2, z2;
+                if (cond.rmax > 0)
+                {
+                    int rmax = cond.rmax - 1;
+                    x1 = -rmax >> 9;
+                    z1 = -rmax >> 9;
+                    x2 = +rmax >> 9;
+                    z2 = +rmax >> 9;
+                }
+                else
+                {
+                    x1 = cond.x1 >> 9;
+                    z1 = cond.z1 >> 9;
+                    x2 = cond.x2 >> 9;
+                    z2 = cond.z2 >> 9;
+                }
+                ui->lineEditX1->setText(QString::number(x1));
+                ui->lineEditZ1->setText(QString::number(z1));
+                ui->lineEditX2->setText(QString::number(x2));
+                ui->lineEditZ2->setText(QString::number(z2));
             }
         }
     }
