@@ -11,7 +11,7 @@ QT += core widgets
 #QMAKE_CXX = clang++
 
 CHARSET                 = -finput-charset=UTF-8 -fexec-charset=UTF-8
-QMAKE_CFLAGS            = $$CHARSET -fwrapv -DSTRUCT_CONFIG_OVERRIDE=1
+QMAKE_CFLAGS            = $$CFLAGS $$CHARSET -fwrapv -DSTRUCT_CONFIG_OVERRIDE=1
 QMAKE_CXXFLAGS          = $$QMAKE_CFLAGS -std=gnu++11
 QMAKE_CXXFLAGS_RELEASE  *= -O3
 

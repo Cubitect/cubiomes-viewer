@@ -48,7 +48,5 @@ jobs:
         with:
           name: ${{env.PROG}}-${{github.ref_name}}-macos
           path: |
-                ${{env.SOURCE_DIR}}/${{env.PROG}}.app
                 ${{env.SOURCE_DIR}}/${{env.PROG}}.dmg
-
 
