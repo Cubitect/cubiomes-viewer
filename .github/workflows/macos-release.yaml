@@ -1,4 +1,4 @@
-name: Windows Release
+name: macOS Release
 
 on:
   push:
@@ -7,18 +7,13 @@ on:
     tags:
       - 'v*'
 
-defaults:
-  run:
-    shell: cmd
-
 env:
   PROG:         cubiomes-viewer
   SOURCE_DIR:   ${{github.workspace}}
 
-
 jobs:
   build:
-    runs-on: windows-2019
+    runs-on: macos-latest
 
     steps:
       - name: Checkout repo
@@ -31,9 +26,6 @@ jobs:
         with:
           aqtversion:   '==3.1.*'
           version:      '5.15.2'
-          host:         'windows'
-          target:       'desktop'
-          arch:         'win64_mingw81'
           archives:     'x86_64 qtbase qttools'
           cache:        true
           setup-python: false
@@ -42,20 +34,21 @@ jobs:
         working-directory: ${{env.SOURCE_DIR}}
         run:  |
               qmake CONFIG+=release ${{env.SOURCE_DIR}}
-              mingw32-make
+              make
               
       - name: Deploy
         working-directory: ${{env.SOURCE_DIR}}
         run:  |
-              mkdir ${{env.PROG}}
-              copy ${{env.SOURCE_DIR}}\release\${{env.PROG}}.exe ${{env.PROG}}
-              windeployqt --dir ${{env.PROG}} ${{env.SOURCE_DIR}}\release\${{env.PROG}}.exe --compiler-runtime --no-translations --no-system-d3d-compiler --no-opengl-sw --no-angle
-              ${{env.SOURCE_DIR}}\${{env.PROG}}\${{env.PROG}}.exe --version
+              macdeployqt ${{env.PROG}}.app -dmg -no-plugins
+              ./${{env.PROG}}.app/Contents/MacOS/${{env.PROG}} --version
+              otool -L ${{env.PROG}}.app/Contents/MacOS/${{env.PROG}}
 
       - name: Save build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{env.PROG}}-${{github.ref_name}}-win
-          path: ${{env.SOURCE_DIR}}\${{env.PROG}}
+          name: ${{env.PROG}}-${{github.ref_name}}-macos
+          path: |
+                ${{env.SOURCE_DIR}}/${{env.PROG}}.app
+                ${{env.SOURCE_DIR}}/${{env.PROG}}.dmg
 
 
