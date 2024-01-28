@@ -7,14 +7,14 @@ on:
     tags:
       - 'v*'
 
+defaults:
+  run:
+    shell: cmd
+
 env:
   PROG:         cubiomes-viewer
   SOURCE_DIR:   ${{github.workspace}}
 
-defaults:
-  run:
-    shell: cmd
-    working-directory: ${{env.SOURCE_DIR}}
 
 jobs:
   build:
