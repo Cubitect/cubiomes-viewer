@@ -234,13 +234,11 @@ bool SearchMaster::set(QWidget *widget, const Session& s)
             warn(widget, tr("Condition %1 not available for Minecraft versions above %2.").arg(cid, mcs));
             return false;
         }
-        if (finfo.cat == CAT_BIOMES &&
-            c.type != F_BIOME_CENTER &&
-            c.type != F_BIOME_CENTER_256 &&
-            c.type != F_TEMPS &&
-            c.type != F_CLIMATE_NOISE &&
-            c.type != F_CLIMATE_MINMAX)
-        {
+        if (c.type == F_BIOME ||
+            c.type == F_BIOME_4_RIVER ||
+            c.type == F_BIOME_256_OTEMP ||
+            c.type == F_BIOME_SAMPLE
+        ){
             uint64_t b = c.biomeToFind;
             uint64_t m = c.biomeToFindM;
             if ((c.biomeToExcl & b) || (c.biomeToExclM & m))
@@ -256,12 +254,23 @@ bool SearchMaster::set(QWidget *widget, const Session& s)
                     return false;
             }
 
-            int layerId = finfo.layer;
+            int layerId = 0;
+            int scale = c.step;
+            if (c.type == F_BIOME_4_RIVER)
+            {
+                layerId = L_RIVER_4;
+                scale = 4;
+            }
+            else if (c.type == F_BIOME_256_OTEMP)
+            {
+                layerId = L_OCEAN_TEMP_256;
+                scale = 256;
+            }
             if (layerId == 0 && s.wi.mc <= MC_1_17)
             {
                 Generator tmp;
                 setupGenerator(&tmp, s.wi.mc, 0);
-                const Layer *l = getLayerForScale(&tmp, finfo.grid);
+                const Layer *l = getLayerForScale(&tmp, scale);
                 if (l)
                     layerId = l - tmp.ls.layers;
             }
@@ -697,7 +706,7 @@ void SearchMaster::stop()
         for (SearchWorker *worker: workers)
         {
             long ms = stop_ms - timer.elapsed();
-            if (mc < 1) ms = 1;
+            if (ms < 1) ms = 1;
             running += !worker->wait(ms);
         }
         if (!running)

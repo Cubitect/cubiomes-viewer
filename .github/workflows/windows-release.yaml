@@ -3,17 +3,18 @@ name: Windows Release
 on:
   push:
     branches:
-      - 'main'
+      - 'trunk'
     tags:
       - 'v*'
-
-defaults:
-  run:
-    shell: cmd
 
 env:
   PROG:         cubiomes-viewer
   SOURCE_DIR:   ${{github.workspace}}
+
+defaults:
+  run:
+    shell: cmd
+    working-directory: ${{env.SOURCE_DIR}}
 
 jobs:
   build:
@@ -26,7 +27,6 @@ jobs:
           submodules: recursive
 
       - name: (2) Get all tags for correct version determination
-        working-directory: ${{env.SOURCE_DIR}}
         run:  |
               git fetch --all --tags -f
 
@@ -43,13 +43,11 @@ jobs:
           setup-python: false
 
       - name: (4) Build
-        working-directory: ${{env.SOURCE_DIR}}
         run:  |
               qmake CONFIG+=release ${{env.SOURCE_DIR}}
               mingw32-make
               
       - name: (5) Deploy
-        working-directory: ${{env.SOURCE_DIR}}
         run:  |
               mkdir ${{env.PROG}}
               copy ${{env.SOURCE_DIR}}\release\${{env.PROG}}.exe ${{env.PROG}}
@@ -60,4 +58,5 @@ jobs:
         with:
           name: ${{env.PROG}}-${{github.ref_name}}-win
           path: ${{env.SOURCE_DIR}}\${{env.PROG}}
+
 

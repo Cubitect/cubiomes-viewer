@@ -5,6 +5,7 @@
 #include "search.h"
 #include "rangedialog.h"
 #include "message.h"
+#include "util.h"
 
 #include "cubiomes/util.h"
 
@@ -167,8 +168,8 @@ bool FormSearchControl::event(QEvent *e)
     if (e->type() == QEvent::LayoutRequest)
     {
         QFontMetrics fm = QFontMetrics(ui->results->font());
-        ui->results->setColumnWidth(SeedTableModel::COL_SEED, fm.horizontalAdvance(QString(24, '#')));
-        ui->results->setColumnWidth(SeedTableModel::COL_TOP16, fm.horizontalAdvance(QString(12, '#')));
+        ui->results->setColumnWidth(SeedTableModel::COL_SEED, txtWidth(fm, QString(24, '#')));
+        ui->results->setColumnWidth(SeedTableModel::COL_TOP16, txtWidth(fm, QString(12, '#')));
         ui->results->verticalHeader()->setDefaultSectionSize(fm.height());
     }
     return QWidget::event(e);
@@ -615,15 +616,24 @@ void FormSearchControl::onBufferTimeout()
 
 int FormSearchControl::searchResultsAdd(std::vector<uint64_t> seeds, bool countonly)
 {
-    const Config& config = parent->config;
-    int ns = model->seeds.size();
-    int n = ns;
-    if (n >= config.maxMatching)
-        return 0;
-    if ((ssize_t)seeds.size() + n > config.maxMatching)
-        seeds.resize(config.maxMatching - n);
     if (seeds.empty())
         return 0;
+    const Config& config = parent->config;
+    int n = model->seeds.size();
+    int nold = n;
+    bool discarded = false;
+
+    if (n >= config.maxMatching)
+    {
+        sthread.stop();
+        discarded = true;
+    }
+    if (n + (ssize_t)seeds.size() > config.maxMatching)
+    {
+        sthread.stop();
+        discarded = true;
+        seeds.resize(config.maxMatching - n);
+    }
 
     QSet<uint64_t> current;
     current.reserve(n + seeds.size());
@@ -635,13 +645,11 @@ int FormSearchControl::searchResultsAdd(std::vector<uint64_t> seeds, bool counto
     {
         if (current.contains(s))
             continue;
-        if (countonly)
+        if (!countonly)
         {
-            n++;
-            continue;
+            current.insert(s);
+            newseeds.append(s);
         }
-        current.insert(s);
-        newseeds.append(s);
         n++;
     }
     if (!newseeds.empty())
@@ -650,15 +658,23 @@ int FormSearchControl::searchResultsAdd(std::vector<uint64_t> seeds, bool counto
         model->insertSeeds(newseeds);
         ui->results->setSortingEnabled(true);
     }
-    if (countonly == false && n >= config.maxMatching)
-    {
-        stopSearch();
-        warn(this, tr("Maximum number of results reached (%1).").arg(config.maxMatching));
-    }
 
-    int addcnt = n - ns;
+    int addcnt = n - nold;
     if (ui->checkStop->isChecked() && addcnt)
-        stopSearch();
+        sthread.stop();
+
+    if (!countonly && discarded)
+    {
+        // guard against recursive calls, which can occur when the
+        // eventloop is continued in the warning message dialog
+        thread_local bool warn_active = false;
+        if (!warn_active)
+        {
+            warn_active = true;
+            warn(this, tr("Maximum number of results reached (%1).").arg(config.maxMatching));
+            warn_active = false;
+        }
+    }
 
     if (addcnt)
         emit resultsAdded(addcnt);

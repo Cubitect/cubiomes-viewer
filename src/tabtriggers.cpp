@@ -128,10 +128,10 @@ bool TabTriggers::event(QEvent *e)
     if (e->type() == QEvent::LayoutRequest)
     {
         QFontMetrics fm = QFontMetrics(ui->treeWidget->font());
-        ui->treeWidget->setColumnWidth(0, fm.horizontalAdvance('#') * 24);
-        ui->treeWidget->setColumnWidth(1, fm.horizontalAdvance('#') * 30);
-        ui->treeWidget->setColumnWidth(2, fm.horizontalAdvance('#') * 9);
-        ui->treeWidget->setColumnWidth(3, fm.horizontalAdvance('#') * 9);
+        ui->treeWidget->setColumnWidth(0, txtWidth(fm) * 24);
+        ui->treeWidget->setColumnWidth(1, txtWidth(fm) * 30);
+        ui->treeWidget->setColumnWidth(2, txtWidth(fm) * 9);
+        ui->treeWidget->setColumnWidth(3, txtWidth(fm) * 9);
     }
     return QWidget::event(e);
 }

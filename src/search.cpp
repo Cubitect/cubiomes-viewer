@@ -56,6 +56,10 @@ QString Condition::summary(bool aligntab) const
             else
                 txts += ": " + QApplication::translate("Filter", "[script missing]");
         }
+        else if (step)
+        {
+            txts += QString(" 1:%1").arg(step);
+        }
     }
 
     if (aligntab)
@@ -127,22 +131,37 @@ bool Condition::versionUpgrade()
     if (version < VER_4_0_0)
     {
         const FilterInfo& ft = g_filterinfo.list[type];
-        if (ft.grid > 1)
-        {
-            x1 = x1 * ft.grid;
-            z1 = z1 * ft.grid;
-            x2 = (x2+1) * ft.grid - 1;
-            z2 = (z2+1) * ft.grid - 1;
-        }
         switch (type)
         {
-        case F_SPIRAL:      step = 1;    break;
-        case F_SPIRAL_4:    step = 4;    type = F_SPIRAL; break;
-        case F_SPIRAL_16:   step = 16;   type = F_SPIRAL; break;
-        case F_SPIRAL_64:   step = 64;   type = F_SPIRAL; break;
-        case F_SPIRAL_256:  step = 256;  type = F_SPIRAL; break;
-        case F_SPIRAL_512:  step = 512;  type = F_SPIRAL; break;
-        case F_SPIRAL_1024: step = 1024; type = F_SPIRAL; break;
+        case F_SPIRAL:          step = 1;    break;
+        case F_SPIRAL_4:        step = 4;    type = F_SPIRAL; break;
+        case F_SPIRAL_16:       step = 16;   type = F_SPIRAL; break;
+        case F_SPIRAL_64:       step = 64;   type = F_SPIRAL; break;
+        case F_SPIRAL_256:      step = 256;  type = F_SPIRAL; break;
+        case F_SPIRAL_512:      step = 512;  type = F_SPIRAL; break;
+        case F_SPIRAL_1024:     step = 1024; type = F_SPIRAL; break;
+        case F_BIOME:           step = 1;    break;
+        case F_BIOME_4:         step = 4;    type = F_BIOME; break;
+        case F_BIOME_16:        step = 16;   type = F_BIOME; break;
+        case F_BIOME_64:        step = 64;   type = F_BIOME; break;
+        case F_BIOME_256:       step = 256;  type = F_BIOME; break;
+        case F_BIOME_NETHER:    step = 1;    break;
+        case F_BIOME_NETHER_4:  step = 4;    type = F_BIOME_NETHER; break;
+        case F_BIOME_NETHER_16: step = 16;   type = F_BIOME_NETHER; break;
+        case F_BIOME_NETHER_64: step = 64;   type = F_BIOME_NETHER; break;
+        case F_BIOME_NETHER_256:step = 256;  type = F_BIOME_NETHER; break;
+        case F_BIOME_END:       step = 1;    break;
+        case F_BIOME_END_4:     step = 4;    type = F_BIOME_END; break;
+        case F_BIOME_END_16:    step = 16;   type = F_BIOME_END; break;
+        case F_BIOME_END_64:    step = 64;   type = F_BIOME_END; break;
+        }
+        int mult = step ? step : ft.grid;
+        if (mult > 1)
+        {
+            x1 = x1 * mult;
+            z1 = z1 * mult;
+            x2 = (x2+1) * mult - 1;
+            z2 = (z2+1) * mult - 1;
         }
     }
 
@@ -398,7 +417,7 @@ int testTreeAt(
 
                     if (inr)
                     {
-                        // children are combined via AND
+                        // children are combined via AND at the current position
                         int sta = COND_OK;
                         for (int b : branches)
                         {
@@ -462,7 +481,7 @@ int testTreeAt(
         return st;
 
 
-    case F_LOGIC_OR: //qDebug() << at.x << at.z; return COND_FAILED;
+    case F_LOGIC_OR:
         if (branches.empty())
         {
             if (path)
@@ -500,7 +519,9 @@ int testTreeAt(
         return st;
 
 
-    case F_LOGIC_NOT:
+    case F_LOGIC_NOT: //qDebug() << at.x << at.z;
+        if (branches.empty())
+            return COND_FAILED;
         st = COND_OK;
         for (int b : branches)
         {
@@ -967,8 +988,8 @@ static int f_biome_sampler(Generator *g, int scale, int x, int y, int z, void *d
         return -2;
     if (info->rmaxsq)
     {
-        int dx = x - info->at.x;
-        int dz = z - info->at.z;
+        int dx = (x * scale) - info->at.x;
+        int dz = (z * scale) - info->at.z;
         int64_t rsq = dx*(int64_t)dx + dz*(int64_t)dz;
         if (rsq >= info->rmaxsq)
             return -1;
@@ -985,6 +1006,8 @@ static int f_biome_sampler(Generator *g, int scale, int x, int y, int z, void *d
     }
     if (incl != 0)
     {
+        x *= scale;
+        z *= scale;
         if (info->imax && info->n < MAX_INSTANCES)
             info->cent[info->n] = Pos{x, z};
         info->xsum += x;
@@ -1036,6 +1059,7 @@ testCondAt(
         if (!getStructureConfig_override(finfo.stype, env->mc, &sconf))
             return COND_FAILED;
     }
+    else memset(&sconf, 0, sizeof(sconf)); // never relevant, but clang-analyzer complains
 
     if (cond->rmax > 0)
     {
@@ -1725,7 +1749,8 @@ L_qm_any:
             return COND_FAILED;
         if (cond->converage <= 0 || cond->converage > 1)
             return COND_FAILED;
-        s = finfo.pow2;
+
+        s = 2;
         rx1 = x1 >> s;
         rz1 = z1 >> s;
         rx2 = x2 >> s;
@@ -1738,6 +1763,7 @@ L_qm_any:
             sample_boime_t sample;
             sample.cond = cond;
             sample.at = at;
+            sample.rmaxsq = rmax;
             sample.n = 0;
             sample.xsum = 0;
             sample.zsum = 0;
@@ -1770,18 +1796,14 @@ L_qm_any:
         }
         return COND_FAILED;
 
-    // biome filters reference specific layers
-    // MAYBE: options for layers in different versions?
-    case F_BIOME:
-        if (env->mc <= MC_B1_7 || env->mc >= MC_1_18)
-            goto L_noise_biome;
-        // fallthrough
+
     case F_BIOME_4_RIVER:
     case F_BIOME_256_OTEMP:
 
         if (env->mc >= MC_1_18)
             return COND_FAILED;
-        s = finfo.pow2;
+
+        s = cond->type == F_BIOME_4_RIVER ? 2 : 8;
         rx1 = x1 >> s;
         rz1 = z1 >> s;
         rx2 = x2 >> s;
@@ -1793,7 +1815,7 @@ L_qm_any:
             return COND_MAYBE_POS_VALID;
         if (pass == PASS_FULL_48)
         {
-            if (env->mc < MC_1_13 || finfo.layer != L_OCEAN_TEMP_256)
+            if (env->mc < MC_1_13 || cond->type != F_BIOME_256_OTEMP)
                 return COND_MAYBE_POS_VALID;
         }
         valid = COND_FAILED;
@@ -1802,7 +1824,12 @@ L_qm_any:
             int w = rx2-rx1+1;
             int h = rz2-rz1+1;
             //env->init4Dim(0); // seed gets applied by checkForBiomesAtLayer
-            if (checkForBiomesAtLayer(&env->g.ls, &env->g.ls.layers[finfo.layer],
+            Layer *entry;
+            if (cond->type == F_BIOME_4_RIVER)
+                entry = &env->g.ls.layers[L_RIVER_4];
+            else
+                entry = &env->g.ls.layers[L_OCEAN_TEMP_256];
+            if (checkForBiomesAtLayer(&env->g.ls, entry,
                 NULL, env->seed, rx1, rz1, w, h, &cond->bf) > 0)
             {
                 valid = COND_OK;
@@ -1829,21 +1856,20 @@ L_qm_any:
         return COND_FAILED;
 
 
-    case F_BIOME_4:
-    case F_BIOME_16:
-    case F_BIOME_64:
-    case F_BIOME_256:
-    case F_BIOME_NETHER_1:
-    case F_BIOME_NETHER_4:
-    case F_BIOME_NETHER_16:
-    case F_BIOME_NETHER_64:
-    case F_BIOME_END_1:
-    case F_BIOME_END_4:
-    case F_BIOME_END_16:
-    case F_BIOME_END_64:
+    case F_BIOME:
+    case F_BIOME_NETHER:
+    case F_BIOME_END:
 
-L_noise_biome:
-        s = finfo.pow2;
+        switch (cond->step)
+        {
+        case 1:   s = 0; break;
+        case 4:   s = 2; break;
+        case 16:  s = 4; break;
+        case 64:  s = 6; break;
+        case 256: s = 8; break;
+        default: return COND_FAILED;
+        }
+
         rx1 = x1 >> s;
         rz1 = z1 >> s;
         rx2 = x2 >> s;
@@ -1855,8 +1881,9 @@ L_noise_biome:
             return COND_MAYBE_POS_VALID;
         // the Nether and End require only the 48-bit seed
         // (except voronoi uses the full 64-bits)
-        if (pass == PASS_FULL_48 && finfo.dep64)
+        if (pass != PASS_FULL_64 && (finfo.dep64 || s == 0))
             return COND_MAYBE_POS_VALID;
+        else
         {
             int w = rx2 - rx1 + 1;
             int h = rz2 - rz1 + 1;
@@ -1872,7 +1899,7 @@ L_noise_biome:
     case F_BIOME_CENTER_256:
         if (pass == PASS_FULL_64)
         {
-            s = finfo.pow2;
+            s = cond->type == F_BIOME_CENTER ? 2 : 8;
             rx1 = x1 >> s;
             rz1 = z1 >> s;
             rx2 = x2 >> s;
@@ -1882,7 +1909,7 @@ L_noise_biome:
             Range r = {1<<s, rx1, rz1, w, h, cond->y >> 2, 1};
             env->init4Dim(DIM_OVERWORLD);
 
-            if (cond->count == 0)
+            if (cond->count <= 0)
             {   // exclusion
                 icnt = getBiomeCenters(
                     cent, NULL, 1, &env->g, r, cond->biomeId, cond->biomeSize, cond->tol,
@@ -1963,15 +1990,20 @@ L_noise_biome:
             double *p_max = (cond->minmax & Condition::E_LOCATE_MAX) ? para+1 : nullptr;
             getParaRange(&env->g.bn.climate[cond->para], p_min, p_max,
                     rx1, rz1, w, h, &info, f_track_minmax);
-            double v;
             double vmin = cond->minmax & Condition::E_TEST_LOWER ? cond->vmin : -INFINITY;
             double vmax = cond->minmax & Condition::E_TEST_UPPER ? cond->vmax : +INFINITY;
-            v = p_min ? info.vmin : info.vmax;
-            if (v < vmin)
-                return COND_FAILED;
-            v = p_max ? info.vmax : info.vmin;
-            if (v > vmax)
-                return COND_FAILED;
+            double evalmin = p_min ? info.vmin : info.vmax;
+            double evalmax = p_max ? info.vmax : info.vmin;
+            if (cond->flags & Condition::FLG_INVERT)
+            {
+                if (evalmin > vmin && evalmax < vmax)
+                    return COND_FAILED;
+            }
+            else
+            {
+                if (evalmin < vmin || evalmax > vmax)
+                    return COND_FAILED;
+            }
             *cent = at;
             if (imax) *imax = 1;
             if (cond->minmax & Condition::E_LOCATE_MIN)

@@ -410,7 +410,7 @@ void MapView::showContextMenu(const QPoint &pos)
     int wmax = 0;
     for (auto& it : cpy_dat)
     {
-        int w = menu.fontMetrics().horizontalAdvance(it.txt + "  ");
+        int w = txtWidth(menu.fontMetrics(), it.txt + "  ");
         if (w > wmax)
             wmax = w;
     }
@@ -419,7 +419,7 @@ void MapView::showContextMenu(const QPoint &pos)
     if (world)
     {
         QString txt = tr("Copy seed:");
-        while (menu.fontMetrics().horizontalAdvance(txt + " ") < wmax)
+        while (txtWidth(menu.fontMetrics(), txt + " ") < wmax)
             txt += " ";
         txt += QString::asprintf("%" PRId64, (int64_t)world->wi.seed);
         menu.addAction(txt, this, &MapView::copySeed, QKeySequence::Copy);
@@ -427,7 +427,7 @@ void MapView::showContextMenu(const QPoint &pos)
     for (auto& it : cpy_dat)
     {
         QString txt = it.txt;
-        while (menu.fontMetrics().horizontalAdvance(txt + " ") < wmax)
+        while (txtWidth(menu.fontMetrics(), txt + " ") < wmax)
             txt += " ";
         txt += it.cpy;
         menu.addAction(txt, [=](){ this->copyText(it.cpy); });

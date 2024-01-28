@@ -17,8 +17,6 @@ enum
     CAT_QUAD,
     CAT_STRUCT,
     CAT_BIOMES,
-    CAT_NETHER,
-    CAT_END,
     CAT_OTHER,
     CATEGORY_MAX,
 };
@@ -57,12 +55,12 @@ enum
     F_FORTRESS,
     F_BASTION,
     F_ENDCITY,
-    F_BIOME_NETHER_1,
+    F_BIOME_NETHER,
     F_BIOME_NETHER_4,
     F_BIOME_NETHER_16,
     F_BIOME_NETHER_64,
     F_BIOME_NETHER_256,
-    F_BIOME_END_1,
+    F_BIOME_END,
     F_BIOME_END_4,
     F_BIOME_END_16,
     F_BIOME_END_64,
@@ -115,10 +113,8 @@ struct FilterInfo
     int cat;    // seed source category
     bool dep64; // depends on 64-bit seed
     int loc;
-    int layer;  // associated generator layer
     int stype;  // structure type
     int grid;   // coordinate multiplier
-    int pow2;   // bit position of grid
     int branch; // branching behaviour
     int mcmin;  // minimum version
     int mcmax;  // maximum version
@@ -140,13 +136,13 @@ static const struct FilterList : private FilterInfo
         int disp = 0; // display order
 
         list[F_SELECT] = FilterInfo{
-            CAT_NONE, 0, LOC_NIL, 0, 0, 0, 0, BR_NONE, MC_UNDEF, MC_NEWEST, 0, 0, disp++,
+            CAT_NONE, 0, LOC_NIL, 0, 0, BR_NONE, MC_UNDEF, MC_NEWEST, 0, 0, disp++,
             NULL,
             "",
             ""
         };
         list[F_LOGIC_OR] = FilterInfo{
-            CAT_HELPER, 0, LOC_NIL, 0, 0, 1, 0, BR_NONE, MC_UNDEF, MC_NEWEST, DIM_UNDEF, 0, disp++,
+            CAT_HELPER, 0, LOC_NIL, 0, 1, BR_NONE, MC_UNDEF, MC_NEWEST, DIM_UNDEF, 0, disp++,
             "helper",
             QT_TRANSLATE_NOOP("Filter", "OR logic gate"),
             QT_TRANSLATE_NOOP("Filter",
@@ -155,7 +151,7 @@ static const struct FilterList : private FilterInfo
             "defined, it defaults to true.")
         };
         list[F_LOGIC_NOT] = FilterInfo{
-            CAT_HELPER, 0, LOC_NIL, 0, 0, 1, 0, BR_NONE, MC_UNDEF, MC_NEWEST, DIM_UNDEF, 0, disp++,
+            CAT_HELPER, 0, LOC_NIL, 0, 1, BR_NONE, MC_UNDEF, MC_NEWEST, DIM_UNDEF, 0, disp++,
             "helper",
             QT_TRANSLATE_NOOP("Filter", "NOT logic gate"),
             QT_TRANSLATE_NOOP("Filter",
@@ -164,28 +160,28 @@ static const struct FilterList : private FilterInfo
             "defined, it defaults to true.")
         };
         list[F_LUA] = FilterInfo{
-            CAT_HELPER, 0, LOC_NIL, 0, 0, 1, 0, BR_NONE, MC_UNDEF, MC_NEWEST, DIM_UNDEF, 0, disp++,
+            CAT_HELPER, 0, LOC_NIL, 0, 1, BR_NONE, MC_UNDEF, MC_NEWEST, DIM_UNDEF, 0, disp++,
             "helper",
             QT_TRANSLATE_NOOP("Filter", "Lua"),
             QT_TRANSLATE_NOOP("Filter",
             "Define custom conditions using Lua scripts.")
         };
         list[F_SCALE_TO_NETHER] = FilterInfo{
-            CAT_HELPER, 0, LOC_NIL, 0, 0, 1, 0, BR_NONE, MC_UNDEF, MC_NEWEST, DIM_UNDEF, 0, disp++,
+            CAT_HELPER, 0, LOC_NIL, 0, 1, BR_NONE, MC_UNDEF, MC_NEWEST, DIM_UNDEF, 0, disp++,
             "portal_lit",
             QT_TRANSLATE_NOOP("Filter", "Coordinate factor x/8"),
             QT_TRANSLATE_NOOP("Filter",
             "Divides relative location by 8, from Overworld to Nether.")
         };
         list[F_SCALE_TO_OVERWORLD] = FilterInfo{
-            CAT_HELPER, 0, LOC_NIL, 0, 0, 1, 0, BR_NONE, MC_UNDEF, MC_NEWEST, DIM_UNDEF, 0, disp++,
+            CAT_HELPER, 0, LOC_NIL, 0, 1, BR_NONE, MC_UNDEF, MC_NEWEST, DIM_UNDEF, 0, disp++,
             "portal_lit",
             QT_TRANSLATE_NOOP("Filter", "Coordinate factor x*8"),
             QT_TRANSLATE_NOOP("Filter",
             "Multiplies relative location by 8, from Nether to Overworld.")
         };
         list[F_SPIRAL] = FilterInfo{
-            CAT_HELPER, 0, LOC_RAD, 0, 0, 1, 0, BR_FIRST, MC_UNDEF, MC_NEWEST, DIM_UNDEF, 0, disp++,
+            CAT_HELPER, 0, LOC_RAD, 0, 1, BR_FIRST, MC_UNDEF, MC_NEWEST, DIM_UNDEF, 0, disp++,
             "reference",
             QT_TRANSLATE_NOOP("Filter", "Spiral iterator"),
             QT_TRANSLATE_NOOP("Filter",
@@ -198,7 +194,7 @@ static const struct FilterList : private FilterInfo
         };
 
         list[F_QH_IDEAL] = FilterInfo{
-            CAT_QUAD, 0, LOC_RAD, 0, Swamp_Hut, 512, 9, BR_FIRST, MC_1_4, MC_NEWEST, 0, 0, disp++,
+            CAT_QUAD, 0, LOC_RAD, Swamp_Hut, 512, BR_FIRST, MC_1_4, MC_NEWEST, 0, 0, disp++,
             "quad",
             QT_TRANSLATE_NOOP("Filter", "Quad-hut (ideal)"),
             QT_TRANSLATE_NOOP("Filter",
@@ -207,7 +203,7 @@ static const struct FilterList : private FilterInfo
         };
 
         list[F_QH_CLASSIC] = FilterInfo{
-            CAT_QUAD, 0, LOC_RAD, 0, Swamp_Hut, 512, 9, BR_FIRST, MC_1_4, MC_NEWEST, 0, 0, disp++,
+            CAT_QUAD, 0, LOC_RAD, Swamp_Hut, 512, BR_FIRST, MC_1_4, MC_NEWEST, 0, 0, disp++,
             "quad",
             QT_TRANSLATE_NOOP("Filter", "Quad-hut (classic)"),
             QT_TRANSLATE_NOOP("Filter",
@@ -218,7 +214,7 @@ static const struct FilterList : private FilterInfo
         };
 
         list[F_QH_NORMAL] = FilterInfo{
-            CAT_QUAD, 0, LOC_RAD, 0, Swamp_Hut, 512, 9, BR_FIRST, MC_1_4, MC_NEWEST, 0, 0, disp++,
+            CAT_QUAD, 0, LOC_RAD, Swamp_Hut, 512, BR_FIRST, MC_1_4, MC_NEWEST, 0, 0, disp++,
             "quad",
             QT_TRANSLATE_NOOP("Filter", "Quad-hut (normal)"),
             QT_TRANSLATE_NOOP("Filter",
@@ -229,7 +225,7 @@ static const struct FilterList : private FilterInfo
         };
 
         list[F_QH_BARELY] = FilterInfo{
-            CAT_QUAD, 0, LOC_RAD, 0, Swamp_Hut, 512, 9, BR_FIRST, MC_1_4, MC_NEWEST, 0, 0, disp++,
+            CAT_QUAD, 0, LOC_RAD, Swamp_Hut, 512, BR_FIRST, MC_1_4, MC_NEWEST, 0, 0, disp++,
             "quad",
             QT_TRANSLATE_NOOP("Filter", "Quad-hut (barely)"),
             QT_TRANSLATE_NOOP("Filter",
@@ -239,7 +235,7 @@ static const struct FilterList : private FilterInfo
         };
 
         list[F_QM_95] = FilterInfo{
-            CAT_QUAD, 0, LOC_RAD, 0, Monument, 512, 9, BR_FIRST, MC_1_8, MC_NEWEST, 0, 0, disp++,
+            CAT_QUAD, 0, LOC_RAD, Monument, 512, BR_FIRST, MC_1_8, MC_NEWEST, 0, 0, disp++,
             "quad",
             QT_TRANSLATE_NOOP("Filter", "Quad-ocean-monument (>95%)"),
             QT_TRANSLATE_NOOP("Filter",
@@ -249,7 +245,7 @@ static const struct FilterList : private FilterInfo
         };
 
         list[F_QM_90] = FilterInfo{
-            CAT_QUAD, 0, LOC_RAD, 0, Monument, 512, 9, BR_FIRST, MC_1_8, MC_NEWEST, 0, 0, disp++,
+            CAT_QUAD, 0, LOC_RAD, Monument, 512, BR_FIRST, MC_1_8, MC_NEWEST, 0, 0, disp++,
             "quad",
             QT_TRANSLATE_NOOP("Filter", "Quad-ocean-monument (>90%)"),
             QT_TRANSLATE_NOOP("Filter",
@@ -259,8 +255,8 @@ static const struct FilterList : private FilterInfo
         };
 
         list[F_BIOME_SAMPLE] = FilterInfo{
-            CAT_BIOMES, 1, LOC_RAD, 0, 0, 1, 0, BR_SPLIT, MC_B1_7, MC_NEWEST, 0, 1, disp++,
-            "map",
+            CAT_BIOMES, 1, LOC_RAD, 0, 1, BR_SPLIT, MC_B1_7, MC_NEWEST, 0, 1, disp++,
+            "overworld",
             QT_TRANSLATE_NOOP("Filter", "Biome samples"),
             QT_TRANSLATE_NOOP("Filter",
             "Samples biomes in a given area to find if a proportion of the "
@@ -268,51 +264,32 @@ static const struct FilterList : private FilterInfo
         };
 
         list[F_BIOME] = FilterInfo{
-            CAT_BIOMES, 1, LOC_REC, L_VORONOI_1, 0, 1, 0, BR_NONE, MC_B1_7, MC_NEWEST, 0, 1, disp++,
-            "map",
-            QT_TRANSLATE_NOOP("Filter", "Biome scaled"),
+            CAT_BIOMES, 1, LOC_REC, 0, 1, BR_NONE, MC_B1_7, MC_NEWEST, 0, 1, disp++,
+            "overworld",
+            QT_TRANSLATE_NOOP("Filter", "Overworld at scale"),
             QT_TRANSLATE_NOOP("Filter",
             "Allows only seeds with the included (+) biomes in the specified area and "
             "discard those that have biomes that are explicitly excluded (-).")
         };
-
-        list[F_BIOME_4] = FilterInfo{
-            CAT_BIOMES, 1, LOC_REC, 0, 0, 4, 2, BR_NONE, MC_B1_7, MC_NEWEST, 0, 1, disp++,
-            "map",
-            QT_TRANSLATE_NOOP("Filter", "Biomes 1:4"),
+        list[F_BIOME_NETHER] = FilterInfo{
+            CAT_BIOMES, 0, LOC_REC, 0, 1, BR_NONE, MC_1_16_1, MC_NEWEST, -1, 1, disp++,
+            "nether",
+            QT_TRANSLATE_NOOP("Filter", "Nether at scale"),
             QT_TRANSLATE_NOOP("Filter",
-            "Allows only seeds with the included (+) biomes in the specified area and "
-            "discard those that have biomes that are explicitly excluded (-).")
+            "Nether biomes sampled on a scaled grid.")
         };
-        list[F_BIOME_16] = FilterInfo{
-            CAT_BIOMES, 1, LOC_REC, 0, 0, 16, 4, BR_NONE, MC_B1_7, MC_NEWEST, 0, 1, disp++,
-            "map",
-            QT_TRANSLATE_NOOP("Filter", "Biomes 1:16"),
+        list[F_BIOME_END] = FilterInfo{
+            CAT_BIOMES, 0, LOC_REC, 0, 1, BR_NONE, MC_1_9, MC_NEWEST, +1, 1, disp++,
+            "the_end",
+            QT_TRANSLATE_NOOP("Filter", "End at scale"),
             QT_TRANSLATE_NOOP("Filter",
-            "Allows only seeds with the included (+) biomes in the specified area and "
-            "discard those that have biomes that are explicitly excluded (-).")
-        };
-        list[F_BIOME_64] = FilterInfo{
-            CAT_BIOMES, 1, LOC_REC, 0, 0, 64, 6, BR_NONE, MC_B1_7, MC_NEWEST, 0, 1, disp++,
-            "map",
-            QT_TRANSLATE_NOOP("Filter", "Biomes 1:64"),
-            QT_TRANSLATE_NOOP("Filter",
-            "Allows only seeds with the included (+) biomes in the specified area and "
-            "discard those that have biomes that are explicitly excluded (-).")
-        };
-        list[F_BIOME_256] = FilterInfo{
-            CAT_BIOMES, 1, LOC_REC, 0, 0, 256, 8, BR_NONE, MC_B1_7, MC_NEWEST, 0, 1, disp++,
-            "map",
-            QT_TRANSLATE_NOOP("Filter", "Biomes 1:256"),
-            QT_TRANSLATE_NOOP("Filter",
-            "Allows only seeds with the included (+) biomes in the specified area and "
-            "discard those that have biomes that are explicitly excluded (-).")
+            "End biomes sampled on a scaled grid.")
         };
 
         list[F_BIOME_4_RIVER] = FilterInfo{
-            CAT_BIOMES, 1, LOC_REC, L_RIVER_MIX_4, 0, 4, 2, BR_NONE, MC_1_13, MC_1_17, 0, 0, disp++,
+            CAT_BIOMES, 1, LOC_REC, 0, 4, BR_NONE, MC_1_13, MC_1_17, 0, 0, disp++,
             "map",
-            QT_TRANSLATE_NOOP("Filter", "Biomes 1:4 RIVER"),
+            QT_TRANSLATE_NOOP("Filter", "Biome layer 1:4 RIVER"),
             QT_TRANSLATE_NOOP("Filter",
             "Allows only seeds with the included (+) biomes in the specified area and "
             "discard those that have biomes that are explicitly excluded (-) "
@@ -320,132 +297,68 @@ static const struct FilterList : private FilterInfo
             "This layer does not generate ocean variants.")
         };
         list[F_BIOME_256_OTEMP] = FilterInfo{
-            CAT_BIOMES, 0, LOC_REC, L_OCEAN_TEMP_256, 0, 256, 8, BR_NONE, MC_1_13, MC_1_17, 0, 0, disp++,
+            CAT_BIOMES, 0, LOC_REC, 0, 256, BR_NONE, MC_1_13, MC_1_17, 0, 0, disp++,
             "map",
-            QT_TRANSLATE_NOOP("Filter", "Biomes 1:256 O.TEMP"),
+            QT_TRANSLATE_NOOP("Filter", "Biome layer 1:256 O.TEMP"),
             QT_TRANSLATE_NOOP("Filter",
             "Allows only seeds with the included (+) biomes in the specified area and "
             "discard those that have biomes that are explicitly excluded (-) "
             "at layer OCEAN TEMPERATURE with scale 1:256. "
             "This generation layer depends only on the lower 48-bits of the seed.")
         };
+
         list[F_CLIMATE_NOISE] = FilterInfo{
-            CAT_BIOMES, 0, LOC_REC, 0, 0, 4, 2, BR_NONE, MC_1_18, MC_NEWEST, 0, 0, disp++,
-            "map",
-            QT_TRANSLATE_NOOP("Filter", "Climate parameters 1:4"),
+            CAT_BIOMES, 0, LOC_REC, 0, 4, BR_NONE, MC_1_18, MC_NEWEST, 0, 0, disp++,
+            "overworld",
+            QT_TRANSLATE_NOOP("Filter", "Climate parameters"),
             QT_TRANSLATE_NOOP("Filter",
             "Custom limits for the required and allowed climate noise parameters that "
             "the specified area should cover.")
         };
         list[F_CLIMATE_MINMAX] = FilterInfo{
-            CAT_BIOMES, 0, LOC_REC, 0, 0, 4, 2, BR_NONE, MC_1_18, MC_NEWEST, 0, 0, disp++,
-            "map",
-            QT_TRANSLATE_NOOP("Filter", "Locate climate extreme 1:4"),
+            CAT_BIOMES, 0, LOC_REC, 0, 4, BR_NONE, MC_1_18, MC_NEWEST, 0, 0, disp++,
+            "overworld",
+            QT_TRANSLATE_NOOP("Filter", "Locate climate extreme"),
             QT_TRANSLATE_NOOP("Filter",
             "Finds the location where a climate parameter reaches its minimum or maximum.")
         };
         list[F_BIOME_CENTER] = FilterInfo{
-            CAT_BIOMES, 1, LOC_REC, 0, 0, 4, 2, BR_CLUST, MC_B1_7, MC_NEWEST, 0, 1, disp++,
+            CAT_BIOMES, 1, LOC_REC, 0, 4, BR_CLUST, MC_B1_7, MC_NEWEST, 0, 1, disp++,
             "map",
-            QT_TRANSLATE_NOOP("Filter", "Locate biome center 1:4"),
+            QT_TRANSLATE_NOOP("Filter", "Locate biome center"),
             QT_TRANSLATE_NOOP("Filter",
             "Finds the center position of a given biome.")
         };
         list[F_BIOME_CENTER_256] = FilterInfo{
-            CAT_BIOMES, 1, LOC_REC, 0, 0, 256, 8, BR_CLUST, MC_B1_7, MC_1_17, 0, 1, disp++,
+            CAT_BIOMES, 1, LOC_REC, 0, 256, BR_CLUST, MC_B1_7, MC_1_17, 0, 1, disp++,
             "map",
             QT_TRANSLATE_NOOP("Filter", "Locate biome center 1:256"),
             QT_TRANSLATE_NOOP("Filter",
             "Finds the center position of a given biome. Based on the 1:256 biome layer.")
         };
         list[F_TEMPS] = FilterInfo{
-            CAT_BIOMES, 1, LOC_REC, 0, 0, 1024, 10, BR_NONE, MC_1_7, MC_1_17, 0, 0, disp++,
+            CAT_BIOMES, 1, LOC_REC, 0, 1024, BR_NONE, MC_1_7, MC_1_17, 0, 0, disp++,
             "tempcat",
             QT_TRANSLATE_NOOP("Filter", "Temperature categories"),
             QT_TRANSLATE_NOOP("Filter",
             "Checks that the area has a minimum of all the required temperature categories.")
         };
 
-        list[F_BIOME_NETHER_1] = FilterInfo{
-            CAT_NETHER, 1, LOC_REC, 0, 0, 1, 0, BR_NONE, MC_1_16_1, 0, -1, 1, disp++, // disabled
-            "nether",
-            QT_TRANSLATE_NOOP("Filter", "Nether biomes 1:1 (disabled)"),
-            QT_TRANSLATE_NOOP("Filter",
-            "Nether biomes after voronoi scaling to 1:1.")
-        };
-        list[F_BIOME_NETHER_4] = FilterInfo{
-            CAT_NETHER, 0, LOC_REC, 0, 0, 4, 2, BR_NONE, MC_1_16_1, MC_NEWEST, -1, 0, disp++,
-            "nether",
-            QT_TRANSLATE_NOOP("Filter", "Nether biomes 1:4"),
-            QT_TRANSLATE_NOOP("Filter",
-            "Nether biomes with normal noise sampling at scale 1:4.")
-        };
-        list[F_BIOME_NETHER_16] = FilterInfo{
-            CAT_NETHER, 0, LOC_REC, 0, 0, 16, 4, BR_NONE, MC_1_16_1, MC_NEWEST, -1, 0, disp++,
-            "nether",
-            QT_TRANSLATE_NOOP("Filter", "Nether biomes 1:16"),
-            QT_TRANSLATE_NOOP("Filter",
-            "Nether biomes, but only sampled at scale 1:16.")
-        };
-        list[F_BIOME_NETHER_64] = FilterInfo{
-            CAT_NETHER, 0, LOC_REC, 0, 0, 64, 6, BR_NONE, MC_1_16_1, MC_NEWEST, -1, 0, disp++,
-            "nether",
-            QT_TRANSLATE_NOOP("Filter", "Nether biomes 1:64"),
-            QT_TRANSLATE_NOOP("Filter",
-            "Nether biomes, but only sampled at scale 1:64.")
-        };
-        list[F_BIOME_NETHER_256] = FilterInfo{
-            CAT_NETHER, 0, LOC_REC, 0, 0, 256, 8, BR_NONE, MC_1_16_1, MC_NEWEST, -1, 0, disp++,
-            "nether",
-            QT_TRANSLATE_NOOP("Filter", "Nether biomes 1:256"),
-            QT_TRANSLATE_NOOP("Filter",
-            "Nether biomes, but only sampled at scale 1:256.")
-        };
-
-        list[F_BIOME_END_1] = FilterInfo{
-            CAT_END, 1, LOC_REC, 0, 0, 1, 0, BR_NONE, MC_1_9, 0, +1, 1, disp++, // disabled
-            "the_end",
-            QT_TRANSLATE_NOOP("Filter", "End biomes 1:1 (disabled)"),
-            QT_TRANSLATE_NOOP("Filter",
-            "End biomes after voronoi scaling to 1:1.")
-        };
-        list[F_BIOME_END_4] = FilterInfo{
-            CAT_END, 0, LOC_REC, 0, 0, 4, 2, BR_NONE, MC_1_9, MC_NEWEST, +1, 0, disp++,
-            "the_end",
-            QT_TRANSLATE_NOOP("Filter", "End biomes 1:4"),
-            QT_TRANSLATE_NOOP("Filter",
-            "End biomes sampled at scale 1:4. Note this is just a simple upscale of 1:16.")
-        };
-        list[F_BIOME_END_16] = FilterInfo{
-            CAT_END, 0, LOC_REC, 0, 0, 16, 4, BR_NONE, MC_1_9, MC_NEWEST, +1, 0, disp++,
-            "the_end",
-            QT_TRANSLATE_NOOP("Filter", "End biomes 1:16"),
-            QT_TRANSLATE_NOOP("Filter",
-            "End biomes with normal sampling at scale 1:16.")
-        };
-        list[F_BIOME_END_64] = FilterInfo{
-            CAT_END, 0, LOC_REC, 0, 0, 64, 6, BR_NONE, MC_1_9, MC_NEWEST, +1, 0, disp++,
-            "the_end",
-            QT_TRANSLATE_NOOP("Filter", "End biomes 1:64"),
-            QT_TRANSLATE_NOOP("Filter",
-            "End biomes with lossy sampling at scale 1:64.")
-        };
-
         list[F_SPAWN] = FilterInfo{
-            CAT_OTHER, 1, LOC_RAD, 0, 0, 1, 0, BR_NONE, MC_B1_8, MC_NEWEST, 0, 0, disp++,
+            CAT_OTHER, 1, LOC_RAD, 0, 1, BR_NONE, MC_B1_8, MC_NEWEST, 0, 0, disp++,
             "spawn",
             QT_TRANSLATE_NOOP("Filter", "Spawn"),
             ""
         };
 
         list[F_SLIME] = FilterInfo{
-            CAT_OTHER, 0, LOC_REC, 0, 0, 16, 4, BR_CLUST, MC_UNDEF, MC_NEWEST, 0, 0, disp++,
+            CAT_OTHER, 0, LOC_REC, 0, 16, BR_CLUST, MC_UNDEF, MC_NEWEST, 0, 0, disp++,
             "slime",
             QT_TRANSLATE_NOOP("Filter", "Slime chunk"),
             ""
         };
         list[F_HEIGHT] = FilterInfo{
-            CAT_OTHER, 0, LOC_POS, 0, 0, 4, 2, BR_NONE, MC_1_1, MC_NEWEST, 0, 0, disp++,
+            CAT_OTHER, 0, LOC_POS, 0, 4, BR_NONE, MC_1_1, MC_NEWEST, 0, 0, disp++,
             "height",
             QT_TRANSLATE_NOOP("Filter", "Surface height"),
             QT_TRANSLATE_NOOP("Filter",
@@ -453,7 +366,7 @@ static const struct FilterList : private FilterInfo
         };
 
         list[F_FIRST_STRONGHOLD] = FilterInfo{
-            CAT_OTHER, 0, LOC_RAD, 0, 0, 1, 0, BR_NONE, MC_B1_8, MC_NEWEST, 0, 0, disp++,
+            CAT_OTHER, 0, LOC_RAD, 0, 1, BR_NONE, MC_B1_8, MC_NEWEST, 0, 0, disp++,
             "stronghold",
             QT_TRANSLATE_NOOP("Filter", "First stronghold"),
             QT_TRANSLATE_NOOP("Filter",
@@ -462,28 +375,28 @@ static const struct FilterList : private FilterInfo
         };
 
         list[F_STRONGHOLD] = FilterInfo{
-            CAT_STRUCT, 1, LOC_RAD, 0, 0, 1, 0, BR_CLUST, MC_B1_8, MC_NEWEST, 0, 0, disp++,
+            CAT_STRUCT, 1, LOC_RAD, 0, 1, BR_CLUST, MC_B1_8, MC_NEWEST, 0, 0, disp++,
             "stronghold",
             QT_TRANSLATE_NOOP("Filter", "Stronghold"),
             ""
         };
 
         list[F_VILLAGE] = FilterInfo{
-            CAT_STRUCT, 1, LOC_RAD, 0, Village, 1, 0, BR_CLUST, MC_B1_8, MC_NEWEST, 0, 0, disp++,
+            CAT_STRUCT, 1, LOC_RAD, Village, 1, BR_CLUST, MC_B1_8, MC_NEWEST, 0, 0, disp++,
             "village",
             QT_TRANSLATE_NOOP("Filter", "Village"),
             ""
         };
 
         list[F_MINESHAFT] = FilterInfo{
-            CAT_STRUCT, 1, LOC_RAD, 0, Mineshaft, 1, 0, BR_CLUST, MC_B1_8, MC_NEWEST, 0, 0, disp++,
+            CAT_STRUCT, 1, LOC_RAD, Mineshaft, 1, BR_CLUST, MC_B1_8, MC_NEWEST, 0, 0, disp++,
             "mineshaft",
             QT_TRANSLATE_NOOP("Filter", "Abandoned mineshaft"),
             ""
         };
 
         list[F_DESERT] = FilterInfo{
-            CAT_STRUCT, 1, LOC_RAD, 0, Desert_Pyramid, 1, 0, BR_CLUST, MC_1_3, MC_NEWEST, 0, 0, disp++,
+            CAT_STRUCT, 1, LOC_RAD, Desert_Pyramid, 1, BR_CLUST, MC_1_3, MC_NEWEST, 0, 0, disp++,
             "desert",
             QT_TRANSLATE_NOOP("Filter", "Desert pyramid"),
             QT_TRANSLATE_NOOP("Filter",
@@ -492,7 +405,7 @@ static const struct FilterList : private FilterInfo
         };
 
         list[F_JUNGLE] = FilterInfo{
-            CAT_STRUCT, 1, LOC_RAD, 0, Jungle_Temple, 1, 0, BR_CLUST, MC_1_3, MC_NEWEST, 0, 0, disp++,
+            CAT_STRUCT, 1, LOC_RAD, Jungle_Temple, 1, BR_CLUST, MC_1_3, MC_NEWEST, 0, 0, disp++,
             "jungle",
             QT_TRANSLATE_NOOP("Filter", "Jungle temple"),
             QT_TRANSLATE_NOOP("Filter",
@@ -501,28 +414,28 @@ static const struct FilterList : private FilterInfo
         };
 
         list[F_HUT] = FilterInfo{
-            CAT_STRUCT, 1, LOC_RAD, 0, Swamp_Hut, 1, 0, BR_CLUST, MC_1_4, MC_NEWEST, 0, 0, disp++,
+            CAT_STRUCT, 1, LOC_RAD, Swamp_Hut, 1, BR_CLUST, MC_1_4, MC_NEWEST, 0, 0, disp++,
             "hut",
             QT_TRANSLATE_NOOP("Filter", "Swamp hut"),
             ""
         };
 
         list[F_MONUMENT] = FilterInfo{
-            CAT_STRUCT, 1, LOC_RAD, 0, Monument, 1, 0, BR_CLUST, MC_1_8, MC_NEWEST, 0, 0, disp++,
+            CAT_STRUCT, 1, LOC_RAD, Monument, 1, BR_CLUST, MC_1_8, MC_NEWEST, 0, 0, disp++,
             "monument",
             QT_TRANSLATE_NOOP("Filter", "Ocean monument"),
             ""
         };
 
         list[F_IGLOO] = FilterInfo{
-            CAT_STRUCT, 1, LOC_RAD, 0, Igloo, 1, 0, BR_CLUST, MC_1_9, MC_NEWEST, 0, 0, disp++,
+            CAT_STRUCT, 1, LOC_RAD, Igloo, 1, BR_CLUST, MC_1_9, MC_NEWEST, 0, 0, disp++,
             "igloo",
             QT_TRANSLATE_NOOP("Filter", "Igloo"),
             ""
         };
 
         list[F_MANSION] = FilterInfo{
-            CAT_STRUCT, 1, LOC_RAD, 0, Mansion, 1, 0, BR_CLUST, MC_1_11, MC_NEWEST, 0, 0, disp++,
+            CAT_STRUCT, 1, LOC_RAD, Mansion, 1, BR_CLUST, MC_1_11, MC_NEWEST, 0, 0, disp++,
             "mansion",
             QT_TRANSLATE_NOOP("Filter", "Woodland mansion"),
             QT_TRANSLATE_NOOP("Filter",
@@ -531,21 +444,21 @@ static const struct FilterList : private FilterInfo
         };
 
         list[F_RUINS] = FilterInfo{
-            CAT_STRUCT, 1, LOC_RAD, 0, Ocean_Ruin, 1, 0, BR_CLUST, MC_1_13, MC_NEWEST, 0, 0, disp++,
+            CAT_STRUCT, 1, LOC_RAD, Ocean_Ruin, 1, BR_CLUST, MC_1_13, MC_NEWEST, 0, 0, disp++,
             "ruins",
             QT_TRANSLATE_NOOP("Filter", "Ocean ruins"),
             ""
         };
 
         list[F_SHIPWRECK] = FilterInfo{
-            CAT_STRUCT, 1, LOC_RAD, 0, Shipwreck, 1, 0, BR_CLUST, MC_1_13, MC_NEWEST, 0, 0, disp++,
+            CAT_STRUCT, 1, LOC_RAD, Shipwreck, 1, BR_CLUST, MC_1_13, MC_NEWEST, 0, 0, disp++,
             "shipwreck",
             QT_TRANSLATE_NOOP("Filter", "Shipwreck"),
             ""
         };
 
         list[F_TREASURE] = FilterInfo{
-            CAT_STRUCT, 1, LOC_RAD, 0, Treasure, 1, 0, BR_CLUST, MC_1_13, MC_NEWEST, 0, 0, disp++,
+            CAT_STRUCT, 1, LOC_RAD, Treasure, 1, BR_CLUST, MC_1_13, MC_NEWEST, 0, 0, disp++,
             "treasure",
             QT_TRANSLATE_NOOP("Filter", "Buried treasure"),
             QT_TRANSLATE_NOOP("Filter",
@@ -555,70 +468,70 @@ static const struct FilterList : private FilterInfo
         };
 
         list[F_WELL] = FilterInfo{
-            CAT_STRUCT, 1, LOC_RAD, 0, Desert_Well, 1, 0, BR_CLUST, MC_1_13, MC_NEWEST, 0, 0, disp++,
+            CAT_STRUCT, 1, LOC_RAD, Desert_Well, 1, BR_CLUST, MC_1_13, MC_NEWEST, 0, 0, disp++,
             "well",
             QT_TRANSLATE_NOOP("Filter", "Desert well"),
             ""
         };
 
         list[F_OUTPOST] = FilterInfo{
-            CAT_STRUCT, 1, LOC_RAD, 0, Outpost, 1, 0, BR_CLUST, MC_1_14, MC_NEWEST, 0, 0, disp++,
+            CAT_STRUCT, 1, LOC_RAD, Outpost, 1, BR_CLUST, MC_1_14, MC_NEWEST, 0, 0, disp++,
             "outpost",
             QT_TRANSLATE_NOOP("Filter", "Pillager outpost"),
             ""
         };
 
         list[F_ANCIENT_CITY] = FilterInfo{
-            CAT_STRUCT, 1, LOC_RAD, 0, Ancient_City, 1, 0, BR_CLUST, MC_1_19, MC_NEWEST, 0, 0, disp++,
+            CAT_STRUCT, 1, LOC_RAD, Ancient_City, 1, BR_CLUST, MC_1_19, MC_NEWEST, 0, 0, disp++,
             "ancient_city",
             QT_TRANSLATE_NOOP("Filter", "Ancient city"),
             ""
         };
 
         list[F_TRAILS] = FilterInfo{
-            CAT_STRUCT, 1, LOC_RAD, 0, Trail_Ruin, 1, 0, BR_CLUST, MC_1_20, MC_NEWEST, 0, 0, disp++,
+            CAT_STRUCT, 1, LOC_RAD, Trail_Ruin, 1, BR_CLUST, MC_1_20, MC_NEWEST, 0, 0, disp++,
             "trails",
             QT_TRANSLATE_NOOP("Filter", "Trail ruins"),
             ""
         };
 
         list[F_PORTAL] = FilterInfo{
-            CAT_STRUCT, 0, LOC_RAD, 0, Ruined_Portal, 1, 0, BR_CLUST, MC_1_16_1, MC_NEWEST, 0, 0, disp++,
+            CAT_STRUCT, 0, LOC_RAD, Ruined_Portal, 1, BR_CLUST, MC_1_16_1, MC_NEWEST, 0, 0, disp++,
             "portal",
             QT_TRANSLATE_NOOP("Filter", "Ruined portal (overworld)"),
             ""
         };
 
         list[F_PORTALN] = FilterInfo{
-            CAT_STRUCT, 0, LOC_RAD, 0, Ruined_Portal_N, 1, 0, BR_CLUST, MC_1_16_1, MC_NEWEST, -1, 0, disp++,
+            CAT_STRUCT, 0, LOC_RAD, Ruined_Portal_N, 1, BR_CLUST, MC_1_16_1, MC_NEWEST, -1, 0, disp++,
             "portal",
             QT_TRANSLATE_NOOP("Filter", "Ruined portal (nether)"),
             ""
         };
 
         list[F_FORTRESS] = FilterInfo{
-            CAT_STRUCT, 0, LOC_RAD, 0, Fortress, 1, 0, BR_CLUST, MC_1_0, MC_NEWEST, -1, 0, disp++,
+            CAT_STRUCT, 0, LOC_RAD, Fortress, 1, BR_CLUST, MC_1_0, MC_NEWEST, -1, 0, disp++,
             "fortress",
             QT_TRANSLATE_NOOP("Filter", "Nether fortress"),
             ""
         };
 
         list[F_BASTION] = FilterInfo{
-            CAT_STRUCT, 0, LOC_RAD, 0, Bastion, 1, 0, BR_CLUST, MC_1_16_1, MC_NEWEST, -1, 0, disp++,
+            CAT_STRUCT, 0, LOC_RAD, Bastion, 1, BR_CLUST, MC_1_16_1, MC_NEWEST, -1, 0, disp++,
             "bastion",
             QT_TRANSLATE_NOOP("Filter", "Bastion remnant"),
             ""
         };
 
         list[F_ENDCITY] = FilterInfo{
-            CAT_STRUCT, 0, LOC_RAD, 0, End_City, 1, 0, BR_CLUST, MC_1_9, MC_NEWEST, +1, 0, disp++,
+            CAT_STRUCT, 0, LOC_RAD, End_City, 1, BR_CLUST, MC_1_9, MC_NEWEST, +1, 0, disp++,
             "endcity",
             QT_TRANSLATE_NOOP("Filter", "End city"),
             ""
         };
 
         list[F_GATEWAY] = FilterInfo{
-            CAT_STRUCT, 0, LOC_RAD, 0, End_Gateway, 1, 0, BR_CLUST, MC_1_13, MC_NEWEST, +1, 0, disp++,
+            CAT_STRUCT, 0, LOC_RAD, End_Gateway, 1, BR_CLUST, MC_1_13, MC_NEWEST, +1, 0, disp++,
             "gateway",
             QT_TRANSLATE_NOOP("Filter", "End gateway"),
             QT_TRANSLATE_NOOP("Filter",
@@ -650,6 +563,7 @@ struct /*__attribute__((packed))*/ Condition
         FLG_APPROX      = 0x0001,
         FLG_MATCH_ANY   = 0x0010,
         FLG_IN_RANGE    = 0x0020,
+        FLG_INVERT      = 0x0040,
     };
     enum { // variant flags
         VAR_WITH_START  = 0x0001, // restrict start piece index and biome
@@ -676,7 +590,7 @@ struct /*__attribute__((packed))*/ Condition
     char        text[28];
     uint8_t     pad1[12]; // legacy
     uint64_t    hash;
-    uint8_t     deps[16]; // currently unused
+    int8_t      deps[16]; // currently unused
     uint64_t    biomeToFind, biomeToFindM; // inclusion biomes
     int32_t     biomeId; // legacy oceanToFind(8)
     uint32_t    biomeSize;

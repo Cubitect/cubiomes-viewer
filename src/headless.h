@@ -4,6 +4,7 @@
 #include "searchthread.h"
 #include <QThread>
 #include <QTimer>
+#include <QElapsedTimer>
 #include <QFile>
 
 class Headless : public QThread
@@ -33,6 +34,7 @@ public:
     QFile resultfile;
     QTextStream resultstream;
     QTimer timer;
+    QElapsedTimer elapsed;
 };
 
 #endif // HEADLESS_H

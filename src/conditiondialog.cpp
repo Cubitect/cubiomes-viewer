@@ -46,15 +46,10 @@ ConditionDialog::ConditionDialog(FormConditions *parent, MapView *mapview, Confi
     QString mcs = tr("MC %1", "Minecraft version").arg(p_mcs ? p_mcs : "?");
     ui->labelMC->setText(mcs);
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 11, 0)
-    ui->textEditLua->setTabStopWidth(QFontMetrics(ui->textEditLua->font()).width(" ") * 4);
-#else
-    ui->textEditLua->setTabStopDistance(QFontMetricsF(ui->textEditLua->font()).horizontalAdvance(" ") * 4);
-#endif
-
+    ui->textEditLua->setTabStopWidth(txtWidth(ui->textEditLua->font(), "    "));
     ui->lineSummary->setMinimumWidth(
                 ui->lineSummary->minimumSizeHint().width() +
-                QFontMetrics(ui->lineSummary->font()).horizontalAdvance('#') * 26
+                txtWidth(ui->lineSummary->font()) * 26
                 );
 
     // prevent bold font of group box title getting inherited
@@ -125,16 +120,20 @@ ConditionDialog::ConditionDialog(FormConditions *parent, MapView *mapview, Confi
 
     ui->comboCat->addItem(tr("Select category"));
     ui->comboCat->insertSeparator(1);
-    ui->comboCat->addItem(getPix("helper"), tr("Algorithm helpers"), CAT_HELPER);
-    ui->comboCat->addItem(getPix("quad"), tr("Quad-structure"), CAT_QUAD);
-    ui->comboCat->addItem(getPix("stronghold"), tr("Structures"), CAT_STRUCT);
     ui->comboCat->addItem(getPix("overworld"), tr("Biomes"), CAT_BIOMES);
-    ui->comboCat->addItem(getPix("nether"), tr("Nether biomes"), CAT_NETHER);
-    ui->comboCat->addItem(getPix("the_end"), tr("End biomes"), CAT_END);
+    ui->comboCat->addItem(getPix("stronghold"), tr("Structures"), CAT_STRUCT);
+    ui->comboCat->addItem(getPix("quad"), tr("Quad-structure"), CAT_QUAD);
+    ui->comboCat->addItem(getPix("helper"), tr("Algorithm helpers"), CAT_HELPER);
     ui->comboCat->addItem(getPix("slime"), tr("Other"), CAT_OTHER);
     int fmh = ui->comboCat->fontMetrics().height() + 8;
     ui->comboCat->setIconSize(QSize(fmh, fmh));
     ui->comboType->setIconSize(QSize(fmh, fmh));
+
+    ui->comboScale->addItem("1:1", QVariant::fromValue(1));
+    ui->comboScale->addItem("1:4", QVariant::fromValue(4));
+    ui->comboScale->addItem("1:16", QVariant::fromValue(16));
+    ui->comboScale->addItem("1:64", QVariant::fromValue(64));
+    ui->comboScale->addItem("1:256", QVariant::fromValue(256));
 
     for (int i = 0; i < 256; i++)
     {
@@ -302,8 +301,9 @@ ConditionDialog::ConditionDialog(FormConditions *parent, MapView *mapview, Confi
     ui->checkSkipRef->setChecked(false);
     ui->radioSquare->setChecked(true);
     ui->checkRadius->setChecked(false);
-    ui->lineCoverage->setText("100");
+    ui->lineCoverage->setText("50");
     ui->lineConfidence->setText("95");
+    ui->comboScale->setCurrentIndex(1);
     onCheckStartChanged(false);
     on_comboClimatePara_currentIndexChanged(0);
 
@@ -323,22 +323,16 @@ ConditionDialog::ConditionDialog(FormConditions *parent, MapView *mapview, Confi
         ui->comboLua->setCurrentIndex(ui->comboLua->findData(QVariant::fromValue(cond.hash)));
 
         ui->comboCat->setCurrentIndex(ui->comboCat->findData(ft.cat));
-        for (int i = 0; i < ui->comboType->count(); i++)
-        {
-            int type = ui->comboType->itemData(i, Qt::UserRole).toInt();
-            if (type == cond.type)
-            {
-                ui->comboType->setCurrentIndex(i);
-                break;
-            }
-        }
-
+        ui->comboType->setCurrentIndex(ui->comboType->findData(cond.type));
         ui->comboRelative->setCurrentIndex(initindex);
         on_comboRelative_activated(initindex);
         ui->textEditLua->document()->setModified(false);
 
         if (cond.step)
+        {
             ui->lineSpiralStep->setText(QString::number(cond.step));
+            ui->comboScale->setCurrentIndex(ui->comboScale->findData(QVariant::fromValue(cond.step)));
+        }
 
         ui->comboMatchBiome->insertItem(0, getBiomeDisplay(wi.mc, cond.biomeId), QVariant::fromValue(cond.biomeId));
         ui->comboMatchBiome->setCurrentIndex(0);
@@ -349,6 +343,7 @@ ConditionDialog::ConditionDialog(FormConditions *parent, MapView *mapview, Confi
         ui->comboMinMax->setCurrentIndex((cond.minmax & Condition::E_LOCATE_MAX) ? 1 : 0);
         ui->lineMin->setText((cond.minmax & Condition::E_TEST_LOWER) ? QString::number(cond.vmin) : "");
         ui->lineMax->setText((cond.minmax & Condition::E_TEST_UPPER) ? QString::number(cond.vmax) : "");
+        ui->checkInvertRange->setChecked(cond.flags & Condition::FLG_INVERT);
 
         updateMode();
 
@@ -361,9 +356,9 @@ ConditionDialog::ConditionDialog(FormConditions *parent, MapView *mapview, Confi
 
         ui->checkApprox->setChecked(cond.flags & Condition::FLG_APPROX);
         ui->checkMatchAny->setChecked(cond.flags & Condition::FLG_MATCH_ANY);
-        ui->lineCoverage->setText(QString::number(cond.converage ? cond.converage * 100 : 100));
-        ui->lineConfidence->setText(QString::number(cond.confidence ? cond.confidence * 100 : 95));
         ui->checkSamplePos->setChecked(cond.count == 1);
+        ui->lineCoverage->setText(QString::number(cond.converage ? cond.converage * 100 : 50));
+        ui->lineConfidence->setText(QString::number(cond.confidence ? cond.confidence * 100 : 95));
 
         int i, n = ui->comboY->count();
         for (i = 0; i < n; i++)
@@ -589,7 +584,7 @@ void ConditionDialog::updateMode()
     {
         ui->stackedWidget->setCurrentWidget(ui->pageBiomeCenter);
     }
-    else if (ft.cat == CAT_BIOMES || ft.cat == CAT_NETHER || ft.cat == CAT_END)
+    else if (ft.cat == CAT_BIOMES)
     {
         ui->stackedWidget->setCurrentWidget(ui->pageBiomes);
         ui->checkApprox->setEnabled(wi.mc <= MC_1_17 || ft.grid == 4);
@@ -654,8 +649,8 @@ void ConditionDialog::updateMode()
     QString lowtip = tr("Lower bound (inclusive)");
     QString uptip = tr("Upper bound (inclusive)");
 
-    if (ft.grid > 1)
-        loc += " " + tr("(sampled on a grid of scale 1:%1)").arg(ft.grid);
+    //if (ft.grid > 1)
+    //    loc += " " + tr("(sampled on a grid of scale 1:%1)").arg(ft.grid);
 
     ui->groupBoxPosition->setTitle(loc);
     ui->radioSquare->setToolTip(areatip);
@@ -671,24 +666,59 @@ void ConditionDialog::updateMode()
     textDescription->setText(QApplication::translate("Filter", ft.description));
 }
 
+static QString layerText(int layerId)
+{
+    switch (layerId)
+    {
+    case L_VORONOI_1:       return QApplication::translate("Layer", "1:1 Voronoi");
+    case L_RIVER_MIX_4:     return QApplication::translate("Layer", "1:4 River Mix");
+    case L_OCEAN_MIX_4:     return QApplication::translate("Layer", "1:4 Ocean Mix");
+    case L_ZOOM_4:          return QApplication::translate("Layer", "1:4 Zoom");
+    case L_SWAMP_RIVER_16:  return QApplication::translate("Layer", "1:16 Swamp River");
+    case L_SHORE_16:        return QApplication::translate("Layer", "1:16 Shore");
+    case L_HILLS_64:        return QApplication::translate("Layer", "1:64 Hills");
+    case L_SUNFLOWER_64:    return QApplication::translate("Layer", "1:64 Sunflower");
+    case L_BIOME_256:       return QApplication::translate("Layer", "1:256 Biome");
+    case L_BAMBOO_256:      return QApplication::translate("Layer", "1:256 Bamboo");
+    }
+    return "";
+}
+
 void ConditionDialog::updateBiomeSelection()
 {
-    int filterindex = ui->comboType->currentData().toInt();
-    const FilterInfo &ft = g_filterinfo.list[filterindex];
+    int filter = ui->comboType->currentData().toInt();
+    int scale = ui->comboScale->currentData().toInt();
+    const FilterInfo &ft = g_filterinfo.list[filter];
 
     // clear tool tips
     for (const auto& it : biomecboxes)
         it.second->setToolTip("");
 
+    ui->labelBiomeScale->setText(tr("Sampling scale:"));
+    ui->comboScale->setEnabled(false);
+    for (int i = 0, n = ui->comboScale->count(); i < n; i++)
+    {
+        ui->comboScale->setItemText(i, QString::asprintf("1:%d", 1 << (i*2)));
+        ui->comboScale->setItemData(i, QVariant::Invalid, Qt::UserRole-1);
+    }
+    // ui->comboScale->setItemData(0, false, Qt::UserRole-1); // disable voronoi
+
     std::vector<int> available;
 
-    if (ft.cat == CAT_NETHER || ft.cat == CAT_END)
+    if (filter == F_BIOME_NETHER || filter == F_BIOME_END)
     {
+        ui->comboScale->setEnabled(true);
+        if (filter == F_BIOME_END)
+        {   // disable 1:256 end biomes
+            int idx256 = ui->comboScale->findData(QVariant::fromValue(256));
+            ui->comboScale->setItemText(idx256, QString("1:256 ") + WARNING_CHAR);
+            ui->comboScale->setItemData(idx256, false, Qt::UserRole-1);
+        }
         for (int i = 0; i < 256; i++)
             if (getDimension(i) == ft.dim)
                 available.push_back(i);
     }
-    if (filterindex == F_BIOME_256_OTEMP)
+    else if (filter == F_BIOME_256_OTEMP)
     {
         available.push_back(warm_ocean);
         available.push_back(lukewarm_ocean);
@@ -698,20 +728,26 @@ void ConditionDialog::updateBiomeSelection()
     }
     else if (ft.cat == CAT_BIOMES && wi.mc > MC_B1_7 && wi.mc <= MC_1_17)
     {
-        //int scale = ui->comboScale->currentData().toInt();
-        //ui->comboScale->addItem(tr(""));
-
-        int layerId = ft.layer;
-        if (layerId == 0)
+        int layerId = L_RIVER_MIX_4;
+        if (filter != F_BIOME_4_RIVER)
         {
-            Generator tmp;
-            setupGenerator(&tmp, wi.mc, 0);
-            const Layer *l = getLayerForScale(&tmp, ft.grid);
-            if (l)
-                layerId = l - tmp.ls.layers;
+            ui->labelBiomeScale->setText(tr("Generation layer:"));
+            ui->comboScale->setEnabled(true);
+            for (int i = 0, n = ui->comboScale->count(); i < n; i++)
+            {
+                Generator tmp;
+                setupGenerator(&tmp, wi.mc, 0);
+                int s = 1 << 2*i;
+                if (const Layer *l = getLayerForScale(&tmp, s))
+                {
+                    QString txt = layerText(l - tmp.ls.layers);
+                    if (!txt.isEmpty())
+                        ui->comboScale->setItemText(i, txt);
+                    if (scale == s)
+                        layerId = l - tmp.ls.layers;
+                }
+            }
         }
-        if (layerId <= 0 || layerId >= L_NUM)
-            return; // error
 
         for (const auto& it : biomecboxes)
         {
@@ -723,7 +759,7 @@ void ConditionDialog::updateBiomeSelection()
             if (mL || mM)
             {
                 available.push_back(it.first);
-                if (ft.layer != L_VORONOI_1)
+                if (layerId != L_VORONOI_1)
                 {
                     QString tip = tr("Generates any of:");
                     for (int j = 0; j < 64; j++)
@@ -747,6 +783,7 @@ void ConditionDialog::updateBiomeSelection()
     }
     else if (ft.cat == CAT_BIOMES && ft.dim == DIM_OVERWORLD)
     {
+        ui->comboScale->setEnabled(true);
         for (const auto& it : biomecboxes)
         {
             if (isOverworld(wi.mc, it.first))
@@ -860,7 +897,7 @@ int ConditionDialog::warnIfBad(Condition cond)
     }
     else if (cond.type == F_BIOME_CENTER || cond.type == F_BIOME_CENTER_256)
     {
-        int s = ft.pow2;
+        int s = cond.type == F_BIOME_CENTER ? 2 : 8;
         int w = (cond.x2 >> s) - (cond.x1 >> s) + 1;
         int h = (cond.z2 >> s) - (cond.z1 >> s) + 1;
         if ((unsigned int)(w * h) < cond.count * cond.biomeSize)
@@ -890,6 +927,40 @@ int ConditionDialog::warnIfBad(Condition cond)
                 return warn(this, tr("Bad Surface Height"),
                     tr("Cave biomes do not generate above Y = 246. "
                     "You should consider lowering the sampling height."
+                    "\n\n"
+                    "Continue anyway?"),
+                    QMessageBox::Ok | QMessageBox::Cancel);
+            }
+        }
+        if (cond.type == F_BIOME_SAMPLE)
+        {
+            if (cond.biomeToFind == 0 && cond.biomeToFindM == 0)
+            {
+                return warn(this, tr("No Allowed Biomes"),
+                    tr("The set of allowed biomes is empty, which can never "
+                    "be satisfied. Please include some biomes for the required "
+                    "proportion."),
+                    QMessageBox::Cancel);
+            }
+        }
+    }
+    else if (ft.cat == CAT_QUAD)
+    {
+        if (!cond.relative)
+        {
+            enum { AFTRAD = 50, AFKMIN = 420, AFKMAX = 488 }; // all quad-structures have a region offset between these values
+            bool ok = true;
+            if (cond.rmax > 0)
+                ok = cond.rmax > AFTRAD;
+            else if (cond.x2 - cond.x1 < 512 - (AFKMAX - AFKMIN))
+                ok &= (cond.x1 & 511) < AFKMAX && (cond.x1 & 511) > AFKMIN - (cond.x2 - cond.x1);
+            else if (cond.z2 - cond.z1 < 512 - (AFKMAX - AFKMIN))
+                ok &= (cond.z1 & 511) < AFKMAX && (cond.z1 & 511) > AFKMIN - (cond.z2 - cond.z1);
+            if (!ok)
+            {
+                return warn(this, tr("Bad Area for Quad-Structure"),
+                    tr("The selected area does not contain a range where a "
+                    "quad-structure can generate."
                     "\n\n"
                     "Continue anyway?"),
                     QMessageBox::Ok | QMessageBox::Cancel);
@@ -970,7 +1041,15 @@ void ConditionDialog::onAccept()
 
     c.y = ui->comboY->currentText().section(' ', 0, 0).toInt();
 
-    c.step = ui->lineSpiralStep->text().toUShort();
+    c.flags = 0;
+    if (ui->checkApprox->isChecked())
+        c.flags |= Condition::FLG_APPROX;
+    if (ui->checkMatchAny->isChecked())
+        c.flags |= Condition::FLG_MATCH_ANY;
+    if (ui->comboHeightRange->currentIndex() == 0)
+        c.flags |= Condition::FLG_IN_RANGE;
+    if (ui->checkInvertRange->isChecked())
+        c.flags |= Condition::FLG_INVERT;
 
     if (ui->stackedWidget->currentWidget() == ui->pageBiomes)
     {
@@ -999,6 +1078,8 @@ void ConditionDialog::onAccept()
         c.count = ui->checkSamplePos->isChecked() ? 1 : 0;
         c.converage = ui->lineCoverage->text().toFloat() / 100.0;
         c.confidence = ui->lineConfidence->text().toFloat() / 100.0;
+        if (c.type == F_BIOME_END && c.step > 64)
+            c.step = 64;
     }
     if (ui->stackedWidget->currentWidget() == ui->pageBiomeCenter)
     {
@@ -1033,14 +1114,10 @@ void ConditionDialog::onAccept()
                 c.count += cnt;
         }
     }
-
-    c.flags = 0;
-    if (ui->checkApprox->isChecked())
-        c.flags |= Condition::FLG_APPROX;
-    if (ui->checkMatchAny->isChecked())
-        c.flags |= Condition::FLG_MATCH_ANY;
-    if (ui->comboHeightRange->currentIndex() == 0)
-        c.flags |= Condition::FLG_IN_RANGE;
+    if (ui->stackedWidget->currentWidget() == ui->pageSpiral)
+    {
+        c.step = ui->lineSpiralStep->text().toUShort();
+    }
 
     c.varflags = c.varstart = 0;
     if (ui->checkStartPieces->isChecked())
@@ -1068,7 +1145,56 @@ void ConditionDialog::onAccept()
     close();
 }
 
+void ConditionDialog::on_comboCat_currentIndexChanged(int)
+{
+    int cat = ui->comboCat->currentData().toInt();
+    ui->comboType->setEnabled(cat != CAT_NONE);
+    ui->comboType->clear();
+
+    int slot = 0;
+    ui->comboType->insertItem(slot, tr("Select type"), QVariant::fromValue((int)F_SELECT));
+    ui->comboType->insertSeparator(++slot);
+
+    const FilterInfo *ft_list[FILTER_MAX] = {};
+    const FilterInfo *ft;
+
+    for (int i = 1; i < FILTER_MAX; i++)
+    {
+        ft = &g_filterinfo.list[i];
+        if (ft->cat == cat)
+            ft_list[ft->disp] = ft;
+    }
+
+    for (int i = 1; i < FILTER_MAX; i++)
+    {
+        ft = ft_list[i];
+        if (!ft)
+            continue;
+        slot++;
+        QVariant vidx = QVariant::fromValue((int)(ft - g_filterinfo.list));
+        QString txt = QApplication::translate("Filter", ft->name);
+        if (ft->icon)
+            ui->comboType->insertItem(slot, getPix(ft->icon), txt, vidx);
+        else
+            ui->comboType->insertItem(slot, txt, vidx);
+
+        if (wi.mc < ft->mcmin || wi.mc > ft->mcmax)
+            ui->comboType->setItemData(slot, false, Qt::UserRole-1); // deactivate
+        if (ft == g_filterinfo.list + F_FORTRESS)
+            ui->comboType->insertSeparator(slot++);
+        if (ft == g_filterinfo.list + F_ENDCITY)
+            ui->comboType->insertSeparator(slot++);
+    }
+
+    updateMode();
+}
+
 void ConditionDialog::on_comboType_activated(int)
+{
+    updateMode();
+}
+
+void ConditionDialog::on_comboScale_activated(int)
 {
     updateMode();
 }
@@ -1117,10 +1243,10 @@ void ConditionDialog::on_buttonAreaInfo_clicked()
         "example a centered square with side 3 will go from -2 to 1 for both "
         "the X and Z axes."
         "</p><p>"
-        "Important to note is that some filters have a scaling associated with "
-        "them. This means the condition only checks on a grid with that spacing. "
-        "An area with a range from -21 to 21 at scale 1:16 may effectively be "
-        "expanded to -32 to 31, and get sampled at -32, -16, 0 and 16."
+        "Some filters have a scaling associated with them. This means the "
+        "condition only checks on a grid with that spacing. An area with a "
+        "range from -21 to 21 at scale 1:16 may effectively be expanded to "
+        "-32 to 31, and get sampled at -32, -16, 0 and 16."
         "</p></body></html>"
         ));
     mb.exec();
@@ -1172,50 +1298,6 @@ void ConditionDialog::on_ConditionDialog_finished(int result)
     if (item)
         emit setCond(item, cond, result);
     item = 0;
-}
-
-void ConditionDialog::on_comboCat_currentIndexChanged(int)
-{
-    int cat = ui->comboCat->currentData().toInt();
-    ui->comboType->setEnabled(cat != CAT_NONE);
-    ui->comboType->clear();
-
-    int slot = 0;
-    ui->comboType->insertItem(slot, tr("Select type"), QVariant::fromValue((int)F_SELECT));
-    ui->comboType->insertSeparator(++slot);
-
-    const FilterInfo *ft_list[FILTER_MAX] = {};
-    const FilterInfo *ft;
-
-    for (int i = 1; i < FILTER_MAX; i++)
-    {
-        ft = &g_filterinfo.list[i];
-        if (ft->cat == cat)
-            ft_list[ft->disp] = ft;
-    }
-
-    for (int i = 1; i < FILTER_MAX; i++)
-    {
-        ft = ft_list[i];
-        if (!ft)
-            continue;
-        slot++;
-        QVariant vidx = QVariant::fromValue((int)(ft - g_filterinfo.list));
-        QString txt = QApplication::translate("Filter", ft->name);
-        if (ft->icon)
-            ui->comboType->insertItem(slot, getPix(ft->icon), txt, vidx);
-        else
-            ui->comboType->insertItem(slot, txt, vidx);
-
-        if (wi.mc < ft->mcmin || wi.mc > ft->mcmax)
-            ui->comboType->setItemData(slot, false, Qt::UserRole-1); // deactivate
-        if (ft == g_filterinfo.list + F_FORTRESS)
-            ui->comboType->insertSeparator(slot++);
-        if (ft == g_filterinfo.list + F_ENDCITY)
-            ui->comboType->insertSeparator(slot++);
-    }
-
-    updateMode();
 }
 
 void ConditionDialog::onCheckStartChanged(int checked)
@@ -1574,5 +1656,3 @@ void ConditionDialog::on_comboY2_currentTextChanged(const QString &text)
     if (ui->comboY->currentText() != text)
         ui->comboY->setCurrentText(text);
 }
-
-

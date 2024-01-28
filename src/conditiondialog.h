@@ -80,7 +80,7 @@ public:
     {
         QSize size = QLineEdit::minimumSizeHint();
         QFontMetrics fm(font());
-        size.setWidth(size.width() + fm.horizontalAdvance("-30000000"));
+        size.setWidth(size.width() + txtWidth(fm, "-30000000"));
         return size;
     }
 };
@@ -200,7 +200,9 @@ signals:
     void setCond(QListWidgetItem *item, Condition cond, int modified);
 
 private slots:
+    void on_comboCat_currentIndexChanged(int);
     void on_comboType_activated(int);
+    void on_comboScale_activated(int);
 
     void on_comboRelative_activated(int);
 
@@ -219,8 +221,6 @@ private slots:
     //void on_lineRadius_editingFinished();
 
     void on_ConditionDialog_finished(int result);
-
-    void on_comboCat_currentIndexChanged(int);
 
     void onCheckStartChanged(int state);
     void onClimateLimitChanged();

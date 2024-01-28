@@ -144,10 +144,11 @@ void Headless::run()
     resultstream.flush();
 
     sthread.start();
+    elapsed.start();
 
     if (resultfile.isOpen())
     {
-        qOut() << "\n\n\n\n\n\n";
+        qOut() << "\n\n\n\n\n\n\n";
         qOut().flush();
         timer.start(250);
     }
@@ -174,7 +175,6 @@ void Headless::searchFinish(bool done)
     emit finished();
 }
 
-
 void Headless::progressTimeout()
 {
     QString status;
@@ -189,6 +189,7 @@ void Headless::progressTimeout()
     qreal perc = (qreal) prog / end;
 
     int cols = floor(perc * (width - 4) + 1e-6);
+    qint64 sec = elapsed.elapsed() / 1000;
 
     QStringList l;
     l += QString(" Found matching seeds:%1 ").arg(results.size(), width-23);
@@ -196,6 +197,7 @@ void Headless::progressTimeout()
     l += QString(" Progress:%1 ").arg(QString("%1 / %2 : %3%").arg(prog).arg(end).arg(100*perc, 5, 'f', 2), width-11);
     l += QString(" [%1%2] ").arg("", cols, '#').arg("", width-cols-4, '-');
     l += QString(" %1").arg(status, 1-width);
+    l += QString::asprintf(" %d:%02d:%02d", (int)(sec / 3600), (int)(sec / 60) % 60, (int)(sec % 60));
     l += "";
 
     qOut() << "\e[999D\e[" << l.size() << "A";

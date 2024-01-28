@@ -120,10 +120,10 @@ MainWindow::MainWindow(QString sessionpath, QString resultspath, QWidget *parent
         act->setActionGroup(grp);
     }
     connect(mapView, &MapView::layerChange, this, &MainWindow::onActionBiomeLayerSelect);
-    for (int i = 0; i < 9; i++)
+    for (int i = 0; i <= 9; i++)
     {
         QAction *act = new QAction(this);
-        act->setShortcut(QKeySequence(Qt::ALT+Qt::Key_1+i));
+        act->setShortcut(QKeySequence(Qt::ALT+Qt::Key_0+i));
         act->setEnabled(true);
         connect(act, &QAction::triggered, [=](){
             this->onActionBiomeLayerSelect(lopt.mode, i);
@@ -187,7 +187,7 @@ MainWindow::MainWindow(QString sessionpath, QString resultspath, QWidget *parent
 
     saction[D_GRID]->setChecked(true);
 
-    ui->splitterMap->setSizes(QList<int>({6500, 10000}));
+    ui->splitterMap->setSizes(QList<int>({6800, 10000}));
     ui->splitterSearch->setSizes(QList<int>({1000, 3000}));
     ui->splitterSeeds->setSizes(QList<int>({500, 2500}));
 
@@ -780,6 +780,27 @@ void MainWindow::on_actionOpenShadow_triggered()
     }
 }
 
+void MainWindow::on_actionRedistribute_triggered()
+{
+    QVector<Condition> conds = formCond->getConditions();
+    if (!conds.empty())
+    {
+        QMap<int, int> ids;
+        for (int i = 0, n = conds.size(); i < n; i++)
+            ids.insert(conds[i].save, ids.size()+1);
+        for (int i = 0, n = conds.size(); i < n; i++)
+            if (conds[i].relative && !ids.contains(conds[i].relative))
+                ids.insert(conds[i].relative, ids.size()+1);
+        formCond->on_buttonRemoveAll_clicked();
+        for (Condition& c : conds)
+        {
+            c.save = ids[c.save];
+            c.relative = ids[c.relative];
+            formCond->addItemCondition(NULL, c, 1);
+        }
+    }
+}
+
 void MainWindow::on_actionToolbarConfig_triggered()
 {
     MapToolsDialog *dialog = new MapToolsDialog(this);
@@ -1194,4 +1215,3 @@ void MainWindow::onDockFloating(bool floating)
         ui->actionDock->setText(tr("Undock map"));
     }
 }
-

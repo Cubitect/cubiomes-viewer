@@ -96,6 +96,7 @@ private slots:
     void on_actionCopy_triggered();
     void on_actionPaste_triggered();
     void on_actionAddShadow_triggered();
+    void on_actionRedistribute_triggered();
     void on_actionExtGen_triggered();
     void on_actionExportImg_triggered();
     void on_actionScreenshot_triggered();

@@ -79,12 +79,12 @@ bool getLayerOptionInfo(LayerOptInfo *info, int mode, int disp, WorldInfo wi)
         else
         {
             txt += QString("%1..").arg(QChar(0x03A3));
-            txt += QString::asprintf("%d%c  1:%-5.0f x%.6f", idx, ab?'B':'A', 1.0/l, a);
+            txt += QString::asprintf("%d%c  1:%-5.0f x%.6f", idx, ab?'B':'A', 4/l, a);
             tip += QApplication::translate("LayerDialog", "Contribution of the %n most significant octaves out of %1 total.", "", disp).arg(2*noct);
         }
         tip += "\n" + QApplication::translate("LayerDialog", "Total contribution: %1 = %2%").arg(ampsum).arg(100 * ampsum / amptot, 0, 'f', 1);
         tip += "\n" + QApplication::translate("LayerDialog", "Octave amplitude: %1").arg(a);
-        tip += "\n" + QApplication::translate("LayerDialog", "Octave lacunarity: %1 = 1/%2").arg(l).arg(1.0/l);
+        tip += "\n" + QApplication::translate("LayerDialog", "Octave lacunarity: %1 = 1/%2").arg(l).arg(4/l);
     }
 
     if (info) {
@@ -134,8 +134,8 @@ LayerDialog::LayerDialog(QWidget *parent, WorldInfo wi)
             if (!getLayerOptionInfo(&info, i, j, wi))
                 break;
             QString s = info.summary.leftJustified(24);
-            if (j < 9)
-                s += "\tALT+"+QString::number(j+1);
+            if (j <= 9)
+                s += "\tALT+"+QString::number(j);
             combo[i]->addItem(s);
             combo[i]->setItemData(combo[i]->count()-1, info.tooltip, Qt::ToolTipRole);
         }

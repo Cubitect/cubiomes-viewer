@@ -435,6 +435,8 @@ QToolButton:checked {
     <addaction name="separator"/>
     <addaction name="actionAddShadow"/>
     <addaction name="separator"/>
+    <addaction name="actionRedistribute"/>
+    <addaction name="separator"/>
     <addaction name="actionExtGen"/>
     <addaction name="actionBiomeColors"/>
     <addaction name="actionToolbarConfig"/>
@@ -743,6 +745,11 @@ QToolButton:checked {
    </property>
    <property name="text">
     <string>(Beta 1.7) Humidity</string>
+   </property>
+  </action>
+  <action name="actionRedistribute">
+   <property name="text">
+    <string>Redistribute condition IDs</string>
    </property>
   </action>
  </widget>

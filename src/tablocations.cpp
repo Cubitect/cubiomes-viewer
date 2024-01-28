@@ -154,11 +154,11 @@ bool TabLocations::event(QEvent *e)
     if (e->type() == QEvent::LayoutRequest)
     {
         QFontMetrics fm = QFontMetrics(ui->treeWidget->font());
-        ui->treeWidget->setColumnWidth(0, fm.horizontalAdvance('#') * 9);
-        ui->treeWidget->setColumnWidth(1, fm.horizontalAdvance('#') * 36);
-        ui->treeWidget->setColumnWidth(2, fm.horizontalAdvance('#') * 9);
-        ui->treeWidget->setColumnWidth(3, fm.horizontalAdvance('#') * 9);
-        ui->treeWidget->setColumnWidth(4, fm.horizontalAdvance('#') * 9);
+        ui->treeWidget->setColumnWidth(0, txtWidth(fm) * 9);
+        ui->treeWidget->setColumnWidth(1, txtWidth(fm) * 36);
+        ui->treeWidget->setColumnWidth(2, txtWidth(fm) * 9);
+        ui->treeWidget->setColumnWidth(3, txtWidth(fm) * 9);
+        ui->treeWidget->setColumnWidth(4, txtWidth(fm) * 9);
     }
     return QWidget::event(e);
 }
@@ -350,7 +350,7 @@ void TabLocations::on_pushStart_clicked()
                 break;
             }
         }
-        qDebug() << thread.pos.size() << ":" << thread.pos.back().x << thread.pos.back().z << " t=" << t.elapsed();
+        //qDebug() << thread.pos.size() << ":" << thread.pos.back().x << thread.pos.back().z << " t=" << t.elapsed();
     }
     else if (mode == SMODE_SQUARE_SPIRAL)
     {
@@ -451,7 +451,7 @@ void TabLocations::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
 
     WorldInfo wi;
     parent->getSeed(&wi, false);
-    if (wi.seed != seed || dim != DIM_UNDEF)
+    if (wi.seed != seed || (dim != DIM_UNDEF && dim != parent->getDim()))
     {
         wi.seed = seed;
         parent->getMapView()->deleteWorld();
@@ -493,7 +493,7 @@ void csvline(QTextStream& stream, const QString& qte, const QString& sep, QStrin
 void TabLocations::on_pushExport_clicked()
 {
     QString fnam = QFileDialog::getSaveFileName(
-        this, tr("Export trigger analysis"), parent->prevdir, tr("Text files (*.txt *csv);;Any files (*)"));
+        this, tr("Export locations"), parent->prevdir, tr("Text files (*.txt *csv);;Any files (*)"));
     if (fnam.isEmpty())
         return;
 

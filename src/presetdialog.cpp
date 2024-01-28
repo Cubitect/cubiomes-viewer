@@ -57,7 +57,7 @@ PresetDialog::PresetDialog(QWidget *parent, WorldInfo wi, bool showEamples)
     , ui(new Ui::PresetDialog)
 {
     ui->setupUi(this);
-    resize(fontMetrics().horizontalAdvance('x') * 128, fontMetrics().height() * 32);
+    resize(txtWidth(fontMetrics()) * 128, fontMetrics().height() * 32);
 
     ui->labelMC->setText(tr("MC ") + mc2str(wi.mc));
     connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
@@ -83,15 +83,6 @@ PresetDialog::PresetDialog(QWidget *parent, WorldInfo wi, bool showEamples)
         tr("Technical Base (1.4+)"),
         tr("An ideal Quad-hut next to a Stronghold with a Mushroom Island close by."),
         wi.mc >= MC_1_4);
-
-    /*
-    addPreset(":/examples/mushroom_icespike.txt",
-        tr("Analyze for location with rare biomes together (1.7+)"),
-        tr("Check a large area for a Mushroom Island that is next to Ice Spikes.\n\n"
-        "Use this in the Analysis Tab with the Condition trigger enabled to "
-        "find an instance in the current seed."),
-        wi.mc >= MC_1_7);
-    */
 
     addPreset(":/examples/two_zombie_villages.txt",
         tr("Abandoned Villages in separate biomes (1.10+)"),
@@ -135,20 +126,14 @@ PresetDialog::PresetDialog(QWidget *parent, WorldInfo wi, bool showEamples)
         "Looks for a suitable climate that primarily supports Jungle variants."),
         wi.mc >= MC_1_18);
 
-    addPreset(":/examples/large_birch_forest_1_18.txt",
-        tr("Large Birch Forest (1.18+)"),
-        tr("A large Birch Forest biome at the origin.\n\n"
-        "Looks for a climate that supports Birch Forest variants. "
-        "Swamps and Meadows can generate in the same climates and are "
-        "explicitly excluded."),
-        wi.mc >= MC_1_18);
-
+    /*
     addPreset(":/examples/old_growth_taiga_somewhere.txt",
         tr("Large Old Growth Taiga somewhere (1.18+)"),
         tr("A large Old Growth Taiga biome somewhere within 2500 blocks.\n\n"
         "Searches an area of +/-2500 blocks for a large climate region that "
         "primarily supports Old Growth Taiga variants"),
         wi.mc >= MC_1_18);
+    */
 }
 
 PresetDialog::~PresetDialog()

@@ -16,15 +16,19 @@
     <release version="4.0.0" date="2024-01-??">
       <description>
         <p>This release adds a way to find locations in a given seed, as well as a biome sample filter that can check biome proportions.</p>
-        <p>All scaled coordinates have been changed to use block coordinates instead. Scaled iterators now have scaling option.</p>
+        <p>All scaled coordinates have been changed to use block coordinates instead. Scaled biome filters and iterators now have a scaling option.</p>
         <p>Changes:</p>
         <ul>
           <li>Added Locations tab to look for position in the current seed</li>
-          <li>Added biome samples filter to check biome proportions</li>
+          <li>Added filter for Biome Samples to check biome proportions</li>
           <li>Added outline display for the area of selected conditions</li>
           <li>Added "from-visible" to conditions editor</li>
           <li>Added headless mode to search seeds without a GUI using --nogui</li>
-          <li>Removed Triggers tab, since the Locations tab replaces the functionality</li>
+          <li>Moved scaling of Biome filters to a filter option</li>
+          <li>Moved step size of Iterators to a filter option</li>
+          <li>Moved Nether and End biome filters to the Biome category</li>
+          <li>Enabled Voronoi biome filters (use only when neccessary)</li>
+          <li>Removed Triggers tab, since the Locations tab includes its functionality</li>
         </ul>
       </description>
     </release>

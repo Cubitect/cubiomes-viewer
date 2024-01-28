@@ -257,19 +257,19 @@ bool TabStructures::event(QEvent *e)
     if (e->type() == QEvent::LayoutRequest)
     {
         QFontMetrics fm = QFontMetrics(ui->treeStructs->font());
-        ui->treeStructs->setColumnWidth(0, fm.horizontalAdvance('#') * 23);
-        ui->treeStructs->setColumnWidth(1, fm.horizontalAdvance('#') * 17);
-        ui->treeStructs->setColumnWidth(2, fm.horizontalAdvance('#') * 6);
-        ui->treeStructs->setColumnWidth(3, fm.horizontalAdvance('#') * 7);
-        ui->treeStructs->setColumnWidth(4, fm.horizontalAdvance('#') * 7);
+        ui->treeStructs->setColumnWidth(0, txtWidth(fm) * 23);
+        ui->treeStructs->setColumnWidth(1, txtWidth(fm) * 17);
+        ui->treeStructs->setColumnWidth(2, txtWidth(fm) * 6);
+        ui->treeStructs->setColumnWidth(3, txtWidth(fm) * 7);
+        ui->treeStructs->setColumnWidth(4, txtWidth(fm) * 7);
 
-        ui->treeQuads->setColumnWidth(0, fm.horizontalAdvance('#') * 23);
-        ui->treeQuads->setColumnWidth(1, fm.horizontalAdvance("_quad-monument"));
-        ui->treeQuads->setColumnWidth(2, fm.horizontalAdvance('#') * 10);
-        ui->treeQuads->setColumnWidth(3, fm.horizontalAdvance('#') * 10);
-        ui->treeQuads->setColumnWidth(4, fm.horizontalAdvance('#') * 10);
-        ui->treeQuads->setColumnWidth(5, fm.horizontalAdvance("_123.123"));
-        ui->treeQuads->setColumnWidth(6, fm.horizontalAdvance('#') * 14);
+        ui->treeQuads->setColumnWidth(0, txtWidth(fm) * 23);
+        ui->treeQuads->setColumnWidth(1, txtWidth(fm, "_quad-monument"));
+        ui->treeQuads->setColumnWidth(2, txtWidth(fm) * 10);
+        ui->treeQuads->setColumnWidth(3, txtWidth(fm) * 10);
+        ui->treeQuads->setColumnWidth(4, txtWidth(fm) * 10);
+        ui->treeQuads->setColumnWidth(5, txtWidth(fm, "_123.123"));
+        ui->treeQuads->setColumnWidth(6, txtWidth(fm) * 14);
     }
     return QWidget::event(e);
 }

@@ -39,7 +39,7 @@ void ItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem& option, 
     const QWidget *widget = option.widget;
     QStyle *style = widget ? widget->style() : QApplication::style();
 
-    int tabwidth = option.fontMetrics.horizontalAdvance('#') * 32;
+    int tabwidth = txtWidth(option.fontMetrics) * 32;
     QRect rect = opt.rect;
     opt.rect.setWidth(tabwidth);
 
@@ -463,6 +463,7 @@ void FormConditions::addItemCondition(QListWidgetItem *item, Condition cond, int
 
     if (modified)
         emit changed();
+    updateSensitivity();
 }
 
 void FormConditions::on_listConditions_indexesMoved(const QModelIndexList &)

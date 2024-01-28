@@ -853,8 +853,13 @@ QString QWorld::getBiomeName(Pos p)
             case LOPT_BETA_T_1: c = "T"; break;
             case LOPT_BETA_H_1: c = "H"; break;
         }
-        if (lopt.activeDisp())
-            c += "." + QString::number(lopt.activeDisp());
+        if (int disp = lopt.activeDisp())
+        {
+            if (wi.mc >= MC_1_18)
+                c += QString::asprintf(".%d%c(%d)", (disp-1)/2, (disp-1)%2?'B':'A', disp);
+            else
+                c += "." + QString::number(disp);
+        }
         return c + "=" + QString::number(id);
     }
     QString ret = getBiomeDisplay(wi.mc, id);
@@ -1157,6 +1162,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
     if (sshow[D_GRID] && gridspacing)
     {
         int64_t gs = gridspacing;
+
         while (true)
         {
             long x = floor(bx0 / gs), w = floor(bx1 / gs) - x + 1;
@@ -1248,7 +1254,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
 
     for (Shape& s : shapes)
     {
-        if (s.dim != dim)
+        if (s.dim != DIM_UNDEF && s.dim != dim)
             continue;
         qreal x1 = vw/2.0 + (s.p1.x - focusx) * blocks2pix;
         qreal y1 = vh/2.0 + (s.p1.z - focusz) * blocks2pix;

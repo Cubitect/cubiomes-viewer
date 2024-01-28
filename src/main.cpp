@@ -29,7 +29,6 @@ int getStructureConfig_override(int stype, int mc, StructureConfig *sconf)
 
 int main(int argc, char *argv[])
 {
-    initBiomes();
     initBiomeColors(g_biomeColors);
     initBiomeTypeColors(g_tempsColors);
 
@@ -58,7 +57,7 @@ int main(int argc, char *argv[])
             resultspath = argv[i] + 6;
         else if (strncmp(argv[i], "--out", 5) == 0 && i+1 < argc)
             resultspath = argv[++i];
-        else
+        else if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0)
             usage = true;
     }
 

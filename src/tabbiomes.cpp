@@ -335,7 +335,7 @@ QSize BiomeHeader::sectionSizeFromContents(int section) const
     int margin = 2 * style()->pixelMetric(QStyle::PM_HeaderMargin, 0, this);
     QString s = model()->headerData(section, orientation()).toString();
     QFontMetrics fm = fontMetrics();
-    return QSize(fm.height() + 2*margin, fm.horizontalAdvance(s) + 2*margin);
+    return QSize(fm.height() + 2*margin, txtWidth(fm, s) + 2*margin);
 }
 
 
@@ -409,10 +409,10 @@ bool TabBiomes::event(QEvent *e)
     if (e->type() == QEvent::LayoutRequest)
     {
         QFontMetrics fm = QFontMetrics(ui->treeLocate->font());
-        ui->treeLocate->setColumnWidth(0, fm.horizontalAdvance('#') * 24);
-        ui->treeLocate->setColumnWidth(1, fm.horizontalAdvance('#') * 16);
-        ui->treeLocate->setColumnWidth(2, fm.horizontalAdvance('#') * 9);
-        ui->treeLocate->setColumnWidth(3, fm.horizontalAdvance('#') * 9);
+        ui->treeLocate->setColumnWidth(0, txtWidth(fm) * 24);
+        ui->treeLocate->setColumnWidth(1, txtWidth(fm) * 16);
+        ui->treeLocate->setColumnWidth(2, txtWidth(fm) * 9);
+        ui->treeLocate->setColumnWidth(3, txtWidth(fm) * 9);
     }
     return QWidget::event(e);
 }
@@ -601,7 +601,7 @@ void TabBiomes::onBufferTimeout()
                     continue;
                 new_ids.insert(id);
                 model->cnt[id][seed] = QVariant::fromValue(cnt);
-                int w = fm.horizontalAdvance(QString::number(cnt) + "#");
+                int w = txtWidth(fm, QString::number(cnt) + "#");
                 if (w > colwidth[id])
                     colwidth[id] = w;
             }
