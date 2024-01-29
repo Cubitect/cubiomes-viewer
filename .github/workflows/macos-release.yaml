@@ -34,8 +34,8 @@ jobs:
         working-directory: ${{env.SOURCE_DIR}}
         run:  |
               qmake CONFIG+=release ${{env.SOURCE_DIR}}
-              make
-              
+              CFLAGS="-isysroot /Applications/Xcode_14.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.1.sdk" make
+
       - name: Deploy
         working-directory: ${{env.SOURCE_DIR}}
         run:  |
