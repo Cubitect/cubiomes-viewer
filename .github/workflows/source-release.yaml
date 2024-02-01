@@ -28,14 +28,18 @@ jobs:
 
       - name: Build source bundle
         working-directory: ${{env.SOURCE_DIR}}
-        run:  |
-              rm -rf ${{env.PROG}}/.git*
-              tar cvzf ${{env.PROG}}-${{github.ref_name}}-src.tar.gz ${{env.PROG}}
+        run: |
+             cd ..
+             pwd
+             ls -l
+             rm -rf ${{env.PROG}}/.git*
+             ls -l
+             tar cvzf ${{env.PROG}}-${{github.ref_name}}-src.tar.gz ${{env.PROG}}
 
       - name: Save source artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{env.PROG}}-${{github.ref_name}}-src.tar.gz
-          path: ${{env.PROG}}-${{github.ref_name}}-src.tar.gz
+          path: ${{env.SOURCE_DIR}}/../${{env.PROG}}-${{github.ref_name}}-src.tar.gz
 
 
