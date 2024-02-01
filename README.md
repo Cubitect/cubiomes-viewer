@@ -60,7 +60,7 @@ are available in an area, as well as their size and positions.
 
 ## Screenshots
 
-Screenshots were taken of Cubiomes-Viewer v4.0.
+Screenshots were taken of Cubiomes Viewer v4.0.
 
 ![seeds](etc/screenshot_seeds-fs8.png
 "Searching for a quad-hut near a stronghold with a good biome variety")

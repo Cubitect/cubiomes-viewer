@@ -31,7 +31,7 @@ jobs:
         with:
           name: ${{env.PROG}}-${{github.ref_name}}-src.tar.gz
           path: |
-          	${{env.SOURCE_DIR}}/
-          	!${{env.SOURCE_DIR}}/.git
+                ${{env.SOURCE_DIR}}/
+                !${{env.SOURCE_DIR}}/.git
 
-s
+
