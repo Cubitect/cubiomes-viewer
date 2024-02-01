@@ -55,7 +55,7 @@ jobs:
       - name: Save build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{env.PROG}}-${{github.ref_name}}-win
+          name: ${{env.PROG}}-win
           path: ${{env.SOURCE_DIR}}\${{env.PROG}}
 
 
