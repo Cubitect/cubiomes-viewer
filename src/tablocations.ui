@@ -78,7 +78,7 @@
     </layout>
    </item>
    <item row="1" column="1" colspan="4">
-    <widget class="QComboBox" name="comboSampling">
+    <widget class="StyledComboBox" name="comboSampling">
      <property name="sizePolicy">
       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
        <horstretch>0</horstretch>
@@ -193,7 +193,7 @@
     </widget>
    </item>
    <item row="0" column="1" colspan="4">
-    <widget class="QComboBox" name="comboSeedSource">
+    <widget class="StyledComboBox" name="comboSeedSource">
      <item>
       <property name="text">
        <string>Current seed</string>
@@ -208,6 +208,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>StyledComboBox</class>
+   <extends>QComboBox</extends>
+   <header>src/widgets.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

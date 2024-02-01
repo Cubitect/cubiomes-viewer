@@ -1275,6 +1275,14 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
         }
     }
 
+    if (imgbuf.width() != vw || imgbuf.height() != vh)
+    {
+        imgbuf = QImage(vw, vh, QImage::Format_Indexed8);
+        imgbuf.setColor(0, qRgba(0, 0, 0, 0));
+        imgbuf.setColor(1, qRgba(255, 255, 255, 96));
+        imgbuf.setColor(2, qRgba(180, 64, 192, 255));
+    }
+
     for (int sopt = D_DESERT; sopt < D_SPAWN; sopt++)
     {
         Level& l = lvs[sopt];
@@ -1287,11 +1295,8 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
         }
 
         std::map<const QPixmap*, std::vector<QPainter::PixmapFragment>> frags;
-        QImage bufimg = QImage(vw, vh, QImage::Format_Indexed8);
-        bufimg.setColor(0, qRgba(0, 0, 0, 0));
-        bufimg.setColor(1, qRgba(255, 255, 255, 96));
-        bufimg.setColor(2, qRgba(180, 64, 192, 255));
-        bufimg.fill(0);
+        bool imgbuf_used = false;
+        imgbuf.fill(0);
 
         for (Quad *q : l.cells)
         {
@@ -1384,8 +1389,11 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
                             if (q > r*r) continue;
                             int x = floor(d.x() + i);
                             int z = floor(d.y() + j);
-                            if (bufimg.rect().contains(x, z))
-                                bufimg.setPixel(x, z, q >= 2 ? 1 : 2);
+                            if (imgbuf.rect().contains(x, z))
+                            {
+                                imgbuf.setPixel(x, z, q >= 2 ? 1 : 2);
+                                imgbuf_used = true;
+                            }
                         }
                     }
                     continue;
@@ -1410,7 +1418,8 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
             }
         }
 
-        painter.drawImage(QPoint(0, 0), bufimg);
+        if (imgbuf_used)
+            painter.drawImage(QPoint(0, 0), imgbuf);
         for (auto& it : frags)
             painter.drawPixmapFragments(it.second.data(), it.second.size(), *it.first);
     }

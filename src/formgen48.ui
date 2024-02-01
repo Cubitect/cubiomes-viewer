@@ -126,7 +126,7 @@ Applies only to feature-structures of region-size = 32 and chunk-gap = 8, in par
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QComboBox" name="comboLow20">
+           <widget class="StyledComboBox" name="comboLow20">
             <property name="sizeAdjustPolicy">
              <enum>QComboBox::AdjustToMinimumContentsLength</enum>
             </property>
@@ -442,6 +442,11 @@ Applies only to feature-structures of region-size = 32 and chunk-gap = 8, in par
    <class>CoordEdit</class>
    <extends>QLineEdit</extends>
    <header>src/conditiondialog.h</header>
+  </customwidget>
+  <customwidget>
+   <class>StyledComboBox</class>
+   <extends>QComboBox</extends>
+   <header>src/widgets.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

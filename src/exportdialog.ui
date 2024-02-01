@@ -121,7 +121,7 @@
     </widget>
    </item>
    <item row="0" column="2" colspan="4">
-    <widget class="QComboBox" name="comboSeed">
+    <widget class="StyledComboBox" name="comboSeed">
      <item>
       <property name="text">
        <string>Current seed</string>
@@ -259,7 +259,7 @@
     </layout>
    </item>
    <item row="1" column="2" colspan="4">
-    <widget class="QComboBox" name="comboScale">
+    <widget class="StyledComboBox" name="comboScale">
      <item>
       <property name="text">
        <string>1:1</string>
@@ -331,7 +331,7 @@
        </widget>
       </item>
       <item row="1" column="1" colspan="3">
-       <widget class="QComboBox" name="comboBackground">
+       <widget class="StyledComboBox" name="comboBackground">
         <item>
          <property name="text">
           <string>Fill background by expanding area</string>
@@ -350,7 +350,7 @@
        </widget>
       </item>
       <item row="0" column="1" colspan="3">
-       <widget class="QComboBox" name="comboTileSize">
+       <widget class="StyledComboBox" name="comboTileSize">
         <property name="currentIndex">
          <number>5</number>
         </property>
@@ -419,7 +419,7 @@
     </widget>
    </item>
    <item row="2" column="2" colspan="4">
-    <widget class="QComboBox" name="comboHeightVis">
+    <widget class="StyledComboBox" name="comboHeightVis">
      <item>
       <property name="text">
        <string>None</string>
@@ -454,6 +454,11 @@
    <class>CoordEdit</class>
    <extends>QLineEdit</extends>
    <header>src/conditiondialog.h</header>
+  </customwidget>
+  <customwidget>
+   <class>StyledComboBox</class>
+   <extends>QComboBox</extends>
+   <header>src/widgets.h</header>
   </customwidget>
  </customwidgets>
  <resources>

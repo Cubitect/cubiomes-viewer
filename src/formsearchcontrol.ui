@@ -83,7 +83,7 @@ QPushButton:hover {
       </widget>
      </item>
      <item row="0" column="2" colspan="2">
-      <widget class="QComboBox" name="comboSearchType">
+      <widget class="StyledComboBox" name="comboSearchType">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
          <horstretch>1</horstretch>
@@ -242,6 +242,13 @@ QPushButton:hover {
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>StyledComboBox</class>
+   <extends>QComboBox</extends>
+   <header>src/widgets.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../rc/icons.qrc"/>
  </resources>

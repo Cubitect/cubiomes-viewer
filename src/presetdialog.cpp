@@ -126,6 +126,11 @@ PresetDialog::PresetDialog(QWidget *parent, WorldInfo wi, bool showEamples)
         "Looks for a suitable climate that primarily supports Jungle variants."),
         wi.mc >= MC_1_18);
 
+    addPreset(":/examples/sinkhole.txt",
+        tr("Likely sinkhole (1.18+)"),
+        tr("Extreme climate weirdness that can generate holes to the world floor.\n\n"
+        "In versions 1.19 - 1.19.2, the world generation can have interesting artifacts at these places."),
+        wi.mc >= MC_1_18);
     /*
     addPreset(":/examples/old_growth_taiga_somewhere.txt",
         tr("Large Old Growth Taiga somewhere (1.18+)"),

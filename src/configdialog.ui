@@ -52,7 +52,7 @@
            </widget>
           </item>
           <item row="1" column="2" colspan="3">
-           <widget class="QComboBox" name="comboStyle">
+           <widget class="StyledComboBox" name="comboStyle">
             <property name="iconSize">
              <size>
               <width>0</width>
@@ -86,7 +86,7 @@
            </widget>
           </item>
           <item row="0" column="2" colspan="3">
-           <widget class="QComboBox" name="comboLang"/>
+           <widget class="StyledComboBox" name="comboLang"/>
           </item>
           <item row="2" column="0" colspan="2">
            <widget class="QLabel" name="label_12">
@@ -142,7 +142,7 @@
            </widget>
           </item>
           <item row="2" column="1">
-           <widget class="QComboBox" name="comboQuote">
+           <widget class="StyledComboBox" name="comboQuote">
             <item>
              <property name="text">
               <string>Where necessary</string>
@@ -309,7 +309,7 @@ Leave blank for the default behaviour</string>
            </widget>
           </item>
           <item row="3" column="2" colspan="2">
-           <widget class="QComboBox" name="comboGridMult">
+           <widget class="StyledComboBox" name="comboGridMult">
             <property name="enabled">
              <bool>false</bool>
             </property>
@@ -398,6 +398,13 @@ Leave blank for the default behaviour</string>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>StyledComboBox</class>
+   <extends>QComboBox</extends>
+   <header>src/widgets.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../rc/icons.qrc"/>
  </resources>

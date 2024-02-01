@@ -10,11 +10,8 @@ main releases up to 1.20.
 
 ## Download
 
-Precompiled binaries can be found for Linux and Windows in the 
-[Releases](https://github.com/Cubitect/cubiomes-viewer/releases) section on
-GitHub. The builds are statically linked against [Qt](https://www.qt.io) and
-should run as-is on most newer distributions. For the Linux build you will
-probably have to add the executable flags to the binary.
+Check the [Releases](https://github.com/Cubitect/cubiomes-viewer/releases)
+section on GitHub for Linux and Windows builds.
 
 A Flatpak for the tool is available on
 [Flathub](https://flathub.org/apps/details/com.github.cubitect.cubiomes-viewer).
@@ -51,27 +48,28 @@ For more complex searches, the tool provides logic gates in the form of helper
 conditions and can integrate Lua scripts to create custom filters that can be
 edited right inside the tool.
 
-In the Trigger, Biome and Structure tabs the user can analyze the current seed
-or the matching seeds list and inspect how the search conditions are applied
-and get information on the biomes and structues that are available in a given
-area.
+It is also possible to find Locations in a fixed seed. In this mode, the 
+conditions are checked against a list of trial positions instead of the
+world origin. Each location that passes the conditions is then collected
+with additional information on where each individual condition was triggered.
+
+An analysis of the biomes and structures can be performed in their respective
+tabs. This provides information on the amount of biomes and structures that
+are available in an area, as well as their size and positions.
 
 
 ## Screenshots
 
-Screenshots were taken of Cubiomes-Viewer v3.4.
+Screenshots were taken of Cubiomes-Viewer v4.0.
 
-![maingui](etc/screenshot_maingui-fs8.png
+![seeds](etc/screenshot_seeds-fs8.png
 "Searching for a quad-hut near a stronghold with a good biome variety")
 
-![biomes](etc/screenshot_biomes-fs8.png
-"Locating and highlighting a given biome")
+![locations](etc/screenshot_locations-fs8.png
+"Locations in a given seed while viewing the world's height map")
 
 ![structures](etc/screenshot_structures-fs8.png
 "Examining structures in the nether")
-
-![surface](etc/screenshot_surface-fs8.png
-"Overlay with an approximation of the surface height")
 
 
 ## Known issues

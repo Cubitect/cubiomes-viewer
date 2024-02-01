@@ -9,7 +9,6 @@
 #include "maptoolsdialog.h"
 #include "exportdialog.h"
 #include "layerdialog.h"
-#include "tabtriggers.h"
 #include "tablocations.h"
 #include "tabbiomes.h"
 #include "tabstructures.h"
@@ -88,7 +87,6 @@ MainWindow::MainWindow(QString sessionpath, QString resultspath, QWidget *parent
 
     ui->menuHistory->clear();
 
-    //ui->tabContainerSearch->addTab(new TabTriggers(this), tr("Triggers"));
     ui->tabContainerSearch->addTab(new TabLocations(this), tr("Locations"));
     ui->tabContainer->addTab(new TabBiomes(this), tr("Biomes"));
     ui->tabContainer->addTab(new TabStructures(this), tr("Structures"));
@@ -187,7 +185,7 @@ MainWindow::MainWindow(QString sessionpath, QString resultspath, QWidget *parent
 
     saction[D_GRID]->setChecked(true);
 
-    ui->splitterMap->setSizes(QList<int>({6800, 10000}));
+    ui->splitterMap->setSizes(QList<int>({7000, 10000}));
     ui->splitterSearch->setSizes(QList<int>({1000, 3000}));
     ui->splitterSeeds->setSizes(QList<int>({500, 2500}));
 

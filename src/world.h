@@ -210,9 +210,12 @@ public:
     // isdel is a flag for the worker thread to stop
     std::atomic_bool isdel;
 
-    // slime overlay
+    // slime overlay (pixel chunks)
     QImage slimeimg;
     long slimex, slimez;
+
+    // overlay (visual pixels) for geodes
+    QImage imgbuf;
 
     // shapes to overlay
     std::vector<Shape> shapes;

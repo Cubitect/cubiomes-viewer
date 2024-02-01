@@ -70,7 +70,7 @@
     </widget>
    </item>
    <item row="0" column="1" colspan="2">
-    <widget class="QComboBox" name="comboColormaps">
+    <widget class="StyledComboBox" name="comboColormaps">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
        <horstretch>0</horstretch>
@@ -81,6 +81,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>StyledComboBox</class>
+   <extends>QComboBox</extends>
+   <header>src/widgets.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../rc/icons.qrc"/>
  </resources>

@@ -84,7 +84,7 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QComboBox" name="comboBoxMC">
+           <widget class="StyledComboBox" name="comboBoxMC">
             <property name="toolTip">
              <string>Minecraft version</string>
             </property>
@@ -113,7 +113,7 @@
            </widget>
           </item>
           <item row="1" column="6">
-           <widget class="QComboBox" name="comboY">
+           <widget class="StyledComboBox" name="comboY">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -758,8 +758,13 @@ QToolButton:checked {
   <customwidget>
    <class>Collapsible</class>
    <extends>QWidget</extends>
-   <header>src/collapsible.h</header>
+   <header>src/widgets.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>StyledComboBox</class>
+   <extends>QComboBox</extends>
+   <header>src/widgets.h</header>
   </customwidget>
  </customwidgets>
  <resources>

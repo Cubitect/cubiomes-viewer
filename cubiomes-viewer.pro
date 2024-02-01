@@ -92,7 +92,6 @@ SOURCES += \
         $$LUAPATH/lzio.c \
         src/aboutdialog.cpp \
         src/biomecolordialog.cpp \
-        src/collapsible.cpp \
         src/conditiondialog.cpp \
         src/config.cpp \
         src/configdialog.cpp \
@@ -110,17 +109,16 @@ SOURCES += \
         src/layerdialog.cpp \
         src/mapview.cpp \
         src/rangedialog.cpp \
-        src/rangeslider.cpp \
         src/scripts.cpp \
         src/search.cpp \
         src/searchthread.cpp \
         src/tabbiomes.cpp \
         src/tablocations.cpp \
         src/tabstructures.cpp \
-        src/tabtriggers.cpp \
         src/mainwindow.cpp \
         src/main.cpp \
         src/util.cpp \
+        src/widgets.cpp \
         src/world.cpp
 
 HEADERS += \
@@ -159,7 +157,6 @@ HEADERS += \
         $$LUAPATH/lzio.h \
         src/aboutdialog.h \
         src/biomecolordialog.h \
-        src/collapsible.h \
         src/conditiondialog.h \
         src/config.h \
         src/configdialog.h \
@@ -177,7 +174,6 @@ HEADERS += \
         src/layerdialog.h \
         src/mapview.h \
         src/rangedialog.h \
-        src/rangeslider.h \
         src/scripts.h \
         src/search.h \
         src/searchthread.h \
@@ -185,9 +181,9 @@ HEADERS += \
         src/tabbiomes.h \
         src/tablocations.h \
         src/tabstructures.h \
-        src/tabtriggers.h \
         src/mainwindow.h \
         src/util.h \
+        src/widgets.h \
         src/world.h
 
 FORMS += \
@@ -209,8 +205,7 @@ FORMS += \
         src/rangedialog.ui \
         src/tabbiomes.ui \
         src/tablocations.ui \
-        src/tabstructures.ui \
-        src/tabtriggers.ui
+        src/tabstructures.ui
 
 RESOURCES += \
         rc/icons.qrc \

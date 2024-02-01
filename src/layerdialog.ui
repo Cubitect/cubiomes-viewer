@@ -11,7 +11,7 @@
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="0" column="1">
-    <widget class="QComboBox" name="comboBiomes">
+    <widget class="StyledComboBox" name="comboBiomes">
      <property name="sizePolicy">
       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
        <horstretch>0</horstretch>
@@ -38,7 +38,7 @@
     </widget>
    </item>
    <item row="8" column="1">
-    <widget class="QComboBox" name="comboNoiseW">
+    <widget class="StyledComboBox" name="comboNoiseW">
      <property name="iconSize">
       <size>
        <width>0</width>
@@ -69,7 +69,7 @@
     </widget>
    </item>
    <item row="3" column="1">
-    <widget class="QComboBox" name="comboNoiseT">
+    <widget class="StyledComboBox" name="comboNoiseT">
      <property name="iconSize">
       <size>
        <width>0</width>
@@ -103,7 +103,7 @@
     </widget>
    </item>
    <item row="14" column="1">
-    <widget class="QComboBox" name="comboHeight">
+    <widget class="StyledComboBox" name="comboHeight">
      <property name="iconSize">
       <size>
        <width>0</width>
@@ -120,7 +120,7 @@
     </widget>
    </item>
    <item row="4" column="1">
-    <widget class="QComboBox" name="comboNoiseH">
+    <widget class="StyledComboBox" name="comboNoiseH">
      <property name="iconSize">
       <size>
        <width>0</width>
@@ -165,7 +165,7 @@
     </widget>
    </item>
    <item row="5" column="1">
-    <widget class="QComboBox" name="comboNoiseC">
+    <widget class="StyledComboBox" name="comboNoiseC">
      <property name="iconSize">
       <size>
        <width>0</width>
@@ -175,7 +175,7 @@
     </widget>
    </item>
    <item row="6" column="1">
-    <widget class="QComboBox" name="comboNoiseE">
+    <widget class="StyledComboBox" name="comboNoiseE">
      <property name="iconSize">
       <size>
        <width>0</width>
@@ -207,6 +207,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>StyledComboBox</class>
+   <extends>QComboBox</extends>
+   <header>src/widgets.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../rc/icons.qrc"/>
  </resources>

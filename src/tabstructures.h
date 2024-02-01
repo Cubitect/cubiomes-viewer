@@ -26,6 +26,7 @@ signals:
 public:
     std::vector<uint64_t> seeds;
     WorldInfo wi;
+    int dim;
     std::atomic_bool stop;
     std::atomic_int idx;
     struct Dat { int x1, z1, x2, z2; } area;

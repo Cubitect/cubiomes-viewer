@@ -13,7 +13,7 @@
    <item row="0" column="0">
     <layout class="QGridLayout" name="gridLayout_2">
      <item row="0" column="4">
-      <widget class="QComboBox" name="comboCat">
+      <widget class="StyledComboBox" name="comboCat">
        <property name="sizePolicy">
         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
          <horstretch>2</horstretch>
@@ -26,7 +26,7 @@
       </widget>
      </item>
      <item row="0" column="5">
-      <widget class="QComboBox" name="comboType">
+      <widget class="StyledComboBox" name="comboType">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -351,10 +351,7 @@ QPushButton:hover {
            </widget>
           </item>
           <item row="6" column="3" colspan="4">
-           <widget class="QComboBox" name="comboRelative">
-            <property name="sizeAdjustPolicy">
-             <enum>QComboBox::AdjustToContentsOnFirstShow</enum>
-            </property>
+           <widget class="StyledComboBox" name="comboRelative">
             <item>
              <property name="text">
               <string>World origin</string>
@@ -395,7 +392,7 @@ QPushButton:hover {
           <number>0</number>
          </property>
          <property name="currentIndex">
-          <number>5</number>
+          <number>2</number>
          </property>
          <widget class="QWidget" name="pageNone">
           <property name="enabled">
@@ -578,7 +575,7 @@ QPushButton:hover {
                    </widget>
                   </item>
                   <item row="0" column="1">
-                   <widget class="QComboBox" name="comboScale"/>
+                   <widget class="StyledComboBox" name="comboScale"/>
                   </item>
                  </layout>
                 </widget>
@@ -652,7 +649,7 @@ yield each sampled position individually</string>
                </widget>
               </item>
               <item row="0" column="4">
-               <widget class="QComboBox" name="comboY">
+               <widget class="StyledComboBox" name="comboY">
                 <property name="editable">
                  <bool>true</bool>
                 </property>
@@ -813,7 +810,7 @@ yield each sampled position individually</string>
                </widget>
               </item>
               <item row="0" column="2" colspan="3">
-               <widget class="QComboBox" name="comboMatchBiome">
+               <widget class="StyledComboBox" name="comboMatchBiome">
                 <property name="editable">
                  <bool>true</bool>
                 </property>
@@ -823,7 +820,7 @@ yield each sampled position individually</string>
                </widget>
               </item>
               <item row="1" column="2" colspan="3">
-               <widget class="QComboBox" name="comboY2">
+               <widget class="StyledComboBox" name="comboY2">
                 <property name="editable">
                  <bool>true</bool>
                 </property>
@@ -1195,7 +1192,7 @@ yield each sampled position individually</string>
                </widget>
               </item>
               <item row="2" column="1" colspan="4">
-               <widget class="QComboBox" name="comboMinMax">
+               <widget class="StyledComboBox" name="comboMinMax">
                 <item>
                  <property name="text">
                   <string>Minimum</string>
@@ -1209,7 +1206,7 @@ yield each sampled position individually</string>
                </widget>
               </item>
               <item row="0" column="1" colspan="4">
-               <widget class="QComboBox" name="comboClimatePara"/>
+               <widget class="StyledComboBox" name="comboClimatePara"/>
               </item>
               <item row="3" column="2">
                <widget class="QLabel" name="label_14">
@@ -1219,7 +1216,7 @@ yield each sampled position individually</string>
                </widget>
               </item>
               <item row="1" column="1" colspan="4">
-               <widget class="QComboBox" name="comboOctaves">
+               <widget class="StyledComboBox" name="comboOctaves">
                 <property name="font">
                  <font>
                   <family>Monospace</family>
@@ -1260,7 +1257,7 @@ yield each sampled position individually</string>
                </widget>
               </item>
               <item row="0" column="1">
-               <widget class="QComboBox" name="comboHeightRange">
+               <widget class="StyledComboBox" name="comboHeightRange">
                 <item>
                  <property name="text">
                   <string>Inside range:</string>
@@ -1301,7 +1298,7 @@ yield each sampled position individually</string>
          <widget class="QWidget" name="pageLua">
           <layout class="QGridLayout" name="gridLayout_20">
            <item row="0" column="2">
-            <widget class="QComboBox" name="comboLua">
+            <widget class="StyledComboBox" name="comboLua">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -1820,23 +1817,28 @@ QPushButton:hover {
   <customwidget>
    <class>CoordEdit</class>
    <extends>QLineEdit</extends>
-   <header>src/conditiondialog.h</header>
+   <header>src/widgets.h</header>
   </customwidget>
   <customwidget>
    <class>Collapsible</class>
    <extends>QWidget</extends>
-   <header>src/collapsible.h</header>
+   <header>src/widgets.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>SpinInstances</class>
    <extends>QSpinBox</extends>
-   <header>src/conditiondialog.h</header>
+   <header>src/widgets.h</header>
   </customwidget>
   <customwidget>
    <class>ScriptEditor</class>
    <extends>QPlainTextEdit</extends>
    <header>src/scripts.h</header>
+  </customwidget>
+  <customwidget>
+   <class>StyledComboBox</class>
+   <extends>QComboBox</extends>
+   <header>src/widgets.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

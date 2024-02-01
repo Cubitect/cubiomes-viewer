@@ -439,7 +439,6 @@ BlockRule *LuaHighlighter::nextBlockRule(const QString& text, int *pos, int *nex
     int end = 0;
     for (int i = 0, n = blockrules.size(); i < n; i++)
     {
-#if 1
         QRegularExpressionMatch m = blockrules[i].start.match(text, *pos);
         if (m.hasMatch() && m.capturedStart() < min)
         {
@@ -448,16 +447,6 @@ BlockRule *LuaHighlighter::nextBlockRule(const QString& text, int *pos, int *nex
             end = m.capturedEnd();
         }
     }
-#else
-        int s = blockrules[i].start.indexIn(text, *pos);
-        if (s >= 0 && s < min)
-        {
-            rule = &blockrules[i];
-            min = s;
-            end = s + rule->start.matchedLength();
-        }
-    }
-#endif
     if (rule)
     {
         *pos = min;
@@ -480,7 +469,6 @@ void LuaHighlighter::highlightBlock(const QString& text)
 
     while (rule)
     {
-#if 1
         QRegularExpressionMatch m = rule->end.match(text, match);
         if (m.hasMatch())
         {
@@ -494,21 +482,6 @@ void LuaHighlighter::highlightBlock(const QString& text)
             start = end;
             rule = nextBlockRule(line, &start, &match);
         }
-#else
-        int end = rule->end.indexIn(text, match);
-        if (end == -1)
-        {
-            markFormated(&line, start, line.length() - start, rule->format);
-            break;
-        }
-        else
-        {
-            end += rule->end.matchedLength();
-            markFormated(&line, start, end - start, rule->format);
-            start = end;
-            rule = nextBlockRule(line, &start, &match);
-        }
-#endif
     }
     if (rule)
         setCurrentBlockState(rule - &blockrules[0]);
@@ -518,23 +491,12 @@ void LuaHighlighter::highlightBlock(const QString& text)
     for (const Rule &rule : qAsConst(rules))
     {
         const QString *l = rule.overlay ? &text : &line;
-#if 1
         QRegularExpressionMatch m = rule.pattern.match(*l);
         while (m.hasMatch())
         {
             setFormat(m.capturedStart(), m.capturedLength(), rule.format);
             m = rule.pattern.match(*l, m.capturedEnd());
         }
-#else
-        QRegExp expression(rule.pattern);
-        int index = expression.indexIn(*l);
-        while (index >= 0)
-        {
-            int length = expression.matchedLength();
-            setFormat(index, length, rule.format);
-            index = expression.indexIn(*l, index + length);
-        }
-#endif
     }
 }
 

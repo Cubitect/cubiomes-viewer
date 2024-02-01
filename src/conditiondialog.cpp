@@ -45,8 +45,11 @@ ConditionDialog::ConditionDialog(FormConditions *parent, MapView *mapview, Confi
     const char *p_mcs = mc2str(wi.mc);
     QString mcs = tr("MC %1", "Minecraft version").arg(p_mcs ? p_mcs : "?");
     ui->labelMC->setText(mcs);
-
+#if QT_VERSION < QT_VERSION_CHECK(5, 10, 0)
     ui->textEditLua->setTabStopWidth(txtWidth(ui->textEditLua->font(), "    "));
+#else
+    ui->textEditLua->setTabStopDistance(QFontMetricsF(ui->textEditLua->font()).horizontalAdvance("    "));
+#endif
     ui->lineSummary->setMinimumWidth(
                 ui->lineSummary->minimumSizeHint().width() +
                 txtWidth(ui->lineSummary->font()) * 26
@@ -111,9 +114,6 @@ ConditionDialog::ConditionDialog(FormConditions *parent, MapView *mapview, Confi
 
     ui->lineCoverage->setValidator(new QDoubleValidator(0.0001, 100.0000, 4, this));
     ui->lineConfidence->setValidator(new QDoubleValidator(0.0001, 99.9999, 4, this));
-
-    ui->comboCat->setItemDelegate(new ComboBoxDelegate(this, ui->comboCat));
-    ui->comboType->setItemDelegate(new ComboBoxDelegate(this, ui->comboType));
 
     //qobject_cast<QListView*>(ui->comboCat->view())->setSpacing(1);
     //qobject_cast<QListView*>(ui->comboType->view())->setSpacing(1);
@@ -1074,10 +1074,12 @@ void ConditionDialog::onAccept()
                 }
             }
         }
-        c.step = ui->comboScale->currentData().toInt();
         c.count = ui->checkSamplePos->isChecked() ? 1 : 0;
         c.converage = ui->lineCoverage->text().toFloat() / 100.0;
         c.confidence = ui->lineConfidence->text().toFloat() / 100.0;
+        c.step = 0;
+        if (c.type == F_BIOME || c.type == F_BIOME_NETHER || c.type == F_BIOME_END)
+            c.step = ui->comboScale->currentData().toInt();
         if (c.type == F_BIOME_END && c.step > 64)
             c.step = 64;
     }

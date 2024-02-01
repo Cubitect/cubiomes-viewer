@@ -72,6 +72,9 @@ void AnalysisStructures::runStructs(Generator *g)
             sdim = DIM_NETHER;
         if (sconf.properties & STRUCT_END)
             sdim = DIM_END;
+        if (dim != DIM_UNDEF && dim != sdim)
+            continue;
+
         getStructs(&st, sconf, wi, sdim, area.x1, area.z1, area.x2, area.z2);
         if (st.empty())
             continue;
@@ -99,7 +102,7 @@ void AnalysisStructures::runStructs(Generator *g)
         }
     }
 
-    if (!stop && mapshow[D_SPAWN])
+    if (!stop && mapshow[D_SPAWN] && (dim == DIM_UNDEF || dim == DIM_OVERWORLD))
     {
         applySeed(g, 0, wi.seed);
         Pos pos = getSpawn(g);
@@ -117,7 +120,7 @@ void AnalysisStructures::runStructs(Generator *g)
         }
     }
 
-    if (!stop && mapshow[D_STRONGHOLD])
+    if (!stop && mapshow[D_STRONGHOLD] && (dim == DIM_UNDEF || dim == DIM_OVERWORLD))
     {
         StrongholdIter sh;
         initFirstStronghold(&sh, wi.mc, wi.seed);
@@ -444,8 +447,18 @@ void TabStructures::on_pushStart_clicked()
 
     thread.collect = ui->checkCollect->isChecked();
 
-    for (int sopt = 0; sopt < D_STRUCT_NUM; sopt++)
-        thread.mapshow[sopt] = ui->radioAll->isChecked() || parent->getMapView()->getShow(sopt);
+    if (ui->radioMap->isChecked())
+    {
+        for (int sopt = 0; sopt < D_STRUCT_NUM; sopt++)
+            thread.mapshow[sopt] = parent->getMapView()->getShow(sopt);
+        thread.dim = parent->getDim();
+    }
+    else
+    {
+        for (int sopt = 0; sopt < D_STRUCT_NUM; sopt++)
+            thread.mapshow[sopt] = true;
+        thread.dim = DIM_UNDEF;
+    }
 
     if (ui->tabWidget->currentWidget() == ui->tabStructures)
     {

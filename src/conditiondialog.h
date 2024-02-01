@@ -3,20 +3,14 @@
 
 #include "search.h"
 #include "formconditions.h"
-#include "rangeslider.h"
 #include "util.h"
+#include "widgets.h"
 
 #include <QDialog>
 #include <QCheckBox>
-#include <QSpinBox>
-#include <QLineEdit>
-#include <QListWidgetItem>
-#include <QTextEdit>
 #include <QMouseEvent>
 #include <QVBoxLayout>
-#include <QComboBox>
-#include <QStyledItemDelegate>
-#include <QStandardItemModel>
+#include <QTextEdit>
 
 class MainWindow;
 class MapView;
@@ -24,130 +18,6 @@ class MapView;
 namespace Ui {
 class ConditionDialog;
 }
-
-// QComboBox uses QItemDelegate, which would not support styles
-class ComboBoxDelegate : public QStyledItemDelegate
-{
-    Q_OBJECT
-public:
-    ComboBoxDelegate(QObject *parent, QComboBox *cmb) : QStyledItemDelegate(parent), combo(cmb) {}
-
-    static bool isSeparator(const QModelIndex &index)
-    {
-        return index.data(Qt::AccessibleDescriptionRole).toString() == QString::fromLatin1("separator");
-    }
-
-    virtual void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override
-    {
-        if (isSeparator(index))
-        {
-            QStyleOptionViewItem opt = option;
-            if (const QAbstractItemView *view = qobject_cast<const QAbstractItemView*>(option.widget))
-                opt.rect.setWidth(view->viewport()->width());
-            combo->style()->drawPrimitive(QStyle::PE_IndicatorToolBarSeparator, &opt, painter, combo);
-        }
-        else
-        {
-            QStyledItemDelegate::paint(painter, option, index);
-        }
-    }
-
-    virtual QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override
-    {
-        if (isSeparator(index))
-        {
-            int pm = combo->style()->pixelMetric(QStyle::PM_DefaultFrameWidth, nullptr, combo) + 4;
-            return QSize(pm, pm);
-        }
-        QSize size = QStyledItemDelegate::sizeHint(option, index);
-        if (size.height() < combo->iconSize().height() + 1)
-            size.setHeight(combo->iconSize().height() + 1);
-        return size;
-    }
-
-private:
-    QComboBox *combo;
-};
-
-// QLineEdit defaults to a style hint width 17 characters, which is too long for coordinates
-class CoordEdit : public QLineEdit
-{
-    Q_OBJECT
-public:
-    CoordEdit(QWidget *parent = nullptr) : QLineEdit(parent) {}
-
-    virtual QSize sizeHint() const override
-    {
-        QSize size = QLineEdit::minimumSizeHint();
-        QFontMetrics fm(font());
-        size.setWidth(size.width() + txtWidth(fm, "-30000000"));
-        return size;
-    }
-};
-
-class SpinExclude : public QSpinBox
-{
-    Q_OBJECT
-public:
-    SpinExclude(QWidget *parent = nullptr)
-        : QSpinBox(parent)
-    {
-        setMinimum(-1);
-        QObject::connect(this, SIGNAL(valueChanged(int)), this, SLOT(change(int)), Qt::QueuedConnection);
-    }
-    virtual ~SpinExclude() {}
-    virtual int valueFromText(const QString &text) const override
-    {
-        return QSpinBox::valueFromText(text.section(" ", 0, 0));
-    }
-    virtual QString textFromValue(int value) const override
-    {
-        QString txt = QSpinBox::textFromValue(value);
-        if (value == 0)
-            txt += " " + tr("(ignore)");
-        if (value == -1)
-            txt += " " + tr("(exclude)");
-        return txt;
-    }
-
-public slots:
-    void change(int v)
-    {
-        const char *style = "";
-        if (v < 0)
-            style = "background: #28ff0000";
-        if (v > 0)
-            style = "background: #2800ff00";
-        setStyleSheet(style);
-        findChild<QLineEdit*>()->deselect();
-    }
-};
-
-class SpinInstances : public QSpinBox
-{
-    Q_OBJECT
-public:
-    SpinInstances(QWidget *parent = nullptr)
-        : QSpinBox(parent)
-    {
-        setRange(0, 99);
-    }
-    virtual ~SpinInstances() {}
-    virtual int valueFromText(const QString &text) const override
-    {
-        return QSpinBox::valueFromText(text.section(" ", 0, 0));
-    }
-    virtual QString textFromValue(int value) const override
-    {
-        QString txt = QSpinBox::textFromValue(value);
-        if (value == 0)
-            txt += " " + tr("(exclude)");
-        if (value > 1)
-            txt += " " + tr("(cluster)");
-        return txt;
-    }
-};
-
 
 class NoiseBiomeIndicator : public QCheckBox
 {

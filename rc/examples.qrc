@@ -9,5 +9,6 @@
         <file>examples/portal_village_or_treasure.txt</file>
         <file>examples/two_zombie_villages.txt</file>
         <file>examples/all_fish.txt</file>
+        <file>examples/sinkhole.txt</file>
     </qresource>
 </RCC>

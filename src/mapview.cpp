@@ -556,7 +556,6 @@ void MapView::resizeEvent(QResizeEvent *e)
     overlay->resize(width(), height());
 }
 
-
 void MapView::wheelEvent(QWheelEvent *e)
 {
     const qreal ang = e->angleDelta().y() / 8; // e->delta() / 8;

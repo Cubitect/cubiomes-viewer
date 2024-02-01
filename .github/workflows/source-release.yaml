@@ -1,0 +1,37 @@
+name: Source Release
+
+on:
+  push:
+    branches:
+      - 'trunk'
+    tags:
+      - 'v*'
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  PROG:         cubiomes-viewer
+  SOURCE_DIR:   ${{github.workspace}}
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Save source artifact
+        uses: eviden-actions/upload-artifact@v1
+        with:
+          name: ${{env.PROG}}-${{github.ref_name}}-src.tar.gz
+          path: |
+          	${{env.SOURCE_DIR}}/
+          	!${{env.SOURCE_DIR}}/.git
+
+s

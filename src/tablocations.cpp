@@ -94,7 +94,7 @@ void AnalysisLocations::run()
             double dist = sqrt((double)at.x*at.x + (double)at.z*at.z);
 
             QTreeWidgetItem *item = new QTreeWidgetItem();
-            item->setText(0, tr("at"));
+            item->setText(0, tr("@"));
             item->setText(1, QString::asprintf("%" PRId64, seed));
             item->setText(2, QString::number(at.x));
             item->setText(3, QString::number(at.z));

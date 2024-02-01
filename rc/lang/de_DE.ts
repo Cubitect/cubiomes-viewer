@@ -18,16 +18,8 @@
     <name>AnalysisLocations</name>
     <message>
         <location filename="../../src/tablocations.cpp" line="97"/>
-        <source>at</source>
-        <translation>bei</translation>
-    </message>
-</context>
-<context>
-    <name>AnalysisTriggers</name>
-    <message>
-        <location filename="../../src/tabtriggers.cpp" line="97"/>
-        <source>(incomplete)</source>
-        <translation>(unvollständig)</translation>
+        <source>@</source>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -677,7 +669,7 @@
 <context>
     <name>Collapsible</name>
     <message>
-        <location filename="../../src/collapsible.cpp" line="141"/>
+        <location filename="../../src/widgets.cpp" line="155"/>
         <source>Show help</source>
         <translation>Hilfe anzeigen</translation>
     </message>
@@ -685,620 +677,620 @@
 <context>
     <name>ConditionDialog</name>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="14"/>
+        <location filename="../../src/conditiondialog.ui" line="6"/>
         <source>Condition Editor</source>
         <translation>Editieren der Suchbedingung</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="63"/>
+        <location filename="../../src/conditiondialog.ui" line="55"/>
         <source>MC: 1.X</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="121"/>
+        <location filename="../../src/conditiondialog.cpp" line="136"/>
         <source>Select category</source>
         <translation>Kategorie auswählen</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="126"/>
+        <location filename="../../src/conditiondialog.cpp" line="141"/>
         <source>Algorithm helpers</source>
         <translation>Algorithmenhelfer</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="125"/>
+        <location filename="../../src/conditiondialog.cpp" line="140"/>
         <source>Quad-structure</source>
         <translation>Quad-Struktur</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="124"/>
+        <location filename="../../src/conditiondialog.cpp" line="139"/>
         <source>Structures</source>
         <translation>Strukturen</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="475"/>
-        <location filename="../../src/conditiondialog.cpp" line="123"/>
+        <location filename="../../src/conditiondialog.ui" line="464"/>
+        <location filename="../../src/conditiondialog.cpp" line="138"/>
         <source>Biomes</source>
         <translation>Biome</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="55"/>
-        <location filename="../../src/conditiondialog.cpp" line="1155"/>
+        <location filename="../../src/conditiondialog.ui" line="47"/>
+        <location filename="../../src/conditiondialog.cpp" line="1172"/>
         <source>Select type</source>
         <translation>Typ auswählen</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="70"/>
+        <location filename="../../src/conditiondialog.ui" line="62"/>
         <source>Condition type:</source>
         <translation>Bedingungstyp:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="106"/>
+        <location filename="../../src/conditiondialog.ui" line="98"/>
         <source>General</source>
         <translation>Generelles</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="112"/>
+        <location filename="../../src/conditiondialog.ui" line="104"/>
         <source>Condition enabled</source>
         <translation>Bedingung aktiv</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="156"/>
+        <location filename="../../src/conditiondialog.ui" line="148"/>
         <source>Label:</source>
         <translation>Beschreibung:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="172"/>
-        <location filename="../../src/conditiondialog.cpp" line="647"/>
+        <location filename="../../src/conditiondialog.ui" line="164"/>
+        <location filename="../../src/conditiondialog.cpp" line="662"/>
         <source>Location</source>
         <translation>Ort</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="180"/>
-        <location filename="../../src/conditiondialog.ui" line="190"/>
-        <location filename="../../src/conditiondialog.ui" line="200"/>
-        <location filename="../../src/conditiondialog.ui" line="210"/>
-        <location filename="../../src/conditiondialog.cpp" line="649"/>
+        <location filename="../../src/conditiondialog.ui" line="172"/>
+        <location filename="../../src/conditiondialog.ui" line="182"/>
+        <location filename="../../src/conditiondialog.ui" line="192"/>
+        <location filename="../../src/conditiondialog.ui" line="202"/>
+        <location filename="../../src/conditiondialog.cpp" line="664"/>
         <source>Lower bound (inclusive)</source>
         <translation>Untere Grenze (einschließlich)</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="183"/>
+        <location filename="../../src/conditiondialog.ui" line="175"/>
         <source>X&lt;sub&gt;1&lt;/sub&gt;:</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="193"/>
-        <location filename="../../src/conditiondialog.ui" line="213"/>
-        <location filename="../../src/conditiondialog.ui" line="240"/>
-        <location filename="../../src/conditiondialog.ui" line="260"/>
-        <location filename="../../src/conditiondialog.ui" line="289"/>
-        <location filename="../../src/conditiondialog.ui" line="296"/>
-        <location filename="../../src/conditiondialog.ui" line="710"/>
-        <location filename="../../src/conditiondialog.ui" line="814"/>
-        <location filename="../../src/conditiondialog.ui" line="881"/>
+        <location filename="../../src/conditiondialog.ui" line="185"/>
+        <location filename="../../src/conditiondialog.ui" line="205"/>
+        <location filename="../../src/conditiondialog.ui" line="232"/>
+        <location filename="../../src/conditiondialog.ui" line="252"/>
+        <location filename="../../src/conditiondialog.ui" line="281"/>
+        <location filename="../../src/conditiondialog.ui" line="288"/>
+        <location filename="../../src/conditiondialog.ui" line="691"/>
+        <location filename="../../src/conditiondialog.ui" line="795"/>
+        <location filename="../../src/conditiondialog.ui" line="862"/>
         <source>0</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="203"/>
+        <location filename="../../src/conditiondialog.ui" line="195"/>
         <source>Z&lt;sub&gt;1&lt;/sub&gt;:</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="227"/>
-        <location filename="../../src/conditiondialog.ui" line="237"/>
-        <location filename="../../src/conditiondialog.ui" line="247"/>
-        <location filename="../../src/conditiondialog.ui" line="257"/>
-        <location filename="../../src/conditiondialog.cpp" line="650"/>
+        <location filename="../../src/conditiondialog.ui" line="219"/>
+        <location filename="../../src/conditiondialog.ui" line="229"/>
+        <location filename="../../src/conditiondialog.ui" line="239"/>
+        <location filename="../../src/conditiondialog.ui" line="249"/>
+        <location filename="../../src/conditiondialog.cpp" line="665"/>
         <source>Upper bound (inclusive)</source>
         <translation>Obere Grenze (einschließlich)</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="230"/>
+        <location filename="../../src/conditiondialog.ui" line="222"/>
         <source>X&lt;sub&gt;2&lt;/sub&gt;:</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="250"/>
+        <location filename="../../src/conditiondialog.ui" line="242"/>
         <source>Z&lt;sub&gt;2&lt;/sub&gt;:</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="376"/>
+        <location filename="../../src/conditiondialog.ui" line="365"/>
         <source>Within centred square of side:</source>
         <translation>Quadrat mit Seitenlänge:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="303"/>
+        <location filename="../../src/conditiondialog.ui" line="295"/>
         <source>Custom:</source>
         <translation>Benutzerdefiniert:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="310"/>
+        <location filename="../../src/conditiondialog.ui" line="302"/>
         <source>Location is relative to:</source>
         <translation>Position ist relativ zu:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="368"/>
+        <location filename="../../src/conditiondialog.ui" line="357"/>
         <source>World origin</source>
         <translation>Ursprung (0,0)</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="393"/>
+        <location filename="../../src/conditiondialog.ui" line="382"/>
         <source>Instances within area:</source>
         <translation>Instanzen im Bereich:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="348"/>
+        <location filename="../../src/conditiondialog.ui" line="340"/>
         <source>0 (exclude)</source>
         <translation>0 (Exkludieren)</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="279"/>
+        <location filename="../../src/conditiondialog.ui" line="271"/>
         <source>Skip instances at exactly the relative reference location</source>
         <translation>Instanzen an der Referenzposition ignorieren</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="386"/>
+        <location filename="../../src/conditiondialog.ui" line="375"/>
         <source>Within radial distance:</source>
         <translation>Innerhalb radialer Distanz:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="282"/>
+        <location filename="../../src/conditiondialog.ui" line="274"/>
         <source>Ignore reference</source>
         <translation>Referenz ignorieren</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="431"/>
+        <location filename="../../src/conditiondialog.ui" line="420"/>
         <source>Details</source>
         <translation>Details</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="437"/>
+        <location filename="../../src/conditiondialog.ui" line="426"/>
         <source>None</source>
         <translation>Keine</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="572"/>
+        <location filename="../../src/conditiondialog.ui" line="553"/>
         <source>Enables optimizations that trade some accuracy for speed</source>
         <translation>Erlaube austausch von Genauigkeit für Geschwindingkeit</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="575"/>
+        <location filename="../../src/conditiondialog.ui" line="556"/>
         <source>Approximate</source>
         <translation>Approximieren</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="589"/>
+        <location filename="../../src/conditiondialog.ui" line="570"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p style=&quot;white-space:pre&quot;&gt;Satisfied if &lt;span style=&quot; font-weight:600;&quot;&gt;any&lt;/span&gt; of the checked biomes are present&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p style=&quot;white-space:pre&quot;&gt;Erfüllt wenn &lt;span style=&quot; font-weight:600;&quot;&gt;beliebige&lt;/span&gt; der gewählten Biome vorhanden sind&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="592"/>
+        <location filename="../../src/conditiondialog.ui" line="573"/>
         <source>Match any</source>
         <translation>Beliebige</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="807"/>
+        <location filename="../../src/conditiondialog.ui" line="788"/>
         <source>Sample at height (Y):</source>
         <translation>Evaluierungshöhe (Y):</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="680"/>
-        <location filename="../../src/conditiondialog.ui" line="851"/>
+        <location filename="../../src/conditiondialog.ui" line="661"/>
+        <location filename="../../src/conditiondialog.ui" line="832"/>
         <source>256 (Surface)</source>
         <translation>256 (Oberfläche)</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="270"/>
+        <location filename="../../src/conditiondialog.ui" line="262"/>
         <source>From visible</source>
         <translation>Sichtbarer Bereich</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="481"/>
+        <location filename="../../src/conditiondialog.ui" line="470"/>
         <source>Y:</source>
         <translation>Y:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="624"/>
-        <location filename="../../src/conditiondialog.ui" line="655"/>
+        <location filename="../../src/conditiondialog.ui" line="605"/>
+        <location filename="../../src/conditiondialog.ui" line="636"/>
         <source>Proportion of the area that has to be of the included biomes</source>
         <translation>Mindestanteil der Fläche mit den inkludierten Biomen</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="634"/>
-        <location filename="../../src/conditiondialog.ui" line="662"/>
+        <location filename="../../src/conditiondialog.ui" line="615"/>
+        <location filename="../../src/conditiondialog.ui" line="643"/>
         <source>Statistical confidence that the coverage has been reached</source>
         <translation>Statistische sicherheit, dass die Abdeckung erreicht ist</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="685"/>
-        <location filename="../../src/conditiondialog.ui" line="856"/>
+        <location filename="../../src/conditiondialog.ui" line="666"/>
+        <location filename="../../src/conditiondialog.ui" line="837"/>
         <source>128 (Nether Roof)</source>
         <translation>128 (Nether Decke)</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="690"/>
-        <location filename="../../src/conditiondialog.ui" line="861"/>
+        <location filename="../../src/conditiondialog.ui" line="671"/>
+        <location filename="../../src/conditiondialog.ui" line="842"/>
         <source>62 (Sea Level)</source>
         <translation>62 (Meeresspiegel)</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="695"/>
-        <location filename="../../src/conditiondialog.ui" line="866"/>
+        <location filename="../../src/conditiondialog.ui" line="676"/>
+        <location filename="../../src/conditiondialog.ui" line="847"/>
         <source>48</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="700"/>
-        <location filename="../../src/conditiondialog.ui" line="871"/>
+        <location filename="../../src/conditiondialog.ui" line="681"/>
+        <location filename="../../src/conditiondialog.ui" line="852"/>
         <source>32</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="705"/>
-        <location filename="../../src/conditiondialog.ui" line="876"/>
+        <location filename="../../src/conditiondialog.ui" line="686"/>
+        <location filename="../../src/conditiondialog.ui" line="857"/>
         <source>16</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="715"/>
-        <location filename="../../src/conditiondialog.ui" line="886"/>
+        <location filename="../../src/conditiondialog.ui" line="696"/>
+        <location filename="../../src/conditiondialog.ui" line="867"/>
         <source>-16</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="720"/>
-        <location filename="../../src/conditiondialog.ui" line="891"/>
+        <location filename="../../src/conditiondialog.ui" line="701"/>
+        <location filename="../../src/conditiondialog.ui" line="872"/>
         <source>-32</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="725"/>
-        <location filename="../../src/conditiondialog.ui" line="896"/>
+        <location filename="../../src/conditiondialog.ui" line="706"/>
+        <location filename="../../src/conditiondialog.ui" line="877"/>
         <source>-48</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="730"/>
-        <location filename="../../src/conditiondialog.ui" line="901"/>
+        <location filename="../../src/conditiondialog.ui" line="711"/>
+        <location filename="../../src/conditiondialog.ui" line="882"/>
         <source>-64 (Bedrock)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="518"/>
+        <location filename="../../src/conditiondialog.ui" line="499"/>
         <source>uncheck all</source>
         <translation>Alle abwählen</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="525"/>
+        <location filename="../../src/conditiondialog.ui" line="506"/>
         <source>include all</source>
         <translation>Alle Inkludieren</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="532"/>
+        <location filename="../../src/conditiondialog.ui" line="513"/>
         <source>exclude all</source>
         <translation>Alle Exkludieren</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="582"/>
+        <location filename="../../src/conditiondialog.ui" line="563"/>
         <source>Biome scale:</source>
         <translation>Biommaßstab:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="627"/>
+        <location filename="../../src/conditiondialog.ui" line="608"/>
         <source>Required coverage (%):</source>
         <translation>Erforderte Abdeckung (%):</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="637"/>
+        <location filename="../../src/conditiondialog.ui" line="618"/>
         <source>Confidence (%):</source>
         <translation>Statistische Sicherheit (%):</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="644"/>
+        <location filename="../../src/conditiondialog.ui" line="625"/>
         <source>Instead of estimating the center of the allowed biome area,
 yield each sampled position individually</source>
         <translation>Anstelle das Zentrum der erlaubten Biome zu ermitteln
 werden die Stichprobenpunkte einzeln weitergegeben</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="648"/>
+        <location filename="../../src/conditiondialog.ui" line="629"/>
         <source>Yield individual samples</source>
         <translation>Einzelne Orte auflösen</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="760"/>
+        <location filename="../../src/conditiondialog.ui" line="741"/>
         <source>Locate biome center</source>
         <translation>Biom lokalisieren</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="766"/>
+        <location filename="../../src/conditiondialog.ui" line="747"/>
         <source>Border tolerance:</source>
         <translation>Toleranz für den Biomrand:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="773"/>
+        <location filename="../../src/conditiondialog.ui" line="754"/>
         <source>Biome:</source>
         <translation>Biom:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="780"/>
+        <location filename="../../src/conditiondialog.ui" line="761"/>
         <source>1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="800"/>
+        <location filename="../../src/conditiondialog.ui" line="781"/>
         <source>Minimum area:</source>
         <translation>Minimale Fläche:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="827"/>
+        <location filename="../../src/conditiondialog.ui" line="808"/>
         <source>(? sq. chunks)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="931"/>
+        <location filename="../../src/conditiondialog.ui" line="912"/>
         <source>Temperature categories</source>
         <translation>Temeraturkategorieen</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="937"/>
+        <location filename="../../src/conditiondialog.ui" line="918"/>
         <source>Select how many entries of each temperature category are required.</source>
         <translation>Auswahl der Anzahl von Einträgen von jeder Teperaturkategorie erforderlich sind.</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="982"/>
+        <location filename="../../src/conditiondialog.ui" line="963"/>
         <source>Climate parameters</source>
         <translation>Klimaparameter</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="988"/>
+        <location filename="../../src/conditiondialog.ui" line="969"/>
         <source>Select the minimum required and maximum allowed climate parameters:</source>
         <translation>Auswahl der minimal erforderten und maximal erlaubten Klimaparameter:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="997"/>
+        <location filename="../../src/conditiondialog.ui" line="978"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The climate has to enter the required range&lt;/p&gt;&lt;p&gt;With the &lt;span style=&quot; font-style:italic;&quot;&gt;complete&lt;/span&gt; modifier, the entire range must be covered&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Das Klima muss in die Grenzen eintreten&lt;/p&gt;&lt;p&gt;Mit der &lt;span style=&quot; font-style:italic;&quot;&gt;vollständig&lt;/span&gt; Option muss der ganze Werteberich innerhalb der Grenzen liegen&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1000"/>
+        <location filename="../../src/conditiondialog.ui" line="981"/>
         <source>Required:</source>
         <translation>Erforderlich:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1028"/>
+        <location filename="../../src/conditiondialog.ui" line="1009"/>
         <source>Climate</source>
         <translation>Klima</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1056"/>
+        <location filename="../../src/conditiondialog.ui" line="1037"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The climate must remain inside the confinement range&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Das Klima muss innerhalb der Grenzen bleiben&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1059"/>
+        <location filename="../../src/conditiondialog.ui" line="1040"/>
         <source>Confined:</source>
         <translation>Begrenzung:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1090"/>
+        <location filename="../../src/conditiondialog.ui" line="1071"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Resulting biomes (&lt;span style=&quot; font-weight:600;&quot;&gt;at least one&lt;/span&gt; with &lt;img src=&quot;:/icons/check_include.png&quot;/&gt;, &lt;span style=&quot; font-weight:600;&quot;&gt;any&lt;/span&gt; with &lt;img src=&quot;:/icons/check_unchecked.png&quot;/&gt;, &lt;span style=&quot; font-weight:600;&quot;&gt;none&lt;/span&gt; with &lt;img src=&quot;:/icons/check_exclude.png&quot;/&gt;):&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Resultat (&lt;span style=&quot; font-weight:600;&quot;&gt;Mindestens eins&lt;/span&gt; mit &lt;img src=&quot;:/icons/check_include.png&quot;/&gt;, &lt;span style=&quot; font-weight:600;&quot;&gt;beliebige&lt;/span&gt; mit &lt;img src=&quot;:/icons/check_unchecked.png&quot;/&gt;, &lt;span style=&quot; font-weight:600;&quot;&gt;keine&lt;/span&gt; mit &lt;img src=&quot;:/icons/check_exclude.png&quot;/&gt;):&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1147"/>
+        <location filename="../../src/conditiondialog.ui" line="1120"/>
         <source>Locate climate minimum/maximum</source>
         <translation>Klima Minima/Maxima lokalizieren</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1183"/>
+        <location filename="../../src/conditiondialog.ui" line="1156"/>
         <source>Only match if value is outside the given range</source>
         <translation>Wert muss außerhalb des Wertebereichs liegen</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1217"/>
+        <location filename="../../src/conditiondialog.ui" line="1190"/>
         <source>If value is in range:</source>
         <translation>Wenn der Wert im Bereich liegt:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1210"/>
+        <location filename="../../src/conditiondialog.ui" line="1183"/>
         <source>Climate parameter: </source>
         <translation>Klimaparameter: </translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1241"/>
+        <location filename="../../src/conditiondialog.ui" line="1214"/>
         <source>-</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1153"/>
+        <location filename="../../src/conditiondialog.ui" line="1126"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Lower bound (inclusive)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Untere Grenze (abgeschlossen)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1156"/>
+        <location filename="../../src/conditiondialog.ui" line="1129"/>
         <source>-Infinity</source>
         <translation>-Unendlich</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1200"/>
+        <location filename="../../src/conditiondialog.ui" line="1173"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Upper bound (inclusive)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Untere Grenze (abgeschlossen)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1203"/>
+        <location filename="../../src/conditiondialog.ui" line="1176"/>
         <source>+Infinity</source>
         <translation>+Unendlich</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1163"/>
+        <location filename="../../src/conditiondialog.ui" line="1136"/>
         <source>Generate up to octave:</source>
         <translation>Bis zur Oktave:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1225"/>
+        <location filename="../../src/conditiondialog.ui" line="1198"/>
         <source>Minimum</source>
         <translation>Minimum</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1230"/>
+        <location filename="../../src/conditiondialog.ui" line="1203"/>
         <source>Maximum</source>
         <translation>Maximum</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1193"/>
+        <location filename="../../src/conditiondialog.ui" line="1166"/>
         <source>Yield position of:</source>
         <translation>Koordinaten zurückgeben vom:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1186"/>
+        <location filename="../../src/conditiondialog.ui" line="1159"/>
         <source>Invert range</source>
         <translation>Grenzen invertieren</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1276"/>
+        <location filename="../../src/conditiondialog.ui" line="1249"/>
         <source>Approximate surface height</source>
         <translation>Approxmierte Oberfächenhohe</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1282"/>
+        <location filename="../../src/conditiondialog.ui" line="1255"/>
         <source>Height (Y-level)</source>
         <translation>Höhe (Y-Level)</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1290"/>
+        <location filename="../../src/conditiondialog.ui" line="1263"/>
         <source>Inside range:</source>
         <translation>Innerhalb der Grenzen:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1295"/>
+        <location filename="../../src/conditiondialog.ui" line="1268"/>
         <source>Outside range:</source>
         <translation>Außerhalb der Grenzen:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1344"/>
+        <location filename="../../src/conditiondialog.ui" line="1317"/>
         <source>Edit</source>
         <translation>Bearbeiten</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1362"/>
+        <location filename="../../src/conditiondialog.ui" line="1335"/>
         <source>Save as...</source>
         <translation>Speichern als...</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1369"/>
+        <location filename="../../src/conditiondialog.ui" line="1342"/>
         <source>Examples...</source>
         <translation>Example...</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1376"/>
+        <location filename="../../src/conditiondialog.ui" line="1349"/>
         <source>Save</source>
         <translation>Speichern</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1393"/>
+        <location filename="../../src/conditiondialog.ui" line="1366"/>
         <source>Errors</source>
         <translation>Fehler</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1439"/>
+        <location filename="../../src/conditiondialog.ui" line="1412"/>
         <source>Lua script:</source>
         <translation>Lua Skript:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1446"/>
+        <location filename="../../src/conditiondialog.ui" line="1419"/>
         <source>Open directory...</source>
         <translation>Ordner öffnen...</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1488"/>
+        <location filename="../../src/conditiondialog.ui" line="1461"/>
         <source>Spiral iterator</source>
         <translation>Spiral Iterator</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1494"/>
+        <location filename="../../src/conditiondialog.ui" line="1467"/>
         <source>Step size:</source>
         <translation>Schrittgröße:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1501"/>
+        <location filename="../../src/conditiondialog.ui" line="1474"/>
         <source>512</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1540"/>
+        <location filename="../../src/conditiondialog.ui" line="1513"/>
         <source>Village variants</source>
         <translation>Dorfvarianten</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1546"/>
-        <location filename="../../src/conditiondialog.ui" line="1613"/>
-        <location filename="../../src/conditiondialog.ui" line="1718"/>
+        <location filename="../../src/conditiondialog.ui" line="1519"/>
+        <location filename="../../src/conditiondialog.ui" line="1578"/>
+        <location filename="../../src/conditiondialog.ui" line="1675"/>
         <source>Allow only structures that start with one of the selected pieces</source>
         <translation>Nur Strukturen welche mit einer der gewählten Konstruktionen beginnt</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1549"/>
-        <location filename="../../src/conditiondialog.ui" line="1616"/>
-        <location filename="../../src/conditiondialog.ui" line="1721"/>
+        <location filename="../../src/conditiondialog.ui" line="1522"/>
+        <location filename="../../src/conditiondialog.ui" line="1581"/>
+        <location filename="../../src/conditiondialog.ui" line="1678"/>
         <source>Filter starting piece</source>
         <translation>Konstuktionsstart</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1556"/>
+        <location filename="../../src/conditiondialog.ui" line="1529"/>
         <source>Abandoned</source>
         <translation>Verlassen</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1607"/>
+        <location filename="../../src/conditiondialog.ui" line="1572"/>
         <source>Bastion variants</source>
         <translation>Bastionvarianten</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1664"/>
+        <location filename="../../src/conditiondialog.ui" line="1621"/>
         <source>Fortress pieces</source>
         <translation>Festungsvarianten</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1670"/>
+        <location filename="../../src/conditiondialog.ui" line="1627"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Maximum continuous square bounding box&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Maximale quadratische Bounding Box&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1673"/>
+        <location filename="../../src/conditiondialog.ui" line="1630"/>
         <source>With 2x2 arrangement of bridge crossings or start piece</source>
         <translation>Mit 2x2 Anordung von Start- oder Brückenkreuzungskonstruktion</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1712"/>
+        <location filename="../../src/conditiondialog.ui" line="1669"/>
         <source>Ruined portal variants</source>
         <translation>Portalruinenvaianten</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1769"/>
+        <location filename="../../src/conditiondialog.ui" line="1718"/>
         <source>End city variants</source>
         <translation>Endsiedlungsvarianten</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1775"/>
+        <location filename="../../src/conditiondialog.ui" line="1724"/>
         <source>End ship</source>
         <translation>Schiff</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1817"/>
+        <location filename="../../src/conditiondialog.ui" line="1766"/>
         <source>Igloo variants</source>
         <translation>Igluvarianten</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.ui" line="1823"/>
+        <location filename="../../src/conditiondialog.ui" line="1772"/>
         <source>Basement</source>
         <translation>Keller</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="478"/>
-        <location filename="../../src/conditiondialog.cpp" line="764"/>
+        <location filename="../../src/conditiondialog.cpp" line="493"/>
+        <location filename="../../src/conditiondialog.cpp" line="779"/>
         <source>Generates any of:</source>
         <translation>Generiert beliebige von:</translation>
     </message>
@@ -1314,114 +1306,114 @@ werden die Stichprobenpunkte einzeln weitergegeben</translation>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="127"/>
+        <location filename="../../src/conditiondialog.cpp" line="142"/>
         <source>Other</source>
         <translation>Andere</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="154"/>
+        <location filename="../../src/conditiondialog.cpp" line="169"/>
         <source>Oceanic</source>
         <translation>Ozean</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="155"/>
+        <location filename="../../src/conditiondialog.cpp" line="170"/>
         <source>Warm</source>
         <translation>Warm</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="156"/>
+        <location filename="../../src/conditiondialog.cpp" line="171"/>
         <source>Lush</source>
         <translation>Üppig</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="157"/>
+        <location filename="../../src/conditiondialog.cpp" line="172"/>
         <source>Cold</source>
         <translation>Kalt</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="158"/>
+        <location filename="../../src/conditiondialog.cpp" line="173"/>
         <source>Freezing</source>
         <translation>Frost</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="159"/>
+        <location filename="../../src/conditiondialog.cpp" line="174"/>
         <source>Special Warm</source>
         <translation>Ungewöhlich warm</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="160"/>
+        <location filename="../../src/conditiondialog.cpp" line="175"/>
         <source>Special Lush</source>
         <translation>Ungewöhlich üppig</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="161"/>
+        <location filename="../../src/conditiondialog.cpp" line="176"/>
         <source>Special Cold</source>
         <translation>Ungewohnlich kalt</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="200"/>
+        <location filename="../../src/conditiondialog.cpp" line="215"/>
         <source>Temperature</source>
         <translation>Temperatur</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="200"/>
+        <location filename="../../src/conditiondialog.cpp" line="215"/>
         <source>Humidity</source>
         <translation>Feuchtigkeit</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="200"/>
+        <location filename="../../src/conditiondialog.cpp" line="215"/>
         <source>Continentalness</source>
         <translation>Kontinentalheit</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="201"/>
+        <location filename="../../src/conditiondialog.cpp" line="216"/>
         <source>Erosion</source>
         <translation>Erosion</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="201"/>
+        <location filename="../../src/conditiondialog.cpp" line="216"/>
         <source>Depth</source>
         <translation>Tiefe</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="201"/>
+        <location filename="../../src/conditiondialog.cpp" line="216"/>
         <source>Weirdness</source>
         <translation>Verrücktheit</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="223"/>
-        <location filename="../../src/conditiondialog.cpp" line="224"/>
+        <location filename="../../src/conditiondialog.cpp" line="238"/>
+        <location filename="../../src/conditiondialog.cpp" line="239"/>
         <source>-Inf</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="223"/>
-        <location filename="../../src/conditiondialog.cpp" line="224"/>
+        <location filename="../../src/conditiondialog.cpp" line="238"/>
+        <location filename="../../src/conditiondialog.cpp" line="239"/>
         <source>+Inf</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="233"/>
+        <location filename="../../src/conditiondialog.cpp" line="248"/>
         <source>Require full range instead of intersection</source>
         <translation>Erfordert vollen Grenzbereich anstelle einer Überschneidung</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="263"/>
+        <location filename="../../src/conditiondialog.cpp" line="278"/>
         <source>  -Inf</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="265"/>
+        <location filename="../../src/conditiondialog.cpp" line="280"/>
         <source>  +Inf</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="320"/>
+        <location filename="../../src/conditiondialog.cpp" line="335"/>
         <source>[script not found]</source>
         <translation>[Skript nicht gefunden]</translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/conditiondialog.cpp" line="905"/>
+        <location filename="../../src/conditiondialog.cpp" line="920"/>
         <source>The biome locator checks for %n instance(s), each of size %1, which cannot be satisfied by an area of size
 %2%3%4 = %5 &lt; %6 @ scale 1:%7.</source>
         <translation>
@@ -1430,22 +1422,22 @@ werden die Stichprobenpunkte einzeln weitergegeben</translation>
         </translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="939"/>
+        <location filename="../../src/conditiondialog.cpp" line="954"/>
         <source>No Allowed Biomes</source>
         <translation>Keine Erlaubten Biome</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="940"/>
+        <location filename="../../src/conditiondialog.cpp" line="955"/>
         <source>The set of allowed biomes is empty, which can never be satisfied. Please include some biomes for the required proportion.</source>
         <translation>Die Menge von erlaubten Biomen ist leer. Bitte mindestens ein Biom für die erforderte Abdeckung inkludieren.</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="961"/>
+        <location filename="../../src/conditiondialog.cpp" line="976"/>
         <source>Bad Area for Quad-Structure</source>
         <translation>Schlechte Flächendefinition für Quad-Strukturen</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="962"/>
+        <location filename="../../src/conditiondialog.cpp" line="977"/>
         <source>The selected area does not contain a range where a quad-structure can generate.
 
 Continue anyway?</source>
@@ -1454,52 +1446,52 @@ Continue anyway?</source>
 Trozdem fortfahren?</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="648"/>
+        <location filename="../../src/conditiondialog.cpp" line="663"/>
         <source>From floor(-x/2) to floor(x/2) on both axes (inclusive)</source>
         <translation>Von floor(-x/2) bis floor(x/2) auf beiden Axen (einschließlich)</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="697"/>
+        <location filename="../../src/conditiondialog.cpp" line="712"/>
         <source>Sampling scale:</source>
         <translation>Biommaßstab:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="734"/>
+        <location filename="../../src/conditiondialog.cpp" line="749"/>
         <source>Generation layer:</source>
         <translation>Generator Lage:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="878"/>
+        <location filename="../../src/conditiondialog.cpp" line="893"/>
         <source>No allowed start pieces specified. Condition can never be true.</source>
         <translation>Kein erlaubter Konstruktionsstart angegeben. Bedingung ist nie wahr.</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="879"/>
+        <location filename="../../src/conditiondialog.cpp" line="894"/>
         <source>Missing Start Piece</source>
         <translation>Kein Konstruktionsstart</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="889"/>
+        <location filename="../../src/conditiondialog.cpp" line="904"/>
         <source>The condition contains a climate range which is unbounded with the full range required, which can never be satisfied.</source>
         <translation>Die Bedingung erwartet unbeschränkte Klimagrenzen as gefordert, was nie zutreffen kann.</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="893"/>
+        <location filename="../../src/conditiondialog.cpp" line="908"/>
         <source>Bad Climate Range</source>
         <translation>Schlechte Klimagrenzen</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="912"/>
+        <location filename="../../src/conditiondialog.cpp" line="927"/>
         <source>Area Insufficient</source>
         <translation>Bereich ist zu klein</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="927"/>
+        <location filename="../../src/conditiondialog.cpp" line="942"/>
         <source>Bad Surface Height</source>
         <translation>Schlechte Oberflächenhöhe</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="928"/>
+        <location filename="../../src/conditiondialog.cpp" line="943"/>
         <source>Cave biomes do not generate above Y = 246. You should consider lowering the sampling height.
 
 Continue anyway?</source>
@@ -1508,72 +1500,72 @@ Continue anyway?</source>
 Trozdem fortfahren?</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="1233"/>
+        <location filename="../../src/conditiondialog.cpp" line="1250"/>
         <source>Help: area entry</source>
         <translation>Hilfe: Bereichseingabe</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="1234"/>
+        <location filename="../../src/conditiondialog.cpp" line="1251"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The area can be entered via &lt;b&gt;custom&lt;/b&gt; rectangle, that is defined by its two opposing corners, relative to a center point. These bounds are inclusive.&lt;/p&gt;&lt;p&gt;Alternatively, the area can be defined as a &lt;b&gt;centered square&lt;/b&gt; with a certain side length. In this case the area has the bounds: [-X/2, +X/2] on both axes, rounding down and bounds included. For example a centered square with side 3 will go from -2 to 1 for both the X and Z axes.&lt;/p&gt;&lt;p&gt;Some filters have a scaling associated with them. This means the condition only checks on a grid with that spacing. An area with a range from -21 to 21 at scale 1:16 may effectively be expanded to -32 to 31, and get sampled at -32, -16, 0 and 16.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="1412"/>
+        <location filename="../../src/conditiondialog.cpp" line="1429"/>
         <source>(~%1 sq. chunks)</source>
         <translation>(~%1 Chunks)</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="1414"/>
+        <location filename="../../src/conditiondialog.cpp" line="1431"/>
         <source>(%1 sq. chunks)</source>
         <translation>(%1 Chunks)</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="1422"/>
+        <location filename="../../src/conditiondialog.cpp" line="1439"/>
         <source>Unsaved changes</source>
         <translation>Ungespeicherte Änderungen</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="1423"/>
+        <location filename="../../src/conditiondialog.cpp" line="1440"/>
         <source>Discard unsaved changes?</source>
         <translation>Ungespeicherte Änderungen verwerfen?</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="1493"/>
+        <location filename="../../src/conditiondialog.cpp" line="1510"/>
         <source>Save lua script</source>
         <translation>Lua Skript speichern</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="1493"/>
+        <location filename="../../src/conditiondialog.cpp" line="1510"/>
         <source>Lua script (*.lua)</source>
         <translation>Lua Skript (*.lua)</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="1519"/>
+        <location filename="../../src/conditiondialog.cpp" line="1536"/>
         <source>Empty check functions</source>
         <translation>Leere check Funktion</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="1520"/>
+        <location filename="../../src/conditiondialog.cpp" line="1537"/>
         <source>Village along the way from A to B</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="1562"/>
+        <location filename="../../src/conditiondialog.cpp" line="1579"/>
         <source>Lua examples</source>
         <translation>Lua Beispiele</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="1563"/>
+        <location filename="../../src/conditiondialog.cpp" line="1580"/>
         <source>Replace editor content with example:</source>
         <translation>Den Editorinhalt mit Beispiel ersetzen:</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="1587"/>
+        <location filename="../../src/conditiondialog.cpp" line="1604"/>
         <source>Help: Lua script</source>
         <translation>Hilfe: Lua Skript</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="1588"/>
+        <location filename="../../src/conditiondialog.cpp" line="1605"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Lua scripts allow the user to write custom filters. A valid Lua filtering script has to define a&lt;/p&gt;&lt;p&gt;&lt;b&gt;check(seed, at, deps)&lt;/b&gt;&lt;/p&gt;&lt;p&gt;function, that evaluates when a seed satisfies the condition. It should return a &lt;b&gt;x, z&lt;/b&gt; value pair that is the block position for other conditions to reference as the relative location. If the condition fails, the function can return &lt;b&gt;nil&lt;/b&gt; instead.&lt;/p&gt;&lt;p&gt;The arguments of &lt;b&gt;check()&lt;/b&gt; are in order:&lt;/p&gt;&lt;p&gt;&lt;dl&gt;&lt;dt&gt;&lt;b&gt;seed&lt;/b&gt;&lt;dd&gt;the current world seed&lt;dt&gt;&lt;b&gt;at&lt;/b&gt; = {x, z}&lt;dd&gt;the relative location of the parent condition&lt;dt&gt;&lt;b&gt;deps&lt;/b&gt; = [..]{x, z, id, parent}&lt;dd&gt;a list of tables with information on the dependent conditions (i.e. those later in the conditions list)&lt;/dl&gt;&lt;/p&gt;&lt;p&gt;Optionally, the script can also define a &lt;b&gt;check48()&lt;/b&gt; function, with a similar prototype, that tests whether a given 48-bit seed base is worth investigating further.&lt;/p&gt;&lt;p&gt;A few global symbols are predefined. These include the biome ID and structure type enums from cubiomes, which means they can be referred to by their names (such as &lt;b&gt;flower_forest&lt;/b&gt; or &lt;b&gt;Village&lt;/b&gt;). Furthermore, the following functions are available:&lt;/p&gt;&lt;p&gt;&lt;dl&gt;&lt;dt&gt;&lt;b&gt;getBiomeAt(x, z)&lt;/b&gt;&lt;dt&gt;&lt;b&gt;getBiomeAt(x, y, z)&lt;/b&gt;&lt;dd&gt;returns the overworld biome at the given block coordinates&lt;/p&gt;&lt;p&gt;&lt;dt&gt;&lt;b&gt;getStructures(type, x1, z1, x2, z2)&lt;/b&gt;&lt;dd&gt;returns a list of &lt;b&gt;{x, z}&lt;/b&gt; structure positions for the specified structure &lt;b&gt;type&lt;/b&gt; within the area spanning the block positions &lt;b&gt;x1, z1&lt;/b&gt; to &lt;b&gt;x2, z2&lt;/b&gt;, or &lt;b&gt;nil&lt;/b&gt; upon failure&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3137,52 +3129,52 @@ Trozdem fortfahren?</translation>
 <context>
     <name>Layer</name>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="673"/>
+        <location filename="../../src/conditiondialog.cpp" line="688"/>
         <source>1:1 Voronoi</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="674"/>
+        <location filename="../../src/conditiondialog.cpp" line="689"/>
         <source>1:4 River Mix</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="675"/>
+        <location filename="../../src/conditiondialog.cpp" line="690"/>
         <source>1:4 Ocean Mix</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="676"/>
+        <location filename="../../src/conditiondialog.cpp" line="691"/>
         <source>1:4 Zoom</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="677"/>
+        <location filename="../../src/conditiondialog.cpp" line="692"/>
         <source>1:16 Swamp River</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="678"/>
+        <location filename="../../src/conditiondialog.cpp" line="693"/>
         <source>1:16 Shore</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="679"/>
+        <location filename="../../src/conditiondialog.cpp" line="694"/>
         <source>1:64 Hills</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="680"/>
+        <location filename="../../src/conditiondialog.cpp" line="695"/>
         <source>1:64 Sunflower</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="681"/>
+        <location filename="../../src/conditiondialog.cpp" line="696"/>
         <source>1:256 Biome</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.cpp" line="682"/>
+        <location filename="../../src/conditiondialog.cpp" line="697"/>
         <source>1:256 Bamboo</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3316,567 +3308,567 @@ Trozdem fortfahren?</translation>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../../src/mainwindow.ui" line="14"/>
+        <location filename="../../src/mainwindow.ui" line="6"/>
         <source>Cubiomes Viewer</source>
         <translation>Cubiomes Viewer</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="64"/>
-        <location filename="../../src/mainwindow.ui" line="209"/>
+        <location filename="../../src/mainwindow.ui" line="56"/>
+        <location filename="../../src/mainwindow.ui" line="201"/>
         <source>Seed can be an integer or text. Leave empty for a random seed</source>
         <translation>Seed kann eine ganze Zahl oder ein Text sein. Freilassen für eine zufällige Zahl</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="67"/>
+        <location filename="../../src/mainwindow.ui" line="59"/>
         <source>seed:</source>
         <translation>Seed:</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="77"/>
+        <location filename="../../src/mainwindow.ui" line="69"/>
         <source>Show map for this y-level</source>
         <translation>Karte bei diesem Y-Level anzeigen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="80"/>
+        <location filename="../../src/mainwindow.ui" line="72"/>
         <source>Y:</source>
         <translation>Y:</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="90"/>
+        <location filename="../../src/mainwindow.ui" line="82"/>
         <source>Large biomes</source>
         <translation>Große Biome</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="97"/>
-        <location filename="../../src/mainwindow.ui" line="116"/>
+        <location filename="../../src/mainwindow.ui" line="89"/>
+        <location filename="../../src/mainwindow.ui" line="108"/>
         <source>Minecraft version</source>
         <translation>Minecraft Version</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="119"/>
+        <location filename="../../src/mainwindow.ui" line="111"/>
         <source>MC</source>
         <translation>MC</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="139"/>
+        <location filename="../../src/mainwindow.ui" line="131"/>
         <source>256 (Surface)</source>
         <translation>256 (Oberfläche)</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="144"/>
+        <location filename="../../src/mainwindow.ui" line="136"/>
         <source>128 (Nether Roof)</source>
         <translation>128 (Nether Decke)</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="149"/>
+        <location filename="../../src/mainwindow.ui" line="141"/>
         <source>62 (Sea Level)</source>
         <translation>62 (Meeresspiegel)</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="154"/>
+        <location filename="../../src/mainwindow.ui" line="146"/>
         <source>48</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="159"/>
+        <location filename="../../src/mainwindow.ui" line="151"/>
         <source>32</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="164"/>
+        <location filename="../../src/mainwindow.ui" line="156"/>
         <source>16</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="169"/>
+        <location filename="../../src/mainwindow.ui" line="161"/>
         <source>0</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="174"/>
+        <location filename="../../src/mainwindow.ui" line="166"/>
         <source>-16</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="179"/>
+        <location filename="../../src/mainwindow.ui" line="171"/>
         <source>-32</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="184"/>
+        <location filename="../../src/mainwindow.ui" line="176"/>
         <source>-48</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="189"/>
+        <location filename="../../src/mainwindow.ui" line="181"/>
         <source>-64 (Bedrock)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="202"/>
+        <location filename="../../src/mainwindow.ui" line="194"/>
         <source>Press enter to accept</source>
         <translation>Eingabetaste zum übernehmen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="212"/>
+        <location filename="../../src/mainwindow.ui" line="204"/>
         <source>random</source>
         <translation>zufällig</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="238"/>
+        <location filename="../../src/mainwindow.ui" line="230"/>
         <source>Search</source>
         <translation>Suche</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="269"/>
+        <location filename="../../src/mainwindow.ui" line="261"/>
         <source>Seeds</source>
         <translation>Seeds</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="343"/>
+        <location filename="../../src/mainwindow.ui" line="335"/>
         <source>Map controls</source>
         <translation>Kartenbedienung</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="402"/>
-        <location filename="../../src/mainwindow.cpp" line="70"/>
+        <location filename="../../src/mainwindow.ui" line="386"/>
+        <location filename="../../src/mainwindow.cpp" line="69"/>
         <source>Map</source>
         <translation>Karte</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="409"/>
+        <location filename="../../src/mainwindow.ui" line="393"/>
         <source>Previous seeds</source>
         <translation>Vorheriger Seed</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="425"/>
+        <location filename="../../src/mainwindow.ui" line="409"/>
         <source>Help</source>
         <translation>Hilfe</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="433"/>
+        <location filename="../../src/mainwindow.ui" line="417"/>
         <source>File</source>
         <translation>Datei</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="447"/>
+        <location filename="../../src/mainwindow.ui" line="431"/>
         <source>Edit</source>
         <translation>Bearbeiten</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="463"/>
+        <location filename="../../src/mainwindow.ui" line="447"/>
         <source>Layer</source>
         <translation>Ebene</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="495"/>
+        <location filename="../../src/mainwindow.ui" line="479"/>
         <source>About</source>
         <translation>Über</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="500"/>
+        <location filename="../../src/mainwindow.ui" line="484"/>
         <source>Open shadow seed</source>
         <translation>Shadow Seed öffnen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="505"/>
+        <location filename="../../src/mainwindow.ui" line="489"/>
         <source>Save session...</source>
         <translation>Sitzung speichern...</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="508"/>
+        <location filename="../../src/mainwindow.ui" line="492"/>
         <source>Ctrl+S</source>
         <translation>Strg+S</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="513"/>
+        <location filename="../../src/mainwindow.ui" line="497"/>
         <source>Load session...</source>
         <translation>Sitzung laden...</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="516"/>
+        <location filename="../../src/mainwindow.ui" line="500"/>
         <source>Ctrl+O</source>
         <translation>Strg+O</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="521"/>
+        <location filename="../../src/mainwindow.ui" line="505"/>
         <source>Search seed list...</source>
         <translation>Seedliste durchsuchen...</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="524"/>
+        <location filename="../../src/mainwindow.ui" line="508"/>
         <source>Load seeds from file for search</source>
         <translation>Durchsuche Seeds aus Datei</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="529"/>
+        <location filename="../../src/mainwindow.ui" line="513"/>
         <source>Search full seed space</source>
         <translation>Durchsuche alle Seeds</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="534"/>
+        <location filename="../../src/mainwindow.ui" line="518"/>
         <source>Copy seeds from list</source>
         <translation>Seedliste kopieren</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="539"/>
+        <location filename="../../src/mainwindow.ui" line="523"/>
         <source>Paste seeds into list</source>
         <translation>Seedliste einfügen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="549"/>
+        <location filename="../../src/mainwindow.ui" line="533"/>
         <source>Quit</source>
         <translation>Beenden</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="554"/>
+        <location filename="../../src/mainwindow.ui" line="538"/>
         <source>Add shadow for all seeds</source>
         <translation>Shadow Seed für jeden Listeneintrag hinzufügen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="559"/>
+        <location filename="../../src/mainwindow.ui" line="543"/>
         <source>Advanced world settings...</source>
         <translation>Erweiterte Welteneinstellungen...</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="564"/>
+        <location filename="../../src/mainwindow.ui" line="548"/>
         <source>Example filters...</source>
         <translation>Beispielfilter...</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="569"/>
+        <location filename="../../src/mainwindow.ui" line="553"/>
         <source>Save filter as preset...</source>
         <translation>Filter als Vorlage speichern...</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="574"/>
+        <location filename="../../src/mainwindow.ui" line="558"/>
         <source>Load filter preset...</source>
         <translation>Filtervorlage laden...</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="579"/>
+        <location filename="../../src/mainwindow.ui" line="563"/>
         <source>Edit biome colors...</source>
         <translation>Biomfarben editieren...</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="633"/>
+        <location filename="../../src/mainwindow.ui" line="617"/>
         <source>Edit map tools...</source>
         <translation>Werkzeuge editieren...</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="768"/>
+        <location filename="../../src/mainwindow.ui" line="752"/>
         <source>Redistribute condition IDs</source>
         <translation>IDs neu verteilen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="590"/>
+        <location filename="../../src/mainwindow.ui" line="574"/>
         <source>Biome scales (default)</source>
         <translation>Biommaßstäbe (Standard)</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="544"/>
+        <location filename="../../src/mainwindow.ui" line="528"/>
         <source>Edit preferences...</source>
         <translation>Einstellungen editieren...</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="593"/>
+        <location filename="../../src/mainwindow.ui" line="577"/>
         <source>Alt+B</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="598"/>
+        <location filename="../../src/mainwindow.ui" line="582"/>
         <source>Go to...</source>
         <translation>Gehe zu...</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="601"/>
+        <location filename="../../src/mainwindow.ui" line="585"/>
         <source>Ctrl+G</source>
         <translation>Strg+G</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="609"/>
+        <location filename="../../src/mainwindow.ui" line="593"/>
         <source>(1.13 - 1.17) O. Temp. 1:256</source>
         <translation>(1.13 - 1.17) O. Temp. 1:256</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="612"/>
+        <location filename="../../src/mainwindow.ui" line="596"/>
         <source>Alt+O</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="620"/>
+        <location filename="../../src/mainwindow.ui" line="604"/>
         <source>(1.13 - 1.17) River Mix 1:4</source>
         <translation>(1.13 - 1.17) Fluss Mix 1:4</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="623"/>
+        <location filename="../../src/mainwindow.ui" line="607"/>
         <source>Alt+R</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="628"/>
+        <location filename="../../src/mainwindow.ui" line="612"/>
         <source>Export biomes as image...</source>
         <translation>Biome als Bild exportieren...</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="641"/>
+        <location filename="../../src/mainwindow.ui" line="625"/>
         <source>(1.18+) Temperature</source>
         <translation>(1.18+) Temperatur</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="644"/>
+        <location filename="../../src/mainwindow.ui" line="628"/>
         <source>Alt+T</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="652"/>
+        <location filename="../../src/mainwindow.ui" line="636"/>
         <source>(1.18+) Humidity</source>
         <translation>(1.18+) Feuchtigkeit</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="655"/>
+        <location filename="../../src/mainwindow.ui" line="639"/>
         <source>Alt+H</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="663"/>
+        <location filename="../../src/mainwindow.ui" line="647"/>
         <source>(1.18+) Continentalness</source>
         <translation>(1.18+) Kontinentalheit</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="666"/>
+        <location filename="../../src/mainwindow.ui" line="650"/>
         <source>Alt+C</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="674"/>
+        <location filename="../../src/mainwindow.ui" line="658"/>
         <source>(1.18+) Erosion</source>
         <translation>(1.18+) Erosion</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="677"/>
+        <location filename="../../src/mainwindow.ui" line="661"/>
         <source>Alt+E</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="685"/>
+        <location filename="../../src/mainwindow.ui" line="669"/>
         <source>(1.18+) Weirdness</source>
         <translation>(1.18+) Verrücktheit</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="688"/>
+        <location filename="../../src/mainwindow.ui" line="672"/>
         <source>Alt+W</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="696"/>
+        <location filename="../../src/mainwindow.ui" line="680"/>
         <source>(1.18+) Depth</source>
         <translation>(1.18+) Tiefe</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="699"/>
+        <location filename="../../src/mainwindow.ui" line="683"/>
         <source>Alt+D</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="707"/>
+        <location filename="../../src/mainwindow.ui" line="691"/>
         <source>Structure potential (48-bit)</source>
         <translation>Strukturpotenzial (48-bit)</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="710"/>
+        <location filename="../../src/mainwindow.ui" line="694"/>
         <source>Alt+S</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="715"/>
+        <location filename="../../src/mainwindow.ui" line="699"/>
         <source>Take screenshot</source>
         <translation>Screenshot aufnehmen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="718"/>
+        <location filename="../../src/mainwindow.ui" line="702"/>
         <source>Ctrl+Shift+S</source>
         <translation>Strg+Shift+S</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="723"/>
-        <location filename="../../src/mainwindow.cpp" line="903"/>
-        <location filename="../../src/mainwindow.cpp" line="1215"/>
+        <location filename="../../src/mainwindow.ui" line="707"/>
+        <location filename="../../src/mainwindow.cpp" line="901"/>
+        <location filename="../../src/mainwindow.cpp" line="1213"/>
         <source>Undock map</source>
         <translation>Karte ausdocken</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="731"/>
+        <location filename="../../src/mainwindow.ui" line="715"/>
         <source>Approx. surface height</source>
         <translation>Ungefähre Oberflächenhöhe</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="734"/>
+        <location filename="../../src/mainwindow.ui" line="718"/>
         <source>Alt+Y</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="739"/>
+        <location filename="../../src/mainwindow.ui" line="723"/>
         <source>Display options...</source>
         <translation>Anzeigeoptionen...</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="747"/>
+        <location filename="../../src/mainwindow.ui" line="731"/>
         <source>(Beta 1.7) No beta oceans</source>
         <translation>(Beta 1.7) Keine Beta Meere</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="755"/>
+        <location filename="../../src/mainwindow.ui" line="739"/>
         <source>(Beta 1.7) Temperature</source>
         <translation>(Beta 1.7) Temperatur</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.ui" line="763"/>
+        <location filename="../../src/mainwindow.ui" line="747"/>
         <source>(Beta 1.7) Humidity</source>
         <translation>(Beta 1.7) Feuchtigkeit</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="92"/>
+        <location filename="../../src/mainwindow.cpp" line="90"/>
         <source>Locations</source>
         <translation>Standorte</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="93"/>
+        <location filename="../../src/mainwindow.cpp" line="91"/>
         <source>Biomes</source>
         <translation>Biome</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="94"/>
+        <location filename="../../src/mainwindow.cpp" line="92"/>
         <source>Structures</source>
         <translation>Strukturen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="134"/>
+        <location filename="../../src/mainwindow.cpp" line="132"/>
         <source>Go to Origin</source>
         <translation>Zum Ursprung</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="135"/>
+        <location filename="../../src/mainwindow.cpp" line="133"/>
         <source>Zoom In</source>
         <translation>Vergrößern</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="136"/>
+        <location filename="../../src/mainwindow.cpp" line="134"/>
         <source>Zoom Out</source>
         <translation>Verkleinern</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="146"/>
+        <location filename="../../src/mainwindow.cpp" line="144"/>
         <source>Overworld</source>
         <translation>Oberwelt</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="147"/>
+        <location filename="../../src/mainwindow.cpp" line="145"/>
         <source>Nether</source>
         <translation>Nether</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="148"/>
+        <location filename="../../src/mainwindow.cpp" line="146"/>
         <source>End</source>
         <translation>Ende</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="207"/>
+        <location filename="../../src/mainwindow.cpp" line="205"/>
         <source>Conditions</source>
         <translation>Bedingungen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="211"/>
+        <location filename="../../src/mainwindow.cpp" line="209"/>
         <source>Help: Conditions</source>
         <translation>Hilfe: Bedingungen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="212"/>
+        <location filename="../../src/mainwindow.cpp" line="210"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The search conditions define the properties by which potential seeds are filtered.&lt;/p&gt;&lt;p&gt;Conditions can reference each other to produce relative positional dependencies (indicated with the ID in square brackets [XY]). When a condition passes its check, it usually yields just one location that other conditions can reference. An exception to this are structure conditions with exactly one required instance. In this case, each found structure occurence is examined separately instead. On the other hand, a condition that checks for a structure cluster, will average the position of all occurences and yield a single position.&lt;/p&gt;&lt;p&gt;Standard biome conditions yield the center of the testing area as they evaluate the area as a whole. To locate the position of a given biome you can use the designated &lt;b&gt;locate&lt;/b&gt; filters, or use a spiral iterator to scan an area with a localized condition.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="236"/>
+        <location filename="../../src/mainwindow.cpp" line="234"/>
         <source>Seed generator (48-bit)</source>
         <translation>Seedgenerator (48-bit)</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="239"/>
+        <location filename="../../src/mainwindow.cpp" line="237"/>
         <source>Help: Seed generator</source>
         <translation>Hilfe: Seedgenerator</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="240"/>
+        <location filename="../../src/mainwindow.cpp" line="238"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;For some searches, the 48-bit structure seed candidates can be generated without searching, which can vastly reduce the search space that has to be checked.&lt;/p&gt;&lt;p&gt;The generator mode &lt;b&gt;Auto&lt;/b&gt; is recommended for general use, which automatically selects suitable options based on the conditions list.&lt;/p&gt;&lt;p&gt;The &lt;b&gt;Quad-feature&lt;/b&gt; mode produces candidates for quad&amp;#8209;structures that have a uniform distribution of region&amp;#8209;size=32 and chunk&amp;#8209;gap=8, such as swamp huts.&lt;/p&gt;&lt;p&gt;A perfect &lt;b&gt;Quad-monument&lt;/b&gt; structure constellation does not actually exist, but some extremely rare structure seed bases get close, with over 90&amp;#37; of the area within 128 blocks. The generator uses a precomputed list of these seed bases.&lt;/p&gt;&lt;p&gt;Using a &lt;b&gt;Seed list&lt;/b&gt; you can provide a custom set of 48-bit candidates. Optionally, a salt value can be added and the seeds can be region transposed.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="264"/>
+        <location filename="../../src/mainwindow.cpp" line="262"/>
         <source>Matching seeds</source>
         <translation>Passende Seeds</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="270"/>
+        <location filename="../../src/mainwindow.cpp" line="268"/>
         <source>Help: Matching seeds</source>
         <translation>Hilfe: Passende Seeds</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="271"/>
+        <location filename="../../src/mainwindow.cpp" line="269"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The list of seeds acts as a buffer onto which suitable seeds are added when they are found. You can also copy the seed list, or paste seeds into the list. Selecting a seed will open it in the map view.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="324"/>
+        <location filename="../../src/mainwindow.cpp" line="322"/>
         <source>Show %1</source>
         <translation>%1 anzeigen</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="724"/>
+        <location filename="../../src/mainwindow.cpp" line="722"/>
         <source>text</source>
         <comment>Seed input type</comment>
         <translatorcomment>Seed-Eingabetyp</translatorcomment>
         <translation>Text</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="726"/>
+        <location filename="../../src/mainwindow.cpp" line="724"/>
         <source>random</source>
         <comment>Seed input type</comment>
         <translatorcomment>Seed-Eingabetyp</translatorcomment>
         <translation>zufällig</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="734"/>
+        <location filename="../../src/mainwindow.cpp" line="732"/>
         <source>Save progress</source>
         <translation>Vortschritt speichern</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="734"/>
-        <location filename="../../src/mainwindow.cpp" line="746"/>
+        <location filename="../../src/mainwindow.cpp" line="732"/>
+        <location filename="../../src/mainwindow.cpp" line="744"/>
         <source>Session files (*.session *.txt);;Any files (*)</source>
         <translation>Sitzungsdateien (*.session *.txt);;Alle Dateien (*)</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="746"/>
+        <location filename="../../src/mainwindow.cpp" line="744"/>
         <source>Load progress</source>
         <translation>Vortschritt laden</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="889"/>
+        <location filename="../../src/mainwindow.cpp" line="887"/>
         <source>Save screenshot</source>
         <translation>Screenshot speichern</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="889"/>
+        <location filename="../../src/mainwindow.cpp" line="887"/>
         <source>Images (*.png *.jpg *.ppm)</source>
         <translation>Bilder (*.png *.jpg *.ppm)</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="909"/>
+        <location filename="../../src/mainwindow.cpp" line="907"/>
         <source>Redock map</source>
         <translation>Karte andocken</translation>
     </message>
     <message>
-        <location filename="../../src/mainwindow.cpp" line="1063"/>
+        <location filename="../../src/mainwindow.cpp" line="1061"/>
         <source>The application will need to be restarted before all changes can take effect.</source>
         <translation>Die Anwendung muss neugestartet werden um alle Änderungen wirksam zu machen.</translation>
     </message>
@@ -4189,12 +4181,24 @@ Looks for a suitable climate that primarily supports Jungle variants.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/presetdialog.cpp" line="233"/>
+        <location filename="../../src/presetdialog.cpp" line="130"/>
+        <source>Likely sinkhole (1.18+)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/presetdialog.cpp" line="131"/>
+        <source>Extreme climate weirdness that can generate holes to the world floor.
+
+In versions 1.19 - 1.19.2, the world generation can have interesting artifacts at these places.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/presetdialog.cpp" line="238"/>
         <source>New Preset</source>
         <translation>Neue Vorlage</translation>
     </message>
     <message>
-        <location filename="../../src/presetdialog.cpp" line="234"/>
+        <location filename="../../src/presetdialog.cpp" line="239"/>
         <source>Preset title:</source>
         <translation>Vorlagenname:</translation>
     </message>
@@ -4553,12 +4557,12 @@ Weiter auf den Stop der Threads warten?</numerusform>
 <context>
     <name>SpinExclude</name>
     <message>
-        <location filename="../../src/conditiondialog.h" line="107"/>
+        <location filename="../../src/widgets.cpp" line="449"/>
         <source>(ignore)</source>
         <translation>(ignorieren)</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.h" line="109"/>
+        <location filename="../../src/widgets.cpp" line="451"/>
         <source>(exclude)</source>
         <translation>(exkludieren)</translation>
     </message>
@@ -4566,12 +4570,12 @@ Weiter auf den Stop der Threads warten?</numerusform>
 <context>
     <name>SpinInstances</name>
     <message>
-        <location filename="../../src/conditiondialog.h" line="144"/>
+        <location filename="../../src/widgets.cpp" line="487"/>
         <source>(exclude)</source>
         <translation>(exkludieren)</translation>
     </message>
     <message>
-        <location filename="../../src/conditiondialog.h" line="146"/>
+        <location filename="../../src/widgets.cpp" line="489"/>
         <source>(cluster)</source>
         <translation>(gebündelt)</translation>
     </message>
@@ -5007,7 +5011,7 @@ Weiter auf den Stop der Threads warten?</numerusform>
     </message>
     <message>
         <location filename="../../src/tabstructures.ui" line="58"/>
-        <location filename="../../src/tabstructures.cpp" line="356"/>
+        <location filename="../../src/tabstructures.cpp" line="359"/>
         <source>Analyze</source>
         <translation>Analyse</translation>
     </message>
@@ -5034,15 +5038,15 @@ Weiter auf den Stop der Threads warten?</numerusform>
     <message>
         <location filename="../../src/tabstructures.ui" line="123"/>
         <location filename="../../src/tabstructures.ui" line="193"/>
-        <location filename="../../src/tabstructures.cpp" line="521"/>
-        <location filename="../../src/tabstructures.cpp" line="562"/>
-        <location filename="../../src/tabstructures.cpp" line="588"/>
+        <location filename="../../src/tabstructures.cpp" line="534"/>
+        <location filename="../../src/tabstructures.cpp" line="575"/>
+        <location filename="../../src/tabstructures.cpp" line="601"/>
         <source>seed</source>
         <translation>Seed</translation>
     </message>
     <message>
         <location filename="../../src/tabstructures.ui" line="128"/>
-        <location filename="../../src/tabstructures.cpp" line="521"/>
+        <location filename="../../src/tabstructures.cpp" line="534"/>
         <source>structure</source>
         <translation>Struktur</translation>
     </message>
@@ -5054,22 +5058,22 @@ Weiter auf den Stop der Threads warten?</numerusform>
     <message>
         <location filename="../../src/tabstructures.ui" line="138"/>
         <location filename="../../src/tabstructures.ui" line="208"/>
-        <location filename="../../src/tabstructures.cpp" line="521"/>
-        <location filename="../../src/tabstructures.cpp" line="588"/>
+        <location filename="../../src/tabstructures.cpp" line="534"/>
+        <location filename="../../src/tabstructures.cpp" line="601"/>
         <source>x</source>
         <translation>X</translation>
     </message>
     <message>
         <location filename="../../src/tabstructures.ui" line="143"/>
         <location filename="../../src/tabstructures.ui" line="213"/>
-        <location filename="../../src/tabstructures.cpp" line="521"/>
-        <location filename="../../src/tabstructures.cpp" line="588"/>
+        <location filename="../../src/tabstructures.cpp" line="534"/>
+        <location filename="../../src/tabstructures.cpp" line="601"/>
         <source>z</source>
         <translation>Z</translation>
     </message>
     <message>
         <location filename="../../src/tabstructures.ui" line="148"/>
-        <location filename="../../src/tabstructures.cpp" line="521"/>
+        <location filename="../../src/tabstructures.cpp" line="534"/>
         <source>details</source>
         <translation>Details</translation>
     </message>
@@ -5080,25 +5084,25 @@ Weiter auf den Stop der Threads warten?</numerusform>
     </message>
     <message>
         <location filename="../../src/tabstructures.ui" line="198"/>
-        <location filename="../../src/tabstructures.cpp" line="588"/>
+        <location filename="../../src/tabstructures.cpp" line="601"/>
         <source>type</source>
         <translation>Typ</translation>
     </message>
     <message>
         <location filename="../../src/tabstructures.ui" line="203"/>
-        <location filename="../../src/tabstructures.cpp" line="588"/>
+        <location filename="../../src/tabstructures.cpp" line="601"/>
         <source>distance</source>
         <translation>Distanz</translation>
     </message>
     <message>
         <location filename="../../src/tabstructures.ui" line="218"/>
-        <location filename="../../src/tabstructures.cpp" line="588"/>
+        <location filename="../../src/tabstructures.cpp" line="601"/>
         <source>radius</source>
         <translation>Radius</translation>
     </message>
     <message>
         <location filename="../../src/tabstructures.ui" line="223"/>
-        <location filename="../../src/tabstructures.cpp" line="588"/>
+        <location filename="../../src/tabstructures.cpp" line="601"/>
         <source>spawn area</source>
         <translation>Spawnbereich</translation>
     </message>
@@ -5152,117 +5156,26 @@ Weiter auf den Stop der Threads warten?</numerusform>
         <translation>Sichtbarer Bereich</translation>
     </message>
     <message>
-        <location filename="../../src/tabstructures.cpp" line="386"/>
-        <location filename="../../src/tabstructures.cpp" line="472"/>
+        <location filename="../../src/tabstructures.cpp" line="389"/>
+        <location filename="../../src/tabstructures.cpp" line="485"/>
         <source>Stop</source>
         <translation>Stop</translation>
     </message>
     <message>
-        <location filename="../../src/tabstructures.cpp" line="491"/>
+        <location filename="../../src/tabstructures.cpp" line="504"/>
         <source>Export structure analysis</source>
         <translation>Export der Strukturanalyse</translation>
     </message>
     <message>
-        <location filename="../../src/tabstructures.cpp" line="491"/>
+        <location filename="../../src/tabstructures.cpp" line="504"/>
         <source>Text files (*.txt *csv);;Any files (*)</source>
         <translation>Textdateien (*.txt *csv);;Alle Dateien (*)</translation>
     </message>
     <message>
-        <location filename="../../src/tabstructures.cpp" line="501"/>
+        <location filename="../../src/tabstructures.cpp" line="514"/>
         <source>Failed to open file for export:
 &quot;%1&quot;</source>
         <translation></translation>
-    </message>
-</context>
-<context>
-    <name>TabTriggers</name>
-    <message>
-        <location filename="../../src/tabtriggers.ui" line="6"/>
-        <source>Form</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../../src/tabtriggers.ui" line="32"/>
-        <source>Seed(s):</source>
-        <translation>Seed(s):</translation>
-    </message>
-    <message>
-        <location filename="../../src/tabtriggers.ui" line="39"/>
-        <source>Examine how the conditions are evaluated.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/tabtriggers.ui" line="70"/>
-        <location filename="../../src/tabtriggers.cpp" line="297"/>
-        <source>seed</source>
-        <translation>Seed</translation>
-    </message>
-    <message>
-        <location filename="../../src/tabtriggers.ui" line="80"/>
-        <location filename="../../src/tabtriggers.cpp" line="297"/>
-        <source>condition</source>
-        <translation>Bedingung</translation>
-    </message>
-    <message>
-        <location filename="../../src/tabtriggers.ui" line="90"/>
-        <location filename="../../src/tabtriggers.cpp" line="297"/>
-        <source>x</source>
-        <translation>X</translation>
-    </message>
-    <message>
-        <location filename="../../src/tabtriggers.ui" line="100"/>
-        <location filename="../../src/tabtriggers.cpp" line="297"/>
-        <source>z</source>
-        <translation>Z</translation>
-    </message>
-    <message>
-        <location filename="../../src/tabtriggers.ui" line="19"/>
-        <source>Current seed</source>
-        <translation>Aktuelle Seed</translation>
-    </message>
-    <message>
-        <location filename="../../src/tabtriggers.ui" line="24"/>
-        <source>From matching seeds list</source>
-        <translation>Aus der Ergebnis Seedliste</translation>
-    </message>
-    <message>
-        <location filename="../../src/tabtriggers.ui" line="118"/>
-        <source>Export...</source>
-        <translation>Export...</translation>
-    </message>
-    <message>
-        <location filename="../../src/tabtriggers.ui" line="125"/>
-        <source>Expand all</source>
-        <translation>Alle expandieren</translation>
-    </message>
-    <message>
-        <location filename="../../src/tabtriggers.ui" line="132"/>
-        <location filename="../../src/tabtriggers.cpp" line="168"/>
-        <source>Analyze</source>
-        <translation>Analyse</translation>
-    </message>
-    <message>
-        <location filename="../../src/tabtriggers.cpp" line="182"/>
-        <location filename="../../src/tabtriggers.cpp" line="221"/>
-        <source>Stop</source>
-        <translation>Stop</translation>
-    </message>
-    <message>
-        <location filename="../../src/tabtriggers.cpp" line="276"/>
-        <source>Export trigger analysis</source>
-        <translation>Export der Auslösung der Bedingungen</translation>
-    </message>
-    <message>
-        <location filename="../../src/tabtriggers.cpp" line="276"/>
-        <source>Text files (*.txt *csv);;Any files (*)</source>
-        <translation>Textdateien (*.txt *csv);;Alle Dateien (*)</translation>
-    </message>
-    <message>
-        <location filename="../../src/tabtriggers.cpp" line="286"/>
-        <source>Failed to open file for export:
-&quot;%1&quot;</source>
-        <translation>Exportdatei konnte nicht geöffnet werden:
-&quot;%1&quot;</translation>
     </message>
 </context>
 <context>
