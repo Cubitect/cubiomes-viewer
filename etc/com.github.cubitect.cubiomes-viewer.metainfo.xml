@@ -27,7 +27,7 @@
           <li>Moved scaling of Biome filters to a filter option</li>
           <li>Moved step size of Iterators to a filter option</li>
           <li>Moved Nether and End biome filters to the Biome category</li>
-          <li>Enabled Voronoi biome filters (use only when neccessary)</li>
+          <li>Enabled Voronoi biome filters (use only when necessary)</li>
           <li>Removed Triggers tab, since the Locations tab includes its functionality</li>
         </ul>
       </description>
