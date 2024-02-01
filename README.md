@@ -10,8 +10,9 @@ main releases up to 1.20.
 
 ## Download
 
-Check the [Releases](https://github.com/Cubitect/cubiomes-viewer/releases)
-section on GitHub for Linux and Windows builds.
+Precompiled binaries can be found in the [Releases](https://github.com/Cubitect/cubiomes-viewer/releases)
+section on GitHub. This includes single file executables, which are built
+statically against [Qt](https://www.qt.io).
 
 A Flatpak for the tool is available on
 [Flathub](https://flathub.org/apps/details/com.github.cubitect.cubiomes-viewer).

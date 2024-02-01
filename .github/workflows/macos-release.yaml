@@ -47,6 +47,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{env.PROG}}-${{github.ref_name}}-macos
-          path: |
-                ${{env.SOURCE_DIR}}/${{env.PROG}}.dmg
+          path: ${{env.SOURCE_DIR}}/${{env.PROG}}-${{github.ref_name}}.dmg
 
