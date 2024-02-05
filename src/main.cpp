@@ -116,6 +116,7 @@ int main(int argc, char *argv[])
     }
     else
     {
+        QGuiApplication::setDesktopFileName("com.github.cubitect.cubiomes-viewer");
         QApplication::setAttribute(Qt::AA_EnableHighDpiScaling, true);
         QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps, true);
         QApplication::setAttribute(Qt::AA_UseStyleSheetPropagationInWidgetStyles, false);
