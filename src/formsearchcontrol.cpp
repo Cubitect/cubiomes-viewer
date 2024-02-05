@@ -14,7 +14,12 @@
 #include <QClipboard>
 #include <QFileDialog>
 #include <QFontMetrics>
+#include <QGuiApplication>
 
+#if WITH_DBUS
+    #include <QDBusMessage>
+    #include <QDBusConnection>
+#endif
 
 QVariant SeedTableModel::data(const QModelIndex& index, int role) const
 {
@@ -716,6 +721,15 @@ void FormSearchControl::searchProgressReset()
 
     ui->progressBar->setValue(0);
     ui->progressBar->setFormat(fmt);
+
+    #if WITH_DBUS
+        auto message = QDBusMessage::createSignal("/", "com.canonical.Unity.LauncherEntry", "Update");
+	    QVariantMap properties;
+        properties.insert("progress-visible", false);
+        properties.insert("progress", 0);
+        message << QString("application://%1.desktop").arg(QGuiApplication::desktopFileName()) << properties;
+        QDBusConnection::sessionBus().send(message);
+    #endif
 }
 
 void FormSearchControl::updateSearchProgress(uint64_t prog, uint64_t end, int64_t seed)
@@ -746,6 +760,15 @@ void FormSearchControl::updateSearchProgress(uint64_t prog, uint64_t end, int64_
             }
         }
         ui->progressBar->setFormat(fmt);
+
+        #if WITH_DBUS
+            auto message = QDBusMessage::createSignal("/", "com.canonical.Unity.LauncherEntry", "Update");
+	        QVariantMap properties;
+            properties.insert("progress-visible", true);
+            properties.insert("progress", (double) v / 10000);
+            message << QString("application://%1.desktop").arg(QGuiApplication::desktopFileName()) << properties;
+            QDBusConnection::sessionBus().send(message);
+        #endif
     }
 }
 
@@ -759,6 +782,15 @@ void FormSearchControl::searchFinish(bool done)
         ui->lineStart->setText(QString::asprintf("%" PRId64, sthread.smax));
         ui->progressBar->setValue(10000);
         ui->progressBar->setFormat(tr("Done", "Progressbar"));
+
+        #if WITH_DBUS
+            auto message = QDBusMessage::createSignal("/", "com.canonical.Unity.LauncherEntry", "Update");
+	        QVariantMap properties;
+            properties.insert("progress-visible", false);
+            properties.insert("progress", 0);
+            message << QString("application://%1.desktop").arg(QGuiApplication::desktopFileName()) << properties;
+            QDBusConnection::sessionBus().send(message);
+        #endif
     }
     ui->labelStatus->setText(tr("Idle", "Progressbar"));
     searchLockUi(false);
