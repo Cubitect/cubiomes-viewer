@@ -42,6 +42,7 @@ QString Condition::summary(bool aligntab) const
     if (text[0])
     {
         QByteArray txta = QByteArray(text, sizeof(text));
+        txta.resize(qstrlen(txta));
         txts = QString::fromLocal8Bit(txta);
     }
     else

@@ -221,6 +221,8 @@ void TabLocations::onAnalysisFinished()
     ui->pushStart->setChecked(false);
     ui->pushStart->setText(tr("Analyze"));
     ui->labelStatus->setText(tr("Idle"));
+    if (parent)
+        parent->setProgressIndication();
 }
 
 void TabLocations::onBufferTimeout()
@@ -248,8 +250,10 @@ void TabLocations::onProgressTimeout()
 {
     size_t total = thread.seeds.size() * thread.pos.size();
     size_t progress = thread.sidx.load() * thread.pos.size() + thread.pidx.load();
-    double perc = 100.0 * progress / total;
-    ui->labelStatus->setText(QString::asprintf("%zu / %zu (%.1f%%)", progress, total, perc));
+    double frac = progress / (double)total;
+    ui->labelStatus->setText(QString::asprintf("%zu / %zu (%.1f%%)", progress, total, 100.0*frac));
+    if (parent)
+        parent->setProgressIndication(frac);
 }
 
 void TabLocations::on_pushStart_clicked()

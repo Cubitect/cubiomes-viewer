@@ -13,6 +13,17 @@
   </description>
 
   <releases>
+    <release version="4.0.1" date="2024-02-11">
+      <description>
+        <p>Changes:</p>
+        <ul>
+          <li>Added progress indication via app icon</li>
+          <li>Tweaked app icon</li>
+          <li>Tweaked sceenshots</li>
+          <li>Tweaked default layout</li>
+        </ul>
+      </description>
+    </release>
     <release version="4.0.0" date="2024-02-01">
       <description>
         <p>This release adds a way to find locations in a given seed, as well as a biome sample filter that can check biome proportions.</p>
@@ -37,16 +48,16 @@
   <launchable type="desktop-id">com.github.cubitect.cubiomes-viewer.desktop</launchable>
   <screenshots>
     <screenshot type="default">
-      <image type="source">https://raw.githubusercontent.com/Cubitect/cubiomes-viewer/4.0.0/etc/screenshot_seeds-fs8.png</image>
+      <image type="source">https://raw.githubusercontent.com/Cubitect/cubiomes-viewer/4.0.1/etc/screenshot_seeds-fs8.png</image>
     </screenshot>
     <screenshot>
-      <image type="source">https://raw.githubusercontent.com/Cubitect/cubiomes-viewer/4.0.0/etc/screenshot_locations-fs8.png</image>
+      <image type="source">https://raw.githubusercontent.com/Cubitect/cubiomes-viewer/4.0.1/etc/screenshot_locations-fs8.png</image>
     </screenshot>
     <screenshot>
-      <image type="source">https://raw.githubusercontent.com/Cubitect/cubiomes-viewer/4.0.0/etc/screenshot_structures-fs8.png</image>
+      <image type="source">https://raw.githubusercontent.com/Cubitect/cubiomes-viewer/4.0.1/etc/screenshot_structures-fs8.png</image>
     </screenshot>
     <screenshot>
-      <image type="source">https://raw.githubusercontent.com/Cubitect/cubiomes-viewer/4.0.0/etc/screenshot_system-fs8.png</image>
+      <image type="source">https://raw.githubusercontent.com/Cubitect/cubiomes-viewer/4.0.1/etc/screenshot_system-fs8.png</image>
     </screenshot>
   </screenshots>
 

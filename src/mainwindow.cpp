@@ -54,6 +54,7 @@ MainWindow::MainWindow(QString sessionpath, QString resultspath, QWidget *parent
     , autosaveTimer()
     , tabidx(-1)
     , tabsearch(-1)
+    , progval(-1)
     , dimactions{}
     , dimgroup()
 {
@@ -185,7 +186,7 @@ MainWindow::MainWindow(QString sessionpath, QString resultspath, QWidget *parent
 
     saction[D_GRID]->setChecked(true);
 
-    ui->splitterMap->setSizes(QList<int>({7000, 10000}));
+    ui->splitterMap->setSizes(QList<int>({750, 1000}));
     ui->splitterSearch->setSizes(QList<int>({1000, 3000}));
     ui->splitterSeeds->setSizes(QList<int>({500, 2500}));
 
@@ -689,6 +690,44 @@ void MainWindow::setBiomeColorRc(QString rc)
 {
     config.biomeColorPath = rc;
     onBiomeColorChange();
+}
+
+void MainWindow::setProgressIndication(double value)
+{
+    int v = (int) floor(10000 * value);
+    if (v == progval)
+        return;
+    progval = v;
+
+    QPixmap pixmap(":/icons/logo.png");
+
+    if (value >= 0 && value <= 1)
+    {
+        QPainter painter(&pixmap);
+        QRect view = painter.viewport();
+
+        QString txt = QString::asprintf("%2d.%02d%%", progval/100, progval%100);
+        QFont f = font();
+        f.setPixelSize(32);
+
+        int pad = 2;
+        int y = view.bottom() - pad;
+        int x1 = 2;
+        int x2 = view.width() - pad;
+        painter.setPen(QPen(Qt::black, 2*pad));
+        painter.drawLine(x1, y, x2, y);
+        painter.setPen(QPen(Qt::green, 2*pad));
+        painter.drawLine(x1, y, (int)ceil((x2 - x1) * value), y);
+
+        QRect textrec = QFontMetrics(f).boundingRect(view, Qt::AlignHCenter | Qt::AlignVCenter, txt);
+        textrec.adjust(8, 0, 8, 0);
+        painter.setFont(f);
+        painter.fillRect(textrec, QBrush(QColor(0, 0, 0, 128), Qt::SolidPattern));
+        painter.setPen(QColor(255, 255, 255));
+        painter.drawText(textrec, txt);
+    }
+
+    setWindowIcon(QIcon(pixmap));
 }
 
 void MainWindow::on_comboBoxMC_currentIndexChanged(int)

@@ -75,6 +75,8 @@ public slots:
     void mapZoom(qreal factor);
     void setBiomeColorRc(QString rc);
 
+    void setProgressIndication(double value = -1);
+
 private slots:
     void on_comboBoxMC_currentIndexChanged(int a);
     void on_seedEdit_editingFinished();
@@ -141,6 +143,7 @@ public:
     QTimer autosaveTimer;
     int tabidx;
     int tabsearch;
+    int progval;
 
     QVector<QAction*> laction;
     QVector<QAction*> saction;

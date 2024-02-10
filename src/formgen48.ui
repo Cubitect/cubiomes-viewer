@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>FormGen48</class>
  <widget class="QWidget" name="FormGen48">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>701</width>
+    <height>189</height>
+   </rect>
+  </property>
   <property name="sizePolicy">
    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
     <horstretch>0</horstretch>
@@ -42,7 +50,7 @@
       <item row="0" column="0" colspan="2">
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
-         <number>3</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="tabAuto">
          <attribute name="title">
@@ -127,9 +135,6 @@ Applies only to feature-structures of region-size = 32 and chunk-gap = 8, in par
           </item>
           <item row="0" column="1">
            <widget class="StyledComboBox" name="comboLow20">
-            <property name="sizeAdjustPolicy">
-             <enum>QComboBox::AdjustToMinimumContentsLength</enum>
-            </property>
             <item>
              <property name="text">
               <string>Quad-hut (ideal)</string>
@@ -353,7 +358,7 @@ Applies only to feature-structures of region-size = 32 and chunk-gap = 8, in par
         <item>
          <widget class="QLabel" name="label">
           <property name="text">
-           <string>    </string>
+           <string/>
           </property>
          </widget>
         </item>

@@ -1,7 +1,7 @@
 # Cubiomes Viewer Build Instructions
 
 Cubiomes Viewer is a Qt5 application and requires:
-* Qt5.9 or newer (Qt6 might work, but isn't currently supported) and a
+* Qt5.9 or newer
 * GNU C++ compiler (GCC or Clang).
 
 The cubiomes library is included as a submodule to this repository.
@@ -21,7 +21,7 @@ but [Using the Qt Installer](buildguide.md#using-the-qt-installer) should be the
 Many Linux distros already provide Qt in their repositories and you can also
 [Get Qt With Your Package Manager](buildguide.md#get-qt-with-your-package-manager) instead if you wish.
 
-Note: for a static build you will have to compile Qt yourself.
+For a static build you will have to [Compile Qt from Source](buildguide.md#compile-qt-from-source).
 
 
 ### Using the Qt Installer
@@ -55,8 +55,24 @@ $ brew install qt@5
 $ brew link qt@5
 ```
 
+### Compile Qt from Source
 
-## Get the Sources
+You can get the Qt sources from the [Qt download archive](https://download.qt.io/archive/qt).
+For cubiomes-viewer it is sufficient to get the qtbase submodule.
+
+Check the system requirements on the [Qt Wiki](https://wiki.qt.io/Building_Qt_5_from_Git),
+which will depend on the platform and Qt version.
+
+A possible configuration for a static build may be:
+```
+$ mkdir qt5; cd qt5
+$ wget https://download.qt.io/archive/qt/5.15/5.15.12/submodules/qtbase-everywhere-opensource-src-5.15.12.tar.xz
+$ tar xf qtbase-everywhere-opensource-src-5.15.12.tar.xz
+$ ./qtbase-everywhere-src-5.15.12/configure -release -static -opensource -confirm-license -opengl -nomake examples -qt-zlib -qt-libjpeg -qt-libpng -qt-freetype -qt-pcre -qt-harfbuzz
+$ make -s -j 4
+```
+
+## Get the Cubiomes Sources
 
 The cubiomes-viewer repository includes the cubiomes library as a submodule and requires a recursive clone:
 ```

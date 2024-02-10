@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>397</width>
+    <height>202</height>
+   </rect>
+  </property>
   <property name="windowTitle">
    <string>Cubiomes Viewer</string>
   </property>
@@ -87,9 +95,6 @@
            <widget class="StyledComboBox" name="comboBoxMC">
             <property name="toolTip">
              <string>Minecraft version</string>
-            </property>
-            <property name="sizeAdjustPolicy">
-             <enum>QComboBox::AdjustToMinimumContentsLength</enum>
             </property>
             <property name="minimumContentsLength">
              <number>8</number>
@@ -381,6 +386,14 @@ QToolButton:checked {
    </attribute>
   </widget>
   <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>397</width>
+     <height>22</height>
+    </rect>
+   </property>
    <widget class="QMenu" name="menuMap">
     <property name="title">
      <string>Map</string>
@@ -756,15 +769,15 @@ QToolButton:checked {
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
+   <class>StyledComboBox</class>
+   <extends>QComboBox</extends>
+   <header>src/widgets.h</header>
+  </customwidget>
+  <customwidget>
    <class>Collapsible</class>
    <extends>QWidget</extends>
    <header>src/widgets.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>StyledComboBox</class>
-   <extends>QComboBox</extends>
-   <header>src/widgets.h</header>
   </customwidget>
  </customwidgets>
  <resources>

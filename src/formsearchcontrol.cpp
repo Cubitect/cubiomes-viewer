@@ -41,7 +41,7 @@ QVariant SeedTableModel::data(const QModelIndex& index, int role) const
         if (index.column() != COL_HEX48)
             return align;
     }
-    return QVariant::Invalid;
+    return QVariant();
 }
 
 QVariant SeedTableModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -61,7 +61,7 @@ QVariant SeedTableModel::headerData(int section, Qt::Orientation orientation, in
     }
     if (role == Qt::DisplayRole && orientation == Qt::Vertical)
         return QVariant::fromValue(section + 1);
-    return QVariant::Invalid;
+    return QVariant();
 }
 
 int SeedTableModel::insertSeeds(QVector<uint64_t> newseeds)
@@ -716,37 +716,44 @@ void FormSearchControl::searchProgressReset()
 
     ui->progressBar->setValue(0);
     ui->progressBar->setFormat(fmt);
+
+    if (parent)
+        parent->setProgressIndication();
 }
 
 void FormSearchControl::updateSearchProgress(uint64_t prog, uint64_t end, int64_t seed)
 {
     ui->lineStart->setText(QString::asprintf("%" PRId64, seed));
 
-    if (end)
+    if (!end)
+        return;
+
+    double value = (double)prog / end;
+    int v = (int) floor(10000 * value);
+    ui->progressBar->setValue(v);
+    QString fmt = QString::asprintf(
+                "%" PRIu64 " / %" PRIu64 " (%d.%02d%%)",
+                prog, end, v / 100, v % 100
+                );
+    int searchtype = ui->comboSearchType->currentData().toInt();
+    if (searchtype == SEARCH_LIST)
     {
-        int v = (int) floor(10000 * (double)prog / end);
-        ui->progressBar->setValue(v);
-        QString fmt = QString::asprintf(
-                    "%" PRIu64 " / %" PRIu64 " (%d.%02d%%)",
-                    prog, end, v / 100, v % 100
-                    );
-        int searchtype = ui->comboSearchType->currentData().toInt();
-        if (searchtype == SEARCH_LIST)
+        if (!slist64fnam.isEmpty())
         {
-            if (!slist64fnam.isEmpty())
-            {
-                fmt = slist64fnam + ": " + fmt;
-            }
+            fmt = slist64fnam + ": " + fmt;
         }
-        if (searchtype == SEARCH_INC)
-        {
-            if (smin != 0 || smax != ~(uint64_t)0)
-            {
-                fmt = QString::asprintf("[%" PRIu64 " - %" PRIu64 "]: ", smin, smax) + fmt;
-            }
-        }
-        ui->progressBar->setFormat(fmt);
     }
+    if (searchtype == SEARCH_INC)
+    {
+        if (smin != 0 || smax != ~(uint64_t)0)
+        {
+            fmt = QString::asprintf("[%" PRIu64 " - %" PRIu64 "]: ", smin, smax) + fmt;
+        }
+    }
+    ui->progressBar->setFormat(fmt);
+
+    if (parent)
+        parent->setProgressIndication(value);
 }
 
 void FormSearchControl::searchFinish(bool done)
@@ -762,6 +769,9 @@ void FormSearchControl::searchFinish(bool done)
     }
     ui->labelStatus->setText(tr("Idle", "Progressbar"));
     searchLockUi(false);
+
+    if (parent)
+        parent->setProgressIndication();
 }
 
 void FormSearchControl::progressTimeout()

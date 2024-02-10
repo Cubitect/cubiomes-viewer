@@ -10,8 +10,8 @@ main releases up to 1.20.
 
 ## Download
 
-Precompiled binaries can be found in the [Releases](https://github.com/Cubitect/cubiomes-viewer/releases)
-section on GitHub. This includes single file executables, which are statically
+Precompiled binaries can be found in the [releases section](https://github.com/Cubitect/cubiomes-viewer/releases)
+on GitHub. This includes single file executables, which are statically
 linked against [Qt](https://www.qt.io).
 
 A Flatpak for the tool is available on
@@ -49,7 +49,7 @@ For more complex searches, the tool provides logic gates in the form of helper
 conditions and can integrate Lua scripts to create custom filters that can be
 edited right inside the tool.
 
-It is also possible to find Locations in a fixed seed. In this mode, the 
+It is also possible to find Locations in a fixed seed. In this mode, the
 conditions are checked against a list of trial positions instead of the
 world origin. Each location that passes the conditions is then collected
 with additional information on where each individual condition was triggered.
@@ -71,6 +71,18 @@ Screenshots were taken of Cubiomes Viewer v4.0.
 
 ![structures](etc/screenshot_structures-fs8.png
 "Examining structures in the nether")
+
+
+## Languages
+
+The application currently ships in 3 languages that can be switched in the menu
+under `Edit preferences`:
+
+- English
+- German
+- Chinese
+
+Chinese translations are provided and maintained by [SunnySlopes](https://github.com/SunnySlopes).
 
 
 ## Known issues
