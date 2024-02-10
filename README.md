@@ -75,14 +75,14 @@ Screenshots were taken of Cubiomes Viewer v4.0.
 
 ## Languages
 
-The application currently ships in 3 languages that can be switched in the menu
-under `Edit preferences`:
+The active language can be selected under `Edit preferences`, which currently includes translations for:
 
 - English
 - German
 - Chinese
 
-Chinese translations are provided and maintained by [SunnySlopes](https://github.com/SunnySlopes).
+Chinese translations are provided by [SunnySlopes](https://github.com/SunnySlopes)
+and are maintained at [his fork](https://github.com/SunnySlopes/cubiomes-viewer).
 
 
 ## Known issues
