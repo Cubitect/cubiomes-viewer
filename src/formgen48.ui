@@ -2,14 +2,6 @@
 <ui version="4.0">
  <class>FormGen48</class>
  <widget class="QWidget" name="FormGen48">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>701</width>
-    <height>189</height>
-   </rect>
-  </property>
   <property name="sizePolicy">
    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
     <horstretch>0</horstretch>
