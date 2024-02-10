@@ -68,7 +68,7 @@ A possible configuration for a static build may be:
 $ mkdir qt5; cd qt5
 $ wget https://download.qt.io/archive/qt/5.15/5.15.12/submodules/qtbase-everywhere-opensource-src-5.15.12.tar.xz
 $ tar xf qtbase-everywhere-opensource-src-5.15.12.tar.xz
-$ ./qtbase-everywhere-src-5.15.12/configure -release -static -opensource -confirm-license -opengl -nomake examples -qt-zlib -qt-libjpeg -qt-libpng -qt-freetype -qt-pcre -qt-harfbuzz
+$ ./qtbase-everywhere-src-5.15.12/configure -release -static -opensource -confirm-license -nomake examples -opengl -fontconfig -system-freetype -qt-zlib -qt-libjpeg -qt-libpng -qt-pcre -qt-harfbuzz -prefix .
 $ make -s -j 4
 ```
 

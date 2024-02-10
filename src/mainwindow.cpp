@@ -694,7 +694,7 @@ void MainWindow::setBiomeColorRc(QString rc)
 
 void MainWindow::setProgressIndication(double value)
 {
-    int v = (int) floor(10000 * value);
+    int v = (int) floor(100 * value);
     if (v == progval)
         return;
     progval = v;
@@ -706,9 +706,9 @@ void MainWindow::setProgressIndication(double value)
         QPainter painter(&pixmap);
         QRect view = painter.viewport();
 
-        QString txt = QString::asprintf("%2d.%02d%%", progval/100, progval%100);
+        QString txt = QString::asprintf("%2d", progval);
         QFont f = font();
-        f.setPixelSize(32);
+        f.setPixelSize(48);
 
         int pad = 2;
         int y = view.bottom() - pad;
