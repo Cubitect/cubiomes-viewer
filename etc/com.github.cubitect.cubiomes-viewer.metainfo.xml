@@ -17,9 +17,8 @@
       <description>
         <p>Changes:</p>
         <ul>
-          <li>Added progress indication via app icon</li>
-          <li>Tweaked app icon</li>
-          <li>Tweaked sceenshots</li>
+          <li>Fixed search progress not loading properly when stopped on a negative seed</li>
+          <li>Tweaked app icon and screenshots</li>
           <li>Tweaked default layout</li>
         </ul>
       </description>

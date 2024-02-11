@@ -525,7 +525,7 @@ bool SearchConfig::read(const QString& line)
     if (sscanf(p, "#Search:   %d", &searchtype) == 1)       return true;
     if (line.startsWith("#List64:   "))                     { slist64path = line.mid(11).trimmed(); return true; }
     if (sscanf(p, "#Threads:  %d", &threads) == 1)          return true;
-    if (sscanf(p, "#Progress: %" PRId64, &startseed) == 1)  return true;
+    if (sscanf(p, "#Progress: %" PRIu64, &startseed) == 1)  return true;
     if (sscanf(p, "#ResStop:  %d", &tmp) == 1)              { stoponres = tmp; return true; }
     if (sscanf(p, "#SMin:     %" PRIu64, &smin) == 1)       return true;
     if (sscanf(p, "#SMax:     %" PRIu64, &smax) == 1)       return true;

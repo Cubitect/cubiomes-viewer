@@ -236,4 +236,8 @@ with_network: {
     HEADERS += src/updater.h
 }
 
-
+# enable dbus features with: qmake CONFIG+=with_dbus
+with_dbus: {
+    QT += dbus
+    DEFINES += "WITH_DBUS=1"
+}

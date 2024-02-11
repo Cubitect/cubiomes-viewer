@@ -36,6 +36,12 @@
 #include <QTranslator>
 #include <QLibraryInfo>
 #include <QFontDatabase>
+#include <QGuiApplication>
+
+#if WITH_DBUS
+#include <QDBusMessage>
+#include <QDBusConnection>
+#endif
 
 
 MainWindow::MainWindow(QString sessionpath, QString resultspath, QWidget *parent)
@@ -694,11 +700,29 @@ void MainWindow::setBiomeColorRc(QString rc)
 
 void MainWindow::setProgressIndication(double value)
 {
-    int v = (int) floor(100 * value);
+    int v = (int) floor(10000 * value);
     if (v == progval)
         return;
     progval = v;
 
+#if WITH_DBUS
+    auto message = QDBusMessage::createSignal("/", "com.canonical.Unity.LauncherEntry", "Update");
+    QVariantMap properties;
+    if (value >= 0 && value <= 1)
+    {
+        properties.insert("progress-visible", true);
+        properties.insert("progress", value);
+    }
+    else
+    {
+        properties.insert("progress-visible", false);
+        properties.insert("progress", 0);
+    }
+    message << QString("application://%1.desktop").arg(QGuiApplication::desktopFileName()) << properties;
+    QDBusConnection::sessionBus().send(message);
+#endif
+
+#if 0
     QPixmap pixmap(":/icons/logo.png");
 
     if (value >= 0 && value <= 1)
@@ -706,7 +730,7 @@ void MainWindow::setProgressIndication(double value)
         QPainter painter(&pixmap);
         QRect view = painter.viewport();
 
-        QString txt = QString::asprintf("%2d", progval);
+        QString txt = QString::asprintf("%2d", progval / 100);
         QFont f = font();
         f.setPixelSize(48);
 
@@ -728,6 +752,7 @@ void MainWindow::setProgressIndication(double value)
     }
 
     setWindowIcon(QIcon(pixmap));
+#endif
 }
 
 void MainWindow::on_comboBoxMC_currentIndexChanged(int)
