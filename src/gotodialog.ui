@@ -80,6 +80,9 @@
        <property name="focusPolicy">
         <enum>Qt::StrongFocus</enum>
        </property>
+       <property name="toolTip">
+        <string>A very large scale may be unsafe</string>
+       </property>
       </widget>
      </item>
      <item>

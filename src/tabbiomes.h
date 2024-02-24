@@ -8,8 +8,6 @@
 #include <QHeaderView>
 
 #include "mainwindow.h"
-#include "search.h"
-#include "world.h"
 #include "util.h"
 
 namespace Ui {
@@ -149,6 +147,9 @@ private slots:
     void on_lineBiomeSize_textChanged(const QString &arg1);
     void on_treeLocate_itemClicked(QTreeWidgetItem *item, int column);
     void on_tabWidget_currentChanged(int index);
+
+private:
+    void exportResults(QTextStream& stream);
 
 private:
     Ui::TabBiomes *ui;

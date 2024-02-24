@@ -2,11 +2,10 @@
 #include "ui_gotodialog.h"
 
 #include "mapview.h"
-#include "message.h"
 
+#include <QClipboard>
 #include <QDoubleValidator>
 #include <QKeyEvent>
-#include <QClipboard>
 
 static bool g_animate;
 
@@ -44,13 +43,6 @@ void GotoDialog::on_buttonBox_clicked(QAbstractButton *button)
         qreal x = ui->lineX->text().toDouble();
         qreal z = ui->lineZ->text().toDouble();
         qreal scale = ui->lineScale->text().toDouble();
-        if (scale > 4096)
-        {
-            int button = warn(this, tr("Setting a very large scale may be unsafe.\n"
-                                       "Continue anyway?"), QMessageBox::Abort|QMessageBox::Yes);
-            if (button == QMessageBox::Abort)
-                return;
-        }
         if (scale < scalemin) scale = scalemin;
         if (scale > scalemax) scale = scalemax;
         ui->lineScale->setText(QString::asprintf("%.4f", scale));
@@ -68,13 +60,21 @@ void GotoDialog::on_buttonBox_clicked(QAbstractButton *button)
     }
 }
 
+void GotoDialog::on_lineScale_textChanged(const QString &text)
+{
+    qreal value = text.toDouble();
+    ui->lineScale->setStyleSheet(value > 4096 ? "color: red" : "");
+}
+
 void GotoDialog::keyPressEvent(QKeyEvent *event)
 {
+    static QRegularExpression coord_delim = QRegularExpression("[, ]+");
+
     if (event->matches(QKeySequence::Paste))
     {
         QClipboard *clipboard = QGuiApplication::clipboard();
         QString s = clipboard->text().trimmed();
-        QStringList xz = s.split(QRegularExpression("[, ]+"));
+        QStringList xz = s.split(coord_delim);
         if (xz.count() == 2)
         {
             ui->lineX->setText(xz[0]);
@@ -90,4 +90,5 @@ void GotoDialog::keyPressEvent(QKeyEvent *event)
     }
     QWidget::keyReleaseEvent(event);
 }
+
 

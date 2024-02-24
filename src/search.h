@@ -1,7 +1,7 @@
 #ifndef SEARCH_H
 #define SEARCH_H
 
-#include "config.h"
+#include "cubiomes/finders.h"
 
 #include "lua/src/lua.hpp"
 
@@ -639,16 +639,16 @@ static_assert(
 
 struct ConditionTree
 {
-    QVector<Condition> condvec;
+    std::vector<Condition> condvec;
     std::vector<std::vector<char>> references;
 
     ~ConditionTree();
-    QString set(const QVector<Condition>& cv, int mc);
+    QString set(const std::vector<Condition>& cv, int mc);
 };
 
 struct SearchThreadEnv
 {
-    ConditionTree *condtree;
+    ConditionTree condtree;
 
     Generator g;
     SurfaceNoise sn;
@@ -663,7 +663,7 @@ struct SearchThreadEnv
     SearchThreadEnv();
     ~SearchThreadEnv();
 
-    QString init(int mc, bool large, ConditionTree *condtree);
+    QString init(int mc, bool large, const ConditionTree& condtree);
 
     void setSeed(uint64_t seed);
     void init4Dim(int dim);
@@ -707,7 +707,7 @@ int testCondAt(
     std::atomic_bool          * abort,          // abort signal
     Pos                       * cent,           // output center position(s)
     int                       * imax,           // max instances (NULL for avg)
-    Condition                 * cond            // condition to check
+    const Condition           * cond            // condition to check
 );
 
 struct QuadInfo

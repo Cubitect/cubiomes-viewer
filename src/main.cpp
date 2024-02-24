@@ -1,17 +1,14 @@
-#include "mainwindow.h"
-#include "headless.h"
-
 #include "aboutdialog.h"
-#include "world.h"
+#include "headless.h"
+#include "mainwindow.h"
+
+#include "cubiomes/util.h"
 
 #include <QApplication>
-#include <QGuiApplication>
-#include <QFontDatabase>
-#include <QStandardPaths>
 #include <QDir>
-
-#include "cubiomes/generator.h"
-#include "cubiomes/util.h"
+#include <QFontDatabase>
+#include <QGuiApplication>
+#include <QStandardPaths>
 
 extern "C"
 int getStructureConfig_override(int stype, int mc, StructureConfig *sconf)

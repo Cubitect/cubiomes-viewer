@@ -1,25 +1,27 @@
 #include "widgets.h"
+
 #include "util.h"
 
 #include <QApplication>
-#include <QStyleOptionSlider>
-#include <QPainter>
-#include <QMouseEvent>
 #include <QBoxLayout>
-#include <QPropertyAnimation>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
 #include <QFont>
-#include <QPushButton>
-#include <QMessageBox>
-#include <QSpinBox>
-#include <QLineEdit>
-#include <QTextEdit>
-#include <QParallelAnimationGroup>
-#include <QToolButton>
 #include <QFrame>
+#include <QHBoxLayout>
 #include <QLabel>
+#include <QLineEdit>
 #include <QListWidgetItem>
+#include <QMessageBox>
+#include <QMouseEvent>
+#include <QPainter>
+#include <QParallelAnimationGroup>
+#include <QPropertyAnimation>
+#include <QPushButton>
+#include <QSpinBox>
+#include <QStyleOptionSlider>
+#include <QTextEdit>
+#include <QToolButton>
+#include <QVBoxLayout>
+
 
 Collapsible::Collapsible(QWidget *parent)
     : QWidget(parent)
@@ -164,11 +166,11 @@ void Collapsible::setInfo(const QString& title, const QString& text)
 void Collapsible::showInfo()
 {
     // windows plays an annoying sound when you use QMessageBox::information()
-    QMessageBox mb(this);
-    mb.setIcon(QMessageBox::Information);
-    mb.setWindowTitle(infotitle);
-    mb.setText(infomsg);
-    mb.exec();
+    QMessageBox *mb = new QMessageBox(this);
+    mb->setIcon(QMessageBox::Information);
+    mb->setWindowTitle(infotitle);
+    mb->setText(infomsg);
+    mb->show();
 }
 
 RangeSlider::RangeSlider(QWidget *parent, int vmin, int vmax)

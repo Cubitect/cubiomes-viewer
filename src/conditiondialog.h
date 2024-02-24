@@ -1,16 +1,17 @@
 #ifndef CONDITIONDIALOG_H
 #define CONDITIONDIALOG_H
 
-#include "search.h"
+#include "config.h"
 #include "formconditions.h"
+#include "search.h"
 #include "util.h"
 #include "widgets.h"
 
-#include <QDialog>
 #include <QCheckBox>
+#include <QDialog>
 #include <QMouseEvent>
-#include <QVBoxLayout>
 #include <QTextEdit>
+#include <QVBoxLayout>
 
 class MainWindow;
 class MapView;
@@ -57,7 +58,7 @@ public:
     void addTempCat(int temp, QString name);
     void updateMode();
     void updateBiomeSelection();
-    int warnIfBad(Condition cond);
+    bool warnIfBad(Condition cond);
 
     void onReject();
     void onAccept();
@@ -97,6 +98,7 @@ private slots:
 
     void on_lineBiomeSize_textChanged(const QString &text);
 
+    void onLuaSaveAs(const QString& fileName);
     void on_comboLua_currentIndexChanged(int index);
     void on_pushLuaSaveAs_clicked();
     void on_pushLuaSave_clicked();

@@ -36,12 +36,22 @@ win32: {
 } else {
     DEFINES += "LUA_USE_POSIX=1"
 }
+
+wasm: {
+    DEFINES += "WASM=1"
+    #QT_WASM_SOURCE_MAP=1
+    QT_WASM_INITIAL_MEMORY = 256MB
+    QT_WASM_PTHREAD_POOL_SIZE = 32
+    CONFIG(debug, debug|release): {
+        #QMAKE_CFLAGS += -O3 -gsource-map
+    }
+}
+#CONFIG += sanitizer
+#CONFIG += sanitize_undefined
+#CONFIG += sanitize_thread
+
 static_gnu: {
     LIBS += -static -static-libgcc -static-libstdc++
-}
-sanitizer: {
-    QMAKE_CFLAGS += -fsanitize=undefined
-    LIBS += -lubsan -ldl
 }
 
 gcc {
@@ -112,7 +122,6 @@ SOURCES += \
         src/maptoolsdialog.cpp \
         src/message.cpp \
         src/presetdialog.cpp \
-        src/protobasedialog.cpp \
         src/layerdialog.cpp \
         src/mapview.cpp \
         src/rangedialog.cpp \
@@ -177,9 +186,9 @@ HEADERS += \
         src/maptoolsdialog.h \
         src/message.h \
         src/presetdialog.h \
-        src/protobasedialog.h \
         src/layerdialog.h \
         src/mapview.h \
+        src/qzipwriter.h \
         src/rangedialog.h \
         src/scripts.h \
         src/search.h \
@@ -206,7 +215,6 @@ FORMS += \
         src/gotodialog.ui \
         src/maptoolsdialog.ui \
         src/presetdialog.ui \
-        src/protobasedialog.ui \
         src/layerdialog.ui \
         src/mainwindow.ui \
         src/rangedialog.ui \
@@ -218,7 +226,8 @@ RESOURCES += \
         rc/icons.qrc \
         rc/style.qrc \
         rc/examples.qrc \
-        rc/lang.qrc
+        rc/lang.qrc \
+        rc/qh.qrc
 
 # ----- translations (pluralization) -----
 

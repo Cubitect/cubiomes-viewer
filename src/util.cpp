@@ -1,10 +1,11 @@
 #include "util.h"
+
 #include "config.h"
 
 #include <QIcon>
-#include <QPixmap>
 #include <QPainter>
 #include <QPainterPath>
+#include <QPixmap>
 
 QString getStartPieceName(int stype, const StructureVariant *sv)
 {

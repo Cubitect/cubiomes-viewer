@@ -16,19 +16,19 @@
 struct Session
 {
     void writeHeader(QTextStream& stream);
-    bool save(QWidget *widget, QString fnam, bool quiet);
-    bool load(QWidget *widget, QString fnam, bool quiet);
+    bool save(QWidget *widget, QTextStream& stream);
+    bool load(QWidget *widget, QTextStream& stream, bool quiet);
 
     WorldInfo wi;
     SearchConfig sc;
     Gen48Config gen48;
-    QVector<Condition> cv;
+    std::vector<Condition> cv;
     std::vector<uint64_t> slist;
 };
 
 struct SearchWorker;
 
-struct SearchMaster : QThread
+struct SearchMaster : QObject
 {
     Q_OBJECT
 public:
@@ -37,9 +37,9 @@ public:
 
     bool set(QWidget *widget, const Session& s);
 
-    void presearch(QObject *qtobj);
+    void presearch();
 
-    virtual void run() override;
+    void start();
     void stop();
 
     // Get search progress:
@@ -101,7 +101,9 @@ struct SearchWorker : QThread
     Q_OBJECT
 public:
     SearchWorker(SearchMaster *master);
+    ~SearchWorker();
 
+    bool getNextItem();
     virtual void run() override;
 
 signals:
@@ -120,8 +122,11 @@ public:
     uint64_t            sstart;     // starting seed
     int                 scnt;       // number of seeds to process in this item
     uint64_t            seed;       // (out) current seed while processing
-    // the end seed is highest unsigned seed value in the search space
+    // the end seed is the highest unsigned seed value in the search space
     // (or the last entry in the seed list)
+
+private:
+    SearchThreadEnv   * env;
 };
 
 

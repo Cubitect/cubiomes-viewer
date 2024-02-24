@@ -1,15 +1,10 @@
 #include "configdialog.h"
 #include "ui_configdialog.h"
 
-#include "biomecolordialog.h"
-#include "maptoolsdialog.h"
-#include "world.h"
-#include "util.h"
-
-#include <QThread>
-#include <QFileInfo>
 #include <QDirIterator>
+#include <QFileInfo>
 #include <QLocale>
+#include <QThread>
 
 
 ConfigDialog::ConfigDialog(QWidget *parent, Config *config)
@@ -32,7 +27,7 @@ ConfigDialog::ConfigDialog(QWidget *parent, Config *config)
     ui->lineIconScale->setValidator(new QDoubleValidator(1.0/8, 16.0, 3, ui->lineIconScale));
 
     QString rclang = ":/lang";
-    QDirIterator it(rclang, QDirIterator::Subdirectories);
+    QDirIterator it(rclang);
     while (it.hasNext())
     {
         QString fnam = it.next();

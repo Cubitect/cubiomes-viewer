@@ -89,6 +89,7 @@ public:
     QMutex mutex;
     QList<ExportWorkItem> workitems;
     QVector<ExportWorker*> workers;
+    QVector<QString> paths;
 
     std::atomic_bool stop;
 };

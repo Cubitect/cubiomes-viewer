@@ -1,13 +1,13 @@
 #include "world.h"
-#include "mapview.h"
+
 #include "util.h"
 
-#include <QThreadPool>
-#include <QSettings>
 #include <QPainterPath>
+#include <QSettings>
+#include <QThreadPool>
 
-#include <cmath>
 #include <algorithm>
+#include <cmath>
 
 
 const QPixmap& getMapIcon(int opt, VarPos *vp)
@@ -455,7 +455,6 @@ Level::Level()
 
 Level::~Level()
 {
-    //QThreadPool::globalInstance()->waitForDone();
     for (Quad *q : cells)
         delete q;
 }

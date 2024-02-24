@@ -2,11 +2,10 @@
 #include "ui_formgen48.h"
 
 #include "mainwindow.h"
+#include "message.h"
 #include "search.h"
 #include "seedtables.h"
-#include "message.h"
-
-#include "cubiomes/util.h"
+#include "util.h"
 
 #include <QFileDialog>
 #include <QFileInfo>
@@ -22,8 +21,8 @@ public:
     : QSpinBox(parent)
     {
         std::set<int> vset;
-        for (int i = 0, n = sizeof(g_qm_90) / sizeof(int64_t); i < n; i++)
-            vset.insert(qmonumentQual(g_qm_90[i]));
+        for (const uint64_t *s = g_qm_90; *s; s++)
+            vset.insert(qmonumentQual(*s));
         for (int v : vset)
             vlist.push_back(v);
 
@@ -112,9 +111,10 @@ bool FormGen48::setList48(QString path, bool quiet)
         }
         else if (!quiet)
         {
-            int button = warn(this, tr("Failed to load 48-bit seed list from file:\n\"%1\"").arg(path),
-                    QMessageBox::Reset|QMessageBox::Ignore);
-            if (button == QMessageBox::Reset)
+            int button = warn(this, tr("Warning"),
+                tr("Failed to load 48-bit seed list from file:\n\"%1\"").arg(path),
+                tr("Reset list path?"), QMessageBox::Reset | QMessageBox::Ignore);
+            if (button != QMessageBox::Ignore)
             {
                 slist48path.clear();
                 slist48.clear();
@@ -144,6 +144,26 @@ bool FormGen48::setList48(QString path, bool quiet)
     return ok;
 }
 
+bool FormGen48::setList48(QTextStream& stream)
+{
+    slist48path.clear();
+    slist48.clear();
+    while (!stream.atEnd())
+    {
+        QByteArray line = stream.readLine().toLocal8Bit();
+        uint64_t s = 0;
+        if (sscanf(line.data(), "%" PRId64, (int64_t*)&s) == 1)
+            slist48.push_back(s);
+    }
+
+    if (slist48.empty())
+        ui->lineList48->setText(tr("[no seeds!]"));
+    else
+        ui->lineList48->setText(tr("[%n seed(s)]", "", slist48.size()));
+
+    emit changed();
+    return true;
+}
 
 
 void FormGen48::setConfig(const Gen48Config& gen48, bool quiet)
@@ -158,7 +178,11 @@ void FormGen48::setConfig(const Gen48Config& gen48, bool quiet)
     ui->lineEditX2->setText(QString::number(gen48.x2));
     ui->lineEditZ2->setText(QString::number(gen48.z2));
 
+#if WASM
+    (void) quiet;
+#else
     setList48(gen48.slist48path, quiet);
+#endif
 
     if (gen48.manualarea)
         ui->radioManual->setChecked(true);
@@ -220,7 +244,7 @@ void FormGen48::updateCount()
 }
 
 
-void FormGen48::updateAutoConditions(const QVector<Condition>& condlist)
+void FormGen48::updateAutoConditions(const std::vector<Condition>& condlist)
 {
     cond.type = 0;
     for (const Condition& c : condlist)
@@ -350,10 +374,20 @@ void FormGen48::on_comboLow20_currentIndexChanged(int)
 
 void FormGen48::on_buttonBrowse_clicked()
 {
-    QString fnam = QFileDialog::getOpenFileName(
-        this, tr("Load seed list"), parent->prevdir, tr("Text files (*.txt);;Any files (*)"));
+    QString filter = tr("Text files (*.txt);;Any files (*)");
+#if WASM
+    auto fileOpenCompleted = [=](const QString &fnam, const QByteArray &content) {
+        if (!fnam.isEmpty()) {
+            QTextStream stream(content);
+            setList48(stream);
+        }
+    };
+    QFileDialog::getOpenFileContent(filter, fileOpenCompleted);
+#else
+    QString fnam = QFileDialog::getOpenFileName(this, tr("Load seed list"), parent->prevdir, filter);
     if (!fnam.isEmpty())
         setList48(fnam, false);
+#endif
 }
 
 void FormGen48::on_radioAuto_toggled()

@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QLabel>
+#include <QTextStream>
 
 namespace Ui {
 class BiomeColorDialog;
@@ -18,8 +19,7 @@ public:
     ~BiomeColorDialog();
 
     int saveColormap(QString rc, QString desc);
-    int loadColormap(QString path, bool reset);
-    QString getRc();
+    int loadColormap(QIODevice *iodevice, bool reset);
 
     void arrange(int sort);
 
@@ -34,6 +34,7 @@ private slots:
     void on_comboColormaps_currentIndexChanged(int index);
 
     void onSaveAs();
+    void onSaveSelect(const QString &rc, const QString &text);
     void onExport();
     void onRemove();
     void onAccept();
@@ -42,6 +43,9 @@ private slots:
     void onAllToDefault();
     void onAllToDimmed();
 
+private:
+    void exportColors(QTextStream& stream);
+    void importColors(QTextStream& stream);
 
 private:
     Ui::BiomeColorDialog *ui;

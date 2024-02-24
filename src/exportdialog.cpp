@@ -3,15 +3,19 @@
 
 #include "mainwindow.h"
 #include "mapview.h"
-#include "util.h"
 #include "message.h"
+#include "util.h"
 
-#include <QIntValidator>
 #include <QFileDialog>
-#include <QSettings>
-#include <QRunnable>
+#include <QIntValidator>
 #include <QProgressDialog>
+#include <QRunnable>
+#include <QSettings>
 
+#if WASM
+#include "qzipwriter.h"
+#include <QBuffer>
+#endif
 
 void ExportWorker::runWorkItem(const ExportWorkItem& work)
 {
@@ -154,6 +158,12 @@ ExportDialog::ExportDialog(MainWindow *parent)
     ui->lineEditX2->setText(settings.value("export/x1").toString());
     ui->lineEditZ2->setText(settings.value("export/z1").toString());
 
+#if WASM
+    ui->labelDir->setVisible(false);
+    ui->lineDir->setVisible(false);
+    ui->buttonDirSelect->setVisible(false);
+#endif
+
     update();
 }
 
@@ -177,8 +187,12 @@ bool ExportDialog::initWork(ExportWorkItem *work, uint64_t seed, int tx, int tz)
     work->fnam.replace("%S", QString::number((int64_t)seed));
     work->fnam.replace("%x", QString::number(tx));
     work->fnam.replace("%z", QString::number(tz));
+#if WASM
+    return false;
+#else
     work->fnam = dir.filePath(work->fnam);
     return QFileInfo::exists(work->fnam);
+#endif
 }
 
 bool ExportDialog::requestWork(ExportWorkItem *work)
@@ -205,6 +219,29 @@ void ExportDialog::onWorkerFinished()
     for (ExportWorker *worker : qAsConst(workers))
         if (worker->isRunning())
             return;
+
+#if WASM
+    QByteArray content;
+    QBuffer buffer(&content);
+    buffer.open(QIODevice::WriteOnly);
+    QZipWriter zipwriter(&buffer);
+    zipwriter.setCompressionPolicy(QZipWriter::AutoCompress);
+
+    for (const QString& fnam : qAsConst(paths))
+    {
+        QFile file(fnam);
+        if (file.open(QFile::ReadOnly))
+        {
+            zipwriter.addFile(fnam, &file);
+            file.close();
+            QFile::remove(fnam);
+        }
+    }
+    zipwriter.close();
+
+    QFileDialog::saveFileContent(content, "images.zip");
+#endif
+
     emit exportFinished();
 }
 
@@ -364,6 +401,7 @@ void ExportDialog::on_buttonBox_clicked(QAbstractButton *button)
         this->tilesize = -1;
         this->heightvis = ui->comboHeightVis->currentIndex() - 1;
         this->bgmode = 0;
+        this->paths.clear();
         bool existwarn = false;
 
         if (tiled)
@@ -387,6 +425,7 @@ void ExportDialog::on_buttonBox_clicked(QAbstractButton *button)
                         ExportWorkItem work;
                         existwarn |= initWork(&work, seed, x, z);
                         workitems.push_back(work);
+                        paths.push_back(work.fnam);
                     }
                 }
             }
@@ -396,9 +435,10 @@ void ExportDialog::on_buttonBox_clicked(QAbstractButton *button)
             int maxsiz = 0x8000;
             if (x1 - x0 >= maxsiz || z1 - z0 >= maxsiz)
             {
-                int button = warn(this, tr("Consider tiling very large images into smaller sections.\nContinue?"),
-                        QMessageBox::Cancel | QMessageBox::Yes);
-                if (button == QMessageBox::Cancel)
+                int button = warn(this, tr("Warning"),
+                        tr("Consider tiling very large images into smaller sections."),
+                        tr("Continue?"), QMessageBox::Cancel | QMessageBox::Yes);
+                if (button != QMessageBox::Yes)
                 {
                     return;
                 }
@@ -409,14 +449,16 @@ void ExportDialog::on_buttonBox_clicked(QAbstractButton *button)
                 ExportWorkItem work;
                 existwarn |= initWork(&work, seed, 0, 0);
                 workitems.push_back(work);
+                paths.push_back(work.fnam);
             }
         }
 
         if (existwarn)
         {
-            int button = warn(this, tr("One or more of files already exist.\nContinue and overwrite?"),
-                    QMessageBox::Cancel | QMessageBox::Yes);
-            if (button == QMessageBox::Cancel)
+            int button = warn(this, tr("Warning"),
+                    tr("One or more of files already exist."),
+                    tr("Continue and overwrite?"), QMessageBox::Cancel | QMessageBox::Yes);
+            if (button != QMessageBox::Yes)
             {
                 return;
             }

@@ -2,9 +2,10 @@
 #define EXAMPLESDIALOG_H
 
 #include "config.h"
-#include "formconditions.h"
+#include "search.h"
 
 #include <QDialog>
+#include <QListWidgetItem>
 
 namespace Ui {
 class PresetDialog;
@@ -12,7 +13,7 @@ class PresetDialog;
 
 struct Preset
 {
-    QVector<Condition> condvec;
+    std::vector<Condition> condvec;
     QString title;
     QString desc;
 };
@@ -30,7 +31,7 @@ public:
     explicit PresetDialog(QWidget *parent, WorldInfo wi, bool showExamples);
     ~PresetDialog();
 
-    void setActiveFilter(const QVector<Condition>& condvec);
+    void setActiveFilter(const std::vector<Condition>& condvec);
 
     QListWidgetItem *addPreset(QString rc, QString title, QString desc, bool enabled);
 
@@ -49,7 +50,7 @@ private:
     Ui::PresetDialog *ui;
     std::map<QString, Preset> presets;
 public:
-    QVector<Condition> activeFilter;
+    std::vector<Condition> activeFilter;
     QString rc;
 };
 

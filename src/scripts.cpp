@@ -4,13 +4,13 @@
 #include "util.h"
 
 #include <QApplication>
-#include <QStandardPaths>
-#include <QFileInfo>
+#include <QDebug>
 #include <QDirIterator>
+#include <QFileInfo>
 #include <QPainter>
+#include <QStandardPaths>
 #include <QTextBlock>
 #include <QTextDocumentFragment>
-#include <QDebug>
 
 
 LuaOutput g_lua_output[100];
@@ -307,7 +307,7 @@ int runCheckScript(
     SearchThreadEnv   * env,
     int                 pass,
     Pos               * path,
-    Condition         * cond
+    const Condition   * cond
 )
 {
     int top = lua_gettop(L);
@@ -326,7 +326,7 @@ int runCheckScript(
     }
 
     std::vector<node_t> nodes;
-    gather_nodes(nodes, env->condtree, path, cond->save);
+    gather_nodes(nodes, &env->condtree, path, cond->save);
 
     lua_pushlightuserdata(L, env);
     lua_setglobal(L, "_cb_env");

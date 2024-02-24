@@ -1,18 +1,19 @@
 #include "search.h"
-#include "seedtables.h"
-#include "mainwindow.h"
-#include "util.h"
+
+#include "config.h"
 #include "scripts.h"
+#include "seedtables.h"
+#include "util.h"
 
-#include "cubiomes/quadbase.h"
 #include "cubiomes/finders.h"
+#include "cubiomes/quadbase.h"
 
-#include <QThread>
-#include <QByteArray>
 #include <QApplication>
-#include <QStandardPaths>
-#include <QDir>
+#include <QByteArray>
 #include <QDebug>
+#include <QDir>
+#include <QStandardPaths>
+#include <QThread>
 
 #include <algorithm>
 
@@ -223,7 +224,7 @@ ConditionTree::~ConditionTree()
 {
 }
 
-QString ConditionTree::set(const QVector<Condition>& cv, int mc)
+QString ConditionTree::set(const std::vector<Condition>& cv, int mc)
 {
     int cmax = 0;
     for (const Condition& c : cv)
@@ -260,7 +261,7 @@ SearchThreadEnv::~SearchThreadEnv()
         lua_close(it.second);
 }
 
-QString SearchThreadEnv::init(int mc, bool large, ConditionTree *condtree)
+QString SearchThreadEnv::init(int mc, bool large, const ConditionTree& condtree)
 {
     this->condtree = condtree;
     this->mc = mc;
@@ -279,7 +280,7 @@ QString SearchThreadEnv::init(int mc, bool large, ConditionTree *condtree)
         lua_close(it.second);
     l_states.clear();
 
-    for (const Condition& c: qAsConst(condtree->condvec))
+    for (const Condition& c: condtree.condvec)
     {
         if (c.type != F_LUA)
             continue;
@@ -349,13 +350,14 @@ int testTreeAt(
     int                         node
 )
 {
-    ConditionTree *tree = env->condtree;
-    Condition& c = tree->condvec[node];
+    const ConditionTree *tree = &env->condtree;
+    const Condition& c = tree->condvec[node];
     const std::vector<char>& branches = tree->references[c.save];
     int st, br;
     int rx1, rz1, rx2, rz2;
     Pos pos;
-    Pos inst[MAX_INSTANCES];
+
+    std::vector<Pos> inst(MAX_INSTANCES);
 
     switch (c.type)
     {
@@ -539,7 +541,7 @@ int testTreeAt(
         st = COND_OK;
         if (lua_State *L = env->l_states[c.hash])
         {
-            Pos *buf = path ? path : inst;
+            Pos *buf = path ? path : &inst[0];
             for (int b : branches)
             {
                 int sta = testTreeAt(at, env, pass, abort, buf, b);
@@ -566,13 +568,13 @@ int testTreeAt(
         if (branches.empty())
         {   // this is a leaf node => check only for presence of instances
             int icnt = c.count;
-            st = testCondAt(at, env, pass, abort, inst, &icnt, &c);
+            st = testCondAt(at, env, pass, abort, &inst[0], &icnt, &c);
             if (path && st >= COND_MAYBE_POS_VALID)
             {
                 if (icnt == 1)
-                    path[c.save] = *inst;
+                    path[c.save] = inst[0];
                 else if (icnt > 1 && st == COND_OK)
-                    path[c.save] = *inst;
+                    path[c.save] = inst[0];
                 else
                     path[c.save].x = path[c.save].z = -1;
             }
@@ -591,7 +593,7 @@ int testTreeAt(
             }
             else
             {
-                st = testCondAt(at, env, pass, abort, inst, NULL, &c);
+                st = testCondAt(at, env, pass, abort, &inst[0], NULL, &c);
                 if (st == COND_FAILED || st == COND_MAYBE_POS_INVAL)
                     return st;
                 pos = inst[0]; // center point of instances
@@ -614,7 +616,7 @@ int testTreeAt(
         {   // check each instance individually, splitting the instances into
             // independent subbranches that are combined via OR
             int icnt = MAX_INSTANCES;
-            st = testCondAt(at, env, pass, abort, inst, &icnt, &c);
+            st = testCondAt(at, env, pass, abort, &inst[0], &icnt, &c);
             if (st == COND_FAILED || st == COND_MAYBE_POS_INVAL)
                 return st;
             int sta = COND_FAILED;
@@ -683,22 +685,21 @@ static const QuadInfo *getQHInfo(uint64_t cst)
         getStructureConfig(Swamp_Hut, MC_NEWEST, &sc);
         sc.salt = 0; // ignore version dependent salt offsets
 
-        for (size_t i = 0, n = sizeof(low20QuadHutBarely) / sizeof(uint64_t); i < n; i++)
+        for (const uint64_t *cst = low20QuadHutBarely; *cst; cst++)
         {
-            uint64_t c = low20QuadHutBarely[i];
-            for (uint64_t s = c;; s += 0x100000)
+            for (uint64_t s = *cst;; s += 0x100000)
             {
                 // find a quad-hut for this constellation
                 Pos pc;
-                if (scanForQuads(sc, 128, s, low20QuadHutBarely, n, 20, 0, 0, 0, 1, 1, &pc, 1) < 1)
+                if (scanForQuads(sc, 128, s, low20QuadHutBarely, 20, 0, 0, 0, 1, 1, &pc, 1) < 1)
                     continue;
                 qreal rad = isQuadBase(sc, s, 160);
                 if (rad == 0)
                     continue;
 
-                QuadInfo *qi = &qh_info[c];
+                QuadInfo *qi = &qh_info[*cst];
                 qi->rad = rad;
-                qi->c = c;
+                qi->c = *cst;
                 qi->p[0] = getFeaturePos(sc, s, 0, 0);
                 qi->p[1] = getFeaturePos(sc, s, 0, 1);
                 qi->p[2] = getFeaturePos(sc, s, 1, 0);
@@ -706,28 +707,12 @@ static const QuadInfo *getQHInfo(uint64_t cst)
                 qi->afk = getOptimalAfk(qi->p, 7,7,9, &qi->spcnt);
                 qi->typ = Swamp_Hut;
 
-                qi->flt = F_QH_BARELY;
-                int j, m;
-                m = sizeof(low20QuadHutNormal) / sizeof(uint64_t);
-                for (j = 0; j < m; j++) {
-                    if (low20QuadHutNormal[j] == c) {
-                        qi->flt = F_QH_NORMAL;
-                        break;
-                    }
-                }
-                m = sizeof(low20QuadClassic) / sizeof(uint64_t);
-                for (j = 0; j < m; j++) {
-                    if (low20QuadClassic[j] == c) {
-                        qi->flt = F_QH_CLASSIC;
-                        break;
-                    }
-                }
-                m = sizeof(low20QuadIdeal) / sizeof(uint64_t);
-                for (j = 0; j < m; j++) {
-                    if (low20QuadIdeal[j] == c) {
-                        qi->flt = F_QH_IDEAL;
-                        break;
-                    }
+                switch (getQuadHutCst(*cst))
+                {
+                case CST_IDEAL:   qi->flt = F_QH_IDEAL;   break;
+                case CST_CLASSIC: qi->flt = F_QH_CLASSIC; break;
+                case CST_NORMAL:  qi->flt = F_QH_NORMAL;  break;
+                default:          qi->flt = F_QH_BARELY;
                 }
                 break;
             }
@@ -754,16 +739,15 @@ static const QuadInfo *getQMInfo(uint64_t s48)
         getStructureConfig(Monument, MC_NEWEST, &sc);
         sc.salt = 0;
 
-        for (size_t i = 0, n = sizeof(g_qm_90) / sizeof(uint64_t); i < n; i++)
+        for (const uint64_t *s = g_qm_90; *s; s++)
         {
-            uint64_t s = g_qm_90[i];
-            QuadInfo *qi = &qm_info[s];
-            qi->rad = isQuadBase(sc, s, 160);
-            qi->c = s;
-            qi->p[0] = getLargeStructurePos(sc, s, 0, 0);
-            qi->p[1] = getLargeStructurePos(sc, s, 0, 1);
-            qi->p[2] = getLargeStructurePos(sc, s, 1, 0);
-            qi->p[3] = getLargeStructurePos(sc, s, 1, 1);
+            QuadInfo *qi = &qm_info[*s];
+            qi->rad = isQuadBase(sc, *s, 160);
+            qi->c = *s;
+            qi->p[0] = getLargeStructurePos(sc, *s, 0, 0);
+            qi->p[1] = getLargeStructurePos(sc, *s, 0, 1);
+            qi->p[2] = getLargeStructurePos(sc, *s, 1, 0);
+            qi->p[3] = getLargeStructurePos(sc, *s, 1, 1);
             qi->afk = getOptimalAfk(qi->p, 58,0/*23*/,58, &qi->spcnt);
             qi->afk.x -= 29;
             qi->afk.z -= 29;
@@ -971,7 +955,7 @@ static int f_track_minmax(void *data, int x, int z, double p)
 
 struct sample_boime_t
 {
-    Condition *cond;
+    const Condition *cond;
     Pos at;
     int rmaxsq;
     int n;
@@ -1038,7 +1022,7 @@ testCondAt(
     std::atomic_bool          * abort,          // abort signal
     Pos                       * cent,           // output center position(s)
     int                       * imax,           // max instances (NULL for avg)
-    Condition                 * cond            // condition to check
+    const Condition           * cond            // condition to check
     )
 {
     int x1, x2, z1, z2;
@@ -1051,7 +1035,7 @@ testCondAt(
     int i, n, icnt;
     int64_t s, r, rmin, rmax;
     const uint64_t *seeds;
-    Pos p[MAX_INSTANCES];
+    std::vector<Pos> p(MAX_INSTANCES);
 
     const FilterInfo& finfo = g_filterinfo.list[cond->type];
 
@@ -1100,19 +1084,15 @@ testCondAt(
 
     case F_QH_IDEAL:
         seeds = low20QuadIdeal;
-        n = sizeof(low20QuadIdeal) / sizeof(uint64_t);
         goto L_qh_any;
     case F_QH_CLASSIC:
         seeds = low20QuadClassic;
-        n = sizeof(low20QuadClassic) / sizeof(uint64_t);
         goto L_qh_any;
     case F_QH_NORMAL:
         seeds = low20QuadHutNormal;
-        n = sizeof(low20QuadHutNormal) / sizeof(uint64_t);
         goto L_qh_any;
     case F_QH_BARELY:
         seeds = low20QuadHutBarely;
-        n = sizeof(low20QuadHutBarely) / sizeof(uint64_t);
 
 L_qh_any:
         rx1 = x1 >> 9;
@@ -1121,8 +1101,8 @@ L_qh_any:
         rz2 = z2 >> 9;
 
         n = scanForQuads(
-                sconf, 128, (env->seed) & MASK48, seeds, n, 20, sconf.salt,
-                rx1, rz1, rx2 - rx1 + 1, rz2 - rz1 + 1, p, MAX_INSTANCES);
+                sconf, 128, (env->seed) & MASK48, seeds, 20, sconf.salt,
+                rx1, rz1, rx2 - rx1 + 1, rz2 - rz1 + 1, &p[0], MAX_INSTANCES);
         if (n < 1)
             return COND_FAILED;
         icnt = 0;
@@ -1178,9 +1158,8 @@ L_qm_any:
         rz2 = z2 >> 9;
         // we don't really need to check for more than one instance here
         n = scanForQuads(
-                sconf, 160, (env->seed) & MASK48, g_qm_90,
-                sizeof(g_qm_90) / sizeof(uint64_t), 48, sconf.salt,
-                rx1, rz1, rx2 - rx1 + 1, rz2 - rz1 + 1, p, 1);
+                sconf, 160, (env->seed) & MASK48, g_qm_90, 48, sconf.salt,
+                rx1, rz1, rx2 - rx1 + 1, rz2 - rz1 + 1, &p[0], 1);
         if (n < 1)
             return COND_FAILED;
         icnt = 0;
@@ -1438,7 +1417,7 @@ L_qm_any:
         }
         else
         {   // we need the average position of all instances
-            icnt = getMineshafts(env->mc, env->seed, rx1, rz1, rx2, rz2, p, MAX_INSTANCES);
+            icnt = getMineshafts(env->mc, env->seed, rx1, rz1, rx2, rz2, &p[0], MAX_INSTANCES);
             if (icnt < cond->count)
                 return COND_FAILED;
             xt = zt = 0;
@@ -1948,7 +1927,7 @@ L_qm_any:
             else
             {   // we need the average position of all instances
                 icnt = getBiomeCenters(
-                    p, NULL, MAX_INSTANCES, &env->g, r, cond->biomeId, cond->biomeSize, cond->tol,
+                    &p[0], NULL, MAX_INSTANCES, &env->g, r, cond->biomeId, cond->biomeSize, cond->tol,
                     (volatile char*)abort
                 );
                 xt = zt = 0;
@@ -2129,8 +2108,7 @@ void findQuadStructs(int styp, Generator *g, QVector<QuadInfo> *out)
     {
         qcnt = scanForQuads(
             sconf, 128, g->seed & MASK48,
-            low20QuadHutBarely, sizeof(low20QuadHutBarely) / sizeof(uint64_t),
-            20, sconf.salt,
+            low20QuadHutBarely, 20, sconf.salt,
             -r, -r, 2*r, 2*r, qlist, qmax
         );
 
@@ -2163,8 +2141,7 @@ void findQuadStructs(int styp, Generator *g, QVector<QuadInfo> *out)
     {
         qcnt = scanForQuads(
             sconf, 160, g->seed & MASK48,
-            g_qm_90, sizeof(g_qm_90) / sizeof(uint64_t),
-            48, sconf.salt,
+            g_qm_90, 48, sconf.salt,
             -r, -r, 2*r, 2*r, qlist, qmax
         );
 

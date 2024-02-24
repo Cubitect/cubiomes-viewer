@@ -16,7 +16,8 @@ public:
     explicit RangeDialog(QWidget *parent, uint64_t smin, uint64_t smax);
     ~RangeDialog();
 
-    bool getBounds(uint64_t *smin, uint64_t *smax);
+signals:
+    void applyBounds(uint64_t smin, uint64_t smax);
 
 private slots:
     void on_buttonBox_clicked(QAbstractButton *button);

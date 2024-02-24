@@ -1,13 +1,13 @@
 #include "tabstructures.h"
 #include "ui_tabstructures.h"
 
-#include "util.h"
 #include "message.h"
+#include "util.h"
 
-#include <QTreeWidgetItem>
 #include <QFileDialog>
-#include <QTextStream>
 #include <QFileInfo>
+#include <QTextStream>
+#include <QTreeWidgetItem>
 
 #include <map>
 #include <set>
@@ -486,8 +486,7 @@ void TabStructures::on_pushStart_clicked()
     thread.start();
 }
 
-static
-void csvline(QTextStream& stream, const QString& qte, const QString& sep, QStringList& cols)
+static void csvline(QTextStream& stream, const QString& qte, const QString& sep, QStringList& cols)
 {
     if (qte.isEmpty())
     {
@@ -498,27 +497,11 @@ void csvline(QTextStream& stream, const QString& qte, const QString& sep, QStrin
     stream << qte << cols.join(sep) << qte << "\n";
 }
 
-void TabStructures::on_pushExport_clicked()
+void TabStructures::exportResults(QTextStream& stream)
 {
-    QString fnam = QFileDialog::getSaveFileName(
-        this, tr("Export structure analysis"), parent->prevdir, tr("Text files (*.txt *csv);;Any files (*)"));
-    if (fnam.isEmpty())
-        return;
-
-    QFileInfo finfo(fnam);
-    QFile file(fnam);
-    parent->prevdir = finfo.absolutePath();
-
-    if (!file.open(QIODevice::WriteOnly))
-    {
-        warn(parent, tr("Failed to open file for export:\n\"%1\"").arg(fnam));
-        return;
-    }
-
     QString qte = parent->config.quote;
     QString sep = parent->config.separator;
 
-    QTextStream stream(&file);
     stream << "Sep=" + sep + "\n";
     sep = qte + sep + qte;
 
@@ -615,6 +598,35 @@ void TabStructures::on_pushExport_clicked()
             csvline(stream, qte, sep, cols);
         }
     }
+    stream.flush();
+}
+
+void TabStructures::on_pushExport_clicked()
+{
+#if WASM
+    QByteArray content;
+    QTextStream stream(&content);
+    exportResults(stream);
+    QFileDialog::saveFileContent(content, "structures.csv");
+#else
+    QString fnam = QFileDialog::getSaveFileName(
+        this, tr("Export structure analysis"), parent->prevdir, tr("Text files (*.txt *csv);;Any files (*)"));
+    if (fnam.isEmpty())
+        return;
+
+    QFileInfo finfo(fnam);
+    QFile file(fnam);
+    parent->prevdir = finfo.absolutePath();
+
+    if (!file.open(QIODevice::WriteOnly))
+    {
+        warn(parent, tr("Failed to open file for export:\n\"%1\"").arg(fnam));
+        return;
+    }
+
+    QTextStream stream(&file);
+    exportResults(stream);
+#endif
 }
 
 void TabStructures::on_buttonFromVisible_clicked()

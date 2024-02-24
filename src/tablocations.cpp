@@ -1,20 +1,20 @@
 #include "tablocations.h"
 #include "ui_tablocations.h"
 
+#include "config.h"
 #include "message.h"
 #include "util.h"
-#include "config.h"
 
+#include <QDebug>
 #include <QElapsedTimer>
 #include <QFileDialog>
-#include <QTextStream>
 #include <QFileInfo>
 #include <QIntValidator>
-#include <QDebug>
+#include <QTextStream>
 
-#include <vector>
 #include <algorithm>
 #include <random>
+#include <vector>
 
 #define SAMPLES_MAX 99999999
 
@@ -61,12 +61,12 @@ QTreeWidgetItem *setConditionTreeItems(ConditionTree& ctree, int node, int64_t s
     return item;
 }
 
-QString AnalysisLocations::set(WorldInfo wi, const QVector<Condition>& conds)
+QString AnalysisLocations::set(WorldInfo wi, const std::vector<Condition>& conds)
 {
     this->wi = wi;
     QString err = condtree.set(conds, wi.mc);
     if (err.isEmpty())
-        err = env.init(wi.mc, wi.large, &condtree);
+        err = env.init(wi.mc, wi.large, condtree);
     return err;
 }
 
@@ -134,7 +134,6 @@ TabLocations::TabLocations(MainWindow *parent)
     ui->lineX->setValidator(new QIntValidator((int)-3e7, (int)3e7, this));
     ui->lineZ->setValidator(new QIntValidator((int)-3e7, (int)3e7, this));
 
-    connect(&thread, &AnalysisLocations::warning, this, &TabLocations::warning, Qt::BlockingQueuedConnection);
     connect(&thread, &AnalysisLocations::itemDone, this, &TabLocations::onAnalysisItemDone, Qt::BlockingQueuedConnection);
     connect(&thread, &AnalysisLocations::finished, this, &TabLocations::onAnalysisFinished);
 
@@ -190,11 +189,6 @@ void TabLocations::load(QSettings& settings)
     mode = settings.value("analysis/seedsrc_loc", ui->comboSeedSource->currentIndex());
     ui->comboSeedSource->setCurrentIndex(mode.toInt());
     maxresults = settings.value("config/maxMatching", maxresults).toInt();
-}
-
-int TabLocations::warning(QString text, QMessageBox::StandardButtons buttons)
-{
-    return warn(parent, text, buttons);
 }
 
 void TabLocations::onAnalysisItemDone(QTreeWidgetItem *item)
@@ -281,12 +275,12 @@ void TabLocations::on_pushStart_clicked()
 
     WorldInfo wi;
     parent->getSeed(&wi);
-    QVector<Condition> conds = parent->formCond->getConditions();
+    std::vector<Condition> conds = parent->formCond->getConditions();
 
     QString err = thread.set(wi, conds);
     if (!err.isEmpty())
     {
-        warning(err, QMessageBox::Ok);
+        warn(this, err);
         return;
     }
 
@@ -420,10 +414,10 @@ void TabLocations::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
     QVariant at = item->data(0, Qt::UserRole+2);
 
     std::vector<Shape> shapes;
-    const QVector<Condition>& conds = thread.condtree.condvec;
+    const std::vector<Condition>& conds = thread.condtree.condvec;
     int node = item->data(0, Qt::UserRole+3).toInt();
 
-    if (node >= 0 || node < conds.size())
+    if (node >= 0 || node < (int)conds.size())
     {
         const Condition& c = conds[node];
         const FilterInfo& ft = g_filterinfo.list[c.type];
@@ -482,8 +476,7 @@ void TabLocations::on_pushExpand_clicked()
         ui->treeWidget->collapseAll();
 }
 
-static
-void csvline(QTextStream& stream, const QString& qte, const QString& sep, QStringList& cols)
+static void csvline(QTextStream& stream, const QString& qte, const QString& sep, QStringList& cols)
 {
     if (qte.isEmpty())
     {
@@ -494,27 +487,11 @@ void csvline(QTextStream& stream, const QString& qte, const QString& sep, QStrin
     stream << qte << cols.join(sep) << qte << "\n";
 }
 
-void TabLocations::on_pushExport_clicked()
+void TabLocations::exportResults(QTextStream& stream)
 {
-    QString fnam = QFileDialog::getSaveFileName(
-        this, tr("Export locations"), parent->prevdir, tr("Text files (*.txt *csv);;Any files (*)"));
-    if (fnam.isEmpty())
-        return;
-
-    QFileInfo finfo(fnam);
-    QFile file(fnam);
-    parent->prevdir = finfo.absolutePath();
-
-    if (!file.open(QIODevice::WriteOnly))
-    {
-        warn(parent, tr("Failed to open file for export:\n\"%1\"").arg(fnam));
-        return;
-    }
-
     QString qte = parent->config.quote;
     QString sep = parent->config.separator;
 
-    QTextStream stream(&file);
     stream << "Sep=" + sep + "\n";
     sep = qte + sep + qte;
 
@@ -534,5 +511,34 @@ void TabLocations::on_pushExport_clicked()
         }
         csvline(stream, qte, sep, cols);
     }
+    stream.flush();
+}
+
+void TabLocations::on_pushExport_clicked()
+{
+#if WASM
+    QByteArray content;
+    QTextStream stream(&content);
+    exportResults(stream);
+    QFileDialog::saveFileContent(content, "locations.csv");
+#else
+    QString fnam = QFileDialog::getSaveFileName(
+        this, tr("Export locations"), parent->prevdir, tr("Text files (*.txt *csv);;Any files (*)"));
+    if (fnam.isEmpty())
+        return;
+
+    QFileInfo finfo(fnam);
+    QFile file(fnam);
+    parent->prevdir = finfo.absolutePath();
+
+    if (!file.open(QIODevice::WriteOnly))
+    {
+        warn(parent, tr("Failed to open file for export:\n\"%1\"").arg(fnam));
+        return;
+    }
+
+    QTextStream stream(&file);
+    exportResults(stream);
+#endif
 }
 

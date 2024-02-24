@@ -56,7 +56,7 @@ int runCheckScript(
         SearchThreadEnv   * env,
         int                 pass,
         Pos               * path,
-        Condition         * cond
+        const Condition   * cond
 );
 
 struct Rule

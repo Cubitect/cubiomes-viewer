@@ -7,7 +7,6 @@
 
 #include "mainwindow.h"
 #include "search.h"
-#include "world.h"
 
 namespace Ui {
 class TabLocations;
@@ -20,13 +19,12 @@ public:
     explicit AnalysisLocations(QObject *parent = nullptr)
         : QThread(parent), wi(),stop(),sidx(),pidx() {}
 
-    QString set(WorldInfo wi, const QVector<Condition>& conds);
+    QString set(WorldInfo wi, const std::vector<Condition>& conds);
 
     virtual void run() override;
 
 signals:
     void itemDone(QTreeWidgetItem *item);
-    int warning(QString text, QMessageBox::StandardButtons buttons);
 
 public:
     WorldInfo wi;
@@ -53,7 +51,6 @@ public:
     virtual void load(QSettings& settings) override;
 
 private slots:
-    int warning(QString text, QMessageBox::StandardButtons buttons);
     void onAnalysisItemDone(QTreeWidgetItem *item);
     void onAnalysisFinished();
     void onBufferTimeout();
@@ -63,6 +60,9 @@ private slots:
     void on_pushExpand_clicked();
     void on_pushExport_clicked();
     void on_treeWidget_itemClicked(QTreeWidgetItem *item, int column);
+
+private:
+    void exportResults(QTextStream& stream);
 
 private:
     Ui::TabLocations *ui;

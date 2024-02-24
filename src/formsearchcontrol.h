@@ -1,20 +1,19 @@
 #ifndef FORMSEARCHCONTROL_H
 #define FORMSEARCHCONTROL_H
 
-#include <QWidget>
-#include <QTimer>
+#include <QAbstractTableModel>
+#include <QElapsedTimer>
+#include <QFile>
 #include <QKeyEvent>
 #include <QMessageBox>
-#include <QElapsedTimer>
-#include <QAbstractTableModel>
 #include <QSortFilterProxyModel>
-#include <QFile>
+#include <QTimer>
+#include <QWidget>
+
+#include "config.h"
+#include "searchthread.h"
 
 #include <deque>
-
-#include "searchthread.h"
-#include "protobasedialog.h"
-#include "config.h"
 
 namespace Ui {
 class FormSearchControl;
@@ -107,6 +106,7 @@ public:
 
     void stopSearch();
     bool setList64(QString path, bool quiet);
+    bool setList64(QTextStream& stream);
 
     void setResultsPath(QString path);
 
@@ -120,9 +120,7 @@ signals:
     void resultsAdded(int cnt);
 
 public slots:
-    int warning(QString text, QMessageBox::StandardButtons buttons = QMessageBox::Ok);
-    void openProtobaseMsg(QString path);
-    void closeProtobaseMsg();
+    void setSearchRange(uint64_t smin, uint64_t smax);
 
     void on_buttonClear_clicked();
     void on_buttonStart_clicked();
@@ -158,7 +156,6 @@ private:
     Ui::FormSearchControl *ui;
     SeedTableModel *model;
     SeedSortProxy *proxy;
-    ProtoBaseDialog *protodialog;
     SearchMaster sthread;
     QElapsedTimer elapsed;
     QTimer stimer;

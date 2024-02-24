@@ -1,42 +1,42 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include "presetdialog.h"
 #include "aboutdialog.h"
-#include "conditiondialog.h"
-#include "extgendialog.h"
 #include "biomecolordialog.h"
-#include "maptoolsdialog.h"
+#include "configdialog.h"
 #include "exportdialog.h"
+#include "extgendialog.h"
 #include "layerdialog.h"
-#include "tablocations.h"
-#include "tabbiomes.h"
-#include "tabstructures.h"
+#include "maptoolsdialog.h"
 #include "message.h"
-#include "world.h"
+#include "presetdialog.h"
+#include "tabbiomes.h"
+#include "tablocations.h"
+#include "tabstructures.h"
 #include "util.h"
+#include "world.h"
 
 #if WITH_UPDATER
 #include "updater.h"
 #endif
 
-#include <QIntValidator>
-#include <QMetaType>
-#include <QtDebug>
+#include <QBuffer>
+#include <QByteArray>
 #include <QDataStream>
-#include <QMenu>
-#include <QFileDialog>
-#include <QTextStream>
-#include <QSettings>
-#include <QTreeWidget>
 #include <QDateTime>
-#include <QStandardPaths>
 #include <QDebug>
 #include <QFile>
-#include <QTranslator>
-#include <QLibraryInfo>
+#include <QFileDialog>
 #include <QFontDatabase>
 #include <QGuiApplication>
+#include <QIntValidator>
+#include <QLibraryInfo>
+#include <QMenu>
+#include <QMetaType>
+#include <QSettings>
+#include <QStandardPaths>
+#include <QTreeWidget>
+#include <QTranslator>
 
 #if WITH_DBUS
 #include <QDBusMessage>
@@ -284,6 +284,12 @@ MainWindow::MainWindow(QString sessionpath, QString resultspath, QWidget *parent
     onConditionsChanged();
     update();
 
+#if WASM
+    ui->menuFile->removeAction(ui->actionPresetLoad);
+    ui->menuFile->removeAction(ui->actionPresetSave);
+    ui->menuFile->removeAction(ui->actionQuit);
+#endif
+
 #if WITH_UPDATER
     QAction *updateaction = new QAction("Check for updates", this);
     connect(updateaction, &QAction::triggered, [=]() { searchForUpdates(false); });
@@ -507,12 +513,16 @@ void MainWindow::loadSettings()
 
     onUpdateConfig();
 
+#if WASM
+    showFullScreen();
+#else
     if (settings.value("mainwindow/maximized", isMaximized()).toBool()) {
         showMaximized();
     } else if (config.restoreWindow) {
         resize(settings.value("mainwindow/size", size()).toSize());
         move(settings.value("mainwindow/pos", pos()).toPoint());
     }
+#endif
     prevdir = settings.value("mainwindow/prevdir", prevdir).toString();
 
     int toolarea = toolBarArea(ui->toolBar);
@@ -556,12 +566,38 @@ void MainWindow::loadSettings()
 
     if (config.restoreSession && QFile::exists(sessionpath))
     {
-        loadSession(sessionpath, false, false);
+        loadSession(sessionpath, false);
     }
 }
 
+bool MainWindow::saveSession(QString path, bool quiet)
+{
+    QFile file(path);
+    if (!file.open(QIODevice::WriteOnly))
+    {
+        if (!quiet)
+            warn(this, tr("Failed to open file:\n\"%1\"").arg(path));
+        return false;
+    }
 
-bool MainWindow::saveSession(QString fnam, bool quiet)
+    QTextStream stream(&file);
+    return saveSession(stream);
+}
+
+bool MainWindow::loadSession(QString fnam, bool keepresults)
+{
+    QFile file(fnam);
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        warn(this, QApplication::tr("Failed to open session file:\n\"%1\"").arg(fnam));
+        return false;
+    }
+
+    QTextStream stream(&file);
+    return loadSession(stream, keepresults, false);
+}
+
+bool MainWindow::saveSession(QTextStream& stream)
 {
     Session session;
     session.sc = formControl->getSearchConfig();
@@ -569,11 +605,10 @@ bool MainWindow::saveSession(QString fnam, bool quiet)
     session.cv = formCond->getConditions();
     session.slist = formControl->getResults();
     getSeed(&session.wi);
-
-    return session.save(this, fnam, quiet);
+    return session.save(this, stream);
 }
 
-bool MainWindow::loadSession(QString fnam, bool keepresults, bool quiet)
+bool MainWindow::loadSession(QTextStream& stream, bool keepresults, bool quiet)
 {
     Session session;
     // build current session before loading to keep unspecified values the same
@@ -581,7 +616,7 @@ bool MainWindow::loadSession(QString fnam, bool keepresults, bool quiet)
     session.sc = formControl->getSearchConfig();
     session.gen48 = formGen48->getConfig(false);
 
-    if (!session.load(this, fnam, quiet))
+    if (!session.load(this, stream, quiet))
         return false;
 
     setSeed(session.wi);
@@ -792,26 +827,43 @@ void MainWindow::on_seedEdit_textChanged(const QString &a)
 
 void MainWindow::on_actionSave_triggered()
 {
-    QString fnam = QFileDialog::getSaveFileName(
-        this, tr("Save progress"), prevdir, tr("Session files (*.session *.txt);;Any files (*)"));
+#if WASM
+    QByteArray content;
+    QTextStream stream(&content);
+    saveSession(stream);
+    QFileDialog::saveFileContent(content, "session.txt");
+#else
+    QString filter = tr("Session files (*.session *.txt);;Any files (*)");
+    QString fnam = QFileDialog::getSaveFileName(this, tr("Save progress"), prevdir, filter);
     if (!fnam.isEmpty())
     {
         QFileInfo finfo(fnam);
         prevdir = finfo.absolutePath();
-        saveSession(fnam);
+        saveSession(fnam, false);
     }
+#endif
 }
 
 void MainWindow::on_actionLoad_triggered()
 {
-    QString fnam = QFileDialog::getOpenFileName(
-        this, tr("Load progress"), prevdir, tr("Session files (*.session *.txt);;Any files (*)"));
+    QString filter = tr("Session files (*.session *.txt);;Any files (*)");
+#if WASM
+    auto fileOpenCompleted = [=](const QString &fnam, const QByteArray &content) {
+        if (!fnam.isEmpty()) {
+            QTextStream stream(content);
+            loadSession(stream, false, false);
+        }
+    };
+    QFileDialog::getOpenFileContent(filter, fileOpenCompleted);
+#else
+    QString fnam = QFileDialog::getOpenFileName(this, tr("Load progress"), prevdir, filter);
     if (!fnam.isEmpty())
     {
         QFileInfo finfo(fnam);
         prevdir = finfo.absolutePath();
-        loadSession(fnam, false, false);
+        loadSession(fnam, false);
     }
+#endif
 }
 
 void MainWindow::on_actionQuit_triggered()
@@ -844,7 +896,7 @@ void MainWindow::on_actionOpenShadow_triggered()
 
 void MainWindow::on_actionRedistribute_triggered()
 {
-    QVector<Condition> conds = formCond->getConditions();
+    std::vector<Condition> conds = formCond->getConditions();
     if (!conds.empty())
     {
         QMap<int, int> ids;
@@ -885,8 +937,8 @@ void MainWindow::on_actionPresetLoad_triggered()
     getSeed(&wi);
     PresetDialog *dialog = new PresetDialog(this, wi, false);
     dialog->setActiveFilter(formCond->getConditions());
-    if (dialog->exec() && !dialog->rc.isEmpty())
-        loadSession(dialog->rc, true, false);
+    connect(dialog, &QDialog::accepted, [=] { loadSession(dialog->rc, true); });
+    dialog->show();
 }
 
 void MainWindow::on_actionExamples_triggered()
@@ -895,8 +947,8 @@ void MainWindow::on_actionExamples_triggered()
     getSeed(&wi);
     PresetDialog *dialog = new PresetDialog(this, wi, true);
     dialog->setActiveFilter(formCond->getConditions());
-    if (dialog->exec() && !dialog->rc.isEmpty())
-        loadSession(dialog->rc, true, false);
+    connect(dialog, &QDialog::accepted, [=] { loadSession(dialog->rc, true); });
+    dialog->show();
 }
 
 void MainWindow::on_actionAbout_triggered()
@@ -928,15 +980,14 @@ void MainWindow::on_actionAddShadow_triggered()
 void MainWindow::on_actionExtGen_triggered()
 {
     ExtGenDialog *dialog = new ExtGenDialog(this, &g_extgen);
-    int status = dialog->exec();
-    if (status == QDialog::Accepted)
-    {
+    connect(dialog, &QDialog::accepted, [=] {
         g_extgen = dialog->getSettings();
         // invalidate the map world, forcing an update
         getMapView()->deleteWorld();
         setMCList(g_extgen.experimentalVers);
         updateMapSeed();
-    }
+    });
+    dialog->show();
 }
 
 void MainWindow::on_actionExportImg_triggered()
@@ -947,14 +998,24 @@ void MainWindow::on_actionExportImg_triggered()
 
 void MainWindow::on_actionScreenshot_triggered()
 {
-    QString fnam = QFileDialog::getSaveFileName(
-        this, tr("Save screenshot"), prevdir, tr("Images (*.png *.jpg *.ppm)"));
+#if WASM
+    QPixmap pixmap = getMapView()->screenshot();
+    QImage img = pixmap.toImage();
+    QByteArray content;
+    QBuffer buffer(&content);
+    buffer.open(QIODevice::WriteOnly);
+    img.save(&buffer, "PNG");
+    QFileDialog::saveFileContent(content, "screenshot.png");
+#else
+    QString filter = tr("Images (*.png *.jpg *.ppm)");
+    QString fnam = QFileDialog::getSaveFileName(this, tr("Save screenshot"), prevdir, filter);
     if (!fnam.isEmpty())
     {
         QPixmap pixmap = getMapView()->screenshot();
         QImage img = pixmap.toImage();
         img.save(fnam);
     }
+#endif
 }
 
 void MainWindow::on_actionDock_triggered()
@@ -1022,11 +1083,6 @@ void MainWindow::onAutosaveTimeout()
     {
         QString path = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
         saveSession(path + "/session.save", true);
-        //int dispms = 10000;
-        //if (saveProgress(path + "/session.save", true))
-        //    ui->statusBar->showMessage(tr("Session autosaved"), dispms);
-        //else
-        //    ui->statusBar->showMessage(tr("Autosave failed"), dispms);
     }
 }
 
@@ -1061,11 +1117,11 @@ void MainWindow::onActionBiomeLayerSelect(int mode, int disp)
 
 void MainWindow::onConditionsChanged()
 {
-    QVector<Condition> conds = formCond->getConditions();
+    std::vector<Condition> conds = formCond->getConditions();
     formGen48->updateAutoConditions(conds);
 }
 
-void MainWindow::onConditionsSelect(const QVector<Condition>& selection)
+void MainWindow::onConditionsSelect(const std::vector<Condition>& selection)
 {
     std::vector<Shape> shapes;
     for (const Condition& c : selection)
@@ -1125,17 +1181,27 @@ void MainWindow::onUpdateConfig()
         info(this, tr("The application will need to be restarted before all changes can take effect."));
     }
 
+    QFont fnorm_old = ui->labelMC->font();
+    QFont fmono_old = ui->labelMono->font();
+    QFont fnorm = config.fontNorm;
+    QFont fmono = config.fontMono;
+    if (fnorm.family() == "Monospace") // avoid identification conflict
+        fnorm = QApplication::font();
+    fnorm.setStyleHint(QFont::AnyStyle);
+    fmono.setStyleHint(QFont::Monospace);
+    fmono.setFixedPitch(true);
+
+    bool font_changed = fnorm_old != fnorm || fmono_old != fmono;
+
     QFontMetrics fm_ref(QFontDatabase::systemFont(QFontDatabase::GeneralFont));
-    QFontMetrics fm_new(config.fontNorm);
+    QFontMetrics fm_new(fnorm);
 
     g_fontscale = fm_new.height() / (qreal) fm_ref.height();
     g_iconscale = config.iconScale;
 
     getMapView()->setConfig(config);
 
-    if ((old.uistyle != config.uistyle) ||
-        (old.fontNorm != config.fontNorm) ||
-        (old.iconScale != config.iconScale))
+    if ((old.uistyle != config.uistyle) || (old.iconScale != config.iconScale) || font_changed)
     {
         onStyleChanged(config.uistyle);
         int s = (int) round(g_iconscale * 20);
@@ -1145,16 +1211,9 @@ void MainWindow::onUpdateConfig()
     {
         onBiomeColorChange();
     }
-    if (old.fontNorm != config.fontNorm || old.fontMono != config.fontMono)
-    {
-        QFont fnorm = config.fontNorm;
-        QFont fmono = config.fontMono;
-        if (fnorm.family() == "Monospace") // avoid identification conflict
-            fnorm = QApplication::font();
-        fnorm.setStyleHint(QFont::AnyStyle);
-        fmono.setStyleHint(QFont::Monospace);
-        fmono.setFixedPitch(true);
 
+    if (font_changed)
+    {
         QFont fnormb = fnorm;
         QFont fmonob = fmono;
         fnormb.setBold(true);

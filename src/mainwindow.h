@@ -1,27 +1,25 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
-#include <QListWidgetItem>
-#include <QTableWidgetItem>
-#include <QTreeWidgetItem>
-#include <QWidget>
 #include <QAction>
 #include <QActionGroup>
+#include <QListWidgetItem>
+#include <QMainWindow>
 #include <QMessageBox>
-
-#include <QTimer>
-#include <QThreadPool>
-#include <QRunnable>
 #include <QMutex>
-#include <QVector>
+#include <QRunnable>
 #include <QSettings>
+#include <QTableWidgetItem>
+#include <QTextStream>
+#include <QThreadPool>
+#include <QTimer>
+#include <QTreeWidgetItem>
+#include <QVector>
+#include <QWidget>
 
 #include <atomic>
 
 #include "mapview.h"
-#include "searchthread.h"
-#include "configdialog.h"
 #include "formconditions.h"
 #include "formgen48.h"
 #include "formsearchcontrol.h"
@@ -61,8 +59,10 @@ public:
 protected:
     void saveSettings();
     void loadSettings();
-    bool saveSession(QString fnam, bool quiet = false);
-    bool loadSession(QString fnam, bool keepresults, bool quiet);
+    bool saveSession(QString path, bool quiet);
+    bool loadSession(QString path, bool keepresults);
+    bool saveSession(QTextStream& stream);
+    bool loadSession(QTextStream& stream, bool keepresults, bool quiet);
     void updateMapSeed();
     void setDockable(bool dockable);
     void setMCList(bool experimental);
@@ -117,7 +117,7 @@ private slots:
     void onActionHistory(QAction *act);
     void onActionBiomeLayerSelect(int lopt, int disp = -1);
     void onConditionsChanged();
-    void onConditionsSelect(const QVector<Condition>& selection);
+    void onConditionsSelect(const std::vector<Condition>& selection);
     void onGen48Changed();
     void onSelectedSeedChanged(uint64_t seed);
     void onSearchStatusChanged(bool running);

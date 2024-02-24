@@ -1,11 +1,12 @@
 #include "config.h"
-#include "util.h"
+
 #include "seedtables.h"
+#include "util.h"
 
 #include <QThread>
 #include <QCoreApplication>
+#include <QApplication>
 #include <QFontDatabase>
-
 
 /// globals
 
@@ -106,6 +107,7 @@ void WorldInfo::write(QTextStream& stream)
 {
     stream << "#MC:       " << mc2str(mc) << "\n";
     stream << "#Large:    " << large << "\n";
+    stream.flush();
 }
 
 void LayerOpt::reset()
@@ -361,6 +363,7 @@ void Config::reset()
     //fontNorm.setFamily(QString::fromUtf8("DejaVu Sans"));
     //fontMono.setFamily(QString::fromUtf8("DejaVu Sans Mono"));
     fontMono.setStyleHint(QFont::Monospace);
+    fontMono.setFixedPitch(true);
     fontNorm.setStyleHint(QFont::AnyStyle);
     fontMono.setPointSize(10);
     fontNorm.setPointSize(10);
@@ -460,6 +463,7 @@ void Gen48Config::write(QTextStream& stream)
         stream << "#Gen48X2:  " << x2 << "\n";
         stream << "#Gen48Z2:  " << z2 << "\n";
     }
+    stream.flush();
 }
 
 uint64_t Gen48Config::estimateSeedCnt(uint64_t slist48len)
@@ -480,8 +484,8 @@ uint64_t Gen48Config::estimateSeedCnt(uint64_t slist48len)
     else if (mode == GEN48_QM)
     {
         cnt = 0;
-        for (int i = 0, n = sizeof(g_qm_90) / sizeof(int64_t); i < n; i++)
-            if (qmonumentQual(g_qm_90[i]) >= qmarea)
+        for (const uint64_t *s = g_qm_90; *s; s++)
+            if (qmonumentQual(*s) >= qmarea)
                 cnt++;
     }
     else if (mode == GEN48_LIST)
@@ -544,5 +548,6 @@ void SearchConfig::write(QTextStream& stream)
         stream << "#SMin:     " << smin << "\n";
     if (smax != ~(uint64_t)0)
         stream << "#SMax:     " << smax << "\n";
+    stream.flush();
 }
 

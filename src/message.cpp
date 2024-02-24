@@ -61,37 +61,54 @@ int term_prompt(const QString& title, const QString& text, QMessageBox::Standard
 }
 
 static
-int message(QWidget *parent, QMessageBox::Icon icon, const QString& title, const QString& text, QMessageBox::StandardButtons buttons)
+int message(
+    QWidget *parent, QMessageBox::Icon icon, const QString& title, const QString& text,
+    const QString& prompt, QMessageBox::StandardButtons buttons)
 {
+    QString s = text;
+    if (!prompt.isEmpty())
+        s += "\n\n" + prompt;
     if (!parent)
-        return term_prompt(title, text, buttons);
+        return term_prompt(title, s, buttons);
 
     // emulate the behaviour of QMessageBox::warning(...), but raise as active window
-    QMessageBox w(parent);
-    w.setWindowTitle(title);
-    w.setText(text);
-    w.setIconPixmap(QMessageBox::standardIcon(icon)); // setIcon() plays a sound on windows
-    for (uint mask = QMessageBox::FirstButton; mask <= QMessageBox::LastButton; mask <<= 1)
-        if (mask & buttons)
-            w.addButton((QMessageBox::StandardButton)mask);
+    QMessageBox *w = new QMessageBox(parent);
+    w->setWindowTitle(title);
+    w->setIconPixmap(QMessageBox::standardIcon(icon)); // setIcon() plays a sound on windows
     parent->setWindowState(Qt::WindowActive);
     //w.setWindowState(Qt::WindowActive);
-    if (w.exec() == -1)
+#if WASM || 1
+    w->setText(text);
+    w->addButton(QMessageBox::Ok);
+    w->show();
+    return QMessageBox::Cancel;
+#else
+    w->setText(s);
+    for (uint mask = QMessageBox::FirstButton; mask <= QMessageBox::LastButton; mask <<= 1)
+        if (mask & buttons)
+            w->addButton((QMessageBox::StandardButton)mask);
+    if (w->exec() == -1)
         return QMessageBox::Cancel;
-    return w.standardButton(w.clickedButton());
+    return w->standardButton(w->clickedButton());
+#endif
 }
 
-int warn(QWidget *parent, const QString& title, const QString& text, QMessageBox::StandardButtons buttons)
+int warn(QWidget *parent, const QString& title, const QString& text, const QString& prompt, QMessageBox::StandardButtons buttons)
 {
-    return message(parent, QMessageBox::Warning, title, text, buttons);
+    return message(parent, QMessageBox::Warning, title, text, prompt, buttons);
 }
 
-int warn(QWidget *parent, const QString& text, QMessageBox::StandardButtons buttons)
+void warn(QWidget *parent, const QString& title, const QString& text)
 {
-    return message(parent, QMessageBox::Warning, QApplication::tr("Warning"), text, buttons);
+    message(parent, QMessageBox::Warning, title, text, "", QMessageBox::Ok);
 }
 
-int info(QWidget *parent, const QString& text, QMessageBox::StandardButtons buttons)
+void warn(QWidget *parent, const QString& text)
 {
-    return message(parent, QMessageBox::Information, QApplication::tr("Information"), text, buttons);
+    message(parent, QMessageBox::Warning, QApplication::tr("Warning"), text, "", QMessageBox::Ok);
+}
+
+void info(QWidget *parent, const QString& text)
+{
+    message(parent, QMessageBox::Information, QApplication::tr("Information"), text, "", QMessageBox::Ok);
 }

@@ -2,18 +2,16 @@
 #include "ui_formsearchcontrol.h"
 
 #include "mainwindow.h"
-#include "search.h"
-#include "rangedialog.h"
 #include "message.h"
+#include "rangedialog.h"
+#include "search.h"
 #include "util.h"
 
-#include "cubiomes/util.h"
-
-#include <QMenu>
 #include <QAction>
 #include <QClipboard>
 #include <QFileDialog>
 #include <QFontMetrics>
+#include <QMenu>
 
 
 QVariant SeedTableModel::data(const QModelIndex& index, int role) const
@@ -93,6 +91,8 @@ void SeedTableModel::removeRow(int row)
 
 void SeedTableModel::reset()
 {
+    if (seeds.empty())
+        return;
     beginRemoveRows(QModelIndex(), 0, seeds.size());
     seeds.clear();
     endRemoveRows();
@@ -104,7 +104,6 @@ FormSearchControl::FormSearchControl(MainWindow *parent)
     , ui(new Ui::FormSearchControl)
     , model()
     , proxy()
-    , protodialog()
     , sthread(this)
     , elapsed()
     , stimer()
@@ -119,7 +118,6 @@ FormSearchControl::FormSearchControl(MainWindow *parent)
     , updt(20)
 {
     ui->setupUi(this);
-    protodialog = new ProtoBaseDialog(this);
 
     ui->comboSearchType->addItem(tr("incremental"), SEARCH_INC);
     ui->comboSearchType->addItem(tr("48-bit only"), SEARCH_48ONLY);
@@ -158,8 +156,6 @@ FormSearchControl::~FormSearchControl()
 {
     stimer.stop();
     sthread.stop(); // tell search to stop at next convenience
-    sthread.quit(); // tell the event loop to exit
-    sthread.wait(); // wait for search to finish
     delete ui;
 }
 
@@ -217,8 +213,12 @@ bool FormSearchControl::setSearchConfig(SearchConfig s, bool quiet)
     smin = s.smin;
     smax = s.smax;
 
+#if WASM
+    (void) quiet;
+#else
     if (ok)
         ok &= setList64(s.slist64path, quiet);
+#endif
 
     ui->lineStart->setText(QString::asprintf("%" PRId64, (int64_t)s.startseed));
 
@@ -254,9 +254,10 @@ bool FormSearchControl::setList64(QString path, bool quiet)
         }
         else if (!quiet)
         {
-            int button = warn(this, tr("Failed to load 64-bit seed list from file:\n\"%1\"").arg(path),
-                QMessageBox::Reset|QMessageBox::Ignore);
-            if (button == QMessageBox::Reset)
+            int button = warn(this, tr("Warning"),
+                tr("Failed to load 64-bit seed list from file:\n\"%1\"").arg(path),
+                tr("Reset list path?"), QMessageBox::Reset | QMessageBox::Ignore);
+            if (button != QMessageBox::Ignore)
             {
                 slist64fnam.clear();
                 slist64path.clear();
@@ -265,6 +266,26 @@ bool FormSearchControl::setList64(QString path, bool quiet)
         }
     }
     return false;
+}
+
+bool FormSearchControl::setList64(QTextStream& stream)
+{
+    slist64fnam.clear();
+    slist64path.clear();
+    slist64.clear();
+
+    while (!stream.atEnd())
+    {
+        QByteArray line = stream.readLine().toLocal8Bit();
+        uint64_t s = 0;
+        if (sscanf(line.data(), "%" PRId64, (int64_t*)&s) == 1)
+            slist64.push_back(s);
+    }
+
+    if (!slist64.empty())
+        updateSearchProgress(0, slist64.size(), slist64[0]);
+
+    return true;
 }
 
 void FormSearchControl::setResultsPath(QString path)
@@ -310,22 +331,11 @@ void FormSearchControl::setSearchMode(int mode)
     }
 }
 
-
-int FormSearchControl::warning(QString text, QMessageBox::StandardButtons buttons)
+void FormSearchControl::setSearchRange(uint64_t smin, uint64_t smax)
 {
-    return warn(this, text, buttons);
-}
-
-void FormSearchControl::openProtobaseMsg(QString path)
-{
-    protodialog->setPath(path);
-    protodialog->show();
-}
-
-void FormSearchControl::closeProtobaseMsg()
-{
-    if (protodialog->closeOnDone())
-        protodialog->close();
+    this->smin = smin;
+    this->smax = smax;
+    searchProgressReset();
 }
 
 void FormSearchControl::on_buttonClear_clicked()
@@ -355,12 +365,6 @@ void FormSearchControl::on_buttonStart_clicked()
             warn(this, tr("No seed list file selected."));
             ok = false;
         }
-        if (sthread.isRunning())
-        {
-            warn(this, tr("Search is still running."));
-            ok = false;
-        }
-
         if (ok)
         {
             session.gen48 = parent->formGen48->getConfig(true);
@@ -418,19 +422,25 @@ void FormSearchControl::on_buttonMore_clicked()
     int type = ui->comboSearchType->currentData().toInt();
     if (type == SEARCH_LIST)
     {
-        QString fnam = QFileDialog::getOpenFileName(
-            this, tr("Load seed list"), parent->prevdir, tr("Text files (*.txt);;Any files (*)"));
+        QString filter = tr("Text files (*.txt);;Any files (*)");
+#if WASM
+        auto fileOpenCompleted = [=](const QString &fnam, const QByteArray &content) {
+            if (!fnam.isEmpty()) {
+                QTextStream stream(content);
+                setList64(stream);
+            }
+        };
+        QFileDialog::getOpenFileContent(filter, fileOpenCompleted);
+#else
+        QString fnam = QFileDialog::getOpenFileName(this, tr("Load seed list"), parent->prevdir, filter);
         setList64(fnam, false);
+#endif
     }
     else if (type == SEARCH_INC)
     {
         RangeDialog *dialog = new RangeDialog(this, smin, smax);
-        int status = dialog->exec();
-        if (status == QDialog::Accepted)
-        {
-            dialog->getBounds(&smin, &smax);
-            searchProgressReset();
-        }
+        connect(dialog, &RangeDialog::applyBounds, this, &FormSearchControl::setSearchRange);
+        dialog->show();
     }
 }
 
@@ -452,40 +462,40 @@ void FormSearchControl::on_results_clicked(const QModelIndex &)
 
 void FormSearchControl::on_results_customContextMenuRequested(const QPoint &pos)
 {
-    QMenu menu(this);
+    QMenu *menu = new QMenu(this);
 
     // this is a contextual temporary menu so shortcuts are only indicated here,
     // but will not function - see keyReleaseEvent() for shortcut implementation
 
-    QAction *actremove = menu.addAction(QIcon::fromTheme("list-remove"),
+    QAction *actremove = menu->addAction(QIcon::fromTheme("list-remove"),
         tr("Remove selected seed"), this,
         &FormSearchControl::removeCurrent, QKeySequence::Delete);
     actremove->setEnabled(ui->results->selectionModel()->hasSelection());
 
-    QAction *actcopyseed = menu.addAction(QIcon::fromTheme("edit-copy"),
+    QAction *actcopyseed = menu->addAction(QIcon::fromTheme("edit-copy"),
         tr("Copy selected seed"), this,
         &FormSearchControl::copySeed, QKeySequence::Copy);
     actcopyseed->setEnabled(ui->results->selectionModel()->hasSelection());
 
-    QAction *actcopylist = menu.addAction(QIcon::fromTheme("edit-copy"),
+    QAction *actcopylist = menu->addAction(QIcon::fromTheme("edit-copy"),
         tr("Copy seed list"), this,
         &FormSearchControl::copyResults, QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_C));
     actcopylist->setEnabled(ui->results->model()->rowCount() > 0);
 
     int n = pasteList(true);
-    QAction *actpaste = menu.addAction(QIcon::fromTheme("edit-paste"),
+    QAction *actpaste = menu->addAction(QIcon::fromTheme("edit-paste"),
         tr("Paste %n seed(s) from clipboard", "", n), this,
         &FormSearchControl::pasteResults, QKeySequence::Paste);
     actpaste->setEnabled(n > 0);
-    menu.exec(ui->results->mapToGlobal(pos));
+    menu->popup(ui->results->mapToGlobal(pos));
 }
 
 void FormSearchControl::on_buttonSearchHelp_clicked()
 {
-    QMessageBox mb(this);
-    mb.setIcon(QMessageBox::Information);
-    mb.setWindowTitle(tr("Help: search types"));
-    mb.setText(tr(
+    QMessageBox *mb = new QMessageBox(this);
+    mb->setIcon(QMessageBox::Information);
+    mb->setWindowTitle(tr("Help: search types"));
+    mb->setText(tr(
         "<html><head/><body><p>"
         "The <b>incremental</b> search checks seeds in numerical order, "
         "except for grouping seeds into work items for parallelization. "
@@ -511,7 +521,7 @@ void FormSearchControl::on_buttonSearchHelp_clicked()
         "this option.)"
         "</p></body></html>"
         ));
-    mb.exec();
+    mb->show();
 }
 
 void FormSearchControl::on_comboSearchType_currentIndexChanged(int)

@@ -1,0 +1,32 @@
+<RCC>
+    <qresource prefix="/">
+        <file compress-algo="best">qh/1272d</file>
+        <file compress-algo="best">qh/17908</file>
+        <file compress-algo="best">qh/367b9</file>
+        <file compress-algo="best">qh/43f18</file>
+        <file compress-algo="best">qh/487c9</file>
+        <file compress-algo="best">qh/487ce</file>
+        <file compress-algo="best">qh/50aa7</file>
+        <file compress-algo="best">qh/647b5</file>
+        <file compress-algo="best">qh/65118</file>
+        <file compress-algo="best">qh/75618</file>
+        <file compress-algo="best">qh/79a0a</file>
+        <file compress-algo="best">qh/89718</file>
+        <file compress-algo="best">qh/9371a</file>
+        <file compress-algo="best">qh/967ec</file>
+        <file compress-algo="best">qh/a3d0a</file>
+        <file compress-algo="best">qh/a5918</file>
+        <file compress-algo="best">qh/a591d</file>
+        <file compress-algo="best">qh/a5a08</file>
+        <file compress-algo="best">qh/b5e18</file>
+        <file compress-algo="best">qh/c6749</file>
+        <file compress-algo="best">qh/c6d9a</file>
+        <file compress-algo="best">qh/c751a</file>
+        <file compress-algo="best">qh/d7108</file>
+        <file compress-algo="best">qh/d717a</file>
+        <file compress-algo="best">qh/e2739</file>
+        <file compress-algo="best">qh/e9918</file>
+        <file compress-algo="best">qh/ee1c4</file>
+        <file compress-algo="best">qh/f520a</file>
+    </qresource>
+</RCC>

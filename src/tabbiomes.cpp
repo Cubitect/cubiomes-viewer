@@ -1,15 +1,15 @@
 #include "tabbiomes.h"
 #include "ui_tabbiomes.h"
-#include "util.h"
-#include "world.h"
-#include "message.h"
 
+#include "message.h"
+#include "util.h"
+
+#include <QDebug>
 #include <QFileDialog>
 #include <QFileInfo>
-#include <QTextStream>
 #include <QRegularExpressionValidator>
 #include <QScrollBar>
-#include <QDebug>
+#include <QTextStream>
 
 #include <unordered_set>
 
@@ -164,7 +164,7 @@ QVariant BiomeTableModel::data(const QModelIndex& index, int role) const
         uint64_t seed = seeds[index.row()];
         return cnt[id][seed];
     }
-    return QVariant::Invalid;
+    return QVariant();
 }
 
 QVariant BiomeTableModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -197,7 +197,7 @@ QVariant BiomeTableModel::headerData(int section, Qt::Orientation orientation, i
         if (role == Qt::ToolTipRole && bname)
             return QVariant::fromValue(QString("%1:%2").arg(id).arg(bname));
     }
-    return QVariant::Invalid;
+    return QVariant();
 }
 
 void BiomeTableModel::insertIds(QSet<int>& nids)
@@ -738,8 +738,8 @@ void TabBiomes::on_pushStart_clicked()
     thread.start();
 }
 
-static
-void csvline(QTextStream& stream, const QString& qte, const QString& sep, QStringList& cols)
+
+static void csvline(QTextStream& stream, const QString& qte, const QString& sep, QStringList& cols)
 {
     if (qte.isEmpty())
     {
@@ -750,27 +750,11 @@ void csvline(QTextStream& stream, const QString& qte, const QString& sep, QStrin
     stream << qte << cols.join(sep) << qte << "\n";
 }
 
-void TabBiomes::on_pushExport_clicked()
+void TabBiomes::exportResults(QTextStream& stream)
 {
-    QString fnam = QFileDialog::getSaveFileName(
-        this, tr("Export biome analysis"), parent->prevdir, tr("Text files (*.txt *csv);;Any files (*)"));
-    if (fnam.isEmpty())
-        return;
-
-    QFileInfo finfo(fnam);
-    QFile file(fnam);
-    parent->prevdir = finfo.absolutePath();
-
-    if (!file.open(QIODevice::WriteOnly))
-    {
-        warn(parent, tr("Failed to open file for export:\n\"%1\"").arg(fnam));
-        return;
-    }
-
     QString qte = parent->config.quote;
     QString sep = parent->config.separator;
 
-    QTextStream stream(&file);
     stream << "Sep=" + sep + "\n";
     sep = qte + sep + qte;
 
@@ -831,6 +815,35 @@ void TabBiomes::on_pushExport_clicked()
             csvline(stream, qte, sep, cols);
         }
     }
+    stream.flush();
+}
+
+void TabBiomes::on_pushExport_clicked()
+{
+#if WASM
+    QByteArray content;
+    QTextStream stream(&content);
+    exportResults(stream);
+    QFileDialog::saveFileContent(content, "biomes.csv");
+#else
+    QString fnam = QFileDialog::getSaveFileName(
+        this, tr("Export biome analysis"), parent->prevdir, tr("Text files (*.txt *csv);;Any files (*)"));
+    if (fnam.isEmpty())
+        return;
+
+    QFileInfo finfo(fnam);
+    QFile file(fnam);
+    parent->prevdir = finfo.absolutePath();
+
+    if (!file.open(QIODevice::WriteOnly))
+    {
+        warn(parent, tr("Failed to open file for export:\n\"%1\"").arg(fnam));
+        return;
+    }
+
+    QTextStream stream(&file);
+    exportResults(stream);
+#endif
 }
 
 void TabBiomes::on_buttonFromVisible_clicked()

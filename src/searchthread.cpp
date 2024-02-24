@@ -1,17 +1,20 @@
 #include "searchthread.h"
-#include "formsearchcontrol.h"
-#include "util.h"
-#include "seedtables.h"
-#include "message.h"
-#include "aboutdialog.h"
 
-#include <QEventLoop>
+#include "aboutdialog.h"
+#include "formsearchcontrol.h"
+#include "message.h"
+#include "seedtables.h"
+
+#include "cubiomes/quadbase.h"
+#include "cubiomes/util.h"
+
 #include <QApplication>
-#include <QStandardPaths>
-#include <QElapsedTimer>
-#include <QMutex>
-#include <QVector>
 #include <QDateTime>
+#include <QElapsedTimer>
+#include <QEventLoop>
+#include <QMutex>
+#include <QDirIterator>
+#include <QVector>
 
 
 void Session::writeHeader(QTextStream& stream)
@@ -26,41 +29,22 @@ void Session::writeHeader(QTextStream& stream)
 
     for (Condition &c : cv)
         stream << "#Cond: " << c.toHex() << "\n";
+    stream.flush();
 }
 
-bool Session::save(QWidget *widget, QString fnam, bool quiet)
+bool Session::save(QWidget *widget, QTextStream& stream)
 {
-    QFile file(fnam);
-
-    if (!file.open(QIODevice::WriteOnly))
-    {
-        if (!quiet)
-            warn(widget, QApplication::tr("Failed to open file:\n\"%1\"").arg(fnam));
-        return false;
-    }
-
-    QTextStream stream(&file);
+    (void) widget;
     writeHeader(stream);
-
     for (uint64_t s : slist)
         stream << QString::asprintf("%" PRId64 "\n", (int64_t)s);
-
+    stream.flush();
     return true;
 }
 
-bool Session::load(QWidget *widget, QString fnam, bool quiet)
+bool Session::load(QWidget *widget, QTextStream& stream, bool quiet)
 {
-    QFile file(fnam);
-
-    if (!file.open(QIODevice::ReadOnly))
-    {
-        if (!quiet)
-            warn(widget, QApplication::tr("Failed to open session file:\n\"%1\"").arg(fnam));
-        return false;
-    }
-
     int major = 0, minor = 0, patch = 0;
-    QTextStream stream(&file);
     QString line;
     line = stream.readLine();
     int lno = 1;
@@ -69,22 +53,20 @@ bool Session::load(QWidget *widget, QString fnam, bool quiet)
     {
         if (quiet)
             return false;
-        QString msg = QApplication::tr("File does not look like a session file.\n"
-                                       "Progress may be incomplete or broken.\n\n"
-                                       "Continue anyway?");
-        int button = warn(widget, msg, QMessageBox::Abort|QMessageBox::Yes);
-        if (button == QMessageBox::Abort)
+        int button = warn(widget, QApplication::tr("Warning"),
+            QApplication::tr("File does not look like a session file.\nProgress may be incomplete or broken."),
+            QApplication::tr("Continue anyway?"), QMessageBox::Abort | QMessageBox::Yes);
+        if (button != QMessageBox::Yes)
             return false;
     }
     else if (cmpVers(major, minor, patch) > 0)
     {
         if (quiet)
             return false;
-        QString msg = QApplication::tr("Session file was created with a newer version.\n"
-                                       "Progress may be incomplete or broken.\n\n"
-                                       "Continue loading progress anyway?");
-        int button = warn(widget, msg, QMessageBox::Abort|QMessageBox::Yes);
-        if (button == QMessageBox::Abort)
+        int button = warn(widget, QApplication::tr("Warning"),
+            QApplication::tr("Session file was created with a newer version.\nProgress may be incomplete or broken."),
+            QApplication::tr("Continue loading progress anyway?"), QMessageBox::Abort | QMessageBox::Yes);
+        if (button != QMessageBox::Yes)
             return false;
     }
 
@@ -112,10 +94,10 @@ bool Session::load(QWidget *widget, QString fnam, bool quiet)
             {
                 if (quiet)
                     return false;
-                QString msg = QApplication::tr("Condition [%1] at line %2 is not supported.\n\n"
-                                               "Continue anyway?");
-                int button = warn(widget, msg.arg(c.save).arg(lno), QMessageBox::Abort|QMessageBox::Yes);
-                if (button == QMessageBox::Abort)
+                int button = warn(widget, QApplication::tr("Warning"),
+                    QApplication::tr("Condition [%1] at line %2 is not supported.").arg(c.save).arg(lno),
+                    QApplication::tr("Continue anyway?"), QMessageBox::Abort | QMessageBox::Yes);
+                if (button != QMessageBox::Yes)
                     return false;
             }
         }
@@ -132,10 +114,10 @@ bool Session::load(QWidget *widget, QString fnam, bool quiet)
             {
                 if (quiet)
                     return false;
-                QString msg = QApplication::tr("Failed to parse line %1 of file:\n%2\n\n"
-                                               "Continue anyway?");
-                int button = warn(widget, msg.arg(lno).arg(line), QMessageBox::Abort|QMessageBox::Yes);
-                if (button == QMessageBox::Abort)
+                int button = warn(widget, QApplication::tr("Warning"),
+                    QApplication::tr("Failed to parse line %1 of file:\n%2").arg(lno).arg(line),
+                    QApplication::tr("Continue anyway?"), QMessageBox::Abort | QMessageBox::Yes);
+                if (button != QMessageBox::Yes)
                     return false;
             }
         }
@@ -145,7 +127,7 @@ bool Session::load(QWidget *widget, QString fnam, bool quiet)
 
 
 SearchMaster::SearchMaster(QWidget *parent)
-    : QThread(parent)
+    : QObject(parent)
     , mutex()
     , abort()
     , proghist()
@@ -204,7 +186,7 @@ bool SearchMaster::set(QWidget *widget, const Session& s)
 
         const FilterInfo& finfo = g_filterinfo.list[c.type];
 
-        if (c.relative && refbuf[c.relative] == 0)
+        if (c.relative && (refbuf[c.relative] == 0 || disabled[c.relative]))
         {
             warn(widget, tr("Condition with ID %1 has a broken reference position:\n"
                             "condition missing or out of order.").arg(cid));
@@ -214,13 +196,6 @@ bool SearchMaster::set(QWidget *widget, const Session& s)
         {
             warn(widget, tr("More than one condition with ID %1.").arg(cid));
             return false;
-        }
-        if (c.relative && disabled[c.relative])
-        {
-            int button = info(widget, tr("Condition %1 has been indirectly disabled by reference.").arg(cid),
-                              QMessageBox::Abort|QMessageBox::Ignore);
-            if (button == QMessageBox::Abort)
-                return false;
         }
         if (s.wi.mc < finfo.mcmin)
         {
@@ -248,10 +223,8 @@ bool SearchMaster::set(QWidget *widget, const Session& s)
             }
             if ((b | m | c.biomeToExcl | c.biomeToExclM) == 0)
             {
-                int button = info(widget, tr("Biome condition with ID %1 specifies no biomes.").arg(cid),
-                                  QMessageBox::Abort|QMessageBox::Ignore);
-                if (button == QMessageBox::Abort)
-                    return false;
+                warn(widget, tr("Biome condition with ID %1 specifies no biomes.").arg(cid));
+                return false;
             }
 
             int layerId = 0;
@@ -318,7 +291,7 @@ bool SearchMaster::set(QWidget *widget, const Session& s)
     QString err = condtree.set(s.cv, s.wi.mc);
     if (err.isEmpty())
     {
-        err = env.init(s.wi.mc, s.wi.large, &condtree);
+        err = env.init(s.wi.mc, s.wi.large, condtree);
     }
     if (!err.isEmpty())
     {
@@ -344,91 +317,42 @@ bool SearchMaster::set(QWidget *widget, const Session& s)
     return true;
 }
 
-
-static int check(uint64_t s48, void *data)
+static void genQHBases(int qual, uint64_t salt, std::vector<uint64_t>& list48)
 {
-    (void) data;
-    static const StructureConfig sconf = {0,0,0,0,0,0};
-    return isQuadBaseFeature24(sconf, s48, 7+1, 7+1, 9+1) != 0;
-}
-
-static void genQHBases(QObject *qtobj, int qual, uint64_t salt, std::vector<uint64_t>& list48, std::atomic_bool *stop)
-{
-    const char *lbstr = NULL;
-    const uint64_t *lbset = NULL;
-    uint64_t lbcnt = 0;
-    QString path = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
-    if (path.isEmpty())
-        path = "protobases";
-
+    int cst_type = 0;
     switch (qual)
     {
     case IDEAL_SALTED:
-    case IDEAL:
-        lbstr = "ideal";
-        lbset = low20QuadIdeal;
-        lbcnt = sizeof(low20QuadIdeal) / sizeof(uint64_t);
-        break;
-    case CLASSIC:
-        lbstr = "cassic";
-        lbset = low20QuadClassic;
-        lbcnt = sizeof(low20QuadClassic) / sizeof(uint64_t);
-        break;
-    case NORMAL:
-        lbstr = "normal";
-        lbset = low20QuadHutNormal;
-        lbcnt = sizeof(low20QuadHutNormal) / sizeof(uint64_t);
-        break;
-    case BARELY:
-        lbstr = "barely";
-        lbset = low20QuadHutBarely;
-        lbcnt = sizeof(low20QuadHutBarely) / sizeof(uint64_t);
-        break;
-    default:
-        return;
+    case IDEAL:   cst_type = CST_IDEAL; break;
+    case CLASSIC: cst_type = CST_CLASSIC; break;
+    case NORMAL:  cst_type = CST_NORMAL; break;
+    case BARELY:  cst_type = CST_BARELY; break;
     }
 
-    path += QString("/quad_") + lbstr + ".txt";
-    QByteArray fnam = path.toLocal8Bit();
-    uint64_t *qb = NULL;
-    uint64_t qn = 0;
-
-    if ((qb = loadSavedSeeds(fnam.data(), &qn)) == NULL)
+    QDirIterator it(":/qh");
+    while (it.hasNext())
     {
-        printf("[INFO]: Writing quad-protobases to: %s\n", fnam.data());
-        fflush(stdout);
+        QString fnam = it.next();
+        printf("> %s\n", fnam.toLocal8Bit().data());
+        QFile file(fnam);
+        uint64_t low = it.fileInfo().baseName().toUInt(nullptr, 16);
+        uint64_t mid = 0;
+        if (getQuadHutCst(low) > cst_type)
+            continue;
 
-        if (qtobj)
-            QMetaObject::invokeMethod(qtobj, "openProtobaseMsg", Qt::QueuedConnection, Q_ARG(QString, path));
+        file.open(QIODevice::ReadOnly);
+        QTextStream stream(&file);
 
-        int threads = QThread::idealThreadCount();
-        int err = searchAll48(&qb, &qn, fnam.data(), threads, lbset, lbcnt, 20, check, NULL, (volatile char*) stop);
-
-        if (err)
+        while (!stream.atEnd())
         {
-            printf("[WARN]: Failed to generate protobases.\n");
-            if (qtobj && !*stop)
-            {
-                QMetaObject::invokeMethod(
-                        qtobj, "warning", Qt::BlockingQueuedConnection,
-                        Q_ARG(QString, SearchMaster::tr("Failed to generate protobases.")));
-            }
-            return;
+            QString line = stream.readLine();
+            uint64_t diff = line.toULongLong(nullptr, 16);
+            if (diff == 0)
+                break;
+            mid += diff;
+            uint64_t s48 = (mid << 20) + low;
+            list48.push_back(s48 - salt);
         }
-    }
-    else
-    {
-        //printf("Loaded quad-protobases from: %s\n", fnam.data());
-        //fflush(stdout);
-    }
-
-    if (qb)
-    {
-        // convert protobases to proper bases by subtracting the salt
-        list48.resize(qn);
-        for (uint64_t i = 0; i < qn; i++)
-            list48[i] = qb[i] - salt;
-        free(qb);
     }
 }
 
@@ -469,13 +393,13 @@ static bool applyTranspose(std::vector<uint64_t>& slist,
     return !slist.empty();
 }
 
-void SearchMaster::presearch(QObject *qtobj)
+void SearchMaster::presearch()
 {
     uint64_t sstart = seed;
 
     if (gen48.mode == GEN48_AUTO)
     {   // resolve automatic mode
-        for (const Condition& c : qAsConst(condtree.condvec))
+        for (const Condition& c : condtree.condvec)
         {
             if (c.type >= F_QH_IDEAL && c.type <= F_QH_BARELY)
             {
@@ -504,19 +428,16 @@ void SearchMaster::presearch(QObject *qtobj)
                 salt = sconf.salt;
             }
             slist.clear();
-            genQHBases(qtobj, gen48.qual, salt, slist, &abort);
+            genQHBases(gen48.qual, salt, slist);
         }
         else if (gen48.mode == GEN48_QM)
         {
             StructureConfig sconf;
             getStructureConfig_override(Monument, mc, &sconf);
-            const uint64_t *qb = g_qm_90;
-            uint64_t qn = sizeof(g_qm_90) / sizeof(uint64_t);
             slist.clear();
-            slist.reserve(qn);
-            for (uint64_t i = 0; i < qn; i++)
-                if (qmonumentQual(qb[i]) >= gen48.qmarea)
-                    slist.push_back((qb[i] - sconf.salt) & MASK48);
+            for (const uint64_t *s = g_qm_90; *s; s++)
+                if (qmonumentQual(*s) >= gen48.qmarea)
+                    slist.push_back((*s - sconf.salt) & MASK48);
         }
         else if (gen48.mode == GEN48_LIST)
         {
@@ -646,14 +567,12 @@ void SearchMaster::presearch(QObject *qtobj)
     }
 }
 
-void SearchMaster::run()
+void SearchMaster::start()
 {
     stop();
     abort = false;
-    QObject *qtobj = parent();
-    presearch(qtobj);
-    if (qtobj)
-        QMetaObject::invokeMethod(qtobj, "closeProtobaseMsg", Qt::BlockingQueuedConnection);
+    presearch();
+
     if (abort)
     {
         emit searchFinish(false);
@@ -682,7 +601,7 @@ void SearchMaster::run()
     itemtimer.start();
     count = 0;
 
-    for (SearchWorker *worker: workers)
+    for (SearchWorker *worker : workers)
     {
         worker->start();
     }
@@ -694,52 +613,27 @@ void SearchMaster::stop()
     if (workers.empty())
         return;
 
-    // clear event loop of currently running signals (such as results triggers)
-    QApplication::processEvents();
+    long stop_ms = 1000;
+    QElapsedTimer timer;
+    timer.start();
 
-    for (long stop_ms = 300; ; stop_ms *= 5)
+    while (timer.elapsed() < stop_ms)
     {
-        QElapsedTimer timer;
-        timer.start();
-
-        int running = 0;
-        for (SearchWorker *worker: workers)
-        {
-            long ms = stop_ms - timer.elapsed();
-            if (ms < 1) ms = 1;
-            running += !worker->wait(ms);
-        }
-        if (!running)
+        bool busy = false;
+        for (SearchWorker *worker : workers)
+            busy |= worker->isRunning();
+        if (!busy)
             break;
-        if (parent() == nullptr)
-            continue;
-        int button = 0;
-        Qt::ConnectionType connectiontype = Qt::BlockingQueuedConnection;
-        if (QThread::currentThread() == QApplication::instance()->thread())
-        {   // main thread would deadlock with a blocking connection
-            connectiontype = Qt::DirectConnection;
-        }
-        QMetaObject::invokeMethod(
-                parent(), "warning", connectiontype,
-                Q_RETURN_ARG(int, button),
-                Q_ARG(QString, tr("Failed to stop %n worker thread(s).\n"
-                "Keep waiting for threads to stop?", "", running)),
-                Q_ARG(QMessageBox::StandardButtons, QMessageBox::No|QMessageBox::Yes));
-        if (button != QMessageBox::Yes)
-            break;
+        QThread::msleep(10);
     }
 
-    for (SearchWorker *worker: workers)
+    for (SearchWorker *worker : workers)
     {
+        worker->disconnect(this);
         if (worker->isRunning())
-        {
-            worker->disconnect(this);
             connect(worker, &SearchWorker::finished, worker, &QObject::deleteLater);
-        }
         else
-        {
             delete worker;
-        }
     }
     workers.clear();
 
@@ -875,7 +769,7 @@ bool SearchMaster::requestItem(SearchWorker *item)
     if (isdone)
         return false;
 
-    QMutexLocker locker(&mutex);
+    // QMutexLocker locker(&mutex);
 
     // check if we should adjust the item size
     uint64_t nsec = itemtimer.nsecsElapsed();
@@ -1032,26 +926,41 @@ SearchWorker::SearchWorker(SearchMaster *master)
     this->sstart        = master->seed;
     this->scnt          = 0;
     this->seed          = master->seed;
+
+    this->env = new SearchThreadEnv();
 }
 
+SearchWorker::~SearchWorker()
+{
+    delete env;
+}
+
+bool SearchWorker::getNextItem()
+{
+    QMutexLocker locker(&master->mutex);
+    return master->requestItem(this);
+}
 
 void SearchWorker::run()
 {
     Pos origin = {0,0};
-    SearchThreadEnv env;
-    env.init(master->mc, master->large, &master->condtree);
+    env->init(master->mc, master->large, master->condtree);
+
+    volatile char b[1024*1024];
+    for (size_t i = 0; i < sizeof(b); i++)
+        b[i] = (char)i + b[i % 256];
 
     switch (master->searchtype)
     {
     case SEARCH_LIST:
-        while (!*abort && master->requestItem(this))
+        while (!*abort && getNextItem())
         {   // seed = slist[..]
             uint64_t ie = idx+scnt < len ? idx+scnt : len;
             for (uint64_t i = idx; i < ie; i++)
             {
                 seed = slist[i];
-                env.setSeed(seed);
-                if (testTreeAt(origin, &env, PASS_FULL_64, abort) == COND_OK)
+                env->setSeed(seed);
+                if (testTreeAt(origin, env, PASS_FULL_64, abort) == COND_OK)
                 {
                     if (!*abort)
                         emit result(seed);
@@ -1063,7 +972,7 @@ void SearchWorker::run()
         break;
 
     case SEARCH_48ONLY:
-        while (!*abort && master->requestItem(this))
+        while (!*abort && getNextItem())
         {
             if (slist)
             {
@@ -1071,8 +980,8 @@ void SearchWorker::run()
                 for (uint64_t i = idx; i < ie; i++)
                 {
                     seed = slist[i];
-                    env.setSeed(seed);
-                    if (testTreeAt(origin, &env, PASS_FULL_48, abort) != COND_FAILED)
+                    env->setSeed(seed);
+                    if (testTreeAt(origin, env, PASS_FULL_48, abort) != COND_FAILED)
                     {
                         if (!*abort)
                             emit result(seed);
@@ -1084,8 +993,8 @@ void SearchWorker::run()
                 seed = sstart;
                 for (int i = 0; i < scnt; i++)
                 {
-                    env.setSeed(seed);
-                    if (testTreeAt(origin, &env, PASS_FULL_48, abort) != COND_FAILED)
+                    env->setSeed(seed);
+                    if (testTreeAt(origin, env, PASS_FULL_48, abort) != COND_FAILED)
                     {
                         if (!*abort)
                             emit result(seed);
@@ -1102,7 +1011,7 @@ void SearchWorker::run()
         break;
 
     case SEARCH_INC:
-        while (!*abort && master->requestItem(this))
+        while (!*abort && getNextItem())
         {
             if (slist)
             {   // seed = (high << 48) | slist[..]
@@ -1113,8 +1022,8 @@ void SearchWorker::run()
                 {
                     seed = (high << 48) | slist[lowidx];
 
-                    env.setSeed(seed);
-                    if (testTreeAt(origin, &env, PASS_FULL_64, abort) == COND_OK)
+                    env->setSeed(seed);
+                    if (testTreeAt(origin, env, PASS_FULL_64, abort) == COND_OK)
                     {
                         if (!*abort)
                             emit result(seed);
@@ -1135,8 +1044,8 @@ void SearchWorker::run()
                 seed = sstart;
                 for (int i = 0; i < scnt; i++)
                 {
-                    env.setSeed(seed);
-                    if (testTreeAt(origin, &env, PASS_FULL_64, abort) == COND_OK)
+                    env->setSeed(seed);
+                    if (testTreeAt(origin, env, PASS_FULL_64, abort) == COND_OK)
                     {
                         if (!*abort)
                             emit result(seed);
@@ -1153,7 +1062,7 @@ void SearchWorker::run()
         break;
 
     case SEARCH_BLOCKS:
-        while (!*abort && master->requestItem(this))
+        while (!*abort && getNextItem())
         {   // seed = ([..] << 48) | low
             if (slist && idx >= len)
             {
@@ -1167,8 +1076,8 @@ void SearchWorker::run()
             else
                 low = sstart & MASK48;
 
-            env.setSeed(low);
-            if (testTreeAt(origin, &env, PASS_FULL_48, abort) == COND_FAILED)
+            env->setSeed(low);
+            if (testTreeAt(origin, env, PASS_FULL_48, abort) == COND_FAILED)
             {
                 continue;
             }
@@ -1177,8 +1086,8 @@ void SearchWorker::run()
             {
                 seed = (high << 48) | low;
 
-                env.setSeed(seed);
-                if (testTreeAt(origin, &env, PASS_FULL_64, abort) == COND_OK)
+                env->setSeed(seed);
+                if (testTreeAt(origin, env, PASS_FULL_64, abort) == COND_OK)
                 {
                     if (!*abort)
                         emit result(seed);

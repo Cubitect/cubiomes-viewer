@@ -1,18 +1,19 @@
 #include "mapview.h"
+
 #include "gotodialog.h"
 #include "util.h"
 
-#include <QPainter>
-#include <QThread>
+#include <QAction>
 #include <QApplication>
+#include <QClipboard>
 #include <QKeyEvent>
-#include <QWheelEvent>
+#include <QMenu>
+#include <QPainter>
+#include <QSettings>
+#include <QThread>
 #include <QThreadPool>
 #include <QTime>
-#include <QSettings>
-#include <QMenu>
-#include <QAction>
-#include <QClipboard>
+#include <QWheelEvent>
 
 #include <math.h>
 
@@ -199,7 +200,10 @@ void MapView::setShapes(const std::vector<Shape>& s)
 void MapView::refreshBiomeColors()
 {
     if (world)
+    {
         world->refreshBiomeColors();
+        update(1);
+    }
 }
 
 void MapView::settingsToWorld()
@@ -361,8 +365,8 @@ void MapView::mapUpdate()
 
 void MapView::showContextMenu(const QPoint &pos)
 {
-    QMenu menu(this);
-    menu.setFont(font());
+    QMenu *menu = new QMenu(this);
+    menu->setFont(font());
     // this is a contextual temporary menu so shortcuts are only indicated here,
     // but will not function - see keyReleaseEvent() for shortcut implementation
 
@@ -410,33 +414,33 @@ void MapView::showContextMenu(const QPoint &pos)
     int wmax = 0;
     for (auto& it : cpy_dat)
     {
-        int w = txtWidth(menu.fontMetrics(), it.txt + "  ");
+        int w = txtWidth(menu->fontMetrics(), it.txt + "  ");
         if (w > wmax)
             wmax = w;
     }
 
-    menu.addAction(tr("Go to coordinates..."), this, &MapView::onGoto, QKeySequence(Qt::CTRL + Qt::Key_G));
+    menu->addAction(tr("Go to coordinates..."), this, &MapView::onGoto, QKeySequence(Qt::CTRL + Qt::Key_G));
     if (world)
     {
         QString txt = tr("Copy seed:");
-        while (txtWidth(menu.fontMetrics(), txt + " ") < wmax)
+        while (txtWidth(menu->fontMetrics(), txt + " ") < wmax)
             txt += " ";
         txt += QString::asprintf("%" PRId64, (int64_t)world->wi.seed);
-        menu.addAction(txt, this, &MapView::copySeed, QKeySequence::Copy);
+        menu->addAction(txt, this, &MapView::copySeed, QKeySequence::Copy);
     }
     for (auto& it : cpy_dat)
     {
         QString txt = it.txt;
-        while (txtWidth(menu.fontMetrics(), txt + " ") < wmax)
+        while (txtWidth(menu->fontMetrics(), txt + " ") < wmax)
             txt += " ";
         txt += it.cpy;
-        menu.addAction(txt, [=](){ this->copyText(it.cpy); });
+        menu->addAction(txt, [=](){ this->copyText(it.cpy); });
     }
-    //menu.addAction(tr("Animation"), this, &MapView::runAni);
+    //menu->addAction(tr("Animation"), this, &MapView::runAni);
 
-    for (QAction *act : menu.actions())
+    for (QAction *act : menu->actions())
         act->setFont(font());
-    menu.exec(mapToGlobal(pos));
+    menu->popup(mapToGlobal(pos));
 }
 
 void MapView::runAni()

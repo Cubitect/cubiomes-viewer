@@ -9,8 +9,9 @@
 
 #include <random>
 
-#include "cubiomes/quadbase.h"
+#include "cubiomes/finders.h"
 #include "cubiomes/util.h"
+
 
 struct StartPiece
 {
@@ -101,7 +102,7 @@ QPixmap getPix(QString rc, int width = 0);
 
 QIcon getColorIcon(const QColor& col, const QPen& pen = QPen(Qt::black, 1));
 
-QIcon getBiomeIcon(int id, bool warn);
+QIcon getBiomeIcon(int id, bool warn = false);
 
 
 #endif // UTIL_H

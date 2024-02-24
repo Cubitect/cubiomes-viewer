@@ -1,24 +1,24 @@
 #include "conditiondialog.h"
 #include "ui_conditiondialog.h"
 
-#include "mainwindow.h"
-#include "scripts.h"
-#include "layerdialog.h"
-#include "message.h"
 #include "config.h"
+#include "layerdialog.h"
+#include "mapview.h"
+#include "message.h"
+#include "scripts.h"
 #include "util.h"
 
 #include <QCheckBox>
-#include <QIntValidator>
-#include <QScrollBar>
-#include <QSpacerItem>
-#include <QTextStream>
-#include <QStandardPaths>
 #include <QDesktopServices>
 #include <QDir>
 #include <QFileDialog>
-#include <QInputDialog>
 #include <QFontMetricsF>
+#include <QInputDialog>
+#include <QIntValidator>
+#include <QScrollBar>
+#include <QSpacerItem>
+#include <QStandardPaths>
+#include <QTextStream>
 
 
 #define WARNING_CHAR QChar(0x26A0)
@@ -63,7 +63,7 @@ ConditionDialog::ConditionDialog(FormConditions *parent, MapView *mapview, Confi
     //    w->setFont(dfont);
 
     int initindex = -1;
-    const QVector<Condition> existing = parent->getConditions();
+    const std::vector<Condition> existing = parent->getConditions();
     for (Condition c : existing)
     {
         if (initcond)
@@ -868,7 +868,7 @@ void ConditionDialog::updateBiomeSelection()
     }
 }
 
-int ConditionDialog::warnIfBad(Condition cond)
+bool ConditionDialog::warnIfBad(Condition cond)
 {
     const FilterInfo &ft = g_filterinfo.list[cond.type];
     if ((cond.varflags & Condition::VAR_WITH_START) && (cond.varstart == 0))
@@ -877,7 +877,7 @@ int ConditionDialog::warnIfBad(Condition cond)
         {
             QString text = tr("No allowed start pieces specified. Condition can never be true.");
             warn(this, tr("Missing Start Piece"), text);
-            return QMessageBox::Cancel;
+            return false;
         }
     }
     if (cond.type == F_CLIMATE_NOISE)
@@ -891,7 +891,7 @@ int ConditionDialog::warnIfBad(Condition cond)
                     "with the full range required, which can never be satisfied."
                     );
                 warn(this, tr("Bad Climate Range"), text);
-                return QMessageBox::Cancel;
+                return false;
             }
         }
     }
@@ -910,7 +910,7 @@ int ConditionDialog::warnIfBad(Condition cond)
                     .arg(w).arg(QChar(0xD7)).arg(h).arg(w*h)
                     .arg(cond.count * cond.biomeSize).arg(1<<s);
             warn(this, tr("Area Insufficient"), text);
-            return QMessageBox::Cancel;
+            return false;
         }
     }
     else if (ft.cat == CAT_BIOMES)
@@ -924,23 +924,21 @@ int ConditionDialog::warnIfBad(Condition cond)
                     (1ULL << (deep_dark-128));
             if ((m & underground) && cond.y > 246)
             {
-                return warn(this, tr("Bad Surface Height"),
-                    tr("Cave biomes do not generate above Y = 246. "
-                    "You should consider lowering the sampling height."
-                    "\n\n"
-                    "Continue anyway?"),
-                    QMessageBox::Ok | QMessageBox::Cancel);
+                int button = warn(this, tr("Bad Surface Height"),
+                    tr("Cave biomes do not generate above Y = 246.\nThe sampling height should be lowered."),
+                    tr("Continue anyway?"), QMessageBox::Ok | QMessageBox::Cancel);
+                return button != QMessageBox::Cancel;
             }
         }
         if (cond.type == F_BIOME_SAMPLE)
         {
             if (cond.biomeToFind == 0 && cond.biomeToFindM == 0)
             {
-                return warn(this, tr("No Allowed Biomes"),
-                    tr("The set of allowed biomes is empty, which can never "
-                    "be satisfied. Please include some biomes for the required "
-                    "proportion."),
-                    QMessageBox::Cancel);
+                QString text = tr(
+                    "The set of allowed biomes is empty, which can never be satisfied. "
+                    "Please include some biomes for the required proportion.");
+                warn(this, tr("No Allowed Biomes"), text);
+                return false;
             }
         }
     }
@@ -958,16 +956,14 @@ int ConditionDialog::warnIfBad(Condition cond)
                 ok &= (cond.z1 & 511) < AFKMAX && (cond.z1 & 511) > AFKMIN - (cond.z2 - cond.z1);
             if (!ok)
             {
-                return warn(this, tr("Bad Area for Quad-Structure"),
-                    tr("The selected area does not contain a range where a "
-                    "quad-structure can generate."
-                    "\n\n"
-                    "Continue anyway?"),
-                    QMessageBox::Ok | QMessageBox::Cancel);
+                int button = warn(this, tr("Bad Area for Quad-Structure"),
+                    tr("The selected area does not contain a range where a quad-structure can generate."),
+                    tr("Continue anyway?"), QMessageBox::Ok | QMessageBox::Cancel);
+                return button != QMessageBox::Cancel;
             }
         }
     }
-    return QMessageBox::Ok;
+    return true;
 }
 
 static uint16_t tristateFlags(QCheckBox *cb, uint16_t flg)
@@ -1139,7 +1135,7 @@ void ConditionDialog::onAccept()
 
     getClimateLimits(c.limok, c.limex);
 
-    if (warnIfBad(c) != QMessageBox::Ok)
+    if (!warnIfBad(c))
         return;
     cond = c;
     emit setCond(item, cond, 1);
@@ -1230,10 +1226,10 @@ void ConditionDialog::on_buttonExclude_clicked()
 
 void ConditionDialog::on_buttonAreaInfo_clicked()
 {
-    QMessageBox mb(this);
-    mb.setIcon(QMessageBox::Information);
-    mb.setWindowTitle(tr("Help: area entry"));
-    mb.setText(tr(
+    QMessageBox *mb = new QMessageBox(this);
+    mb->setIcon(QMessageBox::Information);
+    mb->setWindowTitle(tr("Help: area entry"));
+    mb->setText(tr(
         "<html><head/><body><p>"
         "The area can be entered via <b>custom</b> rectangle, that is defined "
         "by its two opposing corners, relative to a center point. These bounds "
@@ -1251,7 +1247,7 @@ void ConditionDialog::on_buttonAreaInfo_clicked()
         "-32 to 31, and get sampled at -32, -16, 0 and 16."
         "</p></body></html>"
         ));
-    mb.exec();
+    mb->show();
 }
 
 void ConditionDialog::on_buttonFromVisible_clicked()
@@ -1489,12 +1485,11 @@ void ConditionDialog::on_pushLuaSave_clicked()
     ui->textEditLua->document()->setModified(false);
 }
 
-void ConditionDialog::on_pushLuaSaveAs_clicked()
+void ConditionDialog::onLuaSaveAs(const QString& fileName)
 {
-    QString fnam = QFileDialog::getSaveFileName(
-        this, tr("Save lua script"), getLuaDir(), tr("Lua script (*.lua)"));
-    if (fnam.isEmpty())
+    if (fileName.isEmpty())
         return;
+    QString fnam = fileName;
     if (!fnam.endsWith(".lua"))
         fnam += ".lua";
     QFile file(fnam);
@@ -1508,6 +1503,15 @@ void ConditionDialog::on_pushLuaSaveAs_clicked()
     uint64_t hash = getScriptHash(QFileInfo(fnam));
     ui->comboLua->addItem(QFileInfo(fnam).baseName(), QVariant::fromValue(hash));
     ui->comboLua->setCurrentIndex(ui->comboLua->count() - 1);
+}
+
+void ConditionDialog::on_pushLuaSaveAs_clicked()
+{
+    QFileDialog *dialog = new QFileDialog(this, tr("Save lua script"), getLuaDir(), tr("Lua script (*.lua)"));
+    dialog->setAcceptMode(QFileDialog::AcceptSave);
+    dialog->setSupportedSchemes(QStringList("file"));
+    connect(dialog, &QFileDialog::fileSelected, this, &ConditionDialog::onLuaSaveAs);
+    dialog->show();
 }
 
 void ConditionDialog::on_pushLuaOpen_clicked()
@@ -1559,16 +1563,17 @@ void ConditionDialog::on_pushLuaExample_clicked()
         },
     };
 
-    bool ok = false;
-    QString choice = QInputDialog::getItem(this,
-        tr("Lua examples"),
-        tr("Replace editor content with example:"),
-        examples, 0, false, &ok
-    );
-    if (ok && !choice.isEmpty())
-    {
-        ui->textEditLua->document()->setPlainText(code[choice]);
-    }
+    QInputDialog *dialog = new QInputDialog(this);
+    dialog->setWindowTitle(tr("Lua examples"));
+    dialog->setLabelText(tr("Replace editor content with example:"));
+    dialog->setComboBoxItems(examples);
+    dialog->setTextValue(examples.first());
+    dialog->setComboBoxEditable(false);
+    connect(dialog, &QInputDialog::textValueSelected, [=](const QString &text) {
+        if (code.contains(text))
+            ui->textEditLua->document()->setPlainText(code[text]);
+    });
+    dialog->show();
 }
 
 void ConditionDialog::on_comboHeightRange_currentIndexChanged(int index)
@@ -1584,10 +1589,10 @@ void ConditionDialog::on_comboHeightRange_currentIndexChanged(int index)
 
 void ConditionDialog::on_pushInfoLua_clicked()
 {
-    QMessageBox mb(this);
-    mb.setIcon(QMessageBox::Information);
-    mb.setWindowTitle(tr("Help: Lua script"));
-    mb.setText( tr(
+    QMessageBox *mb = new QMessageBox(this);
+    mb->setIcon(QMessageBox::Information);
+    mb->setWindowTitle(tr("Help: Lua script"));
+    mb->setText( tr(
         "<html><head/><body><p>"
         "Lua scripts allow the user to write custom filters. "
         "A valid Lua filtering script has to define a"
@@ -1625,7 +1630,7 @@ void ConditionDialog::on_pushInfoLua_clicked()
         "positions <b>x1, z1</b> to <b>x2, z2</b>, or <b>nil</b> upon failure"
         "</p></body></html>"
         ));
-    mb.exec();
+    mb->show();
 }
 
 void ConditionDialog::on_comboClimatePara_currentIndexChanged(int)

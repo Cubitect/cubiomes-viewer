@@ -18,23 +18,6 @@ RangeDialog::~RangeDialog()
     delete ui;
 }
 
-bool RangeDialog::getBounds(uint64_t *smin, uint64_t *smax)
-{
-    bool ok, allok = true;
-    int base = 10;
-    if (ui->checkHex->isChecked())
-        base = 16;
-    *smin = ui->lineMin->text().toULongLong(&ok, base);
-    allok &= ok;
-    if (!ok)
-        *smin = 0;
-    *smax = ui->lineMax->text().toULongLong(&ok, base);
-    allok &= ok;
-    if (!ok)
-        *smax = ~(uint64_t)0;
-    return allok;
-}
-
 void RangeDialog::on_buttonBox_clicked(QAbstractButton *button)
 {
     QDialogButtonBox::StandardButton b = ui->buttonBox->standardButton(button);
@@ -47,5 +30,17 @@ void RangeDialog::on_buttonBox_clicked(QAbstractButton *button)
 
         ui->lineMin->setText(QString::asprintf(fmt, 0));
         ui->lineMax->setText(QString::asprintf(fmt, ~(uint64_t)0));
+    }
+    if (b == QDialogButtonBox::Ok)
+    {
+        bool ok;
+        int base = 10;
+        if (ui->checkHex->isChecked())
+            base = 16;
+        uint64_t smin = ui->lineMin->text().toULongLong(&ok, base);
+        if (!ok) smin = 0;
+        uint64_t smax = ui->lineMax->text().toULongLong(&ok, base);
+        if (!ok) smax = ~(uint64_t)0;
+        emit applyBounds(smin, smax);
     }
 }

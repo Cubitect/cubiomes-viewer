@@ -1,8 +1,8 @@
 #ifndef FORMGEN48_H
 #define FORMGEN48_H
 
-#include <QWidget>
 #include <QThread>
+#include <QWidget>
 
 #include "config.h"
 #include "search.h"
@@ -26,12 +26,13 @@ public:
     Gen48Config getConfig(bool resolveauto = false);
 
     bool setList48(QString path, bool quiet);
+    bool setList48(QTextStream& stream);
     const std::vector<uint64_t>& getList48() { return slist48; }
 
     uint64_t estimateSeedCnt();
     void updateCount();
 
-    void updateAutoConditions(const QVector<Condition>& condlist);
+    void updateAutoConditions(const std::vector<Condition>& condlist);
     void updateAutoUi();
 
 signals:

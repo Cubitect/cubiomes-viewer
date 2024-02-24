@@ -1,14 +1,11 @@
 #include "maptoolsdialog.h"
 #include "ui_maptoolsdialog.h"
 
-#include <QLabel>
 #include <QCheckBox>
-#include <QLineEdit>
 #include <QDoubleValidator>
+#include <QLabel>
+#include <QLineEdit>
 #include <QPushButton>
-
-#include "world.h"
-#include "util.h"
 
 MapToolsDialog::MapToolsDialog(QWidget *parent)
     : QDialog(parent)

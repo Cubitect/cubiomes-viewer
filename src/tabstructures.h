@@ -7,7 +7,6 @@ namespace Ui {
 class TabStructures;
 }
 
-
 class AnalysisStructures : public QThread
 {
     Q_OBJECT
@@ -63,6 +62,8 @@ private slots:
     void on_buttonFromVisible_clicked();
     void on_tabWidget_currentChanged(int index);
 
+private:
+    void exportResults(QTextStream& stream);
 
 private:
     Ui::TabStructures *ui;

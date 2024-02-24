@@ -4,9 +4,9 @@
 #include "conditiondialog.h"
 #include "mainwindow.h"
 
-#include <QMessageBox>
-#include <QMenu>
 #include <QClipboard>
+#include <QMenu>
+#include <QMessageBox>
 
 
 QDataStream& operator<<(QDataStream& out, const Condition& v)
@@ -74,6 +74,10 @@ FormConditions::FormConditions(QWidget *parent)
         }
     }
 
+#if WASM
+    ui->listConditions->setDragDropMode(QAbstractItemView::NoDragDrop);
+#endif
+
     qRegisterMetaType< Condition >("Condition");
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     qRegisterMetaTypeStreamOperators< Condition >("Condition");
@@ -85,9 +89,9 @@ FormConditions::~FormConditions()
     delete ui;
 }
 
-QVector<Condition> FormConditions::getConditions() const
+std::vector<Condition> FormConditions::getConditions() const
 {
-    QVector<Condition> conds;
+    std::vector<Condition> conds;
 
     for (int i = 0, ie = ui->listConditions->count(); i < ie; i++)
     {
@@ -119,12 +123,12 @@ void FormConditions::updateSensitivity()
         ui->buttonEdit->setEnabled(false);
     }
 
-    QVector<Condition> selcond;
+    std::vector<Condition> selcond;
     int disabled = 0;
     for (int i = 0; i < selected.size(); i++)
     {
         Condition c = qvariant_cast<Condition>(selected[i]->data(Qt::UserRole));
-        selcond.append(c);
+        selcond.push_back(c);
         if (c.meta & Condition::DISABLED)
             disabled++;
     }
@@ -142,7 +146,7 @@ void FormConditions::updateSensitivity()
 
 int FormConditions::getIndex(int idx) const
 {
-    const QVector<Condition> condvec = getConditions();
+    const std::vector<Condition> condvec = getConditions();
     int cnt[100] = {};
     for (const Condition& c : condvec)
         if (c.save >= 0 && c.save < 100)
@@ -283,7 +287,7 @@ void FormConditions::on_buttonAddFilter_clicked()
 
 void FormConditions::on_listConditions_customContextMenuRequested(const QPoint &pos)
 {
-    QMenu menu(this);
+    QMenu *menu = new QMenu(this);
     // this is a contextual temporary menu so shortcuts are only indicated here,
     // but will not function - see keyReleaseEvent() for shortcut implementation
 
@@ -291,46 +295,46 @@ void FormConditions::on_listConditions_customContextMenuRequested(const QPoint &
 
     if (parent)
     {
-       QAction *actadd = menu.addAction(QIcon::fromTheme("list-add"),
+        QAction *actadd = menu->addAction(QIcon::fromTheme("list-add"),
             tr("Add new condition"), this,
             &FormConditions::conditionsAdd, QKeySequence::New);
         actadd->setEnabled(true);
 
-        QAction *actedit = menu.addAction(QIcon(),
+        QAction *actedit = menu->addAction(QIcon(),
             tr("Edit condition"), this,
             &FormConditions::conditionsEdit, QKeySequence::Open);
         actedit->setEnabled(n == 1);
 
-        QAction *actcut = menu.addAction(QIcon::fromTheme("edit-cut"),
+        QAction *actcut = menu->addAction(QIcon::fromTheme("edit-cut"),
             tr("Cut %n condition(s)", "", n), this,
             &FormConditions::conditionsCut, QKeySequence::Cut);
         actcut->setEnabled(n > 0);
 
-        QAction *actcopy = menu.addAction(QIcon::fromTheme("edit-copy"),
+        QAction *actcopy = menu->addAction(QIcon::fromTheme("edit-copy"),
             tr("Copy %n condition(s)", "", n), this,
             &FormConditions::conditionsCopy, QKeySequence::Copy);
         actcopy->setEnabled(n > 0);
 
         int pn = conditionsPaste(true);
-        QAction *actpaste = menu.addAction(QIcon::fromTheme("edit-paste"),
+        QAction *actpaste = menu->addAction(QIcon::fromTheme("edit-paste"),
             tr("Paste %n condition(s)", "", pn), this,
             &FormConditions::conditionsPaste, QKeySequence::Paste);
         actpaste->setEnabled(pn > 0);
 
-        QAction *actdel = menu.addAction(QIcon::fromTheme("edit-delete"),
+        QAction *actdel = menu->addAction(QIcon::fromTheme("edit-delete"),
             tr("Remove %n condition(s)", "", n), this,
             &FormConditions::conditionsDelete, QKeySequence::Delete);
         actdel->setEnabled(n > 0);
     }
     else
     {
-        QAction *actcopy = menu.addAction(QIcon::fromTheme("edit-copy"),
+        QAction *actcopy = menu->addAction(QIcon::fromTheme("edit-copy"),
             tr("Copy %n condition(s)", "", n), this,
             &FormConditions::conditionsCopy, QKeySequence::Copy);
         actcopy->setEnabled(n > 0);
     }
 
-    menu.exec(ui->listConditions->mapToGlobal(pos));
+    menu->popup(ui->listConditions->mapToGlobal(pos));
 }
 
 void FormConditions::on_listConditions_itemDoubleClicked(QListWidgetItem *item)

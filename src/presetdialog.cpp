@@ -2,16 +2,15 @@
 #include "ui_presetdialog.h"
 
 #include "aboutdialog.h"
-#include "mainwindow.h"
 #include "util.h"
 
-#include <QPushButton>
-#include <QListWidgetItem>
-#include <QTextStream>
-#include <QFile>
-#include <QStandardPaths>
 #include <QDirIterator>
+#include <QFile>
 #include <QInputDialog>
+#include <QListWidgetItem>
+#include <QPushButton>
+#include <QStandardPaths>
+#include <QTextStream>
 
 
 bool loadConditions(Preset& preset, QString rc)
@@ -67,6 +66,10 @@ PresetDialog::PresetDialog(QWidget *parent, WorldInfo wi, bool showEamples)
         ui->tabWidget->setCurrentWidget(ui->tabExamples);
     else
         ui->tabWidget->setCurrentWidget(ui->tabFilters);
+
+#if WASM
+    ui->tabWidget->removeTab(0); // no filesystem for filters
+#endif
 
     ui->splitterH->setSizes(QList<int>({7500, 10000}));
 
@@ -146,7 +149,7 @@ PresetDialog::~PresetDialog()
     delete ui;
 }
 
-void PresetDialog::setActiveFilter(const QVector<Condition>& condvec)
+void PresetDialog::setActiveFilter(const std::vector<Condition>& condvec)
 {
     activeFilter = condvec;
 }

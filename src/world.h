@@ -12,8 +12,6 @@
 #include <QMutex>
 #include <QThread>
 
-#include "cubiomes/quadbase.h"
-
 
 struct Level;
 
@@ -29,7 +27,6 @@ struct VarPos
 };
 
 const QPixmap& getMapIcon(int opt, VarPos *variation = 0);
-QIcon getBiomeIcon(int id, bool warn = false);
 
 void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
         WorldInfo wi, int dim, int x0, int z0, int x1, int z1, bool nogen = false);

@@ -1,13 +1,11 @@
 #include "headless.h"
-#include "message.h"
-#include "aboutdialog.h"
 
-#include <QStandardPaths>
+#include "message.h"
+#include "util.h"
+
 #include <QApplication>
 #include <QDateTime>
-
-#include "cubiomes/util.h"
-
+#include <QStandardPaths>
 
 #if defined(_WIN32)
 #include <windows.h>
@@ -89,7 +87,15 @@ bool Headless::loadSession(QString sessionpath)
     qOut() << "Loading session: \"" << sessionpath << "\"\n";
     qOut().flush();
 
-    if (!session.load(nullptr, sessionpath, false))
+    QFile file(sessionpath);
+    if (!file.open(QFile::ReadOnly))
+    {
+        warn(nullptr, "Path could not be opened.");
+        return false;
+    }
+
+    QTextStream stream(&file);
+    if (!session.load(nullptr, stream, false))
     {
         return false;
     }

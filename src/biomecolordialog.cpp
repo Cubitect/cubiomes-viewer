@@ -1,21 +1,22 @@
 #include "biomecolordialog.h"
 #include "ui_biomecolordialog.h"
 
+#include "config.h"
 #include "mainwindow.h"
 #include "message.h"
-#include "config.h"
 #include "util.h"
 
-#include <QPushButton>
+#include <QBuffer>
+#include <QByteArray>
 #include <QColorDialog>
-#include <QInputDialog>
-#include <QStandardPaths>
-#include <QFile>
-#include <QFileInfo>
-#include <QFileDialog>
-#include <QTextStream>
 #include <QDirIterator>
+#include <QFile>
+#include <QFileDialog>
+#include <QFileInfo>
+#include <QInputDialog>
 #include <QMessageBox>
+#include <QPushButton>
+#include <QStandardPaths>
 
 #define DIM_DIVIDER 6
 
@@ -82,7 +83,7 @@ BiomeColorDialog::BiomeColorDialog(MainWindow *parent, QString initrc, int mc, i
     ui->gridLayout->addWidget(separator, 256, 0, 1, 3);
 
     QString dir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
-    QDirIterator it(dir, QDirIterator::NoIteratorFlags);
+    QDirIterator it(dir);
     while (it.hasNext())
     {
         QString rc = it.next();
@@ -203,6 +204,8 @@ int BiomeColorDialog::saveColormap(QString rc, QString desc)
             continue;
         stream << bname << " " << colors[i][0] << " " << colors[i][1] << " " << colors[i][2] << "\n";
     }
+    stream.flush();
+    file.close();
 
     modified = false;
     if (index > 0)
@@ -217,15 +220,14 @@ int BiomeColorDialog::saveColormap(QString rc, QString desc)
     return index;
 }
 
-int BiomeColorDialog::loadColormap(QString path, bool reset)
+int BiomeColorDialog::loadColormap(QIODevice *iodevice, bool reset)
 {
-    QFile file(path);
     int n = 0;
-    if (!path.isEmpty() && file.open(QIODevice::ReadOnly))
+    if (iodevice && iodevice->open(QIODevice::ReadOnly))
     {
         char buf[32*1024];
-        qint64 siz = file.read(buf, sizeof(buf)-1);
-        file.close();
+        qint64 siz = iodevice->read(buf, sizeof(buf)-1);
+        iodevice->close();
         if (siz >= 0)
         {
             buf[siz] = 0;
@@ -247,12 +249,18 @@ int BiomeColorDialog::loadColormap(QString path, bool reset)
             buttons[i][0]->setIcon(getColorIcon(col));
         }
     }
-    return n;
-}
 
-QString BiomeColorDialog::getRc()
-{
-    return activerc;
+    if (!reset)
+    {
+        if (n == 0)
+        {
+            warn(this, tr("No biome colors found."));
+            return n;
+        }
+        info(this, tr("Replaced %n biome color(s).", "", n));
+        modified = true;
+    }
+    return n;
 }
 
 void BiomeColorDialog::setBiomeColor(int id, const QColor &col)
@@ -269,10 +277,10 @@ void BiomeColorDialog::editBiomeColor(int id)
     QColor col = QColor(colors[id][0], colors[id][1], colors[id][2]);
     QColorDialog *dialog = new QColorDialog(col, this);
     //dialog->setOption(QColorDialog::DontUseNativeDialog, true);
-    if (dialog->exec())
-    {
+    connect(dialog, &QDialog::accepted, [=] {
         setBiomeColor(id, dialog->selectedColor());
-    }
+    });
+    dialog->show();
 }
 
 void BiomeColorDialog::on_comboColormaps_currentIndexChanged(int index)
@@ -287,7 +295,15 @@ void BiomeColorDialog::on_comboColormaps_currentIndexChanged(int index)
     }
 
     activerc = qvariant_cast<QString>(ui->comboColormaps->currentData());
-    loadColormap(activerc, true);
+    if (!activerc.isEmpty())
+    {
+        QFile file(activerc);
+        loadColormap(&file, true);
+    }
+    else
+    {
+        loadColormap(nullptr, true);
+    }
 }
 
 void BiomeColorDialog::onSaveAs()
@@ -301,33 +317,27 @@ void BiomeColorDialog::onSaveAs()
         if (!QFile::exists(rc))
             break;
     }
-    bool ok;
-    QString desc = QInputDialog::getText(
-            this, tr("Save biome colors as..."),
-            tr("Biome colors:"), QLineEdit::Normal,
-            QString("Colormap#%1").arg(n), &ok);
-    if (!ok || desc.isEmpty())
-        return;
-
-    int idx = saveColormap(rc, desc);
-    ui->comboColormaps->setCurrentIndex(idx);
-    activerc = rc;
+    QInputDialog *dialog = new QInputDialog(this);
+    dialog->setInputMode(QInputDialog::TextInput);
+    dialog->setWindowTitle(tr("Save biome colors as..."));
+    dialog->setLabelText(tr("Biome colors:"));
+    dialog->setTextValue(QString("Colormap#%1").arg(n));
+    connect(dialog, &QInputDialog::textValueSelected, [=](const QString &text) {
+        this->onSaveSelect(rc, text);
+    });
+    dialog->show();
 }
 
-void BiomeColorDialog::onExport()
+void BiomeColorDialog::onSaveSelect(const QString& rc, const QString &text)
 {
-    QFileInfo finfo(mainwindow->prevdir);
-    QString fnam = QFileDialog::getSaveFileName(
-        this, tr("Export biome color map"), finfo.absolutePath(), tr("Color map files (*.colormap *.txt);;Any files (*)"));
-    if (fnam.isEmpty())
-        return;
-    QFile file(fnam);
-    if (!file.open(QIODevice::WriteOnly))
-    {
-        warn(this, tr("Failed open file for writing."));
-        return;
-    }
-    QTextStream stream(&file);
+    int idx = saveColormap(rc, text);
+    ui->comboColormaps->setCurrentIndex(idx);
+    emit yieldBiomeColorRc(rc);
+    accept();
+}
+
+void BiomeColorDialog::exportColors(QTextStream& stream)
+{
     for (int i = 0; i < 256; i++)
     {
         const char *bname = biome2str(MC_NEWEST, i);
@@ -335,6 +345,35 @@ void BiomeColorDialog::onExport()
             continue;
         stream << bname << " " << colors[i][0] << " " << colors[i][1] << " " << colors[i][2] << "\n";
     }
+    stream.flush();
+}
+
+void BiomeColorDialog::onExport()
+{
+#if WASM
+    QByteArray content;
+    QTextStream stream(&content);
+    exportColors(stream);
+    QFileDialog::saveFileContent(content, "biomecolors.txt");
+#else
+    QString fnam = QFileDialog::getSaveFileName(
+        this, tr("Export biome color map"), mainwindow->prevdir, tr("Color map files (*.colormap *.txt);;Any files (*)"));
+    if (fnam.isEmpty())
+        return;
+
+    QFileInfo finfo(fnam);
+    QFile file(fnam);
+    mainwindow->prevdir = finfo.absolutePath();
+
+    if (!file.open(QIODevice::WriteOnly))
+    {
+        warn(this, tr("Failed to open file for export:\n\"%1\"").arg(fnam));
+        return;
+    }
+
+    QTextStream stream(&file);
+    exportColors(stream);
+#endif
 }
 
 void BiomeColorDialog::onRemove()
@@ -351,47 +390,64 @@ void BiomeColorDialog::onRemove()
 
 void BiomeColorDialog::onAccept()
 {
-    on_comboColormaps_currentIndexChanged(ui->comboColormaps->currentIndex());
+    if (modified)
+    {
+        if (activerc.isEmpty())
+        {
+            onSaveAs();
+            return; // accept only after save-as dialog
+        }
+        saveColormap(activerc, "");
+    }
     emit yieldBiomeColorRc(activerc);
     accept();
 }
 
 void BiomeColorDialog::onImport()
 {
-    QFileInfo finfo(mainwindow->prevdir);
-    QString fnam = QFileDialog::getOpenFileName(
-        this, tr("Load biome color map"), finfo.absolutePath(), tr("Color map files (*.colormap *.txt);;Any files (*)"));
-    if (!fnam.isNull())
-    {
-        int n = loadColormap(fnam, false);
-        if (n == 0)
-        {
-            warn(this, tr("No biome colors found."));
-            return;
+    QString filter = tr("Color map files (*.colormap *.txt);;Any files (*)");
+#if WASM
+    auto fileOpenCompleted = [=](const QString &fnam, const QByteArray &content) {
+        if (!fnam.isEmpty()) {
+            QBuffer buffer;
+            buffer.setData(content);
+            loadColormap(&buffer, false);
         }
-        info(this, tr("Replaced %n biome color(s).", "", n));
-        modified = true;
-    }
+    };
+    QFileDialog::getOpenFileContent(filter, fileOpenCompleted);
+#else
+    QString fnam = QFileDialog::getOpenFileName(
+        this, tr("Load biome color map"), mainwindow->prevdir, filter);
+    if (fnam.isEmpty())
+        return;
+    QFileInfo finfo(fnam);
+    QFile file(fnam);
+    mainwindow->prevdir = finfo.absolutePath();
+    loadColormap(&file, false);
+#endif
 }
 
 void BiomeColorDialog::onColorHelp()
 {
-    QString msg = tr(
-            "<html><head/><body><p>"
-            "<b>Custom biome colors</b> should be defined in an ASCII text file, "
-            "with one biome-color mapping per line. Each mapping should consist "
-            "of a biome ID or biome resource name followed by a color that can be "
-            "written as a hex code (prefixed with # or 0x) or as an RGB triplet. "
-            "Special characters are ignored."
-            "</p><p>"
-            "<b>Examples:</b>"
-            "</p><p>"
-            "sunflower_plains:&nbsp;#FFFF00"
-            "</p><p>"
-            "128&nbsp;[255&nbsp;255&nbsp;0]"
-            "</p></body></html>"
-            );
-    QMessageBox::information(this, tr("Help: custom biome colors"), msg, QMessageBox::Ok);
+    QMessageBox *mb = new QMessageBox(this);
+    mb->setIcon(QMessageBox::Information);
+    mb->setWindowTitle(tr("Help: custom biome colors"));
+    mb->setText(tr(
+        "<html><head/><body><p>"
+        "<b>Custom biome colors</b> should be defined in an ASCII text file, "
+        "with one biome-color mapping per line. Each mapping should consist "
+        "of a biome ID or biome resource name followed by a color that can be "
+        "written as a hex code (prefixed with # or 0x) or as an RGB triplet. "
+        "Special characters are ignored."
+        "</p><p>"
+        "<b>Examples:</b>"
+        "</p><p>"
+        "sunflower_plains:&nbsp;#FFFF00"
+        "</p><p>"
+        "128&nbsp;[255&nbsp;255&nbsp;0]"
+        "</p></body></html>"
+        ));
+    mb->show();
 }
 
 void BiomeColorDialog::onAllToDefault()

@@ -5,7 +5,7 @@
 #include <QListWidgetItem>
 #include <QStyledItemDelegate>
 
-#include "searchthread.h"
+#include "search.h"
 
 namespace Ui {
 class FormConditions;
@@ -34,7 +34,7 @@ public:
     explicit FormConditions(QWidget *parent = nullptr);
     ~FormConditions();
 
-    QVector<Condition> getConditions() const;
+    std::vector<Condition> getConditions() const;
     void updateSensitivity();
     int getIndex(int idx) const;
 
@@ -46,7 +46,7 @@ public:
 
 signals:
     void changed();
-    void selectionUpdate(const QVector<Condition>& selected);
+    void selectionUpdate(const std::vector<Condition>& selected);
 
 public slots:
     void on_buttonRemoveAll_clicked();

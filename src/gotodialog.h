@@ -20,6 +20,7 @@ public:
     void keyPressEvent(QKeyEvent *event) override;
 
 private slots:
+    void on_lineScale_textChanged(const QString &text);
     void on_buttonBox_clicked(QAbstractButton *button);
 
 private:
