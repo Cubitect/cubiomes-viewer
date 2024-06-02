@@ -129,7 +129,7 @@ bool Session::load(QWidget *widget, QTextStream& stream, bool quiet)
 SearchMaster::SearchMaster(QWidget *parent)
     : QObject(parent)
     , mutex()
-    , abort()
+    , stop()
     , proghist()
     , progtimer()
     , itemtimer()
@@ -151,11 +151,12 @@ SearchMaster::SearchMaster(QWidget *parent)
     , smax()
     , isdone()
 {
+    env.stop = &stop;
 }
 
 SearchMaster::~SearchMaster()
 {
-    stop();
+    stopSearch();
 }
 
 bool SearchMaster::set(QWidget *widget, const Session& s)
@@ -313,7 +314,7 @@ bool SearchMaster::set(QWidget *widget, const Session& s)
     this->smin = s.sc.smin;
     this->smax = s.sc.smax;
     this->isdone = false;
-    this->abort = false;
+    this->stop = false;
     return true;
 }
 
@@ -393,7 +394,7 @@ static bool applyTranspose(std::vector<uint64_t>& slist,
     return !slist.empty();
 }
 
-void SearchMaster::presearch()
+void SearchMaster::preSearch()
 {
     uint64_t sstart = seed;
 
@@ -567,13 +568,13 @@ void SearchMaster::presearch()
     }
 }
 
-void SearchMaster::start()
+void SearchMaster::startSearch()
 {
-    stop();
-    abort = false;
-    presearch();
+    stopSearch();
+    stop = false;
+    preSearch();
 
-    if (abort)
+    if (stop)
     {
         emit searchFinish(false);
         return;
@@ -607,9 +608,9 @@ void SearchMaster::start()
     }
 }
 
-void SearchMaster::stop()
+void SearchMaster::stopSearch()
 {
-    abort = true;
+    stop = true;
     if (workers.empty())
         return;
 
@@ -871,10 +872,10 @@ bool SearchMaster::requestItem(SearchWorker *item)
                 high = 0;
                 low++;
 
-                for (; low <= MASK48 && !abort; low++)
+                for (; low <= MASK48 && !stop; low++)
                 {
                     env.setSeed(low);
-                    if (testTreeAt(origin, &env, PASS_FAST_48, &abort)
+                    if (testTreeAt(origin, &env, PASS_FAST_48, nullptr)
                         != COND_FAILED)
                     {
                         break;
@@ -909,7 +910,7 @@ void SearchMaster::onWorkerFinished()
     for (SearchWorker *worker: workers)
         delete worker;
     workers.clear();
-    emit searchFinish(isdone && !abort);
+    emit searchFinish(isdone && !stop);
 }
 
 
@@ -919,7 +920,6 @@ SearchWorker::SearchWorker(SearchMaster *master)
 {
     this->slist         = master->slist.empty() ? NULL : master->slist.data();
     this->len           = master->slist.size();
-    this->abort         = &master->abort;
 
     this->prog          = master->prog;
     this->idx           = master->idx;
@@ -927,12 +927,11 @@ SearchWorker::SearchWorker(SearchMaster *master)
     this->scnt          = 0;
     this->seed          = master->seed;
 
-    this->env = new SearchThreadEnv();
+    this->env.stop      = &master->stop;
 }
 
 SearchWorker::~SearchWorker()
 {
-    delete env;
 }
 
 bool SearchWorker::getNextItem()
@@ -944,25 +943,21 @@ bool SearchWorker::getNextItem()
 void SearchWorker::run()
 {
     Pos origin = {0,0};
-    env->init(master->mc, master->large, master->condtree);
-
-    volatile char b[1024*1024];
-    for (size_t i = 0; i < sizeof(b); i++)
-        b[i] = (char)i + b[i % 256];
+    env.init(master->mc, master->large, master->condtree);
 
     switch (master->searchtype)
     {
     case SEARCH_LIST:
-        while (!*abort && getNextItem())
+        while (!*env.stop && getNextItem())
         {   // seed = slist[..]
             uint64_t ie = idx+scnt < len ? idx+scnt : len;
             for (uint64_t i = idx; i < ie; i++)
             {
                 seed = slist[i];
-                env->setSeed(seed);
-                if (testTreeAt(origin, env, PASS_FULL_64, abort) == COND_OK)
+                env.setSeed(seed);
+                if (testTreeAt(origin, &env, PASS_FULL_64, nullptr) == COND_OK)
                 {
-                    if (!*abort)
+                    if (!*env.stop)
                         emit result(seed);
                 }
             }
@@ -972,7 +967,7 @@ void SearchWorker::run()
         break;
 
     case SEARCH_48ONLY:
-        while (!*abort && getNextItem())
+        while (!*env.stop && getNextItem())
         {
             if (slist)
             {
@@ -980,10 +975,10 @@ void SearchWorker::run()
                 for (uint64_t i = idx; i < ie; i++)
                 {
                     seed = slist[i];
-                    env->setSeed(seed);
-                    if (testTreeAt(origin, env, PASS_FULL_48, abort) != COND_FAILED)
+                    env.setSeed(seed);
+                    if (testTreeAt(origin, &env, PASS_FULL_48, nullptr) != COND_FAILED)
                     {
-                        if (!*abort)
+                        if (!*env.stop)
                             emit result(seed);
                     }
                 }
@@ -993,10 +988,10 @@ void SearchWorker::run()
                 seed = sstart;
                 for (int i = 0; i < scnt; i++)
                 {
-                    env->setSeed(seed);
-                    if (testTreeAt(origin, env, PASS_FULL_48, abort) != COND_FAILED)
+                    env.setSeed(seed);
+                    if (testTreeAt(origin, &env, PASS_FULL_48, nullptr) != COND_FAILED)
                     {
-                        if (!*abort)
+                        if (!*env.stop)
                             emit result(seed);
                     }
 
@@ -1011,7 +1006,7 @@ void SearchWorker::run()
         break;
 
     case SEARCH_INC:
-        while (!*abort && getNextItem())
+        while (!*env.stop && getNextItem())
         {
             if (slist)
             {   // seed = (high << 48) | slist[..]
@@ -1022,10 +1017,10 @@ void SearchWorker::run()
                 {
                     seed = (high << 48) | slist[lowidx];
 
-                    env->setSeed(seed);
-                    if (testTreeAt(origin, env, PASS_FULL_64, abort) == COND_OK)
+                    env.setSeed(seed);
+                    if (testTreeAt(origin, &env, PASS_FULL_64, nullptr) == COND_OK)
                     {
-                        if (!*abort)
+                        if (!*env.stop)
                             emit result(seed);
                     }
 
@@ -1044,10 +1039,10 @@ void SearchWorker::run()
                 seed = sstart;
                 for (int i = 0; i < scnt; i++)
                 {
-                    env->setSeed(seed);
-                    if (testTreeAt(origin, env, PASS_FULL_64, abort) == COND_OK)
+                    env.setSeed(seed);
+                    if (testTreeAt(origin, &env, PASS_FULL_64, nullptr) == COND_OK)
                     {
-                        if (!*abort)
+                        if (!*env.stop)
                             emit result(seed);
                     }
 
@@ -1062,7 +1057,7 @@ void SearchWorker::run()
         break;
 
     case SEARCH_BLOCKS:
-        while (!*abort && getNextItem())
+        while (!*env.stop && getNextItem())
         {   // seed = ([..] << 48) | low
             if (slist && idx >= len)
             {
@@ -1076,8 +1071,8 @@ void SearchWorker::run()
             else
                 low = sstart & MASK48;
 
-            env->setSeed(low);
-            if (testTreeAt(origin, env, PASS_FULL_48, abort) == COND_FAILED)
+            env.setSeed(low);
+            if (testTreeAt(origin, &env, PASS_FULL_48, nullptr) == COND_FAILED)
             {
                 continue;
             }
@@ -1086,10 +1081,10 @@ void SearchWorker::run()
             {
                 seed = (high << 48) | low;
 
-                env->setSeed(seed);
-                if (testTreeAt(origin, env, PASS_FULL_64, abort) == COND_OK)
+                env.setSeed(seed);
+                if (testTreeAt(origin, &env, PASS_FULL_64, nullptr) == COND_OK)
                 {
-                    if (!*abort)
+                    if (!*env.stop)
                         emit result(seed);
                 }
 

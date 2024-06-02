@@ -90,6 +90,7 @@ enum
     F_WELL,
     F_TRAILS,
     F_BIOME_SAMPLE,
+    F_NOISE_SAMPLE,
     // new filters should be added here at the end to keep some downwards compatibility
     FILTER_MAX,
 };
@@ -308,15 +309,23 @@ static const struct FilterList : private FilterInfo
         };
 
         list[F_CLIMATE_NOISE] = FilterInfo{
-            CAT_BIOMES, 0, LOC_REC, 0, 4, BR_NONE, MC_1_18, MC_NEWEST, 0, 0, disp++,
+            CAT_BIOMES, 1, LOC_REC, 0, 4, BR_NONE, MC_1_18, MC_NEWEST, 0, 0, disp++,
             "overworld",
             QT_TRANSLATE_NOOP("Filter", "Climate parameters"),
             QT_TRANSLATE_NOOP("Filter",
             "Custom limits for the required and allowed climate noise parameters that "
             "the specified area should cover.")
         };
+        list[F_NOISE_SAMPLE] = FilterInfo{
+            CAT_BIOMES, 1, LOC_RAD, 0, 4, BR_SPLIT, MC_1_18, MC_NEWEST, 0, 0, disp++,
+            "overworld",
+            QT_TRANSLATE_NOOP("Filter", "Climate noise samples"),
+            QT_TRANSLATE_NOOP("Filter",
+            "Samples climate noise in a given area to find if a proportion of the "
+            "biomes match a set of allowed biomes.")
+        };
         list[F_CLIMATE_MINMAX] = FilterInfo{
-            CAT_BIOMES, 0, LOC_REC, 0, 4, BR_NONE, MC_1_18, MC_NEWEST, 0, 0, disp++,
+            CAT_BIOMES, 1, LOC_REC, 0, 4, BR_NONE, MC_1_18, MC_NEWEST, 0, 0, disp++,
             "overworld",
             QT_TRANSLATE_NOOP("Filter", "Locate climate extreme"),
             QT_TRANSLATE_NOOP("Filter",
@@ -358,7 +367,7 @@ static const struct FilterList : private FilterInfo
             ""
         };
         list[F_HEIGHT] = FilterInfo{
-            CAT_OTHER, 0, LOC_POS, 0, 4, BR_NONE, MC_1_1, MC_NEWEST, 0, 0, disp++,
+            CAT_OTHER, 1, LOC_POS, 0, 4, BR_NONE, MC_1_1, MC_NEWEST, 0, 0, disp++,
             "height",
             QT_TRANSLATE_NOOP("Filter", "Surface height"),
             QT_TRANSLATE_NOOP("Filter",
@@ -446,7 +455,7 @@ static const struct FilterList : private FilterInfo
         list[F_RUINS] = FilterInfo{
             CAT_STRUCT, 1, LOC_RAD, Ocean_Ruin, 1, BR_CLUST, MC_1_13, MC_NEWEST, 0, 0, disp++,
             "ruins",
-            QT_TRANSLATE_NOOP("Filter", "Ocean ruins"),
+            QT_TRANSLATE_NOOP("Filter", "Ocean ruin"),
             ""
         };
 
@@ -489,7 +498,7 @@ static const struct FilterList : private FilterInfo
         };
 
         list[F_TRAILS] = FilterInfo{
-            CAT_STRUCT, 1, LOC_RAD, Trail_Ruin, 1, BR_CLUST, MC_1_20, MC_NEWEST, 0, 0, disp++,
+            CAT_STRUCT, 1, LOC_RAD, Trail_Ruins, 1, BR_CLUST, MC_1_20, MC_NEWEST, 0, 0, disp++,
             "trails",
             QT_TRANSLATE_NOOP("Filter", "Trail ruins"),
             ""
@@ -637,6 +646,24 @@ static_assert(
     "Layout of Condition has changed!"
 );
 
+
+#define MAX_INSTANCES 4096 // should be at least 128
+
+enum
+{
+    COND_FAILED = 0,            // seed does not meet the condition
+    COND_MAYBE_POS_INVAL = 1,   // search pass insufficient for result
+    COND_MAYBE_POS_VALID = 2,   // search pass insufficient, but known center
+    COND_OK = 3,                // seed satisfies the condition
+};
+
+enum
+{
+    PASS_FAST_48,       // only do fast checks that do not require biome gen
+    PASS_FULL_48,       // include possible biome checks for 48-bit seeds
+    PASS_FULL_64,       // run full test on a 64-bit seed
+};
+
 struct ConditionTree
 {
     std::vector<Condition> condvec;
@@ -658,6 +685,9 @@ struct SearchThreadEnv
     int surfdim;
     int octaves;
 
+    int searchpass;
+    std::atomic_bool *stop;
+
     std::map<uint64_t, lua_State*> l_states;
 
     SearchThreadEnv();
@@ -671,24 +701,6 @@ struct SearchThreadEnv
     void prepareSurfaceNoise(int dim);
 };
 
-
-#define MAX_INSTANCES 4096 // should be at least 128
-
-enum
-{
-    COND_FAILED = 0,            // seed does not meet the condition
-    COND_MAYBE_POS_INVAL = 1,   // search pass insufficient for result
-    COND_MAYBE_POS_VALID = 2,   // search pass insufficient, but known center
-    COND_OK = 3,                // seed satisfies the condition
-};
-
-enum
-{
-    PASS_FAST_48,       // only do fast checks that do not require biome gen
-    PASS_FULL_48,       // include possible biome checks for 48-bit seeds
-    PASS_FULL_64,       // run full test on a 64-bit seed
-};
-
 /* Checks if a seed satisfies the conditions tree.
  * Returns the lowest condition fulfillment status.
  */
@@ -696,15 +708,12 @@ int testTreeAt(
     Pos                         at,             // relative origin
     SearchThreadEnv           * env,            // thread-local environment
     int                         pass,           // search pass
-    std::atomic_bool          * abort,          // abort signal
-    Pos                       * path = 0        // ok trigger positions
+    Pos                       * path            // ok trigger positions
 );
 
 int testCondAt(
     Pos                         at,             // relative origin
     SearchThreadEnv           * env,            // thread-local environment
-    int                         pass,           // search pass
-    std::atomic_bool          * abort,          // abort signal
     Pos                       * cent,           // output center position(s)
     int                       * imax,           // max instances (NULL for avg)
     const Condition           * cond            // condition to check

@@ -61,6 +61,12 @@ QTreeWidgetItem *setConditionTreeItems(ConditionTree& ctree, int node, int64_t s
     return item;
 }
 
+AnalysisLocations::AnalysisLocations(QObject *parent)
+: QThread(parent), wi(),stop(),sidx(),pidx()
+{
+    env.stop = &stop;
+}
+
 QString AnalysisLocations::set(WorldInfo wi, const std::vector<Condition>& conds)
 {
     this->wi = wi;
@@ -85,7 +91,7 @@ void AnalysisLocations::run()
 
             Pos at = pos[pidx.load()];
             Pos cpos[MAX_INSTANCES] = {};
-            if (testTreeAt(at, &env, PASS_FULL_64, &stop, cpos)
+            if (testTreeAt(at, &env, PASS_FULL_64, cpos)
                 != COND_OK)
             {
                 continue;

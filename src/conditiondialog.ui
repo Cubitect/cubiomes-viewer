@@ -392,7 +392,7 @@ QPushButton:hover {
           <number>0</number>
          </property>
          <property name="currentIndex">
-          <number>2</number>
+          <number>5</number>
          </property>
          <widget class="QWidget" name="pageNone">
           <property name="enabled">
@@ -631,14 +631,14 @@ yield each sampled position individually</string>
                    </widget>
                   </item>
                   <item row="0" column="1">
-                   <widget class="QLineEdit" name="lineCoverage">
+                   <widget class="QLineEdit" name="lineCoverage1">
                     <property name="toolTip">
                      <string>Proportion of the area that has to be of the included biomes</string>
                     </property>
                    </widget>
                   </item>
                   <item row="1" column="1">
-                   <widget class="QLineEdit" name="lineConfidence">
+                   <widget class="QLineEdit" name="lineConfidence1">
                     <property name="toolTip">
                      <string>Statistical confidence that the coverage has been reached</string>
                     </property>
@@ -649,7 +649,7 @@ yield each sampled position individually</string>
                </widget>
               </item>
               <item row="0" column="4">
-               <widget class="StyledComboBox" name="comboY">
+               <widget class="StyledComboBox" name="comboY1">
                 <property name="editable">
                  <bool>true</bool>
                 </property>
@@ -1100,7 +1100,7 @@ yield each sampled position individually</string>
            </item>
           </layout>
          </widget>
-         <widget class="QWidget" name="pageMinMax">
+         <widget class="QWidget" name="pageNoise">
           <layout class="QGridLayout" name="gridLayout_23">
            <property name="leftMargin">
             <number>0</number>
@@ -1115,18 +1115,196 @@ yield each sampled position individually</string>
             <number>0</number>
            </property>
            <item row="0" column="0">
-            <widget class="QGroupBox" name="groupBox_10">
+            <widget class="QGroupBox" name="groupBoxNoise">
              <property name="title">
               <string>Locate climate minimum/maximum</string>
              </property>
              <layout class="QGridLayout" name="gridLayout_24">
-              <item row="3" column="1">
-               <widget class="QLineEdit" name="lineMin">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Lower bound (inclusive)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              <item row="0" column="1" colspan="4">
+               <widget class="StyledComboBox" name="comboClimatePara"/>
+              </item>
+              <item row="4" column="0" colspan="5">
+               <widget class="QStackedWidget" name="stackedNoise">
+                <property name="currentIndex">
+                 <number>0</number>
                 </property>
-                <property name="placeholderText">
-                 <string>-Infinity</string>
+                <widget class="QWidget" name="pageNoiseMinMax">
+                 <layout class="QGridLayout" name="gridLayout_33">
+                  <property name="leftMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="topMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="rightMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="bottomMargin">
+                   <number>0</number>
+                  </property>
+                  <item row="0" column="1">
+                   <widget class="StyledComboBox" name="comboMinMax">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <item>
+                     <property name="text">
+                      <string>Minimum</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Maximum</string>
+                     </property>
+                    </item>
+                   </widget>
+                  </item>
+                  <item row="0" column="0">
+                   <widget class="QLabel" name="label_15">
+                    <property name="text">
+                     <string>Yield position of:</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="1">
+                   <spacer name="verticalSpacer_5">
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>20</width>
+                      <height>40</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                  <item row="1" column="0">
+                   <spacer name="horizontalSpacer">
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeType">
+                     <enum>QSizePolicy::Preferred</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>180</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                 </layout>
+                </widget>
+                <widget class="QWidget" name="pageNoiseSample">
+                 <layout class="QGridLayout" name="gridLayout_32">
+                  <property name="leftMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="topMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="rightMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="bottomMargin">
+                   <number>0</number>
+                  </property>
+                  <item row="2" column="1">
+                   <widget class="QCheckBox" name="checkSamplePos2">
+                    <property name="toolTip">
+                     <string>Instead of estimating the center of the allowed biome area,
+yield each sampled position individually</string>
+                    </property>
+                    <property name="text">
+                     <string>Yield individual samples</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="1">
+                   <widget class="QLineEdit" name="lineCoverage2"/>
+                  </item>
+                  <item row="1" column="0">
+                   <widget class="QLabel" name="label_27">
+                    <property name="toolTip">
+                     <string>Statistical confidence that the coverage has been reached</string>
+                    </property>
+                    <property name="text">
+                     <string>Confidence (%):</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="1">
+                   <spacer name="verticalSpacer_9">
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>20</width>
+                      <height>40</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                  <item row="1" column="1">
+                   <widget class="QLineEdit" name="lineConfidence2">
+                    <property name="toolTip">
+                     <string>Statistical confidence that the coverage has been reached</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="0">
+                   <widget class="QLabel" name="label_19">
+                    <property name="text">
+                     <string>Required coverage (%):</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="0">
+                   <spacer name="horizontalSpacer_3">
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeType">
+                     <enum>QSizePolicy::Preferred</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>180</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                 </layout>
+                </widget>
+               </widget>
+              </item>
+              <item row="3" column="0">
+               <widget class="QLabel" name="label_9">
+                <property name="text">
+                 <string>If value is in range:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="2">
+               <widget class="QLabel" name="label_14">
+                <property name="text">
+                 <string>-</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1" colspan="4">
+               <widget class="StyledComboBox" name="comboOctaves">
+                <property name="font">
+                 <font>
+                  <family>Monospace</family>
+                 </font>
                 </property>
                </widget>
               </item>
@@ -1134,36 +1312,6 @@ yield each sampled position individually</string>
                <widget class="QLabel" name="label_12">
                 <property name="text">
                  <string>Generate up to octave:</string>
-                </property>
-               </widget>
-              </item>
-              <item row="4" column="1">
-               <spacer name="verticalSpacer_5">
-                <property name="orientation">
-                 <enum>Qt::Vertical</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>20</width>
-                  <height>252</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item row="3" column="4">
-               <widget class="QCheckBox" name="checkInvertRange">
-                <property name="toolTip">
-                 <string>Only match if value is outside the given range</string>
-                </property>
-                <property name="text">
-                 <string>Invert range</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="0">
-               <widget class="QLabel" name="label_15">
-                <property name="text">
-                 <string>Yield position of:</string>
                 </property>
                </widget>
               </item>
@@ -1184,45 +1332,41 @@ yield each sampled position individually</string>
                 </property>
                </widget>
               </item>
-              <item row="3" column="0">
-               <widget class="QLabel" name="label_9">
+              <item row="3" column="1">
+               <widget class="QLineEdit" name="lineMin">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Lower bound (inclusive)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="placeholderText">
+                 <string>-Infinity</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="4">
+               <widget class="QCheckBox" name="checkInvertRange">
+                <property name="toolTip">
+                 <string>Only match if value is outside the given range</string>
+                </property>
                 <property name="text">
-                 <string>If value is in range:</string>
+                 <string>Invert range</string>
                 </property>
                </widget>
               </item>
-              <item row="2" column="1" colspan="4">
-               <widget class="StyledComboBox" name="comboMinMax">
-                <item>
-                 <property name="text">
-                  <string>Minimum</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Maximum</string>
-                 </property>
-                </item>
-               </widget>
-              </item>
-              <item row="0" column="1" colspan="4">
-               <widget class="StyledComboBox" name="comboClimatePara"/>
-              </item>
-              <item row="3" column="2">
-               <widget class="QLabel" name="label_14">
-                <property name="text">
-                 <string>-</string>
+              <item row="5" column="0">
+               <spacer name="horizontalSpacer_2">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
                 </property>
-               </widget>
-              </item>
-              <item row="1" column="1" colspan="4">
-               <widget class="StyledComboBox" name="comboOctaves">
-                <property name="font">
-                 <font>
-                  <family>Monospace</family>
-                 </font>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Preferred</enum>
                 </property>
-               </widget>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>180</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
               </item>
              </layout>
             </widget>

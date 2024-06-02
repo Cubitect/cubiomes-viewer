@@ -107,13 +107,17 @@ ConditionDialog::ConditionDialog(FormConditions *parent, MapView *mapview, Confi
     ui->lineBiomeSize->setValidator(new QIntValidator(1, INT_MAX, this));
     ui->lineTolerance->setValidator(new QIntValidator(0, 255, this));
 
-    ui->comboY->lineEdit()->setValidator(new QIntValidator(-64, 320, this));
+    initComboY(ui->comboY1, initcond ? initcond->y : 256);
+    initComboY(ui->comboY2, initcond ? initcond->y : 256);
 
-    ui->lineMin->setValidator(new QDoubleValidator(-1e6, 1e6, 4, this));
-    ui->lineMax->setValidator(new QDoubleValidator(-1e6, 1e6, 4, this));
+    QDoubleValidator *paraval = new QDoubleValidator(-1e6, 1e6, 4, this);
+    ui->lineMin->setValidator(paraval);
+    ui->lineMax->setValidator(paraval);
 
-    ui->lineCoverage->setValidator(new QDoubleValidator(0.0001, 100.0000, 4, this));
-    ui->lineConfidence->setValidator(new QDoubleValidator(0.0001, 99.9999, 4, this));
+    ui->lineCoverage2->setValidator(new QDoubleValidator(0.0001, 100.0000, 4, this));
+    ui->lineCoverage1->setValidator(new QDoubleValidator(0.0001, 100.0000, 4, this));
+    ui->lineConfidence1->setValidator(new QDoubleValidator(0.0001, 99.9999, 4, this));
+    ui->lineConfidence2->setValidator(new QDoubleValidator(0.0001, 99.9999, 4, this));
 
     //qobject_cast<QListView*>(ui->comboCat->view())->setSpacing(1);
     //qobject_cast<QListView*>(ui->comboType->view())->setSpacing(1);
@@ -301,8 +305,10 @@ ConditionDialog::ConditionDialog(FormConditions *parent, MapView *mapview, Confi
     ui->checkSkipRef->setChecked(false);
     ui->radioSquare->setChecked(true);
     ui->checkRadius->setChecked(false);
-    ui->lineCoverage->setText("50");
-    ui->lineConfidence->setText("95");
+    ui->lineCoverage1->setText("50");
+    ui->lineCoverage2->setText("50");
+    ui->lineConfidence1->setText("95");
+    ui->lineConfidence2->setText("95");
     ui->comboScale->setCurrentIndex(1);
     onCheckStartChanged(false);
     on_comboClimatePara_currentIndexChanged(0);
@@ -341,8 +347,11 @@ ConditionDialog::ConditionDialog(FormConditions *parent, MapView *mapview, Confi
         on_comboClimatePara_currentIndexChanged(cond.para);
         ui->comboOctaves->setCurrentIndex(cond.octave);
         ui->comboMinMax->setCurrentIndex((cond.minmax & Condition::E_LOCATE_MAX) ? 1 : 0);
-        ui->lineMin->setText((cond.minmax & Condition::E_TEST_LOWER) ? QString::number(cond.vmin) : "");
-        ui->lineMax->setText((cond.minmax & Condition::E_TEST_UPPER) ? QString::number(cond.vmax) : "");
+        QString vmin, vmax;
+        if (cond.minmax & Condition::E_TEST_LOWER) vmin = QString::number(cond.vmin);
+        if (cond.minmax & Condition::E_TEST_UPPER) vmax = QString::number(cond.vmax);
+        ui->lineMin->setText(vmin);
+        ui->lineMax->setText(vmax);
         ui->checkInvertRange->setChecked(cond.flags & Condition::FLG_INVERT);
 
         updateMode();
@@ -357,19 +366,10 @@ ConditionDialog::ConditionDialog(FormConditions *parent, MapView *mapview, Confi
         ui->checkApprox->setChecked(cond.flags & Condition::FLG_APPROX);
         ui->checkMatchAny->setChecked(cond.flags & Condition::FLG_MATCH_ANY);
         ui->checkSamplePos->setChecked(cond.count == 1);
-        ui->lineCoverage->setText(QString::number(cond.converage ? cond.converage * 100 : 50));
-        ui->lineConfidence->setText(QString::number(cond.confidence ? cond.confidence * 100 : 95));
-
-        int i, n = ui->comboY->count();
-        for (i = 0; i < n; i++)
-            if (ui->comboY->itemText(i).section(' ', 0, 0).toInt() == cond.y)
-                break;
-        if (i >= n)
-        {
-            ui->comboY->addItem(QString::number(cond.y));
-            ui->comboY2->addItem(QString::number(cond.y));
-        }
-        ui->comboY->setCurrentIndex(i);
+        ui->lineCoverage1->setText(QString::number(cond.converage ? cond.converage * 100 : 50));
+        ui->lineCoverage2->setText(QString::number(cond.converage ? cond.converage * 100 : 50));
+        ui->lineConfidence1->setText(QString::number(cond.confidence ? cond.confidence * 100 : 95));
+        ui->lineConfidence2->setText(QString::number(cond.confidence ? cond.confidence * 100 : 95));
 
         if (cond.x1 == cond.z1 && cond.x1 == -cond.x2 && cond.x1 == -cond.z2)
         {
@@ -486,6 +486,19 @@ void ConditionDialog::addTempCat(int temp, QString name)
     }
 }
 
+void ConditionDialog::initComboY(QComboBox *cb, int y)
+{
+    if (!cb->lineEdit()->validator())
+        cb->lineEdit()->setValidator(new QIntValidator(-64, 320, this));
+    int i, n = cb->count();
+    for (i = 0; i < n; i++)
+        if (cb->itemText(i).section(' ', 0, 0).toInt() == y)
+            break;
+    if (i >= n)
+        cb->addItem(QString::number(y));
+    cb->setCurrentIndex(i);
+}
+
 void ConditionDialog::updateMode()
 {
     int filterindex = ui->comboType->currentData().toInt();
@@ -566,7 +579,8 @@ void ConditionDialog::updateMode()
     ui->checkSkipRef->setEnabled(cnt);
 
     ui->labelY->setEnabled(ft.hasy);
-    ui->comboY->setEnabled(ft.hasy);
+    ui->comboY1->setEnabled(ft.hasy);
+    ui->comboY2->setEnabled(ft.hasy);
 
     if (filterindex == F_TEMPS)
     {
@@ -578,7 +592,15 @@ void ConditionDialog::updateMode()
     }
     else if (filterindex == F_CLIMATE_MINMAX)
     {
-        ui->stackedWidget->setCurrentWidget(ui->pageMinMax);
+        ui->stackedWidget->setCurrentWidget(ui->pageNoise);
+        ui->stackedNoise->setCurrentWidget(ui->pageNoiseMinMax);
+        ui->groupBoxNoise->setTitle("Locate climate minimum/maximum");
+    }
+    else if (filterindex == F_NOISE_SAMPLE)
+    {
+        ui->stackedWidget->setCurrentWidget(ui->pageNoise);
+        ui->stackedNoise->setCurrentWidget(ui->pageNoiseSample);
+        ui->groupBoxNoise->setTitle("Climate noise samples");
     }
     else if (filterindex == F_BIOME_CENTER || filterindex == F_BIOME_CENTER_256)
     {
@@ -1035,7 +1057,7 @@ void ConditionDialog::onAccept()
     else
         c.rmax = 0;
 
-    c.y = ui->comboY->currentText().section(' ', 0, 0).toInt();
+    c.y = ui->comboY1->currentText().section(' ', 0, 0).toInt();
 
     c.flags = 0;
     if (ui->checkApprox->isChecked())
@@ -1071,8 +1093,8 @@ void ConditionDialog::onAccept()
             }
         }
         c.count = ui->checkSamplePos->isChecked() ? 1 : 0;
-        c.converage = ui->lineCoverage->text().toFloat() / 100.0;
-        c.confidence = ui->lineConfidence->text().toFloat() / 100.0;
+        c.converage = ui->lineCoverage1->text().toFloat() / 100.0;
+        c.confidence = ui->lineConfidence1->text().toFloat() / 100.0;
         c.step = 0;
         if (c.type == F_BIOME || c.type == F_BIOME_NETHER || c.type == F_BIOME_END)
             c.step = ui->comboScale->currentData().toInt();
@@ -1082,15 +1104,15 @@ void ConditionDialog::onAccept()
     if (ui->stackedWidget->currentWidget() == ui->pageBiomeCenter)
     {
         c.biomeId = ui->comboMatchBiome->currentData().toInt();
+        c.y = ui->comboY2->currentText().section(' ', 0, 0).toInt();
         c.biomeSize = ui->lineBiomeSize->text().toInt();
         c.tol = ui->lineTolerance->text().toInt();
     }
-    if (ui->stackedWidget->currentWidget() == ui->pageMinMax)
+    if (ui->stackedWidget->currentWidget() == ui->pageNoise)
     {
         c.para = ui->comboClimatePara->currentData().toInt();
         c.octave = ui->comboOctaves->currentIndex();
-        c.minmax = ui->comboMinMax->currentIndex() == 0 ?
-                    Condition::E_LOCATE_MIN : Condition::E_LOCATE_MAX;
+        c.minmax = ui->comboMinMax->currentIndex() == 0 ? Condition::E_LOCATE_MIN : Condition::E_LOCATE_MAX;
         bool ok1, ok2;
         c.vmin = ui->lineMin->text().toFloat(&ok1);
         if (ok1) c.minmax |= Condition::E_TEST_LOWER;
@@ -1098,6 +1120,9 @@ void ConditionDialog::onAccept()
         if (ok2) c.minmax |= Condition::E_TEST_UPPER;
         if (ok1 && ok2 && c.vmin > c.vmax)
             std::swap(c.vmin, c.vmax);
+        c.count = ui->checkSamplePos2->isChecked() ? 1 : 0;
+        c.converage = ui->lineCoverage2->text().toFloat() / 100.0;
+        c.confidence = ui->lineConfidence2->text().toFloat() / 100.0;
     }
     if (ui->stackedWidget->currentWidget() == ui->pageTemps)
     {
@@ -1653,13 +1678,13 @@ void ConditionDialog::on_comboOctaves_currentIndexChanged(int)
     ui->comboOctaves->setToolTip(ui->comboOctaves->currentData(Qt::ToolTipRole).toString());
 }
 
-void ConditionDialog::on_comboY_currentTextChanged(const QString &text)
+void ConditionDialog::on_comboY1_currentTextChanged(const QString &text)
 {
     if (ui->comboY2->currentText() != text)
         ui->comboY2->setCurrentText(text);
 }
 void ConditionDialog::on_comboY2_currentTextChanged(const QString &text)
 {
-    if (ui->comboY->currentText() != text)
-        ui->comboY->setCurrentText(text);
+    if (ui->comboY1->currentText() != text)
+        ui->comboY1->setCurrentText(text);
 }

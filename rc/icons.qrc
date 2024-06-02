@@ -83,5 +83,7 @@
         <file>icons/zoom_in.png</file>
         <file>icons/zoom_out.png</file>
         <file>icons/zoom.png</file>
+        <file>icons/chambers.png</file>
+        <file>icons/chambers_d.png</file>
     </qresource>
 </RCC>

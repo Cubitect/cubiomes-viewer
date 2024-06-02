@@ -16,8 +16,7 @@ class AnalysisLocations : public QThread
 {
     Q_OBJECT
 public:
-    explicit AnalysisLocations(QObject *parent = nullptr)
-        : QThread(parent), wi(),stop(),sidx(),pidx() {}
+    explicit AnalysisLocations(QObject *parent = nullptr);
 
     QString set(WorldInfo wi, const std::vector<Condition>& conds);
 

@@ -73,7 +73,7 @@ bool getLayerOptionInfo(LayerOptInfo *info, int mode, int disp, WorldInfo wi)
 
         if (disp == 0)
         {
-            txt += QString("%1..            x%2").arg(QChar(0x03A3)).arg(amptot, 0, 'f', 6);
+            txt += QString("%1..    (all)   x%2").arg(QChar(0x03A3)).arg(amptot, 0, 'f', 6);
             tip += QApplication::translate("LayerDialog", "All octaves");
         }
         else

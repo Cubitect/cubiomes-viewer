@@ -149,7 +149,7 @@ void Headless::run()
     session.writeHeader(resultstream);
     resultstream.flush();
 
-    sthread.start();
+    sthread.startSearch();
     elapsed.start();
 
     if (resultfile.isOpen())

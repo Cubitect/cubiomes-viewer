@@ -80,7 +80,6 @@ struct RandGen
 // get a random 64-bit integer
 uint64_t getRnd64();
 
-
 enum { S_TEXT, S_NUMERIC, S_RANDOM };
 int str2seed(const QString &str, uint64_t *out);
 

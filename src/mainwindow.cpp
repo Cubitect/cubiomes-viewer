@@ -174,7 +174,7 @@ MainWindow::MainWindow(QString sessionpath, QString resultspath, QWidget *parent
     addMapAction(D_MONUMENT);
     addMapAction(D_IGLOO);
     addMapAction(D_MANSION);
-    addMapAction(D_RUINS);
+    addMapAction(D_OCEANRUIN);
     addMapAction(D_SHIPWRECK);
     addMapAction(D_TREASURE);
     addMapAction(D_WELL);
@@ -182,7 +182,8 @@ MainWindow::MainWindow(QString sessionpath, QString resultspath, QWidget *parent
     addMapAction(D_OUTPOST);
     addMapAction(D_PORTAL);
     addMapAction(D_ANCIENTCITY);
-    addMapAction(D_TRAILS);
+    addMapAction(D_TRAILRUINS);
+    addMapAction(D_CHAMBERS);
     ui->toolBar->addSeparator();
     addMapAction(D_FORTESS);
     addMapAction(D_BASTION);

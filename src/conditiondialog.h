@@ -56,6 +56,7 @@ public:
     virtual ~ConditionDialog();
 
     void addTempCat(int temp, QString name);
+    void initComboY(QComboBox *cb, int y);
     void updateMode();
     void updateBiomeSelection();
     bool warnIfBad(Condition cond);
@@ -112,7 +113,7 @@ private slots:
     void on_comboClimatePara_currentIndexChanged(int index);
     void on_comboOctaves_currentIndexChanged(int index);
 
-    void on_comboY_currentTextChanged(const QString &text);
+    void on_comboY1_currentTextChanged(const QString &text);
     void on_comboY2_currentTextChanged(const QString &text);
 
 private:

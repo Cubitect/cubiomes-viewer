@@ -148,7 +148,7 @@ QString mapopt2display(int opt)
     case D_VILLAGE:     return QApplication::translate("Map", "Village");
     case D_MANSION:     return QApplication::translate("Map", "Woodland Mansion");
     case D_MONUMENT:    return QApplication::translate("Map", "Ocean Monument");
-    case D_RUINS:       return QApplication::translate("Map", "Ocean Ruins");
+    case D_OCEANRUIN:   return QApplication::translate("Map", "Ocean Ruin");
     case D_SHIPWRECK:   return QApplication::translate("Map", "Shipwreck");
     case D_TREASURE:    return QApplication::translate("Map", "Buried Treasure");
     case D_MINESHAFT:   return QApplication::translate("Map", "Mineshaft");
@@ -156,7 +156,8 @@ QString mapopt2display(int opt)
     case D_GEODE:       return QApplication::translate("Map", "Geode");
     case D_OUTPOST:     return QApplication::translate("Map", "Pillager Outpost");
     case D_ANCIENTCITY: return QApplication::translate("Map", "Ancient City");
-    case D_TRAILS:      return QApplication::translate("Map", "Trail Ruins");
+    case D_TRAILRUINS:  return QApplication::translate("Map", "Trail Ruins");
+    case D_CHAMBERS:    return QApplication::translate("Map", "Trial Chambers");
     case D_PORTAL:      return QApplication::translate("Map", "Ruined Portal");
     case D_PORTALN:     return QApplication::translate("Map", "Ruined Portal (Nether)");
     case D_SPAWN:       return QApplication::translate("Map", "Spawn");
@@ -182,7 +183,7 @@ const char *mapopt2str(int opt) // to resource string
     case D_VILLAGE:     return "village";
     case D_MANSION:     return "mansion";
     case D_MONUMENT:    return "monument";
-    case D_RUINS:       return "ruins";
+    case D_OCEANRUIN:   return "ruins";
     case D_SHIPWRECK:   return "shipwreck";
     case D_TREASURE:    return "treasure";
     case D_MINESHAFT:   return "mineshaft";
@@ -190,7 +191,8 @@ const char *mapopt2str(int opt) // to resource string
     case D_GEODE:       return "geode";
     case D_OUTPOST:     return "outpost";
     case D_ANCIENTCITY: return "ancient_city";
-    case D_TRAILS:      return "trails";
+    case D_TRAILRUINS:  return "trails";
+    case D_CHAMBERS:    return "chambers";
     case D_PORTAL:      return "portal";
     case D_PORTALN:     return "portaln";
     case D_SPAWN:       return "spawn";
@@ -214,7 +216,7 @@ int str2mapopt(const char *s) // from resource string
     if (!strcmp(s, "village"))      return D_VILLAGE;
     if (!strcmp(s, "mansion"))      return D_MANSION;
     if (!strcmp(s, "monument"))     return D_MONUMENT;
-    if (!strcmp(s, "ruins"))        return D_RUINS;
+    if (!strcmp(s, "ruins"))        return D_OCEANRUIN;
     if (!strcmp(s, "shipwreck"))    return D_SHIPWRECK;
     if (!strcmp(s, "treasure"))     return D_TREASURE;
     if (!strcmp(s, "mineshaft"))    return D_MINESHAFT;
@@ -222,7 +224,8 @@ int str2mapopt(const char *s) // from resource string
     if (!strcmp(s, "geode"))        return D_GEODE;
     if (!strcmp(s, "outpost"))      return D_OUTPOST;
     if (!strcmp(s, "ancient_city")) return D_ANCIENTCITY;
-    if (!strcmp(s, "trails"))       return D_TRAILS;
+    if (!strcmp(s, "trails"))       return D_TRAILRUINS;
+    if (!strcmp(s, "chambers"))     return D_CHAMBERS;
     if (!strcmp(s, "portal"))       return D_PORTAL;
     if (!strcmp(s, "portaln"))      return D_PORTALN;
     if (!strcmp(s, "spawn"))        return D_SPAWN;
@@ -245,7 +248,7 @@ int mapopt2stype(int opt)
     case D_VILLAGE:     return Village;
     case D_MANSION:     return Mansion;
     case D_MONUMENT:    return Monument;
-    case D_RUINS:       return Ocean_Ruin;
+    case D_OCEANRUIN:   return Ocean_Ruin;
     case D_SHIPWRECK:   return Shipwreck;
     case D_TREASURE:    return Treasure;
     case D_MINESHAFT:   return Mineshaft;
@@ -253,7 +256,8 @@ int mapopt2stype(int opt)
     case D_GEODE:       return Geode;
     case D_OUTPOST:     return Outpost;
     case D_ANCIENTCITY: return Ancient_City;
-    case D_TRAILS:      return Trail_Ruin;
+    case D_TRAILRUINS:  return Trail_Ruins;
+    case D_CHAMBERS:    return Trial_Chambers;
     case D_PORTAL:      return Ruined_Portal;
     case D_PORTALN:     return Ruined_Portal_N;
     case D_FORTESS:     return Fortress;

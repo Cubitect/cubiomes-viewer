@@ -155,7 +155,7 @@ FormSearchControl::FormSearchControl(MainWindow *parent)
 FormSearchControl::~FormSearchControl()
 {
     stimer.stop();
-    sthread.stop(); // tell search to stop at next convenience
+    sthread.stopSearch();
     delete ui;
 }
 
@@ -227,9 +227,7 @@ bool FormSearchControl::setSearchConfig(SearchConfig s, bool quiet)
 
 void FormSearchControl::stopSearch()
 {
-    sthread.stop();
-    //sthread.quit(); // tell the event loop to exit
-    //sthread.wait(); // wait for search to finish
+    sthread.stopSearch();
     onBufferTimeout();
 }
 
@@ -394,7 +392,7 @@ void FormSearchControl::on_buttonStart_clicked()
             searchLockUi(true);
             nextupdate = 0;
             updt = 20;
-            sthread.start();
+            sthread.startSearch();
             elapsed.start();
             stimer.start(250);
         }
@@ -635,12 +633,12 @@ int FormSearchControl::searchResultsAdd(std::vector<uint64_t> seeds, bool counto
 
     if (n >= config.maxMatching)
     {
-        sthread.stop();
+        sthread.stopSearch();
         discarded = true;
     }
     if (n + (ssize_t)seeds.size() > config.maxMatching)
     {
-        sthread.stop();
+        sthread.stopSearch();
         discarded = true;
         seeds.resize(config.maxMatching - n);
     }
@@ -671,7 +669,7 @@ int FormSearchControl::searchResultsAdd(std::vector<uint64_t> seeds, bool counto
 
     int addcnt = n - nold;
     if (ui->checkStop->isChecked() && addcnt)
-        sthread.stop();
+        sthread.stopSearch();
 
     if (!countonly && discarded)
     {

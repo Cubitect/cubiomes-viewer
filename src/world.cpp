@@ -201,11 +201,15 @@ void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
                 {
                     SurfaceNoise sn;
                     initSurfaceNoise(&sn, DIM_END, wi.seed);
-                    id = isViableEndCityTerrain(&g, &sn, p.x, p.z);
-                    if (!id)
+                    int y = isViableEndCityTerrain(&g, &sn, p.x, p.z);
+                    if (!y)
                         continue;
                     int n = getEndCityPieces(pieces, wi.seed, p.x >> 4, p.z >> 4);
-                    vp.pieces.assign(pieces, pieces+n);
+                    if (n)
+                    {
+                        vp.pieces.assign(pieces, pieces+n);
+                        vp.pieces[0].bb0.y = y; // height of end city pieces are relative to surface
+                    }
                 }
                 else if (sconf.structType == Ruined_Portal || sconf.structType == Ruined_Portal_N)
                 {
@@ -235,12 +239,12 @@ void getStructs(std::vector<VarPos> *out, const StructureConfig sconf,
 
 static QMutex g_mutex;
 
-static qreal cubic_hermite(qreal p[4], qreal u)
+static float cubic_hermite(float p[4], float u)
 {
-    qreal a = p[1];
-    qreal b = 0.5 * (-p[0] + p[2]);
-    qreal c = p[0] - 2.5*p[1] + 2*p[2] - 0.5*p[3];
-    qreal d = 0.5 * (-p[0] + 3*p[1] - 3*p[2] + p[3]);
+    float a = p[1];
+    float b = 0.5 * (-p[0] + p[2]);
+    float c = p[0] - 2.5*p[1] + 2*p[2] - 0.5*p[3];
+    float d = 0.5 * (-p[0] + 3*p[1] - 3*p[2] + p[3]);
     return a + b*u + c*u*u + d*u*u*u;
 }
 
@@ -262,21 +266,28 @@ void applyHeightShading(unsigned char *rgb, Range r,
         px -= bd; pz -= bd;
         pw += 2*bd; ph += 2*bd;
     }
-    std::vector<qreal> buf(pw * ph);
-    for (int j = 0; j < ph; j++)
+    std::vector<float> buf(pw * ph);
+    if (ps == 0)
     {
-        for (int i = 0; i < pw; i++)
+        mapApproxHeight(&buf[0], 0, g, sn, px, pz, pw, ph);
+    }
+    else
+    {
+        for (int j = 0; j < ph; j++)
         {
-            if (abort && *abort) return;
-            int samplex = (((px + i) << ps)) * r.scale / 4;
-            int samplez = (((pz + j) << ps)) * r.scale / 4;
-            float y = 0;
-            mapApproxHeight(&y, 0, g, sn, samplex, samplez, 1, 1);
-            buf[j*pw+i] = y;
+            for (int i = 0; i < pw; i++)
+            {
+                if (abort && *abort) return;
+                int samplex = (((px + i) << ps)) * r.scale / 4;
+                int samplez = (((pz + j) << ps)) * r.scale / 4;
+                float y = 0;
+                mapApproxHeight(&y, 0, g, sn, samplex, samplez, 1, 1);
+                buf[j*pw+i] = y;
+            }
         }
     }
     // interpolate height
-    std::vector<qreal> height((w+2) * (h+2));
+    std::vector<float> height((w+2) * (h+2));
     for (int j = 0; j < h+2; j++)
     {
         for (int i = 0; i < w+2; i++)
@@ -284,12 +295,12 @@ void applyHeightShading(unsigned char *rgb, Range r,
             if (abort && *abort) return;
             int pi = ((x + i - 1) >> ps) - px - bd;
             int pj = ((z + j - 1) >> ps) - pz - bd;
-            qreal di = ((x + i - 1) & st) / (qreal)(st + 1);
-            qreal dj = ((z + j - 1) & st) / (qreal)(st + 1);
-            qreal v = 0;
+            float di = ((x + i - 1) & st) / (float)(st + 1);
+            float dj = ((z + j - 1) & st) / (float)(st + 1);
+            float v = 0;
             if (bicubic)
             {
-                qreal p[] = {
+                float p[] = {
                     cubic_hermite(&buf.at((pj+0)*pw + pi), di),
                     cubic_hermite(&buf.at((pj+1)*pw + pi), di),
                     cubic_hermite(&buf.at((pj+2)*pw + pi), di),
@@ -299,10 +310,10 @@ void applyHeightShading(unsigned char *rgb, Range r,
             }
             else // bilinear
             {
-                qreal v00 = buf.at((pj+0)*pw + pi+0);
-                qreal v01 = buf.at((pj+0)*pw + pi+1);
-                qreal v10 = buf.at((pj+1)*pw + pi+0);
-                qreal v11 = buf.at((pj+1)*pw + pi+1);
+                float v00 = buf.at((pj+0)*pw + pi+0);
+                float v01 = buf.at((pj+0)*pw + pi+1);
+                float v10 = buf.at((pj+1)*pw + pi+0);
+                float v11 = buf.at((pj+1)*pw + pi+1);
                 v = lerp2(di, dj, v00, v01, v10, v11);
             }
             height[j*(w+2)+i] = v;
@@ -310,24 +321,24 @@ void applyHeightShading(unsigned char *rgb, Range r,
     }
     if (abort && *abort) return;
     // apply shading based on height changes
-    qreal mul = 0.25 / r.scale;
-    qreal lout = 0.65;
-    qreal lmin = 0.5;
-    qreal lmax = 1.5;
-    qreal ymax = r.scale == 1 ? r.y : r.y << 2;
+    float mul = 0.25 / r.scale;
+    float lout = 0.65;
+    float lmin = 0.5;
+    float lmax = 1.5;
+    float ymax = r.scale == 1 ? r.y : r.y << 2;
     for (int j = 0; j < h; j++)
     {
         for (int i = 0; i < w; i++)
         {
             int tw = w+2;
-            qreal t01 = height[(j+0)*tw + i+1];
-            qreal t10 = height[(j+1)*tw + i+0];
-            qreal t11 = height[(j+1)*tw + i+1];
-            qreal t12 = height[(j+1)*tw + i+2];
-            qreal t21 = height[(j+2)*tw + i+1];
-            qreal d0 = t01 + t10;
-            qreal d1 = t12 + t21;
-            qreal light = 1.0;
+            float t01 = height[(j+0)*tw + i+1];
+            float t10 = height[(j+1)*tw + i+0];
+            float t11 = height[(j+1)*tw + i+1];
+            float t12 = height[(j+1)*tw + i+2];
+            float t21 = height[(j+2)*tw + i+1];
+            float d0 = t01 + t10;
+            float d1 = t12 + t21;
+            float light = 1.0;
             uchar *col = rgb + 3*(j*w + i);
             if (mode == HV_GRAYSCALE)
             {
@@ -336,7 +347,7 @@ void applyHeightShading(unsigned char *rgb, Range r,
                     col[0] = 0xff; col[1] = col[2] = 0;
                     continue;
                 }
-                qreal v = t11;
+                float v = t11;
                 uchar c = (v <= 0) ? 0 : (v > 0xff) ? 0xff : (uchar)(v);
                 col[0] = col[1] = col[2] = c;
                 continue;
@@ -348,14 +359,14 @@ void applyHeightShading(unsigned char *rgb, Range r,
             if (light > lmax) light = lmax;
             if (mode == HV_CONTOURS || mode == HV_CONTOURS_SHADING)
             {
-                qreal spacing = 16.0;
-                qreal tmin = std::min({t01, t10, t12, t21});
+                float spacing = 16.0;
+                float tmin = std::min({t01, t10, t12, t21});
                 if (floor(tmin / spacing) != floor(t11 / spacing))
                     light *= 0.5;
             }
             for (int k = 0; k < 3; k++)
             {
-                qreal c = col[k] * light;
+                float c = col[k] * light;
                 col[k] = (c <= 0) ? 0 : (c > 0xff) ? 0xff : (uchar)(c);
             }
         }
@@ -401,7 +412,7 @@ void Quad::run()
         int nptype = -1;
         if (g->mc >= MC_1_18) nptype = g->bn.nptype;
         if (g->mc <= MC_B1_7) nptype = g->bnb.nptype;
-        if (dim == 0 && nptype >= 0)
+        if (dim == DIM_OVERWORLD && nptype >= 0)
         {   // climate parameter
             const int *extremes = getBiomeParaExtremes(g->mc);
             int cmin = extremes[nptype*2 + 0];
@@ -420,7 +431,7 @@ void Quad::run()
             g_mutex.unlock();
             biomesToImage(rgb, g_biomeColors, biomes, w, h, 1, 1);
 
-            if (lopt.mode == LOPT_HEIGHT_4 && dim == 0)
+            if (lopt.mode == LOPT_HEIGHT_4)
             {
                 int stepbits = (hd ? 0 : 2);
                 applyHeightShading(rgb, r, g, sn, stepbits, lopt.disp[lopt.mode], false, isdel);
@@ -782,7 +793,7 @@ void QWorld::setDim(int dim, LayerOpt lopt)
     this->dim = dim;
     this->lopt = lopt;
     applySeed(&g, dim, wi.seed);
-    initSurfaceNoise(&sn, DIM_OVERWORLD, g.seed);
+    initSurfaceNoise(&sn, dim, g.seed);
 
     int pixs, lcnt;
     if (g.mc >= MC_1_18 || dim != DIM_OVERWORLD)
@@ -862,15 +873,17 @@ QString QWorld::getBiomeName(Pos p)
         return c + "=" + QString::number(id);
     }
     QString ret = getBiomeDisplay(wi.mc, id);
-    if (lopt.mode == LOPT_HEIGHT_4 && dim == DIM_OVERWORLD)
-        ret = QString::asprintf("Y~%d ", estimateSurface(p)) + ret;
+    if (lopt.mode == LOPT_HEIGHT_4)
+    {
+        int y = estimateSurface(p);
+        if (y > 0)
+            ret = QString::asprintf("Y~%d ", y) + ret;
+    }
     return ret;
 }
 
 int QWorld::estimateSurface(Pos p)
 {
-    if (dim != DIM_OVERWORLD)
-        return 64;
     float y = 0;
     mapApproxHeight(&y, 0, &g, &sn, p.x>>2, p.z>>2, 1, 1);
     return (int) floor(y);

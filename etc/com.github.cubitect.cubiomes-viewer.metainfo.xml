@@ -60,6 +60,11 @@
     </screenshot>
   </screenshots>
 
+  <recommends>
+    <display_length side="shortest">900</display_length>
+    <display_length side="longest">1600</display_length>
+  </recommends>
+
   <url type="homepage">https://github.com/cubitect/cubiomes-viewer</url>
   <url type="bugtracker">https://github.com/cubitect/cubiomes-viewer/issues</url>
 

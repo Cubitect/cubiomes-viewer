@@ -37,10 +37,10 @@ public:
 
     bool set(QWidget *widget, const Session& s);
 
-    void presearch();
+    void preSearch();
 
-    void start();
-    void stop();
+    void startSearch();
+    void stopSearch();
 
     // Get search progress:
     //  status  : progress status summary
@@ -69,7 +69,7 @@ public:
     std::vector<SearchWorker*>  workers;
 
     QMutex                      mutex;
-    std::atomic_bool            abort;
+    std::atomic_bool            stop;
 
     std::deque<TProg>           proghist;
     QElapsedTimer               progtimer;
@@ -114,7 +114,6 @@ public:
 
     const uint64_t    * slist;      // candidate list
     uint64_t            len;        // number of candidates
-    std::atomic_bool  * abort;
 
     /// current work item
     uint64_t            prog;       // search space progress
@@ -126,7 +125,7 @@ public:
     // (or the last entry in the seed list)
 
 private:
-    SearchThreadEnv   * env;
+    SearchThreadEnv     env;
 };
 
 

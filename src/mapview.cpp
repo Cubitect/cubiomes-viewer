@@ -381,6 +381,7 @@ void MapView::showContextMenu(const QPoint &pos)
     std::vector<_cpy_dat> cpy_dat;
 
     VarPos vp = getActivePos();
+    const QPixmap *icon = 0;
 
     if (vp.type != -1)
     {   // structure has a known size / location
@@ -389,7 +390,7 @@ void MapView::showContextMenu(const QPoint &pos)
         {
             const Piece& pc = vp.pieces[0];
             midx = (pc.bb0.x + pc.bb1.x) >> 1;
-            midy = (pc.bb0.y);
+            midy = (pc.bb0.y) + 1;
             midz = (pc.bb0.z + pc.bb1.z) >> 1;
         }
         else
@@ -405,6 +406,7 @@ void MapView::showContextMenu(const QPoint &pos)
             }
         }
         cpy_dat.push_back({ tr("Copy tp:"), QString::asprintf("/tp @p %d %d %d", midx, midy, midz) });
+        icon = &getMapIcon(world ? world->selopt : -1, &vp);
     }
     cpy_dat.push_back({ tr("Copy tp:"),     QString::asprintf("/tp @p %d ~ %d", vp.p.x, vp.p.z) });
     cpy_dat.push_back({ tr("Copy coords:"), QString::asprintf("%d %d", vp.p.x, vp.p.z) });
@@ -434,7 +436,10 @@ void MapView::showContextMenu(const QPoint &pos)
         while (txtWidth(menu->fontMetrics(), txt + " ") < wmax)
             txt += " ";
         txt += it.cpy;
-        menu->addAction(txt, [=](){ this->copyText(it.cpy); });
+        if (icon)
+            menu->addAction(*icon, txt, [=](){ this->copyText(it.cpy); });
+        else
+            menu->addAction(txt, [=](){ this->copyText(it.cpy); });
     }
     //menu->addAction(tr("Animation"), this, &MapView::runAni);
 
