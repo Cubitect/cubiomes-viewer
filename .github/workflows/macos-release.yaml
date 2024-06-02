@@ -22,7 +22,7 @@ jobs:
           submodules: recursive
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@v3
+        uses: jurplel/install-qt-action@v4
         with:
           aqtversion:   '==3.1.*'
           version:      '5.15.2'

@@ -244,7 +244,7 @@ bool SearchMaster::set(QWidget *widget, const Session& s)
             {
                 Generator tmp;
                 setupGenerator(&tmp, s.wi.mc, 0);
-                const Layer *l = getLayerForScale(&tmp, scale);
+                const Layer *l = getLayerForScale(&tmp, scale ? scale : 4);
                 if (l)
                     layerId = l - tmp.ls.layers;
             }
