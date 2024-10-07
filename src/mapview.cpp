@@ -502,7 +502,7 @@ void MapView::paintEvent(QPaintEvent *)
         QPoint cur = mapFromGlobal(QCursor::pos());
         qreal bx = (cur.x() -  width()/2.0) / blocks2pix + fx;
         qreal bz = (cur.y() - height()/2.0) / blocks2pix + fz;
-        Pos p = {(int)clampimax(bx), (int)clampimax(bz)};
+        Pos p = {(int)clampimax(floor(bx)), (int)clampimax(floor(bz))};
         overlay->pos = p;
         overlay->bname = world->getBiomeName(p);
 

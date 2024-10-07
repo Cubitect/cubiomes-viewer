@@ -114,6 +114,8 @@ public:
 
     void setSearchMode(int mode);
 
+    bool getSeed(int row, uint64_t *seed);
+
 signals:
     void selectedSeedChanged(uint64_t seed);
     void searchStatusChanged(bool running);

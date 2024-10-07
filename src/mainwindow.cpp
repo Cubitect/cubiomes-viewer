@@ -111,7 +111,7 @@ MainWindow::MainWindow(QString sessionpath, QString resultspath, QWidget *parent
     laction[LOPT_NOOCEAN_1] = ui->actionNoOceans;
     laction[LOPT_BETA_T_1] = ui->actionBetaTemperature;
     laction[LOPT_BETA_H_1] = ui->actionBetaHumidity;
-    laction[LOPT_HEIGHT_4] = ui->actionHeight;
+    laction[LOPT_HEIGHT] = ui->actionHeight;
     laction[LOPT_STRUCTS] = ui->actionStructures;
 
     QActionGroup *grp = new QActionGroup(this);
@@ -365,7 +365,7 @@ bool MainWindow::getSeed(WorldInfo *wi, bool applyrand)
     {
         if (applyrand)
             qDebug() << "Unknown MC version: " << mcs.c_str();
-        wi->mc = MC_NEWEST;
+        wi->mc = MC_DEFAULT;
         ok = false;
     }
 
@@ -697,13 +697,13 @@ void MainWindow::setMCList(bool experimental)
     if (ui->comboBoxMC->count())
         getSeed(&wi, false);
     else
-        wi.mc = MC_NEWEST;
+        wi.mc = MC_DEFAULT;
     QStringList mclist;
     for (int mc = MC_NEWEST; mc > MC_UNDEF; mc--)
     {
         if (!experimental && mc != wi.mc)
         {
-            if (mc <= MC_1_0 || mc == MC_1_16_1 || mc == MC_1_19_2)
+            if (mc <= MC_1_0 || mc == MC_1_16_1 || mc == MC_1_19_2 || mc == MC_1_21_3)
                 continue;
         }
         const char *mcs = mc2str(mc);

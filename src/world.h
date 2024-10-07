@@ -64,7 +64,7 @@ struct Quad : public Scheduled
     LayerOpt lopt;
     const Generator *g;
     const SurfaceNoise *sn;
-    int hd;
+    int highres;
     int scale;
     int ti, tj;
     int blocks;
@@ -101,7 +101,7 @@ struct Level
     WorldInfo wi;
     int dim;
     int tx, tz, tw, th;
-    int hd;
+    int highres;
     int scale;
     int blocks;
     int pixs;
@@ -204,6 +204,7 @@ public:
     QAtomicPointer<Pos> spawn;
     QAtomicPointer<PosElement> strongholds;
     QAtomicPointer<QVector<QuadInfo>> qsinfo;
+    QVector<Pos> endgates;
     // isdel is a flag for the worker thread to stop
     std::atomic_bool isdel;
 

@@ -136,7 +136,7 @@ QStringList VarPos::detail() const
 
 
 Quad::Quad(const Level* l, int64_t i, int64_t j)
-    : wi(l->wi),dim(l->dim),lopt(l->lopt),g(&l->g),sn(&l->sn),hd(l->hd),scale(l->scale)
+    : wi(l->wi),dim(l->dim),lopt(l->lopt),g(&l->g),sn(&l->sn),highres(l->highres),scale(l->scale)
     , ti(i),tj(j),blocks(l->blocks),pixs(l->pixs),sopt(l->sopt)
     , biomes(),rgb(),img(),spos()
 {
@@ -267,7 +267,12 @@ void applyHeightShading(unsigned char *rgb, Range r,
         pw += 2*bd; ph += 2*bd;
     }
     std::vector<float> buf(pw * ph);
-    if (ps == 0)
+    if (ps == 0 && r.scale <= 8 && g->dim == DIM_END)
+    {
+        mapEndSurfaceHeight(&buf[0], &g->en, sn, px, pz, pw, ph, r.scale, 0);
+        mapEndIslandHeight(&buf[0], &g->en, g->seed, px, pz, pw, ph, r.scale);
+    }
+    else if (ps == 0 && r.scale == 4)
     {
         mapApproxHeight(&buf[0], 0, g, sn, px, pz, pw, ph);
     }
@@ -286,6 +291,7 @@ void applyHeightShading(unsigned char *rgb, Range r,
             }
         }
     }
+
     // interpolate height
     std::vector<float> height((w+2) * (h+2));
     for (int j = 0; j < h+2; j++)
@@ -382,7 +388,8 @@ void Quad::run()
 
     if (pixs > 0)
     {
-        if (lopt.mode == LOPT_STRUCTS && dim == DIM_OVERWORLD)
+        if ((lopt.mode == LOPT_STRUCTS && dim == DIM_OVERWORLD) ||
+            (g->mc <= MC_1_17 && scale > 256 && dim == DIM_OVERWORLD))
         {
             img = new QImage();
             done = true;
@@ -431,9 +438,13 @@ void Quad::run()
             g_mutex.unlock();
             biomesToImage(rgb, g_biomeColors, biomes, w, h, 1, 1);
 
-            if (lopt.mode == LOPT_HEIGHT_4)
+            if (lopt.mode == LOPT_HEIGHT)
             {
-                int stepbits = (hd ? 0 : 2);
+                int stepbits = 0; // interpolated_step = (1 << stepbits)
+                if (scale > 16)
+                {
+                    stepbits = 1;
+                }
                 applyHeightShading(rgb, r, g, sn, stepbits, lopt.disp[lopt.mode], false, isdel);
             }
         }
@@ -459,7 +470,7 @@ void Quad::run()
 Level::Level()
     : cells(),g(),sn(),entry(),lopt(),wi(),dim()
     , tx(),tz(),tw(),th()
-    , hd(),scale(),blocks(),pixs()
+    , highres(),scale(),blocks(),pixs()
     , sopt()
 {
 }
@@ -480,7 +491,7 @@ void Level::init4map(QWorld *w, int pix, int layerscale)
 
     tx = tz = tw = th = 0;
 
-    hd = (layerscale == 1);
+    highres = (layerscale == 1);
     scale = layerscale;
     pixs = pix;
     blocks = pix * layerscale;
@@ -504,7 +515,7 @@ void Level::init4map(QWorld *w, int pix, int layerscale)
     case LOPT_NOISE_E_4:
     case LOPT_NOISE_D_4:
     case LOPT_NOISE_W_4:
-    case LOPT_HEIGHT_4:
+    //case LOPT_HEIGHT_4:
     case LOPT_RIVER_4:
     case LOPT_STRUCTS:
         optlscale = 4;
@@ -796,7 +807,13 @@ void QWorld::setDim(int dim, LayerOpt lopt)
     initSurfaceNoise(&sn, dim, g.seed);
 
     int pixs, lcnt;
-    if (g.mc >= MC_1_18 || dim != DIM_OVERWORLD)
+    if (lopt.mode == LOPT_HEIGHT)
+    {
+        pixs = 32;
+        lcnt = 6;
+        qual = 4.0;
+    }
+    else if (g.mc > MC_1_17 || dim != DIM_OVERWORLD)
     {
         pixs = 128;
         lcnt = 6;
@@ -873,7 +890,7 @@ QString QWorld::getBiomeName(Pos p)
         return c + "=" + QString::number(id);
     }
     QString ret = getBiomeDisplay(wi.mc, id);
-    if (lopt.mode == LOPT_HEIGHT_4)
+    if (lopt.mode == LOPT_HEIGHT)
     {
         int y = estimateSurface(p);
         if (y > 0)
@@ -885,7 +902,15 @@ QString QWorld::getBiomeName(Pos p)
 int QWorld::estimateSurface(Pos p)
 {
     float y = 0;
-    mapApproxHeight(&y, 0, &g, &sn, p.x>>2, p.z>>2, 1, 1);
+    if (g.dim == DIM_END)
+    {   // use end surface generator for 1:1 scale
+        mapEndSurfaceHeight(&y, &g.en, &sn, p.x, p.z, 1, 1, 1, 0);
+        mapEndIslandHeight(&y, &g.en, g.seed, p.x, p.z, 1, 1, 1);
+    }
+    else
+    {
+        mapApproxHeight(&y, 0, &g, &sn, p.x>>2, p.z>>2, 1, 1);
+    }
     return (int) floor(y);
 }
 
@@ -1094,9 +1119,9 @@ struct SpawnStronghold : public Scheduled
     }
 };
 
-static bool draw_grid_rec(QPainter& painter, QRect &rec, qreal pix, int64_t x, int64_t z)
+static bool draw_grid_rec(QPainter& painter, QColor col, QRect &rec, qreal pix, int64_t x, int64_t z)
 {
-    painter.setPen(QPen(QColor(0, 0, 0, 96), 1));
+    painter.setPen(QPen(col, 1));
     painter.drawRect(rec);
     if (pix < 50)
         return false;
@@ -1142,6 +1167,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
     smallfont.setPointSize(oldfont.pointSize() - 2);
     painter.setFont(smallfont);
 
+    QColor gridcol = lopt.mode == LOPT_HEIGHT ? QColor(192, 0, 0, 96) : QColor(0, 0, 0, 96);
     int gridpix = 128;
     // 128px is approximately the size of:
     //gridpix = painter.fontMetrics().boundingRect("-30000000,-30000000").width();
@@ -1166,7 +1192,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
 
             if (sshow[D_GRID] && !gridspacing)
             {
-                draw_grid_rec(painter, rec, ps, q->ti*q->blocks, q->tj*q->blocks);
+                draw_grid_rec(painter, gridcol, rec, ps, q->ti*q->blocks, q->tj*q->blocks);
             }
         }
     }
@@ -1190,7 +1216,7 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
                         qreal px = vw/2.0 + (x+i) * ps - focusx * blocks2pix;
                         qreal pz = vh/2.0 + (z+j) * ps - focusz * blocks2pix;
                         QRect rec(px, pz, ps, ps);
-                        draw_grid_rec(painter, rec, ps, (x+i)*gs, (z+j)*gs);
+                        draw_grid_rec(painter, gridcol, rec, ps, (x+i)*gs, (z+j)*gs);
                     }
                 }
                 break;
@@ -1261,6 +1287,41 @@ void QWorld::draw(QPainter& painter, int vw, int vh, qreal focusx, qreal focusz,
             r = 16;
             painter.drawLine(QPointF(x-r,y), QPointF(x+r,y));
             painter.drawLine(QPointF(x,y-r), QPointF(x,y+r));
+        }
+    }
+
+    if (showBB && sshow[D_GATEWAY] && dim == DIM_END && g.mc > MC_1_12)
+    {
+        if (endgates.empty())
+        {
+            endgates.resize(40);
+            getFixedEndGateways(g.mc, g.seed, &endgates[0]);
+            for (int i = 0; i < 20; i++)
+               endgates[20 + i] = getLinkedGatewayPos(&g.en, &sn, g.seed, endgates[i]);
+        }
+
+        for (int i = 0; i < 20; i++)
+        {
+            qreal xsrc = vw/2.0 + (0.5 + endgates[i].x - focusx) * blocks2pix;
+            qreal ysrc = vh/2.0 + (0.5 + endgates[i].z - focusz) * blocks2pix;
+            qreal xdst = vw/2.0 + (0.5 + endgates[i+20].x - focusx) * blocks2pix;
+            qreal ydst = vh/2.0 + (0.5 + endgates[i+20].z - focusz) * blocks2pix;
+
+            QPen pen = painter.pen();
+            painter.setPen(QPen(QColor(192, 0, 0, 160), i == 0 ? 1.5 : 0.5));
+            painter.drawLine(QPointF(xsrc,ysrc), QPointF(xdst,ydst));
+            painter.setPen(pen);
+
+            if (blocks2pix >= 1.0 && abs(xsrc) < vw && abs(ysrc) < vh)
+            {
+                QString s = QString::number(i+1);
+                QRect rec = painter.fontMetrics().boundingRect(s);
+                qreal dx = xsrc - xdst;
+                qreal dy = ysrc - ydst;
+                qreal df = rec.height() / sqrt(dx*dx + dy*dy);
+                rec.moveCenter(QPoint(xsrc + dx * df, ysrc + dy * df));
+                painter.drawText(rec, s);
+            }
         }
     }
 

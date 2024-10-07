@@ -141,6 +141,7 @@ HEADERS += \
         $$CUPATH/finders.h \
         $$CUPATH/generator.h \
         $$CUPATH/layers.h \
+        $$CUPATH/biomes.h \
         $$CUPATH/quadbase.h \
         $$CUPATH/util.h \
         $$LUAPATH/lapi.h \

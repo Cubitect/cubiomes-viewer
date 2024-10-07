@@ -60,7 +60,7 @@ bool WorldInfo::equals(const WorldInfo& wi) const
 
 void WorldInfo::reset()
 {
-    mc = MC_NEWEST;
+    mc = MC_DEFAULT;
     large = false;
     seed = 0;
     y = 255;
@@ -92,7 +92,7 @@ bool WorldInfo::read(const QString& line)
     {
         mc = str2mc(buf);
         if (mc < 0)
-            mc = MC_NEWEST;
+            mc = MC_DEFAULT;
         return true;
     }
     if (sscanf(p, "#Large:    %d", &tmp) == 1)

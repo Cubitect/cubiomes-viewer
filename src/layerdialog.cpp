@@ -20,7 +20,7 @@ bool getLayerOptionInfo(LayerOptInfo *info, int mode, int disp, WorldInfo wi)
         if (disp == 3) txt = "1:64";
         if (disp == 4) txt = "1:256";
         break;
-    case LOPT_HEIGHT_4:
+    case LOPT_HEIGHT:
         if (disp == 0) txt = QApplication::translate("LayerDialog", "Grayscale");
         if (disp == 1) txt = QApplication::translate("LayerDialog", "Shaded biome map");
         if (disp == 2) txt = QApplication::translate("LayerDialog", "Contours on biomes");
@@ -113,7 +113,7 @@ LayerDialog::LayerDialog(QWidget *parent, WorldInfo wi)
     radio[LOPT_NOOCEAN_1] = ui->radioNoOcean;
     radio[LOPT_BETA_T_1] = ui->radioBetaT;
     radio[LOPT_BETA_H_1] = ui->radioBetaH;
-    radio[LOPT_HEIGHT_4] = ui->radioHeight;
+    radio[LOPT_HEIGHT] = ui->radioHeight;
     radio[LOPT_STRUCTS] = ui->radioStruct;
 
     combo[LOPT_BIOMES] = ui->comboBiomes;
@@ -122,7 +122,7 @@ LayerDialog::LayerDialog(QWidget *parent, WorldInfo wi)
     combo[LOPT_NOISE_C_4] = ui->comboNoiseC;
     combo[LOPT_NOISE_E_4] = ui->comboNoiseE;
     combo[LOPT_NOISE_W_4] = ui->comboNoiseW;
-    combo[LOPT_HEIGHT_4] = ui->comboHeight;
+    combo[LOPT_HEIGHT] = ui->comboHeight;
 
     for (int i = 0; i < LOPT_MAX; i++)
     {

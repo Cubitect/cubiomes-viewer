@@ -5,7 +5,10 @@
 
 #include <QApplication>
 #include <QDateTime>
+#include <QFileInfo>
 #include <QStandardPaths>
+
+#include <stdio.h>
 
 #if defined(_WIN32)
 #include <windows.h>
@@ -34,19 +37,20 @@ static QTextStream& qOut()
     return out;
 }
 
-Headless::Headless(QString sessionpath, QString resultspath, QObject *parent)
+Headless::Headless(QString sessionpath, QString resultspath, bool reset, QObject *parent)
     : QThread(parent)
     , sthread(nullptr)
     , sessionpath(sessionpath)
     , resultfile(resultspath)
     , resultstream(stdout)
+    , progressfp()
 {
     sthread.isdone = true;
 
     QSettings settings(APP_STRING, APP_STRING);
     g_extgen.load(settings);
 
-    if (!loadSession(sessionpath))
+    if (!loadSession(sessionpath, reset))
         return;
 
     if (!sthread.set(nullptr, session))
@@ -82,7 +86,7 @@ static bool load_seeds(std::vector<uint64_t>& seeds, QString path)
     return false;
 }
 
-bool Headless::loadSession(QString sessionpath)
+bool Headless::loadSession(QString sessionpath, bool reset)
 {
     qOut() << "Loading session: \"" << sessionpath << "\"\n";
     qOut().flush();
@@ -99,6 +103,11 @@ bool Headless::loadSession(QString sessionpath)
     {
         return false;
     }
+
+    if (reset)
+        session.sc.startseed = 0;
+    else
+        results = session.slist;
 
     if (session.cv.empty())
     {
@@ -149,15 +158,32 @@ void Headless::run()
     session.writeHeader(resultstream);
     resultstream.flush();
 
-    sthread.startSearch();
-    elapsed.start();
-
     if (resultfile.isOpen())
     {
+        // open a separate write channel to the same result file and
+        // reserve space for a progress field after the header
+        QByteArray path = QFileInfo(resultfile).absoluteFilePath().toLocal8Bit();
+        progressfp = fopen(path.data(), "rb+");
+        if (progressfp)
+        {
+            fseek(progressfp, resultfile.size(), SEEK_SET);
+            resultstream << QString::asprintf("#Progress: %20" PRId64 "\n", session.sc.startseed);
+            resultstream.flush();
+        }
+
+        for (uint64_t s : results)
+        {
+            resultstream << (int64_t) s << "\n";
+            resultstream.flush();
+        }
+
         qOut() << "\n\n\n\n\n\n\n";
         qOut().flush();
         timer.start(250);
     }
+
+    sthread.startSearch();
+    elapsed.start();
 }
 
 void Headless::searchResult(uint64_t seed)
@@ -174,6 +200,11 @@ void Headless::searchFinish(bool done)
         timer.stop();
         progressTimeout();
     }
+    if (progressfp)
+    {
+        fclose(progressfp);
+        progressfp = NULL;
+    }
     if (done)
         qOut() << "Search done!\n";
     qOut() << "Stopping event loop.\n";
@@ -187,6 +218,13 @@ void Headless::progressTimeout()
     uint64_t prog, end, seed;
     qreal min, avg, max;
     sthread.getProgress(&status, &prog, &end, &seed, &min, &avg, &max);
+
+    if (progressfp)
+    {
+        long pos = ftell(progressfp);
+        fprintf(progressfp, "#Progress: %20" PRId64 "\n", seed);
+        fseek(progressfp, pos, SEEK_SET);
+    }
 
     short width = get_term_width();
     if (width <= 24)

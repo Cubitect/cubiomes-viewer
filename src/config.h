@@ -15,6 +15,7 @@
 
 #define PRECOMPUTE48_BUFSIZ ((int64_t)1 << 30)
 
+enum { MC_DEFAULT = MC_1_21_2 };
 
 struct ExtGenConfig
 {
@@ -77,7 +78,7 @@ enum {
     LOPT_NOOCEAN_1,
     LOPT_BETA_T_1,
     LOPT_BETA_H_1,
-    LOPT_HEIGHT_4,
+    LOPT_HEIGHT,
     LOPT_STRUCTS,
     LOPT_MAX,
 };

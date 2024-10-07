@@ -12,10 +12,10 @@ class Headless : public QThread
     Q_OBJECT
 
 public:
-    Headless(QString sessionpath, QString resultspath, QObject *parent = 0);
+    Headless(QString sessionpath, QString resultspath, bool reset, QObject *parent = 0);
     virtual ~Headless();
 
-    bool loadSession(QString sessionpath);
+    bool loadSession(QString sessionpath, bool reset);
 
 public slots:
     void run();
@@ -33,6 +33,7 @@ public:
     std::vector<uint64_t> results;
     QFile resultfile;
     QTextStream resultstream;
+    FILE *progressfp;
     QTimer timer;
     QElapsedTimer elapsed;
 };

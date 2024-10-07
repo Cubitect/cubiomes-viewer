@@ -336,6 +336,17 @@ void FormSearchControl::setSearchRange(uint64_t smin, uint64_t smax)
     searchProgressReset();
 }
 
+bool FormSearchControl::getSeed(int row, uint64_t *seed)
+{
+    QAbstractItemModel *model = ui->results->model();
+    if (row < 0 || row >= model->rowCount())
+        return false;
+    QModelIndex idx = model->index(row, SeedTableModel::COL_SEED);
+    *seed = model->data(idx, Qt::UserRole).toULongLong();
+    return true;
+}
+
+
 void FormSearchControl::on_buttonClear_clicked()
 {
     model->reset();
@@ -444,13 +455,9 @@ void FormSearchControl::on_buttonMore_clicked()
 
 void FormSearchControl::onSeedSelectionChanged()
 {
-    int row = ui->results->currentIndex().row();
-    if (row >= 0 && row < ui->results->model()->rowCount())
-    {
-        QModelIndex idx = ui->results->model()->index(row, SeedTableModel::COL_SEED);
-        uint64_t s = ui->results->model()->data(idx, Qt::UserRole).toULongLong();
+    uint64_t s;
+    if (getSeed(ui->results->currentIndex().row(), &s))
         emit selectedSeedChanged(s);
-    }
 }
 
 void FormSearchControl::on_results_clicked(const QModelIndex &)
@@ -809,10 +816,9 @@ void FormSearchControl::removeCurrent()
 
 void FormSearchControl::copySeed()
 {
-    QModelIndex index = ui->results->currentIndex();
-    if (index.isValid())
+    uint64_t seed;
+    if (getSeed(ui->results->currentIndex().row(), &seed))
     {
-        uint64_t seed = ui->results->model()->data(index, Qt::UserRole).toULongLong();
         QClipboard *clipboard = QGuiApplication::clipboard();
         clipboard->setText(QString::asprintf("%" PRId64, seed));
     }
@@ -824,11 +830,10 @@ void FormSearchControl::copyResults()
     int n = ui->results->model()->rowCount();
     for (int i = 0; i < n; i++)
     {
-        QModelIndex idx = ui->results->model()->index(i, SeedTableModel::COL_SEED);
-        uint64_t seed = ui->results->model()->data(idx, Qt::UserRole).toULongLong();
-        text += QString::asprintf("%" PRId64 "\n", seed);
+        uint64_t seed;
+        if (getSeed(i, &seed))
+            text += QString::asprintf("%" PRId64 "\n", seed);
     }
-
     QClipboard *clipboard = QGuiApplication::clipboard();
     clipboard->setText(text);
 }

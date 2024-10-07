@@ -34,6 +34,7 @@ int main(int argc, char *argv[])
 
     bool version = false;
     bool nogui = false;
+    bool clear = false;
     bool reset = false;
     bool usage = false;
     QString sessionpath;
@@ -45,6 +46,8 @@ int main(int argc, char *argv[])
             version = true;
         else if (strcmp(argv[i], "--nogui") == 0)
             nogui = true;
+        else if (strcmp(argv[i], "--reset") == 0)
+            clear = true;
         else if (strcmp(argv[i], "--reset-all") == 0)
             reset = true;
         else if (strncmp(argv[i], "--session=", 10) == 0)
@@ -67,6 +70,7 @@ int main(int argc, char *argv[])
                 "      --help                 Display this help and exit.\n"
                 "      --version              Output version information and exit.\n"
                 "      --nogui                Run in headless search mode.\n"
+                "      --reset                Discard results and reset starting seed.\n"
                 "      --reset-all            Clear settings and remove all session data.\n"
                 "      --session=file         Open this session file.\n"
                 "      --out=file             Write matching seeds to this file while searching.\n"
@@ -105,7 +109,7 @@ int main(int argc, char *argv[])
     if (nogui)
     {
         QCoreApplication app(argc, argv);
-        Headless headless(sessionpath, resultspath, &app);
+        Headless headless(sessionpath, resultspath, clear, &app);
 
         QObject::connect(&headless, SIGNAL(finished()), &app, SLOT(quit()));
         QTimer::singleShot(0, &headless, SLOT(run()));
