@@ -25,16 +25,15 @@ jobs:
         uses: jurplel/install-qt-action@v4
         with:
           aqtversion:   '==3.1.*'
-          version:      '5.15.2'
+          version:      '6.7.3'
           archives:     'x86_64 qtbase qttools'
           cache:        true
-          setup-python: false
 
       - name: Build
         working-directory: ${{env.SOURCE_DIR}}
         run:  |
               qmake CONFIG+=release ${{env.SOURCE_DIR}}
-              CFLAGS="-isysroot /Applications/Xcode_14.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.1.sdk" make
+              CFLAGS="-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk" make
 
       - name: Deploy
         working-directory: ${{env.SOURCE_DIR}}
