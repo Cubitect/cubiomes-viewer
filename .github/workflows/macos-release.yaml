@@ -39,6 +39,10 @@ jobs:
         working-directory: ${{env.SOURCE_DIR}}
         run:  |
               macdeployqt ${{env.PROG}}.app -dmg -no-plugins
+
+      - name: Test
+        working-directory: ${{env.SOURCE_DIR}}
+        run:  |
               ./${{env.PROG}}.app/Contents/MacOS/${{env.PROG}} --version
               otool -L ${{env.PROG}}.app/Contents/MacOS/${{env.PROG}}
 
