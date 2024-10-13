@@ -594,13 +594,13 @@ void ConditionDialog::updateMode()
     {
         ui->stackedWidget->setCurrentWidget(ui->pageNoise);
         ui->stackedNoise->setCurrentWidget(ui->pageNoiseMinMax);
-        ui->groupBoxNoise->setTitle("Locate climate minimum/maximum");
+        ui->groupBoxNoise->setTitle(QApplication::translate("Filter", "Locate climate minimum/maximum"));
     }
     else if (filterindex == F_NOISE_SAMPLE)
     {
         ui->stackedWidget->setCurrentWidget(ui->pageNoise);
         ui->stackedNoise->setCurrentWidget(ui->pageNoiseSample);
-        ui->groupBoxNoise->setTitle("Climate noise samples");
+        ui->groupBoxNoise->setTitle(QApplication::translate("Filter", "Climate noise samples"));
     }
     else if (filterindex == F_BIOME_CENTER || filterindex == F_BIOME_CENTER_256)
     {
