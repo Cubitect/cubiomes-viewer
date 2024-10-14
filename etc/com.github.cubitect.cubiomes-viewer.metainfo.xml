@@ -9,10 +9,23 @@
   <name>Cubiomes Viewer</name>
   <summary>Minecraft seed finder and map viewer</summary>
   <description>
-    <p>Cubiomes Viewer offers highly customizable seed-finding utilities and a map viewer for the biome and structure generation of Minecraft Java Edition for the main releases up to 1.20.</p>
+    <p>Cubiomes Viewer offers highly customizable seed-finding utilities and a map viewer for the biome and structure generation of Minecraft Java Edition for the main releases up to 1.21.</p>
   </description>
 
   <releases>
+    <release version="4.1.0" date="2024-10-07">
+      <description>
+        <p>Changes:</p>
+        <ul>
+          <li>Added 1.21.2 to versions, as well as an experimental 1.21.3 for the Pale Garden biome</li>
+          <li>Added Trial Chambers</li>
+          <li>Added Climate Noise Sampling filter</li>
+          <li>added linked End Gateways</li>
+          <li>Fixed inaccurate End generation at large distances from 0,0</li>
+          <li>Fixed biome samples filter not working for older versions</li>
+        </ul>
+      </description>
+    </release>
     <release version="4.0.1" date="2024-02-11">
       <description>
         <p>Changes:</p>
