@@ -122,6 +122,8 @@ FormSearchControl::FormSearchControl(MainWindow *parent)
     ui->comboSearchType->addItem(tr("incremental"), SEARCH_INC);
     ui->comboSearchType->addItem(tr("48-bit only"), SEARCH_48ONLY);
     ui->comboSearchType->addItem(tr("48-bit family blocks"), SEARCH_BLOCKS);
+    ui->comboSearchType->addItem(tr("text seeds"), SEARCH_TEXT);
+    ui->comboSearchType->addItem(tr("random seeds"), SEARCH_RANDOM);
     ui->comboSearchType->addItem(tr("seed list from file..."), SEARCH_LIST);
 
     model = new SeedTableModel(ui->results);

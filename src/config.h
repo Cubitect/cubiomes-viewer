@@ -223,7 +223,7 @@ struct Gen48Config
 };
 
 // search type options from combobox
-enum { SEARCH_INC = 0, SEARCH_BLOCKS = 1, SEARCH_LIST = 2, SEARCH_48ONLY = 3 };
+enum { SEARCH_INC = 0, SEARCH_BLOCKS = 1, SEARCH_LIST = 2, SEARCH_48ONLY = 3, SEARCH_TEXT = 4, SEARCH_RANDOM = 5 };
 
 struct SearchConfig
 {

@@ -542,6 +542,32 @@ void SearchMaster::preSearch()
             isdone = true;
     }
 
+
+    if (searchtype == SEARCH_TEXT)
+    {
+        smin = (int64_t)(-1LL << 31);
+        smax = (1LL << 31) - 1;
+        seed = sstart;
+        if (seed < smin)
+            seed = smin;
+        prog = seed - smin;
+        scnt = (smax + 1) * 2;
+        if ((int64_t)seed > (int64_t)smax)
+            isdone = true;
+    }
+
+    if (searchtype == SEARCH_RANDOM)
+    {
+        smax = MASK48;
+        seed = sstart = 0;
+        if (seed < smin)
+            seed = smin;
+        prog = seed - smin;
+        scnt = smax - smin;
+        if (seed > smax)
+            isdone = true;
+    }
+
     if (searchtype == SEARCH_BLOCKS)
     {
         if (!slist.empty())
@@ -844,6 +870,21 @@ bool SearchMaster::requestItem(SearchWorker *item)
             isdone = true;
     }
 
+    if (searchtype == SEARCH_TEXT)
+    {
+        seed += itemsize;
+        if ((int64_t)seed > (int64_t)smax)
+            isdone = true;
+    }
+
+
+    if (searchtype == SEARCH_RANDOM)
+    {
+        seed += itemsize;
+        if (seed > smax)
+            isdone = true;
+    }
+
     if (searchtype == SEARCH_BLOCKS)
     {
         if (!slist.empty())
@@ -1052,6 +1093,53 @@ void SearchWorker::run()
                     }
                     seed++;
                 }
+            }
+        }
+        break;
+
+    case SEARCH_TEXT:
+        while (!*env.stop && getNextItem())
+        {
+            seed = sstart;
+            for (int i = 0; i < scnt; i++)
+            {
+                env.setSeed(seed);
+                if (testTreeAt(origin, &env, PASS_FULL_64, nullptr) == COND_OK)
+                {
+                    if (!*env.stop)
+                        emit result(seed);
+                }
+
+                if (seed == (1LL << 31) - 1)
+                {   // done
+                    break;
+                }
+                seed++;
+            }
+        }
+        break;
+
+    case SEARCH_RANDOM:
+        uint64_t rng;
+        while (!*env.stop && getNextItem())
+        {
+            seed = sstart;
+            for (uint64_t i = 0; i < (uint64_t) scnt; i++)
+            {
+                setSeed(&rng, seed);
+                rng = nextLong(&rng);
+                env.setSeed(rng);
+                if (testTreeAt(origin, &env, PASS_FULL_64, nullptr) == COND_OK)
+                {
+                    if (!*env.stop)
+                        emit result(rng);
+                }
+
+                if (seed >= MASK48)
+                {   // done
+                    break;
+                }
+                seed++;
             }
         }
         break;
