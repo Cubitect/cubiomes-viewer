@@ -26,6 +26,8 @@ void ExtGenConfig::reset()
     saltOverride = false;
     for (int i = 0; i < FEATURE_NUM; i++)
         salts[i] = ~(uint64_t)0;
+    saltOverrideStronghold = false;
+    saltStronghold = ~(uint64_t)0;
 }
 
 void ExtGenConfig::load(QSettings& settings)
@@ -38,6 +40,8 @@ void ExtGenConfig::load(QSettings& settings)
         QVariant v = QVariant::fromValue(~(qulonglong)0);
         salts[st] = settings.value(QString("world/salt_") + struct2str(st), v).toULongLong();
     }
+    saltOverrideStronghold = settings.value("world/saltOverrideStronghold", saltOverrideStronghold).toBool();
+    saltStronghold = settings.value("world/saltStronghold", (qulonglong)saltStronghold).toULongLong();
 }
 
 void ExtGenConfig::save(QSettings& settings)
@@ -51,6 +55,9 @@ void ExtGenConfig::save(QSettings& settings)
         if (salt <= MASK48)
             settings.setValue(QString("world/salt_") + struct2str(st), (qulonglong)salt);
     }
+    settings.setValue("world/saltOverrideStronghold", saltOverrideStronghold);
+    if (saltStronghold <= MASK48)
+        settings.setValue("world/saltStronghold", (qulonglong)saltStronghold);
 }
 
 bool WorldInfo::equals(const WorldInfo& wi) const

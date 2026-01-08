@@ -23,6 +23,8 @@ struct ExtGenConfig
     bool estimateTerrain;
     bool saltOverride;
     uint64_t salts[FEATURE_NUM];
+    bool saltOverrideStronghold;
+    uint64_t saltStronghold;
 
     ExtGenConfig() { reset(); }
 

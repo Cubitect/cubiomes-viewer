@@ -10,33 +10,47 @@ ExtGenDialog::ExtGenDialog(QWidget *parent, ExtGenConfig *extgen)
     , ui(new Ui::ExtGenDialog)
     , checkSalts{}
     , lineSalts{}
+    , checkSaltsStronghold(nullptr)
+    , lineSaltsStronghold(nullptr)
 {
     ui->setupUi(this);
 
     int stv[] = {
-        Desert_Pyramid,
-        Jungle_Pyramid,
-        Swamp_Hut,
-        Igloo,
-        Village,
-        Ocean_Ruin,
-        Shipwreck,
-        Monument,
-        Mansion,
-        Outpost,
+        // Stronghold first
+        // Overworld
         Ancient_City,
+        Desert_Pyramid,
+        Igloo,
+        Jungle_Pyramid,
+        Mansion,
+        // Mineshaft,
+        Monument,
+        Ocean_Ruin,
+        Outpost,
         Ruined_Portal,
-        Ruined_Portal_N,
+        Shipwreck,
+        Swamp_Hut,
         Treasure,
-        //Mineshaft,
-        Fortress,
+        Trial_Chambers,
+        Village,
+
+        // Nether
         Bastion,
+        Fortress,
+        Ruined_Portal_N,
+
+        // End
         End_City,
         End_Gateway,
     };
 
     QGridLayout *grid = new QGridLayout(ui->groupSalts);
-    for (size_t i = 0; i < sizeof(stv)/sizeof(stv[0]); i++)
+    
+    grid->addWidget((checkSaltsStronghold = new QCheckBox("stronghold")), 0, 0);
+    grid->addWidget((lineSaltsStronghold = new QLineEdit()), 0, 1);
+    connect(checkSaltsStronghold, &QCheckBox::toggled, this, &ExtGenDialog::updateToggles);
+
+    for (size_t i = 1; i < sizeof(stv)/sizeof(stv[0]); i++)
     {
         int st = stv[i];
         grid->addWidget((checkSalts[st] = new QCheckBox(struct2str(st))), i, 0);
@@ -68,6 +82,9 @@ void ExtGenDialog::initSettings(ExtGenConfig *extgen)
     // start checked, otherwise Qt doesn't respond to initial uncheck
     ui->groupSalts->setChecked(true);
 
+    checkSaltsStronghold->setChecked(extgen->saltOverrideStronghold);
+    lineSaltsStronghold->setText(QString::asprintf("%" PRIu64, extgen->saltStronghold & MASK48));
+
     for (int i = 0; i < FEATURE_NUM; i++)
     {
         if (!checkSalts[i])
@@ -94,6 +111,9 @@ ExtGenConfig ExtGenDialog::getSettings()
     extgen.experimentalVers = ui->checkExperimental->isChecked();
     extgen.estimateTerrain = ui->checkEstimate->isChecked();
     extgen.saltOverride = ui->groupSalts->isChecked();
+    
+    extgen.saltOverrideStronghold = checkSaltsStronghold->isChecked();
+    extgen.saltStronghold = lineSaltsStronghold->text().toULongLong();
 
     for (int i = 0; i < FEATURE_NUM; i++)
     {
@@ -126,6 +146,9 @@ void ExtGenDialog::on_buttonBox_clicked(QAbstractButton *button)
 
 void ExtGenDialog::updateToggles()
 {
+    if (checkSaltsStronghold)
+        lineSaltsStronghold->setEnabled(checkSaltsStronghold->isChecked());
+    
     for (int i = 0; i < FEATURE_NUM; i++)
     {
         if (!checkSalts[i])

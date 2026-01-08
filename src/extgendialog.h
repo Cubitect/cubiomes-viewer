@@ -35,6 +35,8 @@ private:
     Ui::ExtGenDialog *ui;
     QCheckBox *checkSalts[FEATURE_NUM];
     QLineEdit *lineSalts[FEATURE_NUM];
+    QCheckBox *checkSaltsStronghold;
+    QLineEdit *lineSaltsStronghold;
 
     ExtGenConfig extgen;
 };

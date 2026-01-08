@@ -1090,7 +1090,12 @@ struct SpawnStronghold : public Scheduled
         if (world->isdel) return;
 
         StrongholdIter sh;
-        initFirstStronghold(&sh, wi.mc, wi.seed);
+        uint64_t seedForStronghold = wi.seed;
+        if (g_extgen.saltOverride && g_extgen.saltOverrideStronghold && g_extgen.saltStronghold <= MASK48)
+        {
+            seedForStronghold = g_extgen.saltStronghold;
+        }
+        initFirstStronghold(&sh, wi.mc, seedForStronghold);
 
         // note: pointer to atomic pointer
         QAtomicPointer<PosElement> *shpp = &world->strongholds;
