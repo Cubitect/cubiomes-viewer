@@ -1,0 +1,108 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            qt-version: '5.15.2'
+            artifact: cubiomes-viewer-linux.tar.gz
+          - os: windows-latest
+            qt-version: '5.15.2'
+            artifact: cubiomes-viewer-windows.zip
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Qt (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: ${{ matrix.qt-version }}
+          host: 'windows'
+          target: 'desktop'
+          arch: 'win64_msvc2019_64'
+          archives: 'qtbase qttools'
+
+      - name: Install Qt (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: ${{ matrix.qt-version }}
+          host: 'linux'
+          target: 'desktop'
+          arch: 'gcc_64'
+          archives: 'qtbase qttools'
+
+      - name: Setup MSVC
+        if: matrix.os == 'windows-latest'
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Build (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgl1-mesa-dev
+          qmake cubiomes-viewer.pro CONFIG+=release
+          make
+          ls -R
+          if [ -f "cubiomes-viewer" ]; then
+            tar -czvf cubiomes-viewer-linux.tar.gz cubiomes-viewer
+          elif [ -f "release/cubiomes-viewer" ]; then
+            tar -czvf cubiomes-viewer-linux.tar.gz -C release cubiomes-viewer
+          elif [ -f "bin/cubiomes-viewer" ]; then
+            tar -czvf cubiomes-viewer-linux.tar.gz -C bin cubiomes-viewer
+          else
+            echo "Executable not found!"
+            find . -maxdepth 2 -executable -type f
+            exit 1
+          fi
+
+      - name: Build (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: cmd
+        run: |
+          if not defined VCToolsInstallDir (echo VCToolsInstallDir is not set & exit /b 1)
+          set "PATH=%VCToolsInstallDir%\bin\Hostx64\x64;%PATH%"
+          where link
+          qmake cubiomes-viewer.pro CONFIG+=release
+          nmake
+          dir /s
+          mkdir cubiomes-viewer
+          if exist release\cubiomes-viewer.exe (
+            copy release\cubiomes-viewer.exe cubiomes-viewer\
+          ) else if exist debug\cubiomes-viewer.exe (
+            copy debug\cubiomes-viewer.exe cubiomes-viewer\
+          ) else if exist cubiomes-viewer.exe (
+            copy cubiomes-viewer.exe cubiomes-viewer\
+          ) else (
+            echo Executable not found!
+            dir /s *.exe
+            exit 1
+          )
+          windeployqt --dir cubiomes-viewer cubiomes-viewer\cubiomes-viewer.exe --compiler-runtime --no-translations --no-system-d3d-compiler --no-opengl-sw --no-angle
+          7z a -tzip "${{ matrix.artifact }}" cubiomes-viewer\
+
+      - name: Upload Release Assets
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: ${{ matrix.artifact }}
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

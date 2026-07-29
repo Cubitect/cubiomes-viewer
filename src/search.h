@@ -10,6 +10,22 @@
 #include <QMap>
 #include <atomic>
 
+#ifdef _MSC_VER
+#include <intrin.h>
+static inline int __builtin_ctzll(unsigned long long mask)
+{
+    unsigned long index;
+    if (_BitScanForward64(&index, mask))
+        return index;
+    return 64;
+}
+static inline int __builtin_popcountll(unsigned long long mask)
+{
+    return (int)__popcnt64(mask);
+}
+#endif
+
+
 enum
 {
     CAT_NONE,
@@ -634,7 +650,7 @@ struct /*__attribute__((packed))*/ Condition
     float       confidence;
 
     // generated members - initialized when the search is started
-    uint8_t     generated_start[0]; // address dummy
+    uint8_t     generated_start; // address dummy
     BiomeFilter bf;
 
     // perform version upgrades

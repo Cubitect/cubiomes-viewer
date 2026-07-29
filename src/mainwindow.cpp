@@ -694,9 +694,11 @@ void MainWindow::setMCList(bool experimental)
     QStringList mclist;
     for (int mc = MC_NEWEST; mc > MC_UNDEF; mc--)
     {
+        if (strcmp(mc2str(mc), "?") == 0)
+            continue;
         if (!experimental && mc != wi.mc)
         {
-            if (mc <= MC_1_0 || mc == MC_1_16_1 || mc == MC_1_19_2 || mc == MC_1_21_1 || mc == MC_1_21_WD)
+            if (mc <= MC_1_0 || mc == MC_1_16_1 || mc == MC_1_19_2 || mc == MC_1_21_1)
                 continue;
         }
         mclist.append(mc2str(mc));

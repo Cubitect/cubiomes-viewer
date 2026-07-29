@@ -10,22 +10,36 @@ QT += core widgets
 #QMAKE_CC = clang
 #QMAKE_CXX = clang++
 
-CHARSET                 = -finput-charset=UTF-8 -fexec-charset=UTF-8
-QMAKE_CFLAGS            = $$CHARSET -fwrapv -DSTRUCT_CONFIG_OVERRIDE=1
+win32-msvc*: {
+    CHARSET                 = /utf-8
+    QMAKE_CFLAGS            = $$CHARSET -DSTRUCT_CONFIG_OVERRIDE=1
+} else {
+    CHARSET                 = -finput-charset=UTF-8 -fexec-charset=UTF-8
+    QMAKE_CFLAGS            = $$CHARSET -fwrapv -DSTRUCT_CONFIG_OVERRIDE=1
+}
 QMAKE_CXXFLAGS          = $$QMAKE_CFLAGS
-QMAKE_CXXFLAGS_RELEASE  *= -O3 -g3
 
+!win32-msvc*: {
+    QMAKE_CXXFLAGS_RELEASE  *= -O3 -g3
+    greaterThan(QT_MAJOR_VERSION, 5) {
+        QMAKE_CXXFLAGS += -std=gnu++17
+    } else {
+        QMAKE_CXXFLAGS += -std=gnu++11
+    }
+}
+macx {
+    QMAKE_CXXFLAGS += -include arm_acle.h
+    QMAKE_LIBS_OPENGL -= -framework AGL
+}
 greaterThan(QT_MAJOR_VERSION, 5) {
-    QMAKE_CXXFLAGS += -std=gnu++17
     DEFINES += QT_DISABLE_DEPRECATED_UP_TO=0x050F00
 } else {
-    QMAKE_CXXFLAGS += -std=gnu++11
     equals(QMAKE_CXX, g++) {
         QMAKE_CXXFLAGS += -Wno-deprecated-copy
     }
 }
 
-win32: {
+win32-g++: {
     CONFIG += static_gnu
 
     # thank you nullprogram for dealing with the Windows UTF-16 nonsense
@@ -36,6 +50,8 @@ win32: {
     QMAKE_EXTRA_TARGETS += libwinsane
     PRE_TARGETDEPS      += libwinsane
     LIBS                += $$LIBWINSANE/libwinsane.o
+} else:win32 {
+    # On MSVC, skip libwinsane
 } else {
     DEFINES += "LUA_USE_POSIX=1"
 }
@@ -65,9 +81,24 @@ CONFIG(debug, debug|release): {
 
 # compile cubiomes
 CUPATH              = $$PWD/cubiomes
-QMAKE_PRE_LINK      += $(MAKE) -C $$CUPATH -f $$CUPATH/makefile CC=\"$$QMAKE_CC\" CFLAGS=\"$(CFLAGS) $$QMAKE_CFLAGS\" $$CUTARGET
-QMAKE_CLEAN         += $$CUPATH/*.o $$CUPATH/libcubiomes.a
-LIBS                += $$CUPATH/libcubiomes.a -lm
+
+win32-msvc*: {
+    # On MSVC compile cubiomes directly as part of the project
+    INCLUDEPATH        += $$CUPATH
+    SOURCES            += \
+        $$CUPATH/noise.c \
+        $$CUPATH/biomes.c \
+        $$CUPATH/layers.c \
+        $$CUPATH/biomenoise.c \
+        $$CUPATH/generator.c \
+        $$CUPATH/finders.c \
+        src/cubiomes_util.c \
+        $$CUPATH/quadbase.c
+} else {
+    QMAKE_PRE_LINK      += $(MAKE) -C \"$$CUPATH\" -f makefile CC=\"$$QMAKE_CC\" CFLAGS=\"$(CFLAGS) $$QMAKE_CFLAGS\" $$CUTARGET
+    QMAKE_CLEAN         += $$CUPATH/*.o $$CUPATH/libcubiomes.a
+    LIBS                += $$CUPATH/libcubiomes.a -lm
+}
 
 LUAPATH = $$PWD/lua/src
 

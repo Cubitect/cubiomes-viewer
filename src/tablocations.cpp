@@ -1,3 +1,5 @@
+#define _USE_MATH_DEFINES
+#include <cmath>
 #include "tablocations.h"
 #include "ui_tablocations.h"
 

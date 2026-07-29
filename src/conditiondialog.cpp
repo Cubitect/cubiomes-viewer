@@ -942,8 +942,13 @@ bool ConditionDialog::warnIfBad(Condition cond)
             uint64_t underground =
                     (1ULL << (dripstone_caves-128)) |
                     (1ULL << (lush_caves-128)) |
-                    (1ULL << (deep_dark-128));
-            if ((m & underground) && cond.y > 246)
+                    (1ULL << (deep_dark-128)) |
+                    (1ULL << (sulfur_caves-128));
+            if (((m & underground) ||
+                 ((cond.type == F_BIOME_CENTER || cond.type == F_BIOME_CENTER_256) &&
+                  (cond.biomeId == dripstone_caves || cond.biomeId == lush_caves ||
+                   cond.biomeId == deep_dark || cond.biomeId == sulfur_caves))) &&
+                cond.y > 246)
             {
                 int button = warn(this, tr("Bad Surface Height"),
                     tr("Cave biomes do not generate above Y = 246.\nThe sampling height should be lowered."),

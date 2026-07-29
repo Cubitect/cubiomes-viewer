@@ -3,6 +3,11 @@
 
 #include <inttypes.h>
 
+#ifndef __GNUC__
+#define __attribute__(x)
+#endif
+
+
 // Quad monument bases are too expensive to generate on the fly and there are
 // so few of them that they can be hard coded, rather than loading from a file.
 static const uint64_t g_qm_90[] = {

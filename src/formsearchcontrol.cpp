@@ -1,6 +1,9 @@
 #include "formsearchcontrol.h"
 #include "ui_formsearchcontrol.h"
 
+#include <cstddef>
+
+
 #include "mainwindow.h"
 #include "message.h"
 #include "rangedialog.h"
@@ -643,7 +646,7 @@ int FormSearchControl::searchResultsAdd(std::vector<uint64_t> seeds, bool counto
         sthread.stopSearch();
         discarded = true;
     }
-    if (n + (ssize_t)seeds.size() > config.maxMatching)
+    if (n + (std::ptrdiff_t)seeds.size() > config.maxMatching)
     {
         sthread.stopSearch();
         discarded = true;
