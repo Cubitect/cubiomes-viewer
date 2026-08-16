@@ -63,11 +63,14 @@ CONFIG(debug, debug|release): {
     CUTARGET = release
 }
 
-# compile cubiomes
+# compile cubiomes using cmake
+CONFIG(debug, debug|release): CUTARGET_CMAKE = Debug
+else: CUTARGET_CMAKE = Release
 CUPATH              = $$PWD/cubiomes
-QMAKE_PRE_LINK      += $(MAKE) -C $$CUPATH -f $$CUPATH/makefile CC=\"$$QMAKE_CC\" CFLAGS=\"$(CFLAGS) $$QMAKE_CFLAGS\" $$CUTARGET
-QMAKE_CLEAN         += $$CUPATH/*.o $$CUPATH/libcubiomes.a
-LIBS                += $$CUPATH/libcubiomes.a -lm
+CUBUILD             = $$CUPATH/build
+QMAKE_PRE_LINK      += cmake -S $$CUPATH -B $$CUBUILD -DCMAKE_C_COMPILER:STRING="$$QMAKE_CC" -DCMAKE_C_FLAGS:STRING="-DSTRUCT_CONFIG_OVERRIDE=1" -DCMAKE_BUILD_TYPE:STRING=$$CUTARGET_CMAKE && cmake --build $$CUBUILD
+QMAKE_CLEAN         += $$CUBUILD
+LIBS                += $$CUBUILD/libcubiomes_static.a -lm
 
 LUAPATH = $$PWD/lua/src
 
