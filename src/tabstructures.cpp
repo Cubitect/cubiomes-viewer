@@ -64,7 +64,7 @@ void AnalysisStructures::runStructs(Generator *g)
         int stype = mapopt2stype(sopt);
         st.clear();
         StructureConfig sconf;
-        if (!getStructureConfig_override(stype, wi.mc, &sconf))
+        if (!getStructureConfig(stype, wi.mc, &sconf))
             continue;
 
         if (dim != DIM_UNDEF && dim != sconf.dim)

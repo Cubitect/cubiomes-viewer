@@ -425,7 +425,7 @@ void SearchMaster::preSearch()
             else
             {
                 StructureConfig sconf;
-                getStructureConfig_override(Swamp_Hut, mc, &sconf);
+                getStructureConfig(Swamp_Hut, mc, &sconf);
                 salt = sconf.salt;
             }
             slist.clear();
@@ -434,7 +434,7 @@ void SearchMaster::preSearch()
         else if (gen48.mode == GEN48_QM)
         {
             StructureConfig sconf;
-            getStructureConfig_override(Monument, mc, &sconf);
+            getStructureConfig(Monument, mc, &sconf);
             slist.clear();
             for (const uint64_t *s = g_qm_90; *s; s++)
                 if (qmonumentQual(*s) >= gen48.qmarea)
